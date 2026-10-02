@@ -31,7 +31,7 @@ Any structural, behavioral, or naming deviation from this diagram must:
 - **Date**: 2026-10-02
 - **Context**: The reference diagram defines no settings layer. `GUI_mockup.svg` — the visual reference for the game view — requires a SETTINGS tab and states explicitly: *"No SettingsView or SettingsController"* and *"No Settings model/controller/view exists yet."* The mockup also binds every settings row to a current data source (`board.py:26-37`, `piece.py:43-67`, `quest.py:9`, `timer.py:9`), which is only possible against real code.
 - **Deviation**: `SettingsView`, `SettingsController` and a settings model are added to the view and controller layers. They have no counterpart in any diagram box.
-- **Rationale**: FR-1 to FR-5 and FR-29 to FR-35 require the board, pieces, quests, clocks and rule sets to be configurable, and FR-7 requires rule logic to be authored. Without a settings layer those requirements are unreachable, and the mockup's configuration surface — the product's primary purpose — cannot be delivered.
+- **Rationale**: FR-1 to FR-8 and FR-31 to FR-37 require the board, pieces, quests, clocks and rule sets to be configurable, and FR-7 requires rule logic to be authored. Without a settings layer those requirements are unreachable, and the mockup's configuration surface — the product's primary purpose — cannot be delivered.
 - **Mitigation**: The settings classes are kept as thin adapters over the model. They hold no game state and add no rules of their own, so the deviation is additive and does not alter the object model the diagram defines.
 - **Approval**: Explicitly approved by the user on 2026-10-02 ("yup 2 build it, note deviation").
 

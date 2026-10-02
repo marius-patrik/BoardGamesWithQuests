@@ -27,7 +27,7 @@ thorough Google-style docstrings and no third-party imports.
 | Gap | Evidence |
 |---|---|
 | **The entire view layer** | `src/view/__init__.py` is one docstring line. No GUI, no renderer, no entry point. Tracked in #125 |
-| **Rule set is not configuration data** | `RevizorTahu` inlines each rule and `get_state` hard-codes the outcome ladder. There is nowhere to store a named rule set, so FR-7 to FR-20 are unmet. Not a redesign — the diagram already provides the fields (`Tah.typ tahu`, `Figurka.vektory`, `GameManager.get_stav`) |
+| **Rule set is not configuration data** | `RevizorTahu` inlines each rule and `get_state` hard-codes the outcome ladder. There is nowhere to store a named rule set, so FR-9 to FR-22 are unmet. Not a redesign — the diagram already provides the fields (`Tah.typ tahu`, `Figurka.vektory`, `GameManager.get_stav`) |
 | **Most chess rules absent** | `notes/chess_rules.md:52-111` mandates castling, en passant, promotion, fifty-move, threefold repetition, insufficient material and mutual-agreement draw. Only stalemate is implemented. `King._has_moved` and `Rook._has_moved` are tracked and never read by any rule |
 | **Custom board sizes broken** | `move.py:44,46` rejects any move outside a hard-coded 8×8. `board.py:41` silently produces an empty board for any other size. Twelve sites in total |
 | **Running application** | No `[project]` table, no build backend, no entry point. The package imports only because pytest sets `pythonpath` |
@@ -138,14 +138,14 @@ The surviving ~87 tests keep their product coverage and gain:
   reach a result. No test currently exercises `GameManager.make_move` in a
   sequence, which is why six orphan subsystems went unnoticed.
 - **Rule tests.** One per rule, each exercised both enabled and disabled, so
-  FR-16 and FR-18 are genuinely covered rather than asserted.
+  FR-18 and FR-20 are genuinely covered rather than asserted.
 - **Rule-configuration tests.** Each rule driven both on and off through the
   same game, proving the setting — not a code path — is what changes it. Covers
-  FR-12 and FR-18.
+  FR-14 and FR-20.
 - **Rule-set tests.** `OrthodoxChess` plays orthodox chess
   unconfigured; a duplicated-and-edited profile differs in exactly the rules that
   were changed; the default cannot be edited or deleted; profiles survive a
-  process restart. Covers FR-16 to FR-20.
+  process restart. Covers FR-18 to FR-22.
 - **Quest tests.** A quest built from each data-driven condition completes on the
   intended event and not before, awards its reward once, and survives being
   checked again after completion.
@@ -363,21 +363,21 @@ The project is finished when all of these hold:
 | 16 | Mockup fidelity | **Reference, not spec** |
 | 17 | PRD home | **`PRD.md`** at root — a planning artifact, not documentation |
 | 18 | Plan home | **`SCRATCHPAD.md`** at root, same PR as the PRD |
-| 19 | Rules architecture | **Level 1 — the rule set is data**, with standard chess as the default. Every rule disableable per game by setting a value. Assessed in `notes/object_model.md` section 4 as **not** a deviation: the diagram already provides `Tah.typ tahu`, `Figurka.vektory` and `GameManager.get_stav` |
+| 19 | Rules architecture | **Superseded by decision 30.** Originally "Level 1, the rule set is data". Full customisation in any direction turned out to need code, so rules became the one code-driven layer instead. Retained because the reasoning is why the change happened |
 | 20 | PRD scope | Current state, out-of-scope, work streams, risks, acceptance criteria and decisions live in this file, not the PRD |
 | 21 | Where the PRD points for governance | `AGENTS.md` stays normative for object model, language, delivery and the review trail. The PRD states only libraries and tests, which `AGENTS.md` does not cover. Confirmed on 2026-10-02 that the existing rules already cover it, so nothing was added |
-| 22 | Pluggable classes | **Deferred.** A master issue covers a pluggable class per layer — rules, board, pieces, quests — landing after this track. Level 1 everywhere in the meantime |
-| 23 | Quest conditions | **Data-driven and settings-configurable.** `condition_fn` callbacks are replaced by conditions a form can build. Pluggable quest logic deferred with 22 |
+| 22 | Pluggable classes | **Superseded by decision 40.** Originally a master issue for a pluggable class per layer. Rejected after assessment: board, piece and quest customisation is already complete through data |
+| 23 | Quest conditions | **Extended by decisions 43 and 44.** `condition_fn` callbacks are replaced by conditions a form can build; each carries a `when`, and quest scope is split |
 | 24 | Mockup reference | Lives in `SCRATCHPAD.md`, not the PRD. The PRD describes the product; the mockup guides implementation |
 | 25 | Customisable pieces | **In v1.** FR-3 already requires it — piece type, movement vectors, attack vectors, jump flag, colour, `kind`, addable to the palette. An earlier entry here wrongly recorded this as backlog; corrected 2026-10-02 |
-| 26 | Rule vs rule set | A **rule** is the one code-driven layer, four hooks, each defaulting permissively. A **rule set** is a multiselect over rule instances with no behaviour of its own. FR-7 to FR-20 |
-| 27 | Rule sets as profiles | Settings manages profiles. **`OrthodoxChess`** is the default and cannot be edited or deleted; a variant starts by duplicating it. FR-17 to FR-20 |
-| 28 | Persistence | Rules as `.py` under `rules/`, rule sets as JSON under `rulesets/`, both at the repository root. No account needed. FR-20 |
-| 29 | Backlog scope | **Pluggable logic only** (#130). Every data-driven configuration concern — rules, rule sets, board, pieces, quests — ships in v1 |
+| 26 | Rule vs rule set | A **rule** is the one code-driven layer, four hooks, each defaulting permissively. A **rule set** is a multiselect over rule instances with no behaviour of its own. FR-9 to FR-22 |
+| 27 | Rule sets as profiles | Settings manages profiles. **`OrthodoxChess`** is the default and cannot be edited or deleted; a variant starts by duplicating it. FR-19 to FR-22 |
+| 28 | Persistence | Rules as `.py` under `rules/`, rule sets as JSON under `rulesets/`, both at the repository root. No account needed. FR-22 |
+| 29 | Backlog scope | **Narrowed by decision 40** to a single no-code rule builder |
 | 30 | Full customisation | Required "in any way", including a piece that may move to any square. Achieved by making **rules the only code-driven layer**, not by adding `Custom*` classes |
-| 31 | Rule hook set | `permits_move`, `available_moves`, `outcome`, `on_move_made`. Exhaustive: turn-based logic can only forbid a move or end the game |
-| 32 | Result precedence | `Result(kind, precedence, winner)`. Without it two rules firing at once is ambiguous, which would break "any conceivable logic" on the first collision |
-| 33 | Rule `value` vs `state` | Configured value persists in the profile; runtime counters reset each game. Otherwise saving a profile would save a game's history |
+| 31 | Rule hook set | FR-10.  `permits_move`, `available_moves`, `outcome`, `on_move_made`. Exhaustive: turn-based logic can only forbid a move or end the game |
+| 32 | Result precedence | FR-13.  `Result(kind, precedence, winner)`. Without it two rules firing at once is ambiguous, which would break "any conceivable logic" on the first collision |
+| 33 | Rule `value` vs `state` | FR-14.  Configured value persists in the profile; runtime counters reset each game. Otherwise saving a profile would save a game's history |
 | 34 | `define_ruleset` | **Rejected.** A rule set is constructed explicitly by multiselect, so the type set is closed and greppable. A registry would add surface for nothing |
 | 35 | `CustomBoard` / `CustomPiece` / `CustomQuest` | **Rejected.** Board, piece and quest customisation is already complete via data; these classes would wrap data that is already custom and exist only for symmetry |
 | 36 | `src/` flattened to root | `model/`, `controller/`, `view/` at the root. PR 2, first, because it touches every module and every config file |
@@ -385,7 +385,11 @@ The project is finished when all of these hold:
 | 38 | Ruleset selector | **Settings only** — "which profile am I editing". The game-start modal is the only place a rule set is chosen for play |
 | 39 | Form exposure | **All** data-based configuration is form-exposed. The code editor is for rule *logic* only |
 | 40 | Backlog, final | **Exactly one item**: #130, a no-code builder for authoring rule logic. The code editor covers the full hook expressiveness meanwhile |
-| 41 | Execution of authored code | Deliberate product property, bounded: rules load only from `rules/`, never an arbitrary path, and the editor validates before a rule joins the vocabulary. PRD 3.3 |
+| 41 | Log directory | **Configurable, defaulting to `logs/` at the repository root, git-ignored, created on demand.** FR-41. Note `GameLogger()` currently writes nothing at all, so this closes a gap rather than preserving a convention |
+| 42 | Quest `when` | Every quest condition carries `after_move` or `at_game_end`. One vocabulary and one evaluation path, rather than splitting quest logic across the rule layer. FR-5 |
+| 43 | Quest scope | **Split explicitly.** Quests in play for the current game live with the quest manager; quests a user has completed live on the user. Conflating the two is the current defect. FR-6 |
+| 44 | `Quest.validate()` | **Undecided.** Elaborated for review 2026-10-02 and deliberately left open rather than decided. See `notes/object_model.md` and the PR discussion |
+| 45 | Execution of authored code | Deliberate product property, bounded: rules load only from `rules/`, never an arbitrary path, and the editor validates before a rule joins the vocabulary. PRD 3.3 |
 
 ---
 

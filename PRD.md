@@ -1,7 +1,7 @@
 # ChessWithQuests — Product Requirements Document
 
 **Status:** Draft, awaiting review
-**Version:** 0.7
+**Version:** 0.8
 
 Planning material — current state, work streams, risks, acceptance criteria and
 the decision log — lives in `SCRATCHPAD.md`. This document states only what the
@@ -99,72 +99,75 @@ Everything in this section is **data**. None of it requires code to express.
 | FR-2 | The starting position is either standard or edited square by square before play. |
 | FR-3 | Each piece type is configurable with movement vectors, attack vectors, a jump flag, a colour and a `kind` label. A piece may be added to the palette and placed on the board. |
 | FR-4 | A quest is configurable with a name, a description, a completion condition drawn from a set of data-driven conditions (capture N pieces, move a piece N times, survive N plies, reach a named square), and a reward. |
-| FR-5 | Clocks are configured with an initial time and an increment. |
-| FR-6 | A game is played under exactly one rule set, chosen when the game starts. |
+| FR-5 | Every quest condition carries a **`when`**: `after_move` or `at_game_end`. Conditions that resolve during play and conditions that only resolve once the game ends share one vocabulary and one evaluation path, rather than quest logic being split across two layers. |
+| FR-6 | **Quest scope is split explicitly.** The quests configured *for the current game* are held by the quest manager; quests *this user has completed, ever*, are held by the user. The two are distinct and are never conflated — a quest in play is not the same thing as a quest earned. |
+| FR-7 | Clocks are configured with an initial time and an increment. |
+| FR-8 | A game is played under exactly one rule set, chosen when the game starts. |
 
 ### 4.2 Rules — the only code-driven layer
 
 | ID | Requirement |
 |---|---|
-| FR-7 | **Rules are the only place in the product where logic is written in code.** Board, pieces, quests and clocks are data; rule behaviour is the single extension point. |
-| FR-8 | A rule implements four hooks, each with a permissive default: `permits_move(position, move) -> bool` (default `True`), `available_moves(position, piece) -> Iterable[Move]` (default empty), `outcome(position) -> Optional[Result]` (default `None`), and `on_move_made(position, move) -> None` (default no-op). |
-| FR-9 | **These hooks are exhaustive for turn-based game logic**, which can only forbid a move or end the game. Anything else is either a special case of one of them or a defect. |
-| FR-10 | **No rule owns behaviour.** The validator asks and rules answer: a rule may permit or forbid, never cause; a rule may propose an outcome, never impose one. This is what keeps arbitrary rules from corrupting each other. |
-| FR-11 | An outcome is a `Result` carrying a kind (win, loss, draw), a **precedence**, and an optional winner. Decisive outcomes outrank draws; equal precedence resolves by a declared order. Without this, two rules firing at once is ambiguous. |
-| FR-12 | A rule's **configured `value` is persisted** in the rule set profile. Its **runtime `state`** — counters, position history — resets each game and is never persisted. Without this split, saving a profile would save a game's history. |
-| FR-13 | Every rule in `notes/chess_rules.md` is expressible in those hooks: castling, en passant, promotion, check, checkmate, stalemate, insufficient material, the fifty-move rule, threefold repetition, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
-| FR-14 | Logic beyond the orthodox set is expressible without extending the engine: a piece that may move to any square satisfies `available_moves`; a piece that must capture if able satisfies `permits_move`; a game that ends when a named piece is lost satisfies `outcome`. |
-| FR-15 | Board size is not restricted to 8×8, and FR-13 holds on whatever board the player configured. Rank-relative rules are **generalised, not disabled**: the home rank and the castling and knight-forward files are derived from the configured board. |
-| FR-16 | A **rule set is a multiselect over rule instances** and has no behaviour of its own. |
-| FR-17 | `OrthodoxChess` ships as the default rule set, with every standard rule at its orthodox value. |
-| FR-18 | The default rule set is selected whenever nothing else is, so an unconfigured game is orthodox chess. It can be neither edited nor deleted — a variant starts by duplicating it. |
-| FR-19 | Rule sets are created, renamed, duplicated, edited rule by rule, and deleted. |
-| FR-20 | Rule sets persist to `rulesets/*.json`; rules are Python files under `rules/`. Both survive a restart without an account. |
+| FR-9 | **Rules are the only place in the product where logic is written in code.** Board, pieces, quests and clocks are data; rule behaviour is the single extension point. |
+| FR-10 | A rule implements four hooks, each with a permissive default: `permits_move(position, move) -> bool` (default `True`), `available_moves(position, piece) -> Iterable[Move]` (default empty), `outcome(position) -> Optional[Result]` (default `None`), and `on_move_made(position, move) -> None` (default no-op). |
+| FR-11 | **These hooks are exhaustive for turn-based game logic**, which can only forbid a move or end the game. Anything else is either a special case of one of them or a defect. |
+| FR-12 | **No rule owns behaviour.** The validator asks and rules answer: a rule may permit or forbid, never cause; a rule may propose an outcome, never impose one. This is what keeps arbitrary rules from corrupting each other. |
+| FR-13 | An outcome is a `Result` carrying a kind (win, loss, draw), a **precedence**, and an optional winner. Decisive outcomes outrank draws; equal precedence resolves by a declared order. Without this, two rules firing at once is ambiguous. |
+| FR-14 | A rule's **configured `value` is persisted** in the rule set profile. Its **runtime `state`** — counters, position history — resets each game and is never persisted. Without this split, saving a profile would save a game's history. |
+| FR-15 | Every rule in `notes/chess_rules.md` is expressible in those hooks: castling, en passant, promotion, check, checkmate, stalemate, insufficient material, the fifty-move rule, threefold repetition, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
+| FR-16 | Logic beyond the orthodox set is expressible without extending the engine: a piece that may move to any square satisfies `available_moves`; a piece that must capture if able satisfies `permits_move`; a game that ends when a named piece is lost satisfies `outcome`. |
+| FR-17 | Board size is not restricted to 8×8, and FR-13 holds on whatever board the player configured. Rank-relative rules are **generalised, not disabled**: the home rank and the castling and knight-forward files are derived from the configured board. |
+| FR-18 | A **rule set is a multiselect over rule instances** and has no behaviour of its own. |
+| FR-19 | `OrthodoxChess` ships as the default rule set, with every standard rule at its orthodox value. |
+| FR-20 | The default rule set is selected whenever nothing else is, so an unconfigured game is orthodox chess. It can be neither edited nor deleted — a variant starts by duplicating it. |
+| FR-21 | Rule sets are created, renamed, duplicated, edited rule by rule, and deleted. |
+| FR-22 | Rule sets persist to `rulesets/*.json`; rules are Python files under `rules/`. Both survive a restart without an account. |
 
 ### 4.3 Game view
 
 | ID | Requirement |
 |---|---|
-| FR-21 | The board renders with coordinates, the active player's squares highlighted, and legal-move highlights on selection. |
-| FR-22 | Each player panel shows identity, ELO, clock, and captured and lost pieces. |
-| FR-23 | The turn is indicated, including check. |
-| FR-24 | Move history is visible and exportable. |
-| FR-25 | Status and alerts appear in a footer. |
-| FR-26 | Quests appear as side cards showing progress and reward. |
+| FR-23 | The board renders with coordinates, the active player's squares highlighted, and legal-move highlights on selection. |
+| FR-24 | Each player panel shows identity, ELO, clock, and captured and lost pieces. |
+| FR-25 | The turn is indicated, including check. |
+| FR-26 | Move history is visible and exportable. |
+| FR-27 | Status and alerts appear in a footer. |
+| FR-28 | Quests appear as side cards showing progress and reward. |
 
 ### 4.4 Game start
 
 | ID | Requirement |
 |---|---|
-| FR-27 | Starting a game presents a modal offering a **rule set selector**, a **Settings** button and a **Start** button. |
-| FR-28 | The selector here means *"which rule set to play"*. It is the only place a rule set is chosen for play, and it does not affect which rule set the settings screen is editing. |
+| FR-29 | Starting a game presents a modal offering a **rule set selector**, a **Settings** button and a **Start** button. |
+| FR-30 | The selector here means *"which rule set to play"*. It is the only place a rule set is chosen for play, and it does not affect which rule set the settings screen is editing. |
 
 ### 4.5 Settings surface
 
 | ID | Requirement |
 |---|---|
-| FR-29 | A selector in the corner chooses **which rule set is being edited**. It appears in settings only, and means *"which profile am I editing"*. |
-| FR-30 | Below the selector are sections, one per configurable data layer: **Rules, Board, Pieces, Quests, Clocks**. |
-| FR-31 | **All data-based configuration is form-exposed.** No layer requires the code editor to be configured. |
-| FR-32 | The Rules section offers a multiselect with a checkbox and a value field per rule — the data parts of a rule are forms, like every other layer. |
-| FR-33 | The Rules section offers a **code editor** for authoring new rule logic, which writes a file under `rules/`. |
-| FR-34 | The editor validates a rule before it may join the vocabulary, reporting errors in the editor rather than failing at game start. |
-| FR-35 | Settings can be saved, reset to the shipped defaults, or cancelled. |
+| FR-31 | A selector in the corner chooses **which rule set is being edited**. It appears in settings only, and means *"which profile am I editing"*. |
+| FR-32 | Below the selector are sections, one per configurable data layer: **Rules, Board, Pieces, Quests, Clocks**. |
+| FR-33 | **All data-based configuration is form-exposed.** No layer requires the code editor to be configured. |
+| FR-34 | The Rules section offers a multiselect with a checkbox and a value field per rule — the data parts of a rule are forms, like every other layer. |
+| FR-35 | The Rules section offers a **code editor** for authoring new rule logic, which writes a file under `rules/`. |
+| FR-36 | The editor validates a rule before it may join the vocabulary, reporting errors in the editor rather than failing at game start. |
+| FR-37 | Settings can be saved, reset to the shipped defaults, or cancelled. |
 
 ### 4.6 Users, notation and persistence
 
 | ID | Requirement |
 |---|---|
-| FR-36 | A user has a username, display name, email, ELO rating and completed quests. |
-| FR-37 | Users can be registered, looked up, and linked to the player they control. |
-| FR-38 | The transcript can be exported as FEN, PGN and algebraic notation, with a PGN header roster. |
+| FR-38 | A user has a username, display name, email, ELO rating and completed quests. |
+| FR-39 | Users can be registered, looked up, and linked to the player they control. |
+| FR-40 | The transcript can be exported as FEN, PGN and algebraic notation, with a PGN header roster. |
+| FR-41 | The game log directory is **configurable**. It defaults to `logs/` at the repository root, is created on demand, and is git-ignored. A configured directory is honoured rather than silently redirected. |
 
 ### 4.7 Application
 
 | ID | Requirement |
 |---|---|
-| FR-39 | The package is installable and declares its metadata and runtime dependencies, of which there are none beyond the standard library. |
-| FR-40 | The application starts from a documented entry point and a complete game can be played to a result. |
+| FR-42 | The package is installable and declares its metadata and runtime dependencies, of which there are none beyond the standard library. |
+| FR-43 | The application starts from a documented entry point and a complete game can be played to a result. |
 
 ## 5. Naming requirements
 
