@@ -22,7 +22,7 @@ thorough Google-style docstrings and no third-party imports.
 | Gap | Evidence |
 |---|---|
 | **The entire view layer** | `src/view/__init__.py` is one docstring line. No GUI, no renderer, no entry point. Tracked in #125 |
-| **Rule set is not configuration data** | `RevizorTahu` inlines each rule and `get_state` hard-codes the outcome ladder. There is nowhere to store a named rule set, so FR-8 to FR-13 are unmet. Not a redesign — the diagram already provides the fields (`Tah.typ tahu`, `Figurka.vektory`, `GameManager.get_stav`) |
+| **Rule set is not configuration data** | `RevizorTahu` inlines each rule and `get_state` hard-codes the outcome ladder. There is nowhere to store a named rule set, so FR-7 to FR-20 are unmet. Not a redesign — the diagram already provides the fields (`Tah.typ tahu`, `Figurka.vektory`, `GameManager.get_stav`) |
 | **Most chess rules absent** | `notes/chess_rules.md:52-111` mandates castling, en passant, promotion, fifty-move, threefold repetition, insufficient material and mutual-agreement draw. Only stalemate is implemented. `King._has_moved` and `Rook._has_moved` are tracked and never read by any rule |
 | **Custom board sizes broken** | `move.py:44,46` rejects any move outside a hard-coded 8×8. `board.py:41` silently produces an empty board for any other size. Twelve sites in total |
 | **Running application** | No `[project]` table, no build backend, no entry point. The package imports only because pytest sets `pythonpath` |
@@ -72,7 +72,7 @@ a probe breaks, not only when a name changes.
 `UserManager.find_user:50`
 
 `Tower`, `Horse` and `Controller` are removed by PR 8 as part of the rename. The
-rest are removed by PR 12.
+rest are removed by PR 13.
 
 **Written but never read:** `Board.captured_white:38` ·
 `Move.captured_piece:32` · `Move.promotion_piece:33` · `GameManager.players:48` ·
@@ -81,7 +81,7 @@ rest are removed by PR 12.
 `Player.user` / `Player.setUser`
 
 Several of these become live once PR 5 wires the subsystems and PR 17 provides
-the view. PR 12 re-checks each one and removes only what is still dead — a
+the view. PR 13 re-checks each one and removes only what is still dead — a
 write-only attribute may have been written in anticipation of a consumer that
 now exists.
 
@@ -131,14 +131,14 @@ The surviving ~87 tests keep their product coverage and gain:
   reach a result. No test currently exercises `GameManager.make_move` in a
   sequence, which is why six orphan subsystems went unnoticed.
 - **Rule tests.** One per rule, each exercised both enabled and disabled, so
-  FR-11 and FR-12 are genuinely covered rather than asserted.
+  FR-16 and FR-18 are genuinely covered rather than asserted.
 - **Rule-configuration tests.** Each rule driven both on and off through the
   same game, proving the setting — not a code path — is what changes it. Covers
-  FR-8 and FR-11.
+  FR-12 and FR-18.
 - **Rule-set profile tests.** The Classic Chess profile plays orthodox chess
   unconfigured; a duplicated-and-edited profile differs in exactly the rules that
   were changed; the default cannot be edited or deleted; profiles survive a
-  process restart. Covers FR-9 to FR-13 and FR-28.
+  process restart. Covers FR-16 to FR-20 and FR-29.
 - **Quest tests.** A quest built from each data-driven condition completes on the
   intended event and not before, awards its reward once, and survives being
   checked again after completion.
@@ -161,61 +161,71 @@ The surviving ~87 tests keep their product coverage and gain:
 
 ## 3. Work streams and PR topology
 
-Stacked where a real dependency exists; independent and mergeable in any order
-otherwise.
+14 PRs in 4 waves. Independent wherever there is no real dependency.
 
 ```
-TRACK 1 - Governance                      (independent of all code)
-  PR 1   PRD + SCRATCHPAD                 ◄── in review
-  PR 2   Governance rules
+WAVE 1 - no dependencies between these
+  PR 2   Flatten src/ to root, amend AGENTS.md 1-2
+  PR 3   Governance rules
+  PR 4   Board generalisation - kill the hard-coded 8s
+  PR 5   Quest conditions as data-driven classes
+  (+ PR 11 remove scaffolding, PR 12 packaging - independent, any wave)
 
-TRACK 5 - Repository health
-  PR 9   Remove agent scaffolding                    (independent)
-  PR 10  Packaging + entry point                     (independent)
-  PR 11  Test-suite restructuring                    (deletions standalone;
-                                                    additions follow the stack)
-  PR 12  Code hygiene: dead code, docstring gaps     (follows PR 8 - see below)
+WAVE 2 - needs PR 4 (and PR 5 for quests)
+  PR 6   Rule + RuleSet + OrthodoxChess + rules/ rulesets/ loading
+  PR 7   Standard rules as Rule subclasses
 
-TRACK 2+3+4 - Product code                (one stack)
-  PR 3   Generalise the board beyond 8x8        ─┐
-  PR 4   Rule set as data + standard rules    │ ordered
-  PR 5   Wire the orphan subsystems             ─┘
-              │
-              ├──▶ PR 6   View layer            ─┐ parallel
-              └──▶ PR 7   Settings layer        ─┘
-                        │
-                        └──▶ PR 8   Czech aliases
-                                     │
-                                     └──▶ PR 12  Code hygiene
+WAVE 3 - needs PR 6 + PR 7
+  PR 8   Wire all orphan subsystems incl. QuestManager
+
+WAVE 4 - needs PR 8
+  PR 9   View layer, tkinter, with the game-start modal
+  PR 10  Settings surface: rule set selector, forms, code editor
+
+WAVE 5 - needs PR 10
+  PR 13  Czech aliases + dead code sweep
+
+INDEPENDENT - any wave, any order
+  PR 1   PRD + SCRATCHPAD                (in review)
+  PR 11  Remove agent scaffolding
+  PR 12  Packaging + entry point
+  PR 14  Test-suite restructuring
 ```
 
-**Why this shape.**
+Critical path is **5 waves**: `4 -> 6 -> 8 -> 10 -> 13`. Four PRs run
+concurrently in wave 1, two in wave 2, two in wave 4.
 
-PR 3 is first because custom boards are a prerequisite for honest rules.
-En passant and castling logic must not be written against a hard-coded 8×8, and
-FR-16 needs the home rank and castling files derived before any rule depends on
-them.
+**Why the flatten goes first.** PR 2 touches all 32 modules, `pyproject.toml`,
+`properdocs.yml`, `docs_hooks.py` and `AGENTS.md`. Doing it before anything else
+keeps every later diff a real behavioural change rather than an import-path
+churn.
 
-PR 4 introduces the rule set as configuration data, then implements the standard
-rules on top of it. Building them straight into the hard-coded validator would
-mean rebuilding them the moment FR-8 to FR-13 land, so the rule and rule-set data lands
-first. This is a smaller job than a plugin system: no registry, no callbacks,
-no new classes — the diagram's existing fields carry it.
+**Why PR 14 follows PR 13.** The dead-code sweep and the rename touch the same
+modules; merging them avoids a guaranteed conflict and produces one coherent
+"rename and clean" review.
 
-PR 6 and PR 7 do not touch each other and branch from PR 5. Both consume
-subsystems that are orphans until PR 5 wires them, so neither can merge before it.
-
-PR 8 is forced last — it adds a symbol to every module in `src/`, so landing it
-early guarantees conflicts with everything after it.
-
-PR 12 follows PR 8 rather than running in parallel, because it removes the same
-aliases PR 8 touches. The deletions in §2.1 can merge immediately and stand
-alone; only the added test coverage depends on the code existing.
+**`define_ruleset` is not a PR.** It was proposed, assessed against the diagram,
+and rejected — see `notes/object_model.md` section 5.
 
 **Do not remove DarkFactory before the replacement CI is green on `main`.** The
 repository must never sit without working required checks.
 
----
+### 3.1 PR 2 — the flatten, in full
+
+| What | Change |
+|---|---|
+| `src/model` → `model`, `src/controller` → `controller`, `src/view` → `view` | delete `src/` |
+| `pyproject.toml` | `pythonpath = ["src", "."]` → `["."]` |
+| ~15 modules | collapse the 3-level `try/except ImportError` fallbacks to plain imports; they existed only because of `src` |
+| `AGENTS.md` Rules 1 and 2 | both say "all code in `src/`" |
+| `properdocs.yml` | `docs_dir: src` → `docs_dir: .`, with `exclude_docs` extended, since the whole repo becomes the docs tree |
+| `docs_hooks.py` | walk only `model/`, `controller/`, `view/` when emitting API pages, rather than scanning everything |
+| `tests/test_docs_and_docstrings.py` | walk the package dirs |
+| `tests/test_structure.py` | **no change** — its module list is already top-level, never `src.*` |
+
+**Trap for PR 12, not PR 2:** a flat layout plus setuptools auto-discovery trips
+over `tests/` sitting at the root, so packaging must set
+`packages = ["model", "controller", "view"]` explicitly.
 
 ## 4. Risks
 
@@ -226,7 +236,7 @@ repository must never sit without working required checks.
 | The code stack is eight PRs deep; a late rework invalidates the bottom | High | PR 3 and PR 4 are the risky ones and land first, while the stack is short and cheap to restart |
 | Removing DarkFactory leaves the repo without CI mid-flight | High | Replacement CI merges and goes green before any removal |
 | Generalising rank-relative rules to arbitrary board sizes is harder than it looks — home rank, knight-forward file and castling rook files all derived | High | Land in PR 3, before PR 4, so rule work builds on a correct board abstraction |
-| Deleting 52 tests could mask real regressions | Medium | Every deletion is import-only or metadata-only. §2.2 adds behavioural coverage to offset, and PR 11's deletions can merge early and be observed |
+| Deleting 52 tests could mask real regressions | Medium | Every deletion is import-only or metadata-only. §2.2 adds behavioural coverage to offset, and PR 14's deletions can merge early and be observed |
 | Czech aliases in mkdocstrings may render as data rather than documented API | Medium | Accepted per decision 7. No special handling |
 | `python3-tk` absent on some runners | Medium | Assert-and-skip in tests; install in CI in the PR that first imports `tkinter` |
 | GUI scope creep from the mockup | Medium | PRD §6 caps it; the mockup is a reference, the diagram governs |
@@ -250,22 +260,28 @@ The project is finished when all of these hold:
 
 **Rules and rule sets**
 
-7. Every rule in `notes/chess_rules.md` implemented, each driven both on and off
-   through the same game: castling, en passant, promotion, fifty-move, threefold
-   repetition, insufficient material, stalemate, mutual-agreement draw, and the
-   flag-fall nuance.
-8. A **rule is one setting with a value**. Disabling it changes a value and
-   removes no source logic.
-9. A **rule set is a named profile** holding the complete set of rule settings.
-   A game is played under exactly one.
-10. **Classic Chess** is the default profile, plays orthodox chess with nothing
+7. A `Rule` parent class with the four hooks, each defaulting permissively, and a
+   `Result` carrying a kind, a precedence and an optional winner.
+8. Every rule in `notes/chess_rules.md` implemented against those hooks, each
+   driven on and off through one game: castling, en passant, promotion,
+   checkmate, stalemate, insufficient material, fifty-move, threefold repetition,
+   mutual-agreement draw, and the flag-fall nuance.
+9. Logic beyond the orthodox set is expressible without touching the engine: a
+   piece that may move to any square, a piece that must capture if able, a game
+   that ends when a named piece is lost. Asserted by tests, not by prose.
+10. Two rules firing at once resolve by precedence, and the resolution is tested
+    with rules written specifically to collide.
+11. A rule's configured `value` persists in its profile; its runtime `state`
+    resets each game and is never written to disk.
+12. `OrthodoxChess` is the default rule set, plays orthodox chess with nothing
     configured, and can be neither edited nor deleted.
-11. Custom rule sets can be created, renamed, duplicated, edited rule by rule and
-    deleted.
-12. Rule sets persist to a file on disk and survive a restart without an account.
-13. Castling, en passant and promotion are generated as `Tah.typ tahu` move
-    types, not as special cases in the validator.
-14. Those rules hold on non-8×8 boards, with rank-relative rules generalised
+13. Rule sets are a multiselect over rule instances with no behaviour of their
+    own; created, renamed, duplicated, edited rule by rule and deleted.
+14. Rules load **only** from `rules/`. An attempt to load from any other path is
+    refused, and that refusal is tested.
+15. The editor refuses a rule that fails validation, and the failure is reported
+    in the editor rather than at game start.
+16. Those rules hold on non-8×8 boards, with rank-relative rules generalised
     rather than disabled.
 
 **Configurable configuration**
@@ -278,8 +294,8 @@ The project is finished when all of these hold:
 **Runnable product**
 
 17. A game is played end to end from the documented entry point to a result.
-18. The GUI covers FR-20 to FR-25. Settings covers FR-26 to FR-28, including rule
-    set management.
+18. The GUI covers FR-21 to FR-26. Starting a game shows the modal of FR-27.
+    Settings covers FR-29 to FR-35, including rule set management and the editor.
 19. CI green across Python `3.10`, `3.11`, `3.12`, `3.13`, depending on no
     external repository's workflow.
 
@@ -321,11 +337,23 @@ The project is finished when all of these hold:
 | 22 | Pluggable classes | **Deferred.** A master issue covers a pluggable class per layer — rules, board, pieces, quests — landing after this track. Level 1 everywhere in the meantime |
 | 23 | Quest conditions | **Data-driven and settings-configurable.** `condition_fn` callbacks are replaced by conditions a form can build. Pluggable quest logic deferred with 22 |
 | 24 | Mockup reference | Lives in `SCRATCHPAD.md`, not the PRD. The PRD describes the product; the mockup guides implementation |
-| 25 | Customisable pieces | **In v1.** FR-3 and FR-15 already require it — piece type, movement vectors, attack vectors, jump flag, addable to the palette. An earlier entry here wrongly recorded this as backlog; corrected 2026-10-02 |
-| 26 | Rule vs rule set | A **rule is one setting with a value**; a **rule set is the full named profile** holding the complete set of those settings. FR-8 to FR-13 |
-| 27 | Rule sets as profiles | Settings manages profiles. **Classic Chess** is the default and cannot be edited or deleted; a variant starts by duplicating it. FR-12, FR-28 |
-| 28 | Profile persistence | **Global file on disk.** No account needed to save a variant. FR-13 |
+| 25 | Customisable pieces | **In v1.** FR-3 already requires it — piece type, movement vectors, attack vectors, jump flag, colour, `kind`, addable to the palette. An earlier entry here wrongly recorded this as backlog; corrected 2026-10-02 |
+| 26 | Rule vs rule set | A **rule** is the one code-driven layer, four hooks, each defaulting permissively. A **rule set** is a multiselect over rule instances with no behaviour of its own. FR-7 to FR-20 |
+| 27 | Rule sets as profiles | Settings manages profiles. **`OrthodoxChess`** is the default and cannot be edited or deleted; a variant starts by duplicating it. FR-17 to FR-20 |
+| 28 | Persistence | Rules as `.py` under `rules/`, rule sets as JSON under `rulesets/`, both at the repository root. No account needed. FR-20 |
 | 29 | Backlog scope | **Pluggable logic only** (#130). Every data-driven configuration concern — rules, rule sets, board, pieces, quests — ships in v1 |
+| 30 | Full customisation | Required "in any way", including a piece that may move to any square. Achieved by making **rules the only code-driven layer**, not by adding `Custom*` classes |
+| 31 | Rule hook set | `permits_move`, `available_moves`, `outcome`, `on_move_made`. Exhaustive: turn-based logic can only forbid a move or end the game |
+| 32 | Result precedence | `Result(kind, precedence, winner)`. Without it two rules firing at once is ambiguous, which would break "any conceivable logic" on the first collision |
+| 33 | Rule `value` vs `state` | Configured value persists in the profile; runtime counters reset each game. Otherwise saving a profile would save a game's history |
+| 34 | `define_ruleset` | **Rejected.** A rule set is constructed explicitly by multiselect, so the type set is closed and greppable. A registry would add surface for nothing |
+| 35 | `CustomBoard` / `CustomPiece` / `CustomQuest` | **Rejected.** Board, piece and quest customisation is already complete via data; these classes would wrap data that is already custom and exist only for symmetry |
+| 36 | `src/` flattened to root | `model/`, `controller/`, `view/` at the root. PR 2, first, because it touches every module and every config file |
+| 37 | Engine vs rule content | Engine in `model/`, `controller/`, `view/`. Player-authored content in `rules/` (code) and `rulesets/` (data). Keeping them apart keeps authored files out of the source package |
+| 38 | Ruleset selector | **Settings only** — "which profile am I editing". The game-start modal is the only place a rule set is chosen for play |
+| 39 | Form exposure | **All** data-based configuration is form-exposed. The code editor is for rule *logic* only |
+| 40 | Backlog, final | **Exactly one item**: #130, a no-code builder for authoring rule logic. The code editor covers the full hook expressiveness meanwhile |
+| 41 | Execution of authored code | Deliberate product property, bounded: rules load only from `rules/`, never an arbitrary path, and the editor validates before a rule joins the vocabulary. PRD 3.3 |
 
 ---
 
@@ -340,8 +368,8 @@ Nothing is out of scope globally; each item is owned by an issue.
 | Reinstalling the shared DarkFactory pipeline | Deferred, no issue until requested |
 | The `pipeline` remote and empty `.pipeline/` | #126 |
 | Pluggable logic for rules, board, pieces, quests | **The only backlog item.** #130, deferred master issue, after this track |
-| Generalised and customisable pieces | **Not backlog.** FR-3 and FR-15, shipped in v1 |
-| Rule sets as profiles | **Not backlog.** FR-9 to FR-13 and FR-28, shipped in v1 |
+| Generalised and customisable pieces | **Not backlog.** FR-3 and FR-14, shipped in v1 |
+| Rule sets as profiles | **Not backlog.** FR-16 to FR-20, shipped in v1 |
 
 ### 7.1 Resolved: the stale upstream note
 
