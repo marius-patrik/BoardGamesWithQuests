@@ -1,7 +1,7 @@
 # ChessWithQuests — Product Requirements Document
 
 **Status:** Draft, awaiting review
-**Version:** 0.8
+**Version:** 1.0
 
 Planning material — current state, work streams, risks, acceptance criteria and
 the decision log — lives in `SCRATCHPAD.md`. This document states only what the
@@ -11,25 +11,28 @@ product is and requires.
 
 ## 1. What the product is
 
-A desktop chess application in Python, built as an MVC application, in which the
-**configuration surface is the product**. A stock 8×8 game with standard pieces
-is one configuration among many: before a game starts, a player chooses the
-board size, the starting position, the movement of every piece, which rules are
-in force, the quests in play, and the time controls. Every one of these starts at
-the standard chess default and changes only where the player changes it.
+A desktop board game engine and application in Python, built as an MVC
+application, in which **the configuration is the product**. A stock 8×8 game
+with the standard pieces is one configuration among many: before a game starts,
+a player chooses the board, the starting position, every piece's movement, which
+rules are in force, the quests in play, and the time controls.
 
-The application is two products sharing one window:
+Two games ship with the engine:
 
-1. **A configurator** that defines a variant of chess.
-2. **A player** that plays the resulting game to a result, under the configured
-   rules and real clocks.
+1. **Chess** — orthodox chess, which is the default configuration.
+2. **Checkers** — English draughts, which shares the engine and changes no
+   engine code.
+
+The second exists to demonstrate the abstraction. If checkers needs an engine
+change that chess did not, the abstraction is wrong — so building it is also a
+test of the engine's generality.
 
 ## 2. Users and what they need
 
 | User | Need |
 |---|---|
 | **The player** | Configure a variant quickly, then play it without friction: see the board, the turn, both clocks, what has been captured, and what is still to do |
-| **The grader** | See an object model that conforms to the supplied Czech architecture diagram, with every deviation from it declared and justified |
+| **The grader** | See an object model that conforms to the supplied Czech architecture diagram, with every deviation declared and justified |
 | **The maintainer** | Behaviour covered by tests that exercise real code paths, not tests that restate the rulebook |
 
 ## 3. Constraints
@@ -47,8 +50,8 @@ restate them:** object-model conformance (Rule 3), language (Rule 4), delivery
 **Standard library plus `tkinter` only. No third-party runtime dependency. No
 chess library.**
 
-- FEN, PGN, SAN and all coordinate conversion are hand-rolled and stay
-  hand-rolled. `python-chess` is not used.
+- Notation, position encoding and all coordinate conversion are hand-rolled and
+  stay hand-rolled. `python-chess` is not used.
 - `tkinter` is the GUI toolkit and the only one. No PyQt, PySide, wxPython,
   Kivy, pygame or webview shell.
 - `tkinter` is standard library and adds no dependency, but it is absent from
@@ -71,103 +74,48 @@ for like:
   rather than kept in a reduced form.
 - **Metadata assertions.** Tests that open `AGENTS.md`, workflow YAML, `notes/`
   or `README.md` and assert substrings police the rulebook, not the product.
-  Governance is a review convention here, not an enforced gate.
 
-The tests that survive are reworked to drive real behaviour: a move is played
-and its effect asserted, a rule is exercised and its outcome asserted, an
-invariant such as "no third-party import anywhere under the project source" or
-"no hard-coded 8 outside `Board`'s default" is asserted against the code itself.
+The tests that survive drive real behaviour: a move is played and its effect
+asserted, a rule is exercised and its outcome asserted, an invariant such as "no
+third-party import anywhere under the project source" is asserted against the
+code itself.
 
-### 3.3 Execution of user-authored code
+### 3.3 Execution of authored code
 
-The application loads and runs Python written by the player, in the rule editor.
-This is a deliberate property of the product, not an accident, and it is bounded
-on purpose: rules load **only** from the project's `rules/` directory, never from
-an arbitrary path, an environment variable or user input elsewhere. The editor
-validates a rule before it is allowed to join the vocabulary, so a syntax error
-is caught in the editor rather than at game start.
+The application loads and runs Python the player writes in the rule and quest
+editors. This is a deliberate property of the product, not an accident, and it
+is bounded on purpose: code loads **only** from within the variant directory
+being edited, never from an arbitrary path, an environment variable or user
+input elsewhere. The editor validates before the code is allowed to join the
+configuration, so a syntax error is caught in the editor rather than at game
+start.
 
-## 4. Functional requirements
+## 4. The configuration pattern
 
-### 4.1 Configurable data
+One pattern applies to the whole engine, and the settings screen reuses it
+everywhere.
 
-Everything in this section is **data**. None of it requires code to express.
+**Every configurable type declares its fields. The view renders them.**
 
-| ID | Requirement |
+```python
+Field(name, kind, label, default, ...)
+
+class Configurable:
+    @classmethod
+    def spec(cls) -> list[Field]: ...
+```
+
+| Configurable | Declares |
 |---|---|
-| FR-1 | The player sets board dimensions in rows and columns. |
-| FR-2 | The starting position is either standard or edited square by square before play. |
-| FR-3 | Each piece type is configurable with movement vectors, attack vectors, a jump flag, a colour and a `kind` label. A piece may be added to the palette and placed on the board. |
-| FR-4 | A quest is configurable with a name, a description, a completion condition drawn from a set of data-driven conditions (capture N pieces, move a piece N times, survive N plies, reach a named square), and a reward. |
-| FR-5 | Every quest condition carries a **`when`**: `after_move` or `at_game_end`. Conditions that resolve during play and conditions that only resolve once the game ends share one vocabulary and one evaluation path, rather than quest logic being split across two layers. |
-| FR-6 | **Quest scope is split explicitly.** The quests configured *for the current game* are held by the quest manager; quests *this user has completed, ever*, are held by the user. The two are distinct and are never conflated — a quest in play is not the same thing as a quest earned. |
-| FR-7 | Clocks are configured with an initial time and an increment. |
-| FR-8 | A game is played under exactly one rule set, chosen when the game starts. |
+| `Board` | rows, columns, placement |
+| `Piece` | name, symbols, movement vectors, attack vectors, jump flag, kind, optional FEN character |
+| `Clock` | initial time, increment |
+| `Rule` subclass | its own value fields; `enabled` is added by the framework |
+| `Quest` subclass | its `parameters()`; `name`, `description` and `reward` are added by the framework |
 
-### 4.2 Rules — the only code-driven layer
-
-| ID | Requirement |
-|---|---|
-| FR-9 | **Rules are the only place in the product where logic is written in code.** Board, pieces, quests and clocks are data; rule behaviour is the single extension point. |
-| FR-10 | A rule implements four hooks, each with a permissive default: `permits_move(position, move) -> bool` (default `True`), `available_moves(position, piece) -> Iterable[Move]` (default empty), `outcome(position) -> Optional[Result]` (default `None`), and `on_move_made(position, move) -> None` (default no-op). |
-| FR-11 | **These hooks are exhaustive for turn-based game logic**, which can only forbid a move or end the game. Anything else is either a special case of one of them or a defect. |
-| FR-12 | **No rule owns behaviour.** The validator asks and rules answer: a rule may permit or forbid, never cause; a rule may propose an outcome, never impose one. This is what keeps arbitrary rules from corrupting each other. |
-| FR-13 | An outcome is a `Result` carrying a kind (win, loss, draw), a **precedence**, and an optional winner. Decisive outcomes outrank draws; equal precedence resolves by a declared order. Without this, two rules firing at once is ambiguous. |
-| FR-14 | A rule's **configured `value` is persisted** in the rule set profile. Its **runtime `state`** — counters, position history — resets each game and is never persisted. Without this split, saving a profile would save a game's history. |
-| FR-15 | Every rule in `notes/chess_rules.md` is expressible in those hooks: castling, en passant, promotion, check, checkmate, stalemate, insufficient material, the fifty-move rule, threefold repetition, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
-| FR-16 | Logic beyond the orthodox set is expressible without extending the engine: a piece that may move to any square satisfies `available_moves`; a piece that must capture if able satisfies `permits_move`; a game that ends when a named piece is lost satisfies `outcome`. |
-| FR-17 | Board size is not restricted to 8×8, and FR-13 holds on whatever board the player configured. Rank-relative rules are **generalised, not disabled**: the home rank and the castling and knight-forward files are derived from the configured board. |
-| FR-18 | A **rule set is a multiselect over rule instances** and has no behaviour of its own. |
-| FR-19 | `OrthodoxChess` ships as the default rule set, with every standard rule at its orthodox value. |
-| FR-20 | The default rule set is selected whenever nothing else is, so an unconfigured game is orthodox chess. It can be neither edited nor deleted — a variant starts by duplicating it. |
-| FR-21 | Rule sets are created, renamed, duplicated, edited rule by rule, and deleted. |
-| FR-22 | Rule sets persist to `rulesets/*.json`; rules are Python files under `rules/`. Both survive a restart without an account. |
-
-### 4.3 Game view
-
-| ID | Requirement |
-|---|---|
-| FR-23 | The board renders with coordinates, the active player's squares highlighted, and legal-move highlights on selection. |
-| FR-24 | Each player panel shows identity, ELO, clock, and captured and lost pieces. |
-| FR-25 | The turn is indicated, including check. |
-| FR-26 | Move history is visible and exportable. |
-| FR-27 | Status and alerts appear in a footer. |
-| FR-28 | Quests appear as side cards showing progress and reward. |
-
-### 4.4 Game start
-
-| ID | Requirement |
-|---|---|
-| FR-29 | Starting a game presents a modal offering a **rule set selector**, a **Settings** button and a **Start** button. |
-| FR-30 | The selector here means *"which rule set to play"*. It is the only place a rule set is chosen for play, and it does not affect which rule set the settings screen is editing. |
-
-### 4.5 Settings surface
-
-| ID | Requirement |
-|---|---|
-| FR-31 | A selector in the corner chooses **which rule set is being edited**. It appears in settings only, and means *"which profile am I editing"*. |
-| FR-32 | Below the selector are sections, one per configurable data layer: **Rules, Board, Pieces, Quests, Clocks**. |
-| FR-33 | **All data-based configuration is form-exposed.** No layer requires the code editor to be configured. |
-| FR-34 | The Rules section offers a multiselect with a checkbox and a value field per rule — the data parts of a rule are forms, like every other layer. |
-| FR-35 | The Rules section offers a **code editor** for authoring new rule logic, which writes a file under `rules/`. |
-| FR-36 | The editor validates a rule before it may join the vocabulary, reporting errors in the editor rather than failing at game start. |
-| FR-37 | Settings can be saved, reset to the shipped defaults, or cancelled. |
-
-### 4.6 Users, notation and persistence
-
-| ID | Requirement |
-|---|---|
-| FR-38 | A user has a username, display name, email, ELO rating and completed quests. |
-| FR-39 | Users can be registered, looked up, and linked to the player they control. |
-| FR-40 | The transcript can be exported as FEN, PGN and algebraic notation, with a PGN header roster. |
-| FR-41 | The game log directory is **configurable**. It defaults to `logs/` at the repository root, is created on demand, and is git-ignored. A configured directory is honoured rather than silently redirected. |
-
-### 4.7 Application
-
-| ID | Requirement |
-|---|---|
-| FR-42 | The package is installable and declares its metadata and runtime dependencies, of which there are none beyond the standard library. |
-| FR-43 | The application starts from a documented entry point and a complete game can be played to a result. |
+**Data-driven things are forms assembled from the declaration. Code-driven logic
+is edited as code.** There is one form renderer, so adding a field kind is one
+widget and every surface inherits it.
 
 ## 5. Naming requirements
 
@@ -200,17 +148,145 @@ counterpart in the diagram.
 The package sits at the repository root. There is no `src/` directory.
 
 ```
-model/  controller/  view/    the engine
-rules/                         rule logic, one Rule subclass per file
-rulesets/                      rule set profiles, JSON
-tests/  notes/  theme/         tests, design notes, documentation theme
+controller/  model/  view/        the engine
+model/        the parent classes a configuration is written against,
+              plus the machinery every configuration shares
+games/
+  chess/      the default configuration, shipped
+  checkers/   the second configuration, shipped
+logs/         game logs, configurable, git-ignored
 ```
 
-**Engine and rule content are separated.** `model/`, `controller/` and `view/`
-hold the engine; `rules/` and `rulesets/` hold the content the player authors.
-Keeping them apart means player-authored files stay out of the source package,
-and a reviewer can read every rule and profile the project ships or has been
-given without reading the engine.
+**Inside a configuration directory:**
 
-Rules are code and rule sets are data, so they are kept in directories named for
-what they are rather than mixed into either.
+```
+games/chess/
+  board.py      rows, columns, starting placement — one board per game
+  pieces/       one file per piece: identity, symbols, vectors
+  rules/        one file per rule: logic and configuration
+  quests/       one file per quest: logic and parameters
+  clocks/       clock configuration
+```
+
+Everything in a configuration is a Python file. It could not all be data — see
+§8 — and one language avoids a format split and keeps the tree readable.
+
+**A configuration is a folder that can be copied.** `cp -r games/chess
+games/house`, change what differs, and a new variant exists. Duplication is the
+extension mechanism: to change the board, duplicate the configuration and change
+the board. One game runs one board.
+
+`model/` keeps the parent classes — `Piece`, `Rule`, `Quest`, `Board`, `Clock` —
+and the machinery every configuration needs, such as the move, the validator and
+the game manager. Only configuration-specific implementations live in
+`games/`.
+
+## 7. Functional requirements
+
+### 7.1 Configurable data
+
+| ID | Requirement |
+|---|---|
+| FR-1 | Board dimensions are configurable in rows and columns. |
+| FR-2 | The starting position is either the shipped one or edited square by square. |
+| FR-3 | A piece declares a name, a white symbol, a black symbol, movement vectors, attack vectors, a jump flag and a `kind` label. A piece may be added to the palette and placed on the board. |
+| FR-4 | Symbols are **unicode chess glyphs declared as data**. The board renderer and the notation writer hold no knowledge of piece types; both read what the piece declares. |
+| FR-5 | A piece may additionally declare an optional FEN character. Without one it has no FEN representation. |
+| FR-6 | Clocks declare an initial time and an increment. |
+| FR-7 | A game runs under exactly one configuration and exactly one board. |
+
+### 7.2 Rules — the code-driven layer
+
+| ID | Requirement |
+|---|---|
+| FR-8 | A `Rule` is the parent class for game logic. It carries a configured `value` and per-game `state`, and implements five hooks, each with a permissive default: `permits_move(position, move) -> bool`, `available_moves(position, piece) -> Iterable[Move]`, `outcome(position) -> Optional[Result]`, `on_move_made(position, move) -> None`, and `status(position) -> Optional[str]`. |
+| FR-9 | **Four of the five hooks are exhaustive for turn-based game logic**, which can only forbid a move or end the game. The fifth, `status`, is display rather than logic: it reports something worth showing, such as `Check`, while the game continues. |
+| FR-10 | **No rule owns behaviour.** The validator asks and rules answer: a rule may permit or forbid, never cause; a rule may propose an outcome, never impose one. |
+| FR-11 | An outcome is a `Result` carrying a kind (win, loss, draw), a **precedence**, and an optional winner. Decisive outcomes outrank draws; equal precedence resolves by a declared order. |
+| FR-12 | A rule's configured `value` is persisted. Its runtime `state` — counters, history — resets each game and is never persisted. |
+| FR-13 | A move may consist of **several hops**. A capture chain in checkers is one move the player makes, not several. |
+| FR-14 | No piece type is special to the engine. Whether a position has a king is a rule, not a lookup by type name. |
+| FR-15 | Board size is not restricted to 8×8. Rank-relative rules are **generalised, not disabled**: the home rank and the castling and knight-forward files are derived from the configured board. |
+| FR-16 | Every orthodox rule in `notes/chess_rules.md` is expressible in those hooks: castling, en passant, promotion, check, checkmate, stalemate, insufficient material, the fifty-move rule, threefold repetition, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
+| FR-17 | Logic beyond any shipped set is expressible without extending the engine: a piece that may move to any square satisfies `available_moves`; a piece that must capture if able satisfies `permits_move`; a game that ends when a named piece is lost satisfies `outcome`. |
+
+### 7.3 Quests — also code-driven
+
+| ID | Requirement |
+|---|---|
+| FR-18 | A `Quest` is a parent class with subclasses for the built-in quests, following the same pattern as `Rule`. Its `validate() -> bool` takes no arguments, exactly as the reference diagram draws it. |
+| FR-19 | There is no separate condition class. A quest carries its own logic; the pattern is identical to `Rule`'s. |
+| FR-20 | A quest declares `name`, `description`, a `reward`, and its `parameters()`, which is what the settings form asks the player for. |
+| FR-21 | Every quest declares a **`when`**: `after_move` or `at_game_end`. |
+| FR-22 | A quest reports **progress** as current and target, not only a boolean, so a card can render `3/5`. |
+| FR-23 | **Quest scope is split explicitly.** Quests in play for the current game are held by the quest manager. Quests a user has completed are held by the user. |
+| FR-24 | Total experience is **derived** from the quests a user has completed, so the user type gains no new field. |
+
+### 7.4 Configurations
+
+| ID | Requirement |
+|---|---|
+| FR-25 | A configuration is a directory under `games/` holding board, pieces, rules, quests and clocks. |
+| FR-26 | `chess` ships as the default: 8×8, the six standard pieces, every orthodox rule at its orthodox value, and default clocks. Playing orthodox chess requires no configuration. |
+| FR-27 | The default configuration cannot be edited or deleted. A variant starts by duplicating it. |
+| FR-28 | Configurations can be created, renamed, duplicated, edited and deleted. |
+| FR-29 | Configurations persist as directories and survive a restart without an account. |
+
+### 7.5 Settings surface
+
+| ID | Requirement |
+|---|---|
+| FR-30 | A selector in the corner chooses **which configuration is being edited**. It appears in settings only. |
+| FR-31 | Below it are sections, one per configurable surface: **Board, Pieces, Rules, Quests, Clocks**. |
+| FR-32 | **All data-based configuration is form-exposed**, assembled from each type's declaration by one renderer. |
+| FR-33 | The Rules and Quests sections offer a code editor for authoring logic, which writes into the configuration directory. |
+| FR-34 | The editor validates before the code may join the configuration, reporting errors in the editor rather than at game start. |
+| FR-35 | Settings can be saved, reset to the shipped defaults, or cancelled. |
+
+### 7.6 Game start and view
+
+| ID | Requirement |
+|---|---|
+| FR-36 | Starting a game presents a modal offering a **configuration selector**, a **Settings** button and a **Start** button. |
+| FR-37 | The board renders with coordinates, symbols, the active player's squares highlighted, and legal-move highlights on selection. |
+| FR-38 | Each player panel shows identity, clock, and captured and lost pieces. |
+| FR-39 | The turn is indicated. |
+| FR-40 | Move history is visible. |
+| FR-41 | Status and alerts appear in a footer. |
+| FR-42 | Quests appear as cards showing progress and reward. |
+
+### 7.7 Notation and export
+
+The reference diagram is the specification for this area. It draws an **export
+writers** box that enumerates the formats — *letter*, *PGN*, *FEN*,
+*Field - Field - Extra*, *Stenographic* (standard or custom compression) — plus
+**the game transcript**, with an `Extends` relation between writers. **All of
+them are implemented.** Nothing in this section is optional.
+
+| ID | Requirement |
+|---|---|
+| FR-43 | Export is one class per format, extending a base exporter, living in the configuration that uses it. There is no format switch and no format-name string anywhere in the engine. |
+| FR-44 | *Letter* — the move is rendered in algebraic notation with piece letters, capture markers, promotion and castling notation. |
+| FR-45 | *PGN* — real PGN: a seven-tag roster **derived from the game** (event, site, date, round, both players, result), and movetext in Standard Algebraic Notation, including piece disambiguation, castling notation, promotion, and check and mate suffixes. |
+| FR-46 | *FEN* — all six fields are **computed from the game state**: placement, side to move, castling rights, en passant square, halfmove clock and fullmove number. No field is hard-coded. |
+| FR-47 | *FEN* round-trips: import a position, build it, export it, obtain the identical string. Asserted for the start position, a mid-game position carrying both castling rights, and one carrying an en passant square. |
+| FR-48 | *Field - Field - Extra* — the game transcript header, derived from real state. Player names come from the users playing, the result from the game, the date from the game. No placeholder strings. |
+| FR-49 | *Stenographic* — the transcript in stenographic form, with compression that is either a standard choice or a configured one, drawn from the standard library codecs only. |
+| FR-50 | *The game transcript* — every move is recorded and readable, independently of any export format. |
+| FR-51 | A format that belongs to one game ships with that game. FEN and PGN are chess formats and therefore live in `games/chess/export/`; a game with no FEN representation has no FEN exporter, because the structure says so rather than a capability check. |
+
+### 7.8 Games shipped
+
+| ID | Requirement |
+|---|---|
+| FR-52 | `games/chess/` is a complete, correct orthodox chess configuration. |
+| FR-53 | `games/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings sliding any distance diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
+| FR-54 | Adding `games/checkers/` requires **no engine change**. If it does, the abstraction is wrong — and that is the point of shipping it. |
+
+### 7.9 Application
+
+| ID | Requirement |
+|---|---|
+| FR-55 | The game log directory is **configurable**. It defaults to `logs/` at the repository root, is created on demand, and is git-ignored. |
+| FR-56 | The package is installable and declares its metadata and runtime dependencies, of which there are none beyond the standard library. |
+| FR-57 | The application starts from a documented entry point and a complete game can be played to a result. |

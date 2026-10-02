@@ -168,72 +168,77 @@ The surviving ~87 tests keep their product coverage and gain:
 
 ## 3. Work streams and PR topology
 
-Two phases. **Phase 1 changes no product behaviour** — it is mechanical, safe and
-reviewed to green before anything is built on top of it. Phase 2 builds the
-product.
+Two phases. **Phase 1 changes no product behaviour** — mechanical, safe, and
+reviewed to green before anything is built on it. Phase 2 builds the product.
 
 ### Phase 1 — quick wins, each reviewed and merged before Phase 2 starts
 
-| PR | Content | Depends on |
+| PR | Content | Needs |
 |---|---|---|
 | 1 | PRD + SCRATCHPAD | — *(in review)* |
 | 2 | Flatten `src/` to root, and reconfigure the docs pipeline with it | 1 |
 | 3 | CI: native self-contained workflows, then remove the DarkFactory dependency | 1 |
 | 4 | Governance rules: `AGENTS.md` 1, 2, 4, 7, 11 | 1 |
-| 5 | Cleanup: delete the metadata-only tests, close the two docstring gaps, remove the `piece.py` demo block | 2 |
-| 6 | Packaging metadata: `[project]` table and a build backend | 2 |
-| 7 | README: stop claiming capabilities the product does not yet have | 1 |
+| 5 | Cleanup: delete metadata-only tests, close the docstring gaps, remove the `piece.py` demo block | 2 |
+| 6 | Packaging metadata | 2 |
+| 7 | README: stop claiming what the product does not yet do | 1 |
 
 ### Phase 2 — the product
 
-| PR | Content | Depends on |
+| PR | Content | Needs |
 |---|---|---|
 | 8 | Board generalisation: remove every hard-coded `8` | 2 |
-| 9 | Quest conditions as data-driven classes | 2 |
-| 10 | `Rule`, `RuleSet`, `OrthodoxChess`, and loading from `rules/` and `rulesets/` | 8 |
-| 11 | Standard rules as `Rule` subclasses | 8, 10 |
-| 12 | Wire the orphan subsystems, including `QuestManager` | 9, 11 |
-| 13 | View layer in tkinter, with the game-start modal | 12 |
-| 14 | Settings surface: rule set selector, forms, rule editor | 12 |
-| 15 | Czech aliases and the remaining dead code | 14 |
-| 16 | Behavioural test coverage to close the gaps PR 5 opened | 8–15 |
+| 9 | `Quest` parent with built-in quest subclasses; `QuestManager` scoped to quests in play | 2 |
+| 10 | `Rule` parent, four hooks, `Result` precedence, loading a configuration from `games/` | 8 |
+| 11 | Orthodox chess rules as `Rule` subclasses | 10 |
+| 12 | King detection becomes a rule; remove every `getType()` string coupling | 10, 11 |
+| 13 | Multi-hop moves, so a capture chain is one move | 10 |
+| 14 | Migrate chess into `games/chess/` — pieces, rules, board, clocks | 11, 12 |
+| 15 | Wire the orphan subsystems: `User`, `UserManager`, writers, `WindowController` | 9, 11 |
+| 16 | View layer with the game-start modal | 15 |
+| 17 | Settings surface: one spec-driven form renderer, plus the code editor | 16 |
+| 18 | `games/checkers/` — full English draughts | 13, 14 |
+| 19 | Export generalised: one class per format in `games/<variant>/export/` | 11, 12 |
+| 20 | Czech aliases and the remaining dead code | 17 |
+| 21 | Export formats: algebraic, real PGN with SAN and a derived seven-tag roster, correct FEN plus the round-trip check, metadata header, stenographic with compression | 19 |
+| 22 | Behavioural test coverage | 8–21 |
 
 ### Shape
 
 ```
-Phase 1 (linear, one at a time)
+Phase 1 (linear)
   1 ─ 2 ─ 3 ─ 4 ─ 5 ─ 6 ─ 7
 
 Phase 2
-  8 ─┐
-  9 ─┼─ 12 ─┬─ 13
- 10 ─┤      └─ 14 ─ 15 ─ 16
- 11 ─┘
+  8 ─ 10 ─┬─ 11 ─┬─ 12 ─ 14 ─┬─ 16 ─ 17 ─ 20 ─ 21
+           │     │           │     └─ 18 ─┘
+   9 ──────┘     ├─ 15 ──────┘
+                 └─ 19
+                 13 ─┘(→18)
 ```
 
-Critical path in Phase 2 is **five PRs**: `8 -> 11 -> 12 -> 14 -> 15`. Three lanes
-run concurrently at the front, two at the back.
+Critical path: `8 → 10 → 11 → 12 → 14 → 16 → 17 → 20 → 21`. Nine deep, which is
+why the front is deliberately wide: 9, 13 and 19 all run alongside the chain.
 
 **Why Phase 1 is separate.** Every Phase 2 PR would otherwise carry import-path
 and docs-configuration churn alongside its real change, which makes review much
-harder. Phase 1 pays that cost once, in PRs with no behavioural risk, and leaves
-Phase 2 to contain only behaviour.
+harder.
 
 **Why the flatten is PR 2.** It touches all 32 modules, `pyproject.toml`,
-`properdocs.yml`, `docs_hooks.py` and `AGENTS.md`, and it is the reason PR 5, 6
-and every Phase 2 PR exist in their current shape.
+`properdocs.yml`, `docs_hooks.py` and `AGENTS.md`.
 
-**Why `10 -> 11` rather than merging them.** `Rule` and `RuleSet` are
-reviewable on their own — four hooks, a precedence ladder, a loader — before any
-chess rule is written against them. The standard rules are then written against a
-mechanism that has already been proven.
+**Why PR 12 sits before PR 14.** Removing the hard-coded king lookup is what
+makes `games/checkers/` possible at all. Doing it after the migration means
+touching the same code twice.
+
+**Why PR 13 sits before PR 18.** English draughts capture chains are multi-hop.
+Without multi-hop moves, checkers is not correct.
+
+**Why `define_ruleset` is not a PR.** Proposed, assessed against the diagram,
+rejected — `notes/object_model.md` section 5.
 
 **Do not remove DarkFactory before the replacement CI is green on `main`.** The
-repository must never sit without working required checks. Inside PR 3 the
-replacement lands and goes green first; removal follows in the same PR.
-
-**`define_ruleset` is not a PR.** Proposed, assessed against the diagram,
-rejected — see `notes/object_model.md` section 5.
+repository must never sit without working required checks.
 
 ### 3.1 PR 2 — the flatten, in full
 
@@ -241,23 +246,28 @@ rejected — see `notes/object_model.md` section 5.
 |---|---|
 | `src/model` → `model`, `src/controller` → `controller`, `src/view` → `view` | delete `src/` |
 | `pyproject.toml` | `pythonpath = ["src", "."]` → `["."]` |
-| ~15 modules | collapse the 3-level `try/except ImportError` fallbacks to plain imports; they existed only because of `src` |
+| ~15 modules | collapse the 3-level `try/except ImportError` fallbacks to plain imports |
 | `AGENTS.md` Rules 1 and 2 | both say "all code in `src/`" |
-| `properdocs.yml` | `docs_dir: src` → `docs_dir: .`, with `exclude_docs` extended, since the whole repo becomes the docs tree |
-| `docs_hooks.py` | walk only `model/`, `controller/`, `view/` when emitting API pages, rather than scanning everything |
+| `properdocs.yml` | `docs_dir: src` → `docs_dir: .`, with `exclude_docs` extended |
+| `docs_hooks.py` | walk only `model/`, `controller/`, `view/` when emitting API pages |
 | `tests/test_docs_and_docstrings.py` | walk the package dirs |
-| `tests/test_structure.py` | **no change** — its module list is already top-level, never `src.*` |
+| `tests/test_structure.py` | **no change** — its module list is already top-level |
 
-**Two known risks, both with a fallback.**
+**Two known risks, both with a fallback.** *Docs:* `docs_dir: src` keeps tests and
+CI config out of the docs by construction; flattened, `exclude_docs` must do that
+work. Fallback is a dedicated docs directory. *Packaging:* a flat layout plus
+setuptools auto-discovery trips over `tests/` at the root, so PR 6 sets
+`packages = [...]` explicitly.
 
-*Docs.* `docs_dir: src` keeps tests, theme and CI config out of the docs by
-construction; flattened, `exclude_docs` has to do that work explicitly. If it
-proves awkward, the fallback is a dedicated docs directory rather than widening
-the docs tree to the whole repo.
+### 3.2 PR 18 — checkers, and why it is not optional
 
-*Packaging.* A flat layout plus setuptools auto-discovery trips over `tests/`
-sitting at the root, so PR 6 must set `packages = ["model", "controller", "view"]`
-explicitly rather than relying on discovery.
+`games/checkers/` shares the engine and changes nothing in it (FR-49). It is
+therefore the executable proof of the abstraction, and it is self-verifying: if
+checkers needs an engine change that chess did not, the seam is in the wrong
+place.
+
+It needs, from earlier PRs, exactly the two things that chess would have needed
+anyway: multi-hop moves (13) and no hard-coded king (12).
 
 ## 4. Risks
 
@@ -268,6 +278,8 @@ explicitly rather than relying on discovery.
 | The code stack is eight PRs deep; a late rework invalidates the bottom | High | PR 3 and PR 4 are the risky ones and land first, while the stack is short and cheap to restart |
 | Removing DarkFactory leaves the repo without CI mid-flight | High | Replacement CI merges and goes green before any removal |
 | Generalising rank-relative rules to arbitrary board sizes is harder than it looks — home rank, knight-forward file and castling rook files all derived | High | Land in PR 3, before PR 4, so rule work builds on a correct board abstraction |
+| Real PGN requires SAN with piece disambiguation, and disambiguation is easy to get subtly wrong — `Nbd7` versus `N1d7` versus plain `Nd7` | High | Each disambiguation case gets its own test: two knights, three queens, two rooks on one rank, a pinned piece that can still legally reach the square, and promotion capture. A round-trip against a known PGN string is the backstop |
+| The export roster is fixed by the diagram, so "add one more format" is not a free choice | Medium | The base class plus one file per format means adding a format is one file and no engine change. The roster itself is not negotiable, but the cost of any format is now bounded |
 | Deleting 52 tests could mask real regressions | Medium | Every deletion is import-only or metadata-only. §2.2 adds behavioural coverage to offset, and PR 14's deletions can merge early and be observed |
 | Czech aliases in mkdocstrings may render as data rather than documented API | Medium | Accepted per decision 7. No special handling |
 | `python3-tk` absent on some runners | Medium | Assert-and-skip in tests; install in CI in the PR that first imports `tkinter` |
@@ -330,6 +342,13 @@ The project is finished when all of these hold:
     Settings covers FR-29 to FR-35, including rule set management and the editor.
 19. CI green across Python `3.10`, `3.11`, `3.12`, `3.13`, depending on no
     external repository's workflow.
+19a. Every export format the diagram names is implemented: *letter*, *PGN*,
+    *FEN*, *Field - Field - Extra*, *Stenographic*, and the game transcript.
+    Nothing in the roster is deferred.
+19b. No format switch and no format-name string exists anywhere in the engine.
+19c. FEN round-trips for the three positions named in FR-47.
+19d. PGN movetext is genuine SAN, verified against known-good PGN for a
+    position that requires disambiguation.
 
 **Object model and hygiene**
 
