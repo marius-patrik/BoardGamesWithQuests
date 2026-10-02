@@ -59,7 +59,7 @@ include-package-data = true
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = ["src", "."]
 
 [tool.black]
 line-length = 100
