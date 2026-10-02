@@ -1,7 +1,7 @@
 # ChessWithQuests — Product Requirements Document
 
 **Status:** Draft, awaiting review
-**Version:** 0.3
+**Version:** 0.4
 
 Planning material — current state, work streams, risks, acceptance criteria and
 the decision log — lives in `SCRATCHPAD.md`. This document states only what the
@@ -15,8 +15,9 @@ A desktop chess application in Python, built as an MVC application, in which the
 **configuration surface is the product**. A stock 8×8 game with standard pieces
 is one configuration among many: before a game starts, a player chooses the
 board size, the starting position, the movement and attack vectors of every
-piece, which rules are in force, any custom rules they want to add, the quests
-in play, and the time controls.
+piece, which rules are in force, the quests in play, and the time controls.
+Every one of these starts at the standard chess default and changes only where the
+player changes it.
 
 The application is therefore two products sharing one window:
 
@@ -36,11 +37,16 @@ The application is therefore two products sharing one window:
 
 ---
 
-## 3. Binding constraints
+## 3. Constraints
 
-`AGENTS.md` is normative for object-model conformance, language and delivery.
-This section states only the constraints `AGENTS.md` does not already carry, and
-a change that violates any of them does not merge as written.
+Three things are fixed and are not up for debate.
+
+**Already covered by `AGENTS.md`, which is what governs — this document does not
+restate them:** object-model conformance (Rule 3), language (Rule 4), delivery
+(Rule 7) and the pull-request review trail (Rule 11).
+
+**Not covered by `AGENTS.md`, stated here:** the two below, libraries and tests.
+
 
 ### 3.1 Libraries
 
@@ -90,7 +96,7 @@ invariant such as "no third-party import in `src/`" or "no hard-coded 8 outside
 | FR-2 | The starting position is either standard or edited square by square before play. |
 | FR-3 | Each piece type is configurable with movement vectors, attack vectors and a jump flag. A piece may be added to the palette and placed on the board. |
 | FR-4 | The rule set for a game is chosen explicitly: which standard rules are in force, and which custom rules are added. |
-| FR-5 | A quest is configurable with a name, a description, a completion condition and a reward. |
+| FR-5 | A quest is configurable **from the settings surface**: a name, a description, a completion condition drawn from a set of data-driven conditions (capture N pieces, move a piece N times, survive N plies, reach a named square), and a reward. Conditions are data, so a player builds a quest without writing code. |
 | FR-6 | Clocks are configured with an initial time and an increment. |
 | FR-7 | A configured game can be saved, reset to defaults, or cancelled. |
 
@@ -98,11 +104,11 @@ invariant such as "no third-party import in `src/`" or "no hard-coded 8 outside
 
 | ID | Requirement |
 |---|---|
-| FR-8 | Rules are **pluggable, not hard-coded into the validator**. A rule is a named unit that inspects game state and reports whether it is satisfied, so adding or removing a rule does not require changing the engine core. |
-| FR-9 | Every rule in `notes/chess_rules.md` ships as a rule: castling, en passant, promotion, the fifty-move rule, threefold repetition, insufficient material, stalemate, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
-| FR-10 | **A custom rule can be added at runtime**, expressed as a condition over game state with an effect when satisfied. Adding one requires no change to the engine core and no rule enumerating it in advance. |
-| FR-11 | **Any rule, standard or custom, can be disabled for a given game.** A disabled rule is not evaluated and cannot end that game. |
-| FR-12 | Rules compose: several may be satisfied at once, and the game's result reflects all enabled rules together. |
+| FR-8 | The rule set is **data, not code**. Each rule is a named setting on the game: whether castling applies, whether en passant applies, what a pawn promotes to, how many moves pass without a capture before a draw, whether repetition counts. Turning a rule off sets the setting; no rule logic is deleted from the source. |
+| FR-9 | Standard chess ships as the **default** rule set: castling, en passant, promotion, the fifty-move rule, threefold repetition, insufficient material, stalemate, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
+| FR-10 | Special moves are **move types, not special cases**. `Tah.typ tahu` carries the move type, so castling, en passant and promotion are generated and validated along the same path as every other move. |
+| FR-11 | A game is playable with **any subset** of the standard rules enabled. |
+| FR-12 | Piece behaviour is data too — movement vectors, attack vectors and jump capability are settings on the piece. The classic pieces are nothing more than the default values of those settings. |
 | FR-13 | Board size is not restricted to 8×8, and FR-9 holds on whatever board the player configured. Rank-relative rules are **generalised, not disabled**: the home rank and the castling and knight-forward files are derived from the configured board, so en passant and castling work at any size rather than being switched off outside 8×8. |
 | FR-14 | Clocks run, apply increment, and end the game on expiry. |
 | FR-15 | Moves can be selected, previewed as highlights, made and cancelled. |
@@ -123,7 +129,7 @@ invariant such as "no third-party import in `src/`" or "no hard-coded 8 outside
 
 | ID | Requirement |
 |---|---|
-| FR-23 | A settings surface configures board, position, pieces, rules, custom rules, quests and clocks, and its changes apply when a new custom game is created. |
+| FR-23 | A settings surface configures board, position, pieces, which rules are in force, quests and clocks, and its changes apply when a new custom game is created. |
 | FR-24 | Settings can be reset to defaults, saved or cancelled. |
 
 ### 4.5 Users, notation and persistence
@@ -170,9 +176,3 @@ Czech aliases required, English canonical, no diacritics:
 counterpart in the diagram.
 
 ---
-
-## 6. Visual reference
-
-`GUI_mockup.svg` is the reference for the game's layout, content and data
-bindings. The implementation is not required to reproduce it exactly. Where the
-mockup and the reference diagram disagree, the diagram governs.

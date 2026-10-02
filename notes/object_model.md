@@ -35,10 +35,14 @@ Any structural, behavioral, or naming deviation from this diagram must:
 - **Mitigation**: The settings classes are kept as thin adapters over the model. They hold no game state and add no rules of their own, so the deviation is additive and does not alter the object model the diagram defines.
 - **Approval**: Explicitly approved by the user on 2026-10-02 ("yup 2 build it, note deviation").
 
-### 4. Pluggable Rule Engine (Deviation — Not in the Reference Diagram)
+### 4. Customisable Rules and Quests — NOT a Deviation
 - **Date**: 2026-10-02
-- **Context**: The diagram specifies `RevizorTahu` as a fixed class whose internals implement `simulate_Move()`, `check_Šach()`, `check_Mat` and `check_Pat`. There is no rule registry, no notion of an enabled or disabled rule, and no extension point.
-- **Deviation**: Rules become discrete, named, individually toggleable units held in a registry, and the validator evaluates the enabled set rather than hard-coding each rule.
-- **Rationale**: FR-8 through FR-12 require that a custom rule be addable at runtime with no change to the engine core, and that any rule be disableable per game. Neither is expressible in the diagram's shape. Rank-relative rules (FR-13) also require deriving the home rank and castling files from a configured board, which the fixed-class shape has nowhere to express.
-- **Mitigation**: `RevizorTahu` remains the validator and remains the diagram's class name. The rule units are composed by it rather than replacing it, so the diagram's box and its four documented operations still exist and still behave as drawn. The registry is an internal collaborator.
-- **Approval**: Explicitly approved by the user on 2026-10-02 ("rules should be completely generalized, able to add custom ones and disable any for game").
+- **Assessment**: The user raised the question directly: *"I dont think the diagram really supports that even tho it is a part of the assignment for rules to be customizable."* On examination it does, and no deviation is required.
+- **Why the diagram already supports it**:
+  - `Tah` carries `typ tahu: string`. That field is a move-type tag, so castling, en passant and promotion are expressed as move types generated and validated through the ordinary path, not as branches in the validator.
+  - `Figurka` carries `vektory`, `vektory_utoku` and `skok` as data. Custom piece behaviour is therefore already diagram-shaped, and the classic pieces are simply the default values of those fields.
+  - `RevizorTahu` exposes exactly four operations — `simulate_Move()`, `check_Šach()`, `check_Mat` and `check_Pat` — none of which is a special move. Special moves were never the validator's concern.
+  - `GameManager.get_stav()` is the single point at which the game's outcome is decided, which is where draw conditions belong.
+- **Consequence**: the rule set is configuration data held by the game, with standard chess as the default. Disabling a rule sets a value; no rule logic is removed from the source. Quest completion conditions are likewise data, so a quest is built from the settings surface rather than from a Python lambda.
+- **A withdrawn proposal**: an earlier draft of this file recorded deviation 4, "Pluggable Rule Engine", on the basis that runtime rule injection needs an extension point the diagram has no box for. That proposal is withdrawn. The pluggable form is deferred to a separate master issue covering rules, board, pieces and quests, and is explicitly out of scope for the current track.
+- **Approval**: Confirmed by the user on 2026-10-02 — *"everything level 1 now and pluggable later"*, *"define logic actual quests data driven and settings configurable pluggable logic deffered"*.

@@ -22,7 +22,7 @@ thorough Google-style docstrings and no third-party imports.
 | Gap | Evidence |
 |---|---|
 | **The entire view layer** | `src/view/__init__.py` is one docstring line. No GUI, no renderer, no entry point. Tracked in #125 |
-| **Rules are hard-coded, not pluggable** | `RevizorTahu` inlines each rule. No registry, no per-game enable/disable, no extension point. FR-8 to FR-12 unmet |
+| **Rule set is not configuration data** | `RevizorTahu` inlines each rule and `get_state` hard-codes the outcome ladder. There is nowhere to store "which rules are in force", so FR-8 to FR-12 are unmet. Not a redesign — the diagram already provides the fields (`Tah.typ tahu`, `Figurka.vektory`, `GameManager.get_stav`) |
 | **Most chess rules absent** | `notes/chess_rules.md:52-111` mandates castling, en passant, promotion, fifty-move, threefold repetition, insufficient material and mutual-agreement draw. Only stalemate is implemented. `King._has_moved` and `Rook._has_moved` are tracked and never read by any rule |
 | **Custom board sizes broken** | `move.py:44,46` rejects any move outside a hard-coded 8×8. `board.py:41` silently produces an empty board for any other size. Twelve sites in total |
 | **Running application** | No `[project]` table, no build backend, no entry point. The package imports only because pytest sets `pythonpath` |
@@ -132,10 +132,12 @@ The surviving ~87 tests keep their product coverage and gain:
   sequence, which is why six orphan subsystems went unnoticed.
 - **Rule tests.** One per rule, each exercised both enabled and disabled, so
   FR-11 is genuinely covered rather than asserted.
-- **Custom-rule tests.** A rule added at runtime is evaluated; a bogus one does
-  not crash the engine. Covers FR-10.
-- **Composition tests.** Two rules satisfied at once produce a result reflecting
-  both. Covers FR-12.
+- **Rule-configuration tests.** Each rule driven both on and off through the
+  same game, proving the setting — not a code path — is what changes it. Covers
+  FR-8 and FR-11.
+- **Quest tests.** A quest built from each data-driven condition completes on the
+  intended event and not before, awards its reward once, and survives being
+  checked again after completion.
 - **Invariant tests**, asserted against code rather than docs:
   - no third-party runtime import anywhere in `src/`
   - no hard-coded `8` outside `Board`'s default dimension
@@ -172,7 +174,7 @@ TRACK 5 - Repository health
 
 TRACK 2+3+4 - Product code                (one stack)
   PR 3   Generalise the board beyond 8x8        ─┐
-  PR 4   Pluggable rule engine + standard rules │ ordered
+  PR 4   Rule set as data + standard rules    │ ordered
   PR 5   Wire the orphan subsystems             ─┘
               │
               ├──▶ PR 6   View layer            ─┐ parallel
@@ -190,11 +192,11 @@ En passant and castling logic must not be written against a hard-coded 8×8, and
 FR-13 needs the home rank and castling files derived before any rule depends on
 them.
 
-PR 4 is the rule engine, not just the missing rules. Building the standard rules
-straight into the existing hard-coded validator would mean rebuilding them the
-moment FR-8 to FR-12 land. The engine lands first and the standard rules are
-written on top of it, which is also the only order in which "disable any rule
-for a game" is testable at all.
+PR 4 introduces the rule set as configuration data, then implements the standard
+rules on top of it. Building them straight into the hard-coded validator would
+mean rebuilding them the moment FR-8 to FR-11 land, so the data model lands
+first. This is a smaller job than a plugin system: no registry, no callbacks,
+no new classes — the diagram's existing fields carry it.
 
 PR 6 and PR 7 do not touch each other and branch from PR 5. Both consume
 subsystems that are orphans until PR 5 wires them, so neither can merge before it.
@@ -216,7 +218,7 @@ repository must never sit without working required checks.
 | Risk | Severity | Mitigation |
 |---|---|---|
 | `hasattr` and string probes in the rules engine break **silently** on rename | High | §1.3. Naming PRs ship tests that fail when a probe breaks, not only when a name changes |
-| A pluggable rule engine is a redesign of the validator, not an addition | High | PR 4. `RevizorTahu` is kept and composes the rules; the diagram's box and its four operations survive. Recorded as deviation 4 in `notes/object_model.md` |
+| The rule set must become data without disturbing the diagram's four `RevizorTahu` operations | Medium | PR 4. Those operations stay exactly as drawn; only the outcome ladder in `get_stav` and move generation in `simulate_Move` gain a data-driven path. Assessed in `notes/object_model.md` section 4 as **not** a deviation |
 | The code stack is eight PRs deep; a late rework invalidates the bottom | High | PR 3 and PR 4 are the risky ones and land first, while the stack is short and cheap to restart |
 | Removing DarkFactory leaves the repo without CI mid-flight | High | Replacement CI merges and goes green before any removal |
 | Generalising rank-relative rules to arbitrary board sizes is harder than it looks — home rank, knight-forward file and castling rook files all derived | High | Land in PR 3, before PR 4, so rule work builds on a correct board abstraction |
@@ -239,26 +241,32 @@ The project is finished when all of these hold:
 4. `python -m properdocs build --strict` clean, zero warnings.
 5. No third-party runtime import anywhere in `src/`. Asserted by a test.
 6. No hard-coded `8` outside `Board`'s default dimension. Asserted by a test.
-7. Every rule in `notes/chess_rules.md` implemented as a rule, tested enabled
+7. Every rule in `notes/chess_rules.md` implemented, each tested both enabled
    and disabled: castling, en passant, promotion, fifty-move, threefold
    repetition, insufficient material, stalemate, mutual-agreement draw, and the
    flag-fall nuance.
-8. A custom rule is addable at runtime with no change to the engine core.
-9. Any rule is disableable for a given game, and rules compose.
+8. The rule set is data. Disabling a rule changes a setting and removes no
+   source logic; enabling it again restores it.
+9. Standard chess is the default rule set, so an unconfigured game plays orthodox
+   chess.
+12. Castling, en passant and promotion are generated as `Tah.typ tahu` move
+    types, not as special cases in the validator.
+13. A quest is buildable from the settings surface using a data-driven condition,
+    with no Python written by the player.
 10. Those rules hold on non-8×8 boards, rank-relative rules generalised rather
     than disabled.
 11. A game is played end to end from the entry point to a result.
-12. All 15 Czech aliases importable and identical to their canonical objects;
+14. All 15 Czech aliases importable and identical to their canonical objects;
     `Tower`, `Horse` and `Controller` gone.
-13. Deviation 3 (settings) and deviation 4 (rule engine) recorded in
+15. Deviation 3 (settings) and deviation 4 (rule engine) recorded in
     `notes/object_model.md` with approval context.
-14. The GUI covers FR-17 to FR-22; settings covers FR-23 and FR-24.
-15. CI green across Python `3.10`, `3.11`, `3.12`, `3.13`, depending on no
+16. The GUI covers FR-17 to FR-22; settings covers FR-23 and FR-24.
+17. CI green across Python `3.10`, `3.11`, `3.12`, `3.13`, depending on no
     external repository's workflow.
-16. `notes/chess_rules.md` amended where the generalisation in item 10 departs
+18. `notes/chess_rules.md` amended where the generalisation in item 10 departs
     from it.
-17. No dead code from §1.4 remains, and the §1.5 docstring gaps are closed.
-18. `piece.py` demo block removed.
+19. No dead code from §1.4 remains, and the §1.5 docstring gaps are closed.
+20. `piece.py` demo block removed.
 
 ---
 
@@ -284,9 +292,13 @@ The project is finished when all of these hold:
 | 16 | Mockup fidelity | **Reference, not spec** |
 | 17 | PRD home | **`PRD.md`** at root — a planning artifact, not documentation |
 | 18 | Plan home | **`SCRATCHPAD.md`** at root, same PR as the PRD |
-| 19 | Rules architecture | **Pluggable, not hard-coded.** Custom rules addable at runtime, any rule disableable per game, rules compose. Deviation 4 recorded |
+| 19 | Rules architecture | **Level 1 — the rule set is data**, with standard chess as the default. Every rule disableable per game by setting a value. Assessed in `notes/object_model.md` section 4 as **not** a deviation: the diagram already provides `Tah.typ tahu`, `Figurka.vektory` and `GameManager.get_stav` |
 | 20 | PRD scope | Current state, out-of-scope, work streams, risks, acceptance criteria and decisions live in this file, not the PRD |
-| 21 | Where the PRD points for governance | `AGENTS.md` stays normative for object model, language and delivery; the PRD adds only what `AGENTS.md` lacks |
+| 21 | Where the PRD points for governance | `AGENTS.md` stays normative for object model, language, delivery and the review trail. The PRD states only libraries and tests, which `AGENTS.md` does not cover. Confirmed on 2026-10-02 that the existing rules already cover it, so nothing was added |
+| 22 | Pluggable classes | **Deferred.** A master issue covers a pluggable class per layer — rules, board, pieces, quests — landing after this track. Level 1 everywhere in the meantime |
+| 23 | Quest conditions | **Data-driven and settings-configurable.** `condition_fn` callbacks are replaced by conditions a form can build. Pluggable quest logic deferred with 22 |
+| 24 | Mockup reference | Lives in `SCRATCHPAD.md`, not the PRD. The PRD describes the product; the mockup guides implementation |
+| 25 | Customisable pieces | Already data-driven via `Figurka` vectors, so diagram-supported. **Backlog** for now — not in the current FRs |
 
 ---
 
@@ -299,4 +311,85 @@ Nothing is out of scope globally; each item is owned by an issue.
 | Reproducing the diagram's typos — `GameVeiw`, `check_Pat`, `intger`, `akutalizuj_hrace`, `Id_uzivatele: hrac` | #123. Recorded as observed, never reproduced |
 | Network play, persistence beyond the file log, GUI beyond the mockup's surface | #129 |
 | Reinstalling the shared DarkFactory pipeline | Deferred, no issue until requested |
-| The `upstream` remote and `notes/upstream_base.md` | **Kept.** The fork provenance is real and `README.md` records it. Only the `pipeline` remote goes, in #126 |
+| The `pipeline` remote and empty `.pipeline/` | #126 |
+| Pluggable classes for rules, board, pieces, quests | Deferred master issue, after this track |
+| Generalised and customisable pieces beyond the data model | **Backlog.** The data model already supports it; no FRs are written for it in this track |
+
+### 7.1 Contradiction found and outstanding
+
+`notes/upstream_base.md` documents an `origin/upstream-base` branch as
+"permanently pinned" and protected, with a diff command that reads
+`git diff origin/upstream-base...main`. **That branch no longer exists** — it was
+deleted in the branch cleanup and pruned from the remote, so the documented diff
+command fails and the described branch protection is fiction.
+
+`tests/test_upstream_base_notes.py` does not catch this, because it asserts only
+that the strings `"upstream-base"` and `"a98e36d"` appear in the file.
+
+The `upstream` remote itself still resolves, and the base commit `a98e36d` still
+exists in its history, so the fork provenance is recoverable. This needs
+resolving: restore the branch, or rewrite the note to point at the remote
+directly. The note is currently the one document in the repository that is
+simply untrue.
+
+---
+
+## 8. Visual reference
+
+`GUI_mockup.svg` at the repository root is the reference for the game's layout,
+content and data bindings. **It is not a spec to reproduce exactly.** Where the
+mockup and the reference diagram disagree, the diagram governs.
+
+It is an Excalidraw export of roughly 275 text nodes, and it is more than
+wireframes: it is a design *plus* a gap analysis, carrying live `file:line`
+bindings into the current source.
+
+### Navigation
+
+Tabs: GAME, SETTINGS, QUESTS, OPTIONS, ELO.
+
+### GAME tab
+
+Board with algebraic coordinates; player panels with clocks; captured, lost and
+active columns; a turn indicator including check; NEW / DRAW / RESIGN actions;
+move history with export; a status footer; quest cards reading
+`QUESTS / First Blood - 10 XP`.
+
+Bound by the mockup to `WindowController.on_square_clicked()` /
+`GameController.handle_square_click()`, `GameManager.players / active_player`,
+`GameManager.make_move() -> Move.execute()`, `GameManager.get_state()`,
+`GameLogger.get_moves()` / `ChessNotationWriter.export()`,
+`WindowController.status_message / set_status()` and
+`QuestManager.get_quests() / check_quests()`.
+
+### SETTINGS tab
+
+Board configuration (rows, columns, a custom-size limit), starting position
+(standard or edit), piece configuration with a move-vector / attack-vector /
+can-jump table and an *Add piece* action, quest configuration, gameplay inputs,
+and save / reset / cancel.
+
+Bound to `Board.dimensions / rows / cols`, `Board(setup_pieces=False)` /
+`set_piece_at()` / `replace_piece()`, `getDirections()` /
+`getAttackDirections()` / `canJump()`, quest fields and `QuestManager`
+register/get/check, `Timer.initial_time`, `new_game()` / `reset_time()` /
+`reset_selection()` / `close_dialog()`.
+
+### Gaps the mockup states about itself
+
+- *"The renderer is proposed; green rows are controller hooks, blue rows are
+  model data, and orange rows are partial integrations."*
+- *"No SettingsView or SettingsController"*, and *"No Settings model/controller/
+  view exists yet."*
+- *"Move.validate() hard-codes 8; FEN writer assumes 8."*
+
+It labels its own rows HOOK / MODEL / PROPOSED / PARTIAL / LIMIT.
+
+All three gaps are independently confirmed by this audit and are covered by the
+current track: the settings layer by PR 7, the hard-coded 8 by PR 3.
+
+### Note on staleness
+
+The mockup's `file:line` bindings were accurate when it was drawn and will drift
+as the code changes. They are a starting point for implementation, not a contract
+to hold the source to.
