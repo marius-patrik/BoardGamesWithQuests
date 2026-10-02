@@ -31,6 +31,8 @@ class King(Piece):
             piece_type: Piece type descriptor (default: "king").
         """
         super().__init__(
+            symbols=("♔", "♚"),
+            fen="K",
             color=color,
             piece_type=piece_type,
             vectors=DIRECTIONS,

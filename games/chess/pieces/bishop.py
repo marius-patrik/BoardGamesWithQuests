@@ -15,6 +15,8 @@ class Bishop(Piece):
         """
         vectors = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
         super().__init__(
+            symbols=("♗", "♝"),
+            fen="B",
             color=color,
             piece_type=piece_type,
             vectors=vectors,
