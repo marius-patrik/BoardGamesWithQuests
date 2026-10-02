@@ -114,10 +114,10 @@ Current: `139` tests. Target: behaviour-only.
 | `tests/test_chess_rules_notes.py` | 1 | Asserts keywords in `notes/chess_rules.md` |
 | `tests/test_object_model_notes.py` | 1 | Asserts a URL and phrases in `notes/object_model.md` |
 | `tests/test_reference_diagram_notes.py` | 1 | Asserts a diagram id in `notes/reference_diagram.md` |
-| `tests/test_upstream_base_notes.py` | 1 | Asserts a commit SHA in `notes/upstream_base.md` |
+| `tests/test_upstream_base_notes.py` | 1 | Deleted with its note. Asserted only that a commit SHA appeared in `notes/upstream_base.md` |
 | `tests/test_docs_and_docstrings.py` | 11 of 12 | Metadata and workflow-pin tests go; the docstring-presence and strict-build checks stay |
 
-**52 of 139 tests assert nothing about the product.** Deleted, not reduced.
+**53 of 139 tests assert nothing about the product.** Deleted, not reduced.
 
 `tests/test_object_model_notes.py` is deleted even though `notes/object_model.md`
 is now carrying deviation records — the requirement is that the deviations are
@@ -315,24 +315,22 @@ Nothing is out of scope globally; each item is owned by an issue.
 | Pluggable classes for rules, board, pieces, quests | Deferred master issue, after this track |
 | Generalised and customisable pieces beyond the data model | **Backlog.** The data model already supports it; no FRs are written for it in this track |
 
-### 7.1 Contradiction found and outstanding
+### 7.1 Resolved: the stale upstream note
 
-`notes/upstream_base.md` documents an `origin/upstream-base` branch as
-"permanently pinned" and protected, with a diff command that reads
-`git diff origin/upstream-base...main`. **That branch no longer exists** — it was
-deleted in the branch cleanup and pruned from the remote, so the documented diff
-command fails and the described branch protection is fiction.
+`notes/upstream_base.md` documented an `origin/upstream-base` branch as
+"permanently pinned" and protected, with `git diff origin/upstream-base...main`
+as the documented command. That branch was deleted in the branch cleanup and
+pruned from the remote, so the command failed and the protection claims were
+fiction. `tests/test_upstream_base_notes.py` did not catch it, because it
+asserted only that two strings were present.
 
-`tests/test_upstream_base_notes.py` does not catch this, because it asserts only
-that the strings `"upstream-base"` and `"a98e36d"` appear in the file.
+**Resolved by deleting the note** on 2026-10-02, at the user's direction. Its
+subject, the branch, no longer existed, and the fork provenance is already
+recorded in `README.md`. The accompanying test went with it.
 
-The `upstream` remote itself still resolves, and the base commit `a98e36d` still
-exists in its history, so the fork provenance is recoverable. This needs
-resolving: restore the branch, or rewrite the note to point at the remote
-directly. The note is currently the one document in the repository that is
-simply untrue.
-
----
+`tests/test_docs_and_docstrings.py` hard-coded the note filename in four places
+and would have broken on removal. It now discovers notes from disk, so adding or
+removing a note cannot silently invalidate the docs-pipeline tests.
 
 ## 8. Visual reference
 
