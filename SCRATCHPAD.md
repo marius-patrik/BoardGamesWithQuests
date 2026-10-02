@@ -38,6 +38,26 @@ Breaking any of these is a rejected change regardless of quality.
    `area:view`, `area:controller`, `area:ci`, `area:docs`.
 8. **A change that touches code ships with tests.** `pytest`, `black --check` and
    `properdocs build --strict` are green before any PR is opened.
+9. **One transitional contradiction is live until PR 5 lands, and is expected.**
+   `AGENTS.md` Rule 4 states that all identifiers are English, which contradicts
+   the fifteen Czech aliases `PRD.md` section 5 requires. `AGENTS.md` governs
+   until amended, so an agent working from the rule text alone will write the
+   aliases *out*. **PR 5 closes this.** Until it merges, the aliases are the later
+   and more specific statement, recorded with approval in
+   `notes/object_model.md` section 1. No other contradiction between `AGENTS.md`
+   and this plan survives.
+
+## Where each planned pull request is tracked
+
+| Planned PR | Issue |
+|---|---|
+| 1 | #127 |
+| 2, 3, 6, 7 | #131 |
+| 4 | #126 |
+| 5 | #124 |
+| 8, 9, 10, 11, 12, 13, 14, 18, 19, 20, 21 | #129 |
+| 15, 16 | #125 |
+| backlog | #130 |
 
 ---
 
@@ -478,7 +498,7 @@ corresponding issue.
 
 **Goal**: board size is not restricted to 8×8.
 
-**Scope**: twelve hard-coded sites. `Move.validate` takes its bounds from the
+**Scope**: the nine board-dimension sites listed in §4.1. `Move.validate` takes its bounds from the
 board rather than a literal. `Board.setup_default_board` no longer silently
 yields an empty board for a non-8×8 size. `MoveValidator` ray lengths come from
 the board dimensions. FEN rank and file iteration comes from the board.
@@ -580,7 +600,7 @@ corresponding issue.
 **Goal**: every rule in `notes/chess_rules.md` implemented, and the engine stops
 knowing what a king is.
 
-All eleven rule sets as `Rule` subclasses in `games/chess/rules/`: castling, en
+All eleven chess rules as `Rule` subclasses in `games/chess/rules/`: castling, en
 passant, promotion, check and checkmate, stalemate, insufficient material,
 fifty-move, threefold repetition, mutual-agreement draw, flag fall, and a rule
 declaring which piece kind is royal.
@@ -612,8 +632,8 @@ corresponding issue.
 Move the six piece subclasses out of `model/pieces/` into `games/chess/pieces/`,
 with declared unicode symbols and optional FEN characters. Move the rules from
 PR 11 into `games/chess/rules/`. Create `games/chess/clocks/` and populate
-`games/chess/board.py`. `OrthodoxChess` is the default and cannot be edited or
-deleted; a variant starts by duplicating the folder.
+`games/chess/board.py`. `chess` is the default and cannot be edited or deleted; a variant starts by
+duplicating the folder.
 
 **Two things that break silently unless this PR owns them.** The docs build
 must stay green with the pieces gone from `model/pieces/` — PR 2 generates the
@@ -743,7 +763,7 @@ corresponding issue.
 
 **Needs**: 18. **Blocks**: 21.
 
-Every format the diagram's export writers box enumerates: *letter*, *PGN*,
+Every format the diagram's `ChessNotationWriter` box enumerates: *letter*, *PGN*,
 *FEN*, *Field - Field - Extra*, *Stenographic* with standard or configured
 compression from the standard library codecs, plus the game transcript.
 
@@ -778,10 +798,12 @@ to match the diagram's `GameManagerController`.
 **Re-check §4.3 and remove only what is still dead** — PR 14 made several
 attributes live.
 
-**Acceptance criteria**: every alias importable and `is` its canonical object; `Tower`,
-`Horse` and `Controller` no longer importable; no dangling `hasattr` probe or
-type-string comparison; `notes/object_model.md` alias table matches `src/`
-exactly.
+**Acceptance criteria**: every alias importable and `is` its canonical class;
+`Tower`, `Horse` and `Controller` no longer importable; no dangling `hasattr`
+probe or type-string comparison; `notes/object_model.md` carries the full
+fifteen-row alias table with a location column per class, and that table is
+verified against the source rather than trusted — a test asserts every name in it
+is importable from its stated location.
 
 **Verification**: `pytest -q`, `black --check .`, and
 `python -m properdocs build --strict`, plus the specific commands in the
@@ -925,7 +947,7 @@ reason is what matters.
 | 25 | No format switch in the engine | One class per format extending a base is the `Extends` relation the diagram already draws |
 | 26 | XP is derived from completed quests | `Uzivatel.splnene_kwesty` already holds them, so `User` gains no field and no deviation |
 | 27 | The log directory is configurable, defaulting to `logs/`, git-ignored | `GameLogger()` currently writes nothing at all, so this closes a gap rather than preserving a convention |
-| 28 | The rule set selector exists only in settings | It means *which configuration am I editing*. The start modal is the only place a configuration is chosen to play, so editing cannot silently change what is about to be played |
+| 28 | The configuration selector exists only in settings | It means *which configuration am I editing*. The start modal is the only place a configuration is chosen to play, so editing cannot silently change what is about to be played |
 | 29 | All data-based configuration is form-exposed | The code editor is for logic only. Requiring code to set a board size would make the editor the whole configuration surface |
 | 30 | Backlog is one item: a no-code builder for rule logic | The code editor covers the full expressiveness of the hooks meanwhile, so nothing is unavailable while it waits |
 | 31 | `src/` is flattened to the root | It removes the import-path and docs-configuration churn from every later PR |

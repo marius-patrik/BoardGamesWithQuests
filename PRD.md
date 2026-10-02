@@ -201,7 +201,7 @@ the game manager. Only configuration-specific implementations live in
 | ID | Requirement |
 |---|---|
 | FR-8 | A `Rule` is the parent class for game logic. It carries a configured `value` and per-game `state`, and implements five hooks, each with a permissive default: `permits_move(position, move) -> bool`, `available_moves(position, piece) -> Iterable[Move]`, `outcome(position) -> Optional[Result]`, `on_move_made(position, move) -> None`, and `status(position) -> Optional[str]`. |
-| FR-9 | **Four of the five hooks are exhaustive for turn-based game logic**, which can only forbid a move or end the game. The fifth, `status`, is display rather than logic: it reports something worth showing, such as `Check`, while the game continues. |
+| FR-9 | **Four of the five hooks are exhaustive for turn-based game logic**, which can only forbid a move or end the game: `permits_move` and `available_moves` cover forbidding a move, `outcome` covers ending the game, and `on_move_made` carries the bookkeeping the other three depend on. The fifth, `status`, is **display rather than logic** — it reports something worth showing, such as `Check`, while the game continues. |
 | FR-10 | **No rule owns behaviour.** The validator asks and rules answer: a rule may permit or forbid, never cause; a rule may propose an outcome, never impose one. |
 | FR-11 | An outcome is a `Result` carrying a kind (win, loss, draw), a **precedence**, and an optional winner. Decisive outcomes outrank draws; equal precedence resolves by a declared order. |
 | FR-12 | A rule's configured `value` is persisted. Its runtime `state` — counters, history — resets each game and is never persisted. |
