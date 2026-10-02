@@ -1,34 +1,47 @@
-"""Chessboard representation managing piece layout, bounds, and piece movements."""
+"""A playing surface: piece layout, bounds, and captures.
 
-from typing import Optional, List, Tuple
+The board knows how to hold a rectangle of pieces. It does not know what a piece is, who
+starts where, or how big the game is — a configuration supplies all three, which is why
+nothing here imports a piece subclass.
+"""
 
-try:
-    from model.pieces.pawn import Pawn
-    from model.pieces.rook import Rook
-    from model.pieces.horse import Horse
-    from model.pieces.bishop import Bishop
-    from model.pieces.queen import Queen
-    from model.pieces.king import King
-    from model.pieces.piece import Piece
-except ImportError:
-    from ..pieces.pawn import Pawn
-    from ..pieces.rook import Rook
-    from ..pieces.horse import Horse
-    from ..pieces.bishop import Bishop
-    from ..pieces.queen import Queen
-    from ..pieces.king import King
-    from ..pieces.piece import Piece
+from typing import Iterable, Optional, List, Tuple
+
+from model.pieces.piece import Piece
 
 
 class Board:
-    """Represents a chessboard and tracks piece positions and captures."""
+    """A rectangular playing surface that tracks piece positions and captures.
 
-    def __init__(self, dimensions: Tuple[int, int] = (8, 8), setup_pieces: bool = True):
-        """Initialize a chessboard.
+    The board is any number of rows by any number of columns. It starts empty: a starting
+    position is a fact about a game, so the configuration hands one over as `placement`.
+
+    `DEFAULT_DIMENSIONS` is the size used when a caller does not care. It is a convenience
+    and nothing more — no piece, rule or game may treat it as the size of a board.
+    """
+
+    #: The size used when a caller states no size of its own.
+    DEFAULT_DIMENSIONS: Tuple[int, int] = (8, 8)
+
+    def __init__(
+        self,
+        dimensions: Tuple[int, int] = DEFAULT_DIMENSIONS,
+        setup_pieces: bool = False,
+        placement: Optional[Iterable[Tuple[Tuple[int, int], Piece]]] = None,
+    ):
+        """Initialize a board.
 
         Args:
-            dimensions: Board dimensions as (rows, cols) tuple (default: (8, 8)).
-            setup_pieces: Whether to initialize pieces in standard positions (default: True).
+            dimensions: Board dimensions as a (rows, cols) tuple.
+            setup_pieces: Deprecated. A board has no starting position of its own, so this
+                now only raises: pass `placement` instead. It is kept so a caller that
+                relied on the old default is told why rather than silently handed an empty
+                board.
+            placement: The starting placement as (position, piece) pairs, supplied by the
+                configuration.
+
+        Raises:
+            ValueError: If `setup_pieces` is requested without a `placement`.
         """
         self.dimensions = dimensions
         self.rows, self.cols = dimensions
@@ -38,8 +51,13 @@ class Board:
         self.captured_white: List[Piece] = []
         self.captured_black: List[Piece] = []
 
-        if setup_pieces and dimensions == (8, 8):
-            self.setup_default_board()
+        if placement is not None:
+            self.apply_placement(placement)
+        elif setup_pieces:
+            raise ValueError(
+                "a board carries no starting position of its own; the configuration "
+                "supplies one as placement=[((row, col), piece), ...]"
+            )
 
     def is_within_bounds(self, row: int, col: int) -> bool:
         """Check if coordinates lie within the board boundaries.
@@ -103,8 +121,7 @@ class Board:
 
         self.set_piece_at(end_pos, piece)
         self.set_piece_at(start_pos, None)
-        if hasattr(piece, "setMoved"):
-            piece.setMoved(True)
+        piece.has_moved = True
         return True
 
     def replace_piece(self, position: Tuple[int, int], new_piece: Piece) -> None:
@@ -116,32 +133,17 @@ class Board:
         """
         self.set_piece_at(position, new_piece)
 
-    def setup_default_board(self) -> None:
-        """Initialize the board with standard 8x8 chess starting positions."""
+    def apply_placement(self, placement: Iterable[Tuple[Tuple[int, int], Piece]]) -> None:
+        """Clear the board and place every piece in a placement.
+
+        Args:
+            placement: (position, piece) pairs. Positions outside the board are ignored.
+
+        Returns:
+            None
+        """
         self.board = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.captured_white.clear()
         self.captured_black.clear()
-
-        # White pieces (row 0 and 1, color = 1)
-        self.board[0][0] = Rook(1)
-        self.board[0][1] = Horse(1)
-        self.board[0][2] = Bishop(1)
-        self.board[0][3] = Queen(1)
-        self.board[0][4] = King(1)
-        self.board[0][5] = Bishop(1)
-        self.board[0][6] = Horse(1)
-        self.board[0][7] = Rook(1)
-        for c in range(8):
-            self.board[1][c] = Pawn(1)
-
-        # Black pieces (row 7 and 6, color = -1)
-        self.board[7][0] = Rook(-1)
-        self.board[7][1] = Horse(-1)
-        self.board[7][2] = Bishop(-1)
-        self.board[7][3] = Queen(-1)
-        self.board[7][4] = King(-1)
-        self.board[7][5] = Bishop(-1)
-        self.board[7][6] = Horse(-1)
-        self.board[7][7] = Rook(-1)
-        for c in range(8):
-            self.board[6][c] = Pawn(-1)
+        for position, piece in placement:
+            self.set_piece_at(position, piece)

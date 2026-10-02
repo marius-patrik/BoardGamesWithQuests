@@ -1,4 +1,4 @@
-"""Bishop chess piece implementation with diagonal move vectors."""
+"""Rook: a ray mover along the ranks and files."""
 
 try:
     from .piece import Piece
@@ -9,22 +9,24 @@ except ImportError:
         from piece import Piece
 
 
-class Bishop(Piece):
-    """Bishop chess piece that moves and attacks along diagonals."""
+class Rook(Piece):
+    """Slides any distance along the ranks and files."""
 
-    def __init__(self, color: int, piece_type: str = "bishop"):
-        """Initialize a Bishop piece.
+    def __init__(self, color: int, piece_type: str = "rook"):
+        """Initialize a Rook piece.
 
         Args:
             color: Color identifier (1 for White, -1 for Black).
-            piece_type: Piece type name (default: "bishop").
+            piece_type: Piece descriptor (default: "rook").
         """
-        vectors = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+        vectors = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         super().__init__(
+            symbols=("♖", "♜"),
+            fen="R",
             color=color,
             piece_type=piece_type,
             vectors=vectors,
             attack_vectors=vectors,
             can_jump=False,
-            name="Bishop",
+            name="Rook",
         )
