@@ -75,8 +75,8 @@ for like:
 
 The tests that survive are reworked to drive real behaviour: a move is played
 and its effect asserted, a rule is exercised and its outcome asserted, an
-invariant such as "no third-party import in `src/`" or "no hard-coded 8 outside
-`Board`'s default" is asserted against the code itself.
+invariant such as "no third-party import anywhere under the project source" or
+"no hard-coded 8 outside `Board`'s default" is asserted against the code itself.
 
 ### 3.3 Execution of user-authored code
 

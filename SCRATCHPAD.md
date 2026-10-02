@@ -10,6 +10,11 @@ Not documentation — a planning artifact, same as the PRD.
 
 ## 1. Current state
 
+**Path convention:** `file:line` references below are written in the **post-flatten**
+layout (`model/`, `controller/`, `view/`), which is PR 2 of Phase 1. The audit
+itself ran against the pre-flatten tree, so a path that no longer resolves is
+expected until PR 2 lands and is not by itself a defect.
+
 `139` tests pass. `black --check` clean. `properdocs build --strict` clean. The
 repository is green, and green is misleading.
 
@@ -46,8 +51,8 @@ built as standalone units and never connected to a game.
 | FEN hard-codes castling rights, en-passant square, halfmove and fullmove | `export_writers.py:101` |
 | `get_state` returns a check state that no consumer reads | `manager.py:96`, `window_controller.py:74-79` |
 | `ExportWriter.export` returns `""` on an unrecognised format instead of raising | `export_writers.py:155` |
-| The only `pass` in `src/` is `GameManager.save_log` | `manager.py:78-80` |
-| Leftover demo block in library code | `piece.py:94-97` |
+| The only `pass` in the package is `GameManager.save_log` | `manager.py:78-80` |
+| Leftover demo block in library code. **PR 5** | `piece.py:94-97` |
 
 The rules engine being string-coupled dominates the rename risk: any rename
 touches string literals and `hasattr` probes, and a missed probe returns
@@ -71,8 +76,9 @@ a probe breaks, not only when a name changes.
 `Player.get_elo_rating:57` · `GameManager.possible_moves:72` ·
 `UserManager.find_user:50`
 
-`Tower`, `Horse` and `Controller` are removed by PR 8 as part of the rename. The
-rest are removed by PR 13.
+`Tower`, `Horse` and `Controller` are removed by PR 15 as part of the rename.
+The rest go in PR 5 where they are trivially safe, and in PR 15 for whatever is
+still dead once the product code has landed.
 
 **Written but never read:** `Board.captured_white:38` ·
 `Move.captured_piece:32` · `Move.promotion_piece:33` · `GameManager.players:48` ·
@@ -80,8 +86,8 @@ rest are removed by PR 13.
 `WindowController.title/width/height:28` · `ExportWriter.field:18` ·
 `Player.user` / `Player.setUser`
 
-Several of these become live once PR 5 wires the subsystems and PR 17 provides
-the view. PR 13 re-checks each one and removes only what is still dead — a
+Several of these become live once PR 12 wires the subsystems and PR 13 provides
+the view. PR 15 re-checks each one and removes only what is still dead — a
 write-only attribute may have been written in anticipation of a consumer that
 now exists.
 
@@ -91,8 +97,8 @@ Two concrete violations of the Google-style requirement:
 
 | Location | Gap |
 |---|---|
-| `src/model/misc/export_writers.py:20-29` | `ExportWriter.export` returns `str` but its docstring has no `Returns:` section |
-| `src/model/game/logger.py:58-60` | `GameLogger.file_path` returns `Optional[str]` but has no `Returns:` section |
+| `model/misc/export_writers.py:20-29` | `ExportWriter.export` returns `str` but its docstring has no `Returns:` section. **PR 5** |
+| `model/game/logger.py:58-60` | `GameLogger.file_path` returns `Optional[str]` but has no `Returns:` section. **PR 5** |
 
 Otherwise coverage is complete: 32/32 module docstrings, 23/23 class docstrings,
 111/111 method docstrings, and `Args:` present for every non-self parameter.
@@ -107,17 +113,18 @@ Current: `139` tests. Target: behaviour-only.
 
 | File | Tests | Why |
 |---|---|---|
-| `tests/test_structure.py` | 27 | `importlib.import_module(...) is not None`. Proves a module parses, nothing more |
-| `tests/test_workflow_rules.py` | 15 | Asserts `AGENTS.md` text, workflow YAML and pipeline pins. Zero product code |
-| `tests/test_claude_symlink.py` | 3 | Asserts a symlink target and `.agents/` file existence |
-| `tests/test_readme.py` | 1 | Asserts `README.md` contains three URLs |
+| `tests/test_structure.py` | 27 | `importlib.import_module(...) is not None`. Proves a module parses, nothing more. **PR 5** |
+| `tests/test_workflow_rules.py` | 15 | Asserts `AGENTS.md` text, workflow YAML and pipeline pins. Zero product code. **PR 5** |
+| `tests/test_claude_symlink.py` | 3 | Asserts a symlink target and `.agents/` file existence. **PR 5** |
+| `tests/test_readme.py` | 1 | Asserts `README.md` contains three URLs. **PR 5** |
 | `tests/test_chess_rules_notes.py` | 1 | Asserts keywords in `notes/chess_rules.md` |
 | `tests/test_object_model_notes.py` | 1 | Asserts a URL and phrases in `notes/object_model.md` |
 | `tests/test_reference_diagram_notes.py` | 1 | Asserts a diagram id in `notes/reference_diagram.md` |
-| `tests/test_upstream_base_notes.py` | 1 | Deleted with its note. Asserted only that a commit SHA appeared in `notes/upstream_base.md` |
-| `tests/test_docs_and_docstrings.py` | 11 of 12 | Metadata and workflow-pin tests go; the docstring-presence and strict-build checks stay |
+| `tests/test_upstream_base_notes.py` | 1 | Already deleted with its note. **PR 5** |
+| `tests/test_docs_and_docstrings.py` | 11 of 12 | Metadata and workflow-pin tests go; the docstring-presence and strict-build checks stay. **PR 5** |
 
-**53 of 139 tests assert nothing about the product.** Deleted, not reduced.
+**53 of 139 tests assert nothing about the product.** Deleted in PR 5, not reduced.
+PR 16 then adds the behavioural coverage this table asks for.
 
 `tests/test_object_model_notes.py` is deleted even though `notes/object_model.md`
 is now carrying deviation records — the requirement is that the deviations are
@@ -135,17 +142,17 @@ The surviving ~87 tests keep their product coverage and gain:
 - **Rule-configuration tests.** Each rule driven both on and off through the
   same game, proving the setting — not a code path — is what changes it. Covers
   FR-12 and FR-18.
-- **Rule-set profile tests.** The Classic Chess profile plays orthodox chess
+- **Rule-set tests.** `OrthodoxChess` plays orthodox chess
   unconfigured; a duplicated-and-edited profile differs in exactly the rules that
   were changed; the default cannot be edited or deleted; profiles survive a
-  process restart. Covers FR-16 to FR-20 and FR-29.
+  process restart. Covers FR-16 to FR-20.
 - **Quest tests.** A quest built from each data-driven condition completes on the
   intended event and not before, awards its reward once, and survives being
   checked again after completion.
 - **Invariant tests**, asserted against code rather than docs:
-  - no third-party runtime import anywhere in `src/`
+  - no third-party runtime import anywhere under the project source
   - no hard-coded `8` outside `Board`'s default dimension
-  - every public method in `src/` reachable from at least one test
+  - every public method under `model/`, `controller/`, `view/` and `rules/` reachable from at least one test
   - every Czech alias in PRD §5 importable and identical to its canonical object
   - `black --check` and `properdocs build --strict` clean
 
@@ -161,54 +168,72 @@ The surviving ~87 tests keep their product coverage and gain:
 
 ## 3. Work streams and PR topology
 
-14 PRs in 4 waves. Independent wherever there is no real dependency.
+Two phases. **Phase 1 changes no product behaviour** — it is mechanical, safe and
+reviewed to green before anything is built on top of it. Phase 2 builds the
+product.
+
+### Phase 1 — quick wins, each reviewed and merged before Phase 2 starts
+
+| PR | Content | Depends on |
+|---|---|---|
+| 1 | PRD + SCRATCHPAD | — *(in review)* |
+| 2 | Flatten `src/` to root, and reconfigure the docs pipeline with it | 1 |
+| 3 | CI: native self-contained workflows, then remove the DarkFactory dependency | 1 |
+| 4 | Governance rules: `AGENTS.md` 1, 2, 4, 7, 11 | 1 |
+| 5 | Cleanup: delete the metadata-only tests, close the two docstring gaps, remove the `piece.py` demo block | 2 |
+| 6 | Packaging metadata: `[project]` table and a build backend | 2 |
+| 7 | README: stop claiming capabilities the product does not yet have | 1 |
+
+### Phase 2 — the product
+
+| PR | Content | Depends on |
+|---|---|---|
+| 8 | Board generalisation: remove every hard-coded `8` | 2 |
+| 9 | Quest conditions as data-driven classes | 2 |
+| 10 | `Rule`, `RuleSet`, `OrthodoxChess`, and loading from `rules/` and `rulesets/` | 8 |
+| 11 | Standard rules as `Rule` subclasses | 8, 10 |
+| 12 | Wire the orphan subsystems, including `QuestManager` | 9, 11 |
+| 13 | View layer in tkinter, with the game-start modal | 12 |
+| 14 | Settings surface: rule set selector, forms, rule editor | 12 |
+| 15 | Czech aliases and the remaining dead code | 14 |
+| 16 | Behavioural test coverage to close the gaps PR 5 opened | 8–15 |
+
+### Shape
 
 ```
-WAVE 1 - no dependencies between these
-  PR 2   Flatten src/ to root, amend AGENTS.md 1-2
-  PR 3   Governance rules
-  PR 4   Board generalisation - kill the hard-coded 8s
-  PR 5   Quest conditions as data-driven classes
-  (+ PR 11 remove scaffolding, PR 12 packaging - independent, any wave)
+Phase 1 (linear, one at a time)
+  1 ─ 2 ─ 3 ─ 4 ─ 5 ─ 6 ─ 7
 
-WAVE 2 - needs PR 4 (and PR 5 for quests)
-  PR 6   Rule + RuleSet + OrthodoxChess + rules/ rulesets/ loading
-  PR 7   Standard rules as Rule subclasses
-
-WAVE 3 - needs PR 6 + PR 7
-  PR 8   Wire all orphan subsystems incl. QuestManager
-
-WAVE 4 - needs PR 8
-  PR 9   View layer, tkinter, with the game-start modal
-  PR 10  Settings surface: rule set selector, forms, code editor
-
-WAVE 5 - needs PR 10
-  PR 13  Czech aliases + dead code sweep
-
-INDEPENDENT - any wave, any order
-  PR 1   PRD + SCRATCHPAD                (in review)
-  PR 11  Remove agent scaffolding
-  PR 12  Packaging + entry point
-  PR 14  Test-suite restructuring
+Phase 2
+  8 ─┐
+  9 ─┼─ 12 ─┬─ 13
+ 10 ─┤      └─ 14 ─ 15 ─ 16
+ 11 ─┘
 ```
 
-Critical path is **5 waves**: `4 -> 6 -> 8 -> 10 -> 13`. Four PRs run
-concurrently in wave 1, two in wave 2, two in wave 4.
+Critical path in Phase 2 is **five PRs**: `8 -> 11 -> 12 -> 14 -> 15`. Three lanes
+run concurrently at the front, two at the back.
 
-**Why the flatten goes first.** PR 2 touches all 32 modules, `pyproject.toml`,
-`properdocs.yml`, `docs_hooks.py` and `AGENTS.md`. Doing it before anything else
-keeps every later diff a real behavioural change rather than an import-path
-churn.
+**Why Phase 1 is separate.** Every Phase 2 PR would otherwise carry import-path
+and docs-configuration churn alongside its real change, which makes review much
+harder. Phase 1 pays that cost once, in PRs with no behavioural risk, and leaves
+Phase 2 to contain only behaviour.
 
-**Why PR 14 follows PR 13.** The dead-code sweep and the rename touch the same
-modules; merging them avoids a guaranteed conflict and produces one coherent
-"rename and clean" review.
+**Why the flatten is PR 2.** It touches all 32 modules, `pyproject.toml`,
+`properdocs.yml`, `docs_hooks.py` and `AGENTS.md`, and it is the reason PR 5, 6
+and every Phase 2 PR exist in their current shape.
 
-**`define_ruleset` is not a PR.** It was proposed, assessed against the diagram,
-and rejected — see `notes/object_model.md` section 5.
+**Why `10 -> 11` rather than merging them.** `Rule` and `RuleSet` are
+reviewable on their own — four hooks, a precedence ladder, a loader — before any
+chess rule is written against them. The standard rules are then written against a
+mechanism that has already been proven.
 
 **Do not remove DarkFactory before the replacement CI is green on `main`.** The
-repository must never sit without working required checks.
+repository must never sit without working required checks. Inside PR 3 the
+replacement lands and goes green first; removal follows in the same PR.
+
+**`define_ruleset` is not a PR.** Proposed, assessed against the diagram,
+rejected — see `notes/object_model.md` section 5.
 
 ### 3.1 PR 2 — the flatten, in full
 
@@ -223,9 +248,16 @@ repository must never sit without working required checks.
 | `tests/test_docs_and_docstrings.py` | walk the package dirs |
 | `tests/test_structure.py` | **no change** — its module list is already top-level, never `src.*` |
 
-**Trap for PR 12, not PR 2:** a flat layout plus setuptools auto-discovery trips
-over `tests/` sitting at the root, so packaging must set
-`packages = ["model", "controller", "view"]` explicitly.
+**Two known risks, both with a fallback.**
+
+*Docs.* `docs_dir: src` keeps tests, theme and CI config out of the docs by
+construction; flattened, `exclude_docs` has to do that work explicitly. If it
+proves awkward, the fallback is a dedicated docs directory rather than widening
+the docs tree to the whole repo.
+
+*Packaging.* A flat layout plus setuptools auto-discovery trips over `tests/`
+sitting at the root, so PR 6 must set `packages = ["model", "controller", "view"]`
+explicitly rather than relying on discovery.
 
 ## 4. Risks
 
@@ -252,10 +284,10 @@ The project is finished when all of these hold:
 
 1. `pytest` green, and **no surviving test asserts only on repository
    metadata**.
-2. Every public method in `src/` is reachable from at least one test.
+2. Every public method under `model/`, `controller/`, `view/` and `rules/` is reachable from at least one test.
 3. `black --check .` clean at line length 100.
 4. `python -m properdocs build --strict` clean, zero warnings.
-5. No third-party runtime import anywhere in `src/`. Asserted by a test.
+5. No third-party runtime import anywhere under the project source. Asserted by a test.
 6. No hard-coded `8` outside `Board`'s default dimension. Asserted by a test.
 
 **Rules and rule sets**
@@ -440,7 +472,7 @@ register/get/check, `Timer.initial_time`, `new_game()` / `reset_time()` /
 It labels its own rows HOOK / MODEL / PROPOSED / PARTIAL / LIMIT.
 
 All three gaps are independently confirmed by this audit and are covered by the
-current track: the settings layer by PR 7, the hard-coded 8 by PR 3.
+product track: the settings layer by PR 14, the hard-coded 8 by PR 8.
 
 ### Note on staleness
 

@@ -31,13 +31,13 @@ Any structural, behavioral, or naming deviation from this diagram must:
 - **Date**: 2026-10-02
 - **Context**: The reference diagram defines no settings layer. `GUI_mockup.svg` — the visual reference for the game view — requires a SETTINGS tab and states explicitly: *"No SettingsView or SettingsController"* and *"No Settings model/controller/view exists yet."* The mockup also binds every settings row to a current data source (`board.py:26-37`, `piece.py:43-67`, `quest.py:9`, `timer.py:9`), which is only possible against real code.
 - **Deviation**: `SettingsView`, `SettingsController` and a settings model are added to the view and controller layers. They have no counterpart in any diagram box.
-- **Rationale**: FR-4, FR-5, FR-6 and FR-23 require the rule set, custom rules, quests and clocks to be configurable per game. Without a settings layer those requirements are unreachable, and the mockup's configuration surface — the product's primary purpose — cannot be delivered.
+- **Rationale**: FR-1 to FR-5 and FR-29 to FR-35 require the board, pieces, quests, clocks and rule sets to be configurable, and FR-7 requires rule logic to be authored. Without a settings layer those requirements are unreachable, and the mockup's configuration surface — the product's primary purpose — cannot be delivered.
 - **Mitigation**: The settings classes are kept as thin adapters over the model. They hold no game state and add no rules of their own, so the deviation is additive and does not alter the object model the diagram defines.
 - **Approval**: Explicitly approved by the user on 2026-10-02 ("yup 2 build it, note deviation").
 
 ### 3a. Rule Set Profiles — Part of Deviation 3, Not a New One
 - **Date**: 2026-10-02
-- **Context**: Rule sets became named, persisted profiles on 2026-10-02: a rule is one setting with a value, a rule set is the full named profile of those settings, `Classic Chess` is the default and cannot be edited, and custom sets persist to a file on disk.
+- **Context**: Rule sets became named, persisted profiles on 2026-10-02, later superseded by section 5: a `RuleSet` is a multiselect over `Rule` instances, `OrthodoxChess` is the default and cannot be edited, and rules and rule sets are files under `rules/` and `rulesets/` at the repository root. Kept as the question that was asked and answered.
 - **Question**: does a named, persisted profile have a home in the diagram?
 - **Assessment**: No box in either page describes a profile, and a profile is a saved configuration rather than game state, so it does not belong to `Hra` / `GameManager`.
 - **Conclusion**: not a separate deviation. A profile is part of the settings surface built under deviation 3 above, and is recorded here so the question was asked rather than assumed. Selecting which profile a game runs under is `GameManager`'s configuration, which the diagram already allows.
