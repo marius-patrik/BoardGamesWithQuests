@@ -22,7 +22,7 @@ class ExportWriter:
 
         Args:
             *args: Variable positional arguments.
-            **kwargs: Variable keyword arguments.
+            **kwargs: Any: Variable keyword arguments.
 
         Returns:
             str: The serialized game in the format this writer produces.
@@ -143,7 +143,7 @@ class ChessNotationWriter(ExportWriter):
 
         Args:
             format_type: Format name case-insensitively ('PGN', 'FEN', 'STENOGRAPHIC').
-            **kwargs: Format-specific parameters ('moves', 'board', 'metadata', 'active_color').
+            **kwargs: Any: Format-specific parameters ('moves', 'board', 'metadata', 'active_color').
 
         Returns:
             Serialized string representation.
