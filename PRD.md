@@ -168,8 +168,9 @@ games/chess/
   clocks/       clock configuration
 ```
 
-Everything in a configuration is a Python file. It could not all be data — see
-§8 — and one language avoids a format split and keeps the tree readable.
+Everything in a configuration is a Python file. It could not all be data,
+because rules and quests carry logic, and one language avoids a format split and
+the `tomllib` availability problem on Python 3.10.
 
 **A configuration is a folder that can be copied.** `cp -r games/chess
 games/house`, change what differs, and a new variant exists. Duplication is the
@@ -257,15 +258,23 @@ the game manager. Only configuration-specific implementations live in
 
 ### 7.7 Notation and export
 
-The reference diagram is the specification for this area. It draws an **export
-writers** box that enumerates the formats — *letter*, *PGN*, *FEN*,
-*Field - Field - Extra*, *Stenographic* (standard or custom compression) — plus
-**the game transcript**, with an `Extends` relation between writers. **All of
-them are implemented.** Nothing in this section is optional.
+The reference diagram is the specification for this area. The operation
+compartment of the **`ChessNotationWriter`** box enumerates the formats — *letter*,
+*PGN*, *FEN*, *Field - Field - Extra*, *Stenographic* (standard or custom
+compression) — plus **the game transcript**, described as a single parameter.
+
+**All of them are implemented.** Nothing in this section is optional.
+
+The diagram's `export writers` box is a separate, near-empty box holding one
+field. It does **not** enumerate the formats, and **no edge in the diagram
+connects any writer to any other writer or to that box**. `Extends` in the
+diagram is a legend label on a free-standing line beside the piece row, not a
+relationship. Deriving one class per format from a base class is therefore a
+deviation in its own right — see `notes/object_model.md` section 7.
 
 | ID | Requirement |
 |---|---|
-| FR-43 | Export is one class per format, extending a base exporter, living in the configuration that uses it. There is no format switch and no format-name string anywhere in the engine. |
+| FR-43 | Export is one class per format, extending a base exporter named `ExportWriter`, living in the configuration that uses it. There is no format switch and no format-name string anywhere in the engine. |
 | FR-44 | *Letter* — the move is rendered in algebraic notation with piece letters, capture markers, promotion and castling notation. |
 | FR-45 | *PGN* — real PGN: a seven-tag roster **derived from the game** (event, site, date, round, both players, result), and movetext in Standard Algebraic Notation, including piece disambiguation, castling notation, promotion, and check and mate suffixes. |
 | FR-46 | *FEN* — all six fields are **computed from the game state**: placement, side to move, castling rights, en passant square, halfmove clock and fullmove number. No field is hard-coded. |
@@ -274,19 +283,68 @@ them are implemented.** Nothing in this section is optional.
 | FR-49 | *Stenographic* — the transcript in stenographic form, with compression that is either a standard choice or a configured one, drawn from the standard library codecs only. |
 | FR-50 | *The game transcript* — every move is recorded and readable, independently of any export format. |
 | FR-51 | A format that belongs to one game ships with that game. FEN and PGN are chess formats and therefore live in `games/chess/export/`; a game with no FEN representation has no FEN exporter, because the structure says so rather than a capability check. |
+| FR-52 | **FEN import exists as well as export**, because the round-trip requirement needs a reader. The diagram defines only writers, so a reader is a recorded deviation. |
 
 ### 7.8 Games shipped
 
 | ID | Requirement |
 |---|---|
-| FR-52 | `games/chess/` is a complete, correct orthodox chess configuration. |
-| FR-53 | `games/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings sliding any distance diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
-| FR-54 | Adding `games/checkers/` requires **no engine change**. If it does, the abstraction is wrong — and that is the point of shipping it. |
+| FR-53 | `games/chess/` is a complete, correct orthodox chess configuration. |
+| FR-54 | `games/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings sliding any distance diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
+| FR-55 | Adding `games/checkers/` requires **no engine change**. If it does, the abstraction is wrong — and that is the point of shipping it. |
 
 ### 7.9 Application
 
 | ID | Requirement |
 |---|---|
-| FR-55 | The game log directory is **configurable**. It defaults to `logs/` at the repository root, is created on demand, and is git-ignored. |
-| FR-56 | The package is installable and declares its metadata and runtime dependencies, of which there are none beyond the standard library. |
-| FR-57 | The application starts from a documented entry point and a complete game can be played to a result. |
+| FR-56 | The game log directory is **configurable**. It defaults to `logs/` at the repository root, is created on demand, and is git-ignored. |
+| FR-57 | The package is installable and declares its metadata and runtime dependencies, of which there are none beyond the standard library. |
+| FR-58 | The application starts from a documented entry point and a complete game can be played to a result. |
+| FR-59 | The entry point is a module the packaging declares, so `python -m <entrypoint>` starts a window. |
+
+### 7.10 Diagram surface
+
+Every class and member the diagram defines is listed here with the requirement
+that delivers it. Nothing in the diagram is left without coverage, and anything
+this project adds beyond the diagram is registered in `notes/object_model.md`.
+
+| Diagram member | Delivered by |
+|---|---|
+| `HerníPlocha` · `rozmery`, `herni_deska`, `vyhozene_figurky_b`, `vyhozene_figurky_c` | FR-1, FR-2 |
+| `HerníPlocha` · `vrat_obsah`, `posun_figurky`, `nahrad_figurku` | FR-37, FR-15, FR-16 |
+| `Figurka` · `název`, `barva(tým)`, `vektory`, `vektory_utoku` | FR-3, FR-4, FR-5 |
+| `Pěšák` `Věž` `Kůň` `Král` `Dáma` `Střelec` | FR-3 |
+| `Hrac` · `barva`, `uzivatel`, `getEloRating` | FR-59 |
+| `Tah` · `vychozi pozice`, `cilova pozice`, `figurka`, `typ tahu` | FR-15, FR-16, FR-52 |
+| `Tah` · `over platnost()`, `proved tah()` | FR-15 |
+| `RevizorTahu` · `herni_plocha`, `tah` | FR-15 |
+| `RevizorTahu` · `simulate_Move()`, `check_Šach()`, `check_Mat`, `check_Pat` | FR-8, FR-16, FR-19, FR-60 |
+| `GameManager` · `plocha`, `aktivni_hrac`, `hraci`, `aktualni_tah`, `casovac`, `game_logger`, `revizor_tahu` | FR-61 |
+| `GameManager` · `zacni_tah()`, `mozne_tahy()`, `zrus_tah()`, `uloz_log()`, `get_stav()` | FR-61 |
+| `GameManager` · `najdi_uzivatele(id)` | FR-59 |
+| `Timer` · `cas_hrac`, `nuluj_cas()`, `pocitej_cas()` | FR-6, FR-62 |
+| `GameLogger` · `soubor`, `uloz_tah()`, `vytvor_soubor()` | FR-50, FR-63 |
+| `Uzivatel` · `uzivatelske_jmeno`, `jmeno`, `email`, `elo`, `splnene_kwesty`, `pridej_quest()` | FR-59, FR-24 |
+| `User Manager` · `Id_uzivatele`, `log_uzivatelu`, `historie_uzivatele`, `proveď_tah()` | FR-59 |
+| `Quest` · `nazev`, `popis`, `validate()` | FR-18, FR-20 |
+| `QuestManager` | FR-23 |
+| `ChessNotationWriter` · format list, `item` | FR-43 to FR-52 |
+| `MetadataWriter` | FR-48 |
+| `export writers` · `field` | FR-43 |
+| `GameManagerController` · `vyber_pole()` | FR-64 |
+| `GameView` · `controller`, `aktualizuj_plochu()` | FR-37, FR-65 |
+| `HracGameView` · `controller`, `akutalizuj_hrace()` | FR-38, FR-66 |
+| `HracView` | FR-38 |
+
+### 7.11 Requirements added to close gaps in diagram coverage
+
+| ID | Requirement |
+|---|---|
+| FR-60 | A user has a username, display name, email and an ELO rating, is registered and looked up by identifier, is linked to the player it controls, and the player's rating is readable from that link. The user directory records its users, its action log and its history. |
+| FR-61 | The validator's four drawn operations are preserved. `simulate_Move()` returns the moves available to the active player; `check` reports whether the royal piece is attacked; checkmate and stalemate are reported as outcomes through `Result`. The royal piece is identified by whatever the configuration declares, never by a type name. |
+| FR-62 | The game manager holds the board, the active player, the players, the current move, the clock, the logger and the validator, and exposes starting a turn, listing available moves, cancelling a move, writing the log, and reporting the game state. |
+| FR-63 | A clock holds per-player time, resets, and counts down for the given player. |
+| FR-64 | A log creates its file on demand, records each move with its move type, and exposes the recorded moves. |
+| FR-65 | The controller selects a square and dispatches it to the game manager. |
+| FR-66 | The game view refreshes the board when the controller reports a change. |
+| FR-67 | The player view refreshes that player when the controller reports a change. |
