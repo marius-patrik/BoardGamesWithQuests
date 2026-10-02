@@ -171,7 +171,6 @@ any `Board` constructed with non-8×8 dimensions.
 
 No product behaviour changes. Reviewed and merged one at a time before Phase 2
 begins. **The maintainer merges; do not merge.**
-
 ### PR 1 — PRD and SCRATCHPAD
 
 The requirements and this manual. *(already open for review)*
@@ -183,7 +182,6 @@ consistent; `pytest`, `black --check` and `properdocs build --strict` are green.
 
 **Verification**: `pytest -q`, `black --check .`, `python -m properdocs build
 --strict`, and a cross-reference sweep of every FR and PR reference.
-
 ### PR 2 — Flatten `src/` to root, and reconfigure the docs pipeline
 
 **Goal**: the package sits at the repository root.
@@ -210,6 +208,9 @@ tree to the whole repo.
 
 **Blocks**: 5, 6, 8, 9.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 ### PR 3 — CI: native workflows, then remove DarkFactory
 
 **Goal**: the repository's CI depends on no external repository's workflow.
@@ -236,6 +237,9 @@ repository must never sit without working required checks.
 contains a `uses:` pointing at another repository; CI green on all four Python
 versions.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 ### PR 4 — Governance rules
 
 **Goal**: `AGENTS.md` states what is now true.
@@ -247,6 +251,9 @@ permit Czech aliases, and point Rules 1 and 2 at the flattened layout.
 **Acceptance criteria**: no rule references `.github/darkfactory.json`, `open-pr.yml`, or a
 bot author; Rules 1 and 2 name the root layout.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 ### PR 5 — Cleanup
 
 **Goal**: remove what asserts nothing about the product.
@@ -264,6 +271,9 @@ an abstract base.
 **Risk**: deleting tests could mask regressions. Every deletion is import-only or
 metadata-only, and PR 21 adds behavioural coverage to offset.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 ### PR 6 — Packaging metadata
 
 Add a `[project]` table and a build backend. **`packages` must be set
@@ -274,6 +284,9 @@ sitting at the root.
 imports `model`, `controller`, `view`; no runtime dependency declared beyond the
 standard library.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 ### PR 7 — README honesty
 
 **Goal**: `README.md` stops claiming what the product does not yet do. It
@@ -296,6 +309,9 @@ test.
 | 10 | `Rule` parent, five hooks, configuration loading | 8 |
 | — | 3, 4, 6, 7 are Phase 1 and merge independently | — |
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 8 — Board generalisation
 
 **Goal**: board size is not restricted to 8×8.
@@ -313,6 +329,9 @@ on; `Move.validate` accepts an in-bounds move on any size and rejects an
 out-of-bounds one; no literal `8` remains outside `Board`'s default dimension,
 **and a test asserts that invariant across the whole source tree**.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 9 — Quest parent with built-in subclasses
 
 **Goal**: quests follow the same parent-and-subclass pattern as rules.
@@ -339,6 +358,9 @@ completed; progress renders current and target; `condition_fn` is gone.
 
 **Needs**: 2. **Blocks**: 14.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 10 — Rule parent, five hooks, configuration loading
 
 **Goal**: the code-driven layer, and the configuration concept.
@@ -364,6 +386,9 @@ without any engine edit; two colliding rules resolve by precedence; a rule's
 
 **Needs**: 8. **Blocks**: 11, 12, 18.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 12 — Multi-hop moves
 
 **Goal**: a capture chain is one move the player makes, not several.
@@ -377,6 +402,9 @@ move, executes atomically, and rolls back completely if any hop is invalid.
 
 ### Wave B — two PRs in parallel
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 11 — Orthodox chess rules, and removal of type coupling
 
 **Goal**: every rule in `notes/chess_rules.md` implemented, and the engine stops
@@ -402,6 +430,9 @@ neither crashes nor silently disables check.
 
 **Needs**: 10. **Blocks**: 13, 14, 18.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 13 — Migrate chess into `games/chess/`
 
 **Goal**: the chess configuration is complete and self-contained.
@@ -420,6 +451,9 @@ removes it without touching engine code.
 
 ### Wave C — three PRs
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 14 — Wire the orphan subsystems
 
 `QuestManager`, `UserManager`, `User`, `MetadataWriter`, `ChessNotationWriter`,
@@ -433,6 +467,9 @@ and a user credited.
 
 **Needs**: 9, 11. **Blocks**: 15.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 15 — View layer with the game-start modal
 
 `GameView`, `PlayerView`, `PlayerGameView` in `view/`, in tkinter. Board with
@@ -450,6 +487,9 @@ result through the GUI; every widget is reachable by keyboard.
 
 **Needs**: 14. **Blocks**: 16, 20.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 18 — Export generalised
 
 One class per format extending `ExportWriter`, living in `games/<variant>/export/`.
@@ -466,6 +506,9 @@ derived from the players and result, with no placeholder strings.
 
 ### Wave D — three PRs in parallel
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 16 — Settings surface
 
 One spec-driven form renderer: every configurable type declares its fields, and
@@ -481,6 +524,9 @@ renamed, duplicated, edited, deleted and copied as a folder.
 
 **Needs**: 15. **Blocks**: 20.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 17 — `games/checkers/`
 
 Full English draughts: twelve pieces a side, men moving one square forward
@@ -501,6 +547,9 @@ king, a pawn, a check or a mate.
 
 **Needs**: 12, 13.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 19 — Export formats
 
 Every format the diagram's export writers box enumerates: *letter*, *PGN*,
@@ -523,6 +572,9 @@ capture).
 
 ### Wave E — the last two PRs, strictly sequential
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 20 — Czech aliases and remaining dead code
 
 Add the fifteen aliases from `PRD.md` section 5, `Knight` canonical with `Kun` as
@@ -538,6 +590,9 @@ attributes live.
 type-string comparison; `notes/object_model.md` alias table matches `src/`
 exactly.
 
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
 #### PR 21 — Behavioural test coverage
 
 Close everything §4 lists as missing.
@@ -692,3 +747,6 @@ reason is what matters.
 | Persisting a game in progress | Not in the diagram |
 | A settings surface beyond the diagram's mockup | The mockup is a reference for layout and content, not a spec to reproduce exactly. Where the mockup and the diagram disagree, the diagram governs |
 | Reinstalling the shared DarkFactory pipeline | Deliberately deferred; its pin is stale and the dependency is removed in PR 3 |
+**Verification**: `pytest -q`, `black --check .`, and
+`python -m properdocs build --strict`, plus the specific commands in the
+corresponding issue.
