@@ -320,6 +320,15 @@ Any structural, behavioral, or naming deviation from this diagram must:
 <li><strong>Mitigation</strong>: The settings classes are kept as thin adapters over the model. They hold no game state and add no rules of their own, so the deviation is additive and does not alter the object model the diagram defines.</li>
 <li><strong>Approval</strong>: Explicitly approved by the user on 2026-10-02 ("yup 2 build it, note deviation").</li>
 </ul>
+<h3 id="3a-rule-set-profiles-part-of-deviation-3-not-a-new-one">3a. Rule Set Profiles — Part of Deviation 3, Not a New One<a class="headerlink" href="#3a-rule-set-profiles-part-of-deviation-3-not-a-new-one" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: Rule sets became named, persisted profiles on 2026-10-02: a rule is one setting with a value, a rule set is the full named profile of those settings, <code>Classic Chess</code> is the default and cannot be edited, and custom sets persist to a file on disk.</li>
+<li><strong>Question</strong>: does a named, persisted profile have a home in the diagram?</li>
+<li><strong>Assessment</strong>: No box in either page describes a profile, and a profile is a saved configuration rather than game state, so it does not belong to <code>Hra</code> / <code>GameManager</code>.</li>
+<li><strong>Conclusion</strong>: not a separate deviation. A profile is part of the settings surface built under deviation 3 above, and is recorded here so the question was asked rather than assumed. Selecting which profile a game runs under is <code>GameManager</code>'s configuration, which the diagram already allows.</li>
+<li><strong>Approval</strong>: Confirmed by the user on 2026-10-02 ("rule is one setting ruleset is full profile").</li>
+</ul>
 <h3 id="4-customisable-rules-and-quests-not-a-deviation">4. Customisable Rules and Quests — NOT a Deviation<a class="headerlink" href="#4-customisable-rules-and-quests-not-a-deviation" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Date</strong>: 2026-10-02</li>
@@ -362,6 +371,7 @@ Any structural, behavioral, or naming deviation from this diagram must:
               <li><a href="#1-language-and-translation-policy-not-a-deviation">1. Language and Translation Policy (Not a Deviation)</a></li>
               <li><a href="#2-move-validation-architecture-lazy-core-aggregator">2. Move Validation Architecture (Lazy Core + Aggregator)</a></li>
               <li><a href="#3-settings-layer-deviation-not-in-the-reference-diagram">3. Settings Layer (Deviation — Not in the Reference Diagram)</a></li>
+              <li><a href="#3a-rule-set-profiles-part-of-deviation-3-not-a-new-one">3a. Rule Set Profiles — Part of Deviation 3, Not a New One</a></li>
               <li><a href="#4-customisable-rules-and-quests-not-a-deviation">4. Customisable Rules and Quests — NOT a Deviation</a></li>
             </ul>
           </li>
