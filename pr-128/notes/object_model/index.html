@@ -266,7 +266,7 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../chess_rules/">Complete FIDE Chess Rules Reference</a>
+         href="../chess_rules/">FIDE Chess Rules Reference</a>
     </li>
     <li class="nav__item">
       <a class="nav__link nav__link--active"
@@ -383,10 +383,22 @@ user request adds it.</p>
   other two depend on. Chess rules, checkers rules, and logic well beyond both
   all map onto these. <code>status</code> is display, not logic: it reports something worth
   showing, such as <code>Check</code>, while the game continues.</li>
-<li><strong>Mitigation</strong>: <code>RevizorTahu</code> is retained with all four drawn operations
-  unchanged and <em>asks</em> the active rule set rather than embedding rule logic.
-  Under the default configuration the game behaves exactly as the drawn model
-  describes.</li>
+<li><strong>Mitigation</strong>: <code>RevizorTahu</code> is retained and <em>asks</em> the active rule set rather
+  than embedding rule logic, so the drawn class and its role survive. Under the
+  default configuration the game behaves as the drawn model describes.
+  Its drawn operations map onto the new mechanism as follows: <code>simulate_Move()</code>
+  is satisfied by <code>Rule.available_moves</code>, <code>check_Šach()</code> and <code>check_Mat</code> and
+  <code>check_Pat</code> are outcomes proposed through <code>Rule.outcome</code>. See FR-60.</li>
+<li><strong>Correction to an earlier claim in this file</strong>: a previous version asserted
+  that the four drawn operations were retained <em>unchanged</em>, and that one class per
+  export format extends a base in the manner of the diagram's <code>Extends</code> relation.
+  <strong>Neither is true of the diagram.</strong> <code>Extends</code> is a legend label on a
+  free-standing line beside the piece row, not a relationship, and no edge in the
+  file connects any writer to any other writer or to the <code>export writers</code> box.
+  <code>ChessNotationWriter</code> has zero edges. The base-class-plus-subclasses shape is a
+  legitimate inference from the diagram's generalisation idiom, but it is <strong>not</strong>
+  something the diagram draws, so it is registered as section 7 rather than
+  claimed as conformance.</li>
 <li><strong>Deliberately not added</strong>: a registration function such as <code>define_ruleset</code>, a
   rule registry, or <code>CustomBoard</code> / <code>CustomPiece</code> / <code>CustomQuest</code> types. A
   configuration is composed explicitly, so the set of rule types is closed and
@@ -473,11 +485,193 @@ user request adds it.</p>
   quests, so total experience is the sum of their rewards and <code>Uzivatel</code> gains no
   new field.</li>
 </ul>
+<h3 id="7-export-base-class-and-per-format-subclasses">7. Export Base Class and Per-Format Subclasses<a class="headerlink" href="#7-export-base-class-and-per-format-subclasses" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: the diagram's <code>export writers</code> box holds one field, <code>field: type</code>.
+  <code>ChessNotationWriter</code> holds a format list and one field, <code>item: attribute</code>.
+  <code>MetadataWriter</code> holds <code>method(type): type</code>. <strong>No edge in the diagram connects
+  any writer to any other writer, or to <code>export writers</code>.</strong> <code>ChessNotationWriter</code>
+  has no edges at all. The word <code>Extends</code> appears in the diagram only as an
+  <code>edgeLabel</code> on a free-standing line positioned beside the six piece boxes.</li>
+<li><strong>Deviation</strong>: the writers become a class hierarchy — an <code>ExportWriter</code> base
+  with one subclass per format — and each subclass moves into the configuration
+  that needs it, so <code>games/chess/export/</code> holds <code>ExportAlgebraic</code>, <code>ExportPGN</code>,
+  <code>ExportFEN</code>, <code>ExportStenographic</code> and <code>ExportMetadata</code>.</li>
+<li><strong>Rationale</strong>: the diagram's format list is a single parameter accepted by one
+  writer, which means a format switch. Polymorphism removes the switch, and
+  per-configuration placement is what lets a game have exactly the formats that
+  mean something for it.</li>
+<li><strong>Why this is recorded rather than claimed as conformance</strong>: the same
+  parent-and-subclasses shape is registered as a deviation in section 4 for
+  <code>Rule</code> and <code>Quest</code>. Applying one test consistently means applying it here too.
+  The difference is that section 4 rests on a generalization edge the diagram
+  genuinely draws (<code>Kůň → Figurka</code>), while this one does not.</li>
+<li><strong>Mitigation</strong>: the diagram's three named members all survive as classes —
+  <code>export writers</code> becomes the <code>ExportWriter</code> base with its <code>field</code>, and
+  <code>MetadataWriter</code> keeps its name and its <code>method(type): type</code>. Nothing is
+  renamed away.</li>
+<li><strong>Approval</strong>: directed by the user on 2026-10-02 — <em>"maybe have export
+  generalized same way"</em>.</li>
+</ul>
+<h3 id="8-result-the-outcome-type">8. Result — the Outcome Type<a class="headerlink" href="#8-result-the-outcome-type" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: <code>GameManager.get_stav(): int</code> is the diagram's only game-state
+  accessor, and it returns a bare integer. It cannot express <em>who</em> won, <em>why</em>
+  the game ended, or what to do when two rules end the game at once.</li>
+<li><strong>Deviation</strong>: outcomes become a <code>Result</code> carrying a kind (win, loss, draw), a
+  precedence, and an optional winner.</li>
+<li><strong>Rationale</strong>: without a precedence, two rules ending a game simultaneously is
+  ambiguous, and "any conceivable logic" would collapse on the first collision.
+  <code>get_stav()</code> is retained and reports from <code>Result</code>, so the drawn member
+  survives.</li>
+<li><strong>Approval</strong>: directed by the user on 2026-10-02.</li>
+</ul>
+<h3 id="9-configurable-the-field-declaration-framework">9. Configurable — the Field Declaration Framework<a class="headerlink" href="#9-configurable-the-field-declaration-framework" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: the diagram has no declaration or rendering layer. The mockup
+  requires every configurable surface to be editable.</li>
+<li><strong>Deviation</strong>: a <code>Field</code> declaration type and a <code>Configurable</code> protocol with
+  <code>spec() -&gt; list[Field]</code>, conformed to by <code>Board</code>, <code>Piece</code>, <code>Clock</code>, <code>Rule</code> and
+  <code>Quest</code>, plus one form renderer that turns a declaration into widgets.</li>
+<li><strong>Rationale</strong>: it is what lets one settings screen serve every surface, so a new
+  field is one widget rather than one bespoke form. Without it the settings
+  surface duplicates itself five times.</li>
+<li><strong>Approval</strong>: directed by the user on 2026-10-02 — <em>"we should generalize the
+  configuration pattern across the whole engine that will also allow us to reuse
+  the same ui for the entire settings"</em>.</li>
+</ul>
+<h3 id="10-execution-of-player-authored-code">10. Execution of Player-Authored Code<a class="headerlink" href="#10-execution-of-player-authored-code" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: the diagram has no loading, registration or evaluation mechanism of
+  any kind.</li>
+<li><strong>Deviation</strong>: the product loads and runs Python the player writes in its rule
+  and quest editors, importing from within the configuration directory being
+  edited and from nowhere else.</li>
+<li><strong>Rationale</strong>: it is the only way to satisfy "customisation in any way" — a
+  teleporting piece or an unforeseen draw condition is behaviour, not data, and
+  the diagram's idiom for behaviour is a subclass.</li>
+<li><strong>Bounding</strong>: loading is restricted to the configuration directory, never an
+  arbitrary path or environment variable; the editor validates before code may
+  join a configuration; and a refused path is tested.</li>
+<li><strong>Approval</strong>: directed by the user on 2026-10-02.</li>
+</ul>
+<h3 id="11-multi-hop-moves">11. Multi-Hop Moves<a class="headerlink" href="#11-multi-hop-moves" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: <code>Tah</code> carries <code>vychozi pozice</code>, <code>cilova pozice</code>, <code>figurka</code> and
+  <code>typ tahu</code> — one start, one end, one piece. There is no structure for a move
+  that visits several squares.</li>
+<li><strong>Deviation</strong>: <code>Move</code> grows a sequence of hops alongside its start and end.</li>
+<li><strong>Rationale</strong>: a capture chain in checkers is one move the player makes. The
+  diagram's <code>typ tahu</code> field is a move <em>type</em>, so it cannot express hop count.</li>
+<li><strong>Mitigation</strong>: <code>Tah</code>'s existing members are untouched; only a sequence is
+  added. A single-hop move is the degenerate case, and both share one code path.</li>
+<li><strong>Approval</strong>: directed by the user on 2026-10-02, via the checkers requirement.</li>
+</ul>
+<h3 id="12-fen-import">12. FEN Import<a class="headerlink" href="#12-fen-import" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: the diagram defines only writers. Nothing in it reads a position.</li>
+<li><strong>Deviation</strong>: an importer is added alongside the FEN writer.</li>
+<li><strong>Rationale</strong>: the round-trip conformance requirement needs a reader. Import is
+  the direction the diagram does not draw.</li>
+<li><strong>Approval</strong>: directed by the user on 2026-10-02.</li>
+</ul>
+<h3 id="13-timer-to-clock-and-the-clock-parent">13. Timer to Clock, and the Clock Parent<a class="headerlink" href="#13-timer-to-clock-and-the-clock-parent" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: the diagram's class is <code>Timer</code>, with <code>cas_hrac: List(int)</code>,
+  <code>nuluj_cas()</code> and <code>pocitej_cas(hrac)</code>. <strong>No increment is drawn anywhere.</strong></li>
+<li><strong>Deviation</strong>: the runtime countdown keeps the drawn name <code>Timer</code>; a
+  configurable parent <code>Clock</code> carries the settings a configuration declares — an
+  initial time and an increment — and a <code>Timer</code> is constructed from it.</li>
+<li><strong>Rationale</strong>: the increment is required by the configuration surface and has
+  no drawn home. Splitting the drawn countdown from the configurable settings
+  leaves the drawn class intact rather than renaming it away.</li>
+<li><strong>Approval</strong>: directed by the user on 2026-10-02.</li>
+</ul>
+<h3 id="14-the-two-pages-disagree-recorded-not-resolved">14. The Two Pages Disagree — Recorded, Not Resolved<a class="headerlink" href="#14-the-two-pages-disagree-recorded-not-resolved" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: the diagram's two pages model the same class names with
+  incompatible members.
+  | Member | Page-1 | Page-2 |
+  |---|---|---|
+  | board field on the game manager | <code>plocha</code> | <code>herni_plocha</code> |
+  | player collection | <code>hraci: List(Hrac)</code> | <code>hraci: List(Uzivatele)</code> |
+  | board grid field | <code>herni_deska</code> | <code>hraci_plocha</code> |
+  | board dimensions | <code>rozmery: Tuple = (8,8)</code> | <code>rozmery: Tuple(int,int)</code> |</li>
+<li><strong>Deviation</strong>: neither reading can be satisfied simultaneously, so one is
+  chosen and recorded. <strong>Page-1 is followed</strong> for the shared members, because it
+  is the full object model and page 2 is the MVC integration. <code>hraci</code> is
+  <code>List(Hrac)</code>; a player carries a reference to its user, so a player list can
+  reach users without the list being a list of users.</li>
+<li><strong>Also noted</strong>: <code>rozmery: Tuple = (8,8)</code> on page 1 hard-codes the default board
+  size. That default is kept, but nothing may rely on it — see FR-1 and FR-15.</li>
+<li><strong>Approval</strong>: recorded for visibility on 2026-10-02.</li>
+</ul>
+<h3 id="15-hracview-is-not-a-class">15. HracView Is Not a Class<a class="headerlink" href="#15-hracview-is-not-a-class" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-02</li>
+<li><strong>Context</strong>: page 2 has no <code>HracView</code> box. <code>+ hrac_view: HracView</code> appears only
+  as an attribute <em>type</em> on <code>GameManagerController</code>. There is also no
+  <code>GameVeiw</code>-as-a-class-name match, because the diagram spells it <code>GameVeiw</code>.</li>
+<li><strong>Deviation</strong>: <code>PlayerView</code> is created, with the Czech alias <code>HracView</code>, as a
+  real class; and <code>GameView</code> is created as a real class for the diagram's
+  <code>GameVeiw</code> box. The diagram's spelling is recorded as a typo and not reproduced.</li>
+<li><strong>Rationale</strong>: the controller attribute names a view it must hold, and the
+  requirements render a player panel, so the class has to exist.</li>
+<li><strong>Approval</strong>: directed by the user on 2026-10-02.</li>
+</ul>
+<hr />
+<h2 id="naming-decisions-requiring-approval-context">Naming decisions requiring approval context<a class="headerlink" href="#naming-decisions-requiring-approval-context" title="Permanent link">&para;</a></h2>
+<p>Recorded here because they are deviations from what the diagram draws and
+<code>AGENTS.md</code> Rule 3 requires their approval to be on record.</p>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Outcome</th>
+<th>Approved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Kůň</code> maps to <code>Knight</code>, not <code>Horse</code></td>
+<td><code>Knight</code> is canonical, <code>Kun</code> is its Czech alias, <code>Horse</code> is removed</td>
+<td>2026-10-02</td>
+</tr>
+<tr>
+<td><code>Tower</code></td>
+<td>Dropped. No box in the diagram carries that name, and <code>Věž</code> maps to <code>Rook</code></td>
+<td>2026-10-02</td>
+</tr>
+<tr>
+<td><code>Controller</code></td>
+<td>Dropped. No box carries that name; the diagram's controller box is <code>GameManagerController</code></td>
+<td>2026-10-02</td>
+</tr>
+<tr>
+<td>Czech aliases carry no diacritics</td>
+<td>ASCII spellings only</td>
+<td>2026-10-02</td>
+</tr>
+<tr>
+<td><code>HracView</code> is created as <code>PlayerView</code></td>
+<td>See section 15</td>
+<td>2026-10-02</td>
+</tr>
+</tbody>
+</table>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../chess_rules/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">Complete FIDE Chess Rules Reference</span>
+            <span class="pager__title">FIDE Chess Rules Reference</span>
           </a>
           <a class="pager__link pager__link--next" href="../reference_diagram/">
             <span class="pager__label">Next</span>
@@ -506,6 +700,19 @@ user request adds it.</p>
             </ul>
           </li>
           <li><a href="#non-deviations-worth-stating">Non-Deviations Worth Stating</a>
+            <ul>
+              <li><a href="#7-export-base-class-and-per-format-subclasses">7. Export Base Class and Per-Format Subclasses</a></li>
+              <li><a href="#8-result-the-outcome-type">8. Result — the Outcome Type</a></li>
+              <li><a href="#9-configurable-the-field-declaration-framework">9. Configurable — the Field Declaration Framework</a></li>
+              <li><a href="#10-execution-of-player-authored-code">10. Execution of Player-Authored Code</a></li>
+              <li><a href="#11-multi-hop-moves">11. Multi-Hop Moves</a></li>
+              <li><a href="#12-fen-import">12. FEN Import</a></li>
+              <li><a href="#13-timer-to-clock-and-the-clock-parent">13. Timer to Clock, and the Clock Parent</a></li>
+              <li><a href="#14-the-two-pages-disagree-recorded-not-resolved">14. The Two Pages Disagree — Recorded, Not Resolved</a></li>
+              <li><a href="#15-hracview-is-not-a-class">15. HracView Is Not a Class</a></li>
+            </ul>
+          </li>
+          <li><a href="#naming-decisions-requiring-approval-context">Naming decisions requiring approval context</a>
           </li>
         </ul>
       </aside>

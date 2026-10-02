@@ -266,7 +266,7 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../chess_rules/">Complete FIDE Chess Rules Reference</a>
+         href="../chess_rules/">FIDE Chess Rules Reference</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -286,53 +286,416 @@
       <main class="content" id="content">
         <article class="prose">
           <h1 id="reference-architecture-diagram">Reference Architecture Diagram<a class="headerlink" href="#reference-architecture-diagram" title="Permanent link">&para;</a></h1>
-<h2 id="link-to-live-diagram">Link to Live Diagram<a class="headerlink" href="#link-to-live-diagram" title="Permanent link">&para;</a></h2>
+<h2 id="link-to-the-live-diagram">Link to the live diagram<a class="headerlink" href="#link-to-the-live-diagram" title="Permanent link">&para;</a></h2>
 <p><a href="https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D">Draw.io Architecture Diagram</a></p>
 <ul>
 <li><strong>File</strong>: <code>Šachy - diagram tříd.drawio</code></li>
-<li><strong>Pages</strong>:</li>
-<li><code>Page-1</code>: Full object model encompassing User Management, Quests, Game Management, Board, Pieces, and Exporters.</li>
-<li><code>MVC - GameView</code>: Focus on the Model-View-Controller integration and GameView bindings.</li>
+<li><strong>Pages</strong>: <code>Page-1</code> — the full object model, and <code>MVC - GameView</code> — the MVC
+  integration and the view bindings.</li>
+</ul>
+<p><strong>Status</strong>: this diagram is the assignment specification. Anything it defines is
+implemented; anything it omits is out of scope unless a user request adds it.</p>
+<h2 id="what-this-document-is">What this document is<a class="headerlink" href="#what-this-document-is" title="Permanent link">&para;</a></h2>
+<p>An inventory of the diagram, transcribed from the draw.io file. It records what
+the diagram <strong>actually draws</strong>, including where the diagram is inconsistent or
+incomplete, so that conformance claims elsewhere are checkable against it.</p>
+<p>Deviations from this inventory are recorded in <code>notes/object_model.md</code>.</p>
+<hr />
+<h2 id="page-1-class-inventory">Page-1 — class inventory<a class="headerlink" href="#page-1-class-inventory" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Diagram class</th>
+<th>Declared members</th>
+<th>Declared operations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Uzivatel</code></td>
+<td><code>uzivatelske_jmeno : string</code>, <code>jmeno : string</code>, <code>email : string</code>, <code>elo : integer</code>, <code>splnene_kwesty : List(Kwest)</code></td>
+<td><code>pridej_quest(quest : Quest)</code></td>
+</tr>
+<tr>
+<td><code>Quest</code></td>
+<td><code>nazev</code>, <code>popis</code></td>
+<td><code>validate() : bool</code></td>
+</tr>
+<tr>
+<td><code>HerníPlocha</code></td>
+<td><code>+rozmery: Tuple = (8,8)</code>, <code>herni_deska: List(List(Figurka))</code>, <code>vyhozene_figurky_b: List(Figurka)</code>, <code>vyhozene_figurky_c: List(Figurka)</code></td>
+<td><code>+vrat_obsah(souradnice): Figurka</code>, <code>posun_figurky(Tah): bool</code>, <code>nahrad_figurku(Figurka, Tah)</code></td>
+</tr>
+<tr>
+<td><code>Figurka</code></td>
+<td><code>název: string</code>, <code>vektory_utoku: List(Vektor)</code>, <code>barva(tým): integer</code>, <code>vektory: List(Vektor)</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>Hrac</code></td>
+<td><code>+barva : integer</code>, <code>+uzivatel : Uzivatel</code></td>
+<td><code>getEloRating: integer</code></td>
+</tr>
+<tr>
+<td><code>GameManager</code></td>
+<td><code>plocha: HerníPlocha</code>, <code>aktivni_hrac: int</code>, <code>hraci: List(Hrac)</code>, <code>aktualni_tah: Tah</code>, <code>casovac: Timer</code>, <code>game_logger: GameLogger</code>, <code>+revizor_tahu: RevizorTahu</code></td>
+<td><code>zacni_tah(): Tah</code>, <code>mozne_tahy(): List(Tah)</code>, <code>zrus_tah(): None</code>, <code>uloz_log(): void</code>, <code>get_stav(): int</code>, <code>najdi_uzivatele(id: integer): Uzivatel</code></td>
+</tr>
+<tr>
+<td><code>Tah</code></td>
+<td><code>vychozi pozice: seznam</code>, <code>cilova pozice: seznam</code>, <code>figurka: Figurka</code>, <code>typ tahu: string</code></td>
+<td><code>over platnost(): bool</code>, <code>proved tah(): void</code></td>
+</tr>
+<tr>
+<td><code>RevizorTahu</code></td>
+<td><code>herni_plocha: HerníPlocha</code>, <code>tah: Tah</code></td>
+<td><code>simulate_Move() = seznam</code>, <code>check_Šach() = bool</code>, <code>check_Mat = bool</code>, <code>check_Pat = bool</code></td>
+</tr>
+<tr>
+<td><code>Kůň</code></td>
+<td><code>vektor: seznam</code>, <code>vektor_utoku: seznam</code>, <code>skok: bool = true</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>Král</code></td>
+<td><code>vektor</code>, <code>vektor_utoku</code>, <code>skok: bool = false</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>Dáma</code></td>
+<td><code>vektor</code>, <code>vektor_utoku</code>, <code>skok: bool = false</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>Věž</code></td>
+<td><code>vektor</code>, <code>vektor_utoku</code>, <code>skok: bool = false</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>Pěšák</code></td>
+<td><code>vektor</code>, <code>vektor_utoku</code>, <code>skok: bool = false</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>Střelec</code></td>
+<td><code>vektor</code>, <code>vektor_utoku</code>, <code>skok: bool = false</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>User Manager</code></td>
+<td><code>Id_uzivatele: hrac</code>, <code>log_uzivatelu: string</code>, <code>historie_uzivatele: string</code></td>
+<td><code>proveď_tah: () bool</code></td>
+</tr>
+<tr>
+<td><code>export writers</code></td>
+<td><code>+field: type</code></td>
+<td>none — the operation compartment is empty</td>
+</tr>
+<tr>
+<td><code>ChessNotationWriter</code></td>
+<td><code>+item: attribute</code></td>
+<td>none named; the operation compartment holds prose (see below)</td>
+</tr>
+<tr>
+<td><code>MetadataWriter</code></td>
+<td>none; the attribute compartment reads <code>no parameters</code></td>
+<td><code>+method(type): type</code></td>
+</tr>
+<tr>
+<td><code>GameLogger</code></td>
+<td><code>soubor: File</code></td>
+<td><code>+uloz_tah(Tah): None</code>, <code>+vytvor_soubor(String): None</code></td>
+</tr>
+<tr>
+<td><code>Timer</code></td>
+<td><code>+cas_hrac: List(int)</code></td>
+<td><code>+nuluj_cas(): None</code>, <code>+pocitej_cas(hrac: int): None</code></td>
+</tr>
+<tr>
+<td><code>QuestManager</code></td>
+<td><code>+field: type</code></td>
+<td><code>+method(type): type</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-chessnotationwriter-format-list">The <code>ChessNotationWriter</code> format list<a class="headerlink" href="#the-chessnotationwriter-format-list" title="Permanent link">&para;</a></h3>
+<p>Its operation compartment is prose rather than named operations, and enumerates:
+<em>letter</em>, <em>PGN</em>, <em>FEN</em>, <em>Field - Field - Extra</em>, <em>Stenographic</em> — annotated
+"(Standard or custom compression)" — together with <strong>the game transcript</strong>,
+described as arriving "as a single parameter".</p>
+<p>The <strong><code>export writers</code></strong> box does <strong>not</strong> contain this list. It holds one field.
+Both facts are load-bearing: see <code>notes/object_model.md</code> section 7.</p>
+<h3 id="free-standing-notes-on-page-1">Free-standing notes on Page-1<a class="headerlink" href="#free-standing-notes-on-page-1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Validation timing</strong>, still posed as an open question in the diagram:
+  <em>"Validace tahu — Rozhodněme se, zda je lepší rozhodnout o proveditelnosti tahu
+  pro každou figuru před tahem, nebo bezprostředně po kliknutí na konkrétní a pro
+  konkrétní figuru."</em> Resolved by <code>notes/object_model.md</code> section 2 and FR-15.</li>
+<li><em>"Integer bude buď 1 nebo -1 podle barvy"</em></li>
+<li><em>"Pro pěšáka se vektor vynásobí barvou"</em></li>
 </ul>
 <hr />
-<h2 id="diagram-structure-component-inventory">Diagram Structure &amp; Component Inventory<a class="headerlink" href="#diagram-structure-component-inventory" title="Permanent link">&para;</a></h2>
-<h3 id="1-pieces-layer-modelpieces">1. Pieces Layer (<code>model.pieces</code>)<a class="headerlink" href="#1-pieces-layer-modelpieces" title="Permanent link">&para;</a></h3>
+<h2 id="page-1-relationships">Page-1 — relationships<a class="headerlink" href="#page-1-relationships" title="Permanent link">&para;</a></h2>
+<p><strong>Exactly one generalisation edge exists in the whole file</strong>: <code>Kůň → Figurka</code>,
+drawn with a hollow triangle.</p>
+<p><strong>Composition</strong>: <code>Quest</code> into <code>Uzivatel.splnene_kwesty</code>.</p>
+<p><strong>Associations</strong> (no arrowhead, with multiplicity where drawn):</p>
+<p><code>Uzivatel</code> ↔ <code>Hrac</code> · <code>GameManager.plocha</code> → <code>HerníPlocha</code> · <code>HerníPlocha</code> →
+<code>Figurka</code> · <code>GameManager.hraci</code> → <code>Hrac</code> · <code>Tah.figurka</code> → <code>Figurka</code> ·
+<code>RevizorTahu.herni_plocha</code> → <code>HerníPlocha</code> · <code>RevizorTahu.tah</code> → <code>Tah</code> ·
+<code>GameManager.revizor_tahu</code> → <code>RevizorTahu</code> · <code>GameManager.game_logger</code> →
+<code>GameLogger</code> · <code>GameManager.casovac</code> → <code>Timer</code></p>
+<hr />
+<h2 id="page-2-mvc-integration">Page 2 — MVC integration<a class="headerlink" href="#page-2-mvc-integration" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Diagram class</th>
+<th>Declared members</th>
+<th>Declared operations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GameManagerController</code></td>
+<td><code>+game_manager: GameManager</code>, <code>+herni_plocha: HerniPlocha</code>, <code>+game_view: GameView</code>, <code>+hrac_view: HracView</code></td>
+<td><code>+vyber_pole(souradnice)</code></td>
+</tr>
+<tr>
+<td><code>GameManager</code></td>
+<td><code>+herni_plocha: HerniPlocha</code>, <code>+aktivni_hrac: int</code>, <code>+hraci: List(Uzivatele)</code>, <code>+revizor_tahu: RevizorTahu</code></td>
+<td><code>+je_vlastni_figurka(souradnice): bool</code></td>
+</tr>
+<tr>
+<td><code>HerniPlocha</code></td>
+<td><code>+hraci_plocha: List(List(Figurka))</code>, <code>+rozmery: Tuple(int,int)</code></td>
+<td><code>+vrat_obsah(souradnice): Figurka</code></td>
+</tr>
+<tr>
+<td><code>GameVeiw</code></td>
+<td><code>+controller: GameManagerController</code></td>
+<td><code>+aktualizuj_plochu: None</code></td>
+</tr>
+<tr>
+<td><code>HracGameView</code></td>
+<td><code>+controller: GameManagerController</code></td>
+<td><code>+akutalizuj_hrace(hrac): None</code></td>
+</tr>
+</tbody>
+</table>
+<p>All four edges are plain associations. <strong>Page 2 draws no generalisation.</strong></p>
+<hr />
+<h2 id="recorded-defects-in-the-diagram">Recorded defects in the diagram<a class="headerlink" href="#recorded-defects-in-the-diagram" title="Permanent link">&para;</a></h2>
+<p>Recorded because conformance claims depend on them, and because silently
+smoothing them over would make the deviations unverifiable.</p>
+<h3 id="naming">Naming<a class="headerlink" href="#naming" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Drawn</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GameVeiw</code></td>
+<td>missing <code>r</code>. The class is <code>GameView</code>; the drawn spelling is not reproduced</td>
+</tr>
+<tr>
+<td><code>check_Pat</code></td>
+<td>Czech <em>patová</em> — stalemate. Retained as the drawn operation name's meaning, spelled correctly in code</td>
+</tr>
+<tr>
+<td><code>intger</code></td>
+<td>misspelling of <code>integer</code> on <code>get_stav()</code></td>
+</tr>
+<tr>
+<td><code>akutalizuj_hrace</code></td>
+<td>missing <code>l</code></td>
+</tr>
+<tr>
+<td><code>Id_uzivatele: hrac</code></td>
+<td>a user id typed as a player</td>
+</tr>
+<tr>
+<td><code>proveď_tah</code>, <code>over platnost</code></td>
+<td>Czech with diacritics inside member names</td>
+</tr>
+<tr>
+<td><code>HracView</code></td>
+<td><strong>no class box exists.</strong> It appears only as an attribute <em>type</em> on <code>GameManagerController</code>. The class is created as <code>PlayerView</code> — <code>notes/object_model.md</code> section 15</td>
+</tr>
+</tbody>
+</table>
+<h3 id="structural-inconsistency">Structural inconsistency<a class="headerlink" href="#structural-inconsistency" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong><code>Figurka</code> (<code>Piece</code>)</strong>: Base class with <code>name</code>, <code>color</code> (<code>1</code> / <code>-1</code>), <code>vectors</code>, <code>attack_vectors</code>, and <code>can_jump</code>.</li>
-<li><strong><code>Pěšák</code> (<code>Pawn</code>)</strong>: Forward step <code>(1 * color, 0)</code>, initial 2-step advance, diagonal attack <code>(1 * color, ±1)</code>.</li>
-<li><strong><code>Věž</code> (<code>Rook</code>)</strong> &amp; <strong><code>Tower</code></strong>: Orthogonal ray-marching sliding piece.</li>
-<li><strong><code>Kůň</code> (<code>Horse</code> / <code>Knight</code>)</strong>: L-shaped jumping piece (<code>can_jump = True</code>).</li>
-<li><strong><code>Střelec</code> (<code>Bishop</code>)</strong>: Diagonal ray-marching sliding piece.</li>
-<li><strong><code>Dáma</code> (<code>Queen</code>)</strong>: 8-direction ray-marching sliding piece.</li>
-<li><strong><code>Král</code> (<code>King</code>)</strong>: 8-direction 1-step piece with check/checkmate tracking.</li>
+<li><strong>Only <code>Kůň</code> is connected to <code>Figurka</code>.</strong> The other five pieces have an edge
+  with a source and <strong>no target</strong>, and each redeclares <code>vektor</code>, <code>vektor_utoku</code>
+  and <code>skok</code> rather than inheriting them. The intent is that all six extend
+  <code>Figurka</code>, and the code does that; the drawing is simply unfinished.</li>
+<li><strong><code>skok</code> is declared on the six subclasses, not on <code>Figurka</code>.</strong> <code>Figurka</code> has
+  <code>název</code>, <code>vektory</code>, <code>vektory_utoku</code> and <code>barva</code>.</li>
+<li><strong><code>Extends</code> is not a relationship.</strong> It is an <code>edgeLabel</code> on a free-standing
+  line inside a zero-height legend group positioned beside the piece row.</li>
+<li><strong><code>ChessNotationWriter</code>, <code>MetadataWriter</code>, <code>QuestManager</code> and <code>User Manager</code>
+  have no edges at all.</strong></li>
+<li><strong><code>get_stav()</code> is drawn in transparent zero-size text</strong> wrapping a nested
+  <code>mxGraphModel</code> — a copy-paste leftover that concealed the operation. It is the
+  diagram's only game-state accessor and is retained.</li>
 </ul>
-<h3 id="2-game-core-layer-modelgame">2. Game Core Layer (<code>model.game</code>)<a class="headerlink" href="#2-game-core-layer-modelgame" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong><code>HerníPlocha</code> (<code>Board</code>)</strong>: 8×8 board grid, piece indexing, capture pools (<code>vyhozene_figurky_b</code>, <code>vyhozene_figurky_c</code>).</li>
-<li><strong><code>Tah</code> (<code>Move</code>)</strong>: Move execution, coordinate tracking, promotion handling, and basic geometry validation.</li>
-<li><strong><code>Hrac</code> (<code>Player</code>)</strong>: Player color code and linked user account with ELO rating lookup.</li>
-<li><strong><code>Timer</code></strong>: Dual clock countdown and time increment management.</li>
-<li><strong><code>GameLogger</code></strong>: In-memory and file-based move transcript logging.</li>
-<li><strong><code>RevizorTahu</code> (<code>MoveValidator</code>)</strong>: Ray-marching attack detection, check, checkmate, and stalemate validation.</li>
-<li><strong><code>GameManager</code></strong>: Central engine tying board, players, timer, validator, and state machine together.</li>
-<li><strong><code>Quest</code></strong>: In-game achievement tracking with conditional predicates.</li>
-</ul>
-<h3 id="3-users-layer-modelusers">3. Users Layer (<code>model.users</code>)<a class="headerlink" href="#3-users-layer-modelusers" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong><code>Uzivatel</code> (<code>User</code>)</strong>: User profile with username, display name, email, ELO rating, and completed quests.</li>
-<li><strong><code>User Manager</code> (<code>UserManager</code>)</strong>: User directory, profile registration, match logging, and player linkage.</li>
-</ul>
-<h3 id="4-serialization-notation-layer-modelmisc">4. Serialization &amp; Notation Layer (<code>model.misc</code>)<a class="headerlink" href="#4-serialization-notation-layer-modelmisc" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong><code>MetadataWriter</code></strong>: PGN header tags roster.</li>
-<li><strong><code>ChessNotationWriter</code></strong>: PGN, FEN, and Stenographic notation generation.</li>
-<li><strong><code>QuestManager</code></strong>: Registry for tracking and awarding in-game quests.</li>
-</ul>
-<h3 id="5-controllers-controller">5. Controllers (<code>controller</code>)<a class="headerlink" href="#5-controllers-controller" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong><code>GameController</code></strong>: Handles user board clicks, piece selections, and move executions.</li>
-<li><strong><code>WindowController</code></strong>: Manages window loop, dialog prompts, timer ticks, and UI events.</li>
-</ul>
+<h3 id="the-two-pages-contradict-each-other">The two pages contradict each other<a class="headerlink" href="#the-two-pages-contradict-each-other" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Page-1</th>
+<th>Page 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>board field on the game manager</td>
+<td><code>plocha</code></td>
+<td><code>herni_plocha</code></td>
+</tr>
+<tr>
+<td>player collection</td>
+<td><code>hraci: List(Hrac)</code></td>
+<td><code>hraci: List(Uzivatele)</code></td>
+</tr>
+<tr>
+<td>board grid field</td>
+<td><code>herni_deska</code></td>
+<td><code>hraci_plocha</code></td>
+</tr>
+<tr>
+<td>board dimensions</td>
+<td><code>rozmery: Tuple = (8,8)</code></td>
+<td><code>rozmery: Tuple(int,int)</code></td>
+</tr>
+<tr>
+<td>operations on the game manager</td>
+<td>six</td>
+<td>one</td>
+</tr>
+</tbody>
+</table>
+<p><code>List(Hrac)</code> and <code>List(Uzivatele)</code> cannot both hold. Page-1 is followed,
+because it is the full object model and page 2 is the integration sketch — see
+<code>notes/object_model.md</code> section 14.</p>
+<p>Page-1 also writes <code>rozmery: Tuple = (8,8)</code>, hard-coding the default board size.
+That default is kept; nothing may rely on it.</p>
+<hr />
+<h2 id="canonical-translation">Canonical translation<a class="headerlink" href="#canonical-translation" title="Permanent link">&para;</a></h2>
+<p>Czech-to-English translation is canonical and is not a deviation. Names not
+listed here are already English in the diagram.</p>
+<table>
+<thead>
+<tr>
+<th>Diagram</th>
+<th>English</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Figurka</code></td>
+<td><code>Piece</code></td>
+<td>parent of the six pieces</td>
+</tr>
+<tr>
+<td><code>Pěšák</code></td>
+<td><code>Pawn</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Věž</code></td>
+<td><code>Rook</code></td>
+<td>the diagram has no <code>Tower</code> box</td>
+</tr>
+<tr>
+<td><code>Kůň</code></td>
+<td><code>Knight</code></td>
+<td>the diagram has no <code>Horse</code> box; the Czech alias is <code>Kun</code></td>
+</tr>
+<tr>
+<td><code>Střelec</code></td>
+<td><code>Bishop</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Dáma</code></td>
+<td><code>Queen</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Král</code></td>
+<td><code>King</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>HerníPlocha</code> / <code>HerniPlocha</code></td>
+<td><code>Board</code></td>
+<td>the diagram uses both spellings</td>
+</tr>
+<tr>
+<td><code>Tah</code></td>
+<td><code>Move</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Hrac</code></td>
+<td><code>Player</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>RevizorTahu</code></td>
+<td><code>MoveValidator</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Uzivatel</code></td>
+<td><code>User</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>User Manager</code></td>
+<td><code>UserManager</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Quest</code></td>
+<td><code>Quest</code></td>
+<td>already English</td>
+</tr>
+<tr>
+<td><code>Kwest</code></td>
+<td><code>Quest</code></td>
+<td>appears only inside <code>splnene_kwesty</code></td>
+</tr>
+<tr>
+<td><code>Timer</code></td>
+<td><code>Timer</code></td>
+<td>the configurable parent is <code>Clock</code> — <code>notes/object_model.md</code> section 13</td>
+</tr>
+<tr>
+<td><code>GameManagerController</code></td>
+<td><code>GameManagerController</code></td>
+<td>already English; the diagram has no <code>GameController</code> or <code>WindowController</code> box</td>
+</tr>
+<tr>
+<td><code>GameVeiw</code></td>
+<td><code>GameView</code></td>
+<td>diagram typo</td>
+</tr>
+<tr>
+<td><code>HracGameView</code></td>
+<td><code>PlayerGameView</code></td>
+<td>the <code>Hrac</code> part is Czech</td>
+</tr>
+</tbody>
+</table>
+<p>The full alias table the code must satisfy is in <code>PRD.md</code> section 5.</p>
         </article>
         <nav class="pager" aria-label="Page navigation">
           <a class="pager__link pager__link--prev" href="../object_model/">
@@ -349,16 +712,28 @@
       <aside class="toc">
         <div class="toc__title">On this page</div>
         <ul class="toc__list">
-          <li><a href="#link-to-live-diagram">Link to Live Diagram</a>
+          <li><a href="#link-to-the-live-diagram">Link to the live diagram</a>
           </li>
-          <li><a href="#diagram-structure-component-inventory">Diagram Structure &amp; Component Inventory</a>
+          <li><a href="#what-this-document-is">What this document is</a>
+          </li>
+          <li><a href="#page-1-class-inventory">Page-1 — class inventory</a>
             <ul>
-              <li><a href="#1-pieces-layer-modelpieces">1. Pieces Layer (model.pieces)</a></li>
-              <li><a href="#2-game-core-layer-modelgame">2. Game Core Layer (model.game)</a></li>
-              <li><a href="#3-users-layer-modelusers">3. Users Layer (model.users)</a></li>
-              <li><a href="#4-serialization-notation-layer-modelmisc">4. Serialization &amp; Notation Layer (model.misc)</a></li>
-              <li><a href="#5-controllers-controller">5. Controllers (controller)</a></li>
+              <li><a href="#the-chessnotationwriter-format-list">The ChessNotationWriter format list</a></li>
+              <li><a href="#free-standing-notes-on-page-1">Free-standing notes on Page-1</a></li>
             </ul>
+          </li>
+          <li><a href="#page-1-relationships">Page-1 — relationships</a>
+          </li>
+          <li><a href="#page-2-mvc-integration">Page 2 — MVC integration</a>
+          </li>
+          <li><a href="#recorded-defects-in-the-diagram">Recorded defects in the diagram</a>
+            <ul>
+              <li><a href="#naming">Naming</a></li>
+              <li><a href="#structural-inconsistency">Structural inconsistency</a></li>
+              <li><a href="#the-two-pages-contradict-each-other">The two pages contradict each other</a></li>
+            </ul>
+          </li>
+          <li><a href="#canonical-translation">Canonical translation</a>
           </li>
         </ul>
       </aside>
