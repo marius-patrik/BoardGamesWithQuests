@@ -35,6 +35,14 @@ Any structural, behavioral, or naming deviation from this diagram must:
 - **Mitigation**: The settings classes are kept as thin adapters over the model. They hold no game state and add no rules of their own, so the deviation is additive and does not alter the object model the diagram defines.
 - **Approval**: Explicitly approved by the user on 2026-10-02 ("yup 2 build it, note deviation").
 
+### 3a. Rule Set Profiles — Part of Deviation 3, Not a New One
+- **Date**: 2026-10-02
+- **Context**: Rule sets became named, persisted profiles on 2026-10-02: a rule is one setting with a value, a rule set is the full named profile of those settings, `Classic Chess` is the default and cannot be edited, and custom sets persist to a file on disk.
+- **Question**: does a named, persisted profile have a home in the diagram?
+- **Assessment**: No box in either page describes a profile, and a profile is a saved configuration rather than game state, so it does not belong to `Hra` / `GameManager`.
+- **Conclusion**: not a separate deviation. A profile is part of the settings surface built under deviation 3 above, and is recorded here so the question was asked rather than assumed. Selecting which profile a game runs under is `GameManager`'s configuration, which the diagram already allows.
+- **Approval**: Confirmed by the user on 2026-10-02 ("rule is one setting ruleset is full profile").
+
 ### 4. Customisable Rules and Quests — NOT a Deviation
 - **Date**: 2026-10-02
 - **Assessment**: The user raised the question directly: *"I dont think the diagram really supports that even tho it is a part of the assignment for rules to be customizable."* On examination it does, and no deviation is required.

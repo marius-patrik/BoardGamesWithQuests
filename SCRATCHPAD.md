@@ -22,7 +22,7 @@ thorough Google-style docstrings and no third-party imports.
 | Gap | Evidence |
 |---|---|
 | **The entire view layer** | `src/view/__init__.py` is one docstring line. No GUI, no renderer, no entry point. Tracked in #125 |
-| **Rule set is not configuration data** | `RevizorTahu` inlines each rule and `get_state` hard-codes the outcome ladder. There is nowhere to store "which rules are in force", so FR-8 to FR-12 are unmet. Not a redesign — the diagram already provides the fields (`Tah.typ tahu`, `Figurka.vektory`, `GameManager.get_stav`) |
+| **Rule set is not configuration data** | `RevizorTahu` inlines each rule and `get_state` hard-codes the outcome ladder. There is nowhere to store a named rule set, so FR-8 to FR-13 are unmet. Not a redesign — the diagram already provides the fields (`Tah.typ tahu`, `Figurka.vektory`, `GameManager.get_stav`) |
 | **Most chess rules absent** | `notes/chess_rules.md:52-111` mandates castling, en passant, promotion, fifty-move, threefold repetition, insufficient material and mutual-agreement draw. Only stalemate is implemented. `King._has_moved` and `Rook._has_moved` are tracked and never read by any rule |
 | **Custom board sizes broken** | `move.py:44,46` rejects any move outside a hard-coded 8×8. `board.py:41` silently produces an empty board for any other size. Twelve sites in total |
 | **Running application** | No `[project]` table, no build backend, no entry point. The package imports only because pytest sets `pythonpath` |
@@ -131,10 +131,14 @@ The surviving ~87 tests keep their product coverage and gain:
   reach a result. No test currently exercises `GameManager.make_move` in a
   sequence, which is why six orphan subsystems went unnoticed.
 - **Rule tests.** One per rule, each exercised both enabled and disabled, so
-  FR-11 is genuinely covered rather than asserted.
+  FR-11 and FR-12 are genuinely covered rather than asserted.
 - **Rule-configuration tests.** Each rule driven both on and off through the
   same game, proving the setting — not a code path — is what changes it. Covers
   FR-8 and FR-11.
+- **Rule-set profile tests.** The Classic Chess profile plays orthodox chess
+  unconfigured; a duplicated-and-edited profile differs in exactly the rules that
+  were changed; the default cannot be edited or deleted; profiles survive a
+  process restart. Covers FR-9 to FR-13 and FR-28.
 - **Quest tests.** A quest built from each data-driven condition completes on the
   intended event and not before, awards its reward once, and survives being
   checked again after completion.
@@ -189,12 +193,12 @@ TRACK 2+3+4 - Product code                (one stack)
 
 PR 3 is first because custom boards are a prerequisite for honest rules.
 En passant and castling logic must not be written against a hard-coded 8×8, and
-FR-13 needs the home rank and castling files derived before any rule depends on
+FR-16 needs the home rank and castling files derived before any rule depends on
 them.
 
 PR 4 introduces the rule set as configuration data, then implements the standard
 rules on top of it. Building them straight into the hard-coded validator would
-mean rebuilding them the moment FR-8 to FR-11 land, so the data model lands
+mean rebuilding them the moment FR-8 to FR-13 land, so the rule and rule-set data lands
 first. This is a smaller job than a plugin system: no registry, no callbacks,
 no new classes — the diagram's existing fields carry it.
 
@@ -234,6 +238,8 @@ repository must never sit without working required checks.
 
 The project is finished when all of these hold:
 
+**Tests and quality gates**
+
 1. `pytest` green, and **no surviving test asserts only on repository
    metadata**.
 2. Every public method in `src/` is reachable from at least one test.
@@ -241,34 +247,51 @@ The project is finished when all of these hold:
 4. `python -m properdocs build --strict` clean, zero warnings.
 5. No third-party runtime import anywhere in `src/`. Asserted by a test.
 6. No hard-coded `8` outside `Board`'s default dimension. Asserted by a test.
-7. Every rule in `notes/chess_rules.md` implemented, each tested both enabled
-   and disabled: castling, en passant, promotion, fifty-move, threefold
+
+**Rules and rule sets**
+
+7. Every rule in `notes/chess_rules.md` implemented, each driven both on and off
+   through the same game: castling, en passant, promotion, fifty-move, threefold
    repetition, insufficient material, stalemate, mutual-agreement draw, and the
    flag-fall nuance.
-8. The rule set is data. Disabling a rule changes a setting and removes no
-   source logic; enabling it again restores it.
-9. Standard chess is the default rule set, so an unconfigured game plays orthodox
-   chess.
-12. Castling, en passant and promotion are generated as `Tah.typ tahu` move
+8. A **rule is one setting with a value**. Disabling it changes a value and
+   removes no source logic.
+9. A **rule set is a named profile** holding the complete set of rule settings.
+   A game is played under exactly one.
+10. **Classic Chess** is the default profile, plays orthodox chess with nothing
+    configured, and can be neither edited nor deleted.
+11. Custom rule sets can be created, renamed, duplicated, edited rule by rule and
+    deleted.
+12. Rule sets persist to a file on disk and survive a restart without an account.
+13. Castling, en passant and promotion are generated as `Tah.typ tahu` move
     types, not as special cases in the validator.
-13. A quest is buildable from the settings surface using a data-driven condition,
-    with no Python written by the player.
-10. Those rules hold on non-8×8 boards, rank-relative rules generalised rather
-    than disabled.
-11. A game is played end to end from the entry point to a result.
-14. All 15 Czech aliases importable and identical to their canonical objects;
-    `Tower`, `Horse` and `Controller` gone.
-15. Deviation 3 (settings) and deviation 4 (rule engine) recorded in
-    `notes/object_model.md` with approval context.
-16. The GUI covers FR-17 to FR-22; settings covers FR-23 and FR-24.
-17. CI green across Python `3.10`, `3.11`, `3.12`, `3.13`, depending on no
-    external repository's workflow.
-18. `notes/chess_rules.md` amended where the generalisation in item 10 departs
-    from it.
-19. No dead code from §1.4 remains, and the §1.5 docstring gaps are closed.
-20. `piece.py` demo block removed.
+14. Those rules hold on non-8×8 boards, with rank-relative rules generalised
+    rather than disabled.
 
----
+**Configurable configuration**
+
+15. A custom piece type is definable from settings with its own movement vectors,
+    attack vectors and jump flag, placeable on the board, and movable.
+16. A quest is buildable from the settings surface using a data-driven condition,
+    completes on the intended event and not before, and awards its reward once.
+
+**Runnable product**
+
+17. A game is played end to end from the documented entry point to a result.
+18. The GUI covers FR-20 to FR-25. Settings covers FR-26 to FR-28, including rule
+    set management.
+19. CI green across Python `3.10`, `3.11`, `3.12`, `3.13`, depending on no
+    external repository's workflow.
+
+**Object model and hygiene**
+
+20. All 15 Czech aliases importable and identical to their canonical objects;
+    `Tower`, `Horse` and `Controller` gone.
+21. The settings-layer deviation is recorded in `notes/object_model.md`, and
+    section 4 records that customisable rules and quests are **not** a deviation.
+22. `notes/chess_rules.md` amended where item 14 departs from it.
+23. No dead code from §1.4 remains, and the §1.5 docstring gaps are closed.
+24. The `piece.py` demo block is removed.
 
 ## 6. Decision log
 
@@ -298,7 +321,11 @@ The project is finished when all of these hold:
 | 22 | Pluggable classes | **Deferred.** A master issue covers a pluggable class per layer — rules, board, pieces, quests — landing after this track. Level 1 everywhere in the meantime |
 | 23 | Quest conditions | **Data-driven and settings-configurable.** `condition_fn` callbacks are replaced by conditions a form can build. Pluggable quest logic deferred with 22 |
 | 24 | Mockup reference | Lives in `SCRATCHPAD.md`, not the PRD. The PRD describes the product; the mockup guides implementation |
-| 25 | Customisable pieces | Already data-driven via `Figurka` vectors, so diagram-supported. **Backlog** for now — not in the current FRs |
+| 25 | Customisable pieces | **In v1.** FR-3 and FR-15 already require it — piece type, movement vectors, attack vectors, jump flag, addable to the palette. An earlier entry here wrongly recorded this as backlog; corrected 2026-10-02 |
+| 26 | Rule vs rule set | A **rule is one setting with a value**; a **rule set is the full named profile** holding the complete set of those settings. FR-8 to FR-13 |
+| 27 | Rule sets as profiles | Settings manages profiles. **Classic Chess** is the default and cannot be edited or deleted; a variant starts by duplicating it. FR-12, FR-28 |
+| 28 | Profile persistence | **Global file on disk.** No account needed to save a variant. FR-13 |
+| 29 | Backlog scope | **Pluggable logic only** (#130). Every data-driven configuration concern — rules, rule sets, board, pieces, quests — ships in v1 |
 
 ---
 
@@ -312,8 +339,9 @@ Nothing is out of scope globally; each item is owned by an issue.
 | Network play, persistence beyond the file log, GUI beyond the mockup's surface | #129 |
 | Reinstalling the shared DarkFactory pipeline | Deferred, no issue until requested |
 | The `pipeline` remote and empty `.pipeline/` | #126 |
-| Pluggable classes for rules, board, pieces, quests | Deferred master issue, after this track |
-| Generalised and customisable pieces beyond the data model | **Backlog.** The data model already supports it; no FRs are written for it in this track |
+| Pluggable logic for rules, board, pieces, quests | **The only backlog item.** #130, deferred master issue, after this track |
+| Generalised and customisable pieces | **Not backlog.** FR-3 and FR-15, shipped in v1 |
+| Rule sets as profiles | **Not backlog.** FR-9 to FR-13 and FR-28, shipped in v1 |
 
 ### 7.1 Resolved: the stale upstream note
 
