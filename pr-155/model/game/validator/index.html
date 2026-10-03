@@ -109,6 +109,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../clock_fields/">clock_fields (model.game.clock_fields)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../configuration/">configuration (model.game.configuration)</a>
     </li>
     <li class="nav__item">
@@ -150,6 +154,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="../rule/">rule (model.game.rule)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../source_validation/">source_validation (model.game.source_validation)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -270,6 +278,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="../../../view/app/">app (view.app)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../view/code_editor/">code_editor (view.code_editor)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -1262,7 +1274,36 @@ what turns those answers into the set of moves a player can actually play.</p>
 <span class="normal"><a href="#__codelineno-0-606">606</a></span>
 <span class="normal"><a href="#__codelineno-0-607">607</a></span>
 <span class="normal"><a href="#__codelineno-0-608">608</a></span>
-<span class="normal"><a href="#__codelineno-0-609">609</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="k">class</span><span class="w"> </span><span class="nc">MoveValidator</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-609">609</a></span>
+<span class="normal"><a href="#__codelineno-0-610">610</a></span>
+<span class="normal"><a href="#__codelineno-0-611">611</a></span>
+<span class="normal"><a href="#__codelineno-0-612">612</a></span>
+<span class="normal"><a href="#__codelineno-0-613">613</a></span>
+<span class="normal"><a href="#__codelineno-0-614">614</a></span>
+<span class="normal"><a href="#__codelineno-0-615">615</a></span>
+<span class="normal"><a href="#__codelineno-0-616">616</a></span>
+<span class="normal"><a href="#__codelineno-0-617">617</a></span>
+<span class="normal"><a href="#__codelineno-0-618">618</a></span>
+<span class="normal"><a href="#__codelineno-0-619">619</a></span>
+<span class="normal"><a href="#__codelineno-0-620">620</a></span>
+<span class="normal"><a href="#__codelineno-0-621">621</a></span>
+<span class="normal"><a href="#__codelineno-0-622">622</a></span>
+<span class="normal"><a href="#__codelineno-0-623">623</a></span>
+<span class="normal"><a href="#__codelineno-0-624">624</a></span>
+<span class="normal"><a href="#__codelineno-0-625">625</a></span>
+<span class="normal"><a href="#__codelineno-0-626">626</a></span>
+<span class="normal"><a href="#__codelineno-0-627">627</a></span>
+<span class="normal"><a href="#__codelineno-0-628">628</a></span>
+<span class="normal"><a href="#__codelineno-0-629">629</a></span>
+<span class="normal"><a href="#__codelineno-0-630">630</a></span>
+<span class="normal"><a href="#__codelineno-0-631">631</a></span>
+<span class="normal"><a href="#__codelineno-0-632">632</a></span>
+<span class="normal"><a href="#__codelineno-0-633">633</a></span>
+<span class="normal"><a href="#__codelineno-0-634">634</a></span>
+<span class="normal"><a href="#__codelineno-0-635">635</a></span>
+<span class="normal"><a href="#__codelineno-0-636">636</a></span>
+<span class="normal"><a href="#__codelineno-0-637">637</a></span>
+<span class="normal"><a href="#__codelineno-0-638">638</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="k">class</span><span class="w"> </span><span class="nc">MoveValidator</span><span class="p">:</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="w">    </span><span class="sd">"""Validates piece movement legality, checks, checkmates, and stalemates.</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a>
 <a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    The validator asks and rules answer. It owns no game logic of its own: a rule may permit</span>
@@ -1729,126 +1770,155 @@ what turns those answers into the set of moves a player can actually play.</p>
 <a id="__codelineno-0-487" name="__codelineno-0-487"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">legal_candidates</span> <span class="o">=</span> <span class="n">legal</span>
 <a id="__codelineno-0-488" name="__codelineno-0-488"></a>        <span class="k">return</span> <span class="n">legal_moves</span>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_legal_moves_for</span><span class="p">(</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="w">        </span><span class="sd">"""Return the legal moves for a piece as whole moves, not just destinations.</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">            start_pos: (row, col) origin coordinates.</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">            List[Move]: The legal moves, each carrying whatever its rule attached.</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        """</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_moves</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">board</span><span class="p">)</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a>        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legal_candidates</span><span class="p">)</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_permitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Move</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="w">        </span><span class="sd">"""Ask every rule whether this move is allowed.</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">find_move</span><span class="p">(</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="n">start_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="n">end_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>        <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="w">        </span><span class="sd">"""Return the legal move from one square to another, as the rule offered it.</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">        A caller that learns a move from two clicks needs the move the rule built, not a bare</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        pair of squares rebuilt into a fresh `Move`. A rule may attach more than a destination</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        to a move — a chain of hops, a piece to promote into, a companion rook — and a rebuilt</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        move has none of it, so a capture chain or a promotion silently becomes illegal.</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">            start_pos: (row, col) the move begins at.</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">            end_pos: (row, col) the move ends at.</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
 <a id="__codelineno-0-507" name="__codelineno-0-507"></a>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">            move: The move being considered.</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">            bool: False when any rule in force forbids it, True otherwise.</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">        """</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a>        <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a>        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">permits_move</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">move</span><span class="p">)</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_rules</span><span class="p">())</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_valid_moves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="w">        </span><span class="sd">"""Compute all strictly legal moves for all pieces belonging to a color.</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">            color: Player color (1 for White, -1 for Black).</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="sd">            List of all strictly legal Move instances.</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">        """</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a>        <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a>            <span class="k">return</span> <span class="p">[]</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>        <span class="n">all_moves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a>        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">rows</span><span class="p">):</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a>            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>                <span class="n">piece</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a>                <span class="k">if</span> <span class="n">piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">piece</span><span class="o">.</span><span class="n">getColor</span><span class="p">()</span> <span class="o">==</span> <span class="n">color</span><span class="p">:</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a>                    <span class="n">all_moves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_legal_moves_for</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">),</span> <span class="n">b</span><span class="p">))</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a>        <span class="k">return</span> <span class="n">all_moves</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">            Optional[Move]: The move the rules offered, or None when none is legal.</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">        """</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a>        <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">b</span><span class="o">.</span><span class="n">is_within_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">start_pos</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">b</span><span class="o">.</span><span class="n">is_within_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">end_pos</span><span class="p">):</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a>            <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a>        <span class="k">for</span> <span class="n">move</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_legal_moves_for</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a>            <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">move</span><span class="o">.</span><span class="n">end_pos</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">end_pos</span><span class="p">):</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>                <span class="k">return</span> <span class="n">move</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_legal_moves_for</span><span class="p">(</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="w">        </span><span class="sd">"""Return the legal moves for a piece as whole moves, not just destinations.</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">            start_pos: (row, col) origin coordinates.</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">            List[Move]: The legal moves, each carrying whatever its rule attached.</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="sd">        """</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_moves</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">board</span><span class="p">)</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legal_candidates</span><span class="p">)</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_permitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Move</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="w">        </span><span class="sd">"""Ask every rule whether this move is allowed.</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">            move: The move being considered.</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
 <a id="__codelineno-0-540" name="__codelineno-0-540"></a>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Move</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="w">        </span><span class="sd">"""Verify whether a specific Move is strictly legal.</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">            move: Move instance to evaluate.</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">            True if the move is legal, False otherwise.</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">        """</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a>        <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">move</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a>            <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_permitted</span><span class="p">(</span><span class="n">move</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a>            <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a>        <span class="n">valid_destinations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_moves</span><span class="p">(</span><span class="n">move</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a>        <span class="k">return</span> <span class="n">move</span><span class="o">.</span><span class="n">end_pos</span> <span class="ow">in</span> <span class="n">valid_destinations</span>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_checkmate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="w">        </span><span class="sd">"""Check if the given player is in checkmate.</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">            color: Player color (1 for White, -1 for Black).</span>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="sd">            True if player is in check with zero legal responses, False otherwise.</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="sd">        """</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a>            <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_all_valid_moves</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_stalemate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="w">        </span><span class="sd">"""Check if the given player is stalemated (not in check, but no legal moves).</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">            bool: False when any rule in force forbids it, True otherwise.</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">        """</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a>        <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a>        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">permits_move</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">move</span><span class="p">)</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_rules</span><span class="p">())</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_valid_moves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="w">        </span><span class="sd">"""Compute all strictly legal moves for all pieces belonging to a color.</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">            color: Player color (1 for White, -1 for Black).</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">            List of all strictly legal Move instances.</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">        """</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a>        <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a>            <span class="k">return</span> <span class="p">[]</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a>        <span class="n">all_moves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a>        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">rows</span><span class="p">):</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a>                <span class="n">piece</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a>                <span class="k">if</span> <span class="n">piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">piece</span><span class="o">.</span><span class="n">getColor</span><span class="p">()</span> <span class="o">==</span> <span class="n">color</span><span class="p">:</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>                    <span class="n">all_moves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_legal_moves_for</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">),</span> <span class="n">b</span><span class="p">))</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>        <span class="k">return</span> <span class="n">all_moves</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Move</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="w">        </span><span class="sd">"""Verify whether a specific Move is strictly legal.</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="sd">            move: Move instance to evaluate.</span>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
 <a id="__codelineno-0-576" name="__codelineno-0-576"></a>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">            color: Player color (1 for White, -1 for Black).</span>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="sd">            True if stalemate condition holds, False otherwise.</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">        """</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>            <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_all_valid_moves</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">simulate_move</span><span class="p">(</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Move</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Piece</span><span class="p">]]]:</span>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="w">        </span><span class="sd">"""Simulate move execution and return previous state for rollback.</span>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">            move: Optional Move instance (defaults to self.move).</span>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">            List of ((row, col), previous_piece) tuples for restoration.</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a><span class="sd">        """</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>        <span class="n">m</span> <span class="o">=</span> <span class="n">move</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">move</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a>        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a>        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-603" name="__codelineno-0-603"></a>            <span class="k">return</span> <span class="p">[]</span>
-<a id="__codelineno-0-604" name="__codelineno-0-604"></a>        <span class="n">saved_state</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-0-605" name="__codelineno-0-605"></a>            <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start_pos</span><span class="p">)),</span>
-<a id="__codelineno-0-606" name="__codelineno-0-606"></a>            <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end_pos</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end_pos</span><span class="p">)),</span>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a>        <span class="p">]</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a>        <span class="n">m</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a>        <span class="k">return</span> <span class="n">saved_state</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">            True if the move is legal, False otherwise.</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">        """</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a>        <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">move</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a>            <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_permitted</span><span class="p">(</span><span class="n">move</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a>            <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a>        <span class="n">valid_destinations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_moves</span><span class="p">(</span><span class="n">move</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a>        <span class="k">return</span> <span class="n">move</span><span class="o">.</span><span class="n">end_pos</span> <span class="ow">in</span> <span class="n">valid_destinations</span>
+<a id="__codelineno-0-587" name="__codelineno-0-587"></a>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_checkmate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="w">        </span><span class="sd">"""Check if the given player is in checkmate.</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="sd">            color: Player color (1 for White, -1 for Black).</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a><span class="sd">            True if player is in check with zero legal responses, False otherwise.</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">        """</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a>            <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_all_valid_moves</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a>
+<a id="__codelineno-0-603" name="__codelineno-0-603"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_stalemate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a><span class="w">        </span><span class="sd">"""Check if the given player is stalemated (not in check, but no legal moves).</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a>
+<a id="__codelineno-0-606" name="__codelineno-0-606"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-607" name="__codelineno-0-607"></a><span class="sd">            color: Player color (1 for White, -1 for Black).</span>
+<a id="__codelineno-0-608" name="__codelineno-0-608"></a><span class="sd">            board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-609" name="__codelineno-0-609"></a>
+<a id="__codelineno-0-610" name="__codelineno-0-610"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-611" name="__codelineno-0-611"></a><span class="sd">            True if stalemate condition holds, False otherwise.</span>
+<a id="__codelineno-0-612" name="__codelineno-0-612"></a><span class="sd">        """</span>
+<a id="__codelineno-0-613" name="__codelineno-0-613"></a>        <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-615" name="__codelineno-0-615"></a>            <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-616" name="__codelineno-0-616"></a>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_all_valid_moves</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+<a id="__codelineno-0-617" name="__codelineno-0-617"></a>
+<a id="__codelineno-0-618" name="__codelineno-0-618"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">simulate_move</span><span class="p">(</span>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Move</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Piece</span><span class="p">]]]:</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="w">        </span><span class="sd">"""Simulate move execution and return previous state for rollback.</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">            move: Optional Move instance (defaults to self.move).</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">            List of ((row, col), previous_piece) tuples for restoration.</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a><span class="sd">        """</span>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a>        <span class="n">m</span> <span class="o">=</span> <span class="n">move</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">move</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a>        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a>        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a>            <span class="k">return</span> <span class="p">[]</span>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a>        <span class="n">saved_state</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a>            <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start_pos</span><span class="p">)),</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a>            <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end_pos</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end_pos</span><span class="p">)),</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a>        <span class="p">]</span>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a>        <span class="n">m</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a>        <span class="k">return</span> <span class="n">saved_state</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2039,6 +2109,173 @@ what turns those answers into the set of moves a player can actually play.</p>
 <a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">        List[Rule]: The rules whose `enabled` is True, in declaration order.</span>
 <a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">    """</span>
 <a id="__codelineno-0-98" name="__codelineno-0-98"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">rule</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="k">if</span> <span class="n">rule</span><span class="o">.</span><span class="n">enabled</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h5 id="model.game.validator.MoveValidator.find_move" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">find_move</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">board</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#model.game.validator.MoveValidator.find_move" class="headerlink" title="Permanent link">&para;</a></h5>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the legal move from one square to another, as the rule offered it.</p>
+<p>A caller that learns a move from two clicks needs the move the rule built, not a bare
+pair of squares rebuilt into a fresh <code>Move</code>. A rule may attach more than a destination
+to a move — a chain of hops, a piece to promote into, a companion rook — and a rebuilt
+move has none of it, so a capture chain or a promotion silently becomes illegal.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>start_pos</code>
+            </td>
+            <td>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>(row, col) the move begins at.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>end_pos</code>
+            </td>
+            <td>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="int">int</span>, <span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>(row, col) the move ends at.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>board</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="Board (model.game.board.Board)" href="../board/#model.game.board.Board">Board</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional Board instance (defaults to self.board).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="Move (model.game.move.Move)" href="../move/#model.game.move.Move">Move</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional[Move]: The move the rules offered, or None when none is legal.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>model/game/validator.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-490">490</a></span>
+<span class="normal"><a href="#__codelineno-0-491">491</a></span>
+<span class="normal"><a href="#__codelineno-0-492">492</a></span>
+<span class="normal"><a href="#__codelineno-0-493">493</a></span>
+<span class="normal"><a href="#__codelineno-0-494">494</a></span>
+<span class="normal"><a href="#__codelineno-0-495">495</a></span>
+<span class="normal"><a href="#__codelineno-0-496">496</a></span>
+<span class="normal"><a href="#__codelineno-0-497">497</a></span>
+<span class="normal"><a href="#__codelineno-0-498">498</a></span>
+<span class="normal"><a href="#__codelineno-0-499">499</a></span>
+<span class="normal"><a href="#__codelineno-0-500">500</a></span>
+<span class="normal"><a href="#__codelineno-0-501">501</a></span>
+<span class="normal"><a href="#__codelineno-0-502">502</a></span>
+<span class="normal"><a href="#__codelineno-0-503">503</a></span>
+<span class="normal"><a href="#__codelineno-0-504">504</a></span>
+<span class="normal"><a href="#__codelineno-0-505">505</a></span>
+<span class="normal"><a href="#__codelineno-0-506">506</a></span>
+<span class="normal"><a href="#__codelineno-0-507">507</a></span>
+<span class="normal"><a href="#__codelineno-0-508">508</a></span>
+<span class="normal"><a href="#__codelineno-0-509">509</a></span>
+<span class="normal"><a href="#__codelineno-0-510">510</a></span>
+<span class="normal"><a href="#__codelineno-0-511">511</a></span>
+<span class="normal"><a href="#__codelineno-0-512">512</a></span>
+<span class="normal"><a href="#__codelineno-0-513">513</a></span>
+<span class="normal"><a href="#__codelineno-0-514">514</a></span>
+<span class="normal"><a href="#__codelineno-0-515">515</a></span>
+<span class="normal"><a href="#__codelineno-0-516">516</a></span>
+<span class="normal"><a href="#__codelineno-0-517">517</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_move</span><span class="p">(</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>    <span class="n">start_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>    <span class="n">end_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>    <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="w">    </span><span class="sd">"""Return the legal move from one square to another, as the rule offered it.</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    A caller that learns a move from two clicks needs the move the rule built, not a bare</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">    pair of squares rebuilt into a fresh `Move`. A rule may attach more than a destination</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">    to a move — a chain of hops, a piece to promote into, a companion rook — and a rebuilt</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">    move has none of it, so a capture chain or a promotion silently becomes illegal.</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">        start_pos: (row, col) the move begins at.</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">        end_pos: (row, col) the move ends at.</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        Optional[Move]: The move the rules offered, or None when none is legal.</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">    """</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a>    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">b</span><span class="o">.</span><span class="n">is_within_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">start_pos</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">b</span><span class="o">.</span><span class="n">is_within_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">end_pos</span><span class="p">):</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a>    <span class="k">for</span> <span class="n">move</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_legal_moves_for</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a>        <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">move</span><span class="o">.</span><span class="n">end_pos</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">end_pos</span><span class="p">):</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>            <span class="k">return</span> <span class="n">move</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>    <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2274,45 +2511,45 @@ what turns those answers into the set of moves a player can actually play.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/validator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-520">520</a></span>
-<span class="normal"><a href="#__codelineno-0-521">521</a></span>
-<span class="normal"><a href="#__codelineno-0-522">522</a></span>
-<span class="normal"><a href="#__codelineno-0-523">523</a></span>
-<span class="normal"><a href="#__codelineno-0-524">524</a></span>
-<span class="normal"><a href="#__codelineno-0-525">525</a></span>
-<span class="normal"><a href="#__codelineno-0-526">526</a></span>
-<span class="normal"><a href="#__codelineno-0-527">527</a></span>
-<span class="normal"><a href="#__codelineno-0-528">528</a></span>
-<span class="normal"><a href="#__codelineno-0-529">529</a></span>
-<span class="normal"><a href="#__codelineno-0-530">530</a></span>
-<span class="normal"><a href="#__codelineno-0-531">531</a></span>
-<span class="normal"><a href="#__codelineno-0-532">532</a></span>
-<span class="normal"><a href="#__codelineno-0-533">533</a></span>
-<span class="normal"><a href="#__codelineno-0-534">534</a></span>
-<span class="normal"><a href="#__codelineno-0-535">535</a></span>
-<span class="normal"><a href="#__codelineno-0-536">536</a></span>
-<span class="normal"><a href="#__codelineno-0-537">537</a></span>
-<span class="normal"><a href="#__codelineno-0-538">538</a></span>
-<span class="normal"><a href="#__codelineno-0-539">539</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_all_valid_moves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="w">    </span><span class="sd">"""Compute all strictly legal moves for all pieces belonging to a color.</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">        color: Player color (1 for White, -1 for Black).</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="sd">        List of all strictly legal Move instances.</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">    """</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a>    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a>        <span class="k">return</span> <span class="p">[]</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>    <span class="n">all_moves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">rows</span><span class="p">):</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a>        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>            <span class="n">piece</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a>            <span class="k">if</span> <span class="n">piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">piece</span><span class="o">.</span><span class="n">getColor</span><span class="p">()</span> <span class="o">==</span> <span class="n">color</span><span class="p">:</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a>                <span class="n">all_moves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_legal_moves_for</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">),</span> <span class="n">b</span><span class="p">))</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a>    <span class="k">return</span> <span class="n">all_moves</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-549">549</a></span>
+<span class="normal"><a href="#__codelineno-0-550">550</a></span>
+<span class="normal"><a href="#__codelineno-0-551">551</a></span>
+<span class="normal"><a href="#__codelineno-0-552">552</a></span>
+<span class="normal"><a href="#__codelineno-0-553">553</a></span>
+<span class="normal"><a href="#__codelineno-0-554">554</a></span>
+<span class="normal"><a href="#__codelineno-0-555">555</a></span>
+<span class="normal"><a href="#__codelineno-0-556">556</a></span>
+<span class="normal"><a href="#__codelineno-0-557">557</a></span>
+<span class="normal"><a href="#__codelineno-0-558">558</a></span>
+<span class="normal"><a href="#__codelineno-0-559">559</a></span>
+<span class="normal"><a href="#__codelineno-0-560">560</a></span>
+<span class="normal"><a href="#__codelineno-0-561">561</a></span>
+<span class="normal"><a href="#__codelineno-0-562">562</a></span>
+<span class="normal"><a href="#__codelineno-0-563">563</a></span>
+<span class="normal"><a href="#__codelineno-0-564">564</a></span>
+<span class="normal"><a href="#__codelineno-0-565">565</a></span>
+<span class="normal"><a href="#__codelineno-0-566">566</a></span>
+<span class="normal"><a href="#__codelineno-0-567">567</a></span>
+<span class="normal"><a href="#__codelineno-0-568">568</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_all_valid_moves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="w">    </span><span class="sd">"""Compute all strictly legal moves for all pieces belonging to a color.</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">        color: Player color (1 for White, -1 for Black).</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">        List of all strictly legal Move instances.</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">    """</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a>    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a>        <span class="k">return</span> <span class="p">[]</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a>    <span class="n">all_moves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a>    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">rows</span><span class="p">):</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a>            <span class="n">piece</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a>            <span class="k">if</span> <span class="n">piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">piece</span><span class="o">.</span><span class="n">getColor</span><span class="p">()</span> <span class="o">==</span> <span class="n">color</span><span class="p">:</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>                <span class="n">all_moves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_legal_moves_for</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">),</span> <span class="n">b</span><span class="p">))</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>    <span class="k">return</span> <span class="n">all_moves</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2686,33 +2923,33 @@ only moves to an empty square; an offset in the attack vectors only takes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/validator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-490">490</a></span>
-<span class="normal"><a href="#__codelineno-0-491">491</a></span>
-<span class="normal"><a href="#__codelineno-0-492">492</a></span>
-<span class="normal"><a href="#__codelineno-0-493">493</a></span>
-<span class="normal"><a href="#__codelineno-0-494">494</a></span>
-<span class="normal"><a href="#__codelineno-0-495">495</a></span>
-<span class="normal"><a href="#__codelineno-0-496">496</a></span>
-<span class="normal"><a href="#__codelineno-0-497">497</a></span>
-<span class="normal"><a href="#__codelineno-0-498">498</a></span>
-<span class="normal"><a href="#__codelineno-0-499">499</a></span>
-<span class="normal"><a href="#__codelineno-0-500">500</a></span>
-<span class="normal"><a href="#__codelineno-0-501">501</a></span>
-<span class="normal"><a href="#__codelineno-0-502">502</a></span>
-<span class="normal"><a href="#__codelineno-0-503">503</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_legal_moves_for</span><span class="p">(</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="w">    </span><span class="sd">"""Return the legal moves for a piece as whole moves, not just destinations.</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">        start_pos: (row, col) origin coordinates.</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        List[Move]: The legal moves, each carrying whatever its rule attached.</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">    """</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_moves</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">board</span><span class="p">)</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a>    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legal_candidates</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-519">519</a></span>
+<span class="normal"><a href="#__codelineno-0-520">520</a></span>
+<span class="normal"><a href="#__codelineno-0-521">521</a></span>
+<span class="normal"><a href="#__codelineno-0-522">522</a></span>
+<span class="normal"><a href="#__codelineno-0-523">523</a></span>
+<span class="normal"><a href="#__codelineno-0-524">524</a></span>
+<span class="normal"><a href="#__codelineno-0-525">525</a></span>
+<span class="normal"><a href="#__codelineno-0-526">526</a></span>
+<span class="normal"><a href="#__codelineno-0-527">527</a></span>
+<span class="normal"><a href="#__codelineno-0-528">528</a></span>
+<span class="normal"><a href="#__codelineno-0-529">529</a></span>
+<span class="normal"><a href="#__codelineno-0-530">530</a></span>
+<span class="normal"><a href="#__codelineno-0-531">531</a></span>
+<span class="normal"><a href="#__codelineno-0-532">532</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_legal_moves_for</span><span class="p">(</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Move</span><span class="p">]:</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="w">    </span><span class="sd">"""Return the legal moves for a piece as whole moves, not just destinations.</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">        start_pos: (row, col) origin coordinates.</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">        List[Move]: The legal moves, each carrying whatever its rule attached.</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="sd">    """</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_moves</span><span class="p">(</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">board</span><span class="p">)</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">legal_candidates</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3242,33 +3479,33 @@ only moves to an empty square; an offset in the attack vectors only takes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/validator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-559">559</a></span>
-<span class="normal"><a href="#__codelineno-0-560">560</a></span>
-<span class="normal"><a href="#__codelineno-0-561">561</a></span>
-<span class="normal"><a href="#__codelineno-0-562">562</a></span>
-<span class="normal"><a href="#__codelineno-0-563">563</a></span>
-<span class="normal"><a href="#__codelineno-0-564">564</a></span>
-<span class="normal"><a href="#__codelineno-0-565">565</a></span>
-<span class="normal"><a href="#__codelineno-0-566">566</a></span>
-<span class="normal"><a href="#__codelineno-0-567">567</a></span>
-<span class="normal"><a href="#__codelineno-0-568">568</a></span>
-<span class="normal"><a href="#__codelineno-0-569">569</a></span>
-<span class="normal"><a href="#__codelineno-0-570">570</a></span>
-<span class="normal"><a href="#__codelineno-0-571">571</a></span>
-<span class="normal"><a href="#__codelineno-0-572">572</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_checkmate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="w">    </span><span class="sd">"""Check if the given player is in checkmate.</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">        color: Player color (1 for White, -1 for Black).</span>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="sd">        True if player is in check with zero legal responses, False otherwise.</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="sd">    """</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_all_valid_moves</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-588">588</a></span>
+<span class="normal"><a href="#__codelineno-0-589">589</a></span>
+<span class="normal"><a href="#__codelineno-0-590">590</a></span>
+<span class="normal"><a href="#__codelineno-0-591">591</a></span>
+<span class="normal"><a href="#__codelineno-0-592">592</a></span>
+<span class="normal"><a href="#__codelineno-0-593">593</a></span>
+<span class="normal"><a href="#__codelineno-0-594">594</a></span>
+<span class="normal"><a href="#__codelineno-0-595">595</a></span>
+<span class="normal"><a href="#__codelineno-0-596">596</a></span>
+<span class="normal"><a href="#__codelineno-0-597">597</a></span>
+<span class="normal"><a href="#__codelineno-0-598">598</a></span>
+<span class="normal"><a href="#__codelineno-0-599">599</a></span>
+<span class="normal"><a href="#__codelineno-0-600">600</a></span>
+<span class="normal"><a href="#__codelineno-0-601">601</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_checkmate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="w">    </span><span class="sd">"""Check if the given player is in checkmate.</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="sd">        color: Player color (1 for White, -1 for Black).</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a><span class="sd">        True if player is in check with zero legal responses, False otherwise.</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">    """</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_all_valid_moves</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3361,33 +3598,33 @@ only moves to an empty square; an offset in the attack vectors only takes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/validator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-505">505</a></span>
-<span class="normal"><a href="#__codelineno-0-506">506</a></span>
-<span class="normal"><a href="#__codelineno-0-507">507</a></span>
-<span class="normal"><a href="#__codelineno-0-508">508</a></span>
-<span class="normal"><a href="#__codelineno-0-509">509</a></span>
-<span class="normal"><a href="#__codelineno-0-510">510</a></span>
-<span class="normal"><a href="#__codelineno-0-511">511</a></span>
-<span class="normal"><a href="#__codelineno-0-512">512</a></span>
-<span class="normal"><a href="#__codelineno-0-513">513</a></span>
-<span class="normal"><a href="#__codelineno-0-514">514</a></span>
-<span class="normal"><a href="#__codelineno-0-515">515</a></span>
-<span class="normal"><a href="#__codelineno-0-516">516</a></span>
-<span class="normal"><a href="#__codelineno-0-517">517</a></span>
-<span class="normal"><a href="#__codelineno-0-518">518</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_permitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Move</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="w">    </span><span class="sd">"""Ask every rule whether this move is allowed.</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        move: The move being considered.</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">        bool: False when any rule in force forbids it, True otherwise.</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">    """</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a>    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a>    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">permits_move</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">move</span><span class="p">)</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_rules</span><span class="p">())</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-534">534</a></span>
+<span class="normal"><a href="#__codelineno-0-535">535</a></span>
+<span class="normal"><a href="#__codelineno-0-536">536</a></span>
+<span class="normal"><a href="#__codelineno-0-537">537</a></span>
+<span class="normal"><a href="#__codelineno-0-538">538</a></span>
+<span class="normal"><a href="#__codelineno-0-539">539</a></span>
+<span class="normal"><a href="#__codelineno-0-540">540</a></span>
+<span class="normal"><a href="#__codelineno-0-541">541</a></span>
+<span class="normal"><a href="#__codelineno-0-542">542</a></span>
+<span class="normal"><a href="#__codelineno-0-543">543</a></span>
+<span class="normal"><a href="#__codelineno-0-544">544</a></span>
+<span class="normal"><a href="#__codelineno-0-545">545</a></span>
+<span class="normal"><a href="#__codelineno-0-546">546</a></span>
+<span class="normal"><a href="#__codelineno-0-547">547</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_permitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Move</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="w">    </span><span class="sd">"""Ask every rule whether this move is allowed.</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">        move: The move being considered.</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">        bool: False when any rule in force forbids it, True otherwise.</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">    """</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a>    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a>        <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a>    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">permits_move</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">move</span><span class="p">)</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_rules</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3667,33 +3904,33 @@ only moves to an empty square; an offset in the attack vectors only takes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/validator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-574">574</a></span>
-<span class="normal"><a href="#__codelineno-0-575">575</a></span>
-<span class="normal"><a href="#__codelineno-0-576">576</a></span>
-<span class="normal"><a href="#__codelineno-0-577">577</a></span>
-<span class="normal"><a href="#__codelineno-0-578">578</a></span>
-<span class="normal"><a href="#__codelineno-0-579">579</a></span>
-<span class="normal"><a href="#__codelineno-0-580">580</a></span>
-<span class="normal"><a href="#__codelineno-0-581">581</a></span>
-<span class="normal"><a href="#__codelineno-0-582">582</a></span>
-<span class="normal"><a href="#__codelineno-0-583">583</a></span>
-<span class="normal"><a href="#__codelineno-0-584">584</a></span>
-<span class="normal"><a href="#__codelineno-0-585">585</a></span>
-<span class="normal"><a href="#__codelineno-0-586">586</a></span>
-<span class="normal"><a href="#__codelineno-0-587">587</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_stalemate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="w">    </span><span class="sd">"""Check if the given player is stalemated (not in check, but no legal moves).</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">        color: Player color (1 for White, -1 for Black).</span>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="sd">        True if stalemate condition holds, False otherwise.</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">    """</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_all_valid_moves</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-603">603</a></span>
+<span class="normal"><a href="#__codelineno-0-604">604</a></span>
+<span class="normal"><a href="#__codelineno-0-605">605</a></span>
+<span class="normal"><a href="#__codelineno-0-606">606</a></span>
+<span class="normal"><a href="#__codelineno-0-607">607</a></span>
+<span class="normal"><a href="#__codelineno-0-608">608</a></span>
+<span class="normal"><a href="#__codelineno-0-609">609</a></span>
+<span class="normal"><a href="#__codelineno-0-610">610</a></span>
+<span class="normal"><a href="#__codelineno-0-611">611</a></span>
+<span class="normal"><a href="#__codelineno-0-612">612</a></span>
+<span class="normal"><a href="#__codelineno-0-613">613</a></span>
+<span class="normal"><a href="#__codelineno-0-614">614</a></span>
+<span class="normal"><a href="#__codelineno-0-615">615</a></span>
+<span class="normal"><a href="#__codelineno-0-616">616</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-603" name="__codelineno-0-603"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_stalemate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a><span class="w">    </span><span class="sd">"""Check if the given player is stalemated (not in check, but no legal moves).</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a>
+<a id="__codelineno-0-606" name="__codelineno-0-606"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-607" name="__codelineno-0-607"></a><span class="sd">        color: Player color (1 for White, -1 for Black).</span>
+<a id="__codelineno-0-608" name="__codelineno-0-608"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-609" name="__codelineno-0-609"></a>
+<a id="__codelineno-0-610" name="__codelineno-0-610"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-611" name="__codelineno-0-611"></a><span class="sd">        True if stalemate condition holds, False otherwise.</span>
+<a id="__codelineno-0-612" name="__codelineno-0-612"></a><span class="sd">    """</span>
+<a id="__codelineno-0-613" name="__codelineno-0-613"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-615" name="__codelineno-0-615"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-616" name="__codelineno-0-616"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_all_valid_moves</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3786,39 +4023,39 @@ only moves to an empty square; an offset in the attack vectors only takes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/validator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-541">541</a></span>
-<span class="normal"><a href="#__codelineno-0-542">542</a></span>
-<span class="normal"><a href="#__codelineno-0-543">543</a></span>
-<span class="normal"><a href="#__codelineno-0-544">544</a></span>
-<span class="normal"><a href="#__codelineno-0-545">545</a></span>
-<span class="normal"><a href="#__codelineno-0-546">546</a></span>
-<span class="normal"><a href="#__codelineno-0-547">547</a></span>
-<span class="normal"><a href="#__codelineno-0-548">548</a></span>
-<span class="normal"><a href="#__codelineno-0-549">549</a></span>
-<span class="normal"><a href="#__codelineno-0-550">550</a></span>
-<span class="normal"><a href="#__codelineno-0-551">551</a></span>
-<span class="normal"><a href="#__codelineno-0-552">552</a></span>
-<span class="normal"><a href="#__codelineno-0-553">553</a></span>
-<span class="normal"><a href="#__codelineno-0-554">554</a></span>
-<span class="normal"><a href="#__codelineno-0-555">555</a></span>
-<span class="normal"><a href="#__codelineno-0-556">556</a></span>
-<span class="normal"><a href="#__codelineno-0-557">557</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_valid_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Move</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="w">    </span><span class="sd">"""Verify whether a specific Move is strictly legal.</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">        move: Move instance to evaluate.</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">        True if the move is legal, False otherwise.</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">    """</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a>    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">move</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_permitted</span><span class="p">(</span><span class="n">move</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a>    <span class="n">valid_destinations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_moves</span><span class="p">(</span><span class="n">move</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a>    <span class="k">return</span> <span class="n">move</span><span class="o">.</span><span class="n">end_pos</span> <span class="ow">in</span> <span class="n">valid_destinations</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-570">570</a></span>
+<span class="normal"><a href="#__codelineno-0-571">571</a></span>
+<span class="normal"><a href="#__codelineno-0-572">572</a></span>
+<span class="normal"><a href="#__codelineno-0-573">573</a></span>
+<span class="normal"><a href="#__codelineno-0-574">574</a></span>
+<span class="normal"><a href="#__codelineno-0-575">575</a></span>
+<span class="normal"><a href="#__codelineno-0-576">576</a></span>
+<span class="normal"><a href="#__codelineno-0-577">577</a></span>
+<span class="normal"><a href="#__codelineno-0-578">578</a></span>
+<span class="normal"><a href="#__codelineno-0-579">579</a></span>
+<span class="normal"><a href="#__codelineno-0-580">580</a></span>
+<span class="normal"><a href="#__codelineno-0-581">581</a></span>
+<span class="normal"><a href="#__codelineno-0-582">582</a></span>
+<span class="normal"><a href="#__codelineno-0-583">583</a></span>
+<span class="normal"><a href="#__codelineno-0-584">584</a></span>
+<span class="normal"><a href="#__codelineno-0-585">585</a></span>
+<span class="normal"><a href="#__codelineno-0-586">586</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-570" name="__codelineno-0-570"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_valid_move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Move</span><span class="p">,</span> <span class="n">board</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Board</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="w">    </span><span class="sd">"""Verify whether a specific Move is strictly legal.</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="sd">        move: Move instance to evaluate.</span>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">        board: Optional Board instance (defaults to self.board).</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">        True if the move is legal, False otherwise.</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">    """</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>    <span class="n">b</span> <span class="o">=</span> <span class="n">board</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a>    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">move</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_permitted</span><span class="p">(</span><span class="n">move</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a>    <span class="n">valid_destinations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_moves</span><span class="p">(</span><span class="n">move</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a>    <span class="k">return</span> <span class="n">move</span><span class="o">.</span><span class="n">end_pos</span> <span class="ow">in</span> <span class="n">valid_destinations</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4650,47 +4887,47 @@ seen, the colours that have castled, the clock a flag-fall rule reads.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/validator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-589">589</a></span>
-<span class="normal"><a href="#__codelineno-0-590">590</a></span>
-<span class="normal"><a href="#__codelineno-0-591">591</a></span>
-<span class="normal"><a href="#__codelineno-0-592">592</a></span>
-<span class="normal"><a href="#__codelineno-0-593">593</a></span>
-<span class="normal"><a href="#__codelineno-0-594">594</a></span>
-<span class="normal"><a href="#__codelineno-0-595">595</a></span>
-<span class="normal"><a href="#__codelineno-0-596">596</a></span>
-<span class="normal"><a href="#__codelineno-0-597">597</a></span>
-<span class="normal"><a href="#__codelineno-0-598">598</a></span>
-<span class="normal"><a href="#__codelineno-0-599">599</a></span>
-<span class="normal"><a href="#__codelineno-0-600">600</a></span>
-<span class="normal"><a href="#__codelineno-0-601">601</a></span>
-<span class="normal"><a href="#__codelineno-0-602">602</a></span>
-<span class="normal"><a href="#__codelineno-0-603">603</a></span>
-<span class="normal"><a href="#__codelineno-0-604">604</a></span>
-<span class="normal"><a href="#__codelineno-0-605">605</a></span>
-<span class="normal"><a href="#__codelineno-0-606">606</a></span>
-<span class="normal"><a href="#__codelineno-0-607">607</a></span>
-<span class="normal"><a href="#__codelineno-0-608">608</a></span>
-<span class="normal"><a href="#__codelineno-0-609">609</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="k">def</span><span class="w"> </span><span class="nf">simulate_move</span><span class="p">(</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Move</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Piece</span><span class="p">]]]:</span>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="w">    </span><span class="sd">"""Simulate move execution and return previous state for rollback.</span>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">        move: Optional Move instance (defaults to self.move).</span>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">        List of ((row, col), previous_piece) tuples for restoration.</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a><span class="sd">    """</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>    <span class="n">m</span> <span class="o">=</span> <span class="n">move</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">move</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a>    <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a>    <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-603" name="__codelineno-0-603"></a>        <span class="k">return</span> <span class="p">[]</span>
-<a id="__codelineno-0-604" name="__codelineno-0-604"></a>    <span class="n">saved_state</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-0-605" name="__codelineno-0-605"></a>        <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start_pos</span><span class="p">)),</span>
-<a id="__codelineno-0-606" name="__codelineno-0-606"></a>        <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end_pos</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end_pos</span><span class="p">)),</span>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a>    <span class="p">]</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a>    <span class="n">m</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a>    <span class="k">return</span> <span class="n">saved_state</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-618">618</a></span>
+<span class="normal"><a href="#__codelineno-0-619">619</a></span>
+<span class="normal"><a href="#__codelineno-0-620">620</a></span>
+<span class="normal"><a href="#__codelineno-0-621">621</a></span>
+<span class="normal"><a href="#__codelineno-0-622">622</a></span>
+<span class="normal"><a href="#__codelineno-0-623">623</a></span>
+<span class="normal"><a href="#__codelineno-0-624">624</a></span>
+<span class="normal"><a href="#__codelineno-0-625">625</a></span>
+<span class="normal"><a href="#__codelineno-0-626">626</a></span>
+<span class="normal"><a href="#__codelineno-0-627">627</a></span>
+<span class="normal"><a href="#__codelineno-0-628">628</a></span>
+<span class="normal"><a href="#__codelineno-0-629">629</a></span>
+<span class="normal"><a href="#__codelineno-0-630">630</a></span>
+<span class="normal"><a href="#__codelineno-0-631">631</a></span>
+<span class="normal"><a href="#__codelineno-0-632">632</a></span>
+<span class="normal"><a href="#__codelineno-0-633">633</a></span>
+<span class="normal"><a href="#__codelineno-0-634">634</a></span>
+<span class="normal"><a href="#__codelineno-0-635">635</a></span>
+<span class="normal"><a href="#__codelineno-0-636">636</a></span>
+<span class="normal"><a href="#__codelineno-0-637">637</a></span>
+<span class="normal"><a href="#__codelineno-0-638">638</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-618" name="__codelineno-0-618"></a><span class="k">def</span><span class="w"> </span><span class="nf">simulate_move</span><span class="p">(</span>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">move</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Move</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Piece</span><span class="p">]]]:</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="w">    </span><span class="sd">"""Simulate move execution and return previous state for rollback.</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">        move: Optional Move instance (defaults to self.move).</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">        List of ((row, col), previous_piece) tuples for restoration.</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a><span class="sd">    """</span>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a>    <span class="n">m</span> <span class="o">=</span> <span class="n">move</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">move</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a>    <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a>    <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a>        <span class="k">return</span> <span class="p">[]</span>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a>    <span class="n">saved_state</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a>        <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">start_pos</span><span class="p">)),</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a>        <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end_pos</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">get_piece_at</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end_pos</span><span class="p">)),</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a>    <span class="p">]</span>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a>    <span class="n">m</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a>    <span class="k">return</span> <span class="n">saved_state</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

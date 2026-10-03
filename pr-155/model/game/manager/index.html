@@ -109,6 +109,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../clock_fields/">clock_fields (model.game.clock_fields)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../configuration/">configuration (model.game.configuration)</a>
     </li>
     <li class="nav__item">
@@ -150,6 +154,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="../rule/">rule (model.game.rule)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../source_validation/">source_validation (model.game.source_validation)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -270,6 +278,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="../../../view/app/">app (view.app)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../../view/code_editor/">code_editor (view.code_editor)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -1113,7 +1125,13 @@ gets it anyway.</p>
 <span class="normal"><a href="#__codelineno-0-469">469</a></span>
 <span class="normal"><a href="#__codelineno-0-470">470</a></span>
 <span class="normal"><a href="#__codelineno-0-471">471</a></span>
-<span class="normal"><a href="#__codelineno-0-472">472</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="k">class</span><span class="w"> </span><span class="nc">GameManager</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-472">472</a></span>
+<span class="normal"><a href="#__codelineno-0-473">473</a></span>
+<span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
+<span class="normal"><a href="#__codelineno-0-476">476</a></span>
+<span class="normal"><a href="#__codelineno-0-477">477</a></span>
+<span class="normal"><a href="#__codelineno-0-478">478</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="k">class</span><span class="w"> </span><span class="nc">GameManager</span><span class="p">:</span>
 <a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="w">    </span><span class="sd">"""Core game orchestrator managing turns, clocks, moves, and terminal game conditions."""</span>
 <a id="__codelineno-0-39" name="__codelineno-0-39"></a>
 <a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="n">STATE_IN_PROGRESS</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1401,154 +1419,160 @@ gets it anyway.</p>
 <a id="__codelineno-0-322" name="__codelineno-0-322"></a>        <span class="c1"># before the move. Reading the board here would read the position after it, where the</span>
 <a id="__codelineno-0-323" name="__codelineno-0-323"></a>        <span class="c1"># destination holds the piece that just arrived and every move looks like a capture.</span>
 <a id="__codelineno-0-324" name="__codelineno-0-324"></a>        <span class="n">piece</span> <span class="o">=</span> <span class="n">move</span><span class="o">.</span><span class="n">piece</span>
-<a id="__codelineno-0-325" name="__codelineno-0-325"></a>        <span class="n">captured</span> <span class="o">=</span> <span class="n">move</span><span class="o">.</span><span class="n">captured_piece</span>
-<a id="__codelineno-0-326" name="__codelineno-0-326"></a>        <span class="k">return</span> <span class="n">MoveEvent</span><span class="p">(</span>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a>            <span class="n">move</span><span class="o">=</span><span class="n">move</span><span class="p">,</span>
-<a id="__codelineno-0-328" name="__codelineno-0-328"></a>            <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span>
-<a id="__codelineno-0-329" name="__codelineno-0-329"></a>            <span class="n">color</span><span class="o">=</span><span class="n">mover</span><span class="p">,</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a>            <span class="n">piece_type</span><span class="o">=</span><span class="n">piece</span><span class="o">.</span><span class="n">getType</span><span class="p">()</span> <span class="k">if</span> <span class="n">piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a>            <span class="n">captured_piece_type</span><span class="o">=</span><span class="n">captured</span><span class="o">.</span><span class="n">getType</span><span class="p">()</span> <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-332" name="__codelineno-0-332"></a>            <span class="n">is_check</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">move_validator</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="o">-</span><span class="n">mover</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">),</span>
-<a id="__codelineno-0-333" name="__codelineno-0-333"></a>            <span class="n">in_check</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">move_validator</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">mover</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">),</span>
-<a id="__codelineno-0-334" name="__codelineno-0-334"></a>            <span class="n">is_castling</span><span class="o">=</span><span class="n">move</span><span class="o">.</span><span class="n">move_type</span> <span class="o">==</span> <span class="s2">"castling"</span><span class="p">,</span>
-<a id="__codelineno-0-335" name="__codelineno-0-335"></a>            <span class="n">is_en_passant</span><span class="o">=</span><span class="n">move</span><span class="o">.</span><span class="n">move_type</span> <span class="o">==</span> <span class="s2">"en_passant"</span><span class="p">,</span>
-<a id="__codelineno-0-336" name="__codelineno-0-336"></a>            <span class="n">is_promotion</span><span class="o">=</span><span class="n">move</span><span class="o">.</span><span class="n">promotion_piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-337" name="__codelineno-0-337"></a>            <span class="n">index</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">),</span>
-<a id="__codelineno-0-338" name="__codelineno-0-338"></a>        <span class="p">)</span>
-<a id="__codelineno-0-339" name="__codelineno-0-339"></a>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">finish_game</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Result</span><span class="p">]:</span>
-<a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="w">        </span><span class="sd">"""Close the game, judge the quests that judge a finished game, and credit the users.</span>
-<a id="__codelineno-0-342" name="__codelineno-0-342"></a>
-<a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">            Optional[Result]: The result, or None while the game is still going.</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">        """</span>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>            <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="n">event</span> <span class="o">=</span> <span class="n">ResultEvent</span><span class="p">(</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a>            <span class="n">outcome</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
-<a id="__codelineno-0-354" name="__codelineno-0-354"></a>            <span class="n">winner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">winner</span><span class="p">,</span>
-<a id="__codelineno-0-355" name="__codelineno-0-355"></a>            <span class="n">reason</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span>
-<a id="__codelineno-0-356" name="__codelineno-0-356"></a>            <span class="n">history</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">),</span>
-<a id="__codelineno-0-357" name="__codelineno-0-357"></a>            <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span>
-<a id="__codelineno-0-358" name="__codelineno-0-358"></a>            <span class="n">players</span><span class="o">=</span><span class="p">{</span><span class="n">player</span><span class="o">.</span><span class="n">getColor</span><span class="p">():</span> <span class="n">player</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">},</span>
-<a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="p">)</span>
-<a id="__codelineno-0-360" name="__codelineno-0-360"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">quest_manager</span><span class="o">.</span><span class="n">observe_result</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-<a id="__codelineno-0-361" name="__codelineno-0-361"></a>
-<a id="__codelineno-0-362" name="__codelineno-0-362"></a>        <span class="k">for</span> <span class="n">quest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quest_manager</span><span class="o">.</span><span class="n">get_completed_quests</span><span class="p">():</span>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>            <span class="k">if</span> <span class="n">quest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">completed_quests</span><span class="p">:</span>
-<a id="__codelineno-0-364" name="__codelineno-0-364"></a>                <span class="k">continue</span>
-<a id="__codelineno-0-365" name="__codelineno-0-365"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">completed_quests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quest</span><span class="p">)</span>
-<a id="__codelineno-0-366" name="__codelineno-0-366"></a>            <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">:</span>
-<a id="__codelineno-0-367" name="__codelineno-0-367"></a>                <span class="n">user</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">getUser</span><span class="p">()</span>
-<a id="__codelineno-0-368" name="__codelineno-0-368"></a>                <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-369" name="__codelineno-0-369"></a>                    <span class="n">user</span><span class="o">.</span><span class="n">add_quest</span><span class="p">(</span><span class="n">quest</span><span class="p">)</span>
-<a id="__codelineno-0-370" name="__codelineno-0-370"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
-<a id="__codelineno-0-371" name="__codelineno-0-371"></a>
-<a id="__codelineno-0-372" name="__codelineno-0-372"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">offered_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="w">        </span><span class="sd">"""Return every notation this configuration can write a game in.</span>
-<a id="__codelineno-0-374" name="__codelineno-0-374"></a>
-<a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">            List[str]: The format names the configuration's writers declare, in declaration</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">            order and without repeats.</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">        """</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="n">offered</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporters</span><span class="p">:</span>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a>            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">writer</span><span class="o">.</span><span class="n">formats</span><span class="p">():</span>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a>                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">offered</span><span class="p">:</span>
-<a id="__codelineno-0-383" name="__codelineno-0-383"></a>                    <span class="n">offered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-384" name="__codelineno-0-384"></a>        <span class="k">return</span> <span class="n">offered</span>
-<a id="__codelineno-0-385" name="__codelineno-0-385"></a>
-<a id="__codelineno-0-386" name="__codelineno-0-386"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">default_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="w">        </span><span class="sd">"""Return the notation a game is written in when nothing is asked for.</span>
-<a id="__codelineno-0-388" name="__codelineno-0-388"></a>
-<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-390" name="__codelineno-0-390"></a><span class="sd">            Optional[str]: The first format the configuration offers, or None when it offers</span>
-<a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">            none. There is no fallback: the engine does not know a single notation name, so</span>
-<a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">            it has nothing to fall back to.</span>
-<a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">        """</span>
-<a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="n">offered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offered_formats</span><span class="p">()</span>
-<a id="__codelineno-0-395" name="__codelineno-0-395"></a>        <span class="k">return</span> <span class="n">offered</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">offered</span> <span class="k">else</span> <span class="kc">None</span>
-<a id="__codelineno-0-396" name="__codelineno-0-396"></a>
-<a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">writer_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="w">        </span><span class="sd">"""Return the writer that produces a notation.</span>
-<a id="__codelineno-0-399" name="__codelineno-0-399"></a>
-<a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="sd">        The writers are asked in declaration order and each is judged by what it says it</span>
-<a id="__codelineno-0-401" name="__codelineno-0-401"></a><span class="sd">        writes, rather than the first writer being handed every format and expected to cope.</span>
-<a id="__codelineno-0-402" name="__codelineno-0-402"></a><span class="sd">        A configuration whose second writer writes a format its first does not now reaches</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="sd">        that writer.</span>
-<a id="__codelineno-0-404" name="__codelineno-0-404"></a>
-<a id="__codelineno-0-405" name="__codelineno-0-405"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">            fmt: The notation wanted, matched without regard to case. Defaults to the first</span>
-<a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="sd">                the configuration offers.</span>
-<a id="__codelineno-0-408" name="__codelineno-0-408"></a>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">            Any: The writer that writes that notation.</span>
-<a id="__codelineno-0-411" name="__codelineno-0-411"></a>
-<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">        Raises:</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">            UnsupportedExportFormat: If no writer the configuration offered writes it. An</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="sd">                unknown notation is a question nothing can answer, and answering it with an</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">                empty transcript said otherwise.</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">        """</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a>        <span class="n">wanted</span> <span class="o">=</span> <span class="p">(</span><span class="n">fmt</span> <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>        <span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporters</span><span class="p">:</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a>            <span class="k">if</span> <span class="n">wanted</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">writer</span><span class="o">.</span><span class="n">formats</span><span class="p">()}:</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a>                <span class="k">return</span> <span class="n">writer</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>        <span class="n">offered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offered_formats</span><span class="p">()</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>        <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"this game"</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="k">raise</span> <span class="n">UnsupportedExportFormat</span><span class="p">(</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fmt</span><span class="si">!r}</span><span class="s2"> is not a notation </span><span class="si">{</span><span class="n">configuration</span><span class="si">}</span><span class="s2"> exports; it offers "</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">offered</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">offered</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no notation at all'</span><span class="si">}</span><span class="s2">"</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>        <span class="p">)</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">transcript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="w">        </span><span class="sd">"""Render the game so far in a notation this configuration exports.</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">            fmt: The notation to write. Defaults to the first the configuration offers.</span>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a>        <span class="c1"># A move that chains several captures carries them all, and a quest counting captures</span>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a>        <span class="c1"># must count each one. Reading the single `captured_piece` scored a three-jump</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a>        <span class="c1"># draughts capture as one.</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>        <span class="n">taken</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">move</span><span class="p">,</span> <span class="s2">"captured_pieces"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a>        <span class="k">if</span> <span class="n">taken</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a>            <span class="n">taken</span> <span class="o">=</span> <span class="p">[</span><span class="n">move</span><span class="o">.</span><span class="n">captured_piece</span><span class="p">]</span> <span class="k">if</span> <span class="n">move</span><span class="o">.</span><span class="n">captured_piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a>        <span class="n">captured</span> <span class="o">=</span> <span class="n">taken</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">taken</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a>        <span class="k">return</span> <span class="n">MoveEvent</span><span class="p">(</span>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a>            <span class="n">move</span><span class="o">=</span><span class="n">move</span><span class="p">,</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a>            <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a>            <span class="n">color</span><span class="o">=</span><span class="n">mover</span><span class="p">,</span>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a>            <span class="n">piece_type</span><span class="o">=</span><span class="n">piece</span><span class="o">.</span><span class="n">getType</span><span class="p">()</span> <span class="k">if</span> <span class="n">piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a>            <span class="n">captured_piece_type</span><span class="o">=</span><span class="n">captured</span><span class="o">.</span><span class="n">getType</span><span class="p">()</span> <span class="k">if</span> <span class="n">captured</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a>            <span class="n">is_check</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">move_validator</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="o">-</span><span class="n">mover</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">),</span>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a>            <span class="n">in_check</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">move_validator</span><span class="o">.</span><span class="n">is_check</span><span class="p">(</span><span class="n">mover</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">),</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a>            <span class="n">is_castling</span><span class="o">=</span><span class="n">move</span><span class="o">.</span><span class="n">move_type</span> <span class="o">==</span> <span class="s2">"castling"</span><span class="p">,</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a>            <span class="n">is_en_passant</span><span class="o">=</span><span class="n">move</span><span class="o">.</span><span class="n">move_type</span> <span class="o">==</span> <span class="s2">"en_passant"</span><span class="p">,</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a>            <span class="n">is_promotion</span><span class="o">=</span><span class="n">move</span><span class="o">.</span><span class="n">promotion_piece</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a>            <span class="n">index</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">),</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a>        <span class="p">)</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">finish_game</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Result</span><span class="p">]:</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="w">        </span><span class="sd">"""Close the game, judge the quests that judge a finished game, and credit the users.</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">            Optional[Result]: The result, or None while the game is still going.</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">        """</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a>            <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>        <span class="n">event</span> <span class="o">=</span> <span class="n">ResultEvent</span><span class="p">(</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>            <span class="n">outcome</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>            <span class="n">winner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">winner</span><span class="p">,</span>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>            <span class="n">reason</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>            <span class="n">history</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">),</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>            <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a>            <span class="n">players</span><span class="o">=</span><span class="p">{</span><span class="n">player</span><span class="o">.</span><span class="n">getColor</span><span class="p">():</span> <span class="n">player</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">},</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>        <span class="p">)</span>
+<a id="__codelineno-0-366" name="__codelineno-0-366"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">quest_manager</span><span class="o">.</span><span class="n">observe_result</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>
+<a id="__codelineno-0-368" name="__codelineno-0-368"></a>        <span class="k">for</span> <span class="n">quest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quest_manager</span><span class="o">.</span><span class="n">get_completed_quests</span><span class="p">():</span>
+<a id="__codelineno-0-369" name="__codelineno-0-369"></a>            <span class="k">if</span> <span class="n">quest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">completed_quests</span><span class="p">:</span>
+<a id="__codelineno-0-370" name="__codelineno-0-370"></a>                <span class="k">continue</span>
+<a id="__codelineno-0-371" name="__codelineno-0-371"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">completed_quests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quest</span><span class="p">)</span>
+<a id="__codelineno-0-372" name="__codelineno-0-372"></a>            <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">:</span>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a>                <span class="n">user</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">getUser</span><span class="p">()</span>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a>                <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a>                    <span class="n">user</span><span class="o">.</span><span class="n">add_quest</span><span class="p">(</span><span class="n">quest</span><span class="p">)</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">offered_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="w">        </span><span class="sd">"""Return every notation this configuration can write a game in.</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">            List[str]: The format names the configuration's writers declare, in declaration</span>
+<a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">            order and without repeats.</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="sd">        """</span>
+<a id="__codelineno-0-385" name="__codelineno-0-385"></a>        <span class="n">offered</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-386" name="__codelineno-0-386"></a>        <span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporters</span><span class="p">:</span>
+<a id="__codelineno-0-387" name="__codelineno-0-387"></a>            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">writer</span><span class="o">.</span><span class="n">formats</span><span class="p">():</span>
+<a id="__codelineno-0-388" name="__codelineno-0-388"></a>                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">offered</span><span class="p">:</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389"></a>                    <span class="n">offered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-390" name="__codelineno-0-390"></a>        <span class="k">return</span> <span class="n">offered</span>
+<a id="__codelineno-0-391" name="__codelineno-0-391"></a>
+<a id="__codelineno-0-392" name="__codelineno-0-392"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">default_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="w">        </span><span class="sd">"""Return the notation a game is written in when nothing is asked for.</span>
+<a id="__codelineno-0-394" name="__codelineno-0-394"></a>
+<a id="__codelineno-0-395" name="__codelineno-0-395"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="sd">            Optional[str]: The first format the configuration offers, or None when it offers</span>
+<a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="sd">            none. There is no fallback: the engine does not know a single notation name, so</span>
+<a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="sd">            it has nothing to fall back to.</span>
+<a id="__codelineno-0-399" name="__codelineno-0-399"></a><span class="sd">        """</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400"></a>        <span class="n">offered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offered_formats</span><span class="p">()</span>
+<a id="__codelineno-0-401" name="__codelineno-0-401"></a>        <span class="k">return</span> <span class="n">offered</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">offered</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-0-402" name="__codelineno-0-402"></a>
+<a id="__codelineno-0-403" name="__codelineno-0-403"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">writer_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-0-404" name="__codelineno-0-404"></a><span class="w">        </span><span class="sd">"""Return the writer that produces a notation.</span>
+<a id="__codelineno-0-405" name="__codelineno-0-405"></a>
+<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">        The writers are asked in declaration order and each is judged by what it says it</span>
+<a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="sd">        writes, rather than the first writer being handed every format and expected to cope.</span>
+<a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">        A configuration whose second writer writes a format its first does not now reaches</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">        that writer.</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a>
+<a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">            fmt: The notation wanted, matched without regard to case. Defaults to the first</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">                the configuration offers.</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">            Any: The writer that writes that notation.</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="sd">        Raises:</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="sd">            UnsupportedExportFormat: If no writer the configuration offered writes it. An</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="sd">                unknown notation is a question nothing can answer, and answering it with an</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">                empty transcript said otherwise.</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="sd">        """</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="n">wanted</span> <span class="o">=</span> <span class="p">(</span><span class="n">fmt</span> <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporters</span><span class="p">:</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="k">if</span> <span class="n">wanted</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">writer</span><span class="o">.</span><span class="n">formats</span><span class="p">()}:</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>                <span class="k">return</span> <span class="n">writer</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>        <span class="n">offered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offered_formats</span><span class="p">()</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>        <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"this game"</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>        <span class="k">raise</span> <span class="n">UnsupportedExportFormat</span><span class="p">(</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fmt</span><span class="si">!r}</span><span class="s2"> is not a notation </span><span class="si">{</span><span class="n">configuration</span><span class="si">}</span><span class="s2"> exports; it offers "</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">offered</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">offered</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no notation at all'</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="p">)</span>
 <a id="__codelineno-0-433" name="__codelineno-0-433"></a>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">            str: The game as that notation writes it.</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">transcript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="w">        </span><span class="sd">"""Render the game so far in a notation this configuration exports.</span>
 <a id="__codelineno-0-436" name="__codelineno-0-436"></a>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">        Raises:</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">            UnsupportedExportFormat: If the configuration exports no such notation.</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">        """</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>        <span class="n">writer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer_for</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a>        <span class="n">wanted</span> <span class="o">=</span> <span class="n">fmt</span> <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a>        <span class="n">moves</span> <span class="o">=</span> <span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">move</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">]</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">"Result"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">reason</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="k">else</span> <span class="s2">"*"</span><span class="p">)</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>        <span class="k">return</span> <span class="n">writer</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="n">moves</span><span class="o">=</span><span class="n">moves</span><span class="p">,</span> <span class="n">board</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">save_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="w">        </span><span class="sd">"""Write the transcript of this game to a file.</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">            path: Where to write it. Defaults to a timestamped file under `logs/`, named for</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">                the notation it is written in.</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">            str: The path written to.</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        Raises:</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">            UnsupportedExportFormat: If the configuration exports no notation, so there is</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">                nothing to write and nothing to name the file after.</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">        """</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a>        <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">            fmt: The notation to write. Defaults to the first the configuration offers.</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">            str: The game as that notation writes it.</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">        Raises:</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">            UnsupportedExportFormat: If the configuration exports no such notation.</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">        """</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>        <span class="n">writer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer_for</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>        <span class="n">wanted</span> <span class="o">=</span> <span class="n">fmt</span> <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="n">moves</span> <span class="o">=</span> <span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">move</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">]</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">"Result"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">reason</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="k">else</span> <span class="s2">"*"</span><span class="p">)</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>        <span class="k">return</span> <span class="n">writer</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="n">moves</span><span class="o">=</span><span class="n">moves</span><span class="p">,</span> <span class="n">board</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">save_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="w">        </span><span class="sd">"""Write the transcript of this game to a file.</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">            path: Where to write it. Defaults to a timestamped file under `logs/`, named for</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">                the notation it is written in.</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">            str: The path written to.</span>
 <a id="__codelineno-0-461" name="__codelineno-0-461"></a>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a>        <span class="n">wanted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">wanted</span><span class="p">:</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>            <span class="k">raise</span> <span class="n">UnsupportedExportFormat</span><span class="p">(</span><span class="s2">"this game exports no notation, so it cannot be saved"</span><span class="p">)</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>        <span class="n">moves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game_logger</span><span class="o">.</span><span class="n">get_moves</span><span class="p">())</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>        <span class="n">directory</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"game-</span><span class="si">{</span><span class="n">moves</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">wanted</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>        <span class="n">parent</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a>        <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a>            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a>            <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transcript</span><span class="p">(</span><span class="n">wanted</span><span class="p">))</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="k">return</span> <span class="n">directory</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="sd">        Raises:</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">            UnsupportedExportFormat: If the configuration exports no notation, so there is</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">                nothing to write and nothing to name the file after.</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">        """</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>        <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>        <span class="n">wanted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">wanted</span><span class="p">:</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>            <span class="k">raise</span> <span class="n">UnsupportedExportFormat</span><span class="p">(</span><span class="s2">"this game exports no notation, so it cannot be saved"</span><span class="p">)</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>        <span class="n">moves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game_logger</span><span class="o">.</span><span class="n">get_moves</span><span class="p">())</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="n">directory</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"game-</span><span class="si">{</span><span class="n">moves</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">wanted</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>        <span class="n">parent</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>            <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transcript</span><span class="p">(</span><span class="n">wanted</span><span class="p">))</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>        <span class="k">return</span> <span class="n">directory</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2158,25 +2182,25 @@ game rather than an empty rectangle.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/manager.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-386">386</a></span>
-<span class="normal"><a href="#__codelineno-0-387">387</a></span>
-<span class="normal"><a href="#__codelineno-0-388">388</a></span>
-<span class="normal"><a href="#__codelineno-0-389">389</a></span>
-<span class="normal"><a href="#__codelineno-0-390">390</a></span>
-<span class="normal"><a href="#__codelineno-0-391">391</a></span>
-<span class="normal"><a href="#__codelineno-0-392">392</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-392">392</a></span>
 <span class="normal"><a href="#__codelineno-0-393">393</a></span>
 <span class="normal"><a href="#__codelineno-0-394">394</a></span>
-<span class="normal"><a href="#__codelineno-0-395">395</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="k">def</span><span class="w"> </span><span class="nf">default_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-387" name="__codelineno-0-387"></a><span class="w">    </span><span class="sd">"""Return the notation a game is written in when nothing is asked for.</span>
-<a id="__codelineno-0-388" name="__codelineno-0-388"></a>
-<a id="__codelineno-0-389" name="__codelineno-0-389"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-390" name="__codelineno-0-390"></a><span class="sd">        Optional[str]: The first format the configuration offers, or None when it offers</span>
-<a id="__codelineno-0-391" name="__codelineno-0-391"></a><span class="sd">        none. There is no fallback: the engine does not know a single notation name, so</span>
-<a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="sd">        it has nothing to fall back to.</span>
-<a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="sd">    """</span>
-<a id="__codelineno-0-394" name="__codelineno-0-394"></a>    <span class="n">offered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offered_formats</span><span class="p">()</span>
-<a id="__codelineno-0-395" name="__codelineno-0-395"></a>    <span class="k">return</span> <span class="n">offered</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">offered</span> <span class="k">else</span> <span class="kc">None</span>
+<span class="normal"><a href="#__codelineno-0-395">395</a></span>
+<span class="normal"><a href="#__codelineno-0-396">396</a></span>
+<span class="normal"><a href="#__codelineno-0-397">397</a></span>
+<span class="normal"><a href="#__codelineno-0-398">398</a></span>
+<span class="normal"><a href="#__codelineno-0-399">399</a></span>
+<span class="normal"><a href="#__codelineno-0-400">400</a></span>
+<span class="normal"><a href="#__codelineno-0-401">401</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="k">def</span><span class="w"> </span><span class="nf">default_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="w">    </span><span class="sd">"""Return the notation a game is written in when nothing is asked for.</span>
+<a id="__codelineno-0-394" name="__codelineno-0-394"></a>
+<a id="__codelineno-0-395" name="__codelineno-0-395"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="sd">        Optional[str]: The first format the configuration offers, or None when it offers</span>
+<a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="sd">        none. There is no fallback: the engine does not know a single notation name, so</span>
+<a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="sd">        it has nothing to fall back to.</span>
+<a id="__codelineno-0-399" name="__codelineno-0-399"></a><span class="sd">    """</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400"></a>    <span class="n">offered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offered_formats</span><span class="p">()</span>
+<a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="k">return</span> <span class="n">offered</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">offered</span> <span class="k">else</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2222,13 +2246,7 @@ game rather than an empty rectangle.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/manager.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-340">340</a></span>
-<span class="normal"><a href="#__codelineno-0-341">341</a></span>
-<span class="normal"><a href="#__codelineno-0-342">342</a></span>
-<span class="normal"><a href="#__codelineno-0-343">343</a></span>
-<span class="normal"><a href="#__codelineno-0-344">344</a></span>
-<span class="normal"><a href="#__codelineno-0-345">345</a></span>
-<span class="normal"><a href="#__codelineno-0-346">346</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-346">346</a></span>
 <span class="normal"><a href="#__codelineno-0-347">347</a></span>
 <span class="normal"><a href="#__codelineno-0-348">348</a></span>
 <span class="normal"><a href="#__codelineno-0-349">349</a></span>
@@ -2252,37 +2270,43 @@ game rather than an empty rectangle.</p>
 <span class="normal"><a href="#__codelineno-0-367">367</a></span>
 <span class="normal"><a href="#__codelineno-0-368">368</a></span>
 <span class="normal"><a href="#__codelineno-0-369">369</a></span>
-<span class="normal"><a href="#__codelineno-0-370">370</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="k">def</span><span class="w"> </span><span class="nf">finish_game</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Result</span><span class="p">]:</span>
-<a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="w">    </span><span class="sd">"""Close the game, judge the quests that judge a finished game, and credit the users.</span>
-<a id="__codelineno-0-342" name="__codelineno-0-342"></a>
-<a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">        Optional[Result]: The result, or None while the game is still going.</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">    """</span>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>        <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a>    <span class="n">event</span> <span class="o">=</span> <span class="n">ResultEvent</span><span class="p">(</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="n">outcome</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
-<a id="__codelineno-0-354" name="__codelineno-0-354"></a>        <span class="n">winner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">winner</span><span class="p">,</span>
-<a id="__codelineno-0-355" name="__codelineno-0-355"></a>        <span class="n">reason</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span>
-<a id="__codelineno-0-356" name="__codelineno-0-356"></a>        <span class="n">history</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">),</span>
-<a id="__codelineno-0-357" name="__codelineno-0-357"></a>        <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span>
-<a id="__codelineno-0-358" name="__codelineno-0-358"></a>        <span class="n">players</span><span class="o">=</span><span class="p">{</span><span class="n">player</span><span class="o">.</span><span class="n">getColor</span><span class="p">():</span> <span class="n">player</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">},</span>
-<a id="__codelineno-0-359" name="__codelineno-0-359"></a>    <span class="p">)</span>
-<a id="__codelineno-0-360" name="__codelineno-0-360"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">quest_manager</span><span class="o">.</span><span class="n">observe_result</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-<a id="__codelineno-0-361" name="__codelineno-0-361"></a>
-<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="k">for</span> <span class="n">quest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quest_manager</span><span class="o">.</span><span class="n">get_completed_quests</span><span class="p">():</span>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>        <span class="k">if</span> <span class="n">quest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">completed_quests</span><span class="p">:</span>
-<a id="__codelineno-0-364" name="__codelineno-0-364"></a>            <span class="k">continue</span>
-<a id="__codelineno-0-365" name="__codelineno-0-365"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">completed_quests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quest</span><span class="p">)</span>
-<a id="__codelineno-0-366" name="__codelineno-0-366"></a>        <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">:</span>
-<a id="__codelineno-0-367" name="__codelineno-0-367"></a>            <span class="n">user</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">getUser</span><span class="p">()</span>
-<a id="__codelineno-0-368" name="__codelineno-0-368"></a>            <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-369" name="__codelineno-0-369"></a>                <span class="n">user</span><span class="o">.</span><span class="n">add_quest</span><span class="p">(</span><span class="n">quest</span><span class="p">)</span>
-<a id="__codelineno-0-370" name="__codelineno-0-370"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
+<span class="normal"><a href="#__codelineno-0-370">370</a></span>
+<span class="normal"><a href="#__codelineno-0-371">371</a></span>
+<span class="normal"><a href="#__codelineno-0-372">372</a></span>
+<span class="normal"><a href="#__codelineno-0-373">373</a></span>
+<span class="normal"><a href="#__codelineno-0-374">374</a></span>
+<span class="normal"><a href="#__codelineno-0-375">375</a></span>
+<span class="normal"><a href="#__codelineno-0-376">376</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-346" name="__codelineno-0-346"></a><span class="k">def</span><span class="w"> </span><span class="nf">finish_game</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Result</span><span class="p">]:</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="w">    </span><span class="sd">"""Close the game, judge the quests that judge a finished game, and credit the users.</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">        Optional[Result]: The result, or None while the game is still going.</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">    """</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a>        <span class="k">return</span> <span class="kc">None</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="n">event</span> <span class="o">=</span> <span class="n">ResultEvent</span><span class="p">(</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="n">outcome</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>        <span class="n">winner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">winner</span><span class="p">,</span>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>        <span class="n">reason</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>        <span class="n">history</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">),</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>        <span class="n">position</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a>        <span class="n">players</span><span class="o">=</span><span class="p">{</span><span class="n">player</span><span class="o">.</span><span class="n">getColor</span><span class="p">():</span> <span class="n">player</span> <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">},</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>    <span class="p">)</span>
+<a id="__codelineno-0-366" name="__codelineno-0-366"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">quest_manager</span><span class="o">.</span><span class="n">observe_result</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>
+<a id="__codelineno-0-368" name="__codelineno-0-368"></a>    <span class="k">for</span> <span class="n">quest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quest_manager</span><span class="o">.</span><span class="n">get_completed_quests</span><span class="p">():</span>
+<a id="__codelineno-0-369" name="__codelineno-0-369"></a>        <span class="k">if</span> <span class="n">quest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">completed_quests</span><span class="p">:</span>
+<a id="__codelineno-0-370" name="__codelineno-0-370"></a>            <span class="k">continue</span>
+<a id="__codelineno-0-371" name="__codelineno-0-371"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">completed_quests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quest</span><span class="p">)</span>
+<a id="__codelineno-0-372" name="__codelineno-0-372"></a>        <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">:</span>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a>            <span class="n">user</span> <span class="o">=</span> <span class="n">player</span><span class="o">.</span><span class="n">getUser</span><span class="p">()</span>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a>            <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a>                <span class="n">user</span><span class="o">.</span><span class="n">add_quest</span><span class="p">(</span><span class="n">quest</span><span class="p">)</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2863,31 +2887,31 @@ game rather than an empty rectangle.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/manager.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-372">372</a></span>
-<span class="normal"><a href="#__codelineno-0-373">373</a></span>
-<span class="normal"><a href="#__codelineno-0-374">374</a></span>
-<span class="normal"><a href="#__codelineno-0-375">375</a></span>
-<span class="normal"><a href="#__codelineno-0-376">376</a></span>
-<span class="normal"><a href="#__codelineno-0-377">377</a></span>
-<span class="normal"><a href="#__codelineno-0-378">378</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-378">378</a></span>
 <span class="normal"><a href="#__codelineno-0-379">379</a></span>
 <span class="normal"><a href="#__codelineno-0-380">380</a></span>
 <span class="normal"><a href="#__codelineno-0-381">381</a></span>
 <span class="normal"><a href="#__codelineno-0-382">382</a></span>
 <span class="normal"><a href="#__codelineno-0-383">383</a></span>
-<span class="normal"><a href="#__codelineno-0-384">384</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-372" name="__codelineno-0-372"></a><span class="k">def</span><span class="w"> </span><span class="nf">offered_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="w">    </span><span class="sd">"""Return every notation this configuration can write a game in.</span>
-<a id="__codelineno-0-374" name="__codelineno-0-374"></a>
-<a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">        List[str]: The format names the configuration's writers declare, in declaration</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">        order and without repeats.</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">    """</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>    <span class="n">offered</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>    <span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporters</span><span class="p">:</span>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a>        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">writer</span><span class="o">.</span><span class="n">formats</span><span class="p">():</span>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a>            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">offered</span><span class="p">:</span>
-<a id="__codelineno-0-383" name="__codelineno-0-383"></a>                <span class="n">offered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-384" name="__codelineno-0-384"></a>    <span class="k">return</span> <span class="n">offered</span>
+<span class="normal"><a href="#__codelineno-0-384">384</a></span>
+<span class="normal"><a href="#__codelineno-0-385">385</a></span>
+<span class="normal"><a href="#__codelineno-0-386">386</a></span>
+<span class="normal"><a href="#__codelineno-0-387">387</a></span>
+<span class="normal"><a href="#__codelineno-0-388">388</a></span>
+<span class="normal"><a href="#__codelineno-0-389">389</a></span>
+<span class="normal"><a href="#__codelineno-0-390">390</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="k">def</span><span class="w"> </span><span class="nf">offered_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="w">    </span><span class="sd">"""Return every notation this configuration can write a game in.</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-382" name="__codelineno-0-382"></a><span class="sd">        List[str]: The format names the configuration's writers declare, in declaration</span>
+<a id="__codelineno-0-383" name="__codelineno-0-383"></a><span class="sd">        order and without repeats.</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384"></a><span class="sd">    """</span>
+<a id="__codelineno-0-385" name="__codelineno-0-385"></a>    <span class="n">offered</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-386" name="__codelineno-0-386"></a>    <span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporters</span><span class="p">:</span>
+<a id="__codelineno-0-387" name="__codelineno-0-387"></a>        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">writer</span><span class="o">.</span><span class="n">formats</span><span class="p">():</span>
+<a id="__codelineno-0-388" name="__codelineno-0-388"></a>            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">offered</span><span class="p">:</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389"></a>                <span class="n">offered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-390" name="__codelineno-0-390"></a>    <span class="k">return</span> <span class="n">offered</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2989,13 +3013,7 @@ nothing to write and nothing to name the file after.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/manager.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-446">446</a></span>
-<span class="normal"><a href="#__codelineno-0-447">447</a></span>
-<span class="normal"><a href="#__codelineno-0-448">448</a></span>
-<span class="normal"><a href="#__codelineno-0-449">449</a></span>
-<span class="normal"><a href="#__codelineno-0-450">450</a></span>
-<span class="normal"><a href="#__codelineno-0-451">451</a></span>
-<span class="normal"><a href="#__codelineno-0-452">452</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-452">452</a></span>
 <span class="normal"><a href="#__codelineno-0-453">453</a></span>
 <span class="normal"><a href="#__codelineno-0-454">454</a></span>
 <span class="normal"><a href="#__codelineno-0-455">455</a></span>
@@ -3015,33 +3033,39 @@ nothing to write and nothing to name the file after.</p>
 <span class="normal"><a href="#__codelineno-0-469">469</a></span>
 <span class="normal"><a href="#__codelineno-0-470">470</a></span>
 <span class="normal"><a href="#__codelineno-0-471">471</a></span>
-<span class="normal"><a href="#__codelineno-0-472">472</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="k">def</span><span class="w"> </span><span class="nf">save_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="w">    </span><span class="sd">"""Write the transcript of this game to a file.</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">        path: Where to write it. Defaults to a timestamped file under `logs/`, named for</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">            the notation it is written in.</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">        str: The path written to.</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">        UnsupportedExportFormat: If the configuration exports no notation, so there is</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">            nothing to write and nothing to name the file after.</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">    """</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="normal"><a href="#__codelineno-0-472">472</a></span>
+<span class="normal"><a href="#__codelineno-0-473">473</a></span>
+<span class="normal"><a href="#__codelineno-0-474">474</a></span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
+<span class="normal"><a href="#__codelineno-0-476">476</a></span>
+<span class="normal"><a href="#__codelineno-0-477">477</a></span>
+<span class="normal"><a href="#__codelineno-0-478">478</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="k">def</span><span class="w"> </span><span class="nf">save_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="w">    </span><span class="sd">"""Write the transcript of this game to a file.</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        path: Where to write it. Defaults to a timestamped file under `logs/`, named for</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">            the notation it is written in.</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">        str: The path written to.</span>
 <a id="__codelineno-0-461" name="__codelineno-0-461"></a>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a>    <span class="n">wanted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">wanted</span><span class="p">:</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>        <span class="k">raise</span> <span class="n">UnsupportedExportFormat</span><span class="p">(</span><span class="s2">"this game exports no notation, so it cannot be saved"</span><span class="p">)</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>    <span class="n">moves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game_logger</span><span class="o">.</span><span class="n">get_moves</span><span class="p">())</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>    <span class="n">directory</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"game-</span><span class="si">{</span><span class="n">moves</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">wanted</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>    <span class="n">parent</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a>    <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a>        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a>        <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transcript</span><span class="p">(</span><span class="n">wanted</span><span class="p">))</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="k">return</span> <span class="n">directory</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">        UnsupportedExportFormat: If the configuration exports no notation, so there is</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">            nothing to write and nothing to name the file after.</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">    """</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>    <span class="n">wanted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">wanted</span><span class="p">:</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>        <span class="k">raise</span> <span class="n">UnsupportedExportFormat</span><span class="p">(</span><span class="s2">"this game exports no notation, so it cannot be saved"</span><span class="p">)</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>    <span class="n">moves</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game_logger</span><span class="o">.</span><span class="n">get_moves</span><span class="p">())</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="n">directory</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"logs"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"game-</span><span class="si">{</span><span class="n">moves</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">wanted</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>    <span class="n">parent</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="k">if</span> <span class="n">parent</span><span class="p">:</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>        <span class="n">handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transcript</span><span class="p">(</span><span class="n">wanted</span><span class="p">))</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>    <span class="k">return</span> <span class="n">directory</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3358,13 +3382,7 @@ nothing to write and nothing to name the file after.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/manager.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-428">428</a></span>
-<span class="normal"><a href="#__codelineno-0-429">429</a></span>
-<span class="normal"><a href="#__codelineno-0-430">430</a></span>
-<span class="normal"><a href="#__codelineno-0-431">431</a></span>
-<span class="normal"><a href="#__codelineno-0-432">432</a></span>
-<span class="normal"><a href="#__codelineno-0-433">433</a></span>
-<span class="normal"><a href="#__codelineno-0-434">434</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-434">434</a></span>
 <span class="normal"><a href="#__codelineno-0-435">435</a></span>
 <span class="normal"><a href="#__codelineno-0-436">436</a></span>
 <span class="normal"><a href="#__codelineno-0-437">437</a></span>
@@ -3374,23 +3392,29 @@ nothing to write and nothing to name the file after.</p>
 <span class="normal"><a href="#__codelineno-0-441">441</a></span>
 <span class="normal"><a href="#__codelineno-0-442">442</a></span>
 <span class="normal"><a href="#__codelineno-0-443">443</a></span>
-<span class="normal"><a href="#__codelineno-0-444">444</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="k">def</span><span class="w"> </span><span class="nf">transcript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="w">    </span><span class="sd">"""Render the game so far in a notation this configuration exports.</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">        fmt: The notation to write. Defaults to the first the configuration offers.</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">        str: The game as that notation writes it.</span>
+<span class="normal"><a href="#__codelineno-0-444">444</a></span>
+<span class="normal"><a href="#__codelineno-0-445">445</a></span>
+<span class="normal"><a href="#__codelineno-0-446">446</a></span>
+<span class="normal"><a href="#__codelineno-0-447">447</a></span>
+<span class="normal"><a href="#__codelineno-0-448">448</a></span>
+<span class="normal"><a href="#__codelineno-0-449">449</a></span>
+<span class="normal"><a href="#__codelineno-0-450">450</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="k">def</span><span class="w"> </span><span class="nf">transcript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="w">    </span><span class="sd">"""Render the game so far in a notation this configuration exports.</span>
 <a id="__codelineno-0-436" name="__codelineno-0-436"></a>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">        UnsupportedExportFormat: If the configuration exports no such notation.</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">    """</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="n">writer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer_for</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a>    <span class="n">wanted</span> <span class="o">=</span> <span class="n">fmt</span> <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="n">moves</span> <span class="o">=</span> <span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">move</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">]</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">"Result"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">reason</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="k">else</span> <span class="s2">"*"</span><span class="p">)</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="k">return</span> <span class="n">writer</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="n">moves</span><span class="o">=</span><span class="n">moves</span><span class="p">,</span> <span class="n">board</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">        fmt: The notation to write. Defaults to the first the configuration offers.</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">        str: The game as that notation writes it.</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">        UnsupportedExportFormat: If the configuration exports no such notation.</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">    """</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="n">writer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer_for</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="n">wanted</span> <span class="o">=</span> <span class="n">fmt</span> <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>    <span class="n">moves</span> <span class="o">=</span> <span class="p">[</span><span class="n">event</span><span class="o">.</span><span class="n">move</span> <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">move_events</span><span class="p">]</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">set_header</span><span class="p">(</span><span class="s2">"Result"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">reason</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="k">else</span> <span class="s2">"*"</span><span class="p">)</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>    <span class="k">return</span> <span class="n">writer</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="n">moves</span><span class="o">=</span><span class="n">moves</span><span class="p">,</span> <span class="n">board</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">board</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3497,13 +3521,7 @@ empty transcript said otherwise.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/manager.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-397">397</a></span>
-<span class="normal"><a href="#__codelineno-0-398">398</a></span>
-<span class="normal"><a href="#__codelineno-0-399">399</a></span>
-<span class="normal"><a href="#__codelineno-0-400">400</a></span>
-<span class="normal"><a href="#__codelineno-0-401">401</a></span>
-<span class="normal"><a href="#__codelineno-0-402">402</a></span>
-<span class="normal"><a href="#__codelineno-0-403">403</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-403">403</a></span>
 <span class="normal"><a href="#__codelineno-0-404">404</a></span>
 <span class="normal"><a href="#__codelineno-0-405">405</a></span>
 <span class="normal"><a href="#__codelineno-0-406">406</a></span>
@@ -3526,36 +3544,42 @@ empty transcript said otherwise.</p>
 <span class="normal"><a href="#__codelineno-0-423">423</a></span>
 <span class="normal"><a href="#__codelineno-0-424">424</a></span>
 <span class="normal"><a href="#__codelineno-0-425">425</a></span>
-<span class="normal"><a href="#__codelineno-0-426">426</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="k">def</span><span class="w"> </span><span class="nf">writer_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="w">    </span><span class="sd">"""Return the writer that produces a notation.</span>
-<a id="__codelineno-0-399" name="__codelineno-0-399"></a>
-<a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="sd">    The writers are asked in declaration order and each is judged by what it says it</span>
-<a id="__codelineno-0-401" name="__codelineno-0-401"></a><span class="sd">    writes, rather than the first writer being handed every format and expected to cope.</span>
-<a id="__codelineno-0-402" name="__codelineno-0-402"></a><span class="sd">    A configuration whose second writer writes a format its first does not now reaches</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="sd">    that writer.</span>
-<a id="__codelineno-0-404" name="__codelineno-0-404"></a>
-<a id="__codelineno-0-405" name="__codelineno-0-405"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">        fmt: The notation wanted, matched without regard to case. Defaults to the first</span>
-<a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="sd">            the configuration offers.</span>
-<a id="__codelineno-0-408" name="__codelineno-0-408"></a>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">        Any: The writer that writes that notation.</span>
-<a id="__codelineno-0-411" name="__codelineno-0-411"></a>
-<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">        UnsupportedExportFormat: If no writer the configuration offered writes it. An</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="sd">            unknown notation is a question nothing can answer, and answering it with an</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">            empty transcript said otherwise.</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">    """</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a>    <span class="n">wanted</span> <span class="o">=</span> <span class="p">(</span><span class="n">fmt</span> <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporters</span><span class="p">:</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="k">if</span> <span class="n">wanted</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">writer</span><span class="o">.</span><span class="n">formats</span><span class="p">()}:</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a>            <span class="k">return</span> <span class="n">writer</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>    <span class="n">offered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offered_formats</span><span class="p">()</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"this game"</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>    <span class="k">raise</span> <span class="n">UnsupportedExportFormat</span><span class="p">(</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fmt</span><span class="si">!r}</span><span class="s2"> is not a notation </span><span class="si">{</span><span class="n">configuration</span><span class="si">}</span><span class="s2"> exports; it offers "</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">offered</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">offered</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no notation at all'</span><span class="si">}</span><span class="s2">"</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-426">426</a></span>
+<span class="normal"><a href="#__codelineno-0-427">427</a></span>
+<span class="normal"><a href="#__codelineno-0-428">428</a></span>
+<span class="normal"><a href="#__codelineno-0-429">429</a></span>
+<span class="normal"><a href="#__codelineno-0-430">430</a></span>
+<span class="normal"><a href="#__codelineno-0-431">431</a></span>
+<span class="normal"><a href="#__codelineno-0-432">432</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-403" name="__codelineno-0-403"></a><span class="k">def</span><span class="w"> </span><span class="nf">writer_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-0-404" name="__codelineno-0-404"></a><span class="w">    </span><span class="sd">"""Return the writer that produces a notation.</span>
+<a id="__codelineno-0-405" name="__codelineno-0-405"></a>
+<a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="sd">    The writers are asked in declaration order and each is judged by what it says it</span>
+<a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="sd">    writes, rather than the first writer being handed every format and expected to cope.</span>
+<a id="__codelineno-0-408" name="__codelineno-0-408"></a><span class="sd">    A configuration whose second writer writes a format its first does not now reaches</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">    that writer.</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a>
+<a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a><span class="sd">        fmt: The notation wanted, matched without regard to case. Defaults to the first</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="sd">            the configuration offers.</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">        Any: The writer that writes that notation.</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="sd">        UnsupportedExportFormat: If no writer the configuration offered writes it. An</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a><span class="sd">            unknown notation is a question nothing can answer, and answering it with an</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">            empty transcript said otherwise.</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="sd">    """</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>    <span class="n">wanted</span> <span class="o">=</span> <span class="p">(</span><span class="n">fmt</span> <span class="k">if</span> <span class="n">fmt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_format</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>    <span class="k">for</span> <span class="n">writer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exporters</span><span class="p">:</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>        <span class="k">if</span> <span class="n">wanted</span> <span class="ow">in</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">writer</span><span class="o">.</span><span class="n">formats</span><span class="p">()}:</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>            <span class="k">return</span> <span class="n">writer</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>    <span class="n">offered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offered_formats</span><span class="p">()</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="n">configuration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"this game"</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="k">raise</span> <span class="n">UnsupportedExportFormat</span><span class="p">(</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fmt</span><span class="si">!r}</span><span class="s2"> is not a notation </span><span class="si">{</span><span class="n">configuration</span><span class="si">}</span><span class="s2"> exports; it offers "</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">offered</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">offered</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no notation at all'</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

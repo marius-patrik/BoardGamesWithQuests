@@ -109,6 +109,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="model/game/clock_fields/">clock_fields (model.game.clock_fields)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="model/game/configuration/">configuration (model.game.configuration)</a>
     </li>
     <li class="nav__item">
@@ -150,6 +154,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="model/game/rule/">rule (model.game.rule)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="model/game/source_validation/">source_validation (model.game.source_validation)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -270,6 +278,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="view/app/">app (view.app)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="view/code_editor/">code_editor (view.code_editor)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -612,15 +624,142 @@
       <main class="content" id="content">
         <article class="prose">
           <h1 id="chesswithquests">ChessWithQuests<a class="headerlink" href="#chesswithquests" title="Permanent link">&para;</a></h1>
-<p>School project of a chess game with customizable pieces, board, and quests.
-Forked from class project base.</p>
-<h2 id="project-overview">Project Overview<a class="headerlink" href="#project-overview" title="Permanent link">&para;</a></h2>
-<p>ChessWithQuests is an extensible modular chess engine and desktop application built in Python following the Model-View-Controller (MVC) architectural pattern. It supports standard chess rules as well as custom board configurations, customizable pieces with configurable movement and attack vectors, and an in-game quest system.</p>
-<h2 id="documentation-architecture">Documentation &amp; Architecture<a class="headerlink" href="#documentation-architecture" title="Permanent link">&para;</a></h2>
+<p>A desktop board game engine and application in Python, built as an MVC
+application, in which <strong>the configuration is the product</strong>. Chess and English
+draughts ship as two directories under <code>games/</code> and share one engine.</p>
+<p><strong>Status: playable, incomplete.</strong> Chess is playable from the entry point through
+a tkinter window, and the settings surface is delivered. The export writers are
+prototypes. <code>PRD.md</code> states what the product must be and <code>SCRATCHPAD.md</code> records
+what is built, what is partial, and what is owed — one entry per planned pull
+request.</p>
+<h2 id="what-works-today">What works today<a class="headerlink" href="#what-works-today" title="Permanent link">&para;</a></h2>
+<p>Every item below is exercised by a test in <code>tests/</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Where it lives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A board of any dimensions, with bounds checking, moving, capture recording and piece replacement</td>
+<td><code>model/game/board.py</code></td>
+</tr>
+<tr>
+<td>Moves carrying a start square, a target square, a move type and an optional promotion piece, validated and executed atomically</td>
+<td><code>model/game/move.py</code></td>
+</tr>
+<tr>
+<td>Legal move generation per piece and per side, refusing any move that leaves the mover's own piece attacked</td>
+<td><code>model/game/validator.py</code></td>
+</tr>
+<tr>
+<td>Thirteen orthodox chess rules as <code>Rule</code> subclasses — castling, en passant, promotion, check, checkmate, stalemate, insufficient material, the fifty-move rule, threefold repetition, mutual agreement, flag fall, bishop colour confinement, and which piece kind is royal</td>
+<td><code>games/chess/rules/</code></td>
+</tr>
+<tr>
+<td>A rule layer of five hooks — <code>permits_move</code>, <code>available_moves</code>, <code>outcome</code>, <code>on_move_made</code>, <code>status</code> — with an outcome type carrying a kind, a precedence and a winner</td>
+<td><code>model/game/rule.py</code></td>
+</tr>
+<tr>
+<td>A configuration loaded from a directory as a package in its own right, so a copy composes its own board, pieces, rules, clocks and quests</td>
+<td><code>model/game/configuration.py</code></td>
+</tr>
+<tr>
+<td>A full game loop from <code>new_game()</code> to a result, driving the quest manager, the user manager, the clocks, the transcript and the logger</td>
+<td><code>model/game/manager.py</code></td>
+</tr>
+<tr>
+<td>Twenty built-in quest classes, twelve judged a move at a time and eight judging the finished game</td>
+<td><code>model/game/quests.py</code></td>
+</tr>
+<tr>
+<td>English draughts: twelve pieces a side, flying kings, mandatory capture including chains, crowning without removal, a win by immobilisation or by losing every piece — held to the published perft counts</td>
+<td><code>games/checkers/</code></td>
+</tr>
+<tr>
+<td>A capture chain as one move, carried by <code>HopMove(Move)</code> rather than by the engine's own <code>Move</code></td>
+<td><code>games/checkers/moves.py</code></td>
+</tr>
+<tr>
+<td>A tkinter window: a start modal with a configuration selector, Settings and Start; the board drawn from White's side with coordinates, symbols, selection and legal-move highlights; player panels with clocks and captured pieces; the turn; a notated move history; a status footer; quest cards with progress</td>
+<td><code>view/</code></td>
+</tr>
+<tr>
+<td>A settings surface: a corner selector for which configuration is being edited, sections for Board, Pieces, Rules, Quests and Clocks built from declared fields, create/rename/duplicate/delete, and a code editor for rule and quest source</td>
+<td><code>view/settings_dialog.py</code>, <code>view/code_editor.py</code>, <code>model/game/field.py</code></td>
+</tr>
+<tr>
+<td>Configuration copy, rename and delete, all of which refuse the default configuration</td>
+<td><code>model/game/configuration.py</code></td>
+</tr>
+<tr>
+<td>Fifteen Czech aliases, each the same object as its canonical English class</td>
+<td>throughout; <code>PRD.md</code> section 5 lists them</td>
+</tr>
+<tr>
+<td>An installable package with a <code>python -m chesswithquests</code> entry point</td>
+<td><code>pyproject.toml</code>, <code>chesswithquests/</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-is-partial">What is partial<a class="headerlink" href="#what-is-partial" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Online Documentation</strong>: <a href="https://marius-patrik.github.io/ChessWithQuests/">ChessWithQuests Documentation</a> (autogenerated dynamically from source docstrings via MkDocs)</li>
-<li><strong>Reference Architecture Diagram</strong>: <a href="https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D">Draw.io Architecture Diagram</a> (details the Model-View-Controller architecture and class hierarchy)</li>
+<li><strong>Export is the largest hole.</strong> <code>ChessNotationWriter</code> still switches on a
+  format-name string instead of there being one writer class per format. FEN
+  writes <code>- - 0 1</code> for castling rights, the en passant square, the halfmove clock
+  and the fullmove number. PGN movetext is destination squares rather than SAN,
+  and its header falls back to placeholder strings. The stenographic writer emits
+  coordinate pairs with no compression. No configuration ships a per-format
+  writer, and <code>games/checkers/</code> ships no writer at all.</li>
+<li><strong><code>pyproject.toml</code> does not ship <code>games/checkers</code>.</strong> The package list names
+  <code>games.chess</code> and its subpackages and omits the second configuration, so a clean
+  install finds chess and not draughts.</li>
+<li><strong><code>controller/controller.py</code> is not renamed</strong> to <code>game_manager_controller.py</code> to
+  match the diagram's <code>GameManagerController</code>.</li>
 </ul>
+<h2 id="not-built-yet">Not built yet<a class="headerlink" href="#not-built-yet" title="Permanent link">&para;</a></h2>
+<ul>
+<li>No FEN import, so nothing round-trips a position.</li>
+<li>No keyboard-navigation guarantee for the view layer.</li>
+<li>No network play, and no persistence of a game in progress. Neither is in the
+  reference diagram.</li>
+</ul>
+<h2 id="documentation-and-architecture">Documentation and architecture<a class="headerlink" href="#documentation-and-architecture" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Generated documentation</strong>: <a href="https://marius-patrik.github.io/ChessWithQuests/">ChessWithQuests Documentation</a>
+  — every page is emitted from the source docstrings at build time by
+  <code>properdocs</code> with <code>mkdocstrings</code>; this file is its overview page. Nothing about
+  the documentation is stored: <code>docs_dir</code> points at a generated, git-ignored
+  directory and <code>.github/scripts/docs_hooks.py</code> builds the whole navigation from
+  the source tree.</li>
+<li><strong>Reference architecture diagram</strong>:
+  <a href="https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D">Draw.io diagram</a>
+  — the class hierarchy and the Model-View-Controller split the object model
+  follows. Every deviation from it is registered in <code>notes/object_model.md</code>.</li>
+<li><strong>Product requirements</strong>: <code>PRD.md</code>.</li>
+<li><strong>Implementation state and remaining work</strong>: <code>SCRATCHPAD.md</code>.</li>
+<li><strong>Notes</strong>: <code>notes/chess_rules.md</code>, <code>notes/object_model.md</code>,
+  <code>notes/reference_diagram.md</code>.</li>
+</ul>
+<h2 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h2>
+<p>Python 3.10 or newer. The runtime uses the standard library and <code>tkinter</code>, and
+nothing else; <code>python-chess</code> is banned and FEN, PGN, SAN and coordinate
+conversion are hand-rolled. The tools below are development dependencies and
+never ship:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python -m venv .venv
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>source .venv/bin/activate
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python -m pip install -r requirements-dev.txt
+</code></pre></div>
+<p>Everything runs from the repository root — <code>pyproject.toml</code> configures <code>pytest</code>
+with <code>pythonpath = ["."]</code>, and the package is also installable with <code>pip install .</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python -m pytest -q
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>python -m black --check .
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>python -m properdocs build --strict
+</code></pre></div>
+<p><code>tkinter</code> needs a display. Tests stay within <code>tkinter.Tcl()</code> and <code>ttk.Style()</code>,
+which work without one, or run under <code>xvfb-run</code>.</p>
 <hr />
 <h2 id="reference-architecture-diagram">Reference Architecture Diagram<a class="headerlink" href="#reference-architecture-diagram" title="Permanent link">&para;</a></h2>
 <ul>
@@ -649,9 +788,15 @@ Forked from class project base.</p>
       <aside class="toc">
         <div class="toc__title">On this page</div>
         <ul class="toc__list">
-          <li><a href="#project-overview">Project Overview</a>
+          <li><a href="#what-works-today">What works today</a>
           </li>
-          <li><a href="#documentation-architecture">Documentation &amp; Architecture</a>
+          <li><a href="#what-is-partial">What is partial</a>
+          </li>
+          <li><a href="#not-built-yet">Not built yet</a>
+          </li>
+          <li><a href="#documentation-and-architecture">Documentation and architecture</a>
+          </li>
+          <li><a href="#development">Development</a>
           </li>
           <li><a href="#reference-architecture-diagram">Reference Architecture Diagram</a>
           </li>

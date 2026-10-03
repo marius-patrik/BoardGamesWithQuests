@@ -109,6 +109,10 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
+         href="../../model/game/clock_fields/">clock_fields (model.game.clock_fields)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
          href="../../model/game/configuration/">configuration (model.game.configuration)</a>
     </li>
     <li class="nav__item">
@@ -150,6 +154,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="../../model/game/rule/">rule (model.game.rule)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../model/game/source_validation/">source_validation (model.game.source_validation)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -270,6 +278,10 @@
     <li class="nav__item">
       <a class="nav__link"
          href="../../view/app/">app (view.app)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../view/code_editor/">code_editor (view.code_editor)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -641,14 +653,9 @@ user request adds it.</p>
   object, so the diagram-to-code mapping is discoverable from the source and
   the generated documentation. Aliases use ASCII spellings without diacritics.
   Comments, docstrings, commit messages and documentation remain English.</li>
-<li><strong>Implemented 2026-10-03, partially — see section 19.</strong> This section listed
-  seven alias spellings as though they were the whole set, which they are not:
-  they are the seven whose Czech spelling <em>differs</em> from the English one. The
-  other eight (<code>Figurka</code>, <code>Tah</code>, <code>Hrac</code>, <code>RevizorTahu</code>, <code>Uzivatel</code>, <code>Kwest</code>,
-  <code>HracView</code>, <code>HracGameView</code>) have the same spelling in both languages and were
-  never listed at all, which is how all fifteen went unimplemented while this
-  section read as if they did not. <code>PRD.md</code> section 5 holds the authoritative
-  fifteen-row table; section 19 carries it as corrected against the code.</li>
+<li><strong>All fifteen exist.</strong> <code>PRD.md</code> section 5 holds the authoritative fifteen-row
+  table, and section 19 carries it with the module each alias lives in, checked
+  against the code by <code>tests/test_aliases.py</code>.</li>
 <li><strong>Approval</strong>: recorded with user approval, and re-approved for the alias
   allowance on 2026-10-02.</li>
 </ul>
@@ -907,11 +914,32 @@ user request adds it.</p>
 <li><strong>Context</strong>: <code>Tah</code> carries <code>vychozi pozice</code>, <code>cilova pozice</code>, <code>figurka</code> and
   <code>typ tahu</code> — one start, one end, one piece. There is no structure for a move
   that visits several squares.</li>
-<li><strong>Deviation</strong>: <code>Move</code> grows a sequence of hops alongside its start and end.</li>
-<li><strong>Rationale</strong>: a capture chain in checkers is one move the player makes. The
-  diagram's <code>typ tahu</code> field is a move <em>type</em>, so it cannot express hop count.</li>
-<li><strong>Mitigation</strong>: <code>Tah</code>'s existing members are untouched; only a sequence is
-  added. A single-hop move is the degenerate case, and both share one code path.</li>
+<li><strong>Deviation</strong>: a move that visits several squares is a subclass of the drawn
+  move. <code>Move</code> is unchanged; <code>HopMove(Move)</code> in <code>games/checkers/moves.py</code> carries
+  the hop sequence, and it is declared by the configuration whose game needs it.</li>
+<li><strong>What the subclass carries</strong>: <code>hops</code>, the landing square of each jump in
+  order, of which the last is the move's <code>end_pos</code>; <code>captures</code>, the square each
+  taken piece stood on, one per hop, which cannot be derived because a king's
+  victim is whatever piece stands first along the diagonal; <code>captured_pieces</code> in
+  the order they were taken; and <code>route</code>, the starting square followed by each
+  landing square.</li>
+<li><strong>How it executes</strong>: <code>HopMove</code> overrides <code>apply_to_board</code> and reuses the
+  engine's <code>unapply_from_board</code> verbatim, because it returns the engine's own
+  <code>Applied</code> record. The validator's legality test, the game's move execution and
+  every caller between them already go through that pair polymorphically, so a
+  three-jump chain is put on and taken off the board by the same code that plays a
+  castling move. A single jump is the degenerate case of both sequences, and there
+  is no separate path for it.</li>
+<li><strong>Rationale</strong>: a capture chain in draughts is one move the player makes, and the
+  diagram's <code>typ tahu</code> field is a move <em>type</em>, so it cannot express a hop count.
+  Putting the sequence on a subclass rather than on <code>Tah</code> is the stronger form of
+  the deviation: nothing under <code>model/</code>, <code>controller/</code> or <code>view/</code> grows a
+  draughts-shaped member, which is the same requirement FR-55 states and the same
+  one the checkers configuration exists to test.</li>
+<li><strong>Mitigation</strong>: <code>Tah</code>'s members are untouched; a subclass is added. One caller
+  does not survive: a caller that rebuilds the board from a snapshot rather than
+  undoing, because <code>Move</code> records the mover and <code>HopMove</code> checks it by identity.
+  <code>tests/test_draughts_perft.py</code> walks by undoing for that reason.</li>
 <li><strong>Approval</strong>: directed by the user on 2026-10-02, via the checkers requirement.</li>
 </ul>
 <h3 id="12-fen-import">12. FEN Import<a class="headerlink" href="#12-fen-import" title="Permanent link">&para;</a></h3>
@@ -956,17 +984,38 @@ user request adds it.</p>
   size. That default is kept, but nothing may rely on it — see FR-1 and FR-15.</li>
 <li><strong>Approval</strong>: recorded for visibility on 2026-10-02.</li>
 </ul>
-<h3 id="15-hracview-is-not-a-class">15. HracView Is Not a Class<a class="headerlink" href="#15-hracview-is-not-a-class" title="Permanent link">&para;</a></h3>
+<h3 id="15-the-view-classes-the-diagram-draws-are-not-three-classes">15. The View Classes the Diagram Draws Are Not Three Classes<a class="headerlink" href="#15-the-view-classes-the-diagram-draws-are-not-three-classes" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Date</strong>: 2026-10-02</li>
 <li><strong>Context</strong>: page 2 has no <code>HracView</code> box. <code>+ hrac_view: HracView</code> appears only
-  as an attribute <em>type</em> on <code>GameManagerController</code>. There is also no
-  <code>GameVeiw</code>-as-a-class-name match, because the diagram spells it <code>GameVeiw</code>.</li>
+  as an attribute <em>type</em> on <code>GameManagerController</code>. There is also no <code>GameVeiw</code>-as-a-class-name
+  match, because the diagram spells it <code>GameVeiw</code>.</li>
 <li><strong>Deviation</strong>: <code>PlayerView</code> is created, with the Czech alias <code>HracView</code>, as a
-  real class; and <code>GameView</code> is created as a real class for the diagram's
-  <code>GameVeiw</code> box. The diagram's spelling is recorded as a typo and not reproduced.</li>
+  real class; the diagram's spelling of <code>GameVeiw</code> is recorded as a typo and not
+  reproduced.</li>
+<li><strong>There is no <code>GameView</code> class.</strong> This section previously recorded one as
+  created, and no such class exists in any form. What is there:</li>
+<li><code>view/game_view.py</code> declares <code>BoardView</code>, the only part of the program that
+    knows what a square looks like. It draws the grid, the pieces, the
+    coordinates, the selection and legal-move highlights, and the check marker.</li>
+<li><code>view/player_game_view.py</code> declares <code>PlayerGameView</code>, the window a game is
+    played in. It holds a <code>BoardView</code> as <code>board_view</code> and composes it with the
+    player panels, the move history, the turn indicator, the status footer and the
+    quest cards.</li>
+<li><strong>How the drawn operations are served</strong>: <code>GameView.aktualizuj_plochu()</code> —
+  refresh the board when the controller reports a change — is
+  <code>PlayerGameView.refresh</code>, which calls <code>board_view.refresh</code> and
+  <code>board_view.set_selection</code>. <code>PlayerGameView.reload</code> and <code>on_new_game</code> call the
+  same pair. <code>GameManagerController.game_view: GameView</code> is satisfied by the
+  <code>PlayerGameView</code> that holds the board view.</li>
+<li><strong>Why composition rather than a third class</strong>: the diagram's own
+  generalisation idiom settles what the parent is. <code>BoardView</code> is the piece the
+  diagram has no box for, <code>PlayerGameView</code> is the <code>HracGameView</code> it does, and a
+  <code>GameView</code> that wrapped the first inside the second would hold no state and
+  forward every call — a class with a name and no behaviour. FR-65 and FR-66 are
+  satisfied by the two classes that exist.</li>
 <li><strong>Rationale</strong>: the controller attribute names a view it must hold, and the
-  requirements render a player panel, so the class has to exist.</li>
+  requirements render a board and a player panel, so both classes have to exist.</li>
 <li><strong>Approval</strong>: directed by the user on 2026-10-02.</li>
 </ul>
 <h3 id="16-a-configuration-loads-as-a-package-in-its-own-right">16. A Configuration Loads as a Package in Its Own Right<a class="headerlink" href="#16-a-configuration-loads-as-a-package-in-its-own-right" title="Permanent link">&para;</a></h3>
@@ -1052,27 +1101,28 @@ user request adds it.</p>
   a class name, a spelling and an import list that the plan wrote down and the code did
   not follow.</li>
 <li><strong>Change, five parts.</strong></li>
-<li><strong>The fifteen Czech aliases.</strong> None of the fifteen in <code>PRD.md</code> section 5 existed.
-     Six now do, in the chess configuration: <code>Pesak</code>, <code>Vez</code>, <code>Kun</code>, <code>Strelec</code>, <code>Dama</code>
-     and <code>Kral</code>. The other nine are engine and view classes whose modules were not in
-     this work's file list, so they remain missing and are listed by name below.</li>
-<li><strong><code>Knight</code> is canonical and <code>Horse</code> is gone.</strong> <code>games/chess/pieces/horse.py</code>
-     declared <code>class Horse(Piece)</code> and ended with <code>Knight = Horse</code>, which made the
-     English name the alias — the reverse of the decision. The class is now <code>Knight</code>,
-     the file is <code>games/chess/pieces/knight.py</code>, and <code>Kun</code> is the alias. There is no
-     <code>Horse</code> binding anywhere, per the approved outcome above.</li>
-<li><strong><code>Tower</code> and <code>Controller</code> are removed.</strong> <code>games/chess/pieces/tower.py</code> shipped
-     <code>Tower = Rook</code> on the reasoning that <code>Tower</code> is Czech for the rook; it is not,
-     <code>Věž</code> is, and <code>Vez</code> is its ASCII spelling. <code>controller/controller.py</code> shipped
-     <code>Controller = GameController</code>. Both were approved drops.</li>
-<li><strong>The manager reads <code>configuration.exporters</code> and declares no quests.</strong> It no
-     longer imports or names <code>ChessNotationWriter</code>, and no longer falls back to the
-     engine's quest roster.</li>
+<li><strong>The fifteen Czech aliases all exist.</strong> Six are in the chess configuration
+     (<code>Pesak</code>, <code>Vez</code>, <code>Kun</code>, <code>Strelec</code>, <code>Dama</code>, <code>Kral</code>) and nine are in the engine
+     and view modules that own the class each names (<code>Figurka</code>, <code>HerniPlocha</code>,
+     <code>Tah</code>, <code>Hrac</code>, <code>RevizorTahu</code>, <code>Uzivatel</code>, <code>Kwest</code>, <code>HracView</code>,
+     <code>HracGameView</code>). Each is a one-line binding next to the class it names, and
+     each is the same object rather than a lookalike.</li>
+<li><strong><code>Knight</code> is canonical and <code>Horse</code> is gone.</strong> The class is <code>Knight</code>, the file
+     is <code>games/chess/pieces/knight.py</code>, and <code>Kun</code> is the alias. There is no <code>Horse</code>
+     binding anywhere, per the approved outcome below.</li>
+<li><strong><code>Tower</code> and <code>Controller</code> are removed.</strong> <code>Tower</code> was shipped as <code>Tower = Rook</code>
+     on the reasoning that <code>Tower</code> is Czech for the rook; it is not, <code>Věž</code> is, and
+     <code>Vez</code> is its ASCII spelling. <code>Controller</code> was shipped as
+     <code>Controller = GameController</code>. Both were approved drops, and
+     <code>games/chess/pieces/tower.py</code> is deleted.</li>
+<li><strong>The manager reads <code>configuration.exporters</code> and declares no quests.</strong> It does
+     not import or name <code>ChessNotationWriter</code>, and does not fall back to the engine's
+     quest roster.</li>
 <li><strong><code>games/chess/rules/</code> imports relatively</strong>, and <code>promotion.py</code> builds the
      promoted piece relatively, so a copied configuration composes its own rules and
      promotes into its own pieces. This closes the gap section 16 recorded.</li>
 <li><strong>The fifteen-row alias table, as implemented.</strong> <code>PRD.md</code> section 5 is
-  authoritative; this is that table checked against the code on 2026-10-03.</li>
+  authoritative; this is that table with the module each alias lives in.</li>
 </ul>
 <table>
 <thead>
@@ -1081,7 +1131,6 @@ user request adds it.</p>
 <th>Canonical</th>
 <th>Czech alias</th>
 <th>Where the alias lives</th>
-<th>State</th>
 </tr>
 </thead>
 <tbody>
@@ -1090,112 +1139,98 @@ user request adds it.</p>
 <td><code>Piece</code></td>
 <td><code>Figurka</code></td>
 <td><code>model/pieces/piece.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 <tr>
 <td><code>Pěšák</code></td>
 <td><code>Pawn</code></td>
 <td><code>Pesak</code></td>
 <td><code>games/chess/pieces/pawn.py</code></td>
-<td>present</td>
 </tr>
 <tr>
 <td><code>Věž</code></td>
 <td><code>Rook</code></td>
 <td><code>Vez</code></td>
 <td><code>games/chess/pieces/rook.py</code></td>
-<td>present</td>
 </tr>
 <tr>
 <td><code>Kůň</code></td>
 <td><code>Knight</code></td>
 <td><code>Kun</code></td>
 <td><code>games/chess/pieces/knight.py</code></td>
-<td>present</td>
 </tr>
 <tr>
 <td><code>Střelec</code></td>
 <td><code>Bishop</code></td>
 <td><code>Strelec</code></td>
 <td><code>games/chess/pieces/bishop.py</code></td>
-<td>present</td>
 </tr>
 <tr>
 <td><code>Dáma</code></td>
 <td><code>Queen</code></td>
 <td><code>Dama</code></td>
 <td><code>games/chess/pieces/queen.py</code></td>
-<td>present</td>
 </tr>
 <tr>
 <td><code>Král</code></td>
 <td><code>King</code></td>
 <td><code>Kral</code></td>
 <td><code>games/chess/pieces/king.py</code></td>
-<td>present</td>
 </tr>
 <tr>
 <td><code>HerníPlocha</code></td>
 <td><code>Board</code></td>
 <td><code>HerniPlocha</code></td>
 <td><code>model/game/board.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 <tr>
 <td><code>Tah</code></td>
 <td><code>Move</code></td>
 <td><code>Tah</code></td>
 <td><code>model/game/move.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 <tr>
 <td><code>Hrac</code></td>
 <td><code>Player</code></td>
 <td><code>Hrac</code></td>
 <td><code>model/game/player.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 <tr>
 <td><code>RevizorTahu</code></td>
 <td><code>MoveValidator</code></td>
 <td><code>RevizorTahu</code></td>
 <td><code>model/game/validator.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 <tr>
 <td><code>Uzivatel</code></td>
 <td><code>User</code></td>
 <td><code>Uzivatel</code></td>
 <td><code>model/users/user.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 <tr>
 <td><code>Kwest</code></td>
 <td><code>Quest</code></td>
 <td><code>Kwest</code></td>
 <td><code>model/game/quest.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 <tr>
 <td><code>HracView</code></td>
 <td><code>PlayerView</code></td>
 <td><code>HracView</code></td>
 <td><code>view/player_view.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 <tr>
 <td><code>HracGameView</code></td>
 <td><code>PlayerGameView</code></td>
 <td><code>HracGameView</code></td>
 <td><code>view/player_game_view.py</code></td>
-<td><strong>missing</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Each missing alias is one line — the binding, next to the class it names — in a
-  module this work was not given. <code>tests/test_aliases.py</code> asserts that this table's
-  <em>missing</em> half is still exactly the set that does not resolve, so the gap is
-  tracked rather than forgotten.
+<p><code>tests/test_aliases.py</code> holds this table against the source: it asserts every name
+  resolves from its stated module, that each alias <code>is</code> its canonical class, that
+  the table has exactly fifteen rows, and that <code>ALIASES_OUTSTANDING</code> is exactly the
+  set of aliases which do not resolve. That set is empty, so the table cannot drift
+  from the code without the suite failing.
 - <strong>A piece's class name is not its configured kind.</strong> <code>Knight</code> declares
   <code>piece_type="horse"</code> and that is deliberate. <code>piece_type</code> is data a configuration
   chooses and writes into <code>configuration.json</code>, so renaming it would silently repoint
@@ -1219,6 +1254,63 @@ user request adds it.</p>
   3. <strong>A dead duplicate was removed.</strong> <code>GameManager</code> defined <code>save_log</code> twice, the
      first as a no-argument stub shadowed by the real one. Nothing called the stub;
      it was a trap for anyone who did.</p>
+<h3 id="20-the-settings-surface-gains-what-the-plan-recorded">20. The Settings Surface Gains What the Plan Recorded<a class="headerlink" href="#20-the-settings-surface-gains-what-the-plan-recorded" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-03</li>
+<li><strong>Context</strong>: sections 3 and 9 registered the settings layer and the field declaration
+  framework, and both shipped as <code>view/settings_dialog.py</code> rendering per-rule fields and
+  nothing else. The plan records more: a corner selector (FR-30), five sections (FR-31), a
+  code editor for logic (FR-33, FR-34), and configurations that can be created, renamed,
+  duplicated and deleted (FR-28). Of those, only the per-rule form existed, and
+  <code>SCRATCHPAD.md</code> item 18 — the default configuration cannot be edited or deleted — was
+  unenforced: <code>Configuration.save_values()</code> wrote into the configuration directory with no
+  guard at all.</li>
+<li><strong>Change, four things.</strong></li>
+<li><strong>The default configuration refuses to be written to.</strong> <code>Configuration.is_default</code> names
+     the case and <code>save_values()</code> refuses a target inside that directory's own tree. The guard
+     is scoped to the directory rather than to writing: exporting the default's values
+     elsewhere is a read, not an edit. <code>copy_configuration</code>, <code>rename_configuration</code> and
+     <code>delete_configuration</code> are the directory moves FR-28 asks for, and all three refuse the
+     default.</li>
+<li><strong>The code editor, and the check it stands on.</strong> <code>view/code_editor.py</code> is a text area
+     over one file in the configuration directory being edited, and it refuses to save what
+     <code>model/game/source_validation.py</code> refuses. This is section 10's bounding being carried
+     out rather than a new mechanism: the validator executes the code it checks, which is what
+     the product does anyway when it loads a configuration.</li>
+<li><strong>Five sections and the corner selector.</strong> One tab per configurable surface — Board,
+     Pieces, Rules, Quests, Clocks — each assembled from what its subject declares, plus a
+     selector in the corner with a plus button that duplicates the configuration being edited.</li>
+<li><strong>Declarations where there were none.</strong> <code>Board.value_fields()</code>, <code>Piece.value_fields()</code>
+     and <code>Piece.apply_values()</code>, and <code>model/game/clock_fields.py</code>. None of the three declared
+     anything before, so the sections had nothing to render from.</li>
+<li><strong>Deviation</strong>: none beyond sections 3, 9 and 10, which already register the settings layer,
+  the declaration framework and the execution of authored code. Everything here is those three
+  being finished.</li>
+<li><strong>What this departs from, recorded as required.</strong> Three departures, none of which is a
+  diagram deviation:</li>
+<li><strong><code>model/game/clock_fields.py</code> is new and has no diagram counterpart.</strong> A clock is the
+     one configurable type that is a plain object rather than a parent class with subclasses —
+     both shipped configurations ship a <code>Fischer</code> and neither derives from anything — so there
+     is no <code>Clock</code> class for a declaration to hang off. The module declares a clock's fields
+     from what the clock holds, and asks the clock first if it declares its own. Section 13
+     registered a <code>Clock</code> parent as the intention; this is a declaration function standing in
+     for the class that has not been written. <strong>A real <code>Clock</code> parent remains unbuilt and is
+     recommended.</strong></li>
+<li><strong><code>Piece.apply_values()</code> is new.</strong> <code>value_fields()</code> is a declaration; something has to
+     write the values back, and two of the declared values are not single attributes — the two
+     symbols are one tuple, and the vectors are a list of pairs shown as text. Parsing them in
+     the piece rather than in the view is what keeps the form a renderer.</li>
+<li><strong><code>Configuration.package</code> is new.</strong> A configuration now carries the module name it is
+     registered under, so a relative import inside a file being checked resolves against the
+     package the file belongs to. Without it every file in a configuration that imports its
+     siblings reports an ImportError that is an artefact of checking rather than a fault in
+     the code.</li>
+<li><strong>Recorded as a limit, not finished</strong>: the Pieces section reads each piece class from a
+  probe instance and writes back to that instance. A configuration's <code>pieces</code> are <em>classes</em>,
+  so a symbol changed in the form changes the probe and not the class the configuration
+  composes. Making a piece's identity configurable therefore needs the configuration to hold
+  piece instances or declared overrides, which is not built.</li>
+</ul>
 <hr />
 <h2 id="naming-decisions-requiring-approval-context">Naming decisions requiring approval context<a class="headerlink" href="#naming-decisions-requiring-approval-context" title="Permanent link">&para;</a></h2>
 <p>Recorded here because they are deviations from what the diagram draws and
@@ -1234,17 +1326,17 @@ user request adds it.</p>
 <tbody>
 <tr>
 <td><code>Kůň</code> maps to <code>Knight</code>, not <code>Horse</code></td>
-<td><code>Knight</code> is canonical, <code>Kun</code> is its Czech alias, <code>Horse</code> is removed. <strong>Implemented 2026-10-03</strong> — see section 19.</td>
+<td><code>Knight</code> is canonical, <code>Kun</code> is its Czech alias, <code>Horse</code> is removed — see sections 15 and 19.</td>
 <td>2026-10-02</td>
 </tr>
 <tr>
 <td><code>Tower</code></td>
-<td>Dropped. No box in the diagram carries that name, and <code>Věž</code> maps to <code>Rook</code>. <strong>Implemented 2026-10-03</strong>: <code>games/chess/pieces/tower.py</code> deleted.</td>
+<td>Dropped. No box in the diagram carries that name, and <code>Věž</code> maps to <code>Rook</code>. <code>games/chess/pieces/tower.py</code> is deleted.</td>
 <td>2026-10-02</td>
 </tr>
 <tr>
 <td><code>Controller</code></td>
-<td>Dropped. No box carries that name; the diagram's controller box is <code>GameManagerController</code>. <strong>Implemented 2026-10-03</strong>: the alias is gone from <code>controller/controller.py</code>.</td>
+<td>Dropped. No box carries that name; the diagram's controller box is <code>GameManagerController</code>. The alias is gone from <code>controller/controller.py</code>. The module is still <code>controller.py</code>, not <code>game_manager_controller.py</code> — see <code>SCRATCHPAD.md</code> planned PR 20.</td>
 <td>2026-10-02</td>
 </tr>
 <tr>
@@ -1254,7 +1346,7 @@ user request adds it.</p>
 </tr>
 <tr>
 <td><code>HracView</code> is created as <code>PlayerView</code></td>
-<td>See section 15. The class exists; its <code>HracView</code> alias does not yet.</td>
+<td>See section 15. The class exists, and its <code>HracView</code> alias does too.</td>
 <td>2026-10-02</td>
 </tr>
 <tr>
@@ -1316,11 +1408,12 @@ user request adds it.</p>
               <li><a href="#12-fen-import">12. FEN Import</a></li>
               <li><a href="#13-timer-to-clock-and-the-clock-parent">13. Timer to Clock, and the Clock Parent</a></li>
               <li><a href="#14-the-two-pages-disagree-recorded-not-resolved">14. The Two Pages Disagree — Recorded, Not Resolved</a></li>
-              <li><a href="#15-hracview-is-not-a-class">15. HracView Is Not a Class</a></li>
+              <li><a href="#15-the-view-classes-the-diagram-draws-are-not-three-classes">15. The View Classes the Diagram Draws Are Not Three Classes</a></li>
               <li><a href="#16-a-configuration-loads-as-a-package-in-its-own-right">16. A Configuration Loads as a Package in Its Own Right</a></li>
               <li><a href="#17-the-engine-quest-roster-names-no-piece">17. The Engine Quest Roster Names No Piece</a></li>
               <li><a href="#18-dead-configuration-state-is-populated-not-dropped">18. Dead Configuration State Is Populated, Not Dropped</a></li>
               <li><a href="#19-the-engine-names-no-notation-and-a-copy-keeps-its-own-rules">19. The Engine Names No Notation, and a Copy Keeps Its Own Rules</a></li>
+              <li><a href="#20-the-settings-surface-gains-what-the-plan-recorded">20. The Settings Surface Gains What the Plan Recorded</a></li>
             </ul>
           </li>
           <li><a href="#naming-decisions-requiring-approval-context">Naming decisions requiring approval context</a>
