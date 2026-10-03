@@ -2,13 +2,35 @@
 
 The far rank is derived from the piece's own declared forward vector rather than from the
 number eight, so the rule works on a board of any size.
+
+The replacement pieces are imported relatively, at module level. They used to be imported by
+absolute path inside `_make_promotion`, which meant a promoted pawn became a piece class
+belonging to the original `games/chess` even when the game being played was a copied
+configuration that had declared pieces of its own. Importing them here keeps the promotion
+inside the configuration that is being played.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 from model.game.field import Field
 from model.game.move import Move
 from model.game.rule import Rule
+
+from ..pieces.bishop import Bishop
+from ..pieces.knight import Knight
+from ..pieces.queen import Queen
+from ..pieces.rook import Rook
+
+#: The kinds a pawn may be promoted to, and the class each becomes. Both spellings of the
+#: knight's kind are accepted: the piece declares `horse`, and a configuration may write
+#: `knight` instead.
+PROMOTION_PIECES: Dict[str, Type[Any]] = {
+    "queen": Queen,
+    "rook": Rook,
+    "bishop": Bishop,
+    "knight": Knight,
+    "horse": Knight,
+}
 
 
 class PromotionRule(Rule):
@@ -26,26 +48,38 @@ class PromotionRule(Rule):
         """
         return [
             Field(
+                "promotable_kinds",
+                "text",
+                "Kinds that promote",
+                "pawn",
+            ),
+            Field(
                 "promotion_kinds",
                 "choice",
                 "Promote to",
                 ("queen", "rook", "bishop", "horse"),
                 choices=("queen", "rook", "bishop", "horse"),
-            )
+            ),
         ]
 
-    @staticmethod
-    def promotion_row(position: Any, piece: Any) -> Optional[int]:
+    def promotion_row(self, position: Any, piece: Any) -> Optional[int]:
         """Return the row on which this piece promotes.
+
+        Whether a piece promotes is declared, not inferred. A rook and a king both have a
+        purely vertical step, so deriving the rank from geometry promoted every piece that
+        could slide sideways on the far rank: no queen or rook could ever reach it, and a king
+        walking its own back rank turned into a knight.
 
         Args:
             position: The board to read.
             piece: The piece asking.
 
         Returns:
-            Optional[int]: The row a single-square forward step reaches, or None when the
-            piece has no such step and therefore never promotes.
+            Optional[int]: The row a single-square forward step reaches, or None when this
+            piece does not promote.
         """
+        if not self._promotes(piece):
+            return None
         origin = _origin(position, piece)
         if origin is None:
             return None
@@ -54,6 +88,18 @@ class PromotionRule(Rule):
                 continue
             return position.rows - 1 if dr > 0 else 0
         return None
+
+    def _promotes(self, piece: Any) -> bool:
+        """Report whether this piece is one that promotes.
+
+        Args:
+            piece: The piece asking.
+
+        Returns:
+            bool: True when the piece's kind is one of the declared promoting kinds.
+        """
+        configured = _split(self.value.get("promotable_kinds")) or ["pawn"]
+        return piece is not None and piece.getType() in configured
 
     def available_moves(self, position: Any, piece: Any) -> List[Move]:
         """Offer one promoting move per choice of replacement piece.
@@ -140,6 +186,22 @@ class PromotionRule(Rule):
         return ["queen"]
 
 
+def _split(value: Any) -> List[str]:
+    """Read a comma-separated configuration value as a list.
+
+    Args:
+        value: The configured value.
+
+    Returns:
+        List[str]: The entries, empty when nothing is configured.
+    """
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(",") if item.strip()]
+    if value:
+        return [str(item) for item in value]
+    return []
+
+
 def _make_promotion(piece: Any, kind: str) -> Any:
     """Build the replacement piece for a promotion.
 
@@ -149,15 +211,16 @@ def _make_promotion(piece: Any, kind: str) -> Any:
 
     Returns:
         Any: A piece of that kind and colour, or None when the kind is unknown.
-    """
-    from games.chess.pieces.bishop import Bishop
-    from games.chess.pieces.horse import Horse
-    from games.chess.pieces.queen import Queen
-    from games.chess.pieces.rook import Rook
 
-    catalogue = {"queen": Queen, "rook": Rook, "bishop": Bishop, "knight": Horse, "horse": Horse}
-    factory = catalogue.get(kind)
-    return None if factory is None else factory(piece.getColor())
+    Raises:
+        ValueError: If `kind` is not one of `PROMOTION_PIECES`. A promotion has to produce a
+            piece, and guessing which would silently promote a pawn into something the
+            configuration never offered.
+    """
+    factory = PROMOTION_PIECES.get(kind)
+    if factory is None:
+        raise ValueError(f"{kind!r} is not a piece kind a pawn can promote to")
+    return factory(piece.getColor())
 
 
 def _origin(position: Any, piece: Any) -> Optional[tuple]:

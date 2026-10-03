@@ -53,13 +53,22 @@ class MoveValidator:
         rules: Iterable[Rule],
         clock: Any = None,
         active_color: Optional[int] = None,
+        attach: bool = True,
     ) -> None:
         """Replace the rules in force and hand them the game they are joining.
 
         Args:
             rules: The rules in force, in the order the configuration declared them.
-            clock: The game's clock, for a rule about time.
+            clock: The game's clock, for a rule about time. One that is not supplied leaves
+                each rule holding whatever clock it already had, because a question about
+                the game must not take the clock away from the rule that was reading it.
             active_color: Whose turn it is, for a rule that cannot work it out from a board.
+            attach: Whether to attach the rules that are in force. Attaching is what a game
+                does when it starts: it hands each rule the board it will read and clears
+                the history the rule accumulated in the last one. A question asked mid-game
+                composes the rules it was given and passes `False` here, because re-attaching
+                wipes the very history the question is about — the positions a repetition has
+                seen, the colours that have castled, the clock a flag-fall rule reads.
 
         Returns:
             None
@@ -67,10 +76,18 @@ class MoveValidator:
         self.rules = list(rules)
         for rule in self.rules:
             rule.rules = self.rules
-            rule.clock = clock
+            # Handing a rule its clock or whose turn it is only when one was supplied. A
+            # question like "does anybody have a legal move" composes the same rules again
+            # from a validator that has never seen them, and passing no clock used to strip
+            # the clock rule of the clock it was reading, so a flagged player could never
+            # lose on time.
+            if clock is not None:
+                rule.clock = clock
             if active_color is not None:
                 rule.active_color = active_color
-            rule.attach()
+        if attach:
+            for rule in dict.fromkeys(self.rules):
+                rule.attach()
 
     def active_rules(self) -> List[Rule]:
         """Return the rules that are in force.
@@ -345,7 +362,20 @@ class MoveValidator:
         if not piece.hasMoved():
             for dr, dc in piece.getInitialVectors():
                 nr, nc = r + dr, c + dc
-                if b.is_within_bounds(nr, nc) and b.get_piece_at((nr, nc)) is None:
+                if not b.is_within_bounds(nr, nc) or b.get_piece_at((nr, nc)) is not None:
+                    continue
+                # A first-only advance is a walk, not a leap: every square between here and
+                # there must be empty, or the piece steps over whatever is sitting on it.
+                # The square it lands on was just tested, so the squares to test are the
+                # ones strictly between — one step along the walk for each square skipped.
+                blocked = False
+                steps = max(abs(dr), abs(dc))
+                for step in range(1, steps):
+                    middle = (r + (dr // steps) * step, c + (dc // steps) * step)
+                    if b.get_piece_at(middle) is not None:
+                        blocked = True
+                        break
+                if not blocked:
                     add((nr, nc))
 
         return moves
@@ -440,16 +470,15 @@ class MoveValidator:
             if not self.is_permitted(candidate, b):
                 continue
 
-            # Simulate move to ensure it does not leave/place king in check
-            original_target = b.get_piece_at(target_pos)
-            b.set_piece_at(target_pos, piece)
-            b.set_piece_at(start_pos, None)
-
+            # Put the move on the board the way it would really happen, and take it off again
+            # the same way. Swapping the two squares the move names is not enough: an en
+            # passant capture also lifts a piece from a third square, and a castle carries a
+            # rook to a fourth. A simulation that left either behind was looking at a
+            # position with a blocker fewer than reality, and every pin through that blocker
+            # was invisible to it.
+            applied = candidate.apply_to_board(b)
             in_check = self.is_check(color, b)
-
-            # Rollback
-            b.set_piece_at(start_pos, piece)
-            b.set_piece_at(target_pos, original_target)
+            candidate.unapply_from_board(b, applied)
 
             if not in_check:
                 legal_moves.append(target_pos)
@@ -457,6 +486,35 @@ class MoveValidator:
 
         self.legal_candidates = legal
         return legal_moves
+
+    def find_move(
+        self,
+        start_pos: Tuple[int, int],
+        end_pos: Tuple[int, int],
+        board: Optional[Board] = None,
+    ) -> Optional[Move]:
+        """Return the legal move from one square to another, as the rule offered it.
+
+        A caller that learns a move from two clicks needs the move the rule built, not a bare
+        pair of squares rebuilt into a fresh `Move`. A rule may attach more than a destination
+        to a move — a chain of hops, a piece to promote into, a companion rook — and a rebuilt
+        move has none of it, so a capture chain or a promotion silently becomes illegal.
+
+        Args:
+            start_pos: (row, col) the move begins at.
+            end_pos: (row, col) the move ends at.
+            board: Optional Board instance (defaults to self.board).
+
+        Returns:
+            Optional[Move]: The move the rules offered, or None when none is legal.
+        """
+        b = board or self.board
+        if b is None or not b.is_within_bounds(*start_pos) or not b.is_within_bounds(*end_pos):
+            return None
+        for move in self.get_legal_moves_for(start_pos, b):
+            if tuple(move.end_pos) == tuple(end_pos):
+                return move
+        return None
 
     def get_legal_moves_for(
         self, start_pos: Tuple[int, int], board: Optional[Board] = None
@@ -578,3 +636,8 @@ class MoveValidator:
         ]
         m.execute(b)
         return saved_state
+
+
+#: Czech alias for `MoveValidator`, as `PRD.md` section 5 and `RevizorTahu` in the diagram
+#: require.
+RevizorTahu = MoveValidator
