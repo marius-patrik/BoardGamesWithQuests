@@ -313,6 +313,124 @@
       <a class="nav__link"
          href="../">games package (games)</a>
     </li>
+    <li class="nav__section">
+      <span class="nav__label">checkers</span>
+      
+<ul class="nav nav--depth-3">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/">checkers package (games.checkers)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/board/">board (games.checkers.board)</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">clocks</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/clocks/">clocks package (games.checkers.clocks)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/clocks/fischer/">fischer (games.checkers.clocks.fischer)</a>
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">export</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/export/">export package (games.checkers.export)</a>
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/moves/">moves (games.checkers.moves)</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">pieces</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/pieces/">pieces package (games.checkers.pieces)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/pieces/king/">king (games.checkers.pieces.king)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/pieces/man/">man (games.checkers.pieces.man)</a>
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">quests</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/quests/">quests package (games.checkers.quests)</a>
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">rules</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/">rules package (games.checkers.rules)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/capture/">capture (games.checkers.rules.capture)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/chains/">chains (games.checkers.rules.chains)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/crowning/">crowning (games.checkers.rules.crowning)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/draws/">draws (games.checkers.rules.draws)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/geometric/">geometric (games.checkers.rules.geometric)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/immobilisation/">immobilisation (games.checkers.rules.immobilisation)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/landing/">landing (games.checkers.rules.landing)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../checkers/rules/limited_kings/">limited_kings (games.checkers.rules.limited_kings)</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
     <li class="nav__section nav__section--active">
       <span class="nav__label">chess</span>
       
@@ -348,6 +466,10 @@
       <a class="nav__link"
          href="export/">export package (games.chess.export)</a>
     </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="export/algebraic/">algebraic (games.chess.export.algebraic)</a>
+    </li>
 </ul>
 
     </li>
@@ -365,11 +487,11 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="pieces/horse/">horse (games.chess.pieces.horse)</a>
+         href="pieces/king/">king (games.chess.pieces.king)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="pieces/king/">king (games.chess.pieces.king)</a>
+         href="pieces/knight/">knight (games.chess.pieces.knight)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -382,10 +504,6 @@
     <li class="nav__item">
       <a class="nav__link"
          href="pieces/rook/">rook (games.chess.pieces.rook)</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
-         href="pieces/tower/">tower (games.chess.pieces.tower)</a>
     </li>
 </ul>
 
@@ -515,6 +633,13 @@ and cannot be edited or deleted: a variant starts by duplicating it.</p>
 <p>Composition is explicit. <code>build_configuration()</code> below is the whole list of what chess is —
 there is no registry, nothing is discovered by name, and a rule that is not named here is
 not in force.</p>
+<p>Every import below is relative, and that is load-bearing rather than stylistic. This directory
+is a copyable unit: <code>cp -r games/chess games/house</code> and a variant exists. An absolute
+<code>games.chess.…</code> import inside a copy would still reach back here, so the copy would load this
+board, these pieces and these rules while looking like it had loaded its own — silently, with
+no error and no warning. <code>model/game/configuration.py</code> loads a configuration as a package in
+its own right for the same reason, and <code>rules/</code> and <code>pieces/</code> import relatively for the same
+reason: the rules a copy composes, and the pieces its promotions produce, are the copy's.</p>
 
 
 
@@ -565,7 +690,7 @@ not in force.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The chess board, and the rules, quests, clocks and exporters chess</p>
+                <p>The chess board, and the pieces, rules, quests, clocks and exporters</p>
               </div>
             </td>
           </tr>
@@ -575,7 +700,7 @@ not in force.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>brings with it.</p>
+                <p>chess brings with it.</p>
               </div>
             </td>
           </tr>
@@ -585,41 +710,116 @@ not in force.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>games/chess/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-23">23</a></span>
-<span class="normal"><a href="#__codelineno-0-24">24</a></span>
-<span class="normal"><a href="#__codelineno-0-25">25</a></span>
-<span class="normal"><a href="#__codelineno-0-26">26</a></span>
-<span class="normal"><a href="#__codelineno-0-27">27</a></span>
-<span class="normal"><a href="#__codelineno-0-28">28</a></span>
-<span class="normal"><a href="#__codelineno-0-29">29</a></span>
-<span class="normal"><a href="#__codelineno-0-30">30</a></span>
-<span class="normal"><a href="#__codelineno-0-31">31</a></span>
-<span class="normal"><a href="#__codelineno-0-32">32</a></span>
-<span class="normal"><a href="#__codelineno-0-33">33</a></span>
-<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-49">49</a></span>
+<span class="normal"><a href="#__codelineno-0-50">50</a></span>
+<span class="normal"><a href="#__codelineno-0-51">51</a></span>
+<span class="normal"><a href="#__codelineno-0-52">52</a></span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span>
+<span class="normal"><a href="#__codelineno-0-54">54</a></span>
+<span class="normal"><a href="#__codelineno-0-55">55</a></span>
+<span class="normal"><a href="#__codelineno-0-56">56</a></span>
+<span class="normal"><a href="#__codelineno-0-57">57</a></span>
+<span class="normal"><a href="#__codelineno-0-58">58</a></span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span>
+<span class="normal"><a href="#__codelineno-0-62">62</a></span>
+<span class="normal"><a href="#__codelineno-0-63">63</a></span>
+<span class="normal"><a href="#__codelineno-0-64">64</a></span>
+<span class="normal"><a href="#__codelineno-0-65">65</a></span>
+<span class="normal"><a href="#__codelineno-0-66">66</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_configuration</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="w">    </span><span class="sd">"""Assemble the chess configuration.</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">        Configuration: The chess board, and the pieces, rules, quests, clocks and exporters</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">        chess brings with it.</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">    """</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="k">return</span> <span class="n">Configuration</span><span class="p">(</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>        <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_GAME</span><span class="p">,</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="n">path</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>        <span class="n">board</span><span class="o">=</span><span class="n">build_board</span><span class="p">(),</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="n">pieces</span><span class="o">=</span><span class="n">build_pieces</span><span class="p">(),</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">build_rules</span><span class="p">(),</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>        <span class="n">quests</span><span class="o">=</span><span class="n">build_quests</span><span class="p">(),</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>        <span class="n">clocks</span><span class="o">=</span><span class="p">[</span><span class="n">Fischer</span><span class="p">()],</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a>        <span class="n">exporters</span><span class="o">=</span><span class="n">build_exporters</span><span class="p">(),</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a>        <span class="n">board_factory</span><span class="o">=</span><span class="n">build_board</span><span class="p">,</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a>    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="games.chess.build_exporters" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">build_exporters</span><span class="p">()</span></code>
+
+<a href="#games.chess.build_exporters" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Build the export writers chess offers.</p>
+<p>The chess formats — PGN, FEN and the stenographic coordinate record — are chess formats,
+and <code>notes/object_model.md</code> registers that they belong to a configuration. The writer
+class itself still lives in the engine module <code>model.misc.export_writers</code> because
+<code>model/game/manager.py</code> imports it by name; this function is where that import is
+isolated, so moving the class needs one line changed rather than a search.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="typing.Any">Any</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List[Any]: One writer for the chess configuration.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>games/chess/__init__.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-34">34</a></span>
 <span class="normal"><a href="#__codelineno-0-35">35</a></span>
 <span class="normal"><a href="#__codelineno-0-36">36</a></span>
 <span class="normal"><a href="#__codelineno-0-37">37</a></span>
 <span class="normal"><a href="#__codelineno-0-38">38</a></span>
 <span class="normal"><a href="#__codelineno-0-39">39</a></span>
-<span class="normal"><a href="#__codelineno-0-40">40</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_configuration</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="w">    </span><span class="sd">"""Assemble the chess configuration.</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">        Configuration: The chess board, and the rules, quests, clocks and exporters chess</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">        brings with it.</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    """</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a>    <span class="k">return</span> <span class="n">Configuration</span><span class="p">(</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a>        <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_GAME</span><span class="p">,</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a>        <span class="n">path</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a>        <span class="n">board</span><span class="o">=</span><span class="n">build_board</span><span class="p">(),</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a>        <span class="n">pieces</span><span class="o">=</span><span class="p">[],</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">build_rules</span><span class="p">(),</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a>        <span class="n">quests</span><span class="o">=</span><span class="n">build_quests</span><span class="p">(),</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>        <span class="n">clocks</span><span class="o">=</span><span class="p">[</span><span class="n">Fischer</span><span class="p">()],</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>        <span class="n">exporters</span><span class="o">=</span><span class="p">[],</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a>        <span class="n">board_factory</span><span class="o">=</span><span class="n">build_board</span><span class="p">,</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-40">40</a></span>
+<span class="normal"><a href="#__codelineno-0-41">41</a></span>
+<span class="normal"><a href="#__codelineno-0-42">42</a></span>
+<span class="normal"><a href="#__codelineno-0-43">43</a></span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+<span class="normal"><a href="#__codelineno-0-46">46</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_exporters</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="w">    </span><span class="sd">"""Build the export writers chess offers.</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    The chess formats — PGN, FEN and the stenographic coordinate record — are chess formats,</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    and `notes/object_model.md` registers that they belong to a configuration. The writer</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    class itself still lives in the engine module `model.misc.export_writers` because</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    `model/game/manager.py` imports it by name; this function is where that import is</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    isolated, so moving the class needs one line changed rather than a search.</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">        List[Any]: One writer for the chess configuration.</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    """</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">ChessNotationWriter</span><span class="p">()]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -638,6 +838,9 @@ not in force.</p>
     <div class="doc doc-contents ">
 
         <p>Build the quests chess offers by default.</p>
+<p><code>CaptureOfType</code> and <code>KingOnlyGame</code> are here rather than in <code>model/game/quests.py</code>'s
+roster, because both insist on naming a piece type and only chess can say which one. The
+engine holds the classes and the parameters; this is where the answers live.</p>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -665,33 +868,59 @@ not in force.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>games/chess/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-43">43</a></span>
-<span class="normal"><a href="#__codelineno-0-44">44</a></span>
-<span class="normal"><a href="#__codelineno-0-45">45</a></span>
-<span class="normal"><a href="#__codelineno-0-46">46</a></span>
-<span class="normal"><a href="#__codelineno-0-47">47</a></span>
-<span class="normal"><a href="#__codelineno-0-48">48</a></span>
-<span class="normal"><a href="#__codelineno-0-49">49</a></span>
-<span class="normal"><a href="#__codelineno-0-50">50</a></span>
-<span class="normal"><a href="#__codelineno-0-51">51</a></span>
-<span class="normal"><a href="#__codelineno-0-52">52</a></span>
-<span class="normal"><a href="#__codelineno-0-53">53</a></span>
-<span class="normal"><a href="#__codelineno-0-54">54</a></span>
-<span class="normal"><a href="#__codelineno-0-55">55</a></span>
-<span class="normal"><a href="#__codelineno-0-56">56</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_quests</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Quest</span><span class="p">]:</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="w">    </span><span class="sd">"""Build the quests chess offers by default.</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        List[Quest]: A small starter set, all of them switchable from the settings form.</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    """</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">model.game.quests</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaptureN</span><span class="p">,</span> <span class="n">FirstBlood</span><span class="p">,</span> <span class="n">MakeCheckN</span><span class="p">,</span> <span class="n">WonBy</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="k">return</span> <span class="p">[</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">FirstBlood</span><span class="p">(</span><span class="n">reward</span><span class="o">=</span><span class="mi">25</span><span class="p">),</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="n">CaptureN</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">reward</span><span class="o">=</span><span class="mi">50</span><span class="p">),</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="n">MakeCheckN</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">reward</span><span class="o">=</span><span class="mi">40</span><span class="p">),</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="n">WonBy</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">reward</span><span class="o">=</span><span class="mi">75</span><span class="p">),</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="p">]</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-69">69</a></span>
+<span class="normal"><a href="#__codelineno-0-70">70</a></span>
+<span class="normal"><a href="#__codelineno-0-71">71</a></span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span>
+<span class="normal"><a href="#__codelineno-0-73">73</a></span>
+<span class="normal"><a href="#__codelineno-0-74">74</a></span>
+<span class="normal"><a href="#__codelineno-0-75">75</a></span>
+<span class="normal"><a href="#__codelineno-0-76">76</a></span>
+<span class="normal"><a href="#__codelineno-0-77">77</a></span>
+<span class="normal"><a href="#__codelineno-0-78">78</a></span>
+<span class="normal"><a href="#__codelineno-0-79">79</a></span>
+<span class="normal"><a href="#__codelineno-0-80">80</a></span>
+<span class="normal"><a href="#__codelineno-0-81">81</a></span>
+<span class="normal"><a href="#__codelineno-0-82">82</a></span>
+<span class="normal"><a href="#__codelineno-0-83">83</a></span>
+<span class="normal"><a href="#__codelineno-0-84">84</a></span>
+<span class="normal"><a href="#__codelineno-0-85">85</a></span>
+<span class="normal"><a href="#__codelineno-0-86">86</a></span>
+<span class="normal"><a href="#__codelineno-0-87">87</a></span>
+<span class="normal"><a href="#__codelineno-0-88">88</a></span>
+<span class="normal"><a href="#__codelineno-0-89">89</a></span>
+<span class="normal"><a href="#__codelineno-0-90">90</a></span>
+<span class="normal"><a href="#__codelineno-0-91">91</a></span>
+<span class="normal"><a href="#__codelineno-0-92">92</a></span>
+<span class="normal"><a href="#__codelineno-0-93">93</a></span>
+<span class="normal"><a href="#__codelineno-0-94">94</a></span>
+<span class="normal"><a href="#__codelineno-0-95">95</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_quests</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Quest</span><span class="p">]:</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="w">    </span><span class="sd">"""Build the quests chess offers by default.</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">    `CaptureOfType` and `KingOnlyGame` are here rather than in `model/game/quests.py`'s</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">    roster, because both insist on naming a piece type and only chess can say which one. The</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    engine holds the classes and the parameters; this is where the answers live.</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">        List[Quest]: A small starter set, all of them switchable from the settings form.</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    """</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">model.game.quests</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a>        <span class="n">CaptureN</span><span class="p">,</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a>        <span class="n">CaptureOfType</span><span class="p">,</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a>        <span class="n">FirstBlood</span><span class="p">,</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a>        <span class="n">KingOnlyGame</span><span class="p">,</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="n">MakeCheckN</span><span class="p">,</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="n">WonBy</span><span class="p">,</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a>    <span class="p">)</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="k">return</span> <span class="p">[</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a>        <span class="n">FirstBlood</span><span class="p">(</span><span class="n">reward</span><span class="o">=</span><span class="mi">25</span><span class="p">),</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a>        <span class="n">CaptureN</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">reward</span><span class="o">=</span><span class="mi">50</span><span class="p">),</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a>        <span class="n">CaptureOfType</span><span class="p">(</span><span class="n">piece_type</span><span class="o">=</span><span class="s2">"queen"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">reward</span><span class="o">=</span><span class="mi">45</span><span class="p">),</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a>        <span class="n">MakeCheckN</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">reward</span><span class="o">=</span><span class="mi">40</span><span class="p">),</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a>        <span class="n">KingOnlyGame</span><span class="p">(</span><span class="n">royal_kind</span><span class="o">=</span><span class="s2">"king"</span><span class="p">,</span> <span class="n">reward</span><span class="o">=</span><span class="mi">60</span><span class="p">),</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a>        <span class="n">WonBy</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">reward</span><span class="o">=</span><span class="mi">75</span><span class="p">),</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a>    <span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -707,9 +936,9 @@ not in force.</p>
 </div>
         </article>
         <nav class="pager" aria-label="Page navigation">
-          <a class="pager__link pager__link--prev" href="../">
+          <a class="pager__link pager__link--prev" href="../checkers/rules/limited_kings/">
             <span class="pager__label">Previous</span>
-            <span class="pager__title">games package (games)</span>
+            <span class="pager__title">limited_kings (games.checkers.rules.limited_kings)</span>
           </a>
           <a class="pager__link pager__link--next" href="board/">
             <span class="pager__label">Next</span>
@@ -728,6 +957,7 @@ not in force.</p>
           <li><a href="#games.chess">chess</a>
             <ul>
               <li><a href="#games.chess.build_configuration">build_configuration</a></li>
+              <li><a href="#games.chess.build_exporters">build_exporters</a></li>
               <li><a href="#games.chess.build_quests">build_quests</a></li>
             </ul>
           </li>

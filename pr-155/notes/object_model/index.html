@@ -314,6 +314,124 @@
          href="../../games/">games package (games)</a>
     </li>
     <li class="nav__section">
+      <span class="nav__label">checkers</span>
+      
+<ul class="nav nav--depth-3">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/">checkers package (games.checkers)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/board/">board (games.checkers.board)</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">clocks</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/clocks/">clocks package (games.checkers.clocks)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/clocks/fischer/">fischer (games.checkers.clocks.fischer)</a>
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">export</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/export/">export package (games.checkers.export)</a>
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/moves/">moves (games.checkers.moves)</a>
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">pieces</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/pieces/">pieces package (games.checkers.pieces)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/pieces/king/">king (games.checkers.pieces.king)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/pieces/man/">man (games.checkers.pieces.man)</a>
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">quests</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/quests/">quests package (games.checkers.quests)</a>
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__section">
+      <span class="nav__label">rules</span>
+      
+<ul class="nav nav--depth-4">
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/">rules package (games.checkers.rules)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/capture/">capture (games.checkers.rules.capture)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/chains/">chains (games.checkers.rules.chains)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/crowning/">crowning (games.checkers.rules.crowning)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/draws/">draws (games.checkers.rules.draws)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/geometric/">geometric (games.checkers.rules.geometric)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/immobilisation/">immobilisation (games.checkers.rules.immobilisation)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/landing/">landing (games.checkers.rules.landing)</a>
+    </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/checkers/rules/limited_kings/">limited_kings (games.checkers.rules.limited_kings)</a>
+    </li>
+</ul>
+
+    </li>
+</ul>
+
+    </li>
+    <li class="nav__section">
       <span class="nav__label">chess</span>
       
 <ul class="nav nav--depth-3">
@@ -348,6 +466,10 @@
       <a class="nav__link"
          href="../../games/chess/export/">export package (games.chess.export)</a>
     </li>
+    <li class="nav__item">
+      <a class="nav__link"
+         href="../../games/chess/export/algebraic/">algebraic (games.chess.export.algebraic)</a>
+    </li>
 </ul>
 
     </li>
@@ -365,11 +487,11 @@
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../../games/chess/pieces/horse/">horse (games.chess.pieces.horse)</a>
+         href="../../games/chess/pieces/king/">king (games.chess.pieces.king)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
-         href="../../games/chess/pieces/king/">king (games.chess.pieces.king)</a>
+         href="../../games/chess/pieces/knight/">knight (games.chess.pieces.knight)</a>
     </li>
     <li class="nav__item">
       <a class="nav__link"
@@ -382,10 +504,6 @@
     <li class="nav__item">
       <a class="nav__link"
          href="../../games/chess/pieces/rook/">rook (games.chess.pieces.rook)</a>
-    </li>
-    <li class="nav__item">
-      <a class="nav__link"
-         href="../../games/chess/pieces/tower/">tower (games.chess.pieces.tower)</a>
     </li>
 </ul>
 
@@ -518,12 +636,19 @@ user request adds it.</p>
   do not constitute architecture or object model deviations.</li>
 <li><strong>English is canonical.</strong> All code, class names, method names, attributes,
   variables, comments and docstrings are written in English.</li>
-<li><strong>Czech aliases are permitted.</strong> The classes the diagram names in Czech
-  additionally expose a Czech alias bound to the same object, so the
-  diagram-to-code mapping is discoverable from the source and the generated
-  documentation. Aliases use ASCII spellings without diacritics:
-  <code>HerniPlocha</code>, <code>Kun</code>, <code>Kral</code>, <code>Dama</code>, <code>Strelec</code>, <code>Pesak</code>, <code>Vez</code>. Comments,
-  docstrings, commit messages and documentation remain English.</li>
+<li><strong>Czech aliases are required, not merely permitted.</strong> The classes the
+  diagram names in Czech additionally expose a Czech alias bound to the same
+  object, so the diagram-to-code mapping is discoverable from the source and
+  the generated documentation. Aliases use ASCII spellings without diacritics.
+  Comments, docstrings, commit messages and documentation remain English.</li>
+<li><strong>Implemented 2026-10-03, partially — see section 19.</strong> This section listed
+  seven alias spellings as though they were the whole set, which they are not:
+  they are the seven whose Czech spelling <em>differs</em> from the English one. The
+  other eight (<code>Figurka</code>, <code>Tah</code>, <code>Hrac</code>, <code>RevizorTahu</code>, <code>Uzivatel</code>, <code>Kwest</code>,
+  <code>HracView</code>, <code>HracGameView</code>) have the same spelling in both languages and were
+  never listed at all, which is how all fifteen went unimplemented while this
+  section read as if they did not. <code>PRD.md</code> section 5 holds the authoritative
+  fifteen-row table; section 19 carries it as corrected against the code.</li>
 <li><strong>Approval</strong>: recorded with user approval, and re-approved for the alias
   allowance on 2026-10-02.</li>
 </ul>
@@ -667,6 +792,15 @@ user request adds it.</p>
 <li><strong>Approval</strong>: recorded with explicit user approval, 2026-10-02 — <em>"for pieces we should use
   unicode icons declared with the rest of the data"</em> — and the checkers
   requirement, which cannot be built while a king is hard-coded.</li>
+<li><strong>Implemented on the FEN side, 2026-10-03.</strong> The glyph half was already done
+  and this section already claimed it removed the pawn fallback; it had not. The
+  writer still carried <code>PIECE_CHARS = {"king": "k", ...}</code> and still wrote
+  <code>PIECE_CHARS.get(ptype, "p")</code>, so the sentence above was true of the renderer
+  and false of the writer. <code>ChessNotationWriter</code> now asks the piece —
+  <code>piece.getFen()</code> — and raises <code>ValueError</code> when a piece declares no character.
+  An undeclared piece has no place in a position record, and the record is no
+  longer willing to call it a pawn. <strong>No deviation</strong>: this is this section's
+  decision being carried out, and the recorded approval covers it.</li>
 </ul>
 <hr />
 <h2 id="non-deviations-worth-stating">Non-Deviations Worth Stating<a class="headerlink" href="#non-deviations-worth-stating" title="Permanent link">&para;</a></h2>
@@ -835,6 +969,256 @@ user request adds it.</p>
   requirements render a player panel, so the class has to exist.</li>
 <li><strong>Approval</strong>: directed by the user on 2026-10-02.</li>
 </ul>
+<h3 id="16-a-configuration-loads-as-a-package-in-its-own-right">16. A Configuration Loads as a Package in Its Own Right<a class="headerlink" href="#16-a-configuration-loads-as-a-package-in-its-own-right" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-03</li>
+<li><strong>Context</strong>: section 5 makes a configuration a copyable directory, and
+  <code>SCRATCHPAD.md</code> section 2 makes duplication the extension mechanism: <code>cp -r
+  games/chess games/house</code>, change what differs, a variant exists. Nothing about
+  that works. Every module inside a configuration imported <code>games.chess.…</code> by
+  absolute path, so a copy loaded the <em>original</em> configuration's board, pieces,
+  clocks and quests while looking like it had loaded its own — no error, no
+  warning, and a variant that plays orthodox chess after being edited into
+  something else.</li>
+<li><strong>Change</strong>: two halves, both needed together.</li>
+<li>Inside <code>games/chess/</code>, every module now imports relatively
+    (<code>from .board import …</code>, <code>from .pieces.knight import Knight</code>), so a copy's
+    imports resolve inside the copy. The gap that was left here — the modules
+    under <code>games/chess/rules/</code> importing each other by absolute path — was
+    closed on 2026-10-03; see section 19.</li>
+<li><code>model/game/configuration.py</code> registers a loaded configuration as a <em>package</em>
+    rooted at its own directory (<code>spec_from_file_location(..., submodule_search_locations=[directory])</code>).
+    Without that search path a relative import fails outright, and the tempting
+    repair — an absolute <code>games.chess.…</code> import inside a copy — loads the
+    original. The synthetic module name stays path-derived and unique, so a
+    variant named <code>house</code> never shadows the shipped <code>games.chess</code> package.</li>
+<li><strong>Deviation</strong>: none beyond section 10, which already registers the loading
+  mechanism and its bounding. This is that mechanism working for a copy rather
+  than only for the shipped directory.</li>
+<li><strong>Gap closed 2026-10-03.</strong> The remaining gap recorded below is closed;
+  section 19 carries the change. Nothing in a copied configuration reaches back
+  into <code>games/chess</code> any more — with one exception outside the configuration:
+  <code>model/misc/export_writers.py</code> reaches <code>games.chess.export.algebraic</code> by
+  absolute path inside <code>_to_algebraic()</code>, so a copy that keeps using the shipped
+  writer still borrows the original's square naming. That is harmless for a
+  chess-derived copy and wrong for a copy whose squares are not chess's, and it
+  disappears when the writer itself moves to <code>games/chess/export/</code> as section 7
+  already decided.</li>
+</ul>
+<h3 id="17-the-engine-quest-roster-names-no-piece">17. The Engine Quest Roster Names No Piece<a class="headerlink" href="#17-the-engine-quest-roster-names-no-piece" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-03</li>
+<li><strong>Context</strong>: <code>SCRATCHPAD.md</code> constraint 1.4 says the engine holds no chess, and
+  the module docstring of <code>model/game/quests.py</code> said its quests name none. The
+  roster it exports contradicted both: it composed <code>CaptureOfType("queen")</code> and
+  <code>KingOnlyGame("king")</code>.</li>
+<li><strong>Change</strong>: the roster is seventeen quests rather than nineteen. <code>CaptureOfType</code>
+  and <code>KingOnlyGame</code> are absent for the same stated reason <code>CompositeQuest</code> is —
+  a roster entry must be decidable without a configuration, and these two cannot
+  be, because both <em>require</em> a piece type and raise without one. <code>games/chess/</code>
+  names both, with chess's own piece names, so chess loses no quest.</li>
+<li><strong>Deviation</strong>: none. The roster is not drawn in the diagram; quests themselves
+  are registered in section 4, and this narrows what the engine volunteers rather
+  than adding structure. The roster was the fallback
+  <code>model/game/manager.py</code> reached for when a configuration declared no quests,
+  and that fallback is gone as of 2026-10-03 — a configuration that declares no
+  quests now gets none. <code>model/game/quests.py</code> remains as a library of quest
+  classes a configuration composes from, and <code>BUILT_IN_QUESTS</code> remains a
+  catalogue a caller may read, but nothing in the engine hands it to a game.</li>
+</ul>
+<h3 id="18-dead-configuration-state-is-populated-not-dropped">18. Dead Configuration State Is Populated, Not Dropped<a class="headerlink" href="#18-dead-configuration-state-is-populated-not-dropped" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-03</li>
+<li><strong>Context</strong>: <code>Configuration.pieces</code> and <code>Configuration.exporters</code> were written
+  as empty lists by every configuration and read by nothing.</li>
+<li><strong>Change</strong>: populated rather than dropped. <code>games/chess/pieces/__init__.py</code>
+  declares <code>PIECES</code> and <code>build_pieces()</code>, and <code>games/chess/__init__.py</code> declares
+  <code>build_exporters()</code>. Section 4 registers a configuration as a bundle of <em>pieces</em>
+  and per-configuration export writers, so removing either attribute would
+  contradict a registered decision while filling them in carries it out.</li>
+<li><strong>Consequence recorded, and closed on 2026-10-03.</strong> <code>Configuration.exporters</code>
+  is now read: <code>model/game/manager.py</code> takes its writers from it instead of
+  constructing <code>ChessNotationWriter()</code> unconditionally, so the engine no longer
+  names a chess writer at all and the move section 7 describes is unblocked —
+  see section 19. <code>model/misc/notation.py</code> is still a re-export shim for the
+  moved algebraic conversion, but no longer for the manager's sake: its one
+  remaining consumer outside this repository's configuration layer is
+  <code>view/player_game_view.py</code>.</li>
+</ul>
+<h3 id="19-the-engine-names-no-notation-and-a-copy-keeps-its-own-rules">19. The Engine Names No Notation, and a Copy Keeps Its Own Rules<a class="headerlink" href="#19-the-engine-names-no-notation-and-a-copy-keeps-its-own-rules" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Date</strong>: 2026-10-03</li>
+<li><strong>Context</strong>: two recorded decisions and one wiring gap, all in the same direction —
+  a class name, a spelling and an import list that the plan wrote down and the code did
+  not follow.</li>
+<li><strong>Change, five parts.</strong></li>
+<li><strong>The fifteen Czech aliases.</strong> None of the fifteen in <code>PRD.md</code> section 5 existed.
+     Six now do, in the chess configuration: <code>Pesak</code>, <code>Vez</code>, <code>Kun</code>, <code>Strelec</code>, <code>Dama</code>
+     and <code>Kral</code>. The other nine are engine and view classes whose modules were not in
+     this work's file list, so they remain missing and are listed by name below.</li>
+<li><strong><code>Knight</code> is canonical and <code>Horse</code> is gone.</strong> <code>games/chess/pieces/horse.py</code>
+     declared <code>class Horse(Piece)</code> and ended with <code>Knight = Horse</code>, which made the
+     English name the alias — the reverse of the decision. The class is now <code>Knight</code>,
+     the file is <code>games/chess/pieces/knight.py</code>, and <code>Kun</code> is the alias. There is no
+     <code>Horse</code> binding anywhere, per the approved outcome above.</li>
+<li><strong><code>Tower</code> and <code>Controller</code> are removed.</strong> <code>games/chess/pieces/tower.py</code> shipped
+     <code>Tower = Rook</code> on the reasoning that <code>Tower</code> is Czech for the rook; it is not,
+     <code>Věž</code> is, and <code>Vez</code> is its ASCII spelling. <code>controller/controller.py</code> shipped
+     <code>Controller = GameController</code>. Both were approved drops.</li>
+<li><strong>The manager reads <code>configuration.exporters</code> and declares no quests.</strong> It no
+     longer imports or names <code>ChessNotationWriter</code>, and no longer falls back to the
+     engine's quest roster.</li>
+<li><strong><code>games/chess/rules/</code> imports relatively</strong>, and <code>promotion.py</code> builds the
+     promoted piece relatively, so a copied configuration composes its own rules and
+     promotes into its own pieces. This closes the gap section 16 recorded.</li>
+<li><strong>The fifteen-row alias table, as implemented.</strong> <code>PRD.md</code> section 5 is
+  authoritative; this is that table checked against the code on 2026-10-03.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Diagram</th>
+<th>Canonical</th>
+<th>Czech alias</th>
+<th>Where the alias lives</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Figurka</code></td>
+<td><code>Piece</code></td>
+<td><code>Figurka</code></td>
+<td><code>model/pieces/piece.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+<tr>
+<td><code>Pěšák</code></td>
+<td><code>Pawn</code></td>
+<td><code>Pesak</code></td>
+<td><code>games/chess/pieces/pawn.py</code></td>
+<td>present</td>
+</tr>
+<tr>
+<td><code>Věž</code></td>
+<td><code>Rook</code></td>
+<td><code>Vez</code></td>
+<td><code>games/chess/pieces/rook.py</code></td>
+<td>present</td>
+</tr>
+<tr>
+<td><code>Kůň</code></td>
+<td><code>Knight</code></td>
+<td><code>Kun</code></td>
+<td><code>games/chess/pieces/knight.py</code></td>
+<td>present</td>
+</tr>
+<tr>
+<td><code>Střelec</code></td>
+<td><code>Bishop</code></td>
+<td><code>Strelec</code></td>
+<td><code>games/chess/pieces/bishop.py</code></td>
+<td>present</td>
+</tr>
+<tr>
+<td><code>Dáma</code></td>
+<td><code>Queen</code></td>
+<td><code>Dama</code></td>
+<td><code>games/chess/pieces/queen.py</code></td>
+<td>present</td>
+</tr>
+<tr>
+<td><code>Král</code></td>
+<td><code>King</code></td>
+<td><code>Kral</code></td>
+<td><code>games/chess/pieces/king.py</code></td>
+<td>present</td>
+</tr>
+<tr>
+<td><code>HerníPlocha</code></td>
+<td><code>Board</code></td>
+<td><code>HerniPlocha</code></td>
+<td><code>model/game/board.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+<tr>
+<td><code>Tah</code></td>
+<td><code>Move</code></td>
+<td><code>Tah</code></td>
+<td><code>model/game/move.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+<tr>
+<td><code>Hrac</code></td>
+<td><code>Player</code></td>
+<td><code>Hrac</code></td>
+<td><code>model/game/player.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+<tr>
+<td><code>RevizorTahu</code></td>
+<td><code>MoveValidator</code></td>
+<td><code>RevizorTahu</code></td>
+<td><code>model/game/validator.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+<tr>
+<td><code>Uzivatel</code></td>
+<td><code>User</code></td>
+<td><code>Uzivatel</code></td>
+<td><code>model/users/user.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+<tr>
+<td><code>Kwest</code></td>
+<td><code>Quest</code></td>
+<td><code>Kwest</code></td>
+<td><code>model/game/quest.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+<tr>
+<td><code>HracView</code></td>
+<td><code>PlayerView</code></td>
+<td><code>HracView</code></td>
+<td><code>view/player_view.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+<tr>
+<td><code>HracGameView</code></td>
+<td><code>PlayerGameView</code></td>
+<td><code>HracGameView</code></td>
+<td><code>view/player_game_view.py</code></td>
+<td><strong>missing</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Each missing alias is one line — the binding, next to the class it names — in a
+  module this work was not given. <code>tests/test_aliases.py</code> asserts that this table's
+  <em>missing</em> half is still exactly the set that does not resolve, so the gap is
+  tracked rather than forgotten.
+- <strong>A piece's class name is not its configured kind.</strong> <code>Knight</code> declares
+  <code>piece_type="horse"</code> and that is deliberate. <code>piece_type</code> is data a configuration
+  chooses and writes into <code>configuration.json</code>, so renaming it would silently repoint
+  every stored configuration that says <code>horse</code> at nothing. <code>games/chess/rules/draws.py</code>
+  already accepted both spellings for exactly this reason, and still does. The
+  display name did change to <code>Knight</code>, because a display name is not persisted.
+- <strong>What this departs from, recorded as required.</strong> Three departures, none of which
+  is a diagram deviation:
+  1. <strong><code>ExportWriter.formats()</code> is new.</strong> The engine must be able to tell "this
+     configuration does not export that notation" from "this writer had nothing to
+     write", and the two used to be indistinguishable because both arrived as <code>""</code> —
+     a stenographic record of a game with no moves really is empty. A writer declaring
+     what it writes is therefore the base class's business, not a chess detail.
+     <code>model/misc/export_writers.py</code> is an engine module this work was not given; the
+     addition is <code>ExportWriter.formats()</code> returning <code>()</code> and <code>ChessNotationWriter</code>
+     overriding it.
+  2. <strong><code>GameManager.transcript()</code> lost its default argument.</strong> It was <code>fmt: str =
+     "PGN"</code>, which was chess in a signature, and it now defaults to the first notation
+     the configuration offers; <code>save_log()</code> names its default file from that notation
+     instead of hard-coding <code>.pgn</code>. A caller that passed a format is unaffected.
+  3. <strong>A dead duplicate was removed.</strong> <code>GameManager</code> defined <code>save_log</code> twice, the
+     first as a no-argument stub shadowed by the real one. Nothing called the stub;
+     it was a trap for anyone who did.</p>
 <hr />
 <h2 id="naming-decisions-requiring-approval-context">Naming decisions requiring approval context<a class="headerlink" href="#naming-decisions-requiring-approval-context" title="Permanent link">&para;</a></h2>
 <p>Recorded here because they are deviations from what the diagram draws and
@@ -850,17 +1234,17 @@ user request adds it.</p>
 <tbody>
 <tr>
 <td><code>Kůň</code> maps to <code>Knight</code>, not <code>Horse</code></td>
-<td><code>Knight</code> is canonical, <code>Kun</code> is its Czech alias, <code>Horse</code> is removed</td>
+<td><code>Knight</code> is canonical, <code>Kun</code> is its Czech alias, <code>Horse</code> is removed. <strong>Implemented 2026-10-03</strong> — see section 19.</td>
 <td>2026-10-02</td>
 </tr>
 <tr>
 <td><code>Tower</code></td>
-<td>Dropped. No box in the diagram carries that name, and <code>Věž</code> maps to <code>Rook</code></td>
+<td>Dropped. No box in the diagram carries that name, and <code>Věž</code> maps to <code>Rook</code>. <strong>Implemented 2026-10-03</strong>: <code>games/chess/pieces/tower.py</code> deleted.</td>
 <td>2026-10-02</td>
 </tr>
 <tr>
 <td><code>Controller</code></td>
-<td>Dropped. No box carries that name; the diagram's controller box is <code>GameManagerController</code></td>
+<td>Dropped. No box carries that name; the diagram's controller box is <code>GameManagerController</code>. <strong>Implemented 2026-10-03</strong>: the alias is gone from <code>controller/controller.py</code>.</td>
 <td>2026-10-02</td>
 </tr>
 <tr>
@@ -870,8 +1254,23 @@ user request adds it.</p>
 </tr>
 <tr>
 <td><code>HracView</code> is created as <code>PlayerView</code></td>
-<td>See section 15</td>
+<td>See section 15. The class exists; its <code>HracView</code> alias does not yet.</td>
 <td>2026-10-02</td>
+</tr>
+<tr>
+<td>A piece's configured <code>piece_type</code> is not renamed with its class</td>
+<td><code>Knight</code> declares <code>piece_type="horse"</code>. <code>piece_type</code> is persisted configuration data, so renaming it would repoint every stored value. <strong>New, 2026-10-03</strong>; approval not yet on record.</td>
+<td>Recorded 2026-10-03; <strong>not approved</strong></td>
+</tr>
+<tr>
+<td><code>KingOnlyGame</code> keeps its chess name</td>
+<td><strong>Not renamed, and recommended for renaming.</strong> The class judges a game in which only one kind of piece ever moved, which is not chess-specific, so <code>SingleKindGame</code> would be the honest name — but <code>royal_kind</code> is the constructor keyword configurations pass and <code>tests/test_quest.py</code> calls with it, and renaming either needs that test updated and every player-authored quest file to change with it. Renaming the class while keeping the keyword would leave the vocabulary in place anyway, so the name stays until the keyword can move with it.</td>
+<td>Recorded 2026-10-03; <strong>not approved</strong></td>
+</tr>
+<tr>
+<td><code>ChessNotationWriter</code> keeps its name in the engine</td>
+<td><strong>Not moved, and registered for moving.</strong> Section 7 already places per-format writers in <code>games/chess/export/</code>, and section 7's approval covers it. The blocker was <code>model/game/manager.py</code>'s import by name, and that is gone as of 2026-10-03, so the move is now unblocked and unperformed. Moving it while leaving a shim behind would make the engine module import the configuration that imports the engine module, which fails on a cycle as soon as any variant configuration is loaded.</td>
+<td>Recorded 2026-10-03; <strong>not approved</strong></td>
 </tr>
 </tbody>
 </table>
@@ -918,6 +1317,10 @@ user request adds it.</p>
               <li><a href="#13-timer-to-clock-and-the-clock-parent">13. Timer to Clock, and the Clock Parent</a></li>
               <li><a href="#14-the-two-pages-disagree-recorded-not-resolved">14. The Two Pages Disagree — Recorded, Not Resolved</a></li>
               <li><a href="#15-hracview-is-not-a-class">15. HracView Is Not a Class</a></li>
+              <li><a href="#16-a-configuration-loads-as-a-package-in-its-own-right">16. A Configuration Loads as a Package in Its Own Right</a></li>
+              <li><a href="#17-the-engine-quest-roster-names-no-piece">17. The Engine Quest Roster Names No Piece</a></li>
+              <li><a href="#18-dead-configuration-state-is-populated-not-dropped">18. Dead Configuration State Is Populated, Not Dropped</a></li>
+              <li><a href="#19-the-engine-names-no-notation-and-a-copy-keeps-its-own-rules">19. The Engine Names No Notation, and a Copy Keeps Its Own Rules</a></li>
             </ul>
           </li>
           <li><a href="#naming-decisions-requiring-approval-context">Naming decisions requiring approval context</a>
