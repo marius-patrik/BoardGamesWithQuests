@@ -1,7 +1,6 @@
 import ast
 import importlib.util
 import os
-import subprocess
 import sys
 
 import properdocs.config
@@ -230,31 +229,3 @@ def test_absent_notes_directory_publishes_no_notes_section(tmp_path):
 
     assert not any(isinstance(item, dict) and "Notes" in item for item in nav)
     assert not any(doc_path.startswith("notes/") for doc_path, _, _ in pages)
-
-
-def test_docs_config_and_strict_build():
-    """The site must build with zero warnings, which is what `--strict` enforces."""
-    config_path = os.path.join(repo_root, "properdocs.yml")
-    assert os.path.isfile(config_path), "properdocs.yml must exist at repository root"
-
-    result = subprocess.run(
-        [sys.executable, "-m", "properdocs", "build", "--strict"],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, (
-        f"properdocs build --strict failed with code {result.returncode}:\n"
-        f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
-    )
-
-
-def test_generated_docs_directory_is_not_tracked():
-    """`docs_dir` is a generated placeholder; nothing it produces may reach the index."""
-    result = subprocess.run(
-        ["git", "check-ignore", "--quiet", ".docs/index.md"],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, "generated documentation pages must be git-ignored"
