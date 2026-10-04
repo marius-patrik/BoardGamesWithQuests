@@ -2320,10 +2320,7 @@ done and the copy refused where it would be wrong.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/configuration.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-296">296</a></span>
-<span class="normal"><a href="#__codelineno-0-297">297</a></span>
-<span class="normal"><a href="#__codelineno-0-298">298</a></span>
-<span class="normal"><a href="#__codelineno-0-299">299</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-299">299</a></span>
 <span class="normal"><a href="#__codelineno-0-300">300</a></span>
 <span class="normal"><a href="#__codelineno-0-301">301</a></span>
 <span class="normal"><a href="#__codelineno-0-302">302</a></span>
@@ -2340,27 +2337,38 @@ done and the copy refused where it would be wrong.</p>
 <span class="normal"><a href="#__codelineno-0-313">313</a></span>
 <span class="normal"><a href="#__codelineno-0-314">314</a></span>
 <span class="normal"><a href="#__codelineno-0-315">315</a></span>
-<span class="normal"><a href="#__codelineno-0-316">316</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="k">def</span><span class="w"> </span><span class="nf">delete_configuration</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a><span class="w">    </span><span class="sd">"""Delete a configuration directory.</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a><span class="sd">        name: The configuration directory to remove.</span>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a><span class="sd">        root: The directory configurations must live under. Defaults to the shipped `games/`.</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a><span class="sd">        None</span>
+<span class="normal"><a href="#__codelineno-0-316">316</a></span>
+<span class="normal"><a href="#__codelineno-0-317">317</a></span>
+<span class="normal"><a href="#__codelineno-0-318">318</a></span>
+<span class="normal"><a href="#__codelineno-0-319">319</a></span>
+<span class="normal"><a href="#__codelineno-0-320">320</a></span>
+<span class="normal"><a href="#__codelineno-0-321">321</a></span>
+<span class="normal"><a href="#__codelineno-0-322">322</a></span>
+<span class="normal"><a href="#__codelineno-0-323">323</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-299" name="__codelineno-0-299"></a><span class="k">def</span><span class="w"> </span><span class="nf">delete_configuration</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-300" name="__codelineno-0-300"></a><span class="w">    </span><span class="sd">"""Delete a configuration directory.</span>
+<a id="__codelineno-0-301" name="__codelineno-0-301"></a>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a><span class="sd">        name: The configuration directory to remove.</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a><span class="sd">        root: The directory configurations must live under. Defaults to the shipped `games/`.</span>
 <a id="__codelineno-0-305" name="__codelineno-0-305"></a>
-<a id="__codelineno-0-306" name="__codelineno-0-306"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="sd">        PermissionError: If asked to delete the default configuration.</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a><span class="sd">        FileNotFoundError: If there is no configuration named `name`.</span>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a><span class="sd">    """</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a>    <span class="n">allowed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">games_root</span><span class="p">())</span>
-<a id="__codelineno-0-311" name="__codelineno-0-311"></a>    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">DEFAULT_GAME</span><span class="p">:</span>
-<a id="__codelineno-0-312" name="__codelineno-0-312"></a>        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">DEFAULT_GAME</span><span class="si">}</span><span class="s2"> is the default configuration and cannot be deleted"</span><span class="p">)</span>
-<a id="__codelineno-0-313" name="__codelineno-0-313"></a>    <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-314" name="__codelineno-0-314"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
-<a id="__codelineno-0-315" name="__codelineno-0-315"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no configuration directory named </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in </span><span class="si">{</span><span class="n">allowed</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-316" name="__codelineno-0-316"></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="sd">        None</span>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="sd">        PermissionError: If asked to delete the default configuration.</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a><span class="sd">        FileNotFoundError: If there is no configuration named `name`.</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a><span class="sd">    """</span>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a>    <span class="n">allowed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">games_root</span><span class="p">())</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a>    <span class="c1"># Without this, `name=".."` resolved to the directory *containing* `games/` and</span>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a>    <span class="c1"># `shutil.rmtree` removed everything above it: the function was handed a name and used</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a>    <span class="c1"># it as a path without ever asking whether it was one path segment.</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a>    <span class="n">_validate_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">DEFAULT_GAME</span><span class="p">:</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">DEFAULT_GAME</span><span class="si">}</span><span class="s2"> is the default configuration and cannot be deleted"</span><span class="p">)</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>    <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no configuration directory named </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in </span><span class="si">{</span><span class="n">allowed</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a>    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2487,14 +2495,7 @@ done and the copy refused where it would be wrong.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/configuration.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-421">421</a></span>
-<span class="normal"><a href="#__codelineno-0-422">422</a></span>
-<span class="normal"><a href="#__codelineno-0-423">423</a></span>
-<span class="normal"><a href="#__codelineno-0-424">424</a></span>
-<span class="normal"><a href="#__codelineno-0-425">425</a></span>
-<span class="normal"><a href="#__codelineno-0-426">426</a></span>
-<span class="normal"><a href="#__codelineno-0-427">427</a></span>
-<span class="normal"><a href="#__codelineno-0-428">428</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-428">428</a></span>
 <span class="normal"><a href="#__codelineno-0-429">429</a></span>
 <span class="normal"><a href="#__codelineno-0-430">430</a></span>
 <span class="normal"><a href="#__codelineno-0-431">431</a></span>
@@ -2504,24 +2505,31 @@ done and the copy refused where it would be wrong.</p>
 <span class="normal"><a href="#__codelineno-0-435">435</a></span>
 <span class="normal"><a href="#__codelineno-0-436">436</a></span>
 <span class="normal"><a href="#__codelineno-0-437">437</a></span>
-<span class="normal"><a href="#__codelineno-0-438">438</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_configuration</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a><span class="w">    </span><span class="sd">"""Load a shipped configuration by name.</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="sd">        name: The configuration directory name, for example `chess`.</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">        root: The directory configurations must live under. Defaults to the shipped</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">            `games/` directory.</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a><span class="sd">        Configuration: The assembled configuration.</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="sd">        ValueError: If `name` is empty or names something outside the directory.</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">        FileNotFoundError: If no such configuration is shipped.</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="sd">    """</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="n">_validate_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="n">allowed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">games_root</span><span class="p">())</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>    <span class="k">return</span> <span class="n">load_configuration_at</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="n">root</span><span class="o">=</span><span class="n">allowed</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-438">438</a></span>
+<span class="normal"><a href="#__codelineno-0-439">439</a></span>
+<span class="normal"><a href="#__codelineno-0-440">440</a></span>
+<span class="normal"><a href="#__codelineno-0-441">441</a></span>
+<span class="normal"><a href="#__codelineno-0-442">442</a></span>
+<span class="normal"><a href="#__codelineno-0-443">443</a></span>
+<span class="normal"><a href="#__codelineno-0-444">444</a></span>
+<span class="normal"><a href="#__codelineno-0-445">445</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-428" name="__codelineno-0-428"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_configuration</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="w">    </span><span class="sd">"""Load a shipped configuration by name.</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a><span class="sd">        name: The configuration directory name, for example `chess`.</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a><span class="sd">        root: The directory configurations must live under. Defaults to the shipped</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="sd">            `games/` directory.</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">        Configuration: The assembled configuration.</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">        ValueError: If `name` is empty or names something outside the directory.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">        FileNotFoundError: If no such configuration is shipped.</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">    """</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="n">_validate_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="n">allowed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">games_root</span><span class="p">())</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="k">return</span> <span class="n">load_configuration_at</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="n">root</span><span class="o">=</span><span class="n">allowed</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2649,14 +2657,7 @@ arbitrary path is exactly what the bound is for.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/configuration.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-319">319</a></span>
-<span class="normal"><a href="#__codelineno-0-320">320</a></span>
-<span class="normal"><a href="#__codelineno-0-321">321</a></span>
-<span class="normal"><a href="#__codelineno-0-322">322</a></span>
-<span class="normal"><a href="#__codelineno-0-323">323</a></span>
-<span class="normal"><a href="#__codelineno-0-324">324</a></span>
-<span class="normal"><a href="#__codelineno-0-325">325</a></span>
-<span class="normal"><a href="#__codelineno-0-326">326</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-326">326</a></span>
 <span class="normal"><a href="#__codelineno-0-327">327</a></span>
 <span class="normal"><a href="#__codelineno-0-328">328</a></span>
 <span class="normal"><a href="#__codelineno-0-329">329</a></span>
@@ -2686,44 +2687,51 @@ arbitrary path is exactly what the bound is for.</p>
 <span class="normal"><a href="#__codelineno-0-353">353</a></span>
 <span class="normal"><a href="#__codelineno-0-354">354</a></span>
 <span class="normal"><a href="#__codelineno-0-355">355</a></span>
-<span class="normal"><a href="#__codelineno-0-356">356</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_configuration_at</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
-<a id="__codelineno-0-320" name="__codelineno-0-320"></a><span class="w">    </span><span class="sd">"""Load a configuration from a directory path.</span>
-<a id="__codelineno-0-321" name="__codelineno-0-321"></a>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">        path: Absolute path to the configuration directory.</span>
-<a id="__codelineno-0-324" name="__codelineno-0-324"></a><span class="sd">        root: The directory configurations must live under. Defaults to the shipped</span>
-<a id="__codelineno-0-325" name="__codelineno-0-325"></a><span class="sd">            `games/` directory.</span>
-<a id="__codelineno-0-326" name="__codelineno-0-326"></a>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-328" name="__codelineno-0-328"></a><span class="sd">        Configuration: The assembled configuration.</span>
-<a id="__codelineno-0-329" name="__codelineno-0-329"></a>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">        ValueError: If `path` is not inside `root`. Loading player-authored code from an</span>
-<a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">            arbitrary path is exactly what the bound is for.</span>
-<a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">        FileNotFoundError: If `path` is not a directory, or holds no `build_configuration`.</span>
-<a id="__codelineno-0-334" name="__codelineno-0-334"></a><span class="sd">    """</span>
-<a id="__codelineno-0-335" name="__codelineno-0-335"></a>    <span class="n">allowed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">games_root</span><span class="p">())</span>
-<a id="__codelineno-0-336" name="__codelineno-0-336"></a>    <span class="n">resolved</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-<a id="__codelineno-0-337" name="__codelineno-0-337"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonpath</span><span class="p">([</span><span class="n">allowed</span><span class="p">,</span> <span class="n">resolved</span><span class="p">])</span> <span class="o">!=</span> <span class="n">allowed</span><span class="p">:</span>
-<a id="__codelineno-0-338" name="__codelineno-0-338"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a configuration must live under </span><span class="si">{</span><span class="n">allowed</span><span class="si">}</span><span class="s2">; </span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="s2"> is outside it"</span><span class="p">)</span>
-<a id="__codelineno-0-339" name="__codelineno-0-339"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">resolved</span><span class="p">):</span>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no configuration directory at </span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-341" name="__codelineno-0-341"></a>
-<a id="__codelineno-0-342" name="__codelineno-0-342"></a>    <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span>
-<a id="__codelineno-0-343" name="__codelineno-0-343"></a>    <span class="n">entry_point</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="s2">"__init__.py"</span><span class="p">)</span>
-<a id="__codelineno-0-344" name="__codelineno-0-344"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">entry_point</span><span class="p">):</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="s2"> holds no __init__.py, so it is not a configuration"</span><span class="p">)</span>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a>    <span class="n">module</span> <span class="o">=</span> <span class="n">_import_from_path</span><span class="p">(</span><span class="n">entry_point</span><span class="p">,</span> <span class="n">resolved</span><span class="p">)</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a>    <span class="n">builder</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">"build_configuration"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a>    <span class="k">if</span> <span class="n">builder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="s2"> declares no build_configuration()"</span><span class="p">)</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a>    <span class="n">configuration</span> <span class="o">=</span> <span class="n">builder</span><span class="p">()</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a>    <span class="n">configuration</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-<a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="n">configuration</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">resolved</span>
-<a id="__codelineno-0-355" name="__codelineno-0-355"></a>    <span class="n">configuration</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="vm">__name__</span>
-<a id="__codelineno-0-356" name="__codelineno-0-356"></a>    <span class="k">return</span> <span class="n">configuration</span>
+<span class="normal"><a href="#__codelineno-0-356">356</a></span>
+<span class="normal"><a href="#__codelineno-0-357">357</a></span>
+<span class="normal"><a href="#__codelineno-0-358">358</a></span>
+<span class="normal"><a href="#__codelineno-0-359">359</a></span>
+<span class="normal"><a href="#__codelineno-0-360">360</a></span>
+<span class="normal"><a href="#__codelineno-0-361">361</a></span>
+<span class="normal"><a href="#__codelineno-0-362">362</a></span>
+<span class="normal"><a href="#__codelineno-0-363">363</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-326" name="__codelineno-0-326"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_configuration_at</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="w">    </span><span class="sd">"""Load a configuration from a directory path.</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">        path: Absolute path to the configuration directory.</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">        root: The directory configurations must live under. Defaults to the shipped</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a><span class="sd">            `games/` directory.</span>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a><span class="sd">        Configuration: The assembled configuration.</span>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a><span class="sd">        ValueError: If `path` is not inside `root`. Loading player-authored code from an</span>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a><span class="sd">            arbitrary path is exactly what the bound is for.</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="sd">        FileNotFoundError: If `path` is not a directory, or holds no `build_configuration`.</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="sd">    """</span>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a>    <span class="n">allowed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">games_root</span><span class="p">())</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a>    <span class="n">resolved</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonpath</span><span class="p">([</span><span class="n">allowed</span><span class="p">,</span> <span class="n">resolved</span><span class="p">])</span> <span class="o">!=</span> <span class="n">allowed</span><span class="p">:</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a configuration must live under </span><span class="si">{</span><span class="n">allowed</span><span class="si">}</span><span class="s2">; </span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="s2"> is outside it"</span><span class="p">)</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">resolved</span><span class="p">):</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no configuration directory at </span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a>    <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">resolved</span><span class="p">)</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a>    <span class="n">entry_point</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="s2">"__init__.py"</span><span class="p">)</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">entry_point</span><span class="p">):</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="s2"> holds no __init__.py, so it is not a configuration"</span><span class="p">)</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="n">module</span> <span class="o">=</span> <span class="n">_import_from_path</span><span class="p">(</span><span class="n">entry_point</span><span class="p">,</span> <span class="n">resolved</span><span class="p">)</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a>    <span class="n">builder</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">"build_configuration"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a>    <span class="k">if</span> <span class="n">builder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">resolved</span><span class="si">}</span><span class="s2"> declares no build_configuration()"</span><span class="p">)</span>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>    <span class="n">configuration</span> <span class="o">=</span> <span class="n">builder</span><span class="p">()</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>    <span class="n">configuration</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>    <span class="n">configuration</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">resolved</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="n">configuration</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="vm">__name__</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="k">return</span> <span class="n">configuration</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2824,14 +2832,7 @@ arbitrary path is exactly what the bound is for.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>model/game/configuration.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-441">441</a></span>
-<span class="normal"><a href="#__codelineno-0-442">442</a></span>
-<span class="normal"><a href="#__codelineno-0-443">443</a></span>
-<span class="normal"><a href="#__codelineno-0-444">444</a></span>
-<span class="normal"><a href="#__codelineno-0-445">445</a></span>
-<span class="normal"><a href="#__codelineno-0-446">446</a></span>
-<span class="normal"><a href="#__codelineno-0-447">447</a></span>
-<span class="normal"><a href="#__codelineno-0-448">448</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-448">448</a></span>
 <span class="normal"><a href="#__codelineno-0-449">449</a></span>
 <span class="normal"><a href="#__codelineno-0-450">450</a></span>
 <span class="normal"><a href="#__codelineno-0-451">451</a></span>
@@ -2840,23 +2841,30 @@ arbitrary path is exactly what the bound is for.</p>
 <span class="normal"><a href="#__codelineno-0-454">454</a></span>
 <span class="normal"><a href="#__codelineno-0-455">455</a></span>
 <span class="normal"><a href="#__codelineno-0-456">456</a></span>
-<span class="normal"><a href="#__codelineno-0-457">457</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_default_configuration</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="w">    </span><span class="sd">"""Load the configuration a game runs when the player selects nothing.</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">        root: The directory configurations must live under. Defaults to the shipped</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">            `games/` directory.</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">        Configuration: The assembled configuration.</span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span>
+<span class="normal"><a href="#__codelineno-0-458">458</a></span>
+<span class="normal"><a href="#__codelineno-0-459">459</a></span>
+<span class="normal"><a href="#__codelineno-0-460">460</a></span>
+<span class="normal"><a href="#__codelineno-0-461">461</a></span>
+<span class="normal"><a href="#__codelineno-0-462">462</a></span>
+<span class="normal"><a href="#__codelineno-0-463">463</a></span>
+<span class="normal"><a href="#__codelineno-0-464">464</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_default_configuration</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="w">    </span><span class="sd">"""Load the configuration a game runs when the player selects nothing.</span>
 <a id="__codelineno-0-450" name="__codelineno-0-450"></a>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">        FileNotFoundError: If no configuration is shipped at all.</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">    """</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a>    <span class="n">shipped</span> <span class="o">=</span> <span class="n">available_games</span><span class="p">()</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">shipped</span><span class="p">:</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no configurations are shipped in </span><span class="si">{</span><span class="n">root</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">games_root</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a>    <span class="k">return</span> <span class="n">load_configuration</span><span class="p">(</span><span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">        root: The directory configurations must live under. Defaults to the shipped</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">            `games/` directory.</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        Configuration: The assembled configuration.</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">        FileNotFoundError: If no configuration is shipped at all.</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">    """</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a>    <span class="n">shipped</span> <span class="o">=</span> <span class="n">available_games</span><span class="p">()</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">shipped</span><span class="p">:</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no configurations are shipped in </span><span class="si">{</span><span class="n">root</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">games_root</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a>    <span class="k">return</span> <span class="n">load_configuration</span><span class="p">(</span><span class="n">shipped</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3039,7 +3047,10 @@ arbitrary path is exactly what the bound is for.</p>
 <span class="normal"><a href="#__codelineno-0-290">290</a></span>
 <span class="normal"><a href="#__codelineno-0-291">291</a></span>
 <span class="normal"><a href="#__codelineno-0-292">292</a></span>
-<span class="normal"><a href="#__codelineno-0-293">293</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="k">def</span><span class="w"> </span><span class="nf">rename_configuration</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-293">293</a></span>
+<span class="normal"><a href="#__codelineno-0-294">294</a></span>
+<span class="normal"><a href="#__codelineno-0-295">295</a></span>
+<span class="normal"><a href="#__codelineno-0-296">296</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="k">def</span><span class="w"> </span><span class="nf">rename_configuration</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
 <a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="w">    </span><span class="sd">"""Rename a configuration directory, and load it under its new name.</span>
 <a id="__codelineno-0-264" name="__codelineno-0-264"></a>
 <a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    Args:</span>
@@ -3055,22 +3066,25 @@ arbitrary path is exactly what the bound is for.</p>
 <a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">        FileNotFoundError: If there is no configuration named `name`.</span>
 <a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">        FileExistsError: If `new_name` is already taken.</span>
 <a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    """</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a>    <span class="n">_validate_name</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a>    <span class="k">if</span> <span class="n">new_name</span> <span class="o">==</span> <span class="n">DEFAULT_GAME</span><span class="p">:</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">DEFAULT_GAME</span><span class="si">}</span><span class="s2"> is the default configuration and cannot take a name"</span><span class="p">)</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a>    <span class="n">allowed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">games_root</span><span class="p">())</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a>    <span class="n">origin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">origin</span><span class="p">):</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no configuration directory named </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in </span><span class="si">{</span><span class="n">allowed</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a>    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">DEFAULT_GAME</span><span class="p">:</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a>        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">DEFAULT_GAME</span><span class="si">}</span><span class="s2"> is the default configuration and cannot be renamed"</span><span class="p">)</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a>    <span class="k">if</span> <span class="n">new_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a>        <span class="k">return</span> <span class="n">load_configuration</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">allowed</span><span class="p">)</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a>    <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> already exists"</span><span class="p">)</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="k">return</span> <span class="n">load_configuration_at</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">allowed</span><span class="p">)</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a>    <span class="c1"># Both names become path segments. Validating only the new one left `name` free to be "..",</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a>    <span class="c1"># which renamed the directory *containing* `games/` out from under the caller.</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a>    <span class="n">_validate_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a>    <span class="n">_validate_name</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a>    <span class="k">if</span> <span class="n">new_name</span> <span class="o">==</span> <span class="n">DEFAULT_GAME</span><span class="p">:</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">DEFAULT_GAME</span><span class="si">}</span><span class="s2"> is the default configuration and cannot take a name"</span><span class="p">)</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>    <span class="n">allowed</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">games_root</span><span class="p">())</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a>    <span class="n">origin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">origin</span><span class="p">):</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no configuration directory named </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> in </span><span class="si">{</span><span class="n">allowed</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a>    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">DEFAULT_GAME</span><span class="p">:</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>        <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">DEFAULT_GAME</span><span class="si">}</span><span class="s2"> is the default configuration and cannot be renamed"</span><span class="p">)</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>    <span class="k">if</span> <span class="n">new_name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="k">return</span> <span class="n">load_configuration</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">allowed</span><span class="p">)</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a>        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> already exists"</span><span class="p">)</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a>    <span class="k">return</span> <span class="n">load_configuration_at</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">allowed</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
