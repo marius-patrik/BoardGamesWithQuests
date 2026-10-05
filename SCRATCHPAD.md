@@ -550,6 +550,22 @@ names no draughts writer and no draughts notation (the chess leak gate's shape p
 game), and proves a copied configuration writes with its own writers, its own naming and its
 own board.
 
+**One test was writing into the directory it was run from, 2026-10-05.**
+`tests/test_view.py::test_the_editor_refuses_to_save_when_it_is_told_why` built its scratch
+file as `os.path.join(str(tk_root), "some_rule.py")`, and `str()` of a `tk.Tk()` root is
+`'.'`, so the path was `./some_rule.py` — the **current working directory**, not a
+directory at all. Run from the repository root, which `pyproject.toml` configures, it created
+`some_rule.py` there; the zero-byte file it left was **committed** in `2d9e3cb` alongside the
+test that made it. The test now writes under `tmp_path`, and the tracked artefact is deleted.
+
+A sweep of every filesystem write in `tests/` for the same habit — `write_text`, `open(...,
+"w")`, `mkdir`, `copytree`, `save_log` — found **one** such test, this one. Everything else
+roots its paths in a `tmp_path`-derived directory; `tests/test_checkers_export.py:530` is the
+one place a *relative* path is exercised at all, and it `monkeypatch.chdir(tmp_path)` first.
+That the habit was invisible is the point: nothing failed, because a file appearing in the
+working directory is not an assertion. Running the suite from an empty directory is what makes
+it visible — `ls -A` afterwards is the check, and it is empty.
+
 ---
 
 ## 6. Phase 1 — quick wins
@@ -1164,13 +1180,19 @@ and the difference is the setting rather than a code path; no `getType()` or
 custom piece whose kind is not `"king"` neither crashes nor silently disables
 check.
 
-**Which of those hold.** The first holds for twelve of the thirteen:
-`BishopColourRule` is named only as a string in the rule-order list at
-`tests/test_chess_rules.py:62` and no test drives it on or off through a game. The
-second does **not** hold — see the two tables above. The third holds:
-`test_validator.py:20-26` shows a validator with no rules in force has no royal
-piece and `test_chess_rules.py:276-281` shows a non-`king` kind disables check
-without crashing.
+**Which of those hold.** The first now holds for **all thirteen**, as of
+2026-10-05: `BishopColourRule` had been named only as a string in the rule-order
+list and no test had constructed it, and
+`tests/test_chess_rules.py::test_a_bishop_on_a_light_square_cannot_reach_a_dark_one`,
+`::test_a_bishop_on_a_dark_square_cannot_reach_a_light_one` and
+`::test_a_bishop_promoted_on_a_square_is_confined_to_that_squares_shade` now ask it
+the question it exists to answer — a bishop confined to the shade of the square it
+stood on, including a promoted one, whose shade is the square it was promoted *on*
+rather than the square the pawn left. The rule is taken from `build_rules()`, so
+removing it fails all three. The second does **not** hold — see the two tables above.
+The third holds: `test_validator.py:20-26` shows a validator with no rules in force
+has no royal piece and `test_chess_rules.py:276-281` shows a non-`king` kind disables
+check without crashing.
 
 **Needs**: 10. **Blocks**: 13, 14, 18.
 
@@ -1564,10 +1586,16 @@ asserted. An unannotated item here is a target, not a verified state.
    a kind, a precedence and an optional winner.
 8. Every rule in `notes/chess_rules.md` implemented, each driven on and off
    through one game. **Implemented: yes, thirteen of thirteen. Driven on and off:
-   twelve of thirteen.** `BishopColourRule` is the exception. It appears in
-   `tests/test_chess_rules.py:62` only as a string in the rule-order assertion,
-   and no test constructs it, so the rule `notes/chess_rules.md` §2 mandates has
-   no behavioural test at all.
+   thirteen of thirteen, as of 2026-10-05.** `BishopColourRule` was the exception
+   and no longer is: it had appeared in `tests/test_chess_rules.py:62` only as a
+   string in the rule-order assertion, and no test constructed it, so the rule
+   `notes/chess_rules.md` §2 mandates had no behavioural test at all. **The gate now
+   closes that gap rather than leaving it recorded**: three tests in the same file ask
+   it whether a bishop may leave its own shade, from a light square, from a dark
+   square, and one promoted onto a square it may not leave afterwards. The rule is
+   fetched from `build_rules()` by its declared name rather than constructed, so a
+   configuration that stopped composing it fails all three rather than passing them
+   vacuously.
 9. Logic beyond any shipped set is expressible without touching the engine.
 10. Two colliding rules resolve by precedence, tested with rules written to
     collide.
@@ -1643,6 +1671,13 @@ offers the two formats that mean something for it. **The engine-change half
     `build_exporters()` with the record first. It writes no position record, and
     `ExportLetter` refuses `FEN` by name — the absence is stated in
     `games/checkers/export/__init__.py` rather than probed for at runtime.
+    **The algebraic writer mis-read one thing of its own, 2026-10-05, and it is
+    closed here:** it chose `O-O` from the spelling of `Move.move_type`, which
+    is the single word `castling` for either castle, so a game that castled on both
+    sides was written `O-O` twice. The side is read from the rook's square, as
+    `pgn.py:_castle_of` already did, and
+    `tests/test_notation_and_writers.py::test_a_castle_that_the_engine_itself_offered_tells_which_one_it_is`
+    plays both castles and asserts the two tokens.
 26. No format switch and no format-name string exists in the engine. **True as of
     2026-10-05**, and asserted structurally: `tests/test_engine_holds_no_chess.py` walks
     every module under `model/` with the writer names and format names read from the chess
