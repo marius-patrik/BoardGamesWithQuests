@@ -313,12 +313,17 @@ def test_a_piece_that_declares_no_character_is_refused_even_if_it_looks_like_che
 def test_the_chess_board_still_writes_the_record_it_always_did():
     """Removing the table must not change one character of chess's own output.
 
+    The four fields after the side to move used to be `- - 0 1` whatever the game was doing,
+    and they are now computed. The placement is byte for byte what it always was, and the
+    fields after it are the ones every chess program agrees on for a board nothing has
+    happened to yet: `KQkq - 0 1`.
+
     Returns:
         None
     """
     assert (
         ExportFEN().to_fen(build_board(), active_color=1)
-        == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1"
+        == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     )
 
 
@@ -370,12 +375,16 @@ def test_the_engine_holds_no_notation_shim():
 def test_the_writer_still_writes_coordinates_in_chess_algebra():
     """Reaching the chess naming relatively must not cost the writers their records.
 
+    The coordinate record is compressed now, so what is asserted is what it decodes to rather
+    than what it looks like: the same two squares, reached through the record's own reader.
+
     Returns:
         None
     """
     moves = [Move((1, 4), (3, 4)), Move((6, 4), (4, 4))]
+    writer = ExportStenographic()
 
-    assert ExportStenographic().to_stenographic(moves) == "e2e4 e7e5"
+    assert writer.from_stenographic(writer.to_stenographic(moves)) == "e2e4 e7e5"
     assert "1. e4 e5" in ExportPGN().to_pgn(moves)
 
 
