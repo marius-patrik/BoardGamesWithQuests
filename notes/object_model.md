@@ -844,6 +844,7 @@ Recorded because the question is fair and the answer is not obvious.
     17 ask for *letter* and the metadata header; neither exists. This is a
     requirement not yet met rather than a departure from the diagram, and it is
     recorded here so it is not mistaken for a writer that exists and is wrong.
+    **Superseded by the paragraph below, 2026-10-05: there are two.**
   - **Mitigation**: none of this touches the engine or the diagram's classes. Each
     departure was a rule's configured value, a piece's declared step length, or an
     absent rule inside one configuration directory, which is exactly where
@@ -852,35 +853,30 @@ Recorded because the question is fair and the answer is not obvious.
     the abstraction holds. A variant that wants the international king changes one
     number, `max_steps`, in one piece.
   - **Approval**: recorded 2026-10-04 as a measured discrepancy between `PRD.md`
-FR-54 and `games/checkers/`, closed the same day against FR-54 as written, and
-      **approved by the maintainer on 2026-10-04**. The ruling covered all five gaps, the
-      one divergence kept on purpose (1.32.1 proposed rather than claimed), and leaving
-      `LimitedKingsRule` and `CaptureRule` declared and inert.
+    FR-54 and `games/checkers/`, closed the same day against FR-54 as written, and
+    **approved by the maintainer on 2026-10-04**. The ruling covered all five gaps,
+    the one divergence kept on purpose (1.32.1 proposed rather than claimed), and
+    leaving `LimitedKingsRule` and `CaptureRule` declared and inert.
 - **The exporters this section recorded as absent now exist.** As of 2026-10-05
   `games/checkers` declares **two**: `ExportLetter` (declared `Letter`, written
   in the square numbers one to thirty-two as `18-22` or `18x25`) and its own
   `ExportMetadata` (declared `Field-Field-Extra`), assembled by
-  `build_exporters()` in `games/checkers/__init__.py`. **What is still absent,
-  and still not a departure, is a position record**: English draughts has no FEN,
-  `ExportLetter` refuses `FEN` by name, and `games/checkers/export/__init__.py`
-  argues why from the absence of a halfmove clock and a castling right in this
-  game. No engine file changed to add either writer, which is FR-55 and the
-  acceptance criterion of issue #164 both at once.
-- **Mitigation**: none of this touches the engine or the diagram's classes. Each
-  departure is a rule's configured value or an absent rule inside one
-  configuration directory, which is exactly where `SCRATCHPAD.md` §2 says the
-  variation between games lives. Closing them is a change to
-  `games/checkers/` and to nothing else — which is the strongest evidence yet that
-  the abstraction holds.
-- **Approval**: recorded 2026-10-04 as a measured discrepancy between `PRD.md`
-    FR-54 and `games/checkers/`, closed the same day against FR-54 as written, and
-    **approved by the maintainer on 2026-10-04**. The ruling covered all five gaps, the
-    one divergence kept on purpose (1.32.1 proposed rather than claimed), and leaving
-    `LimitedKingsRule` and `CaptureRule` declared and inert.
+  `build_exporters()` in `games/checkers/__init__.py`. `python -m
+  chesswithquests --check` prints both. **What is still absent, and still not a
+  departure, is a position record**: English draughts has no FEN, `ExportLetter`
+  refuses `FEN` by name, and `games/checkers/export/__init__.py` argues why from
+  the absence of a halfmove clock and a castling right in this game. No engine file
+  changed to add either writer, which is FR-55 and the acceptance criterion of
+  issue #164 both at once. **This paragraph and the two above it were the same
+  fact recorded three times with three different answers**, and `SCRATCHPAD.md` §8
+  item 20 said "zero formats" while its item 25 said two — one commit, one
+  contradiction, five places in two files. The duplicates are kept here rather than
+  merged so the sequence is visible; only the numbers that were true are stated as
+  true.
 
-  ---
+---
 
-  ### 22. A Configuration Composes Its Quests Instead of Declaring Quest Files
+### 22. A Configuration Composes Its Quests Instead of Declaring Quest Files
 
 - **Date**: 2026-10-04
 - **Context**: `PRD.md` §6 states, as a fact about the layout, that
@@ -904,6 +900,15 @@ FR-54 and `games/checkers/`, closed the same day against FR-54 as written, and
   assignment specification.
 - **Approval**: **not approved.** Recorded 2026-10-04 as the correction of a claim
   that had no record behind it.
+- **This section was here all along, and read as if it were not.** §21's body is a
+  list, its whole block indented by two spaces, and this heading was indented with
+  it — so in the generated page it rendered as a paragraph *inside §21's list*, not as
+  a heading, and the numbering a reader saw went 21 → 23. `PRD.md` §6 and
+  `SCRATCHPAD.md` §2 both cite "§22" for this deviation, and the reference resolved to
+  nothing they could navigate to. **The content is unchanged and the number is not
+  renumbered** — `AGENTS.md` rule 13 was tombstoned rather than renumbered for exactly
+  this reason, since a silently repointed reference is worse than a gap. What changed
+  is the indentation, and with it the fact that the section is a section.
 
 ---
 
@@ -1189,6 +1194,86 @@ earlier section registered.
 - **Approval**: this is the change `PRD.md` §7.7's four records were amended for, and the
   maintainer's standing rule that the diagram is the whole specification is what §12's
   withdrawal rests on. Recorded 2026-10-05.
+
+---
+
+### 28. The Engine Names the Default Configuration, and That Is Configuration
+
+- **Date**: 2026-10-05
+- **Context**: `SCRATCHPAD.md` constraint 1.4 is that the engine holds no chess, and
+  `SCRATCHPAD.md` §8 item 14 is its one-line form: *"Nothing in the engine mentions a king, a
+  pawn, a check or a mate."* `model/game/games.py:12` reads `DEFAULT_GAME = "chess"`. It is
+  the one chess string in the engine, and nothing recorded it.
+- **Why the gate does not catch it, which is not an oversight.** `tests/test_engine_holds_no_chess.py`
+  reads its vocabulary at run time rather than keeping it beside the code it guards — from
+  `build_pieces()` for piece kinds (`bishop`, `horse`, `king`, `pawn`, `queen`, `rook`), from
+  the `ExportWriter` subclasses `games/chess/export/` declares, and from the notations
+  `load_configuration("chess").exporters` offers (`algebraic`, `fen`, `field-field-extra`,
+  `pgn`, `stenographic`). A configuration's own **name** is in none of those three sets, and
+  the string `chess` is not in any of them.
+- **Deviation, and the reasoning that defends it**: `DEFAULT_GAME` is a **product
+  configuration value, not chess knowledge.** The engine must be able to answer "which
+  configuration does a game start in when the player selects nothing", and that question has
+  an answer whatever game the distribution ships. `Configuration.is_default`
+  (`model/game/configuration.py:164`) is the same fact read from the other side, and it is a
+  real concept with tests — `tests/test_view.py:455` asserts the start modal's configuration
+  *is* the default, and `tests/test_settings_surface.py:338` asserts a copy is not. FR-27 and
+  FR-28 — the default cannot be renamed or deleted — cannot be enforced at all without
+  naming it. Removing the string would not make the engine configuration-agnostic; it would
+  move the same name to `chesswithquests/__init__.py`, where `build_application`'s default
+  argument lives and where a gate walking only `model/` would no longer see it, which is
+  hiding the coupling rather than removing it.
+- **Why the engine-leak vocabulary must not grow to cover it.** The gate's three sets are all
+  *vocabulary a game teaches the engine*: piece kinds it must not special-case, writer classes
+  it must not hold, and notation names it must not know. A configuration name is none of
+  those — it is the product's answer to "which one is the default", and a distribution whose
+  default were `go` would change this string and nothing else. **Adding configuration names
+  to that vocabulary would make the gate fail on every shipped product and pass on none of
+  them**: it would forbid the string the product requires while never catching a piece kind, a
+  writer or a notation, which is the only thing the gate is for. The honest form of the
+  invariant is therefore the one `SCRATCHPAD.md` §8 item 14 already gives — nothing in the
+  engine names *what a piece is* — and `chess` names no piece, no rule and no notation.
+- **Approval**: **not approved.** Recorded 2026-10-05 as the one place the engine names a
+  game, with the reasoning above, so that a reader who finds it knows it was weighed rather
+  than missed. **No code changed**: the alternative reading — that the default belongs to the
+  configuration layer alone — was considered and not adopted, because §20's `is_default` and
+  FR-27 and FR-28 already make the engine the place that knows the answer.
+
+---
+
+### 29. The Code Editor Reaches Rules and Quests, and the Other Three Sections Are Hand-Written by Design
+
+- **Date**: 2026-10-05
+- **Context**: every section now composes from its own directory — §25 and §26 — so a piece, a
+  clock or a writer written into `pieces/`, `clocks/` or `export/` joins the configuration with
+  no list to edit, and `PRD.md` FR-33 says exactly that. The code editor does not follow.
+  `view/code_editor.py:editable_sources` is generic in its section argument, but
+  `model/game/source_validation.py:413` raises `ValueError` for any `kind` that is not `"rule"`
+  or `"quest"`, so only the Rules and Quests sections have a button that opens it.
+  Nothing recorded that, and a reader of FR-33 alone would read it as an oversight.
+- **Not an oversight — the owner's own words narrow the requirement**: *"code editor is not
+  backlog that should be how **rules** are edited in settings now"*. Rules are the
+  requirement, and quests came with them because a quest is authored logic in the same sense
+  and in the same file format.
+- **Why a piece, a clock or a writer is not reachable, stated rather than left open.** The
+  editor exists to write **logic that must run**, and it is bounded by §10's validation because
+  that code is *executed*: the validator compiles and calls into the file to confirm the hooks
+  are there, and the product loads it at game start. A piece is not a rule and a writer is not
+  a rule, so there is no hook contract to check them against — `RULE_METHODS` and
+  `RULE_ATTRIBUTES` in `source_validation.py` have no counterpart for either, and inventing
+  one would be a second declaration of a contract §9 already governs by fields. Each of the
+  other three sections is instead edited by hand or through the form: a piece and a clock are
+  form-exposed by §9's declaration framework (`Piece.value_fields()`,
+  `model/game/clock_fields.py`), and a writer's declared fields are data the same way.
+- **What this does not claim**: it does not claim the three sections are unreachable, only
+  that they are reached by writing the file rather than by typing into the form. A file in any
+  of the five sections is composed into the configuration the next time it is loaded, which is
+  the property FR-33 asks for and which holds for all five.
+- **Approval**: **not approved.** Recorded 2026-10-05 as the scope the editor ships with, so
+  that FR-33's "each of `pieces/`, `rules/`, `quests/`, `clocks/` and `export/`" is not read
+  as a promise of five editors. **No code changed**: the alternative — a validating editor for
+  the other three — needs a declaration contract that does not exist, which is §9's work and
+  not this one's.
 
 ---
 

@@ -313,8 +313,14 @@ this paragraph is the decision, so that re-check does not have to invent one.
 Several members this section once called dead are alive and must not be touched:
 `Board.dimensions` (`board.py:103,111`), `Board.captured_white`
 (`board.py:57,176`, read by `move.py:165,220`), `Move.promotion_piece`
-(`move.py:93,185`), `ExportWriter.field`, `GameManager.players` and
-`WindowController.title`, `width` and `height`.
+(`move.py:93,185`), `GameManager.players` and `WindowController.title`, `width`
+and `height`. **`ExportWriter.field` is no longer on that list and never was a
+member.** It was `self.field: str = ""` in `__init__` — an instance attribute, not
+a method, and written once and read by nothing — and `3f04e25` deleted it with
+the rest of the dead state that moved the chess writers into their own
+configuration. \`grep -n "field" model/misc/export_writers.py\` finds no such
+member. A record that told a future reader not to delete a name that was already
+gone is the same defect as one that names a live member as dead.
 
 **`Move.captured_piece` is declared, documented and used.** It is a constructor
 parameter and instance attribute of `Move` (`model/game/move.py:67` and `:47`),
@@ -382,7 +388,7 @@ said thirteen, two, three and three.
 | 1 | PRD + SCRATCHPAD | **delivered** | main stack |
 | 2 | Flatten `src/` to root, generated docs pipeline | **delivered** | main stack |
 | 3 | Delete metadata-only tests, close docstring gaps, drop unused aliases | **delivered** — 51 collected tests removed, not 62; §5 | main stack |
-| 4 | CI: native self-contained workflows, remove the agent workflows only | **delivered, outside the main stack** — on a branch 24 commits behind the tip; re-scoped on the main stack by #167 | `feature/native-ci-workflows` |
+| 4 | CI: native self-contained workflows, remove the agent workflows only | **delivered, outside this stack** — on a branch **101 commits behind the tip**, counted with `git rev-list --count feature/native-ci-workflows..HEAD` at `d6ceede`; re-scoped on this stack by #167 | `feature/native-ci-workflows` |
 | 5 | Governance rules: `AGENTS.md` 1, 2, 4, 7, 9, 10, 11, 12, **13** | **delivered, outside the main stack** — on top of PR 4. Rule 13 is withdrawn on the main stack instead, tombstoned, by #167 | `feature/governance-rules` |
 | 6 | Packaging, entry point, git-ignored log directory | **delivered** — including both configurations in the package list (§4.1) | main stack |
 | 7 | README honesty | **delivered** in the main stack by commit `77d978c`. The stale branch rewrite is superseded and is not to be merged | main stack |
@@ -395,7 +401,7 @@ said thirteen, two, three and three.
 | 14 | Wire the orphan subsystems | **delivered** | main stack |
 | 15 | View layer with the game-start modal | **delivered** — `BoardView`, `PlayerGameView`, `PlayerView`, `QuestCard`, `QuestList`, `StartModal` | main stack |
 | 16 | Settings surface | **delivered** — the five sections, the corner configuration selector with create/rename/delete/duplicate, and a code editor that validates before the code joins a configuration | main stack |
-| 17 | `games/checkers/` | **partial** — the board, two piece kinds, eight rules, the clock and four quests, held to the published perft counts, and **two writers**: `ExportLetter` and its own `ExportMetadata`, declared `Letter` and `Field-Field-Extra` by `build_exporters()`. There is no position record and none was invented. The game it plays is flying-kings, not WCDF English draughts; `notes/object_model.md` §21 | main stack |
+| 17 | `games/checkers/` | **partial** — the board, two piece kinds, eight rules, the clock and four quests, held to the published perft counts, and **two writers**: `ExportLetter` and its own `ExportMetadata`, declared `Letter` and `Field-Field-Extra` by `build_exporters()`. There is no position record and none was invented. **The game it plays is now WCDF English draughts** — the king steps one square, the forty-move count is 80 plies, and threefold repetition exists, since 2026-10-04; `notes/object_model.md` §21. This row said it was still flying-kings, which was true until then and was not corrected when it stopped being true | main stack |
 | 18 | Export generalised | **delivered** — one writer class per format in `games/chess/export/`, the format switch and the `ChessNotationWriter` class deleted, the engine holding only the `ExportWriter` protocol and `tests/test_engine_holds_no_chess.py` walking `model/` to keep it that way. The item's other half closed 2026-10-05: *letter* is `ExportAlgebraic`, and the header is `ExportMetadata` supplied through `Configuration.metadata` | this branch |
 | 19 | Export formats: PGN, FEN, field-field-extra, stenographic | **delivered 2026-10-05** — all five formats have a writer, the header is derived from the game with no placeholder strings, the movetext is real SAN read off a replay, FEN computes all six fields, and the coordinate record is compressed with a standard library codec and reads back. See §4.1 and `notes/object_model.md` §27 | this branch |
 | 20 | Czech aliases and remaining dead code | **partial** — all fifteen aliases ship, `Knight` is canonical, `Tower`, `Horse` and `Controller` are gone. Absent: the `controller/controller.py` → `game_manager_controller.py` rename, and the dead-code re-check | main stack |
@@ -413,20 +419,36 @@ the main stack after the plan was written, and each is a real pull request:
 | The knight rename | `Horse` → `Knight`, with `Kun` as the alias and `games/chess/pieces/knight.py` as the file | main stack |
 | The checkers configuration | `games/checkers/` as its own directory | main stack |
 
-**`feature/native-ci-workflows` is not on the main stack**, and neither is
+**`feature/native-ci-workflows` is not on this stack**, and neither is
 `feature/governance-rules`, which is built on it. Planned PR 4 and PR 5 therefore
 exist only there, and any statement in this file about PR 4 or PR 5 describes work
-a reader of the main stack cannot see. Both branches forked from `f4e1487` and are
-22 to 25 commits behind this stack, so neither can be merged without a rebase —
-`feature/native-ci-workflows` still carries a `src/` tree.
+a reader of this stack cannot see.
+
+**Measured, not inherited.** `git rev-list --count <branch>..HEAD` at `d6ceede`, the
+tip when this paragraph was written: **101** for `feature/native-ci-workflows` and
+**101** for `feature/governance-rules`, so neither can be merged without a rebase.
+`git merge-base <branch> HEAD` puts both at `7190f17`, which is the commit after
+`f4e1487` that removed the unused aliases — so "forked from `f4e1487`" was true
+of an ancestor and wrong as a fork point, and the twenty-two-to-twenty-five figure
+was the distance *forward* from `f4e1487` to each branch, read as though it were
+the distance behind. **Re-run the count rather than trusting it:** it grows with
+every commit on this stack, which is exactly why it is quoted against a named one.
+
+**`feature/native-ci-workflows` does not carry a `src/` tree.**
+`git ls-tree -r --name-only feature/native-ci-workflows | grep -c '^src/'` prints
+**0**. An earlier revision of this file said it still did, which was true when
+written and false from the flattening onwards: `4f0638d` moved the model layer to
+the repository root and is an ancestor of the branch's own merge base, so the
+`src/` tree this paragraph warned about could not have been on it.
 
 **`feature/readme-honesty` is superseded and is not to be merged.** Planned PR 7
-was delivered in the main stack by commit `77d978c`; that rewrite states what the
-product does today, and the branch forked from `f4e1487`, twenty-two commits
-before this stack, predates the view layer, `games/`, the packaging and the
-settings surface. Every capability claim in it is false. An earlier revision of
-this file said PR 7 was "not started" and that the branch "must be superseded, not
-merged" as outstanding work; the supersession has happened.
+was delivered in this stack by commit `77d978c`; that rewrite states what the
+product does today, and the branch's merge base with this stack is `623106e`,
+**103** commits behind at `d6ceede` by the same command. It predates the view
+layer, `games/`, the packaging and the settings surface. Every capability claim
+in it is false. An earlier revision of this file said PR 7 was "not started" and
+that the branch "must be superseded, not merged" as outstanding work; the
+supersession has happened.
 
 **The plan issues' labels lag their contents.** #127 (PR 1) and #129 are labelled
 `In Progress`; #126 (PR 4) and #124 (PR 5) carry no status label at all, though
@@ -475,8 +497,34 @@ written and is now stale; the correction lives in the code, not in this file.
 
 ## 5. Test strategy
 
-Current: every test in the suite is behavioural **except one**, named below.
-Target: behaviour-only, and the suite is one test short of it.
+Current: **every test in the suite is behavioural.** There is no exception and no name to
+give, because the one this sentence used to point at is gone — see "The survivor, now
+gone" below, which is that test's own entry in this section.
+Target: the same thing, and it is met.
+
+An earlier revision of these two lines read "every test in the suite is behavioural
+**except one**, named below" / "the suite is one test short of it", and named nothing
+anywhere in the section. It named
+`tests/test_docs_and_docstrings.py::test_generated_docs_directory_is_not_tracked` in an
+earlier revision still, and the paragraph recording its deletion has been in this section
+ever since — so the opening sentence was pointing at a test that the section itself
+recorded as removed. **Checked against the code rather than against the sentence:**
+`grep -rn 'AGENTS.md\|README.md\|\.github/workflows\|check-ignore'` over `tests/` returns
+nothing, and the two tests in `tests/test_docs_and_docstrings.py` that mention `notes/`
+assert against fixtures they own under `tmp_path`, not against this repository's files.
+`PRD.md` §3.2's two categories are both empty.
+
+**One judgement call, stated rather than assumed.** `tests/test_docs_and_docstrings.py`
+reads the project's own source and asserts that every module, class and public method has a
+docstring, and it loads `.github/scripts/docs_hooks.py` to assert what the documentation
+build emits. §3.2 forbids asserting on "rules, rule text, workflow YAML, notes content,
+README content or any other repository metadata", and none of those four is what these
+assert: a missing docstring is a property of the shipped source, and a navigation entry
+pointing at a deleted module is a build that `--strict` would fail. That file is the
+executable form of `AGENTS.md` rule 2, which is a requirement on the code. **If a
+reviewer disagrees, the four tests at \`test_docs_and_docstrings.py:46,75,91\` and
+\`:120` are the whole argument**, and deleting them would leave rule 2 policed by reading
+rather than by running.
 
 **The metadata assertions are gone, and PR 3 removed fifty-one of them.** At
 commit `4e7f270` collection went from **137 to 86**, so 51 collected tests were
@@ -509,7 +557,8 @@ Two consequences for anyone reading this section:
   of this file said the notes test "has been rewritten, not deleted" as though it
   were the only one; three others went with the files.
 
-**The survivor, now gone.** `tests/test_docs_and_docstrings.py::test_generated_docs_directory_is_not_tracked`
+**The survivor, and the one this section's opening sentence used to name — now gone.**
+`tests/test_docs_and_docstrings.py::test_generated_docs_directory_is_not_tracked`
 ran `git check-ignore --quiet .docs/index.md` and asserted the exit code is zero.
 It asserted that `.gitignore` ignores the generated docs directory — a property of
 the repository, not of the product — so by `PRD.md` §3.2's own definition it
@@ -540,8 +589,9 @@ in front of the manager and never constructed the shipped writer, which is preci
 writer that returned `""` for an unknown notation could sit in the tree unnoticed. Since
 2026-10-05 every writer's `export` is called in `tests/test_notation_and_writers.py`, in the
 manager's case-insensitive spelling and in a spelling it does not declare, and the unknown
-notation raises. The writers' *outputs* remain largely unverified in substance because the
-outputs are largely wrong (§4.1) — that is item 19's work, not this one's. **The draughts
+notation raises. The writers' *outputs* are no longer largely wrong: items 27 and 28 above are
+    closed, the Opera Game is asserted movetext for movetext, and the FEN fields are asserted
+    against the rules and the counter that compute them. **The draughts
 writers are held against a played game rather than a pasted one**
 (`tests/test_checkers_export.py`): a game is played to a result through the manager, and the
 record is walked move by move rather than compared against a string written out by hand, so a
@@ -1639,8 +1689,18 @@ offers the two formats that mean something for it. **The engine-change half
       repetition rule exists (1.32.1), and the sufficient-material draw that ended
       two-kings-against-one is gone. Two variants remain declared and inert, and one
       divergence is deliberate: 1.32.1 is a claim to a referee and the engine
-      proposes the draw itself. It still offers **zero** formats, not two.
-      `notes/object_model.md` §21 records each; planned PR 17 owns the exporters.
+      proposes the draw itself.
+      **The formats half now holds, and this paragraph said it did not.** An earlier
+      revision of this item ended "It still offers **zero** formats, not two", which
+      was true when written and false by the same commit that wrote it — the sentence
+      contradicted item 25 below, written in the same change, and the reader working
+      down the definition of done got two opposite answers. `games/checkers` declares
+      **two**: `ExportLetter` (declared `Letter`) and its own `ExportMetadata`
+      (declared `Field-Field-Extra`). What it still offers **no** format for is a
+      position record — English draughts has no FEN, and `ExportLetter` refuses that
+      name by name rather than the tree being probed at run time.
+      `notes/object_model.md` §21 records each; `python -m chesswithquests --check`
+      prints both.
 
 **Interface**
 
@@ -1670,7 +1730,9 @@ offers the two formats that mean something for it. **The engine-change half
     `Letter`) and its own `ExportMetadata` (declared `Field-Field-Extra`), declared by
     `build_exporters()` with the record first. It writes no position record, and
     `ExportLetter` refuses `FEN` by name — the absence is stated in
-    `games/checkers/export/__init__.py` rather than probed for at runtime.
+    `games/checkers/export/__init__.py` rather than probed for at runtime. **Item 20
+    above said the same configuration offered zero formats; it does not, and this
+    item is the one that says so.**
     **The algebraic writer mis-read one thing of its own, 2026-10-05, and it is
     closed here:** it chose `O-O` from the spelling of `Move.move_type`, which
     is the single word `castling` for either castle, so a game that castled on both
@@ -1726,7 +1788,12 @@ offers the two formats that mean something for it. **The engine-change half
 30. Every deviation recorded in `notes/object_model.md` with approval context.
     **Now true.** The audit behind this correction found eleven unrecorded
     departures; §21, §22, §23 and §24 of that file record them, and §3, §7, §9,
-    §11, §13 and §15 have been corrected against the code.
+    §11, §13 and §15 have been corrected against the code. **Two more are recorded
+    2026-10-05, both weighed and neither approved:** §28, the one chess string in
+    the engine (`DEFAULT_GAME = "chess"`), which is a product configuration value
+    and which the engine-leak gate's vocabulary deliberately does not and should not
+    cover; and §29, the code editor reaching rules and quests only, the other three
+    sections being written by hand by design.
 31. `notes/chess_rules.md` amended where board generalisation departs from it.
 32. Nothing in §4.3's unreferenced list survives the PR 20 re-check; the §4.4
     docstring gaps are closed. **The docstring half holds; the other half has not
