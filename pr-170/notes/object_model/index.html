@@ -1517,83 +1517,104 @@ user request adds it.</p>
   piece instances or declared overrides, which is not built.</li>
 </ul>
 <hr />
-<h3 id="21-gamescheckers-is-not-wcdf-english-draughts">21. <code>games/checkers</code> Is Not WCDF English Draughts<a class="headerlink" href="#21-gamescheckers-is-not-wcdf-english-draughts" title="Permanent link">&para;</a></h3>
+<h3 id="21-gamescheckers-was-not-wcdf-english-draughts-and-now-is">21. <code>games/checkers</code> Was Not WCDF English Draughts, and Now Is<a class="headerlink" href="#21-gamescheckers-was-not-wcdf-english-draughts-and-now-is" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Date</strong>: 2026-10-04</li>
+<li><strong>Date</strong>: recorded 2026-10-04, closed 2026-10-04</li>
 <li><strong>Context</strong>: <code>PRD.md</code> FR-54 requires "a complete, correct <strong>English draughts</strong>
-  configuration", naming twelve pieces a side, one-square men, kings sliding any
-  distance diagonally, mandatory capture including chains, promotion on reaching
-  the far rank, and a win by immobilisation or by losing all pieces. FR-55 requires
-  it to need no engine change.</li>
-<li><strong>The engine half holds.</strong> No file under <code>model/</code>, <code>controller/</code> or <code>view/</code>
-  changed to add <code>games/checkers/</code>. That is the requirement FR-55 states and it is
-  satisfied.</li>
-<li><strong>The "English draughts" half does not, in five places.</strong> None of these was
-  recorded anywhere before this section. Each is a departure from what the diagram
-  and the product requirements describe, so <code>AGENTS.md</code> Rule 3 requires it here:</li>
-</ul>
+    configuration", naming twelve pieces a side, one-square men, kings moving one
+    square diagonally, mandatory capture including chains, promotion on reaching
+    the far rank, and a win by immobilisation or by losing all pieces. FR-55 requires
+    it to need no engine change.</li>
+<li><strong>The engine half held throughout.</strong> No file under <code>model/</code>, <code>controller/</code> or
+    <code>view/</code> changed to add <code>games/checkers/</code>, and closing these five gaps changed
+    none of them either. That is the requirement FR-55 states and it is satisfied.</li>
+<li>
+<p><strong>Five places where the configuration was not the rulebook's game.</strong> None of
+    them was recorded anywhere before this section, and each was a departure from
+    what FR-54 describes, which <code>AGENTS.md</code> Rule 3 requires here:</p>
 <table>
 <thead>
 <tr>
 <th>#</th>
 <th>FR-54 asks for</th>
-<th><code>games/checkers</code> ships</th>
-<th>Evidence</th>
+<th>What shipped</th>
+<th>Now</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
 <td>a king <strong>steps</strong> one square</td>
-<td>the king <strong>slides</strong> any distance — flying kings, which is international, Brazilian, Czech and Dutch draughts, not WCDF English</td>
-<td><code>games/checkers/pieces/king.py</code>; the configuration's own module docstring in <code>games/checkers/__init__.py</code> says so</td>
+<td>the king <strong>slid</strong> any distance — flying kings, which is international, Brazilian, Czech and Dutch draughts</td>
+<td><code>max_steps=1</code>. Rule 1.17: "from one square diagonally forward or backward, left or right to an immediately neighbouring vacant square"; rule 1.21 gives its capturing move as a man's in any direction</td>
 </tr>
 <tr>
 <td>2</td>
-<td>the WCDF fifty-move draw</td>
-<td><code>plies</code> defaults to <strong>100</strong> (fifty moves each side); WCDF says forty moves each side, <strong>80</strong> plies. The field is configurable, the default is not the rulebook's</td>
-<td><code>games/checkers/rules/draws.py</code> <code>FiftyMoveRule.value_fields</code></td>
+<td>the WCDF forty-move draw</td>
+<td><code>plies</code> defaulted to <strong>100</strong> — fifty moves each side, the international figure</td>
+<td><code>plies</code> defaults to <strong>80</strong>, rule 1.32.2's "previous 40 moves" by each side</td>
 </tr>
 <tr>
 <td>3</td>
 <td>threefold repetition is one of the rulebook's draws</td>
-<td><strong>no repetition rule exists.</strong> <code>RULES</code> holds eight classes and none of them counts positions</td>
-<td><code>games/checkers/rules/__init__.py</code></td>
+<td><strong>no repetition rule existed</strong></td>
+<td><code>ThreefoldRepetitionRule</code>, rule 1.32.1</td>
 </tr>
 <tr>
 <td>4</td>
-<td>insufficient material is not an English draughts rule at all</td>
-<td><code>InsufficientMaterialRule</code> <strong>is</strong> in force and draws any position in which neither side still holds a man — which is two-king-against-one. Its own docstring: "not an English draughts rule and not quite true"</td>
-<td><code>games/checkers/rules/draws.py</code></td>
+<td>insufficient material is not an English draughts rule</td>
+<td><code>InsufficientMaterialRule</code> was in force and drew any position where neither side held a man — which is two-kings-against-one, a game that is still winnable</td>
+<td><strong>removed</strong>. Article 1.32 lists three draws and this was not one of them</td>
 </tr>
 <tr>
 <td>5</td>
-<td>two non-English variants are not in the rulebook's game</td>
-<td><code>LimitedKingsRule</code> caps how many kings a side may hold, which no rulebook does, and it is in force. <code>CaptureRule</code> also ships, but its <strong>maximum-capture restriction is off by default</strong>, which <em>is</em> the rulebook's game — so <code>CaptureRule</code> is configured correctly and <code>LimitedKingsRule</code> is not</td>
-<td><code>games/checkers/rules/__init__.py</code>, <code>limited_kings.py</code></td>
+<td>two non-English variants are not in force</td>
+<td><code>LimitedKingsRule</code> capped kings per side, which no rulebook does</td>
+<td>unchanged in class, but its shipped value is a side's full complement, so it forbids nothing until somebody lowers it</td>
 </tr>
 </tbody>
 </table>
-<ul>
+</li>
+<li>
+<p><strong>One divergence from the rulebook remains, deliberately.</strong> Rule 1.32.1 is a
+    <em>claim</em>: a player demonstrates to the referee that their next move would create
+    the position for the third time. The engine has no referee and no claim to make,
+    so <code>ThreefoldRepetitionRule</code> proposes the draw itself. The chess configuration's
+    own repetition rule diverges in the same way and for the same reason.</p>
+</li>
+<li><strong>The perft gate could not see any of this, and says so.</strong>
+    <code>tests/test_draughts_perft.py</code> measured a man needs more than eight plies to crown
+    from the starting position — its own two rows are in the way — so no king exists
+    anywhere in the tree it walks. A king that slides and a king that steps produce
+    identical counts at every depth it checks; both were measured at depth eight and
+    both gave 845931. The rulebook, not the numbers, is what decided the king's reach.
+    The gate's own docstring now records that blind spot, and <code>tests/test_checkers.py</code>
+    is what pins the king.</li>
+<li><strong>What closing this cost in counts</strong>: two self-consistent baselines in
+    <code>tests/test_draughts_perft.py</code> — <code>CHAIN_PERFT</code> and <code>CROWNING_PERFT</code> — changed,
+    because they are the only figures in that file a crowned king can reach within four
+    plies. The independent counter and the engine moved to the same new figures
+    together, which is what holding a position where the two differ is for.</li>
 <li><strong>Also absent, and not a departure</strong>: <code>games/checkers</code> declares <strong>zero</strong>
-  exporters. <code>build_configuration()</code> passes <code>exporters=[]</code>. FR-54 and planned PR
-  17 ask for <em>letter</em> and the metadata header; neither exists. This is a
-  requirement not yet met rather than a departure from the diagram, and it is
-  recorded here so it is not mistaken for a writer that exists and is wrong.</li>
+    exporters. <code>build_configuration()</code> passes <code>exporters=[]</code>. FR-54 and planned PR
+    17 ask for <em>letter</em> and the metadata header; neither exists. This is a
+    requirement not yet met rather than a departure from the diagram, and it is
+    recorded here so it is not mistaken for a writer that exists and is wrong.</li>
 <li><strong>Mitigation</strong>: none of this touches the engine or the diagram's classes. Each
-  departure is a rule's configured value or an absent rule inside one
-  configuration directory, which is exactly where <code>SCRATCHPAD.md</code> §2 says the
-  variation between games lives. Closing them is a change to
-  <code>games/checkers/</code> and to nothing else — which is the strongest evidence yet that
-  the abstraction holds.</li>
+    departure was a rule's configured value, a piece's declared step length, or an
+    absent rule inside one configuration directory, which is exactly where
+    <code>SCRATCHPAD.md</code> §2 says the variation between games lives. Closing them was a
+    change to <code>games/checkers/</code> and nothing else — the strongest evidence yet that
+    the abstraction holds. A variant that wants the international king changes one
+    number, <code>max_steps</code>, in one piece.</li>
 <li><strong>Approval</strong>: recorded 2026-10-04 as a measured discrepancy between <code>PRD.md</code>
-    FR-54 and <code>games/checkers/</code>, closed the same day against FR-54 as written, and
-    <strong>approved by the maintainer on 2026-10-04</strong>. The ruling covered all five gaps, the
-    one divergence kept on purpose (1.32.1 proposed rather than claimed), and leaving
-    <code>LimitedKingsRule</code> and <code>CaptureRule</code> declared and inert.</li>
+FR-54 and <code>games/checkers/</code>, closed the same day against FR-54 as written, and
+      <strong>approved by the maintainer on 2026-10-04</strong>. The ruling covered all five gaps, the
+      one divergence kept on purpose (1.32.1 proposed rather than claimed), and leaving
+      <code>LimitedKingsRule</code> and <code>CaptureRule</code> declared and inert.</li>
 </ul>
 <hr />
-<h3 id="22-a-configuration-composes-its-quests-instead-of-declaring-quest-files">22. A Configuration Composes Its Quests Instead of Declaring Quest Files<a class="headerlink" href="#22-a-configuration-composes-its-quests-instead-of-declaring-quest-files" title="Permanent link">&para;</a></h3>
+<p>### 22. A Configuration Composes Its Quests Instead of Declaring Quest Files</p>
 <ul>
 <li><strong>Date</strong>: 2026-10-04</li>
 <li><strong>Context</strong>: <code>PRD.md</code> §6 states, as a fact about the layout, that
@@ -1878,8 +1899,7 @@ relationships; each is an extension of a mechanism an earlier section registered
               <li><a href="#18-dead-configuration-state-is-populated-not-dropped">18. Dead Configuration State Is Populated, Not Dropped</a></li>
               <li><a href="#19-the-engine-names-no-notation-and-a-copy-keeps-its-own-rules">19. The Engine Names No Notation, and a Copy Keeps Its Own Rules</a></li>
               <li><a href="#20-the-settings-surface-gains-what-the-plan-recorded">20. The Settings Surface Gains What the Plan Recorded</a></li>
-              <li><a href="#21-gamescheckers-is-not-wcdf-english-draughts">21. games/checkers Is Not WCDF English Draughts</a></li>
-              <li><a href="#22-a-configuration-composes-its-quests-instead-of-declaring-quest-files">22. A Configuration Composes Its Quests Instead of Declaring Quest Files</a></li>
+              <li><a href="#21-gamescheckers-was-not-wcdf-english-draughts-and-now-is">21. games/checkers Was Not WCDF English Draughts, and Now Is</a></li>
               <li><a href="#23-members-the-diagram-draws-that-the-code-does-not-have-and-members-the-code-has-that-the-diagram-does-not-draw">23. Members the Diagram Draws That the Code Does Not Have, and Members the Code Has That the Diagram Does Not Draw</a></li>
               <li><a href="#24-two-docstrings-in-gamescheckers-misdescribe-the-rulebook-and-these-notes">24. Two Docstrings in games/checkers Misdescribe the Rulebook and These Notes</a></li>
             </ul>

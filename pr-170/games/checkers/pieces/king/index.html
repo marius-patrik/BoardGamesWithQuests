@@ -638,24 +638,22 @@
 
     <div class="doc doc-contents first">
 
-        <p>King: any distance along a diagonal, forwards or backwards.</p>
+        <p>King: one square diagonally, forwards or backwards.</p>
 <p>A king is a man that has been crowned, and everything that changes is declared here and
-nowhere else: it slides instead of stepping, and it jumps backwards as well as forwards.
-Both follow from the data rather than from a special case — no declared maximum step means
-the engine already slides it as far as the board allows, and all four diagonals are declared
-so a jump along any of them is available.</p>
-<p><strong>This is the flying king, and the WCDF rulebook for English draughts does not have one.</strong> Its
-"ordinary move of a king" is "from one square diagonally forward or backward, left or right
-to an immediately neighbouring vacant square", and its "capturing move of a king" is that of a
-man with the direction widened — one square over one piece onto the square beyond. Flying
-kings are the rule in international, Brazilian, Czech and Dutch draughts and the short king is
-the rule in English, American, Italian and Turkish draughts, and the two disagree about which
-positions a king has a move in, so they are genuinely different games.</p>
-<p>Flying is kept here because this configuration was specified with it, and because the two are
-one line of data: <code>max_steps=None</code> slides, <code>max_steps=1</code> steps. A variant that wants the
-rulebook's king declares <code>max_steps=1</code>, and every rule above reads that same number — a jump
-of one square or of any distance is <code>jump_reach</code>, which is this piece's declared step length.
-Nothing else in the configuration has to know which of the two games it is playing.</p>
+nowhere else: it steps instead of sliding, and it jumps backwards as well as forwards. Both
+follow from the data rather than from a special case — <code>max_steps=1</code> is a one-square step,
+and all four diagonals are declared so a jump along any of them is available.</p>
+<p>This is the WCDF rulebook's king, and it is what ships. Rule 1.17: an ordinary move of a king
+"is from one square diagonally forward or backward, left or right to an immediately
+neighbouring vacant square", and rule 1.21 gives its capturing move as a man's "but may be in
+a forward or backward direction" — one square over one piece onto the square beyond.</p>
+<p>The two kings are genuinely different games. The flying king of international, Brazilian,
+Czech and Dutch draughts slides and jumps any distance along a diagonal, and the two disagree
+about which positions a piece has a move in. Flying is one line of data here: <code>max_steps=None</code>
+slides and <code>max_steps=1</code> steps, so a variant that wants the international game changes this
+number and nothing else. Every rule above reads the same number — a jump of one square or of
+any distance is <code>jump_reach</code>, which is this piece's declared step length. Nothing else in the
+configuration has to know which of the two games it is playing.</p>
 <p>Whether a man may be crowned at all is a rule, and so is how many kings a side may hold. This
 piece does not decide either.</p>
 
@@ -695,7 +693,7 @@ piece does not decide either.</p>
 
 
 
-        <p>Slides any distance along any diagonal, and jumps the same way.</p>
+        <p>Steps one square along any diagonal, and jumps the same way.</p>
 
 
 
@@ -706,7 +704,9 @@ piece does not decide either.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>games/checkers/pieces/king.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-35">35</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-33">33</a></span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span>
 <span class="normal"><a href="#__codelineno-0-36">36</a></span>
 <span class="normal"><a href="#__codelineno-0-37">37</a></span>
 <span class="normal"><a href="#__codelineno-0-38">38</a></span>
@@ -724,29 +724,27 @@ piece does not decide either.</p>
 <span class="normal"><a href="#__codelineno-0-50">50</a></span>
 <span class="normal"><a href="#__codelineno-0-51">51</a></span>
 <span class="normal"><a href="#__codelineno-0-52">52</a></span>
-<span class="normal"><a href="#__codelineno-0-53">53</a></span>
-<span class="normal"><a href="#__codelineno-0-54">54</a></span>
-<span class="normal"><a href="#__codelineno-0-55">55</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="k">class</span><span class="w"> </span><span class="nc">King</span><span class="p">(</span><span class="n">Piece</span><span class="p">):</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="w">    </span><span class="sd">"""Slides any distance along any diagonal, and jumps the same way."""</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">piece_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"king"</span><span class="p">):</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="w">        </span><span class="sd">"""Initialize a King piece.</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">            color: Color identifier (1 for White, -1 for Black).</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">            piece_type: Piece descriptor (default: "king").</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">        """</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>            <span class="n">symbols</span><span class="o">=</span><span class="p">(</span><span class="s2">"⛁"</span><span class="p">,</span> <span class="s2">"⛃"</span><span class="p">),</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>            <span class="n">fen</span><span class="o">=</span><span class="s2">"K"</span><span class="p">,</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a>            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>            <span class="n">piece_type</span><span class="o">=</span><span class="n">piece_type</span><span class="p">,</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>            <span class="n">vectors</span><span class="o">=</span><span class="n">DIRECTIONS</span><span class="p">,</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>            <span class="n">attack_vectors</span><span class="o">=</span><span class="n">DIRECTIONS</span><span class="p">,</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>            <span class="n">can_jump</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">"King"</span><span class="p">,</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>            <span class="n">max_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="k">class</span><span class="w"> </span><span class="nc">King</span><span class="p">(</span><span class="n">Piece</span><span class="p">):</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="w">    </span><span class="sd">"""Steps one square along any diagonal, and jumps the same way."""</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">piece_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"king"</span><span class="p">):</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="w">        </span><span class="sd">"""Initialize a King piece.</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">            color: Color identifier (1 for White, -1 for Black).</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">            piece_type: Piece descriptor (default: "king").</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">        """</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>            <span class="n">symbols</span><span class="o">=</span><span class="p">(</span><span class="s2">"⛁"</span><span class="p">,</span> <span class="s2">"⛃"</span><span class="p">),</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>            <span class="n">fen</span><span class="o">=</span><span class="s2">"K"</span><span class="p">,</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>            <span class="n">piece_type</span><span class="o">=</span><span class="n">piece_type</span><span class="p">,</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a>            <span class="n">vectors</span><span class="o">=</span><span class="n">DIRECTIONS</span><span class="p">,</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>            <span class="n">attack_vectors</span><span class="o">=</span><span class="n">DIRECTIONS</span><span class="p">,</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a>            <span class="n">can_jump</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">"King"</span><span class="p">,</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>            <span class="n">max_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -826,7 +824,9 @@ piece does not decide either.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>games/checkers/pieces/king.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-38">38</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-36">36</a></span>
+<span class="normal"><a href="#__codelineno-0-37">37</a></span>
+<span class="normal"><a href="#__codelineno-0-38">38</a></span>
 <span class="normal"><a href="#__codelineno-0-39">39</a></span>
 <span class="normal"><a href="#__codelineno-0-40">40</a></span>
 <span class="normal"><a href="#__codelineno-0-41">41</a></span>
@@ -841,26 +841,24 @@ piece does not decide either.</p>
 <span class="normal"><a href="#__codelineno-0-50">50</a></span>
 <span class="normal"><a href="#__codelineno-0-51">51</a></span>
 <span class="normal"><a href="#__codelineno-0-52">52</a></span>
-<span class="normal"><a href="#__codelineno-0-53">53</a></span>
-<span class="normal"><a href="#__codelineno-0-54">54</a></span>
-<span class="normal"><a href="#__codelineno-0-55">55</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">piece_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"king"</span><span class="p">):</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="w">    </span><span class="sd">"""Initialize a King piece.</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">        color: Color identifier (1 for White, -1 for Black).</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">        piece_type: Piece descriptor (default: "king").</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    """</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>        <span class="n">symbols</span><span class="o">=</span><span class="p">(</span><span class="s2">"⛁"</span><span class="p">,</span> <span class="s2">"⛃"</span><span class="p">),</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>        <span class="n">fen</span><span class="o">=</span><span class="s2">"K"</span><span class="p">,</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a>        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>        <span class="n">piece_type</span><span class="o">=</span><span class="n">piece_type</span><span class="p">,</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>        <span class="n">vectors</span><span class="o">=</span><span class="n">DIRECTIONS</span><span class="p">,</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="n">attack_vectors</span><span class="o">=</span><span class="n">DIRECTIONS</span><span class="p">,</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">can_jump</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">"King"</span><span class="p">,</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="n">max_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">piece_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"king"</span><span class="p">):</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="w">    </span><span class="sd">"""Initialize a King piece.</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">        color: Color identifier (1 for White, -1 for Black).</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">        piece_type: Piece descriptor (default: "king").</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    """</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>        <span class="n">symbols</span><span class="o">=</span><span class="p">(</span><span class="s2">"⛁"</span><span class="p">,</span> <span class="s2">"⛃"</span><span class="p">),</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>        <span class="n">fen</span><span class="o">=</span><span class="s2">"K"</span><span class="p">,</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>        <span class="n">piece_type</span><span class="o">=</span><span class="n">piece_type</span><span class="p">,</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a>        <span class="n">vectors</span><span class="o">=</span><span class="n">DIRECTIONS</span><span class="p">,</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>        <span class="n">attack_vectors</span><span class="o">=</span><span class="n">DIRECTIONS</span><span class="p">,</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a>        <span class="n">can_jump</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">"King"</span><span class="p">,</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">max_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

@@ -652,11 +652,18 @@ and a rule that is not named here is not in force.</p>
   row is crowned and keeps playing, and the only ways out of the game are losing every piece,
   being unable to move, and the three draws.</li>
 <li><strong>Two of the eight rules are not English draughts at all.</strong> <code>LimitedKingsRule</code> caps how many
-  kings a side may hold, which no draughts rulebook does, and <code>CaptureRule</code> ships with its
-  maximum-capture restriction <em>switched off</em>, because the World Checkers Draughts Federation
-  rulebook says a player "may select any one that they wish, not necessarily that which gains
-  the most pieces". Both are here because they are variants somebody plays, and both are
-  configured so that what this configuration plays by default is the rulebook's game.</li>
+    kings a side may hold, which no draughts rulebook does, and <code>CaptureRule</code> ships with its
+    maximum-capture restriction <em>switched off</em>, because the World Checkers Draughts Federation
+    rulebook says a player "may select any one that they wish, not necessarily that which gains
+    the most pieces". Both are here because they are variants somebody plays, and both are
+    configured so that what this configuration plays by default is the rulebook's game. The cap
+    is set to a side's full complement, so <code>LimitedKingsRule</code> forbids nothing at its shipped
+    value and is only a limit once somebody lowers it.</li>
+<li><strong>The three draws are the rulebook's three.</strong> Article 1.32: agreement, the same position for
+    the third time, and forty moves by each side without advancing a man or removing a piece. A
+    fourth — a draw once neither side has a man left — was here and has been removed; no
+    draughts rulebook has it and it was wrong about the two-kings-against-one endgame it was
+    meant to describe. <code>notes/object_model.md</code> records the removal.</li>
 </ul>
 
 
@@ -728,21 +735,21 @@ and a rule that is not named here is not in force.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>games/checkers/rules/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-48">48</a></span>
-<span class="normal"><a href="#__codelineno-0-49">49</a></span>
-<span class="normal"><a href="#__codelineno-0-50">50</a></span>
-<span class="normal"><a href="#__codelineno-0-51">51</a></span>
-<span class="normal"><a href="#__codelineno-0-52">52</a></span>
-<span class="normal"><a href="#__codelineno-0-53">53</a></span>
-<span class="normal"><a href="#__codelineno-0-54">54</a></span>
-<span class="normal"><a href="#__codelineno-0-55">55</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Rule</span><span class="p">]:</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="w">    </span><span class="sd">"""Build one instance of every checkers rule, at its English-draughts value.</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">        List[Rule]: The rules in force, in declaration order. That order is also the tie</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">        break when two propose an outcome at once.</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">    """</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">rule</span><span class="p">()</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">RULES</span><span class="p">]</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-55">55</a></span>
+<span class="normal"><a href="#__codelineno-0-56">56</a></span>
+<span class="normal"><a href="#__codelineno-0-57">57</a></span>
+<span class="normal"><a href="#__codelineno-0-58">58</a></span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span>
+<span class="normal"><a href="#__codelineno-0-62">62</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Rule</span><span class="p">]:</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="w">    </span><span class="sd">"""Build one instance of every checkers rule, at its English-draughts value.</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">        List[Rule]: The rules in force, in declaration order. That order is also the tie</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">        break when two propose an outcome at once.</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">    """</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">rule</span><span class="p">()</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">RULES</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
