@@ -663,10 +663,12 @@ than these.</p>
 <li><strong>There is no royal piece.</strong> A king in this game is a man that has been crowned, and it is
   taken like any other piece, so nothing declares a royal kind and the engine's check
   machinery correctly finds nothing to do.</li>
-<li><strong>The king flies.</strong> The WCDF rulebook's English draughts king steps one square; this one
-  slides any distance, which is international, Brazilian, Czech and Dutch draughts. The
-  difference is one line in <code>pieces/king.py</code> and is documented there. What is gated by the
-  published perft counts in <code>tests/test_draughts_perft.py</code> is the flying game.</li>
+<li><strong>The king steps one square, as the rulebook says.</strong> WCDF rule 1.17 gives a king's ordinary
+    move as one square diagonally in any of the four directions, and rule 1.21 gives its
+    capturing move as a man's in any direction. The flying king of international, Brazilian,
+    Czech and Dutch draughts is the same piece with one number changed — <code>max_steps=None</code>
+    instead of <code>max_steps=1</code> in <code>pieces/king.py</code> — and <code>tests/test_draughts_perft.py</code> records
+    why the published perft counts cannot tell the two apart.</li>
 <li><strong>No man is removed.</strong> A man that reaches the far row is crowned and keeps playing; the
   only ways out of the game are losing every piece, being unable to move, and the draws.</li>
 </ul>
@@ -740,9 +742,7 @@ than these.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>games/checkers/__init__.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-42">42</a></span>
-<span class="normal"><a href="#__codelineno-0-43">43</a></span>
-<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-44">44</a></span>
 <span class="normal"><a href="#__codelineno-0-45">45</a></span>
 <span class="normal"><a href="#__codelineno-0-46">46</a></span>
 <span class="normal"><a href="#__codelineno-0-47">47</a></span>
@@ -757,24 +757,26 @@ than these.</p>
 <span class="normal"><a href="#__codelineno-0-56">56</a></span>
 <span class="normal"><a href="#__codelineno-0-57">57</a></span>
 <span class="normal"><a href="#__codelineno-0-58">58</a></span>
-<span class="normal"><a href="#__codelineno-0-59">59</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_configuration</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="w">    </span><span class="sd">"""Assemble the checkers configuration.</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">        Configuration: The checkers board, and the pieces, rules, quests, clocks and</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        exporters it brings with it.</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    """</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="k">return</span> <span class="n">Configuration</span><span class="p">(</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>        <span class="n">name</span><span class="o">=</span><span class="n">NAME</span><span class="p">,</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="n">path</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">board</span><span class="o">=</span><span class="n">build_board</span><span class="p">(),</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="n">pieces</span><span class="o">=</span><span class="p">[</span><span class="n">Man</span><span class="p">,</span> <span class="n">King</span><span class="p">],</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">build_rules</span><span class="p">(),</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="n">quests</span><span class="o">=</span><span class="n">build_quests</span><span class="p">(),</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>        <span class="n">clocks</span><span class="o">=</span><span class="p">[</span><span class="n">Fischer</span><span class="p">()],</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>        <span class="n">exporters</span><span class="o">=</span><span class="p">[],</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="n">board_factory</span><span class="o">=</span><span class="n">build_board</span><span class="p">,</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_configuration</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Configuration</span><span class="p">:</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="w">    </span><span class="sd">"""Assemble the checkers configuration.</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        Configuration: The checkers board, and the pieces, rules, quests, clocks and</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        exporters it brings with it.</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    """</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="k">return</span> <span class="n">Configuration</span><span class="p">(</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">name</span><span class="o">=</span><span class="n">NAME</span><span class="p">,</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="n">path</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="n">board</span><span class="o">=</span><span class="n">build_board</span><span class="p">(),</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="n">pieces</span><span class="o">=</span><span class="p">[</span><span class="n">Man</span><span class="p">,</span> <span class="n">King</span><span class="p">],</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>        <span class="n">rules</span><span class="o">=</span><span class="n">build_rules</span><span class="p">(),</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>        <span class="n">quests</span><span class="o">=</span><span class="n">build_quests</span><span class="p">(),</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="n">clocks</span><span class="o">=</span><span class="p">[</span><span class="n">Fischer</span><span class="p">()],</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>        <span class="n">exporters</span><span class="o">=</span><span class="p">[],</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="n">board_factory</span><span class="o">=</span><span class="n">build_board</span><span class="p">,</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
