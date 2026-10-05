@@ -167,6 +167,18 @@ class Move:
 
         if self.capture_from is not None:
             self.captured_piece = board.get_piece_at(self.capture_from)
+            if self.captured_piece is not None:
+                # The victim is not on the destination, so `move_piece` cannot record it. An
+                # en passant capture was therefore invisible to the board's capture lists, and
+                # the player's tray showed a pawn vanishing rather than being taken.
+                # The lists are named for the colour of the piece *taken*, not the taker: a
+                # White pawn taking a Black one fills `captured_black`. This had it the other
+                # way round, so an en passant capture showed the pawn under the wrong player.
+                taken_colour = self.captured_piece.getColor()
+                if taken_colour == 1 or taken_colour == "white":
+                    board.captured_white.append(self.captured_piece)
+                else:
+                    board.captured_black.append(self.captured_piece)
             board.set_piece_at(self.capture_from, None)
         else:
             self.captured_piece = board.get_piece_at(self.end_pos)

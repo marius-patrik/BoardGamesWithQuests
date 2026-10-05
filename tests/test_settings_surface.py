@@ -280,6 +280,37 @@ def test_a_deleted_variant_is_gone_and_nothing_else_is(games_dir):
     assert os.path.isdir(os.path.join(games_dir, DEFAULT_GAME))
 
 
+def test_a_name_that_is_not_one_path_segment_cannot_reach_the_disk(games_dir, tmp_path):
+    """`delete_configuration("..")` removed the directory *containing* `games/`.
+
+    The name was joined to the root and handed to `shutil.rmtree` without ever being asked
+    whether it was a single path segment, so a relative marker reached everything above the
+    configurations. The same hole let a rename move that directory aside.
+
+    Args:
+        games_dir: The throwaway `games/` root.
+        tmp_path: pytest's temporary directory, the parent of `games/`.
+
+    Returns:
+        None
+    """
+    outside = tmp_path / "precious.txt"
+    outside.write_text("not a configuration", encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        delete_configuration("..", root=games_dir)
+    with pytest.raises(ValueError):
+        delete_configuration(os.path.join(DEFAULT_GAME, ".."), root=games_dir)
+    with pytest.raises(ValueError):
+        rename_configuration("..", "elsewhere", root=games_dir)
+    with pytest.raises(ValueError):
+        rename_configuration(DEFAULT_GAME, "../elsewhere", root=games_dir)
+
+    assert outside.read_text(encoding="utf-8") == "not a configuration"
+    assert os.path.isdir(os.path.join(games_dir, DEFAULT_GAME))
+    assert os.path.isdir(str(tmp_path)), "the directory holding games/ must still be there"
+
+
 def test_deleting_a_configuration_that_is_not_there_says_so(games_dir):
     """Deleting nothing must not read as having deleted the default.
 
@@ -1564,3 +1595,35 @@ def _button_labels(widget):
         if child.winfo_class() in ("TButton", "Button"):
             yield child.cget("text")
         yield from _button_labels(child)
+
+
+def test_rebuilding_the_form_does_not_leave_the_old_pages_behind(tk_root, games_dir):
+    """Choosing another configuration rebuilds the form, and `forget` is not enough.
+
+    `notebook.forget` takes a page out of the notebook and leaves the widget alive as a child
+    of it, with every entry, label and editor still bound. Switching configuration five times
+    left thirty children on the notebook and twenty-five of them unreachable; a hundred-odd
+    live widgets after a dozen switches, each holding a StringVar and an editor pointing at a
+    file that may since have been renamed.
+
+    Args:
+        tk_root: The session's Tk root.
+        games_dir: A throwaway `games/` root holding the default configuration.
+
+    Returns:
+        None
+    """
+    dialog = SettingsDialog(
+        tk_root, load_configuration(DEFAULT_GAME, root=games_dir), root=games_dir
+    )
+    tk_root.update()
+    sections = len(dialog.notebook.tabs())
+
+    for _ in range(25):
+        dialog._rebuild()
+        tk_root.update()
+
+    assert len(dialog.notebook.tabs()) == sections, "the form lost or gained a section"
+    assert (
+        len(dialog.notebook.winfo_children()) == sections
+    ), f"{len(dialog.notebook.winfo_children())} pages are alive where {sections} should be"

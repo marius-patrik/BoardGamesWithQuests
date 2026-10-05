@@ -263,7 +263,13 @@ class SettingsDialog:
         self.sections = []
         self.entries_by_section = {name: [] for name in SECTIONS}
         for tab in self.notebook.tabs():
+            # `forget` only takes the page out of the notebook; the widget, its entries and its
+            # editors stay alive as children of it. Five rebuilds left thirty children behind,
+            # and a player switching configuration a dozen times was holding a hundred live
+            # widgets, each with a StringVar and an editor bound to a file that may since have
+            # been renamed. A forgotten page has to be destroyed, not just unshown.
             self.notebook.forget(tab)
+            self.notebook.nametowidget(tab).destroy()
         self._build_sections()
 
     def _tab(self, name: str) -> ttk.Frame:
@@ -296,7 +302,7 @@ class SettingsDialog:
         self.entries_by_section["Board"].append((board, fields, editors))
         ttk.Label(
             page,
-            text="Changing the size takes effect on the next game.",
+            text="Changing the size deals a new board, and ends the game in progress.",
             foreground="#666",
         ).pack(anchor="w")
 
@@ -528,8 +534,15 @@ class SettingsDialog:
             kind: `"rule"` or `"quest"`.
 
         Returns:
-            Optional[str]: The path created and opened, or None when the name was refused.
+            Optional[str]: The path created and opened, or None when the name was refused or
+            the configuration may not be edited.
         """
+        if self.configuration.is_default:
+            self.message.set(
+                f"{self.configuration.name} is the default configuration and cannot be edited. "
+                f"Duplicate it into a variant first."
+            )
+            return None
         name = filename.strip()
         stem = name[:-3] if name.endswith(".py") else name
         section = "rules" if kind == "rule" else "quests"
@@ -560,6 +573,12 @@ class SettingsDialog:
             kind=kind,
             package=self.configuration.package,
             root=self.configuration.path,
+            readonly_reason=(
+                f"{self.configuration.name} is the default configuration and cannot be edited. "
+                f"Duplicate it into a variant first."
+                if self.configuration.is_default
+                else None
+            ),
         )
         self.editors_open.append(editor)
         return editor
@@ -633,6 +652,18 @@ class SettingsDialog:
             bool: True when the values were written. False when the configuration refused,
             which is only ever the default.
         """
+        # Ask before touching anything, not after. Every section used to be applied first and
+        # the guard consulted last, so a refused save had already resized the board the running
+        # game is playing on and stranded half the pieces — and then said nothing had been
+        # written. `Configuration.board` is the live board, so applying is not undoable by
+        # declining to save.
+        if self.configuration.is_default:
+            self.message.set(
+                f"{self.configuration.name} is the default configuration and cannot be edited. "
+                f"Duplicate it into a variant first."
+            )
+            return False
+
         for section in SECTIONS:
             for subject, values in self.section_values(section):
                 fields = _declared_by(subject, section)
@@ -723,6 +754,9 @@ def _apply(subject: Any, fields: List[Field], values: Dict[str, Any], section: s
         apply_clock_values(subject, chosen)
         return
     if section == "Board":
+        # The board a configuration holds is the board a running game plays on — there is no
+        # second board until `new_game` deals one — so resizing it here ends the game in
+        # progress. The form says so, and the change takes hold for the next game.
         subject.set_dimensions(
             int(chosen.get("rows", subject.rows)), int(chosen.get("cols", subject.cols))
         )

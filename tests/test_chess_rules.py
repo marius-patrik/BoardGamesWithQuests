@@ -14,6 +14,7 @@ from games.chess.pieces.king import King
 from games.chess.pieces.pawn import Pawn
 from games.chess.pieces.queen import Queen
 from games.chess.pieces.rook import Rook
+from games.chess.board import build_board
 from games.chess.rules import build_rules
 from games.chess.rules.attacks import has_legal_move
 from games.chess.rules.check import in_check
@@ -24,6 +25,7 @@ from games.chess.rules.draws import (
     InsufficientMaterialRule,
     MutualAgreementRule,
     ThreefoldRepetitionRule,
+    position_key,
 )
 from games.chess.rules.flag import FlagFallRule
 from games.chess.rules.promotion import PromotionRule
@@ -389,3 +391,99 @@ def test_flag_fall_stays_silent_when_there_is_no_clock_to_fall():
     rule.attach()
     rule.active_color = 1
     assert rule.outcome(board) is None
+
+
+def test_castling_moves_the_king_two_files_and_the_rook_three():
+    """The two destinations come from the royal piece's own start file, not a constant.
+
+    Castling is offered from the middle of the back rank and lands the king two files towards
+    one rook and the rook one file inside that. Getting the two swapped put the king on the
+    rook's square, so this asserts both ends of both pieces.
+    """
+    board = castling_ready_board()
+    rule = CastlingRule()
+
+    kingside = rule.available_moves(board, board.get_piece_at((0, 4)))[0]
+
+    assert (kingside.start_pos, kingside.end_pos) == ((0, 4), (0, 6))
+    assert (kingside.companion_start, kingside.companion_end) == ((0, 7), (0, 5))
+
+
+def test_a_castle_actually_puts_both_pieces_on_their_squares():
+    """Offered is not played: the board must end with a king on g1 and a rook on f1."""
+    board = castling_ready_board()
+    board.set_piece_at((0, 1), None)
+    board.set_piece_at((0, 6), None)
+    rule = CastlingRule()
+    rule.attach()
+
+    castle = rule.available_moves(board, board.get_piece_at((0, 4)))[0]
+    assert castle.apply_to_board(board) is not None
+
+    assert board.get_piece_at((0, 6)).getType() == "king"
+    assert board.get_piece_at((0, 5)).getType() == "rook"
+    assert board.get_piece_at((0, 4)) is None
+    assert board.get_piece_at((0, 7)) is None
+
+
+def test_a_royal_piece_that_has_left_its_start_file_is_not_offered_a_castle():
+    """The castle is a move to two squares, and only from the one it started on."""
+    board = castling_ready_board()
+    king = board.get_piece_at((0, 4))
+    board.move_piece((0, 4), (0, 3))  # the king steps to d1
+    rule = CastlingRule()
+
+    assert rule.available_moves(board, king) == []
+
+
+def test_the_knight_shuffle_is_a_repetition_and_is_called_one():
+    """`1.Nf3 Nf6 2.Ng1 Ng8` twice returns to the start four times over.
+
+    The key carried every piece's moved flag, so the knight that had been to f3 and back was
+    not the knight that had not moved, and the starting position looked new each time. No draw
+    was ever offered in the one line of chess where threefold repetition is unavoidable.
+    """
+    board = build_board()
+    rule = ThreefoldRepetitionRule()
+    rule.attach()
+    colour = 1
+
+    shuffle = [
+        ((0, 6), (2, 5)),
+        ((7, 1), (5, 2)),
+        ((2, 5), (0, 6)),
+        ((5, 2), (7, 1)),
+    ] * 2
+
+    rule.active_color = colour
+    assert rule.outcome(board) is None  # the starting position, seen once
+    for ply, (start, end) in enumerate(shuffle, start=1):
+        move = Move(start, end)
+        move.apply_to_board(board)
+        rule.active_color = colour
+        rule.on_move_made(board, move)
+        colour = -colour
+        rule.active_color = colour
+        result = rule.outcome(board)
+        if ply < 8:
+            assert result is None, f"a draw was claimed after only {ply} plies"
+    assert result is not None, "the starting position occurred three times and nothing said so"
+    assert result.kind == "draw"
+    assert result.reason == "threefold repetition"
+
+
+def test_a_king_that_moved_and_came_back_is_not_the_same_position():
+    """The guard on the flag above: castling rights are part of a position's identity.
+
+    A king that has stepped out and back stands on its own square with the same pieces around
+    it and may no longer castle, which is a different position by the rulebook's own test.
+    """
+    board = build_board()
+    king = board.get_piece_at((0, 4))
+    before = position_key(board, 1)
+
+    board.move_piece((0, 4), (0, 3))
+    board.move_piece((0, 3), (0, 4))
+    king.setMoved(True)
+
+    assert position_key(board, 1) != before, "losing castling rights did not change the position"
