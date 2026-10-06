@@ -247,16 +247,40 @@ Recorded because the question is fair and the answer is not obvious.
   chess formats and live in `games/chess/export/`. A game with no FEN
   representation has no FEN exporter, because the structure says so rather than
   a runtime capability check deciding.
-- **A repetition key cannot see a capture in passing.** The rulebook counts two positions as
+- **A repetition key asks the rule set what it is offering.** The rulebook counts two positions as
   the same only when the same moves are available to every piece, and a pawn that has just
   advanced two squares hands the opponent a capture that the same placement without it does
-  not. This configuration keeps no en passant target on the board for `position_key` to read —
-  the offer lives in `EnPassantRule`'s state — so the key covers the placement, the side to
-  move and the castling rights, and not the offer. Reaching the same placement a second time
-  *with* a live offer needs a pawn to arrive on that square twice by two different routes,
-  which no line of play produces, so nothing measurable is lost. Recorded 2026-10-04; the
-  honest fix is for the en passant offer to live on the board, which is a change to that rule
-  and not a key.
+  not — so what a rule is offering is part of a position's identity and not merely part of its
+  moves. **Closed 2026-10-05.** This was recorded here as a limitation: the offer lived in
+  `EnPassantRule`'s state, the key read the board, and there was nothing on the board for it to
+  read. `Rule.target_square` is now declared on the parent — *"what square are you offering"*,
+  which `royal_kind` was already the model for — every rule answers it, and `position_key`
+  takes the rule set and asks. `EnPassantRule` answers with the square a capturing piece lands
+  on, one row behind the advanced piece, recorded after every declared first advance whether or
+  not a capture is available, which is the convention `export/fen.py` already writes and for
+  the same reason: an answer that depended on which pieces happened to be standing where would
+  depend on the rules in force rather than on the position.
+
+  Two things about that record remain true and are kept here rather than deleted with it.
+  **Reaching the same placement a second time *with* a live offer needs a pawn to arrive on
+  that square twice by two different routes, which no line of play produces** — one pawn starts
+  on each file, a long advance keeps the file, and a pawn that has advanced cannot come back —
+  so the case the key now answers is asked of the key and not of a game, and
+  `tests/test_chess_rules.py` asks it of the key. And **the key is conservative in the safe
+  direction**: two placements reached with an offer standing and without one are two positions
+  here where the rulebook would sometimes call them one, since an offer nobody can take up
+  grants no move — so a repetition can go uncounted, and a repetition the rulebook does not
+  allow can never be claimed.
+
+  **The offer belongs to a ply, and reading it is a question of when.** A rule that offers a
+  square withdraws the offer on the next move of any kind, so its answer is final only between
+  one move being announced and the next one tried; the rules are notified of a move one at a
+  time in composition order, and this configuration's `draws.py` is notified before its
+  `en_passant.py`. `ThreefoldRepetitionRule` therefore reads the placement when the move is
+  announced and the offers at the first moment the whole set has been told — which is
+  `permits_move`, every attempted move's validation. Nothing asks whether a game is over until
+  it is, so that moment is the only one guaranteed to arrive. No deviation: a question on the
+  parent, asked of the set, which is the shape `royal_kind` already has.
 - **`SurviveWithoutCapture` asks for quiet moves, not for moves that cost you nothing.**
   Its description read "Play the required number of moves without losing a piece",
   while `observe_move` counts a move only when `not event.is_capture` — that is, when the
@@ -1135,12 +1159,29 @@ earlier section registered.
   path: `build_configuration()` hands the same list to all five compositions, so a file that
   declares nothing is reported whichever section it was written into. The refusal for a file
   that cannot be imported is §25's, unchanged.
-- **Out of scope, recorded not fixed**: `games/chess/rules/promotion.py` holds
-  `PROMOTION_PIECES`, a second hand-written piece list — a kind a copy writes into `pieces/`
-  joins the catalogue but cannot be promoted to, which is a different question from the
-  catalogue and belongs to the rule. `view/settings_dialog.py` offers the code editor on the
-  Rules and Quests tabs only and `model/game/source_validation.py` validates `"rule"` and
-  `"quest"` only, so a piece, a clock or a writer is still written by hand.
+- **`PromotionRule` reads the catalogue, not a list of its own.** `games/chess/rules/promotion.py`
+  held `PROMOTION_PIECES` — a second hand-written catalogue beside the composed one — so a kind a
+  copy wrote into `pieces/` joined the catalogue and could not be promoted to. The rule now
+  composes `../pieces` itself, relatively, when it is composed, and resolves every kind it is
+  asked for there: the shape `CrowningRule` already has, where `rules/geometric.py:crown` resolves
+  what a man becomes out of its own configuration's package rather than out of a list beside it.
+  Two declarations decide the rest. **A declaration wins**: a configuration that names its
+  `promotion_kinds` gets exactly those, and a kind the catalogue has no piece for is refused by
+  name rather than dropped — which is why the field is now text rather than a fixed set of
+  choices, so a kind a player's own piece introduces can be named without a code edit. **A blank
+  declaration asks the catalogue**, and what the catalogue may be promoted *to* is declared by the
+  pieces themselves: `Piece.promotion_target`, `False` on the two kinds chess excludes — a pawn,
+  which is what promotes rather than what one becomes, and a king, which is what ends a game
+  rather than what a promotion produces. That is the answer to "how does the rule know the
+  difference": not by a name written into `promotion.py`, and not by asking the rule set whether
+  a kind is royal, which is a question whose answer only exists once the rules are wired. The
+  knight's two spellings are no longer bridged *here* — the catalogue is the authority and it
+  reports one descriptor per piece, so a configuration wanting the other spelling declares it as
+  that piece's `piece_type`, which is data it persists. `draws.py`'s `_KIND_ALIASES` is unchanged
+  for the rules that compare a *configured* kind against a piece.
+- **Still out of scope, recorded not fixed**: `view/settings_dialog.py` offers the code editor on
+  the Rules and Quests tabs only and `model/game/source_validation.py` validates `"rule"` and
+  `"quest"` only, so a piece, a clock or a writer is still written by hand — §29.
 - **Approval**: directed by the user, 2026-10-05, to compose `pieces`, `clocks` and `export`
   from their own directories "using the same mechanism and the same policy", with the two
   judgement calls named as questions to be answered rather than inherited.
@@ -1165,11 +1206,39 @@ earlier section registered.
      repetition has seen — and replaying through them would leave a finished game whose rules
      had forgotten it. It is a chess-configuration concern and it lives in
      `games/chess/export/`, which is where §7 places every other notation concern.
-  2. **`ExportPGN.to_pgn` takes the position the moves were played from.** It defaults to this
-     configuration's own starting position, which is what a game in this configuration starts
-     from. The parameter is what lets the notation be tested on positions a game cannot reach —
-     three queens, a promotion that gives check — and it is how a caller whose game did not
-     start here is not given notation read against a game that is not the one being written.
+     **The writer composes that copy once and every replay resets it** (`Rule.reset`, which
+     clears the state before seeding it — the call `GameManager.new_game` makes for the same
+     reason), so what must be fresh per game is the *state* and not the objects. It used to
+     compose per call, which meant every game written paid for thirteen rules to answer
+     questions about castling rights and check that a reset set answers identically; composing
+     them per call was noted as a cost and is no longer one. **The invalidation is the writer
+     itself**: a writer is composed by the configuration that offers it, so it is built once per
+     configuration load and discarded with it, and saving a rule file loads the configuration
+     again — which purges its modules and builds new writers with new rules. A set therefore
+     cannot outlive the files it came from, and no cache of its own is needed to say so.
+  2. **A writer is handed the position the game began in.** `GameManager.opening_position` is
+     an independent snapshot of the position a game was dealt, taken in `__init__` and again in
+     `new_game` — the two moments a game is dealt, and the only two at which the board is a
+     position a game began in rather than the position a game is in. `transcript` hands it to
+     every writer beside `board` and `active_color`, and hands a **copy** each time, because a
+     writer that reads a position replays the game on it and the manager's snapshot is the
+     record of where the game began: one snapshot shared by every write would make the second
+     transcript begin where the first one ended.
+     **Why the snapshot is taken from the board that was dealt and not from
+     `configuration.new_board()`**: `new_board` falls back to returning the board the
+     configuration already holds when no factory was declared, and for such a configuration that
+     board is the live one — so asking it during a game hands a writer the position it is
+     trying to write, and the notation describes a game that was never played. That fallback is
+     what `Configuration.new_board`'s own docstring records, and `tests/test_manager_exporters.py`
+     holds the case standing: the test asserts that `new_board()` *is* the live board before it
+     asserts that the opening position is not it.
+     `ExportPGN.to_pgn` still takes a position for a caller that holds one — the tests need
+     positions a game cannot reach, three queens and a promotion that gives check — and it
+     defaults to this configuration's own starting position, which is a fact this configuration
+     knows rather than something the writer makes up. A caller that passes nothing gets that
+     opening and a replay that stops at the first move that does not belong to it, so a move
+     list played from somewhere else is written from what the moves themselves carry and claims
+     no hint and no suffix it did not read.
   3. **`ExportFEN` gained four public methods** — `castling_rights`, `en_passant_target`,
      `halfmove_clock` and `fullmove_number` — one per field it computes. The diagram's
      `ChessNotationWriter` box draws a format list and `item`, and §23 records that no `item`
@@ -1187,59 +1256,75 @@ earlier section registered.
      was a default of `1` that nothing passed, so every position with the second colour to move
      was written `w`. This is §19's kind of departure — the manager hands over rather than
      knowing — and not a diagram deviation.
-- **No engine change was needed for any of it.** `Replay` and the FEN methods are chess's; the
-  one engine change is a kwarg the manager already passes to every writer, and it names no
-  game. `tests/test_engine_holds_no_chess.py` walks `model/` with the writer and format names
-  read from the configuration and is unchanged.
+- **Two engine changes were needed, and neither names a game.** `Replay` and the FEN methods are
+  chess's. What the engine gained is `Board.snapshot()` — an independent copy of a position, the
+  one thing a board is for that nothing else could do — and the manager handing it to writers as
+  `opening_position`. `active_color` was the same kind of kwarg and predates this.
+  `tests/test_engine_holds_no_chess.py` walks `model/` with the writer and format names read from
+  the configuration and is unchanged; `opening_position` is not a writer name and not a format
+  name, and the gate covers both.
 - **Approval**: this is the change `PRD.md` §7.7's four records were amended for, and the
   maintainer's standing rule that the diagram is the whole specification is what §12's
   withdrawal rests on. Recorded 2026-10-05.
 
 ---
 
-### 28. The Engine Names the Default Configuration, and That Is Configuration
+### 28. The Default Configuration Is Declared by the Root, and the Engine Names No Game
 
-- **Date**: 2026-10-05
+- **Date**: 2026-10-05. **Revised 2026-10-05**: the reading below was weighed, found defensible
+  and **declined** — "a default configuration name is product configuration, not chess
+  knowledge" is not what the maintainer ruled — so the string is gone and this section records
+  what replaced it and why the alternative was worse.
 - **Context**: `SCRATCHPAD.md` constraint 1.4 is that the engine holds no chess, and
   `SCRATCHPAD.md` §8 item 14 is its one-line form: *"Nothing in the engine mentions a king, a
-  pawn, a check or a mate."* `model/game/games.py:12` reads `DEFAULT_GAME = "chess"`. It is
-  the one chess string in the engine, and nothing recorded it.
-- **Why the gate does not catch it, which is not an oversight.** `tests/test_engine_holds_no_chess.py`
-  reads its vocabulary at run time rather than keeping it beside the code it guards — from
-  `build_pieces()` for piece kinds (`bishop`, `horse`, `king`, `pawn`, `queen`, `rook`), from
-  the `ExportWriter` subclasses `games/chess/export/` declares, and from the notations
-  `load_configuration("chess").exporters` offers (`algebraic`, `fen`, `field-field-extra`,
-  `pgn`, `stenographic`). A configuration's own **name** is in none of those three sets, and
-  the string `chess` is not in any of them.
-- **Deviation, and the reasoning that defends it**: `DEFAULT_GAME` is a **product
-  configuration value, not chess knowledge.** The engine must be able to answer "which
-  configuration does a game start in when the player selects nothing", and that question has
-  an answer whatever game the distribution ships. `Configuration.is_default`
-  (`model/game/configuration.py:164`) is the same fact read from the other side, and it is a
-  real concept with tests — `tests/test_view.py:455` asserts the start modal's configuration
-  *is* the default, and `tests/test_settings_surface.py:338` asserts a copy is not. FR-27 and
-  FR-28 — the default cannot be renamed or deleted — cannot be enforced at all without
-  naming it. Removing the string would not make the engine configuration-agnostic; it would
-  move the same name to `chesswithquests/__init__.py`, where `build_application`'s default
-  argument lives and where a gate walking only `model/` would no longer see it, which is
-  hiding the coupling rather than removing it.
-- **Why the engine-leak vocabulary must not grow to cover it.** The gate's three sets are all
-  *vocabulary a game teaches the engine*: piece kinds it must not special-case, writer classes
-  it must not hold, and notation names it must not know. A configuration name is none of
-  those — it is the product's answer to "which one is the default", and a distribution whose
-  default were `go` would change this string and nothing else. **Adding configuration names
-  to that vocabulary would make the gate fail on every shipped product and pass on none of
-  them**: it would forbid the string the product requires while never catching a piece kind, a
-  writer or a notation, which is the only thing the gate is for. The honest form of the
-  invariant is therefore the one `SCRATCHPAD.md` §8 item 14 already gives — nothing in the
-  engine names *what a piece is* — and `chess` names no piece, no rule and no notation.
-- **Approval**: **not approved.** Recorded 2026-10-05 as the one place the engine names a
-  game, with the reasoning above, so that a reader who finds it knows it was weighed rather
-  than missed. **No code changed**: the alternative reading — that the default belongs to the
-  configuration layer alone — was considered and not adopted, because §20's `is_default` and
-  FR-27 and FR-28 already make the engine the place that knows the answer.
-
----
+  pawn, a check or a mate."* `model/game/games.py:12` read `DEFAULT_GAME = "chess"`, consumed at
+  ten sites in `model/game/configuration.py` for the edit, rename and delete guards. It was the
+  one chess string in the engine.
+- **Why the gate did not catch it.** `tests/test_engine_holds_no_chess.py` read its vocabulary at
+  run time — from `build_pieces()` for piece kinds, from the `ExportWriter` subclasses
+  `games/chess/export/` declares, and from the notations `load_configuration("chess")` offers.
+  A configuration's own **name** is none of those, and `chess` is not in any of them. §28's first
+  form argued the vocabulary must not grow to cover it, on the ground that a gate naming
+  configuration names would fail on every shipped product. That argument has a better answer
+  available than it gave itself: the vocabulary is read from the installed `games/`, so it holds
+  exactly the names the product ships, and the engine's answer is to hold no name at all rather
+  than a different one.
+- **What makes a configuration the default, and why not the configuration.** The configurations
+  root declares it, in `games/default.json`: `{"configuration": "chess"}`. `default_configuration_name`
+  reads that; `Configuration.is_default` is true when the root this configuration was loaded from
+  names it; `copy_configuration`, `rename_configuration` and `delete_configuration` refuse that
+  name, and `load_default_configuration` loads it, falling back to the first configuration
+  shipped when a root declares none.
+  **A declaration inside a configuration cannot answer the question, and this is the whole
+  reasoning.** A configuration is copied to make a variant — `SCRATCHPAD.md` §2 makes `cp -r` the
+  extension mechanism — and a copy is byte-identical to its original. Whatever a configuration
+  declared about itself, its copy declares identically, so `Configuration(default=True)` set by
+  `games/chess/__init__.py` is also set by every copy of it: `house` would inherit the protection
+  every variant exists to escape, and the tests that hold a variant editable would have had to be
+  weakened to keep it. `Configuration.is_default` had to stop being a name comparison for the
+  guards to keep working at all.
+  **Reading the declaration as a file rather than by loading anything** is the second half of it.
+  The guards must never fail for want of their own answer: a variant whose rule does not import
+  cannot be loaded, and a guard that had to load a configuration to ask whether it was the
+  default would make deleting the thing you broke the one operation that fails.
+  `tests/test_settings_surface.py` holds both — a copy is writable, renamable and deletable, and a
+  configuration that cannot be imported is still deletable.
+- **Where the name went, and what that costs.** `games/chess/__init__.py` declares
+  `CONFIGURATION_NAME = "chess"` for its own directory name, which is a configuration's business;
+  `view/app.py`, `view/settings_dialog.py` and `chesswithquests/__init__.py` resolve the default by
+  loading it rather than by naming it, so `build_application(game=None)` and `--game` with no
+  value are what they are now. The start modal's default and the settings selector's order come
+  from `available_games`, which reads the declaration — so a distribution whose default were `go`
+  is one JSON file changed and nothing else.
+- **What the widened gate found that nothing had.** The declaration's vocabulary is the shipped
+  configuration directories, read from `games/`, matched case-insensitively and word-bounded over
+  the same docstring-stripped walk. With `DEFAULT_GAME` gone it reported one more offender on its
+  first run: `model/game/logger.py` wrote `# Chess Game Log` as the first line of every log file
+  the product has ever produced. That is a chess name in the engine in a form no source-reading
+  gate for *constants* would ever have caught, and it is now `# Game log`.
+- **Approval**: recorded 2026-10-05 as the one place the engine named a game, **not approved**, and
+  the maintainer ruled 2026-10-05 that nothing is to be left: a deviation recorded for a reason
+  that still holds is work to do, not a note to keep. This section is the record of the work.
 
 ### 29. The Code Editor Reaches Rules and Quests, and the Other Three Sections Are Hand-Written by Design
 

@@ -237,7 +237,7 @@ each of them.
 |---|---|
 | ~~**Export is the largest remaining hole — and it is now the *records*, not the mechanism.**~~ **Closed 2026-10-05.** All five of the diagram's formats are one writer class each, in `games/chess/export/`, and the engine holds only the `ExportWriter` protocol. All three of the wrong records — the three rows below — were corrected in the same change | `games/chess/export/{pgn,fen,stenographic}.py` |
 | ~~**FEN writes four placeholder fields.**~~ **Closed 2026-10-05.** `return f"{board_fen} {turn} - - 0 1"` wrote the same four values whatever the game was doing. Castling rights now come from the two pieces and their flags (the same question `rules/castling.py` asks, with the kind names read out of that rule rather than written here), the en passant target from the last move, the halfmove clock from the plies since a capture or an advance — which is `FiftyMoveRule`'s own number, asserted equal so no second counter exists — and the fullmove number from the move count. `GameManager.transcript` also hands the writer the side to move, which nothing passed and which made every position with Black to move read `w` | `games/chess/export/fen.py`, `model/game/manager.py` |
-| ~~**PGN movetext is not SAN.**~~ **Closed 2026-10-05.** The movetext is Standard Algebraic Notation: piece letters, `x`, the file or rank that says which identical piece moved, the file a pawn took from, `O-O`/`O-O-O` read off the rook's square, `=Q`, and `+`/`#`. SAN is a question about a position and a `Move` carries none, so the writer **replays** the game — a fresh board from its own configuration, its own copy of the rules, notified of each move as `GameManager.make_move` notifies them. Asserted against the Opera Game's published movetext, written in as a literal, and case by case | `games/chess/export/pgn.py`, `tests/test_transcript_notation.py` |
+| ~~**PGN movetext is not SAN.**~~ **Closed 2026-10-05.** The movetext is Standard Algebraic Notation: piece letters, `x`, the file or rank that says which identical piece moved, the file a pawn took from, `O-O`/`O-O-O` read off the rook's square, `=Q`, and `+`/`#`. SAN is a question about a position and a `Move` carries none, so the writer **replays** the game — a fresh board from its own configuration, notified of each move as `GameManager.make_move` notifies them and read through the writer's own copy of the rules — composed once per configuration load and reset for each game, so what is fresh per game is the state rather than thirteen rules. The manager hands the writer the position the game began in, so a game is not written against whatever a configuration deals by default. Asserted against the Opera Game's published movetext, written in as a literal, and case by case | `games/chess/export/pgn.py`, `tests/test_transcript_notation.py` |
 | ~~**Stenographic is a coordinate pair, not a stenographic record.**~~ **Closed 2026-10-05.** The record is compressed with a standard library codec — `STANDARD_CODECS` is `zlib`, `gzip`, `bz2` and `lzma` and nothing else — with `zlib` as the standard choice and the codec configurable per writer and per call. The bytes are written as base85 because a writer returns a `str`, and the record names the codec that produced it so `from_stenographic` can read it back. What the three sentences of the specification settle, and what was decided, is in the module docstring | `games/chess/export/stenographic.py`, `tests/test_coordinate_record.py` |
 | ~~**`PRD.md` FR-52 claims a FEN import that does not exist.**~~ **Closed 2026-10-05, by amendment.** FR-52 said a reader was "directed by the user on 2026-10-02" and `notes/object_model.md` §12 recorded it. No reader exists, and the owner's rule is that the diagram is the whole specification — and the diagram draws writers. FR-47 and FR-52 are amended and §12's approval line is withdrawn. **The reader is not built** | `PRD.md` FR-47/FR-52, `notes/object_model.md` §12, §27 |
 | **The draughts letter record does not write the route of a capture chain.** `ExportLetter` writes the departure square and the arrival square, which is the rulebook's own convention (FMJD Annex 1 article 8.2), but a chain of three jumps that arrives on 30 by one route and a different chain that arrives on 30 by another read alike. The disambiguating long form — every square landed on, `18x25x30` — is what `PDN` prescribes for exactly this and is **not written**. Recorded rather than fixed: a chain is one move in this engine, so the record is correct about what was played and silent about how | `games/checkers/export/letter.py`, `move_text` |
@@ -258,7 +258,12 @@ line and §8's item 24a — and once in `README.md`. All four now say the opposi
 `model/game/configuration.py` also carries `copy_configuration`,
 `rename_configuration` and `delete_configuration`, which refuse the default
 configuration — so FR-27 and FR-28 are enforced at the data layer whether or not a
-widget calls them.
+widget calls them. **Which configuration is the default is now declared by the
+configurations root** in `games/default.json`, read by
+`default_configuration_name()`; the guards refuse the name that declaration gives,
+read it without importing anything so a variant that cannot be loaded is still
+deletable, and a copy of the default is neither refused nor protected — a copy is
+byte-identical to its original, which is why the declaration cannot live inside one.
 
 ### 4.2 What the game loop does
 
@@ -1196,15 +1201,22 @@ and every `hasattr` probe are gone. `find_king` is gone. **`is_check`
 called from `manager.py:211,215,353,354`. Neither is *hard-coded* coupling —
 neither names a piece type — but neither was removed either.
 
-**Where `getType()` actually still is.** Twenty-one call sites across ten files,
-counted as occurrences of the call rather than lines holding it — `attacks.py:98`,
-`draws.py:340` and `geometric.py:89` each hold two:
+**Where `getType()` actually still is.** Twenty-two call sites across ten files,
+counted as occurrences of the call rather than lines holding it — `attacks.py:98` and
+`geometric.py:89` each hold two:
 
 | Location | Sites |
 |---|---|
-| `games/chess/rules/` | **13 across 5 files** — `attacks.py:62,98`, `castling.py:84,145,191,215`, `draws.py:128,333,340,395`, `bishop_colour.py:90`, `promotion.py:102` |
-| `games/checkers/rules/` | 5 across 3 files — `draws.py:100`, `limited_kings.py:68`, `geometric.py:89,131` |
-| `model/game/` | **3 across 2 files** — `validator.py:199`, `manager.py:351,352` |
+| `games/chess/rules/` | **14 across 5 files** — `attacks.py:62,98`, `bishop_colour.py:90`, `castling.py:88,149,195,219`, `draws.py:128,432,439,536`, `promotion.py:119,270` |
+| `games/checkers/rules/` | 6 across 3 files — `draws.py:105,229`, `limited_kings.py:68`, `geometric.py:89,131` |
+| `model/game/` | **3 across 2 files** — `validator.py:199`, `manager.py:382,383` |
+
+Re-measured 2026-10-05 rather than inherited. This table said **twelve** sites in
+`games/chess/rules/` listed as thirteen, with `castling.py` and `draws.py` three
+and four lines out of date and `promotion.py` holding one call where it now holds
+two — the second is the one that resolves what a pawn may be promoted to out of
+this configuration's own catalogue, added with the catalogue-driven promotion.
+The two `model/game/` rows were correct and are unchanged.
 
 An earlier revision of this section said "the three remaining `getType()`
 comparisons are in `games/chess/rules/` — `attacks.py`, `castling.py` and
@@ -1788,12 +1800,14 @@ offers the two formats that mean something for it. **The engine-change half
 30. Every deviation recorded in `notes/object_model.md` with approval context.
     **Now true.** The audit behind this correction found eleven unrecorded
     departures; §21, §22, §23 and §24 of that file record them, and §3, §7, §9,
-    §11, §13 and §15 have been corrected against the code. **Two more are recorded
-    2026-10-05, both weighed and neither approved:** §28, the one chess string in
-    the engine (`DEFAULT_GAME = "chess"`), which is a product configuration value
-    and which the engine-leak gate's vocabulary deliberately does not and should not
-    cover; and §29, the code editor reaching rules and quests only, the other three
-    sections being written by hand by design.
+    §11, §13 and §15 have been corrected against the code. **The eleventh was
+    recorded 2026-10-05 and is now fixed:** §28, the one chess string in the engine
+    (`DEFAULT_GAME = "chess"`), recorded as a product configuration value and then
+    declined — the default is declared by the configurations root in
+    `games/default.json`, the guards read that, and the engine holds no configuration
+    name at all. **The twelfth is recorded, weighed and not approved:** §29, the code
+    editor reaching rules and quests only, the other three sections being written by
+    hand by design.
 31. `notes/chess_rules.md` amended where board generalisation departs from it.
 32. Nothing in §4.3's unreferenced list survives the PR 20 re-check; the §4.4
     docstring gaps are closed. **The docstring half holds; the other half has not

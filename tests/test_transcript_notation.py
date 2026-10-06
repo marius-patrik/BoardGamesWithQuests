@@ -502,3 +502,109 @@ def test_the_writer_replays_from_the_configurations_own_starting_position_by_def
 
     assert "1. e4" in text
     assert build_board().rows == 8
+
+
+def test_a_game_that_began_elsewhere_is_written_against_where_it_began():
+    """The whole path, with nobody supplying a position: the manager tells the writer.
+
+    The game is dealt from a board that differs from this configuration's starting position in
+    one piece — the knight that stands on b1 stands on d2 instead — so the first move, `d2f3`,
+    is one two knights can both make. That is the question the notation asks of a position and
+    cannot ask of a `Move`, and the answer here is `Ndf3`: the file of the knight that moved.
+    Read against the configuration's own opening instead, where d2 holds a pawn and no knight
+    stands there at all, the same move would be written as a bare `f3` — a well-formed move of
+    a game that was never played.
+
+    Returns:
+        None
+    """
+    board = build_board()
+    board.move_piece(algebraic_to_pos("b1"), algebraic_to_pos("d2"))
+    game = GameManager(board=board)
+    move = game.move_validator.find_move(algebraic_to_pos("d2"), algebraic_to_pos("f3"), game.board)
+
+    assert game.make_move(move) is True
+    movetext = game.transcript("PGN").split("\n\n")[1]
+
+    assert movetext.startswith("1. Ndf3")
+    assert game.opening_position.get_piece_at(algebraic_to_pos("d2")) is not None
+    assert game.board.get_piece_at(algebraic_to_pos("d2")) is None
+
+
+def test_writing_one_game_twice_writes_that_game_twice():
+    """The second transcript must not begin where the first one ended.
+
+    A writer that reads a position replays the game on it, so the position it is handed is
+    consumed by being written — the board is left as the replay ended. The manager keeps its own
+    record of where the game began and hands each writer a copy of that, so asking twice asks
+    the same question twice rather than asking what the first answer left behind.
+
+    Returns:
+        None
+    """
+    game = _play(OPERA_SQUARES)
+    game.finish_game()
+
+    assert game.transcript("PGN") == game.transcript("PGN")
+
+
+def test_a_writer_composes_its_rules_once_and_not_once_per_game(monkeypatch):
+    """Writing a game in a loop must not compose a rule set every time.
+
+    A rule set has to be the writer's own rather than the game's — the rules in force hold the
+    history of the game being played — so what cannot be shared is its *state*. Composing it per
+    call meant every game written paid for thirteen rules to answer questions a set it already
+    holds answers the same way; `Rule.reset` is what makes borrowing one safe, and this asserts
+    that the composition really is the configuration load's cost rather than the write's.
+
+    Returns:
+        None
+    """
+    from games.chess.rules import build_rules
+
+    composed = []
+    real = build_rules
+
+    def counting(notes=None):
+        """Compose the rules as usual, and remember that it happened.
+
+        Args:
+            notes: Ignored, and named so the caller's signature is honoured.
+
+        Returns:
+            list: Whatever the real composition returns.
+        """
+        composed.append(True)
+        return real(notes)
+
+    monkeypatch.setattr("games.chess.rules.build_rules", counting)
+    writer = ExportPGN()
+
+    writer.to_pgn([Move(algebraic_to_pos("e2"), algebraic_to_pos("e4"))])
+    writer.to_pgn([Move(algebraic_to_pos("e2"), algebraic_to_pos("e4"))])
+    writer.to_pgn([])
+
+    assert len(composed) == 1, f"the rules were composed {len(composed)} times"
+
+
+def test_the_rules_a_writer_borrows_carry_nothing_over_from_the_last_game():
+    """Borrowing a rule set is only safe if `reset` really does clear it.
+
+    The game written here castles on both sides and ends in a mate, so a set that remembered the
+    first write would refuse the second one's castling rights and answer the check questions
+    from a game that had already ended. Two identical records is the assertion; which rule would
+    have given it away does not matter.
+
+    Returns:
+        None
+    """
+    game = _play(OPERA_SQUARES)
+    moves = [event.move for event in game.move_events]
+
+    writer = ExportPGN()
+    first = writer.to_pgn(moves)
+    second = writer.to_pgn(moves)
+
+    assert writer.rules, "a writer that composes no rule set of its own has nothing to borrow"
+    assert first == second
+    assert "O-O-O" in first and "Rd8#" in first

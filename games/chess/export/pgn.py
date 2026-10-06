@@ -42,10 +42,17 @@ own square is read; the name of the move type is the fallback for a hand-built m
 no companion.
 
 **A move that cannot be replayed is still written.** A caller may hand this writer a move list
-that did not begin at this configuration's starting position — a fragment quoted out of a
-game, or a test's two squares. The token is written from what the move itself carries, the
-replay stops there, and no suffix is claimed for anything after it, because a check that was
-never looked for must not be written as one that was not found.
+that did not begin at the position it is given — a fragment quoted out of a game, or a test's
+two squares. The token is written from what the move itself carries, the replay stops there,
+and no suffix is claimed for anything after it, because a check that was never looked for must
+not be written as one that was not found.
+
+**The position the game began in is handed over, not inferred.** `GameManager.transcript` passes
+`opening_position` to every writer, and `Replay` plays on that. What is left as a default is this
+configuration's own starting position, which is a fact this configuration knows rather than
+something the writer makes up: a caller that holds a different position passes it, and a caller
+that passes nothing gets this game's opening and a replay that stops at the first move that
+does not belong to it.
 """
 
 from datetime import datetime
@@ -117,8 +124,10 @@ class Replay:
             point it stopped is known and no suffix may be claimed.
     """
 
-    def __init__(self, moves: List[Any], position: Optional[Any] = None):
-        """Deal the starting position and compose this replay's own rules.
+    def __init__(
+        self, moves: List[Any], position: Optional[Any] = None, rules: Optional[List[Any]] = None
+    ):
+        """Deal the starting position and take hold of a rule set to read the game through.
 
         The imports are inside the constructor because `..board` imports the naming out of this
         same package: a module-level import would ask for `games.chess.board` while that module
@@ -126,19 +135,37 @@ class Replay:
 
         Args:
             moves: The `Move` objects as they were played, in order.
-            position: The position the moves were played from. Defaults to None, which deals
-                this configuration's own starting position — what a game in this configuration
-                always starts from. A caller holding a different position hands it in, rather
-                than being given notation read against a game that is not the one being written.
+            position: The position the moves were played from — where the game began. The
+                manager hands this to every writer, so a game is written against the position
+                it started in rather than against whatever a configuration deals by default.
+                Defaults to None, which deals this configuration's own starting position: what
+                a game in this configuration always starts from, and a fact this configuration
+                knows. A caller holding a different position hands it in, and a caller who
+                hands nothing gets this one and a replay that stops at the first move that
+                does not belong to it — which is a record of what it was given, not a guess.
+            rules: A rule set to read the game through. Defaults to None, which composes this
+                configuration's own rules — what a caller who stands a `Replay` up on its own
+                gets. A rule set handed in is *borrowed*: it is reset to its starting state
+                before the first move and belongs to whoever composed it, so two replays through
+                one writer are sequential by construction, which is how a writer uses them.
         """
         from ..board import build_board
-        from ..rules import build_rules
 
         self.moves: List[Any] = list(moves or [])
         self.board: Any = position if position is not None else build_board()
-        self.rules: List[Any] = build_rules()
+        if rules is None:
+            from ..rules import build_rules
+
+            rules = build_rules()
+        # `reset`, not `attach`: a borrowed rule set carries the last replay's history — which
+        # colours have castled, whose advance may be taken, which positions a repetition has
+        # seen — and `reset` is the one call that clears it first. This is the same call
+        # `GameManager.new_game` makes and the reason it exists.
+        self.rules: List[Any] = [rule for rule in rules]
+        for rule in self.rules:
+            rule.reset()
         self.validator: MoveValidator = MoveValidator(self.board)
-        self.validator.set_rules(self.rules)
+        self.validator.set_rules(self.rules, attach=False)
         self.active: int = 1
         self.broken: bool = False
 
@@ -316,7 +343,39 @@ class Replay:
 
 
 class ExportPGN(ExportWriter):
-    """Writes a game's moves and its header as PGN text."""
+    """Writes a game's moves and its header as PGN text.
+
+    Attributes:
+        rules: This writer's own copy of the rules in force, composed once and borrowed by
+            every replay it reads a game through. See `__init__` for why once is enough.
+    """
+
+    def __init__(self) -> None:
+        """Compose this writer's own rule set, once.
+
+        **Why once, and what makes that safe.** A rule set holds the history of the game it has
+        watched — which colours have castled, whose two-square advance may be taken, which
+        positions a repetition has seen — so a replay cannot be given the rules in force and
+        must have its own. Composing them per call is what it used to do, and every game written
+        paid for thirteen rules to answer questions about castling rights and check that a
+        freshly composed set answers identically. What actually has to be fresh is the *state*,
+        not the objects, and `Rule.reset` is the call that makes a rule set indistinguishable
+        from a newly composed one: it clears the state dict before seeding it, which is what
+        `GameManager.new_game` relies on for exactly the same reason.
+
+        **The invalidation is the writer itself.** A writer is composed by the configuration
+        that offers it, so it is built once per configuration load and thrown away with it.
+        Saving a rule file loads the configuration again, which purges its modules and builds
+        new writers with new rules — so this set cannot outlive the files it was composed from,
+        and no cache of its own is needed to know that.
+
+        The imports are inside the constructor for the same reason `Replay`'s are: this module
+        is what started the composition of `export/`, and `export/` is composed before `rules/`
+        is.
+        """
+        from ..rules import build_rules
+
+        self.rules: List[Any] = build_rules()
 
     def formats(self) -> Tuple[str, ...]:
         """Return the notations this writer writes.
@@ -344,8 +403,9 @@ class ExportPGN(ExportWriter):
         says what the move did to check, are both questions about a position.
 
         Args:
-            moves: List of played Move instances. Replayed from `position`, which is this
-                configuration's own starting position unless one is given.
+            moves: List of played Move instances. Replayed from `position`, which is where the
+                game began — handed over by the manager, and this configuration's own starting
+                position when no caller supplies one.
             metadata: The header writer the configuration declared. Optional, so the writer
                 can be handed a game and nothing else — in which case a header is derived from
                 that game rather than being left out.
@@ -353,9 +413,9 @@ class ExportPGN(ExportWriter):
                 come from.
             result: The game's outcome, which is where the header's result comes from.
             date: When the game began, which is where the header's date comes from.
-            position: The position the moves were played from, for a game that did not begin at
-                this configuration's starting position. Defaults to None, which deals that
-                starting position.
+            position: The position the moves were played from, for a game that began somewhere
+                other than this configuration's starting position. Defaults to None, which
+                deals that starting position.
 
         Returns:
             str: The PGN text: the header, a blank line, and the moves.
@@ -363,7 +423,7 @@ class ExportPGN(ExportWriter):
         header = metadata if metadata is not None else ExportMetadata()
         tags = header.header_values(players=players, result=result, date=date)
         headers = header.format_tags(tags)
-        tokens = Replay(list(moves or []), position).tokens()
+        tokens = Replay(list(moves or []), position, self.rules).tokens()
         move_pairs = []
         for i in range(0, len(tokens), 2):
             move_num = (i // 2) + 1
@@ -382,7 +442,9 @@ class ExportPGN(ExportWriter):
             format_type: The notation asked for, in the caller's own spelling. The manager
                 looks a writer up without regard to case, so this writer compares the same
                 way rather than expecting one exact string.
-            **kwargs: Any: `moves`, and optionally `metadata`, `players`, `result` and `date`.
+            **kwargs: Any: `moves`, and optionally `metadata`, `players`, `result`, `date` and
+                `opening_position` — the position the game began in, which the manager hands
+                every writer because a notation cannot work it out from the board.
 
         Returns:
             str: The game as PGN text.
@@ -403,6 +465,7 @@ class ExportPGN(ExportWriter):
             kwargs.get("players"),
             kwargs.get("result"),
             kwargs.get("date"),
+            kwargs.get("opening_position"),
         )
 
 
