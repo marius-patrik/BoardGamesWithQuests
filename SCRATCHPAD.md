@@ -408,7 +408,7 @@ said thirteen, two, three and three.
 | 16 | Settings surface | **delivered** — the five sections, the corner configuration selector with create/rename/delete/duplicate, and a code editor that validates before the code joins a configuration | main stack |
 | 17 | `games/checkers/` | **partial** — the board, two piece kinds, eight rules, the clock and four quests, held to the published perft counts, and **two writers**: `ExportLetter` and its own `ExportMetadata`, declared `Letter` and `Field-Field-Extra` by `build_exporters()`. There is no position record and none was invented. **The game it plays is now WCDF English draughts** — the king steps one square, the forty-move count is 80 plies, and threefold repetition exists, since 2026-10-04; `notes/object_model.md` §21. This row said it was still flying-kings, which was true until then and was not corrected when it stopped being true | main stack |
 | 18 | Export generalised | **delivered** — one writer class per format in `games/chess/export/`, the format switch and the `ChessNotationWriter` class deleted, the engine holding only the `ExportWriter` protocol and `tests/test_engine_holds_no_chess.py` walking `model/` to keep it that way. The item's other half closed 2026-10-05: *letter* is `ExportAlgebraic`, and the header is `ExportMetadata` supplied through `Configuration.metadata` | this branch |
-| 19 | Export formats: PGN, FEN, field-field-extra, stenographic | **delivered 2026-10-05** — all five formats have a writer, the header is derived from the game with no placeholder strings, the movetext is real SAN read off a replay, FEN computes all six fields, and the coordinate record is compressed with a standard library codec and reads back. See §4.1 and `notes/object_model.md` §27 | this branch |
+| 19 | Export formats: PGN, FEN, field-field-extra, stenographic | **delivered 2026-10-05** — all five formats have a writer, the header is derived from the game with no placeholder strings, the movetext is real SAN read off a replay, FEN computes all six fields, and the coordinate record is compressed with a standard library codec and reads back. See §4.1 and `notes/object_model.md` §28 | this branch |
 | 20 | Czech aliases and remaining dead code | **partial** — all fifteen aliases ship, `Knight` is canonical, `Tower`, `Horse` and `Controller` are gone. Absent: the `controller/controller.py` → `game_manager_controller.py` rename, and the dead-code re-check | main stack |
 | 21 | Behavioural test coverage | **partial** — no test asserts on repository metadata any more, §4.3's list is unreferenced rather than untriaged, and §8 items 2, 6, 8 and 12 are not fully asserted | main stack |
 
@@ -1201,7 +1201,7 @@ and every `hasattr` probe are gone. `find_king` is gone. **`is_check`
 called from `manager.py:211,215,353,354`. Neither is *hard-coded* coupling —
 neither names a piece type — but neither was removed either.
 
-**Where `getType()` actually still is.** Twenty-two call sites across ten files,
+**Where `getType()` actually still is.** Twenty-three call sites across ten files,
 counted as occurrences of the call rather than lines holding it — `attacks.py:98` and
 `geometric.py:89` each hold two:
 
@@ -1220,7 +1220,7 @@ The two `model/game/` rows were correct and are unchanged.
 
 An earlier revision of this section said "the three remaining `getType()`
 comparisons are in `games/chess/rules/` — `attacks.py`, `castling.py` and
-`draws.py`". There are **thirteen** in that directory, across **five** files:
+`draws.py`". There are **fourteen** in that directory, across **five** files:
 `bishop_colour.py` and `promotion.py` were not named.
 
 **Where `hasattr` actually is.** Four probes, all in one file:
@@ -1233,8 +1233,10 @@ Rank-relative rules generalise: the home rank, the knight-forward file and the
 castling rook files are derived from the configured board rather than assumed to
 be 1, 8 and `a`–`h`. `CastlingRule.home_row` (`castling.py:44`) and
 `CastlingRule.start_file` (`:56`) read the board, and the castle loop bounds
-`rook_file` and `king_dest` against `position.cols`. **No test exercises castling
-or en passant on a non-8×8 board** — §8 item 12.
+`rook_file` and `king_dest` against `position.cols`. **No test exercises en passant on a non-8×8 board**, and this line said castling
+too until 2026-10-09. Castling is covered now: `tests/test_chess_rules.py:855` plays a
+ten-file castle and `:872` writes its record for the same board. §8 item 12 records the
+same correction, which this line contradicted.
 
 **Acceptance criteria**: each rule passes a game with it enabled and a game with it disabled,
 and the difference is the setting rather than a code path; no `getType()` or
@@ -1805,7 +1807,7 @@ offers the two formats that mean something for it. **The engine-change half
     **Now true.** The audit behind this correction found eleven unrecorded
     departures; §21, §22, §23 and §24 of that file record them, and §3, §7, §9,
     §11, §13 and §15 have been corrected against the code. **The eleventh was
-    recorded 2026-10-05 and is now fixed:** §28, the one chess string in the engine
+    recorded 2026-10-05 and is now fixed:** §29, the one chess string in the engine
     (`DEFAULT_GAME = "chess"`), recorded as a product configuration value and then
     declined — the default is declared by the configurations root in
     `games/default.json`, the guards read that, and the engine holds no configuration
@@ -1836,7 +1838,7 @@ offers the two formats that mean something for it. **The engine-change half
 | Risk | Severity | Mitigation |
 |---|---|---|
 | ~~Real PGN requires SAN disambiguation, which is easy to get subtly wrong — `Nbd7` versus `N1d7` versus `Nd7`~~ | **Discharged 2026-10-05.** The mitigation was each case getting its own test plus a known-good PGN, and both exist: seven disambiguation cases in `tests/test_transcript_notation.py`, and the Opera Game's published movetext as a literal the whole transcript is compared against. The pinned case is asserted in both directions — `Nb3` when the rival knight may not move, `Ndb3` when it may — because that is the one a geometry-based implementation gets wrong |
-| `getType()` and `hasattr` coupling fails **silently** on rename or on a custom piece | High | PR 11 removes it. PR 20 ships tests that fail when a probe breaks, not only when a name changes. **Partly discharged already**: the *hard-coded* kind comparisons are gone and `tests/test_engine_holds_no_chess.py` reads the chess catalogue from the configuration so the gate cannot drift. What remains is 16 `getType()` sites in `games/chess/rules/` and `model/game/` — the draughts rules hold five more — and four `hasattr` probes; §7 PR 11 lists them file by file |
+| `getType()` and `hasattr` coupling fails **silently** on rename or on a custom piece | High | PR 11 removes it. PR 20 ships tests that fail when a probe breaks, not only when a name changes. **Partly discharged already**: the *hard-coded* kind comparisons are gone and `tests/test_engine_holds_no_chess.py` reads the chess catalogue from the configuration so the gate cannot drift. What remains is 17 `getType()` sites in `games/chess/rules/` and `model/game/` — the draughts rules hold six more — and four `hasattr` probes; §7 PR 11 lists them file by file |
 | Deleting 51 collected tests masks a regression | Medium | Every deletion is import-only or metadata-only, and one `docs_hooks.py` test was rewritten to read a `tmp_path` fixture instead of real `notes/`. PR 21 adds behavioural coverage. §5 gives the exact count |
 | The flatten makes the whole repo the docs tree, and `exclude_docs` has to do work `docs_dir: src` did by construction | High | PR 2. Fallback is a dedicated docs directory rather than widening the tree |
 | A flat layout breaks setuptools auto-discovery over `tests/` | Medium | PR 6 sets `packages` explicitly |
@@ -1902,3 +1904,95 @@ reason is what matters.
 | Persisting a game in progress | Not in the diagram |
 | A settings surface beyond the diagram's mockup | The mockup is a reference for layout and content, not a spec to reproduce exactly. Where the mockup and the diagram disagree, the diagram governs |
 | Reinstalling the shared DarkFactory pipeline | Deliberately deferred; its pin is stale and the dependency is removed in PR 4 |
+
+---
+
+## 12. Checkpoint — 2026-10-09
+
+Paused on the owner's request. This section says where the work stands and what is deliberately
+unfinished, so the next run starts from facts rather than from re-derivation.
+
+### What is delivered and open for review
+
+| PR | Subject | Plan |
+|---|---|---|
+| #187 | chess on a board wider than eight files | #186 |
+| #195 | the records asserted six claims the code did not bear out | #193/#194 |
+| #205 | every non-checkmate ending was announced as a checkmate | #203 |
+| #206 | the layout dropped panels on a short window | #201 |
+| #207 | the settings dialog discarded everything and nothing read it back | #199 |
+| #209 | close the divergences an independent review found | #208 |
+
+All Draft, bot-authored, each bound to exactly one Plan issue, each carrying a `Matches Plan`
+review, all CI-success across Python 3.10–3.13 plus docs, web, math, rust and paper. **Nothing is
+merged.** The full chain is 30 pull requests, every one green.
+
+### Bugs found by exercising the code rather than reading it
+
+Six, none of which a test failure would have surfaced. In order of severity: settings were never
+read back from disk, so every setting was lost at exit; the Pieces settings tab edited a throwaway
+instance; the layout unmapped panels below ~760 pixels; every non-checkmate ending was called a
+checkmate; a `hasattr`-style gate asserted `"knight" in SET | {"knight"}`, true of any input; and a
+piece that shipped its own declared values had them wiped.
+
+The pattern worth keeping: **four of the six were introduced by fixes made earlier the same day.** A
+green suite and a careful reading did not catch any of them. Building a real game and looking at it
+did, every time.
+
+### What is deliberately unfinished, and why
+
+**Five feature requests await a decision** (#188 symbols, #189 quests per player, #190 resign, #191
+layout, #192 SVG diagram). Each turns on an architectural choice, not a preference:
+
+- #191 names a diagram whose two pages contain 26 class boxes and no panel, widget or coordinate. If
+  "the layout" means the window, only `GUI_mockup.svg` describes one.
+- #189: duplicated per-side quest instances, or one quest carrying per-side progress.
+  `Quest.is_completed` is a single latch, which is the actual blocker either way.
+- #190: immediate resignation, or a confirmation step. And whether the control belongs to the side to
+  act or to each panel.
+- #188: the settings work it depends on is now delivered (#207), so only the filled-symbol and
+  per-side-colour decisions remain.
+- #192: whether to commit the reference `.drawio`. Without it the SVG cannot regenerate.
+
+Rule 12 holds all five until the interpretations are confirmed.
+
+### Two corrections this file's history should carry
+
+**The pipeline was not broken.** `marius-patrik/agent-DarkFactory` was renamed to
+`marius-patrik/DarkFactory` (pipeline commit `6203185`, 2026-10-08T09:10). The REST API follows the
+rename, so every probe looked healthy; the Actions resolver does not. The symptom — *"workflow was
+not found"* — reads like a missing file. `workflow_call` was never the cause: the consumers pin a
+SHA whose copy still has it. Two wrong diagnoses were published to #204 before the rename was found.
+
+**The transcript can be read directly.** `/Users/user/.local/share/opencode/opencode.db` stores
+message text in the `part` table, not `message` — the latter holds metadata only. Owner prose is
+`part.type = 'text'` joined to a `message` with `role = "user"`. 151 owner messages on 2026-10-02
+across 41 sessions, in a 7 GB database.
+
+### The owner's own last word on 2026-10-02, verified against today's code
+
+> "everything should be done ##settings button in start modal doesnt work, clocks dont count, quests
+> dont sem to advance, there is no way to reach settings after the initial modal - the modal should
+> show on new game, checkers arent implemented"
+
+All four behavioural complaints are **fixed today**, each verified by driving the real widget:
+
+| Complaint | Now |
+|---|---|
+settings button in start modal | `StartModal` shows Start/Settings/Cancel; invoking Settings calls `on_settings` |
+clocks dont count | the active player's clock ticks on its own — 600 to 595 over ~4s of wall time |
+quests dont sem to advance | a real capture completes `First blood` (1/1, done) and advances `Capture` to 1/5 |
+no way to reach settings after the modal | the playing window carries a Settings button; New game re-shows the modal |
+checkers arent implemented | `load_configuration("checkers")` composes, and both its exporters work |
+
+Two of my own checks were wrong on the way: I "verified" clocks and quests with moves that were not
+legal — `e2xd3` captures on an empty square — and read the absence of progress as a defect. The rule
+that keeps catching me: **a reproduction that is not a reproduction proves nothing.**
+
+### Standing constraints
+
+Never merge. One Plan issue per branch, one implementation review, CI dispatched on every ref
+because stacked pull requests do not trigger it. Tests assert behaviour, not repository metadata.
+Correct the records to the code, never the code to the records.
+
+---
