@@ -1,13 +1,17 @@
 import ast
 import importlib.util
+import json
 import os
+import re
+import subprocess
 import sys
 
 import properdocs.config
-from properdocs.structure.files import Files, get_files
+import pytest
+from properdocs.structure.files import Files
 
 repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-package_roots = ("model", "controller", "view", "games")
+package_roots = ("src/model", "src/controller", "src/view", "src/games")
 
 hook_path = os.path.join(repo_root, ".github", "scripts", "docs_hooks.py")
 spec = importlib.util.spec_from_file_location("docs_hooks", hook_path)
@@ -79,7 +83,8 @@ def test_every_source_module_gets_a_page():
 
     missing = []
     for path in _source_modules():
-        dotted = os.path.relpath(path, repo_root)[: -len(".py")].replace(os.sep, ".")
+        dotted = os.path.relpath(path, os.path.join(repo_root, "src"))[: -len(".py")]
+        dotted = dotted.replace(os.sep, ".")
         if dotted.endswith(".__init__"):
             dotted = dotted[: -len(".__init__")]
         if dotted not in directives:
@@ -128,9 +133,11 @@ def test_module_pages_emit_mkdocstrings_directives():
 
 def test_renaming_a_module_needs_no_configuration_edit(tmp_path):
     """A module discovered only in the hook's tree must appear without a nav edit."""
-    package = tmp_path / "model" / "widget"
+    package = tmp_path / "src" / "model" / "widget"
     package.mkdir(parents=True)
-    (tmp_path / "model" / "__init__.py").write_text('"""Model layer."""\n', encoding="utf-8")
+    (tmp_path / "src" / "model" / "__init__.py").write_text(
+        '"""Model layer."""\n', encoding="utf-8"
+    )
     (package / "__init__.py").write_text('"""Widgets."""\n', encoding="utf-8")
     (package / "sprocket.py").write_text('"""A sprocket."""\n', encoding="utf-8")
 
@@ -229,3 +236,105 @@ def test_absent_notes_directory_publishes_no_notes_section(tmp_path):
 
     assert not any(isinstance(item, dict) and "Notes" in item for item in nav)
     assert not any(doc_path.startswith("notes/") for doc_path, _, _ in pages)
+
+
+def test_empty_notes_directory_publishes_no_notes_section(tmp_path):
+    notes_dir = tmp_path / "notes"
+    notes_dir.mkdir()
+    docs_dir = tmp_path / ".docs"
+    docs_dir.mkdir()
+
+    nav, pages = docs_hooks.build_nav({"docs_dir": str(docs_dir), "notes_dir": str(notes_dir)})
+
+    assert not any(isinstance(item, dict) and "Notes" in item for item in nav)
+    assert not any(doc_path.startswith("notes/") for doc_path, _, _ in pages)
+
+
+def test_docs_config_and_strict_build():
+    """The site must build with zero warnings, which is what `--strict` enforces."""
+    config_path = os.path.join(repo_root, "properdocs.yml")
+    assert os.path.isfile(config_path), "properdocs.yml must exist at repository root"
+
+    result = subprocess.run(
+        [sys.executable, "-m", "properdocs", "build", "--strict"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, (
+        f"properdocs build --strict failed with code {result.returncode}:\n"
+        f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+    )
+
+
+def test_generated_docs_directory_is_not_tracked():
+    """`docs_dir` is a generated placeholder; nothing it produces may reach the index."""
+    result = subprocess.run(
+        ["git", "check-ignore", "--quiet", ".docs/index.md"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, "generated documentation pages must be git-ignored"
+
+
+def test_pymdown_extensions_is_capped_below_the_highlight_break():
+    """The pinned highlighter must match what the docs build needs.
+
+    `pymdown-extensions` 12.2 makes `Highlight.__init__` require an `md` argument the
+    extension never passes, so every build fails with "Highlight.__init__() missing 1
+    required positional argument: 'md'". An unbounded requirement resolves 12.2 on CI and
+    12.1 on a developer machine, which is how the break reaches production unnoticed. The
+    cap in `requirements-dev.txt` is what keeps the two in step, so it is asserted here
+    rather than left to review.
+    """
+    requirements = os.path.join(repo_root, "requirements-dev.txt")
+    with open(requirements, encoding="utf-8") as handle:
+        content = handle.read()
+
+    requirement = next(
+        line.strip()
+        for line in content.splitlines()
+        if line.strip().startswith("pymdown-extensions")
+    )
+    assert (
+        "<12.2" in requirement
+    ), f"pymdown-extensions must stay below 12.2, which breaks the docs build; found: {requirement}"
+
+    from pymdownx.highlight import Highlight
+
+    try:
+        Highlight()
+    except TypeError as error:
+        pytest.fail(f"the installed pymdown-extensions is incompatible with this build: {error}")
+
+
+def test_deploy_docs_workflow_exists():
+    workflow_path = os.path.join(repo_root, ".github", "workflows", "deploy-docs.yml")
+
+    assert os.path.isfile(workflow_path), "deploy-docs.yml workflow must exist"
+    with open(workflow_path, encoding="utf-8") as handle:
+        content = handle.read()
+
+    assert "Deploy Documentation" in content
+
+    # The deploy is a caller now: the build command, the theme and the version manifest all come
+    # from the pinned pipeline, so this file names a pin rather than a build.
+    with open(os.path.join(repo_root, ".github", "darkfactory.json"), encoding="utf-8") as handle:
+        pinned = json.load(handle)["upstream"]
+    assert f"deploy-docs.yml@{pinned['ref']}" in content, "the deploy must call the pinned pipeline"
+    assert re.findall(r"[0-9a-f]{40}", content) == [pinned["ref"], pinned["ref"]]
+    assert (
+        "concurrency:" not in content
+    ), "a caller naming the callee's concurrency group deadlocks the run it calls"
+
+
+def test_agents_rule_mandates_google_docstrings_and_a_strict_docs_build():
+    agents_file = os.path.join(repo_root, "AGENTS.md")
+
+    with open(agents_file, encoding="utf-8") as handle:
+        content = handle.read()
+
+    assert "Google-style" in content or "Google-Style" in content
+    assert "build --strict" in content, "the rule must mandate a zero-warning documentation build"
+    assert "GitHub Pages" in content

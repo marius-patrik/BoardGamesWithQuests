@@ -34,9 +34,12 @@ Documentation = "https://marius-patrik.github.io/ChessWithQuests/"
 chesswithquests = "chesswithquests:main"
 
 [tool.setuptools]
-# A flat layout plus auto-discovery trips over `tests/` sitting at the root, so the package
-# list is explicit. `games` is listed because a configuration is a Python package of its own:
-# an install that ships only the engine cannot find its own default configuration.
+# The packages live under `src/`, so discovery is told where the package root is. An explicit
+# list is still declared rather than left to auto-discovery: `tests/` sits at the repository
+# root beside `src/`, and a flat layout plus auto-discovery trips over it. `games` is listed
+# because a configuration is a Python package of its own: an install that ships only the engine
+# cannot find its own default configuration.
+package-dir = { "" = "src" }
 packages = [
     "chesswithquests",
     "controller",
@@ -72,7 +75,7 @@ games = ["default.json"]
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = ["src", "."]
 
 [tool.black]
 line-length = 100

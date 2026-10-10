@@ -17,7 +17,16 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from properdocs.structure.files import File, Files
 
 #: Repository directories that hold importable Python, in navigation order.
-SOURCE_ROOTS: Tuple[str, ...] = ("model", "controller", "view", "games")
+#: Importable packages, as (directory below the repository root, documentation path) pairs,
+#: in navigation order. The packages live under ``src/``, so the directory and the
+#: documentation path differ: the walk reads ``src/model`` but the emitted page is
+#: ``model/game/board.md`` and its mkdocstrings directive resolves ``model.game.board``.
+SOURCE_ROOTS: Tuple[Tuple[str, str], ...] = (
+    ("src/model", "model"),
+    ("src/controller", "controller"),
+    ("src/view", "view"),
+    ("src/games", "games"),
+)
 
 #: Navigation section label for each source root.
 SECTION_LABELS: Dict[str, str] = {
@@ -90,28 +99,28 @@ def _module_pages(repo_root: str) -> List[Page]:
         List of (doc_path, nav_label, markdown_body) triples, sorted by doc_path.
     """
     pages: List[Page] = []
-    for root_name in SOURCE_ROOTS:
-        base = os.path.join(repo_root, root_name)
+    for source_dir, doc_root in SOURCE_ROOTS:
+        base = os.path.join(repo_root, source_dir)
         if not os.path.isdir(base):
             continue
         for dirpath, dirnames, filenames in os.walk(base):
             dirnames[:] = sorted(d for d in dirnames if d != "__pycache__")
-            rel_dir = os.path.relpath(dirpath, repo_root)
+            rel_dir = os.path.relpath(dirpath, base)
             parts: List[str] = [] if rel_dir == os.curdir else rel_dir.split(os.sep)
+            doc_parts = [doc_root] + parts
 
             if "__init__.py" in filenames:
-                dotted = ".".join(parts)
-                doc_path = "/".join(parts + ["index.md"])
-                label = f"{parts[-1]} package ({dotted})"
-                pages.append(
-                    (doc_path, label, f"# {parts[-1].capitalize()} package\n\n::: {dotted}\n")
-                )
+                dotted = ".".join(doc_parts)
+                doc_path = "/".join(doc_parts + ["index.md"])
+                label = f"{parts[-1] if parts else doc_root} package ({dotted})"
+                title = (parts[-1] if parts else doc_root).capitalize()
+                pages.append((doc_path, label, f"# {title}\n\n::: {dotted}\n"))
 
             for name in sorted(filenames):
                 if not name.endswith(".py") or name == "__init__.py":
                     continue
-                dotted = ".".join(parts + [name[:-3]])
-                doc_path = "/".join(parts + [name[:-3] + ".md"])
+                dotted = ".".join(doc_parts + [name[:-3]])
+                doc_path = "/".join(doc_parts + [name[:-3] + ".md"])
                 label = f"{name[:-3]} ({dotted})"
                 pages.append((doc_path, label, f"# {name[:-3].capitalize()}\n\n::: {dotted}\n"))
     return sorted(pages, key=lambda page: page[0])
@@ -130,7 +139,6 @@ def _note_pages(notes_dir: Optional[str]) -> List[Page]:
         return []
 
     pages: List[Page] = []
-    hub_content = ["# Architecture & Design Notes", ""]
     for name in sorted(os.listdir(notes_dir)):
         if not name.endswith(".md") or name == "index.md":
             continue
@@ -145,17 +153,24 @@ def _note_pages(notes_dir: Optional[str]) -> List[Page]:
             continue
         title = os.path.splitext(name)[0].replace("_", " ").title()
         pages.append((f"notes/{name}", title, content))
-        hub_content.append(f"- [{title}]({name})")
 
     index_path = os.path.join(notes_dir, "index.md")
     if os.path.isfile(index_path):
         try:
             with open(index_path, "r", encoding="utf-8") as handle:
-                hub_content = [handle.read()]
+                # A stored hub is published as authored. It gains a trailing newline it did not
+                # have, which is harmless for Markdown and is what the test suite pins.
+                pages.append(("notes/index.md", "Overview", handle.read() + "\n"))
         except (OSError, UnicodeDecodeError) as error:
             print(f"Warning: Failed to read notes index {index_path}: {error}")
 
-    if len(hub_content) > 1 or pages:
+    # A notes directory holding nothing publishes nothing: a hub page linking no note is an
+    # empty section in the navigation, and the section is the absence of notes rather than a
+    # page about their absence.
+    if pages and not any(doc_path == "notes/index.md" for doc_path, _, _ in pages):
+        hub_content = ["# Architecture & Design Notes", ""]
+        for doc_path, label, _ in pages:
+            hub_content.append(f"- [{label}]({os.path.basename(doc_path)})")
         pages.append(("notes/index.md", "Overview", "\n".join(hub_content) + "\n"))
     return pages
 
@@ -275,10 +290,10 @@ def build_nav(config: Any) -> Tuple[List[Any], List[Page]]:
     per_root: Dict[str, List[Page]] = {}
     for doc_path, label, body in module_pages:
         per_root.setdefault(doc_path.split("/")[0], []).append((doc_path, label, body))
-    for root_name in SOURCE_ROOTS:
-        pages = per_root.get(root_name)
+    for _, doc_root in SOURCE_ROOTS:
+        pages = per_root.get(doc_root)
         if pages:
-            nav.append({SECTION_LABELS[root_name]: _render(_nest(pages))})
+            nav.append({SECTION_LABELS[doc_root]: _render(_nest(pages))})
 
     if note_pages:
         nav.append({"Notes": _render(_nest(note_pages))})
