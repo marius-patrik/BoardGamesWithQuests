@@ -7,7 +7,7 @@ import properdocs.config
 from properdocs.structure.files import Files, get_files
 
 repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-package_roots = ("model", "controller", "view", "games")
+package_roots = ("src/model", "src/controller", "src/view", "src/games")
 
 hook_path = os.path.join(repo_root, ".github", "scripts", "docs_hooks.py")
 spec = importlib.util.spec_from_file_location("docs_hooks", hook_path)
@@ -79,7 +79,8 @@ def test_every_source_module_gets_a_page():
 
     missing = []
     for path in _source_modules():
-        dotted = os.path.relpath(path, repo_root)[: -len(".py")].replace(os.sep, ".")
+        dotted = os.path.relpath(path, os.path.join(repo_root, "src"))[: -len(".py")]
+        dotted = dotted.replace(os.sep, ".")
         if dotted.endswith(".__init__"):
             dotted = dotted[: -len(".__init__")]
         if dotted not in directives:
@@ -128,9 +129,11 @@ def test_module_pages_emit_mkdocstrings_directives():
 
 def test_renaming_a_module_needs_no_configuration_edit(tmp_path):
     """A module discovered only in the hook's tree must appear without a nav edit."""
-    package = tmp_path / "model" / "widget"
+    package = tmp_path / "src" / "model" / "widget"
     package.mkdir(parents=True)
-    (tmp_path / "model" / "__init__.py").write_text('"""Model layer."""\n', encoding="utf-8")
+    (tmp_path / "src" / "model" / "__init__.py").write_text(
+        '"""Model layer."""\n', encoding="utf-8"
+    )
     (package / "__init__.py").write_text('"""Widgets."""\n', encoding="utf-8")
     (package / "sprocket.py").write_text('"""A sprocket."""\n', encoding="utf-8")
 
