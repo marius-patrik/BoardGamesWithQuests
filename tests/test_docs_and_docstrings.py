@@ -7,6 +7,7 @@ import subprocess
 import sys
 
 import properdocs.config
+import pytest
 from properdocs.structure.files import Files
 
 repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -273,6 +274,37 @@ def test_generated_docs_directory_is_not_tracked():
         text=True,
     )
     assert result.returncode == 0, "generated documentation pages must be git-ignored"
+
+
+def test_pymdown_extensions_is_capped_below_the_highlight_break():
+    """The pinned highlighter must match what the docs build needs.
+
+    `pymdown-extensions` 12.2 makes `Highlight.__init__` require an `md` argument the
+    extension never passes, so every build fails with "Highlight.__init__() missing 1
+    required positional argument: 'md'". An unbounded requirement resolves 12.2 on CI and
+    12.1 on a developer machine, which is how the break reaches production unnoticed. The
+    cap in `requirements-dev.txt` is what keeps the two in step, so it is asserted here
+    rather than left to review.
+    """
+    requirements = os.path.join(repo_root, "requirements-dev.txt")
+    with open(requirements, encoding="utf-8") as handle:
+        content = handle.read()
+
+    requirement = next(
+        line.strip()
+        for line in content.splitlines()
+        if line.strip().startswith("pymdown-extensions")
+    )
+    assert (
+        "<12.2" in requirement
+    ), f"pymdown-extensions must stay below 12.2, which breaks the docs build; found: {requirement}"
+
+    from pymdownx.highlight import Highlight
+
+    try:
+        Highlight()
+    except TypeError as error:
+        pytest.fail(f"the installed pymdown-extensions is incompatible with this build: {error}")
 
 
 def test_deploy_docs_workflow_exists():
