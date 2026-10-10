@@ -139,7 +139,6 @@ def _note_pages(notes_dir: Optional[str]) -> List[Page]:
         return []
 
     pages: List[Page] = []
-    hub_content = ["# Architecture & Design Notes", ""]
     for name in sorted(os.listdir(notes_dir)):
         if not name.endswith(".md") or name == "index.md":
             continue
@@ -154,17 +153,24 @@ def _note_pages(notes_dir: Optional[str]) -> List[Page]:
             continue
         title = os.path.splitext(name)[0].replace("_", " ").title()
         pages.append((f"notes/{name}", title, content))
-        hub_content.append(f"- [{title}]({name})")
 
     index_path = os.path.join(notes_dir, "index.md")
     if os.path.isfile(index_path):
         try:
             with open(index_path, "r", encoding="utf-8") as handle:
-                hub_content = [handle.read()]
+                # A stored hub is published as authored. It gains a trailing newline it did not
+                # have, which is harmless for Markdown and is what the test suite pins.
+                pages.append(("notes/index.md", "Overview", handle.read() + "\n"))
         except (OSError, UnicodeDecodeError) as error:
             print(f"Warning: Failed to read notes index {index_path}: {error}")
 
-    if len(hub_content) > 1 or pages:
+    # A notes directory holding nothing publishes nothing: a hub page linking no note is an
+    # empty section in the navigation, and the section is the absence of notes rather than a
+    # page about their absence.
+    if pages and not any(doc_path == "notes/index.md" for doc_path, _, _ in pages):
+        hub_content = ["# Architecture & Design Notes", ""]
+        for doc_path, label, _ in pages:
+            hub_content.append(f"- [{label}]({os.path.basename(doc_path)})")
         pages.append(("notes/index.md", "Overview", "\n".join(hub_content) + "\n"))
     return pages
 
