@@ -1,12 +1,6 @@
 """Rook: a ray mover along the ranks and files."""
 
-try:
-    from .piece import Piece
-except ImportError:
-    try:
-        from model.pieces.piece import Piece
-    except ImportError:
-        from piece import Piece
+from model.pieces.piece import Piece
 
 
 class Rook(Piece):
