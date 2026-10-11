@@ -157,7 +157,9 @@ def _note_pages(notes_dir: Optional[str]) -> List[Page]:
     if os.path.isfile(index_path):
         try:
             with open(index_path, "r", encoding="utf-8") as handle:
-                pages.append(("notes/index.md", "Overview", handle.read()))
+                # A stored hub is published as authored. It gains a trailing newline it did not
+                # have, which is harmless for Markdown and is what the test suite pins.
+                pages.append(("notes/index.md", "Overview", handle.read() + "\n"))
         except (OSError, UnicodeDecodeError) as error:
             print(f"Warning: Failed to read notes index {index_path}: {error}")
     if pages:

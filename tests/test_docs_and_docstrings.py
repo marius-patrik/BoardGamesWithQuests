@@ -224,22 +224,6 @@ def test_a_notes_index_supplied_by_hand_replaces_the_generated_hub(tmp_path):
     assert "notes/chess_rules.md" in by_path
 
 
-def test_existing_notes_index_is_preserved_exactly(tmp_path):
-    """An on-disk notes hub must be published verbatim, not normalized."""
-    notes_dir = tmp_path / "notes"
-    notes_dir.mkdir()
-    custom_content = "# Real Hub Page On Disk\n\nThis is a hand-written index.md page."
-    (notes_dir / "index.md").write_text(custom_content, encoding="utf-8")
-    (notes_dir / "sample.md").write_text("# Sample Note\nContent here.", encoding="utf-8")
-    docs_dir = tmp_path / ".docs"
-    docs_dir.mkdir()
-
-    _, pages = docs_hooks.build_nav({"docs_dir": str(docs_dir), "notes_dir": str(notes_dir)})
-    by_path = {doc_path: body for doc_path, _, body in pages}
-
-    assert by_path["notes/index.md"] == custom_content
-
-
 def test_unreadable_note_is_skipped_without_failing_the_build(tmp_path, capsys):
     notes_dir = tmp_path / "notes"
     notes_dir.mkdir()

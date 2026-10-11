@@ -987,7 +987,7 @@ def test_nothing_in_this_game_can_be_in_check():
 
 
 SHORT_KING = (
-    pathlib.Path("games/checkers/pieces/king.py")
+    (pathlib.Path(__file__).resolve().parent.parent / "src" / "games/checkers/pieces/king.py")
     .read_text(encoding="utf-8")
     .replace("max_steps=None", "max_steps=1")
 )
