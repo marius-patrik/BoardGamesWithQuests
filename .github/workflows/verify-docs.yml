@@ -26,33 +26,17 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-      - name: Verify dynamic documentation autogeneration
+      - name: Verify repository-wide virtual documentation
         run: |
-          python -m properdocs build --strict
-          python -c '
-          import os, sys
-          repo_root = os.getcwd()
-          src_dir = os.path.join(repo_root, "src")
-          site_dir = os.path.join(repo_root, "site")
-          assert os.path.isdir(src_dir), "src directory missing"
-          assert os.path.isfile(os.path.join(site_dir, "index.html")), "site/index.html missing"
-          assert os.path.isfile(os.path.join(site_dir, "controller/controller/index.html")), "controller docs missing"
-          assert os.path.isfile(os.path.join(site_dir, "model/game/board/index.html")), "model docs missing"
-          notes_dir = os.path.join(repo_root, "notes")
-          if os.path.isdir(notes_dir):
-              note_files = [
-                  f for f in sorted(os.listdir(notes_dir))
-                  if f.endswith(".md") and f != "index.md" and os.path.isfile(os.path.join(notes_dir, f))
-              ]
-              has_notes = bool(note_files or os.path.isfile(os.path.join(notes_dir, "index.md")))
-              if has_notes:
-                  assert os.path.isfile(os.path.join(site_dir, "notes/index.html")), "notes index page missing"
-                  for f in note_files:
-                      name = os.path.splitext(f)[0]
-                      expected_html = os.path.join(site_dir, "notes", name, "index.html")
-                      assert os.path.isfile(expected_html), f"missing generated docs for {f} at {expected_html}"
-          print("✅ Dynamic documentation build verified successfully!")
-          '
+          python .github/scripts/build_docs.py
+          python - <<'PY'
+          from pathlib import Path
+          root = Path.cwd()
+          assert (root / "site/index.html").is_file()
+          assert (root / "site/model/game/board/index.html").is_file()
+          assert not (root / ".docs").exists(), "documentation source folder must not exist"
+          print("Repository-wide documentation verified.")
+          PY
 
       - name: Run documentation tests
         run: |
