@@ -1,7 +1,6 @@
 # FIDE Chess Rules Reference
 
-This is the **rules baseline for the chess configuration**, transcribed from FIDE
-rules. It describes orthodox chess on an 8×8 board.
+This is the **target rules baseline for the chess configuration**, summarized from FIDE Laws of Chess. It is not a claim of current implementation or a substitute for the official FIDE rules. It describes orthodox chess on an 8×8 board.
 
 **Two things this document is not:**
 
@@ -108,14 +107,17 @@ A simultaneous movement of the King and a Rook of the same color along the playe
 ## 5. Draw Conditions
 
 1. **Stalemate**: The player whose turn it is has no legal moves available and their King is **not** in check. The game ends in an immediate draw.
-2. **Insufficient Material**: Neither player possesses material sufficient to checkmate under any legal sequence of moves:
+2. **Dead position**: Checkmate cannot occur by any legal series of moves, including familiar examples such as:
    - King vs. King
    - King and Bishop vs. King
    - King and Knight vs. King
-   - King and Bishop vs. King and Bishop (where both Bishops are on the same square color)
-3. **Threefold Repetition**: The exact identical board position occurs 3 times with the same player to move, same legal move set, castling rights, and en passant rights.
-4. **Fifty-Move Rule**: 50 consecutive full moves (50 by White and 50 by Black) have elapsed without a pawn advance or piece capture.
-5. **Mutual Agreement**: Both players agree to a draw.
+   - King and Bishop vs. King and Bishop (where both Bishops move on the same square color)
+    - This list is illustrative, not a complete decision procedure; material count alone is insufficient.
+3. **Threefold repetition (claim):** The same position occurs three times with the same side to move and the same possible moves (including castling/en-passant rights).
+4. **Fivefold repetition (automatic):** The same position occurs five times.
+5. **Fifty-move rule (claim):** Each player has made 50 consecutive moves without any pawn move or capture (100 half-moves).
+6. **Seventy-five-move rule (automatic):** Each player has made 75 such moves (150 half-moves); checkmate on the final move takes precedence.
+7. **Mutual agreement:** Both players agree to a draw.
 
 ---
 

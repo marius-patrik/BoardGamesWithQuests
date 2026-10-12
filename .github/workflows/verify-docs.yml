@@ -36,6 +36,19 @@ jobs:
           from pathlib import Path
           root = Path.cwd()
           assert (root / "site/index.html").is_file()
+          homepage = (root / "site/index.html").read_text()
+          assert 'data-switcher-projects' in homepage
+          assert 'data-switcher-versions' in homepage
+          assert 'data-switcher-versions-group' in homepage
+          assert (root / "site/assets/theme.css").is_file()
+          assert not (root / "theme").exists(), "theme assets now live under .github/docs-ui"
+          assert (root / ".github/docs-ui/main.html").is_file()
+          import subprocess
+          subprocess.run(["python", ".github/scripts/docs_manifest.py", "--site", "site"], check=True)
+          import json
+          manifest = json.loads((root / "site/versions.json").read_text())
+          assert manifest["versions"][0] == {"name": "main", "path": ""}
+          assert any(p["name"] == "BoardGamesWithQuests" for p in manifest["projects"])
           assert (root / "site/engine/model/game/board/index.html").is_file()
           assert (root / "site/agents/notes/diagrams/reference-page1.svg").is_file()
           assert (root / "site/agents/notes/diagrams/implementation-classes.svg").is_file()

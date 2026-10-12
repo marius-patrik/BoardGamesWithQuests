@@ -1,18 +1,56 @@
 name: Release
 
-# A caller, not a copy: the job body comes from the pinned pipeline commit.
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "Optional explicit PrideVer bump: patch, minor, major, proud or version"
+        required: false
+        type: string
 
 permissions:
   contents: write
 
 jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      fallback_bump: ${{ steps.resolve.outputs.bump }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: marius-patrik/DarkFactory
+          ref: 953fd972834baf3b5a2ad2122890f55ea3679943
+          path: .darkfactory
+      - id: resolve
+        name: Ensure every untagged main change creates a development release
+        run: |
+          PYTHONPATH=.darkfactory/.github/scripts python - <<'PY' >> "$GITHUB_OUTPUT"
+          import subprocess
+          import versioning
+
+          decision = versioning.resolve(".")
+          tag = versioning.latest_tag(versioning.git_tags("."))
+          untagged = subprocess.check_output(
+              ["git", "rev-list", "--count", f"{tag}..HEAD" if tag else "HEAD"],
+              text=True,
+          ).strip()
+          # Preserve normal Conventional Commit classification (feat -> minor,
+          # fix -> patch). Docs/chore commits otherwise silently create no release.
+          # No untagged commits means rerunning the workflow remains idempotent.
+          print("bump=patch" if int(untagged) and not decision["next"] else "bump=")
+          PY
+
   release:
+    needs: resolve
     uses: marius-patrik/DarkFactory/.github/workflows/release.yml@953fd972834baf3b5a2ad2122890f55ea3679943
     with:
       pipeline-repo: marius-patrik/DarkFactory
       pipeline-ref: "953fd972834baf3b5a2ad2122890f55ea3679943"
+      bump: ${{ inputs.bump || needs.resolve.outputs.fallback_bump }}
     secrets: inherit

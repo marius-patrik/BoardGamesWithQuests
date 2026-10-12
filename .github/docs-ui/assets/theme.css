@@ -1,5 +1,5 @@
 /*
- * Omnis documentation theme — shadcn/ui design system.
+ * Shared documentation visual system — shadcn/ui design tokens.
  *
  * The token block is the entire design surface: change a token and every component follows. Tokens
  * are bare HSL channels, the shadcn convention, so they compose with `hsl(var(--token) / <alpha>)`
@@ -409,49 +409,31 @@ svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width:
   .content { max-width: none; }
 }
 
-/* ---------------------------------------------------------------------------------------------
-   Version and project switcher
-
-   Sits above the navigation because it changes what the navigation means: every link below it
-   resolves within whichever build is selected. Hidden until `versions.json` says there is more
-   than one build, so a single-version site shows no dead control.
-   --------------------------------------------------------------------------------------------- */
-.switcher {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0 0 1rem;
-  margin: 0 0 1rem;
-  border-bottom: 1px solid var(--border, hsl(0 0% 89.8%));
+/* Compact, keyboard-accessible repository and branch selectors in the header. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
-
-.switcher__group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.header__home { display: inline-flex; align-items: center; flex-shrink: 0; }
+.header__selectors {
+  display: flex; align-items: center; gap: 0.5rem; min-width: 0; flex-shrink: 1;
 }
-
-.switcher__label {
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted-foreground, hsl(0 0% 45.1%));
+.header__project { min-width: 0; }
+.header__branch { min-width: 0; }
+.header__selectors .switcher__select {
+  display: block; height: 2.1rem; width: auto; max-width: min(30vw, 18rem);
+  color: hsl(var(--foreground)); background: hsl(var(--background));
+  border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+  padding: 0.3rem 1.5rem 0.3rem 0.55rem;
+  font: inherit; font-size: 0.8125rem; cursor: pointer; text-overflow: ellipsis;
 }
-
-.switcher__select {
-  width: 100%;
-  padding: 0.375rem 0.5rem;
-  font: inherit;
-  font-size: 0.8125rem;
-  color: var(--foreground, hsl(0 0% 9%));
-  background-color: var(--background, hsl(0 0% 100%));
-  border: 1px solid var(--border, hsl(0 0% 89.8%));
-  border-radius: var(--radius, 0.5rem);
-  cursor: pointer;
+.header__project .switcher__select { font-weight: 600; }
+.header__selectors .switcher__select:focus-visible {
+  outline: 2px solid hsl(var(--ring)); outline-offset: 2px;
 }
-
-.switcher__select:focus-visible {
-  outline: 2px solid var(--ring, hsl(0 0% 63.9%));
-  outline-offset: 2px;
+@media (max-width: 700px) {
+  .header__inner { gap: 0.5rem; padding: 0 0.65rem; }
+  .header__selectors .switcher__select { max-width: 32vw; font-size: 0.75rem; }
+  .header__search { min-width: 4.25rem; }
+  .header__kbd { display: none; }
 }
