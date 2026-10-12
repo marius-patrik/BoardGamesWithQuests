@@ -2,44 +2,33 @@
 
 from typing import Iterable, List, Optional, Tuple
 
-from engine.model.pieces.bishop import Bishop
-from engine.model.pieces.horse import Horse
-from engine.model.pieces.king import King
-from engine.model.pieces.pawn import Pawn
 from engine.model.pieces.piece import Piece
-from engine.model.pieces.queen import Queen
-from engine.model.pieces.rook import Rook
 
 
 class Board:
     """A rectangular playing surface that tracks piece positions and captures.
 
-    The board is any number of rows by any number of columns. `DEFAULT_DIMENSIONS` is the
-    size the shipped starting placement describes; it is a default, not a constraint, and
-    nothing outside this class may rely on it.
+    Game-specific placements and movement rules do not belong to board storage.
+    A board begins empty unless its creator provides an explicit placement.
+    `DEFAULT_DIMENSIONS` is a convenience only, not a game constraint.
     """
 
-    #: The board size the shipped starting placement describes.
+    #: Default size for callers that do not provide a game configuration.
     DEFAULT_DIMENSIONS: Tuple[int, int] = (8, 8)
 
     def __init__(
         self,
         dimensions: Tuple[int, int] = DEFAULT_DIMENSIONS,
-        setup_pieces: bool = True,
         placement: Optional[Iterable[Tuple[Tuple[int, int], Piece]]] = None,
     ):
         """Initialize a board.
 
         Args:
             dimensions: Board dimensions as a (rows, cols) tuple.
-            setup_pieces: Whether to apply the shipped starting placement. Ignored when
-                `placement` is given.
-            placement: Explicit starting placement as (position, piece) pairs. Use this to
-                populate a board the shipped placement does not describe.
+            placement: Optional (position, piece) pairs supplied by a game configuration.
 
         Raises:
-            ValueError: If dimensions are invalid, or if the shipped placement does not
-                describe the requested board size and no explicit placement was supplied.
+            ValueError: If dimensions or placement are invalid.
         """
         if (
             not isinstance(dimensions, tuple)
@@ -58,8 +47,6 @@ class Board:
 
         if placement is not None:
             self.apply_placement(placement)
-        elif setup_pieces:
-            self.setup_default_board()
 
     def is_within_bounds(self, row: int, col: int) -> bool:
         """Check if coordinates lie within the board boundaries.
@@ -171,44 +158,3 @@ class Board:
         self.captured_white.clear()
         self.captured_black.clear()
 
-    def default_placement(self) -> List[Tuple[Tuple[int, int], Piece]]:
-        """Return the shipped starting placement for this board.
-
-        Returns:
-            List[Tuple[Tuple[int, int], Piece]]: (position, piece) pairs, White first.
-
-        Raises:
-            ValueError: If this board is not the size the shipped placement describes. A
-                board of any other size is legal and playable; it simply has no shipped
-                starting position, and saying so beats handing back an empty board that
-                looks like a starting position.
-        """
-        if self.dimensions != self.DEFAULT_DIMENSIONS:
-            raise ValueError(
-                f"the shipped starting placement describes a "
-                f"{self.DEFAULT_DIMENSIONS[0]}x{self.DEFAULT_DIMENSIONS[1]} board, not a "
-                f"{self.rows}x{self.cols} one; pass placement=..., or setup_pieces=False"
-            )
-
-        back_rank = [Rook, Horse, Bishop, Queen, King, Bishop, Horse, Rook]
-        placement: List[Tuple[Tuple[int, int], Piece]] = [
-            ((0, file), piece(1)) for file, piece in enumerate(back_rank)
-        ]
-        placement += [((1, file), Pawn(1)) for file in range(self.cols)]
-
-        last_row = self.rows - 1
-        last_pawn_row = self.rows - 2
-        placement += [((last_row, file), piece(-1)) for file, piece in enumerate(back_rank)]
-        placement += [((last_pawn_row, file), Pawn(-1)) for file in range(self.cols)]
-        return placement
-
-    def setup_default_board(self) -> None:
-        """Initialize the board with the shipped starting placement.
-
-        Returns:
-            None
-
-        Raises:
-            ValueError: If this board is not the size the shipped placement describes.
-        """
-        self.apply_placement(self.default_placement())

@@ -140,6 +140,51 @@ def installed_definitions() -> list[GameDefinition]:
     return sorted(found.values(), key=lambda game: (not game.default, game.name))
 
 
+def board_from_definition(definition: GameDefinition):
+    """Construct a game-neutral board from a validated game definition.
+
+    A package owns its initial position and piece capability data. The engine
+    does not select a game by name or hardcode any game's piece types.
+
+    Args:
+        definition: Configuration returned by `load_definition`.
+
+    Returns:
+        Board: Board with exactly the configured dimensions and starting pieces.
+    """
+    from engine.model.game.board import Board
+    from engine.model.pieces.piece import Piece
+
+    rows, cols = definition.board["rows"], definition.board["columns"]
+    placements = []
+    for entry in definition.board["starting_pieces"]:
+        kind = entry["piece"]
+        color_name = entry["color"]
+        color = 1 if color_name == "white" else -1
+        spec = definition.pieces[kind]
+        # The supplied vectors are from White's perspective; Black mirrors the row.
+        direction = 1 if color_name == "white" else -1
+        for position in entry["squares"]:
+            def vectors(field: str):
+                return [
+                    (row * direction if spec.get("color_relative") else row, col)
+                    for row, col in spec[field]
+                ]
+
+            piece = Piece(
+                color,
+                kind,
+                vectors=vectors("moves"),
+                attack_vectors=vectors("attacks"),
+                can_jump=spec["jump"],
+                repeat=spec["repeat"],
+                royal=bool(spec.get("royal", False)),
+                name=kind,
+            )
+            placements.append((tuple(position), piece))
+    return Board((rows, cols), placement=placements)
+
+
 def named_definition(name: str) -> GameDefinition:
     """Look up a validated registered game by name."""
     for definition in installed_definitions():

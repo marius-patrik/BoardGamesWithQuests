@@ -35,6 +35,7 @@ class King(Piece):
             vectors=vectors,
             attack_vectors=vectors,
             can_jump=False,
+            royal=True,
             name="King",
         )
         self._has_moved = False

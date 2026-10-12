@@ -1,355 +1,248 @@
-"""Move validation engine enforcing chess rules, checks, pins, and terminal conditions."""
+"""Generic movement geometry and optional royal-safety primitives.
 
-from typing import Any, List, Optional, Tuple
+A candidate is not a game-legal move until all game-specific rules permit it.
+In particular, castling, en-passant, mandatory captures and multi-jumps are
+rules supplied by game packages, not special cases inferred from piece names.
+"""
+
+from typing import List, Optional, Tuple
 
 from engine.model.game.board import Board
 from engine.model.game.move import Move
-from engine.model.pieces.king import King
-from engine.model.pieces.pawn import Pawn
 from engine.model.pieces.piece import Piece
 
-
-def _ray_length(board: Board) -> int:
-    """Return the longest ray a sliding piece can travel on this board.
-
-    Args:
-        board: The board being measured.
-
-    Returns:
-        int: The greater of the two dimensions, which no straight ray can exceed.
-    """
-    return max(board.rows, board.cols) - 1
-
-
-def _is_single_step(piece: Piece) -> bool:
-    """Report whether a piece moves exactly one square per vector.
-
-    Args:
-        piece: The piece to measure.
-
-    Returns:
-        bool: True for a one-square mover, False for a piece that slides.
-    """
-    return piece.getType() == "king" or isinstance(piece, King)
+Square = Tuple[int, int]
 
 
 class MoveValidator:
-    """Checks geometric moves and king safety; full rules are integrated later."""
+    """Generate geometric candidates without depending on any named game or piece.
+
+    The optional royal-safety filter is driven by the piece's `isRoyal()`
+    capability. This class does not claim game-specific move completeness.
+    """
 
     def __init__(self, board: Optional[Board] = None, move: Optional[Move] = None):
-        """Initialize a MoveValidator instance.
+        """Initialize the geometric validator.
 
         Args:
-            board: Optional Board instance to validate moves on.
-            move: Optional Move instance being inspected.
+            board: Board supplying dimensions and occupancy.
+            move: Optional move to inspect.
         """
         self.board = board
         self.move = move
 
     def set_board(self, board: Board) -> None:
-        """Assign the active chessboard.
-
-        Args:
-            board: Board instance.
-        """
+        """Set the board used by default."""
         self.board = board
 
     def set_move(self, move: Move) -> None:
-        """Assign the active move to evaluate.
-
-        Args:
-            move: Move instance.
-        """
+        """Set the current move used by callers."""
         self.move = move
 
-    def find_king(self, color: int, board: Optional[Board] = None) -> Optional[Tuple[int, int]]:
-        """Find the coordinates of a specified player's king.
+    @staticmethod
+    def _limit(piece: Piece, board: Board) -> int:
+        """Derive the maximum ray length from capabilities and board geometry."""
+        return max(board.rows, board.cols) - 1 if piece.canRepeat() else 1
 
-        Args:
-            color: King's color (1 for White, -1 for Black).
-            board: Optional Board instance (defaults to self.board).
+    @staticmethod
+    def _walk(board: Board, origin: Square, vector: Square, limit: int):
+        """Yield in-bounds destinations along a vector, stopping at occupied squares."""
+        if vector == (0, 0):
+            return
+        dr, dc = vector
+        for step in range(1, limit + 1):
+            pos = (origin[0] + dr * step, origin[1] + dc * step)
+            if not board.is_within_bounds(*pos):
+                break
+            yield pos
+            if board.get_piece_at(pos) is not None:
+                break
 
-        Returns:
-            Tuple of (row, col) coordinates or None if king is missing.
-        """
+    def find_royal(self, color: int, board: Optional[Board] = None) -> Optional[Square]:
+        """Find a royal piece declared by the game for the given side."""
         b = board or self.board
         if b is None:
             return None
-        for r in range(b.rows):
-            for c in range(b.cols):
-                p = b.get_piece_at((r, c))
-                if p is not None and p.getColor() == color and p.getType() == "king":
-                    return (r, c)
+        for row in range(b.rows):
+            for col in range(b.cols):
+                piece = b.get_piece_at((row, col))
+                if piece is not None and piece.getColor() == color and piece.isRoyal():
+                    return row, col
         return None
 
     def is_square_attacked(
-        self, target_square: Tuple[int, int], by_color: int, board: Optional[Board] = None
+        self, target_square: Square, by_color: int, board: Optional[Board] = None
     ) -> bool:
-        """Determine whether a given square is under attack by pieces of a given color.
-
-        Args:
-            target_square: (row, col) target coordinates.
-            by_color: Color of the attacking side (1 for White, -1 for Black).
-            board: Optional Board instance (defaults to self.board).
-
-        Returns:
-            True if target_square is attacked by by_color pieces, False otherwise.
-        """
+        """Report whether a side geometrically attacks an in-bounds square."""
         b = board or self.board
-        if b is None:
+        if b is None or not b.is_within_bounds(*target_square):
             return False
-
-        tr, tc = target_square
-        if not b.is_within_bounds(tr, tc):
-            return False
-        for r in range(b.rows):
-            for c in range(b.cols):
-                piece = b.get_piece_at((r, c))
+        for row in range(b.rows):
+            for col in range(b.cols):
+                piece = b.get_piece_at((row, col))
                 if piece is None or piece.getColor() != by_color:
                     continue
-
-                if isinstance(piece, Pawn) or piece.getType() == "pawn":
-                    for dr, dc in piece.getAttackDirections():
-                        if (r + dr, c + dc) == (tr, tc):
+                for vector in piece.getAttackDirections():
+                    for pos in self._walk(b, (row, col), vector, self._limit(piece, b)):
+                        if pos == target_square:
                             return True
-                    continue
-
-                directions = piece.getAttackDirections() or []
-                can_jump = piece.canJump()
-                max_steps = 1 if (can_jump or _is_single_step(piece)) else _ray_length(b)
-
-                for dr, dc in directions:
-                    step = 1
-                    while step <= max_steps:
-                        nr, nc = r + dr * step, c + dc * step
-                        if not b.is_within_bounds(nr, nc):
-                            break
-                        if (nr, nc) == (tr, tc):
-                            return True
-                        if not can_jump and b.get_piece_at((nr, nc)) is not None:
-                            break
-                        step += 1
         return False
 
     def is_check(self, color: int, board: Optional[Board] = None) -> bool:
-        """Check if the king of the given color is currently under attack.
-
-        Args:
-            color: Player color to check (1 for White, -1 for Black).
-            board: Optional Board instance (defaults to self.board).
-
-        Returns:
-            True if the king is attacked, False otherwise.
-        """
+        """Check configured royal safety for one side; no royal means no check."""
         b = board or self.board
-        if b is None:
+        royal = self.find_royal(color, b)
+        if royal is None:
             return False
-        king_pos = self.find_king(color, b)
-        if king_pos is None:
+        return self.is_square_attacked(royal, -color, b)
+
+    @staticmethod
+    def _initial_path_clear(board: Board, origin: Square, offset: Square) -> bool:
+        """Check an initial multi-square quiet move does not cross occupied squares.
+
+        Nonlinear offsets that cannot be traced in a straight line are rejected
+        unless the piece explicitly declares itself a jumper.
+        """
+        import math
+
+        dr, dc = offset
+        count = math.gcd(abs(dr), abs(dc))
+        if count == 0:
             return False
-        opponent_color = -1 if color == 1 else 1
-        return self.is_square_attacked(king_pos, opponent_color, b)
+        step = (dr // count, dc // count)
+        for distance in range(1, count + 1):
+            pos = (origin[0] + step[0] * distance, origin[1] + step[1] * distance)
+            if not board.is_within_bounds(*pos) or board.get_piece_at(pos) is not None:
+                return False
+        return True
 
     def get_pseudo_legal_moves(
-        self, start_pos: Tuple[int, int], board: Optional[Board] = None
-    ) -> List[Tuple[int, int]]:
-        """Compute candidate move destinations ignoring check constraints.
+        self, start_pos: Square, board: Optional[Board] = None
+    ) -> List[Square]:
+        """Find destinations consistent with movement and occupancy capabilities.
 
-        Args:
-            start_pos: (row, col) origin coordinates.
-            board: Optional Board instance (defaults to self.board).
-
-        Returns:
-            List of valid geometric destination squares.
+        This does not apply special rules or game-specific win conditions.
         """
         b = board or self.board
         if b is None:
             return []
-
         piece = b.get_piece_at(start_pos)
         if piece is None:
             return []
 
-        r, c = start_pos
-        moves: List[Tuple[int, int]] = []
-
-        if isinstance(piece, Pawn) or piece.getType() == "pawn":
-            # Pawn single forward step
-            for dr, dc in piece.getDirections():
-                nr, nc = r + dr, c + dc
-                if b.is_within_bounds(nr, nc) and b.get_piece_at((nr, nc)) is None:
-                    moves.append((nr, nc))
-                    # Initial 2-step advance
-                    if hasattr(piece, "hasMoved") and not piece.hasMoved():
-                        if hasattr(piece, "getInitialVectors"):
-                            for idr, idc in piece.getInitialVectors():
-                                inr, inc = r + idr, c + idc
-                                if (
-                                    b.is_within_bounds(inr, inc)
-                                    and b.get_piece_at((inr, inc)) is None
-                                ):
-                                    moves.append((inr, inc))
-
-            # Pawn diagonal attacks
-            for dr, dc in piece.getAttackDirections():
-                nr, nc = r + dr, c + dc
-                if b.is_within_bounds(nr, nc):
-                    target = b.get_piece_at((nr, nc))
-                    if target is not None and target.getColor() != piece.getColor():
-                        moves.append((nr, nc))
-            return moves
-
-        directions = piece.getDirections() or []
-        can_jump = piece.canJump()
-        max_steps = 1 if (can_jump or _is_single_step(piece)) else _ray_length(b)
-
-        for dr, dc in directions:
-            step = 1
-            while step <= max_steps:
-                nr, nc = r + dr * step, c + dc * step
-                if not b.is_within_bounds(nr, nc):
+        quiet = set(piece.getDirections())
+        attacks = set(piece.getAttackDirections())
+        seen: set[Square] = set()
+        destinations: List[Square] = []
+        for vector in piece.getDirections() + piece.getAttackDirections():
+            if vector == (0, 0):
+                continue
+            if vector not in quiet and vector not in attacks:
+                continue
+            for dest in self._walk(b, start_pos, vector, self._limit(piece, b)):
+                target = b.get_piece_at(dest)
+                allowed = (
+                    (target is None and vector in quiet)
+                    or (target is not None and target.getColor() != piece.getColor() and vector in attacks)
+                )
+                if allowed and dest not in seen:
+                    seen.add(dest)
+                    destinations.append(dest)
+                if target is not None:
                     break
-                target = b.get_piece_at((nr, nc))
-                if target is None:
-                    moves.append((nr, nc))
-                else:
-                    if target.getColor() != piece.getColor():
-                        moves.append((nr, nc))
-                    break
-                step += 1
-        return moves
+
+        if not piece.hasMoved():
+            for vector in piece.getInitialVectors():
+                dest = (start_pos[0] + vector[0], start_pos[1] + vector[1])
+                if (
+                    b.is_within_bounds(*dest)
+                    and dest not in seen
+                    and (
+                        piece.canJump() and b.get_piece_at(dest) is None
+                        or not piece.canJump() and self._initial_path_clear(b, start_pos, vector)
+                    )
+                ):
+                    seen.add(dest)
+                    destinations.append(dest)
+        return destinations
 
     def get_valid_moves(
-        self, start_pos: Tuple[int, int], board: Optional[Board] = None
-    ) -> List[Tuple[int, int]]:
-        """Filter geometric destinations that would expose the friendly king to check.
+        self, start_pos: Square, board: Optional[Board] = None
+    ) -> List[Square]:
+        """Filter geometric candidates through configured royal safety only.
 
-        Args:
-            start_pos: (row, col) origin coordinates.
-            board: Optional Board instance (defaults to self.board).
-
-        Returns:
-            List of strictly legal destination squares.
+        Full game legality requires additional rule evaluation, which the
+        incomplete game packages do not expose yet.
         """
         b = board or self.board
         if b is None:
             return []
-
         piece = b.get_piece_at(start_pos)
         if piece is None:
             return []
-
-        color = piece.getColor()
-        pseudo_moves = self.get_pseudo_legal_moves(start_pos, b)
-        legal_moves: List[Tuple[int, int]] = []
-
-        for target_pos in pseudo_moves:
-            # Simulate move to ensure it does not leave/place king in check
-            original_target = b.get_piece_at(target_pos)
-            b.set_piece_at(target_pos, piece)
+        possible = self.get_pseudo_legal_moves(start_pos, b)
+        legal: List[Square] = []
+        for destination in possible:
+            captured = b.get_piece_at(destination)
+            b.set_piece_at(destination, piece)
             b.set_piece_at(start_pos, None)
-
             try:
-                in_check = self.is_check(color, b)
+                safe = not self.is_check(piece.getColor(), b)
             finally:
                 b.set_piece_at(start_pos, piece)
-                b.set_piece_at(target_pos, original_target)
-
-            if not in_check:
-                legal_moves.append(target_pos)
-
-        return legal_moves
+                b.set_piece_at(destination, captured)
+            if safe:
+                legal.append(destination)
+        return legal
 
     def get_all_valid_moves(self, color: int, board: Optional[Board] = None) -> List[Move]:
-        """Compute all strictly legal moves for all pieces belonging to a color.
-
-        Args:
-            color: Player color (1 for White, -1 for Black).
-            board: Optional Board instance (defaults to self.board).
-
-        Returns:
-            List of all strictly legal Move instances.
-        """
+        """Return geometrically and royal-safe candidate moves for the given side."""
         b = board or self.board
         if b is None:
             return []
-        all_moves: List[Move] = []
-        for r in range(b.rows):
-            for c in range(b.cols):
-                piece = b.get_piece_at((r, c))
-                if piece is not None and piece.getColor() == color:
-                    destinations = self.get_valid_moves((r, c), b)
-                    for dest in destinations:
-                        move_type = "capture" if b.get_piece_at(dest) is not None else "normal"
-                        all_moves.append(
-                            Move(start_pos=(r, c), end_pos=dest, piece=piece, move_type=move_type)
+        result: List[Move] = []
+        for row in range(b.rows):
+            for col in range(b.cols):
+                piece = b.get_piece_at((row, col))
+                if piece is None or piece.getColor() != color:
+                    continue
+                for dest in self.get_valid_moves((row, col), b):
+                    result.append(
+                        Move(
+                            (row, col),
+                            dest,
+                            piece=piece,
+                            move_type="capture" if b.get_piece_at(dest) is not None else "normal",
                         )
-        return all_moves
+                    )
+        return result
 
     def is_valid_move(self, move: Move, board: Optional[Board] = None) -> bool:
-        """Check geometric validity and king safety for a candidate move.
-
-        Args:
-            move: Move instance to evaluate.
-            board: Optional Board instance (defaults to self.board).
-
-        Returns:
-            True if the move is legal, False otherwise.
-        """
+        """Validate geometric and royal-safe candidacy, not full game legality."""
         b = board or self.board
-        if b is None or not move.validate(b):
-            return False
-        valid_destinations = self.get_valid_moves(move.start_pos, b)
-        return move.end_pos in valid_destinations
+        return bool(
+            b is not None
+            and move.validate(b)
+            and move.end_pos in self.get_valid_moves(move.start_pos, b)
+        )
 
     def is_checkmate(self, color: int, board: Optional[Board] = None) -> bool:
-        """Check if the given player is in checkmate.
+        """Return whether the declared royal has no basic response while attacked.
 
-        Args:
-            color: Player color (1 for White, -1 for Black).
-            board: Optional Board instance (defaults to self.board).
-
-        Returns:
-            True if player is in check with zero legal responses, False otherwise.
+        This is a geometric diagnostic, not a final game outcome adjudication.
         """
         b = board or self.board
-        if not self.is_check(color, b):
-            return False
-        return len(self.get_all_valid_moves(color, b)) == 0
+        return bool(b is not None and self.is_check(color, b) and not self.get_all_valid_moves(color, b))
 
     def is_stalemate(self, color: int, board: Optional[Board] = None) -> bool:
-        """Check if the given player is stalemated (not in check, but no legal moves).
+        """Return whether a declared royal has no basic moves and is not attacked.
 
-        Args:
-            color: Player color (1 for White, -1 for Black).
-            board: Optional Board instance (defaults to self.board).
-
-        Returns:
-            True if stalemate condition holds, False otherwise.
+        Only a game's rules can declare an actual stalemate outcome.
         """
         b = board or self.board
-        if self.is_check(color, b):
-            return False
-        return len(self.get_all_valid_moves(color, b)) == 0
-
-    def simulate_move(
-        self, move: Optional[Move] = None
-    ) -> List[Tuple[Tuple[int, int], Optional[Piece]]]:
-        """Simulate move execution and return previous state for rollback.
-
-        Args:
-            move: Optional Move instance (defaults to self.move).
-
-        Returns:
-            List of ((row, col), previous_piece) tuples for restoration.
-        """
-        m = move or self.move
-        b = self.board
-        if m is None or b is None:
-            return []
-        saved_state = [
-            (m.start_pos, b.get_piece_at(m.start_pos)),
-            (m.end_pos, b.get_piece_at(m.end_pos)),
-        ]
-        m.execute(b)
-        return saved_state
+        return bool(
+            b is not None
+            and self.find_royal(color, b) is not None
+            and not self.is_check(color, b)
+            and not self.get_all_valid_moves(color, b)
+        )

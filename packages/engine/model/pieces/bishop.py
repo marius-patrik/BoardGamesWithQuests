@@ -26,5 +26,6 @@ class Bishop(Piece):
             vectors=vectors,
             attack_vectors=vectors,
             can_jump=False,
+            repeat=True,
             name="Bishop",
         )

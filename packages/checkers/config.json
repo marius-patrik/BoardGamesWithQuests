@@ -207,9 +207,7 @@
     "initial_seconds": 600,
     "increment_seconds": 0
   },
-  "exports": [
-    "draughts_numbered"
-  ],
+  "exports": [],
   "appearance": {
     "light_square": "#E8DABC",
     "dark_square": "#70573F"

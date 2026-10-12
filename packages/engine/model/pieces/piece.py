@@ -1,17 +1,18 @@
-"""Base piece module defining the foundational Piece abstraction for chess."""
+"""Game-neutral piece movement capabilities and identity."""
 
 from typing import Any, List, Optional, Tuple
 
 
 class Piece:
-    """Base class for all chess pieces.
+    """A piece whose movement is declared by its game, not by the engine.
 
     Attributes:
-        _type: The piece type descriptor (e.g. "pawn", "king", 1, -1).
-        _vectors: List of relative coordinate move offsets (row_delta, col_delta).
-        _attack_vectors: List of relative coordinate attack offsets.
-        _can_jump: Boolean indicating whether piece can leap over other pieces.
-        _name: Human-readable display name of the piece.
+        _type: Game-defined piece identity.
+        _vectors: Offsets a piece may travel into an empty square.
+        _attack_vectors: Offsets a piece may use to capture.
+        _can_jump: Whether intermediate occupied squares are ignored.
+        _repeat: Whether movement and attack offsets can repeat along rays.
+        _royal: Whether capture of this piece is subject to royal safety.
     """
 
     def __init__(
@@ -22,70 +23,80 @@ class Piece:
         attack_vectors: Optional[List[Tuple[int, int]]] = None,
         can_jump: bool = False,
         name: Optional[str] = None,
+        repeat: bool = False,
+        royal: bool = False,
+        initial_vectors: Optional[List[Tuple[int, int]]] = None,
     ):
-        """Initialize a new chess piece.
+        """Define a piece using game-supplied movement capabilities.
 
         Args:
-            color: Color identifier (1 for White, -1 for Black).
-            piece_type: Piece identifier or type descriptor.
-            vectors: Optional movement vectors.
-            attack_vectors: Optional attack vectors (defaults to vectors if None).
-            can_jump: Whether this piece can jump over other pieces.
-            name: Optional display name for the piece.
+            color: Game-defined side identifier.
+            piece_type: Game-defined piece kind.
+            vectors: Quiet-move offsets; shared attack offsets also permit capturing.
+            attack_vectors: Capture offsets (defaults to the move offsets).
+            can_jump: Whether intermediate squares may be occupied.
+            name: Display name (defaults to the kind).
+            repeat: Whether vectors may repeat, as for a sliding piece.
+            royal: Whether royal safety restrictions apply to the piece.
+            initial_vectors: Additional quiet offsets allowed only before its first move.
         """
         self.__color = color
         self._type = piece_type
-        self._vectors = vectors
-        self._attack_vectors = attack_vectors
+        self._vectors = list(vectors or [])
+        self._attack_vectors = (
+            list(attack_vectors) if attack_vectors is not None else list(self._vectors)
+        )
         self._can_jump = can_jump
-        self._name = name or (str(piece_type) if piece_type is not None else "Piece")
+        self._repeat = repeat
+        self._royal = royal
+        self._initial_vectors = list(initial_vectors or [])
+        self._has_moved = False
+        self._name = name or str(piece_type)
 
-    def getDirections(self) -> Optional[List[Tuple[int, int]]]:
-        """Return the standard movement vectors for this piece.
+    def getDirections(self) -> List[Tuple[int, int]]:
+        """Return quiet-move vectors."""
+        return list(self._vectors)
 
-        Returns:
-            Optional[List[Tuple[int, int]]]: List of (row_offset, col_offset) tuples, or None.
-        """
-        return self._vectors
+    def getAttackDirections(self) -> List[Tuple[int, int]]:
+        """Return capture and attacked-square vectors."""
+        return list(self._attack_vectors)
 
-    def getAttackDirections(self) -> Optional[List[Tuple[int, int]]]:
-        """Return the attack vectors for this piece.
-
-        Returns:
-            Optional[List[Tuple[int, int]]]: Attack movement vectors, defaulting to standard vectors.
-        """
-        if self._attack_vectors is not None:
-            return self._attack_vectors
-        return self._vectors
+    def getInitialVectors(self) -> List[Tuple[int, int]]:
+        """Return extra quiet moves available only before the first move."""
+        return list(self._initial_vectors)
 
     def canJump(self) -> bool:
-        """Check whether the piece can jump over other pieces.
-
-        Returns:
-            bool: True if jumping is enabled, False otherwise.
-        """
+        """Return whether intermediate occupied squares can be ignored."""
         return self._can_jump
 
-    def getColor(self) -> Any:
-        """Return the piece's player color code.
+    def canRepeat(self) -> bool:
+        """Return whether a vector repeats along a ray."""
+        return self._repeat
 
-        Returns:
-            Any: Color representation (1 for White, -1 for Black).
+    def isRoyal(self) -> bool:
+        """Return whether the piece participates in royal-safety checks."""
+        return self._royal
+
+    def hasMoved(self) -> bool:
+        """Return whether the piece has moved."""
+        return self._has_moved
+
+    def setMoved(self, moved: bool = True) -> None:
+        """Update the moved state.
+
+        Args:
+            moved: New moved-state value.
         """
+        self._has_moved = moved
+
+    def getColor(self) -> Any:
+        """Return the piece's game-defined side identifier."""
         return self.__color
 
     def getType(self) -> Any:
-        """Return the piece's type descriptor.
-
-        Returns:
-            Any: Piece type identifier.
-        """
+        """Return the piece's game-defined kind."""
         return self._type
 
     def getName(self) -> str:
-        """Return the piece's human-readable name.
-
-        Returns:
-            str: Piece name.
-        """
+        """Return the piece's display name."""
         return self._name

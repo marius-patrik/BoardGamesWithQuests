@@ -26,6 +26,7 @@ class Rook(Piece):
             vectors=vectors,
             attack_vectors=vectors,
             can_jump=False,
+            repeat=True,
             name="Rook",
         )
         self._has_moved = False

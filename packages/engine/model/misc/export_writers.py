@@ -1,150 +1,32 @@
-"""Chess export writers converting games to PGN, FEN, and stenographic notation."""
+"""Game-independent exporter interface; concrete writers belong to game packages."""
 
-from typing import Any, List, Optional
-
-from engine.model.misc.metadata import MetadataWriter
-from engine.model.misc.notation import pos_to_algebraic
+from abc import ABC, abstractmethod
+from typing import Any, Tuple
 
 
-class ExportWriter:
-    """Abstract base class for game export serialization writers."""
+class ExportWriter(ABC):
+    """Interface implemented by a game-specific, validated serializer.
 
-    def __init__(self):
-        """Initialize an ExportWriter instance."""
-        self.field: str = ""
+    The engine does not offer PGN, FEN or any other game-specific format.
+    Only a game package that can produce a correct representation may advertise
+    and register that format.
+    """
 
-    def export(self, *args: Any, **kwargs: Any) -> str:
-        """Export game data into the target serialization format.
+    @abstractmethod
+    def formats(self) -> Tuple[str, ...]:
+        """Return the format identifiers implemented by this writer."""
+
+    @abstractmethod
+    def export(self, format_type: str, **kwargs: Any) -> str:
+        """Serialize a game state or move history.
 
         Args:
-            *args: Variable positional arguments.
-            **kwargs: Variable keyword arguments.
+            format_type: Format previously declared by `formats`.
+            **kwargs: Format-specific state provided by the game implementation.
 
         Returns:
-            str: The serialized game in the format this writer produces.
+            Valid serialized output in the requested format.
 
         Raises:
-            NotImplementedError: Must be implemented by subclasses.
+            ValueError: If the format is unsupported or state cannot be serialized.
         """
-        raise NotImplementedError
-
-
-class ChessNotationWriter(ExportWriter):
-    """Serializes chess moves and board states into standard chess formats (PGN, FEN, stenographic)."""
-
-    PIECE_CHARS = {
-        "king": "k",
-        "queen": "q",
-        "rook": "r",
-        "bishop": "b",
-        "horse": "n",
-        "knight": "n",
-        "pawn": "p",
-    }
-
-    def to_stenographic(self, moves: List[Any]) -> str:
-        """Convert a list of moves to stenographic coordinate format (e.g. 'e2e4 e7e5').
-
-        Args:
-            moves: List of Move instances with start_pos and end_pos.
-
-        Returns:
-            Space-delimited string of concatenated coordinate pairs.
-        """
-        tokens = []
-        for m in moves:
-            start = pos_to_algebraic(m.start_pos)
-            end = pos_to_algebraic(m.end_pos)
-            tokens.append(f"{start}{end}")
-        return " ".join(tokens)
-
-    def to_fen(self, board: Any, active_color: int = 1) -> str:
-        """Convert board state to Forsyth-Edwards Notation (FEN) string.
-
-        Args:
-            board: Board instance. Rows and columns determine the placement size.
-                For non-8x8 boards the output is FEN-like, not standard chess FEN.
-                Castling, en-passant, and move-counter fields are placeholders.
-            active_color: Active side color (1 for White, -1 for Black).
-
-        Returns:
-            FEN record string.
-        """
-        ranks: List[str] = []
-        for row in range(board.rows - 1, -1, -1):
-            fragments: List[str] = []
-            empty = 0
-            for col in range(board.cols):
-                piece = board.get_piece_at((row, col))
-                if piece is None:
-                    empty += 1
-                    continue
-                if empty:
-                    fragments.append(str(empty))
-                    empty = 0
-                piece_type = piece.getType()
-                char = self.PIECE_CHARS.get(str(piece_type).lower())
-                if char is None:
-                    raise ValueError(f"FEN cannot represent piece type {piece_type!r}")
-                fragments.append(char.upper() if piece.getColor() in (1, "white") else char)
-            if empty:
-                fragments.append(str(empty))
-            ranks.append("".join(fragments))
-
-        board_fen = "/".join(ranks)
-        turn = "w" if active_color == 1 else "b"
-        return f"{board_fen} {turn} - - 0 1"
-
-    def to_pgn(self, moves: List[Any], metadata: Optional[MetadataWriter] = None) -> str:
-        """Export game moves and metadata to Portable Game Notation (PGN) text.
-
-        Args:
-            moves: List of played Move instances.
-            metadata: Optional MetadataWriter instance providing PGN header tags.
-
-        Returns:
-            Complete PGN format string.
-        """
-        headers = (
-            metadata.format_pgn_headers() if metadata else '[Event "Casual Game"]\n[Result "*"]'
-        )
-        move_pairs = []
-        for i in range(0, len(moves), 2):
-            move_num = (i // 2) + 1
-            w_move = (
-                pos_to_algebraic(moves[i].end_pos)
-                if hasattr(moves[i], "end_pos")
-                else str(moves[i])
-            )
-            if i + 1 < len(moves):
-                b_move = (
-                    pos_to_algebraic(moves[i + 1].end_pos)
-                    if hasattr(moves[i + 1], "end_pos")
-                    else str(moves[i + 1])
-                )
-                move_pairs.append(f"{move_num}. {w_move} {b_move}")
-            else:
-                move_pairs.append(f"{move_num}. {w_move}")
-
-        moves_text = " ".join(move_pairs)
-        result = metadata.get_header("Result", "*") if metadata else "*"
-        return f"{headers}\n\n{moves_text} {result}".strip()
-
-    def export(self, format_type: str = "PGN", **kwargs: Any) -> str:
-        """Export game information in the requested format ('PGN', 'FEN', or 'STENOGRAPHIC').
-
-        Args:
-            format_type: Format name case-insensitively ('PGN', 'FEN', 'STENOGRAPHIC').
-            **kwargs: Format-specific parameters ('moves', 'board', 'metadata', 'active_color').
-
-        Returns:
-            Serialized string representation.
-        """
-        fmt = format_type.upper()
-        if fmt == "PGN":
-            return self.to_pgn(kwargs.get("moves", []), kwargs.get("metadata"))
-        elif fmt == "FEN":
-            return self.to_fen(kwargs["board"], kwargs.get("active_color", 1))
-        elif fmt == "STENOGRAPHIC":
-            return self.to_stenographic(kwargs.get("moves", []))
-        return ""
