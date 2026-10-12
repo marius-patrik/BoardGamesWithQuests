@@ -1,5 +1,7 @@
 # SCRATCHPAD
 
+**The package-workspace decision in section 2 supersedes earlier references to src/ or a games/ container in older implementation notes.**
+
 **This file is the execution manual for the whole track.** An agent with no other
 context should be able to read this and drive the project from its current state
 to a finished, playable product. Where this file and the product requirements
@@ -194,18 +196,14 @@ begins. **The maintainer merges; do not merge.**
 | PR | Content | Needs |
 |---|---|---|
 | 1 | PRD + SCRATCHPAD | — *(in review)* |
-| 2 | Flatten `src/` to root, and reconfigure the docs pipeline with it | 1 |
-| 3 | Delete metadata-only tests, close docstring gaps, remove the `piece.py` demo block | 2 |
+| 2 | Repository-wide virtual documentation without a committed docs source directory (#210, merged) | 1 |
+| 3 | Retire the old test suite for an end-of-stack rewrite (#222, merged; #239 release gate) | 2 |
 | 4 | CI: native self-contained workflows, then remove the DarkFactory dependency | 3 |
 | 5 | Governance rules: `AGENTS.md` 1, 2, 4, 7, 9, 10, 11, 12 | 4 |
-| 6 | Packaging, entry point, and the git-ignored log directory | 2 |
+| 6 | Package workspace, engine launcher, game plugins, and git-ignored logs (#220) | 3 |
 | 7 | README: stop claiming what the product does not yet do | 1 |
 
-**The order is load-bearing.** PR 4 deletes `.github/darkfactory.json` and the
-workflows that `tests/test_workflow_rules.py` and
-`tests/test_auto_format_workflow.py` assert on; PR 5 rewrites `AGENTS.md` Rules 7
-and 11, which those tests also assert on. Both would land red. PR 3 removes the
-tests, so it must precede them.
+**The order is load-bearing.** #210 and #222 have merged. #220 introduces the new package layout; later stacked changes must be ported to these paths during their deferred rebases. Behavioral tests are rebuilt only at the final issue #239 release gate.
 
 ### PR 1 — PRD and SCRATCHPAD
 
@@ -218,63 +216,16 @@ consistent; `pytest`, `black --check` and `properdocs build --strict` are green.
 
 **Verification**: `pytest -q`, `black --check .`, `python -m properdocs build
 --strict`, and a cross-reference sweep of every FR and PR reference.
-### PR 2 — Flatten `src/` to root, and reconfigure the docs pipeline
+### PR 2 — Repository-wide documentation (#210, merged)
 
-**Goal**: the package sits at the repository root.
+The documentation builder reads tracked content from the repository root and
+generates pages and navigation without a committed source folder. With the new
+packages workspace, Python API pages are generated under engine/, chess/ and
+checkers/ automatically. The Python import root comes from pyproject.toml.
 
-| What | Change |
-|---|---|
-| `src/model` → `model`, `src/controller` → `controller`, `src/view` → `view` | delete `src/` |
-| `pyproject.toml` | `pythonpath = ["src", "."]` → `["."]` |
-| ~15 modules | collapse the 3-level `try/except ImportError` fallbacks to plain imports; they existed only because of `src` |
-| `AGENTS.md` Rules 1 and 2 | both say "all code in `src/`" |
-| `properdocs.yml` | `docs_dir: src` → a generated child directory; the hand-written module `nav:` is deleted entirely |
-| `docs_hooks.py` | build the whole nav programmatically and emit every page as a virtual file |
-| `.gitignore` | ignore the generated docs source directory |
-| `tests/test_docs_and_docstrings.py` | walk the package dirs |
-| `tests/test_structure.py` | **no change** — its module list is already top-level, never `src.*` |
+**Verification**: strict documentation build and navigation for each tracked
+importable Python package.
 
-**Acceptance criteria**: `pytest` green; `black --check` clean; `properdocs build --strict`
-clean; `grep -rn "src\." --include='*.py' .` finds no stale `src.` import;
-every previously-passing test still passes.
-
-**The docs pipeline is the hard part of this PR, and `docs_dir: .` does not
-work.** `properdocs` validates that `docs_dir` is not the parent directory of the
-config file, so pointing it at the repository root aborts before any file is
-walked:
-
-```
-ERROR - Config value 'docs_dir': The 'docs_dir' should not be the parent
-directory of the config file. Use a child directory instead so that the
-'docs_dir' is a sibling of the config file.
-```
-
-`exclude_docs` cannot help — the failure is at config validation — and a
-committed `docs/` directory is forbidden by `AGENTS.md` Rule 2.
-
-**The design that works is closer to what Rule 2 wants anyway.** `docs_dir` points
-at a **generated, git-ignored child directory**, and `docs_hooks.py` builds the
-whole navigation and emits every page as a virtual `File.generated`. Nothing
-static is stored anywhere. The hook already builds the Notes section of the nav;
-this PR extends it to build the entire nav, one entry per module.
-
-**This also removes a recurring breakage.** `properdocs.yml` hard-codes nav
-entries for `model/pieces/horse.md`, `model/pieces/tower.md` and
-`controller/controller.md`. A nav entry pointing at a missing file is a warning,
-and `--strict` makes it a build failure — so PR 13 (moving the pieces) and PR 20
-(renaming `horse.py`, deleting `tower.py`) would each break the docs build.
-Generating the nav makes that class of breakage structurally impossible, and **no
-later PR needs to touch `properdocs.yml`**.
-
-**Additional acceptance criteria**: the generated docs source directory does not
-appear in `git status`; adding or renaming a module requires no `properdocs.yml`
-edit.
-
-**Blocks**: 5, 6, 8, 9.
-
-**Verification**: `pytest -q`, `black --check .`, and
-`python -m properdocs build --strict`, plus the specific commands in the
-corresponding issue.
 ### PR 3 — CI: native workflows, then remove DarkFactory
 
 **Goal**: the repository's CI depends on no external repository's workflow.
@@ -369,31 +320,26 @@ metadata-only, and PR 21 adds behavioural coverage to offset.
 **Verification**: `pytest -q`, `black --check .`, and
 `python -m properdocs build --strict`, plus the specific commands in the
 corresponding issue.
-### PR 6 — Packaging, entry point, and the log directory
+### PR 6 — Importable package workspace and application entry point (#220)
 
-Add a `[project]` table and a build backend. **`packages` must be set
-explicitly** — a flat layout plus setuptools auto-discovery trips over `tests/`
-sitting at the root.
+Create a package workspace instead of a monolithic src/ directory:
 
-**Three things the product needs that have no other home:**
+- packages/engine/ contains the shared model, controller, view and executable
+  application entry point. The supported launcher is python -m engine.
+- packages/chess/ and packages/checkers/ are importable sibling game packages,
+  registered through standard distribution entry points. No games/ container.
+- The distribution is installable using pyproject.toml and setuptools; the
+  original console command chesswithquests continues to invoke engine.app:main.
+- The chess package is the available default. The checkers package is declared
+  but remains unavailable until its implementation lands in the later stack.
+- logs/ is ignored. Remaining descendant branches must migrate old src/games
+  paths and imports during their later rebases; do not merge their legacy tests.
 
-1. **An entry point.** `python -m <entrypoint>` must start a window (FR-58).
-2. **`games/` must ship with the package.** It sits outside `model/`,
-   `controller/` and `view/`, so an install shipping only packages would not find
-   its own default configuration and every later phase would look broken. Either
-   declare the configurations as package data or have the loader locate them
-   relative to the installed distribution.
-3. **`logs/` must be git-ignored.** FR-55 requires it; `.gitignore` has no such
-   entry today.
+**Verification**: package importability, editable and clean-wheel installs,
+python -m engine --check from an unrelated working directory, Black formatting,
+tracked-Python compilation, and the strict documentation build. Pytest is
+explicitly skipped until the final complete rewrite in issue #239.
 
-**Acceptance criteria**: the package builds and installs; `pip install .` in a
-clean venv imports `model`, `controller` and `view` **and finds `games/chess/`**;
-the entry point starts the application; `git check-ignore logs/` succeeds; no
-runtime dependency is declared beyond the standard library.
-
-**Verification**: `pytest -q`, `black --check .`, and
-`python -m properdocs build --strict`, plus the specific commands in the
-corresponding issue.
 ### PR 7 — README honesty
 
 **Goal**: `README.md` stops claiming what the product does not yet do. It
@@ -530,12 +476,12 @@ and ties by declared order. A loader reads a configuration directory.
 - **`value` persists, `state` resets each game.** A saved configuration must not
   contain a game's history.
 
-`games/chess/` is created with `board.py`, and empty `pieces/`, `rules/`,
+`packages/chess/` is created with `board.py`, and empty `pieces/`, `rules/`,
 `quests/`, `clocks/`, `export/` directories. Populated in PR 13.
 
 **Acceptance criteria**: a custom rule loaded from a test fixture participates in a game
 without any engine edit; two colliding rules resolve by precedence; a rule's
-`state` never reaches disk; loading from a path outside `games/` is refused.
+`state` never reaches disk; loading from a path outside `packages/` is refused.
 
 **Needs**: 8. **Blocks**: 11, 12, 18.
 
@@ -570,7 +516,7 @@ corresponding issue.
 **Goal**: every rule in `notes/chess_rules.md` implemented, and the engine stops
 knowing what a king is.
 
-All eleven chess rules as `Rule` subclasses in `games/chess/rules/`: castling, en
+All eleven chess rules as `Rule` subclasses in `packages/chess/rules/`: castling, en
 passant, promotion, check and checkmate, stalemate, insufficient material,
 fifty-move, threefold repetition, mutual-agreement draw, flag fall, and a rule
 declaring which piece kind is royal.
@@ -593,16 +539,16 @@ neither crashes nor silently disables check.
 **Verification**: `pytest -q`, `black --check .`, and
 `python -m properdocs build --strict`, plus the specific commands in the
 corresponding issue.
-#### PR 13 — Migrate chess into `games/chess/`
+#### PR 13 — Migrate chess into `packages/chess/`
 
 **Needs**: 11. **Blocks**: 17, 20.
 
 **Goal**: the chess configuration is complete and self-contained.
 
-Move the six piece subclasses out of `model/pieces/` into `games/chess/pieces/`,
+Move the six piece subclasses out of `model/pieces/` into `packages/chess/pieces/`,
 with declared unicode symbols and optional FEN characters. Move the rules from
-PR 11 into `games/chess/rules/`. Create `games/chess/clocks/` and populate
-`games/chess/board.py`. `chess` is the default and cannot be edited or deleted; a variant starts by
+PR 11 into `packages/chess/rules/`. Create `packages/chess/clocks/` and populate
+`packages/chess/board.py`. `chess` is the default and cannot be edited or deleted; a variant starts by
 duplicating the folder.
 
 **Two things that break silently unless this PR owns them.** The docs build
@@ -613,7 +559,7 @@ those entries become `games.chess.pieces.*` — unless PR 3 already deleted that
 file, so check which applies.
 
 **Acceptance criteria**: `model/` retains only the parent classes and machinery;
-chess plays from `games/chess/` with no engine change; removing a piece file
+chess plays from `packages/chess/` with no engine change; removing a piece file
 removes it from a game without touching engine code; `properdocs build --strict`
 is green with no `properdocs.yml` edit.
 
@@ -705,7 +651,7 @@ renamed, duplicated, edited, deleted and copied as a folder.
 **Verification**: `pytest -q`, `black --check .`, and
 `python -m properdocs build --strict`, plus the specific commands in the
 corresponding issue.
-#### PR 17 — `games/checkers/`
+#### PR 17 — `packages/checkers/`
 
 **Needs**: 12, 13, 18 — it ships *letter* and metadata exports, and PR 18 is what makes those possible. **Blocks**: 21.
 
@@ -785,11 +731,11 @@ corresponding issue.
 Close everything §4 lists as missing.
 
 **Acceptance criteria**: every public method under `model/`, `controller/`, `view/` and
-`games/` is reachable from at least one test; no surviving test asserts only on
+`packages/` is reachable from at least one test; no surviving test asserts only on
 repository metadata; the invariant tests hold — no third-party runtime import
 anywhere under the project source, no hard-coded `8` outside `Board`'s default,
 all aliases importable, the default configuration cannot be edited or deleted,
-configurations survive a restart, a rule loaded from outside `games/` is refused,
+configurations survive a restart, a rule loaded from outside `packages/` is refused,
 colliding rules resolve by precedence, and a rule's `state` never reaches disk.
 
 ---
@@ -842,7 +788,7 @@ The project is finished when all of these hold.
 22. Every data-based configuration is form-exposed from one renderer.
 23. The editor refuses invalid code before it joins a configuration.
 24. A game is played end to end from the entry point to a result.
-24a. `games/` ships with the installed package, so a clean install finds its own
+24a. `packages/` ships with the installed package, so a clean install finds its own
     default configuration.
 
 **Export**
@@ -872,7 +818,7 @@ The project is finished when all of these hold.
 | Real PGN requires SAN disambiguation, which is easy to get subtly wrong — `Nbd7` versus `N1d7` versus `Nd7` | High | Each case gets its own test: two knights, three queens, two rooks on one rank, a pinned piece that can still legally reach the square, promotion capture. A round-trip against known-good PGN is the backstop |
 | `getType()` and `hasattr` coupling fails **silently** on rename or on a custom piece | High | PR 11 removes it. PR 20 ships tests that fail when a probe breaks, not only when a name changes |
 | The flatten makes the whole repo the docs tree, and `exclude_docs` has to do work `docs_dir: src` did by construction | High | PR 2. Fallback is a dedicated docs directory rather than widening the tree |
-| A flat layout breaks setuptools auto-discovery over `tests/` | Medium | PR 6 sets `packages` explicitly |
+| Game-specific import paths from older PRs become obsolete | High | Restack later PRs onto packages/engine, packages/chess and packages/checkers without restoring tests |
 | Removing DarkFactory leaves the repository without working required checks | High | PR 3 lands the replacement and gets it green before removing anything |
 | `checkers` needs an engine change that chess did not | High | That is the point of shipping it. Treat it as a failure of the abstraction and fix the abstraction, not the game |
 | A multi-hop move model change destabilises ordinary single-hop moves | Medium | PR 12 tests a one-hop move through the same path as a three-hop chain |
@@ -907,12 +853,12 @@ reason is what matters.
 | 15 | No `CustomBoard`, `CustomPiece` or `CustomQuest` types | Board, piece and quest customisation is already complete through data; these classes would wrap data that is already custom and exist only for symmetry |
 | 16 | No condition class for quests | Two hierarchies would express the same thing. The pieces pattern settles it: `Pawn(Piece)` carries its own logic, with no strategy object underneath |
 | 17 | The whole configuration is one file tree in Python | It cannot all be data — rules and quests carry logic — and one language avoids a format split and the `tomllib` availability problem on Python 3.10 |
-| 18 | Configurations live in `games/`, outside the package | Keeps authored and built-in implementations out of the engine, and makes a configuration a copyable unit |
+| 18 | Game implementations live in sibling packages beside engine | Keeps game-specific implementations out of the reusable engine; packaged extensions are discoverable through entry points |
 | 19 | One board per game | Duplication is already the mechanism for every other change, so multiple boards would have been the one place it was not |
 | 20 | Piece symbols are declared data | The renderer and notation writer then hold no knowledge of piece types, which also removes the silent-pawn fallback |
 | 21 | FEN characters are optional per piece | A custom piece has no FEN representation, and reporting that beats emitting something wrong |
 | 22 | The king is a rule, not a type | Checkers has no king, and the engine must not know chess. Also removes the silent-failure coupling |
-| 23 | FEN and PGN live in `games/chess/export/` | They are chess formats. A game with no FEN representation has no FEN exporter, because the structure says so rather than a runtime check |
+| 23 | FEN and PGN live in `packages/chess/export/` | They are chess formats. A game with no FEN representation has no FEN exporter, because the structure says so rather than a runtime check |
 | 24 | Every export format the diagram names is implemented | The diagram is the assignment specification; nothing in that box is negotiable |
 | 25 | No format switch in the engine | One class per format extending a base is the `Extends` relation the diagram already draws |
 | 26 | XP is derived from completed quests | `Uzivatel.splnene_kwesty` already holds them, so `User` gains no field and no deviation |
@@ -920,7 +866,7 @@ reason is what matters.
 | 28 | The configuration selector exists only in settings | It means *which configuration am I editing*. The start modal is the only place a configuration is chosen to play, so editing cannot silently change what is about to be played |
 | 29 | All data-based configuration is form-exposed | The code editor is for logic only. Requiring code to set a board size would make the editor the whole configuration surface |
 | 30 | Backlog is one item: a no-code builder for rule logic | The code editor covers the full expressiveness of the hooks meanwhile, so nothing is unavailable while it waits |
-| 31 | `src/` is flattened to the root | It removes the import-path and docs-configuration churn from every later PR |
+| 31 | `packages/` holds engine, chess and checkers as peers | A single importable engine remains separate from each game's rule/piece package; no src/ or games/ directory |
 | 32 | The project ships `checkers` | It is the executable proof of the abstraction, and it is self-verifying: if checkers needs an engine change that chess did not, the seam is wrong |
 | 33 | Phase 1 changes no product behaviour | Every Phase 2 PR would otherwise carry mechanical churn alongside its real change, which makes review harder |
 | 34 | Bot-authored pull requests are dropped | PRs are authored normally and the maintainer merges them |
