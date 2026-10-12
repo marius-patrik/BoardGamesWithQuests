@@ -75,9 +75,9 @@ for like:
 - **Metadata assertions.** Tests that open `../AGENTS.md`, workflow YAML, `notes/`
   or `README.md` and assert substrings police the rulebook, not the product.
 
-The tests that survive drive real behaviour: a move is played and its effect
-asserted, a rule is exercised and its outcome asserted, an invariant such as "no
-third-party import anywhere under the project source" is asserted against the
+The suite must drive real behaviour: a move is played and its effect asserted,
+a rule is exercised and its outcome asserted, and an invariant such as "no
+third-party import anywhere under the project source" is checked against the
 code itself.
 
 ### 3.3 Execution of authored code
@@ -155,7 +155,7 @@ packages/
 logs/              game logs, configurable, git-ignored
 ```
 
-**Inside a game package (target structure; rules and quests land in later PRs):**
+**Inside a game package (target structure):**
 
 ```text
 packages/chess/
@@ -173,8 +173,7 @@ identity, glyphs, movement vectors, attack vectors, clocks, exported formats,
 appearance, default selection and other configurable values are data. **Only
 rules and quests are executable Python extensions**, because their behavior
 cannot be represented by these static values. The shared engine validates the
-JSON and discovers sibling packages via distribution entry points. This design
-supersedes the older all-Python configuration arrangement.
+JSON and discovers sibling packages via distribution entry points.
 
 **A game variant is another importable package.** Copying `packages/chess/` to
 `packages/house/` creates a starting point, but the copied `config.json` must get

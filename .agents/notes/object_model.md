@@ -2,9 +2,9 @@
 
 **Purpose:** Record deliberate differences between the [external reference diagram](reference_diagram.md) and the **target implementation**, with rationale and approval. This is not an inventory of completed code. The reference document alone owns the literal boxes, members, spelling errors and disagreements between its two pages; the [PRD](PRD.md) owns acceptance requirements; the [execution plan](../SCRATCHPAD.md) owns implementation status.
 
-## Actual implementation
+## Model diagrams
 
-The generated [class and inheritance graph](diagrams/implementation-classes.svg) and [package dependency graph](diagrams/implementation.svg) are rendered from tracked Python on each documentation build. They show what exists on the checked-out revision, **not** whether target behaviors, edges or UML requirements are satisfied. In particular, `main` does not yet include the Tkinter `GameView` and `PlayerView` implementations, the game rules, or their integration tests.
+The generated [class and inheritance graph](diagrams/implementation-classes.svg) and [package dependency graph](diagrams/implementation.svg) are rendered from tracked Python on each documentation build. They show source-level relationships for the checked-out revision, **not** whether target behaviors, edges or UML requirements are satisfied. Current implementation gaps are tracked in [SCRATCHPAD.md](../SCRATCHPAD.md).
 
 ## Approved deviations and design decisions
 
@@ -14,7 +14,7 @@ All entries below describe the **agreed target**, not necessarily completed func
 |---|---|---|
 | Naming and translation | English names are canonical; ASCII Czech aliases map to the **same** classes where required by [PRD §5](PRD.md#5-naming-requirements). | Translation is not structural deviation; alias policy approved 2026-10-02. |
 | Validation (diagram's unresolved question) | Calculate legal destinations on selection; aggregate all legal moves for mate/stalemate evaluation. | Avoid exhaustive UI recalculation while keeping complete game-end evaluation. Approved 2026-09-04. |
-| Configuration and packaging | Shared `packages/engine/`; independent `packages/chess/` and `packages/checkers/`, with game-local `config.json`, behavior extensions and entry-point discovery. No `src/games/`. | Copyable game packages without chess-specific behavior in the engine. Approved 2026-10-02; folder layout updated 2026-10-12 and present on `main`. |
+| Configuration and packaging | Shared `packages/engine/`; independent `packages/chess/` and `packages/checkers/`, with game-local `config.json`, behavior extensions and entry-point discovery. No `src/games/`. | Copyable game packages without chess-specific behavior in the engine. Approved 2026-10-02; folder layout updated 2026-10-12. |
 | Rule model | `Rule` with configured values, per-game state, and `permits_move`, `available_moves`, `outcome`, `on_move_made`, `status` hooks. Active rules are explicitly composed. | The diagram has a fixed validator and no rule extension mechanism. Approved 2026-10-02. |
 | Quest model | `Quest` subclasses expose validation and progress; `QuestManager` holds current-game quests, `User` holds completions, XP derives from completed rewards. No standalone condition class. | Supports configurable objectives while preserving the drawn `Quest` concept. Approved 2026-10-02. |
 | Field declarations | `Field`/`Configurable.spec()` drives a shared form renderer for boards, pieces, clocks, rules and quests. | The reference lacks a settings schema. Approved 2026-10-02. |
@@ -39,4 +39,4 @@ Refer to [the diagram transcription](reference_diagram.md) for the exact boxes, 
 
 ## Verification boundary
 
-A deviation is **approved design** until the relevant feature PR is integrated and behavior-tested. Source-generated UML verifies current class relationships only. Full gameplay conformance and any claim of an executable release remain gated by the fresh behavioral test suite in [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239).
+An approved deviation records **target design**, not proof that its implementation exists or behaves correctly. Source-generated UML verifies current class relationships only. Behavioral conformance requires tests of the implemented system; the current coverage and release gates are maintained in [SCRATCHPAD.md](../SCRATCHPAD.md).
