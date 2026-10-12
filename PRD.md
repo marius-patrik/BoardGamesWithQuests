@@ -170,8 +170,7 @@ Everything in a configuration is a Python file. It could not all be data,
 because rules and quests carry logic, and one language avoids a format split and
 the `tomllib` availability problem on Python 3.10.
 
-**A configuration is a folder that can be copied.** `cp -r games/chess
-games/house`, change what differs, and a new variant exists. Duplication is the
+**A configuration is a folder that can be copied.** `cp -r packages/chess packages/house`, change what differs, and a new variant exists. Duplication is the
 extension mechanism: to change the board, duplicate the configuration and change
 the board. One game runs one board. The new package must be declared in the distribution's game entry points to be installed and selectable.
 
