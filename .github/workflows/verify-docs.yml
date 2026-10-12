@@ -39,6 +39,11 @@ jobs:
           assert (root / "site/engine/model/game/board/index.html").is_file()
           assert (root / "site/agents/notes/diagrams/reference-page1.svg").is_file()
           assert (root / "site/agents/notes/diagrams/implementation-classes.svg").is_file()
+          # Prevent replacing real UML connectivity with a flat inventory SVG.
+          for diagram, min_edges in (("implementation.svg", 2), ("implementation-classes.svg", 5)):
+              svg = (root / "site/agents/notes/diagrams" / diagram).read_text()
+              assert svg.count('class="node"') >= 3, f"{diagram}: missing UML boxes"
+              assert svg.count('class="edge"') >= min_edges, f"{diagram}: no graph relationships"
           assert (root / ".agents/AGENTS.md").is_file() and not (root / ".agents/AGENTS.md").is_symlink()
           assert (root / ".agents/notes/PRD.md").is_file()
           assert (root / ".agents/notes/GUI_mockup.svg").is_file()
