@@ -25,8 +25,8 @@ Install for development with `python -m pip install -e .`. Run
 
 ## Documentation
 
-- [Requirements and acceptance criteria](.agents/notes/PRD.md)
-- [Reference architecture diagram](.agents/notes/reference_diagram.md)
-- [Object-model decisions](.agents/notes/object_model.md)
-- [Development automation architecture](.agents/notes/automation_architecture.md)
-- [Current progress, integration sequence and release gates](.agents/SCRATCHPAD.md)
+- [Requirements and acceptance criteria](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PRD.md)
+- [Reference architecture diagram](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/reference_diagram.md)
+- [Object-model decisions](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/object_model.md)
+- [Development automation architecture](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/automation_architecture.md)
+- [Current progress, integration sequence and release gates](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md)
