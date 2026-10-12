@@ -41,8 +41,8 @@
     },
     "documentation": {
       "python": {
-        "command": "properdocs build --strict",
-        "source": "docstrings"
+        "command": "python .github/scripts/build_docs.py",
+        "source": "repository Markdown and Python docstrings"
       }
     },
     "release": {

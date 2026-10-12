@@ -1,331 +1,181 @@
-"""Dynamic MkDocs hook for generating virtual documentation pages from Python docstrings."""
+"""Build the documentation tree from tracked repository content.
 
-import os
-import shutil
-from typing import Any, List, Optional, Tuple, Union, MutableMapping
-from mkdocs.config.defaults import MkDocsConfig
-from mkdocs.structure.files import File, Files
+Markdown is published as written. Python packages are rendered with mkdocstrings;
+other Python files receive source pages. All paths, titles and navigation are
+derived from the checked-out repository, not a curated list of directories.
+"""
+
+import ast
+import subprocess
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
+from pathlib import Path
+from typing import Any
+
+from properdocs.structure.files import File, Files
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
-def _get_repo_root(config: Any) -> str:
-    """Resolve the repository root directory from configuration.
-
-    Prioritizes config.config_file_path and __file__, falling back to docs_dir.
-
-    Args:
-        config (Any): The MkDocs configuration object or dictionary.
-
-    Returns:
-        str: Absolute path to the repository root directory.
-    """
-    if hasattr(config, "config_file_path") and config.config_file_path:
-        return os.path.dirname(os.path.abspath(config.config_file_path))
-    if isinstance(config, dict) and config.get("config_file_path"):
-        return os.path.dirname(os.path.abspath(config["config_file_path"]))
-
-    docs_dir = (
-        config.get("docs_dir") if hasattr(config, "get") else getattr(config, "docs_dir", None)
+def tracked_files(root: Path = ROOT) -> list[Path]:
+    """Discover all tracked Python and Markdown files, respecting Git's own index."""
+    result = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "-z", "--cached"],
+        check=True,
+        capture_output=True,
     )
-    hook_repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    files = [root / Path(p.decode("utf-8")) for p in result.stdout.split(b"\0") if p]
+    return sorted(
+        (p for p in files if p.is_file() and p.suffix.lower() in {".md", ".py"}),
+        key=lambda p: p.relative_to(root).as_posix(),
+    )
 
-    if docs_dir:
-        docs_parent = os.path.abspath(os.path.join(docs_dir, ".."))
+
+def python_roots(root: Path = ROOT) -> list[Path]:
+    """Read the project's Python import roots instead of listing packages by name."""
+    project = root / "pyproject.toml"
+    roots: list[Path] = []
+    if project.exists():
+        config = tomllib.loads(project.read_text(encoding="utf-8"))
+        candidates = (
+            config.get("tool", {}).get("pytest", {}).get("ini_options", {}).get("pythonpath", [])
+        )
+        if isinstance(candidates, str):
+            candidates = candidates.split()
+        roots += [root / entry for entry in candidates]
+        setuptools = config.get("tool", {}).get("setuptools", {})
+        roots += [
+            root / entry
+            for entry in setuptools.get("packages", {}).get("find", {}).get("where", [])
+        ]
+    roots.append(root)
+    return [p.resolve() for p in dict.fromkeys(p for p in roots if p.is_dir())]
+
+
+def import_name(path: Path, roots: list[Path]) -> str | None:
+    """Return an importable dotted name, or None for standalone Python scripts."""
+    sources = [item for item in roots if item != ROOT]
+    for base in sources or roots:
         try:
-            if os.path.commonpath([docs_parent, hook_repo_root]) != hook_repo_root:
-                return docs_parent
+            relative = path.relative_to(base)
         except ValueError:
-            return docs_parent
-
-    return hook_repo_root
-
-
-def _get_notes_dir(config: Union[MkDocsConfig, MutableMapping[str, Any], Any]) -> Optional[str]:
-    """Resolve the notes directory from configuration if present.
-
-    Args:
-        config (Union[MkDocsConfig, MutableMapping[str, Any], Any]): The MkDocs configuration object or dictionary.
-
-    Returns:
-        Optional[str]: Absolute path to the notes directory if it exists, None otherwise.
-    """
-    custom_notes = (
-        config.get("notes_dir") if hasattr(config, "get") else getattr(config, "notes_dir", None)
-    )
-    if custom_notes and os.path.isdir(custom_notes):
-        return os.path.abspath(custom_notes)
-
-    repo_root = _get_repo_root(config)
-    notes_dir = os.path.join(repo_root, "notes")
-    return notes_dir if os.path.isdir(notes_dir) else None
+            continue
+        if len(relative.parts) == 1:
+            continue
+        package_parts = relative.parts[:-1]
+        if not all(
+            (base.joinpath(*package_parts[:i]) / "__init__.py").exists()
+            for i in range(1, len(package_parts) + 1)
+        ):
+            continue
+        tail = () if path.name == "__init__.py" else (path.stem,)
+        return ".".join((*package_parts, *tail))
+    return None
 
 
-def on_config(
-    config: Union[MkDocsConfig, MutableMapping[str, Any]],
-) -> Union[MkDocsConfig, MutableMapping[str, Any]]:
-    """Inspect notes directory and dynamically populate the Notes navigation section.
+def display_name(stem: str) -> str:
+    """Derive readable labels without a manually maintained title mapping."""
+    return stem.replace("_", " ").replace("-", " ").title()
 
-    Args:
-        config (Union[MkDocsConfig, MutableMapping[str, Any]]): The MkDocs configuration object.
 
-    Returns:
-        Union[MkDocsConfig, MutableMapping[str, Any]]: The updated MkDocs configuration object with notes navigation.
-    """
-    # Finding 5: If nav is not configured in mkdocs.yml (nav is None), preserve auto-navigation
-    nav = config.get("nav") if hasattr(config, "get") else getattr(config, "nav", None)
-    if nav is None:
-        return config
+def public_path(path: Path) -> str:
+    """Publish hidden tracked directories under ordinary URL-safe names."""
+    return "/".join(part.lstrip(".") if part.startswith(".") else part for part in path.parts)
 
-    notes_dir = _get_notes_dir(config)
-    if not notes_dir:
-        # Clean up empty Notes placeholder if notes directory does not exist
-        if isinstance(config.get("nav"), list):
-            config["nav"] = [
-                item
-                for item in config["nav"]
-                if not (isinstance(item, dict) and "Notes" in item and not item["Notes"])
-            ]
-        return config
 
-    try:
-        dir_entries = sorted(os.listdir(notes_dir))
-    except OSError as e:
-        print(f"Warning: Failed to list notes directory {notes_dir}: {e}")
-        dir_entries = []
+def pages_for(root: Path = ROOT) -> list[tuple[str, str]]:
+    """Create virtual pages for every tracked Markdown and Python file."""
+    pages: dict[str, str] = {}
+    roots = python_roots(root)
+    for path in tracked_files(root):
+        relative = path.relative_to(root)
+        if path.suffix.lower() == ".md":
+            dest = (
+                "index.md" if relative.as_posix().lower() == "readme.md" else public_path(relative)
+            )
+            if path.name.lower() == "readme.md" and len(relative.parts) > 1:
+                dest = public_path(relative.parent.joinpath("index.md"))
+            if dest not in pages or path.name.lower() != "readme.md":
+                pages[dest] = path.read_text(encoding="utf-8")
+            continue
 
-    note_files = [
-        f
-        for f in dir_entries
-        if f.endswith(".md") and f != "index.md" and os.path.isfile(os.path.join(notes_dir, f))
-    ]
-    notes_index_path = os.path.join(notes_dir, "index.md")
-    has_notes = bool(note_files or os.path.isfile(notes_index_path))
+        dotted = import_name(path, roots)
+        if dotted is not None:
+            dest = dotted.replace(".", "/") + ("/index.md" if path.name == "__init__.py" else ".md")
+            body = f"# {display_name(path.parent.name if path.name == '__init__.py' else path.stem)}\n\n::: {dotted}\n"
+        else:
+            dest = public_path(relative.with_suffix(".md"))
+            source = path.read_text(encoding="utf-8")
+            try:
+                summary = ast.get_docstring(ast.parse(source)) or ""
+            except SyntaxError:
+                summary = ""
+            body = f"# {display_name(path.stem)}\n\n{summary}\n\n````python\n{source}\n````\n"
+        if dest in pages:
+            raise ValueError(f"Documentation page collision at {dest}: {relative}")
+        pages[dest] = body
 
-    if not has_notes:
-        if isinstance(config.get("nav"), list):
-            config["nav"] = [
-                item
-                for item in config["nav"]
-                if not (isinstance(item, dict) and "Notes" in item and not item["Notes"])
-            ]
-        return config
+    if "index.md" not in pages:
+        name = display_name(root.name)
+        pages["index.md"] = f"# {name}\n"
+    # Every directory receives a generated hub unless a real index or package index exists.
+    directories = {Path(name).parent.as_posix() for name in pages}
+    directories.discard(".")
+    for directory in sorted(directories, key=lambda d: d.count("/"), reverse=True):
+        index = f"{directory}/index.md"
+        if index in pages:
+            continue
+        children = sorted(
+            key for key in pages if Path(key).parent.as_posix() == directory and key != index
+        )
+        if children:
+            items = "\n".join(
+                f"- [{display_name(Path(key).stem)}]({Path(key).name})" for key in children
+            )
+            pages[index] = f"# {display_name(Path(directory).name)}\n\n{items}\n"
+    return sorted(pages.items())
 
-    notes_section: Optional[List[Any]] = None
-    for item in config["nav"]:
-        if isinstance(item, dict) and "Notes" in item:
-            if item["Notes"] is None:
-                item["Notes"] = []
-            elif not isinstance(item["Notes"], list):
-                item["Notes"] = [item["Notes"]]
-            notes_section = item["Notes"]
-            break
 
-    if notes_section is None:
-        notes_section = []
-        config["nav"].append({"Notes": notes_section})
+def navigation(pages: list[tuple[str, str]]) -> list[dict[str, Any]]:
+    """Derive the exact navigation from the same pages emitted by on_files."""
+    tree: dict[str, Any] = {}
+    for dest, _ in pages:
+        parts = Path(dest).with_suffix("").parts
+        cursor = tree
+        for part in parts[:-1]:
+            cursor = cursor.setdefault(part, {})
+        cursor[parts[-1]] = dest
 
-    def _is_present(target_path: str) -> bool:
-        for entry in notes_section:
-            if entry == target_path:
-                return True
-            if isinstance(entry, dict) and target_path in entry.values():
-                return True
-        return False
+    def render(node: dict[str, Any]) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = []
+        for key, value in sorted(node.items(), key=lambda item: (item[0] != "index", item[0])):
+            result.append({display_name(key): render(value) if isinstance(value, dict) else value})
+        return result
 
-    if not _is_present("notes/index.md"):
-        notes_section.insert(0, "notes/index.md")
+    return render(tree)
 
-    for f in note_files:
-        note_uri = f"notes/{f}"
-        if not _is_present(note_uri):
-            notes_section.append(note_uri)
 
+def build_nav(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[tuple[str, str]]]:
+    """Build navigation and content together so their targets cannot diverge."""
+    pages = pages_for(root)
+    return navigation(pages), pages
+
+
+def on_config(config: Any) -> Any:
+    """Populate navigation from repository content before rendering."""
+    config["nav"] = build_nav()[0]
     return config
 
 
-def on_files(files: Files, config: Union[MkDocsConfig, MutableMapping[str, Any]]) -> Files:
-    """Dynamically generate virtual markdown documentation pages for Python modules and notes.
-
-    Args:
-        files (Files): The MkDocs collection of File objects.
-        config (Union[MkDocsConfig, MutableMapping[str, Any]]): The MkDocs configuration object.
-
-    Returns:
-        Files: The updated collection of File objects including virtual documentation.
-    """
+def on_files(files: Files, config: Any) -> Files:
+    """Materialize virtual pages without writing documentation sources to disk."""
     plugins = getattr(config, "plugins", None)
     if plugins is not None and not hasattr(plugins, "_current_plugin"):
-        try:
-            plugins._current_plugin = None
-        except AttributeError:
-            pass
-
-    repo_root = _get_repo_root(config)
-    src_dir = (
-        config.get("docs_dir") if hasattr(config, "get") else getattr(config, "docs_dir", None)
-    )
-    if not src_dir:
-        src_dir = os.path.join(repo_root, "src")
-
-    notes_dir = _get_notes_dir(config)
-
-    note_entries: List[Tuple[str, str]] = []
-    if notes_dir and os.path.isdir(notes_dir):
-        try:
-            dir_entries = sorted(os.listdir(notes_dir))
-        except OSError as e:
-            print(f"Warning: Failed to list notes directory {notes_dir}: {e}")
-            dir_entries = []
-
-        for f in dir_entries:
-            if f.endswith(".md") and f != "index.md":
-                note_path = os.path.join(notes_dir, f)
-                if os.path.isfile(note_path):
-                    try:
-                        with open(note_path, "r", encoding="utf-8") as nf:
-                            content = nf.read()
-                    except (OSError, UnicodeDecodeError) as e:
-                        print(f"Warning: Failed to read note {note_path}: {e}")
-                        continue
-
-                    title = os.path.splitext(f)[0].replace("_", " ").title()
-                    note_entries.append((f, title))
-
-                    doc_uri = f"notes/{f}"
-                    if not files.get_file_from_path(doc_uri):
-                        gen_file = File.generated(
-                            config,
-                            doc_uri,
-                            content=content,
-                        )
-                        files.append(gen_file)
-
-    # Dynamically generate virtual notes/index.md hub page if notes directory exists and has notes or index.md
-    if notes_dir and os.path.isdir(notes_dir):
-        notes_index_path = os.path.join(notes_dir, "index.md")
-        has_index_on_disk = os.path.isfile(notes_index_path)
-        if note_entries or has_index_on_disk:
-            if not files.get_file_from_path("notes/index.md"):
-                notes_hub_content = None
-                if has_index_on_disk:
-                    try:
-                        with open(notes_index_path, "r", encoding="utf-8") as f:
-                            notes_hub_content = f.read()
-                    except (OSError, UnicodeDecodeError) as e:
-                        print(f"Warning: Failed to read notes index {notes_index_path}: {e}")
-
-                if notes_hub_content is None:
-                    hub_lines = [
-                        "# Architecture & Design Notes",
-                        "",
-                        "Authoritative architectural references, design decisions, and baseline rules for the ChessWithQuests project.",
-                        "",
-                        "## Table of Contents",
-                        "",
-                    ]
-                    for f, title in note_entries:
-                        hub_lines.append(f"- [{title}]({f})")
-                    hub_lines.append("")
-                    notes_hub_content = "\n".join(hub_lines)
-
-                notes_index_file = File.generated(
-                    config,
-                    "notes/index.md",
-                    content=notes_hub_content,
-                )
-                files.append(notes_index_file)
-
-    # Generate virtual index.md overview from README.md if no index.md on disk
-    if not files.get_file_from_path("index.md"):
-        readme_path = os.path.join(repo_root, "README.md")
-        overview_content = ""
-        if os.path.isfile(readme_path):
-            try:
-                with open(readme_path, "r", encoding="utf-8") as rf:
-                    overview_content = rf.read()
-            except (OSError, UnicodeDecodeError) as e:
-                print(f"Warning: Failed to read README {readme_path}: {e}")
-                overview_content = "# ChessWithQuests\n\nAutogenerated API Documentation.\n"
-        else:
-            overview_content = "# ChessWithQuests\n\nAutogenerated API Documentation.\n"
-
-        overview_content += "\n\n---\n\n## Reference Architecture Diagram\n- [Architecture Diagram](https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D)\n"
-
-        if (
-            notes_dir
-            and os.path.isdir(notes_dir)
-            and (note_entries or os.path.isfile(os.path.join(notes_dir, "index.md")))
-        ):
-            overview_content += (
-                "\n\n---\n\n## Architecture & Reference Notes\n- [Notes Overview](notes/index.md)\n"
-            )
-            for f, title in note_entries:
-                overview_content += f"- [{title}](notes/{f})\n"
-
-        index_file = File.generated(
-            config,
-            "index.md",
-            content=overview_content,
-        )
-        files.append(index_file)
-
-    if os.path.isdir(src_dir):
-        for root, _, filenames in os.walk(src_dir):
-            for f in sorted(filenames):
-                if not f.endswith(".py"):
-                    continue
-
-                full_path = os.path.join(root, f)
-                rel_path = os.path.relpath(full_path, src_dir)
-                parts = rel_path.split(os.sep)
-                parts[-1] = os.path.splitext(parts[-1])[0]
-
-                if parts[-1] == "__init__":
-                    if len(parts) == 1:
-                        # Root package overview is covered by docs/index.md
-                        continue
-                    dotted_path = ".".join(parts[:-1])
-                    doc_uri = "/".join(parts[:-1]) + "/index.md"
-                    title = f"{parts[-2].capitalize()} Package (`{dotted_path}`)"
-                else:
-                    dotted_path = ".".join(parts)
-                    doc_uri = "/".join(parts) + ".md"
-                    title = f"{parts[-1].capitalize()} (`{dotted_path}`)"
-
-                # Avoid collisions with static docs if already present
-                if files.get_file_from_path(doc_uri):
-                    continue
-
-                content = f"# {title}\n\n::: {dotted_path}\n"
-                gen_file = File.generated(
-                    config,
-                    doc_uri,
-                    content=content,
-                )
-                files.append(gen_file)
-
+        plugins._current_plugin = None
+    for dest, body in build_nav()[1]:
+        if files.get_file_from_path(dest) is None:
+            files.append(File.generated(config, dest, content=body))
     return files
-
-
-def on_post_build(config: Union[MkDocsConfig, MutableMapping[str, Any]]) -> None:
-    """Ensure site/index.html is available.
-
-    Args:
-        config (Union[MkDocsConfig, MutableMapping[str, Any]]): The MkDocs configuration object.
-
-    Returns:
-        None
-    """
-    site_dir = (
-        config.get("site_dir") if hasattr(config, "get") else getattr(config, "site_dir", None)
-    )
-    if not site_dir:
-        site_dir = os.path.join(_get_repo_root(config), "site")
-
-    index_html = os.path.join(site_dir, "index.html")
-    if not os.path.exists(index_html):
-        for candidate in ["index.html", "__init__/index.html", "src/index.html"]:
-            src = os.path.join(site_dir, candidate)
-            if os.path.exists(src):
-                shutil.copyfile(src, index_html)
-                print(f"Generated site/index.html from {candidate}")
-                break
