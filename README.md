@@ -29,7 +29,7 @@ complete application; it does not pretend the GUI exists while it is unfinished.
 
 ## Architecture and documentation
 
-- [Original two-page reference diagram and source](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/notes/reference_diagram.md)
-- [Actual codebase model — generated from tracked Python classes](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/notes/object_model.md)
-- [Requirements and acceptance criteria](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/PRD.md)
-- [Implementation sequencing](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/SCRATCHPAD.md)
+- [Original two-page reference diagram and source](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/reference_diagram.md)
+- [Actual codebase model — generated from tracked Python classes](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/object_model.md)
+- [Requirements and acceptance criteria](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PRD.md)
+- [Implementation sequencing](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md)

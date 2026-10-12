@@ -8,10 +8,10 @@ to a finished, playable product. Where this file and the product requirements
 disagree, the product requirements win; where this file and the architecture
 notes disagree, the notes win.
 
-- What the product is: `PRD.md`
+- What the product is: `notes/PRD.md`
 - Object model and deviations: `notes/object_model.md`
 - Chess rules baseline: `notes/chess_rules.md`
-- Visual reference: `GUI_mockup.svg`
+- Visual reference: `notes/GUI_mockup.svg`
 - Governing process: `AGENTS.md`
 
 ---
@@ -44,7 +44,7 @@ Breaking any of these is a rejected change regardless of quality.
    comprehensive test suite before release.
 9. **One transitional contradiction is live until PR 5 lands, and is expected.**
    `AGENTS.md` Rule 4 states that all identifiers are English, which contradicts
-   the fifteen Czech aliases `PRD.md` section 5 requires. `AGENTS.md` governs
+   the fifteen Czech aliases `notes/PRD.md` section 5 requires. `AGENTS.md` governs
    until amended, so an agent working from the rule text alone will write the
    aliases *out*. **PR 5 closes this.** Until it merges, the aliases are the later
    and more specific statement, recorded with approval in
@@ -710,7 +710,7 @@ corresponding issue.
 
 **Needs**: 13, 15 — PR 13 for the piece files, PR 15 for the view classes it must alias. **Blocks**: 21.
 
-Add the fifteen aliases from `PRD.md` section 5, `Knight` canonical with `Kun` as
+Add the fifteen aliases from `notes/PRD.md` section 5, `Knight` canonical with `Kun` as
 its alias. Rename `horse.py` → `knight.py`; delete `Tower`, `Horse` and
 `Controller`; rename `controller/controller.py` → `controller/game_manager_controller.py`
 to match the diagram's `GameManagerController`.

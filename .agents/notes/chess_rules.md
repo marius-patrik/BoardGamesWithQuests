@@ -13,7 +13,7 @@ rules. It describes orthodox chess on an 8×8 board.
    true of the *default* configuration and is parameterised everywhere else.
 2. **It is not the specification for the object model.** The reference
    architecture diagram is. Where this document and
-   `notes/reference_diagram.md` disagree about structure, the diagram governs.
+   `reference_diagram.md` disagree about structure, the diagram governs.
 
 The rule names used by the code are listed in `PRD.md` FR-16.
 

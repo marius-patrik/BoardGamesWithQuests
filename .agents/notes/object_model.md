@@ -371,7 +371,7 @@ Recorded because the question is fair and the answer is not obvious.
 ## Naming decisions requiring approval context
 
 Recorded here because they are deviations from what the diagram draws and
-`AGENTS.md` Rule 3 requires their approval to be on record.
+`../AGENTS.md` Rule 3 requires their approval to be on record.
 
 | Decision | Outcome | Approved |
 |---|---|---|

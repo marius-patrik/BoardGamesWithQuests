@@ -15,7 +15,7 @@ import re
 import subprocess
 from xml.etree import ElementTree as ET
 
-SOURCE = Path("notes/diagrams/reference.drawio")
+SOURCE = Path(".agents/notes/diagrams/reference.drawio")
 SVG_HEAD = '<svg xmlns="http://www.w3.org/2000/svg" role="img"'
 FONT = 'font-family="DejaVu Sans,Arial,sans-serif"'
 
@@ -164,8 +164,8 @@ def reference_svgs(source: str) -> dict[str, str]:
     if len(diagrams) < 2:
         raise ValueError("reference diagram is missing one of its two pages")
     return {
-        "notes/diagrams/reference-page1.svg": _ref_page(diagrams[0]),
-        "notes/diagrams/reference-mvc.svg": _ref_page(diagrams[1]),
+        "agents/notes/diagrams/reference-page1.svg": _ref_page(diagrams[0]),
+        "agents/notes/diagrams/reference-mvc.svg": _ref_page(diagrams[1]),
     }
 
 
@@ -349,15 +349,16 @@ def generated_assets(root: Path) -> dict[str, str]:
     reference = (root / SOURCE).read_text(encoding="utf-8")
     return {
         **reference_svgs(reference),
-        "notes/diagrams/implementation.svg": implementation_svg(root),
-        "notes/diagrams/implementation-classes.svg": implementation_classes_svg(root),
+        "agents/notes/diagrams/implementation.svg": implementation_svg(root),
+        "agents/notes/diagrams/implementation-classes.svg": implementation_classes_svg(root),
     }
 
 
 if __name__ == "__main__":
     repo = Path(__file__).resolve().parents[2]
     for name, svg in generated_assets(repo).items():
-        dest = repo / name
+        # The public Docs URL omits the leading dot from .agents.
+        dest = repo / ("." + name if name.startswith("agents/") else name)
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(svg, encoding="utf-8")
         print(name)

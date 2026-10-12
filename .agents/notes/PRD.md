@@ -4,7 +4,7 @@
 **Version:** 1.0
 
 Planning material — current state, work streams, risks, acceptance criteria and
-the decision log — lives in `SCRATCHPAD.md`. This document states only what the
+the decision log — lives in `../SCRATCHPAD.md`. This document states only what the
 product is and requires.
 
 ---
@@ -39,11 +39,11 @@ test of the engine's generality.
 
 Three things are fixed and are not up for debate.
 
-**Already covered by `AGENTS.md`, which is what governs — this document does not
+**Already covered by `../AGENTS.md`, which is what governs — this document does not
 restate them:** object-model conformance (Rule 3), language (Rule 4), delivery
 (Rule 7) and the pull-request review trail (Rule 11).
 
-**Not covered by `AGENTS.md`, stated here:** the three below.
+**Not covered by `../AGENTS.md`, stated here:** the three below.
 
 ### 3.1 Libraries
 
@@ -72,7 +72,7 @@ for like:
 - **Import smoke tests.** `importlib.import_module(name) is not None` proves a
   module parses. It proves nothing about behaviour and is deleted outright
   rather than kept in a reduced form.
-- **Metadata assertions.** Tests that open `AGENTS.md`, workflow YAML, `notes/`
+- **Metadata assertions.** Tests that open `../AGENTS.md`, workflow YAML, `notes/`
   or `README.md` and assert substrings police the rulebook, not the product.
 
 The tests that survive drive real behaviour: a move is played and its effect
@@ -212,7 +212,7 @@ the game manager. Only configuration-specific implementations live in sibling ga
 | FR-13 | A move may consist of **several hops**. A capture chain in checkers is one move the player makes, not several. |
 | FR-14 | No piece type is special to the engine. Whether a position has a king is a rule, not a lookup by type name. |
 | FR-15 | Board size is not restricted to 8×8. Rank-relative rules are **generalised, not disabled**: the home rank and the castling and knight-forward files are derived from the configured board. |
-| FR-16 | Every orthodox rule in `notes/chess_rules.md` is expressible in those hooks: castling, en passant, promotion, check, checkmate, stalemate, insufficient material, the fifty-move rule, threefold repetition, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
+| FR-16 | Every orthodox rule in `chess_rules.md` is expressible in those hooks: castling, en passant, promotion, check, checkmate, stalemate, insufficient material, the fifty-move rule, threefold repetition, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
 | FR-17 | Logic beyond any shipped set is expressible without extending the engine: a piece that may move to any square satisfies `available_moves`; a piece that must capture if able satisfies `permits_move`; a game that ends when a named piece is lost satisfies `outcome`. |
 
 ### 7.3 Quests — also code-driven
@@ -274,7 +274,7 @@ field. It does **not** enumerate the formats, and **no edge in the diagram
 connects any writer to any other writer or to that box**. `Extends` in the
 diagram is a legend label on a free-standing line beside the piece row, not a
 relationship. Deriving one class per format from a base class is therefore a
-deviation in its own right — see `notes/object_model.md` section 7.
+deviation in its own right — see `object_model.md` section 7.
 
 | ID | Requirement |
 |---|---|
@@ -310,7 +310,7 @@ deviation in its own right — see `notes/object_model.md` section 7.
 
 Every class and member the diagram defines is listed here with the requirement
 that delivers it. Nothing in the diagram is left without coverage, and anything
-this project adds beyond the diagram is registered in `notes/object_model.md`.
+this project adds beyond the diagram is registered in `object_model.md`.
 
 | Diagram member | Delivered by |
 |---|---|
