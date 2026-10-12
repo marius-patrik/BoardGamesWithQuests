@@ -36,8 +36,10 @@ Breaking any of these is a rejected change regardless of quality.
    merge — that is the maintainer's decision alone.
 7. **Commit messages are Conventional Commits**, scoped by area: `area:model`,
    `area:view`, `area:controller`, `area:ci`, `area:docs`.
-8. **A change that touches code ships with tests.** `pytest`, `black --check` and
-   `properdocs build --strict` are green before any PR is opened.
+8. **Temporary test-suite exception (#239):** the former tests are retired in PR #222.
+   Until the end-of-stack test rebuild, verify compilation, formatting and strict
+   documentation; these do not substitute for behavioral tests. Restore a fresh
+   comprehensive test suite before release.
 9. **One transitional contradiction is live until PR 5 lands, and is expected.**
    `AGENTS.md` Rule 4 states that all identifiers are English, which contradicts
    the fifteen Czech aliases `PRD.md` section 5 requires. `AGENTS.md` governs
@@ -187,32 +189,26 @@ and `Args:` is present for every non-self parameter.
 
 ---
 
-## 5. Test strategy
+## 5. Test strategy — final integration release gate
 
-Current: `138` tests. Target: behaviour-only.
+The existing tests have been discarded in PR #222 by explicit maintainer decision.
+Do **not** recover or adapt them incrementally. Rebuild tests independently from
+actual public APIs and supported GUI flows **at the end of the current GitHub-native
+stack**, after #209, following issue #239.
 
-**Delete outright** — 62 of the 138 assert nothing about the product:
+The final suite must cover chess and draughts conformance, moves and outcomes,
+quests, game isolation, configuration editing/persistence, clocks, all exporters,
+full GUI interactions, installation, and relevant error handling. User identity
+must be tested only against a supported user experience; the current in-memory
+`UserManager` ID assignment is not proof that the GUI supports user accounts.
 
-| File | Tests | Why |
-|---|---|---|
-| `tests/test_structure.py` | 27 | `importlib.import_module(...) is not None`. Proves a module parses, nothing more |
-| `tests/test_auto_format_workflow.py` | 2 | Asserts on `auto-format.yml` content and the `darkfactory.json` pin |
-| `tests/test_workflow_rules.py` | 15 | Asserts `AGENTS.md` text, workflow YAML and pipeline pins |
-| `tests/test_claude_symlink.py` | 3 | Asserts a symlink target and `.agents/` existence |
-| `tests/test_readme.py` | 1 | Asserts `README.md` contains three URLs |
-| `tests/test_chess_rules_notes.py` | 1 | Asserts keywords in `notes/chess_rules.md` |
-| `tests/test_object_model_notes.py` | 1 | Asserts a URL and phrases in `notes/object_model.md` |
-| `tests/test_reference_diagram_notes.py` | 1 | Asserts a diagram id in `notes/reference_diagram.md` |
-| `tests/test_docs_and_docstrings.py` | 10 of 12 | The docstring-presence and strict-build checks stay. Seven of the ten removed are behavioural tests of `.github/scripts/docs_hooks.py`; they are rewritten, not lost |
-| **Total** | **62** | |
-
-PR 5 performs the deletions. PR 21 replaces them with behavioural coverage.
-
-**Known coverage gaps to close.** `GameManager.start_turn`, `cancel_move`,
-`save_log`, `STATE_CHECK`, `MoveValidator.set_board`, `is_square_attacked`,
-`GameLogger.file_path`, `Board.captured_white`, `Move.captured_piece`,
-`ChessNotationWriter.export`, `Timer.add_time`, `Board.setup_default_board`, and
-any `Board` constructed with non-8×8 dimensions.
+Until the final test suite lands, shared CI **skips** the pytest step when no
+Python test files exist, with a prominent CI notice. Python compilation,
+formatting and strict documentation checks still run. Skipping is **not** a
+behavioral pass; issue #239 must rebuild tests and restore full validation
+before release.
+The final implementation is **not release-ready** until #239 reinstates tests
+on Python 3.10–3.13 and the complete matrix passes.
 
 ---
 

@@ -19,7 +19,7 @@
   "upstream": {
     "$comment": "The shared pipeline. `ref` is the pin: bump it to adopt a pipeline update, and the diff shows exactly what changed.",
     "repo": "marius-patrik/DarkFactory",
-    "ref": "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    "ref": "69255458b9b313494610d627265be0b408d6c1c1"
   },
   "versioning": {
     "mode": "pridever",
@@ -36,7 +36,8 @@
           "3.11",
           "3.12",
           "3.13"
-        ]
+        ],
+        "$comment": "TEMPORARY #239: no tests/ yet. The pinned shared CI explicitly skips pytest when no tests exist, emits a notice, and still enforces compilation, formatting, and strict docs. This is NOT behavioral coverage. Restore tests at final release gate."
       }
     },
     "documentation": {
