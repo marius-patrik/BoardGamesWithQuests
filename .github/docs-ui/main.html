@@ -45,10 +45,10 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
 
-        <a class="header__brand" href="{{ nav.homepage.url|url if nav.homepage else base_url }}">
+        <a class="header__home" href="{{ nav.homepage.url|url if nav.homepage else base_url }}" aria-label="Documentation home">
           <span class="header__mark" aria-hidden="true"></span>
-          <span class="header__name">{{ config.site_name }}</span>
         </a>
+        {%- include "partials/switcher.html" -%}
 
         <div class="header__search">
           <svg class="header__search-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -83,7 +83,6 @@
 
     <div class="layout">
       <aside class="sidebar" data-nav>
-        {%- include "partials/switcher.html" -%}
         <nav aria-label="Documentation">
           {%- include "partials/nav.html" -%}
         </nav>

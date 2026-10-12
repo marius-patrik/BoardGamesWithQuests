@@ -226,101 +226,100 @@
 })();
 
 /**
- * Populates the version and project switcher from `versions.json` at the site root.
- *
- * The documentation site holds several builds at once: the current one at the root, a preview per
- * open pull request under `pr-<N>/`, and a build per tracked branch under `branch/<name>/`. Which
- * of those exist changes whenever a pull request opens or closes, so the list is fetched at read
- * time rather than baked into each page - a page built last week would otherwise offer previews
- * that have since been torn down.
- *
- * The manifest is written by the deploy workflow and looks like:
- *
- *     {
- *       "current": "",
- *       "versions": [{"name": "main", "path": ""}, {"name": "PR #27", "path": "pr-27"}],
- *       "projects": [{"name": "Omnis", "url": "https://marius-patrik.github.io/omnis/"}]
- *     }
- *
- * A site without the file simply keeps the control hidden.
+ * Repository and branch selectors. The selected value comes from the current URL, not
+ * manifest.current (which describes the publisher, not the page a visitor is reading).
+ * Compute the shared site root from the absolute CSS URL; it works on nested pages
+ * and in PR/branch previews alike. Every navigation target is a published site URL.
  */
 (function () {
   "use strict";
 
-  var root = document.querySelector("[data-switcher]");
-  if (!root) {
-    return;
-  }
+  var controls = document.querySelector("[data-switcher]");
+  var css = document.querySelector('link[rel="stylesheet"][href*="assets/theme.css"]');
+  if (!controls || !css) return;
 
-  /**
-   * Works out the site root from the current location and the page's own depth.
-   *
-   * Pages are nested arbitrarily deep, and a preview adds a further prefix, so the root cannot be
-   * assumed to be one level up.
-   *
-   * @returns {string} Absolute path of the site root, with a trailing slash.
-   */
-  function siteRoot() {
-    var base = document.querySelector("link[rel=stylesheet][href*='assets/theme.css']");
-    if (base) {
-      return base.getAttribute("href").replace(/assets\/theme\.css.*$/, "");
+  var cssUrl = new URL(css.href, window.location.href);
+  var buildRoot = cssUrl.href.replace(/assets\/theme\.css(?:[?#].*)?$/, "");
+  var siteRoot = buildRoot.replace(/(?:pr-\d+|branch\/[^/]+)\/$/, "");
+  var manifestUrl = new URL("versions.json", siteRoot).href;
+  var projectSelect = controls.querySelector("[data-switcher-projects]");
+  var versionSelect = controls.querySelector("[data-switcher-versions]");
+  var versionGroup = controls.querySelector("[data-switcher-versions-group]");
+  var currentSite = new URL(siteRoot);
+
+  function normalizedSite(value) {
+    try {
+      var url = new URL(value, siteRoot);
+      return url.origin.toLowerCase() + url.pathname.replace(/\/*$/, "/").toLowerCase();
+    } catch (error) {
+      return "";
     }
-    return "/";
   }
 
-  /**
-   * Fills a select element and navigates on change.
-   *
-   * @param {HTMLSelectElement} select Element to populate.
-   * @param {Array<Object>} entries Items carrying `name` and either `path` or `url`.
-   * @param {string} base Site root, used to resolve `path` entries.
-   * @param {string} current The `path` currently being viewed.
-   */
-  function fill(select, entries, base, current) {
+  function populate(select, entries, selected) {
+    select.replaceChildren();
     entries.forEach(function (entry) {
       var option = document.createElement("option");
       option.textContent = entry.name;
-      option.value = entry.url || base + (entry.path ? entry.path + "/" : "");
-      if (entry.url === undefined && (entry.path || "") === (current || "")) {
-        option.selected = true;
-      }
+      option.value = entry.url;
+      option.selected = entry.id === selected;
       select.appendChild(option);
-    });
-    select.addEventListener("change", function () {
-      if (select.value) {
-        window.location.href = select.value;
-      }
     });
   }
 
-  var base = siteRoot();
-  fetch(base + "versions.json", { cache: "no-cache" })
+  // Both controls are functional even if a legacy site has no manifest.
+  populate(projectSelect, [
+    { name: controls.dataset.siteName, url: siteRoot, id: "this" }
+  ], "this");
+  projectSelect.addEventListener("change", function () {
+    if (projectSelect.value) window.location.assign(projectSelect.value);
+  });
+  versionSelect.addEventListener("change", function () {
+    if (versionSelect.value) window.location.assign(versionSelect.value);
+  });
+
+  fetch(manifestUrl, { cache: "no-store" })
     .then(function (response) {
-      return response.ok ? response.json() : null;
+      if (!response.ok) throw new Error("No published build manifest");
+      return response.json();
     })
     .then(function (manifest) {
-      if (!manifest) {
-        return;
+      var versionList = (manifest.versions || []).filter(function (entry) {
+        return typeof entry.path === "string" && typeof entry.name === "string";
+      }).map(function (entry) {
+        return {
+          name: entry.name,
+          path: entry.path.replace(/^\/+|\/+$/g, ""),
+          id: entry.path.replace(/^\/+|\/+$/g, ""),
+          url: new URL(entry.path ? entry.path.replace(/^\/+|\/+$/g, "") + "/" : "./", siteRoot).href
+        };
+      });
+
+      // Select based on where the visitor actually is; a preview's manifest is shared
+      // with main and its 'current' property cannot identify the active preview.
+      var suffix = decodeURI(window.location.pathname).slice(currentSite.pathname.length);
+      var active = versionList.filter(function (entry) {
+        return !entry.path || suffix === entry.path || suffix.startsWith(entry.path + "/");
+      }).sort(function (left, right) {
+        return right.path.length - left.path.length;
+      })[0];
+      if (versionList.length > 1) {
+        populate(versionSelect, versionList, active ? active.id : "");
+        versionGroup.hidden = false;
       }
-      var versions = manifest.versions || [];
-      var projects = manifest.projects || [];
-      if (versions.length > 1) {
-        fill(
-          root.querySelector("[data-switcher-versions]"),
-          versions,
-          base,
-          manifest.current || ""
-        );
-        root.hidden = false;
+
+      var projects = (manifest.projects || []).filter(function (entry) {
+        return entry && typeof entry.name === "string" && typeof entry.url === "string";
+      }).map(function (entry) {
+        return { name: entry.name, url: new URL(entry.url, siteRoot).href, id: normalizedSite(entry.url) };
+      });
+      var current = normalizedSite(siteRoot);
+      if (!projects.some(function (entry) { return entry.id === current; })) {
+        projects.unshift({ name: controls.dataset.siteName, url: siteRoot, id: current });
       }
-      if (projects.length > 0) {
-        var group = root.querySelector("[data-switcher-projects-group]");
-        fill(root.querySelector("[data-switcher-projects]"), projects, base, null);
-        group.hidden = false;
-        root.hidden = false;
-      }
+      populate(projectSelect, projects, current);
     })
     .catch(function () {
-      /* A site without a manifest keeps the control hidden; nothing to report. */
+      // Continue showing the correct current repository rather than a broken control.
     });
 })();

@@ -1,0 +1,15 @@
+{# The repository selector replaces the title; both selectors belong to the global header. #}
+<div class="header__selectors" data-switcher data-site-name="{{ config.site_name }}">
+  <label class="header__project">
+    <span class="sr-only">Repository</span>
+    <select class="switcher__select" data-switcher-projects aria-label="Repository">
+      <option selected>{{ config.site_name }}</option>
+    </select>
+  </label>
+  <label class="header__branch" data-switcher-versions-group hidden>
+    <span class="sr-only">Branch or preview</span>
+    <select class="switcher__select" data-switcher-versions aria-label="Branch or preview">
+      <option selected>main</option>
+    </select>
+  </label>
+</div>
