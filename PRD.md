@@ -166,9 +166,13 @@ packages/chess/
   clocks/       clock configuration
 ```
 
-Everything in a configuration is a Python file. It could not all be data,
-because rules and quests carry logic, and one language avoids a format split and
-the `tomllib` availability problem on Python 3.10.
+Each game package has a root `config.json`. Board dimensions, placement, piece
+identity, glyphs, movement vectors, attack vectors, clocks, exported formats,
+appearance, default selection and other configurable values are data. **Only
+rules and quests are executable Python extensions**, because their behavior
+cannot be represented by these static values. The shared engine validates the
+JSON and discovers sibling packages via distribution entry points. This design
+supersedes the older all-Python configuration arrangement.
 
 **A configuration is a folder that can be copied.** `cp -r packages/chess packages/house`, change what differs, and a new variant exists. Duplication is the
 extension mechanism: to change the board, duplicate the configuration and change

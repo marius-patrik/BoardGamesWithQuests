@@ -1,5 +1,17 @@
 # Reference Architecture Diagram
 
+## Original reference diagrams
+
+These SVGs are rendered from the **original, two-page diagrams.net file**,
+preserving the class labels, relationships and geometry; they are not generated
+from the implementation or redrawn from the prose inventory.
+
+![Original class diagram — Page 1](diagrams/reference-page1.svg)
+
+![Original MVC integration diagram — Page 2](diagrams/reference-mvc.svg)
+
+The retained source is [the original diagrams.net file](diagrams/reference.drawio).
+
 ## Link to the live diagram
 
 [Draw.io Architecture Diagram](https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D)

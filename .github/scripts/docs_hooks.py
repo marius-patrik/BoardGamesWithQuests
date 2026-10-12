@@ -178,4 +178,11 @@ def on_files(files: Files, config: Any) -> Files:
     for dest, body in build_nav()[1]:
         if files.get_file_from_path(dest) is None:
             files.append(File.generated(config, dest, content=body))
+    # The actual reference diagram and code-derived architecture diagram are
+    # generated on every build, so neither can silently diverge from its source.
+    from generate_architecture_diagrams import generated_assets
+
+    for dest, svg in generated_assets(ROOT).items():
+        if files.get_file_from_path(dest) is None:
+            files.append(File.generated(config, dest, content=svg))
     return files

@@ -4,6 +4,17 @@ The governing object model is the reference architecture diagram. Deviations fro
 it are recorded here with their rationale and approval context, as Rule 3
 requires.
 
+## Implemented architecture — automatically generated
+
+The diagram below is generated on each documentation build directly from the
+tracked files under `packages/` and their Python import statements.
+It reflects the code **as implemented**, not the assignment's reference model.
+
+![Actual codebase package architecture](diagrams/implementation.svg)
+
+The reference diagram is kept separately in
+[Reference Architecture Diagram](reference_diagram.md).
+
 ## Reference Architecture Diagram
 
 https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D

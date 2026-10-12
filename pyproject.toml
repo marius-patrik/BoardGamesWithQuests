@@ -27,7 +27,7 @@ dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/marius-patrik/BoardGamesWithQuests"
-Documentation = "https://marius-patrik.github.io/ChessWithQuests/"
+Documentation = "https://marius-patrik.github.io/BoardGamesWithQuests/"
 "Architecture diagram" = "https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D"
 
 [project.gui-scripts]
@@ -43,6 +43,10 @@ package-dir = {"" = "packages"}
 [tool.setuptools.packages.find]
 where = ["packages"]
 include = ["engine*", "chess*", "checkers*"]
+
+[tool.setuptools.package-data]
+chess = ["config.json"]
+checkers = ["config.json"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
