@@ -1,21 +1,15 @@
 """Game manager coordinating board state, turn alternation, clock ticks, and game rules."""
 
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
-try:
-    from engine.model.game.board import Board
-    from engine.model.game.move import Move
-    from engine.model.game.player import Player
-    from engine.model.game.timer import Timer
-    from engine.model.game.logger import GameLogger
-    from engine.model.game.validator import MoveValidator
-except ImportError:
-    from .board import Board
-    from .move import Move
-    from .player import Player
-    from .timer import Timer
-    from .logger import GameLogger
-    from .validator import MoveValidator
+from engine.model.game.board import Board
+from engine.model.game.runtime_configuration import Configuration
+from engine.model.game.move import Move
+from engine.model.game.player import Player
+from engine.model.game.rule import Result
+from engine.model.game.timer import Timer
+from engine.model.game.logger import GameLogger
+from engine.model.game.validator import MoveValidator
 
 
 class GameManager:
@@ -34,23 +28,44 @@ class GameManager:
         timer: Optional[Timer] = None,
         logger: Optional[GameLogger] = None,
         validator: Optional[MoveValidator] = None,
+        configuration: Optional[Configuration] = None,
     ):
         """Initialize a GameManager instance.
 
         Args:
-            board: Optional Board instance (defaults to standard 8x8 Board).
+            board: Optional Board instance. A configuration's board wins over this.
             players: Optional list of Player instances (defaults to White and Black players).
             timer: Optional Timer instance (defaults to standard 600s timer).
             logger: Optional GameLogger instance.
             validator: Optional MoveValidator instance.
+            configuration: Optional configuration to play. Its board and its rules in force
+                are what the game runs on.
         """
-        self.board: Board = board or Board()
+        self.configuration: Optional[Configuration] = configuration
+        self.board: Board = board or (configuration.board if configuration else None) or Board()
         self.players: List[Player] = players or [Player(1), Player(-1)]
         self.active_player: int = 1
         self.current_move: Optional[Move] = None
         self.timer: Timer = timer or Timer()
         self.game_logger: GameLogger = logger or GameLogger()
-        self.move_validator: MoveValidator = validator or MoveValidator(self.board)
+        rules = configuration.enabled_rules() if configuration else None
+        self.move_validator: MoveValidator = validator or MoveValidator(self.board, rules=rules)
+
+    def get_result(self) -> Optional[Result]:
+        """Ask the rules in force whether the game is over.
+
+        Returns:
+            Optional[Result]: The outcome that wins, or None when the game continues.
+        """
+        return self.move_validator.resolve_outcome(self.board)
+
+    def status(self) -> Optional[str]:
+        """Ask the rules in force whether they have something worth showing.
+
+        Returns:
+            Optional[str]: The first thing a rule reports, or None.
+        """
+        return self.move_validator.status(self.board)
 
     def start_turn(self) -> Optional[Move]:
         """Begin a new turn, clearing any pending move selection.
@@ -117,5 +132,6 @@ class GameManager:
 
         self.current_move = move
         self.game_logger.log_move(move)
+        self.move_validator.notify_move_made(move, self.board)
         self.active_player = -1 if self.active_player == 1 else 1
         return True
