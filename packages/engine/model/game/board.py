@@ -72,10 +72,7 @@ class Board:
             True if (row, col) is within bounds, False otherwise.
         """
         return (
-            type(row) is int
-            and type(col) is int
-            and 0 <= row < self.rows
-            and 0 <= col < self.cols
+            type(row) is int and type(col) is int and 0 <= row < self.rows and 0 <= col < self.cols
         )
 
     def get_piece_at(self, position: Tuple[int, int]) -> Optional[Piece]:

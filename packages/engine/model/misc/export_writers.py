@@ -86,9 +86,7 @@ class ChessNotationWriter(ExportWriter):
                 char = self.PIECE_CHARS.get(str(piece_type).lower())
                 if char is None:
                     raise ValueError(f"FEN cannot represent piece type {piece_type!r}")
-                fragments.append(
-                    char.upper() if piece.getColor() in (1, "white") else char
-                )
+                fragments.append(char.upper() if piece.getColor() in (1, "white") else char)
             if empty:
                 fragments.append(str(empty))
             ranks.append("".join(fragments))
