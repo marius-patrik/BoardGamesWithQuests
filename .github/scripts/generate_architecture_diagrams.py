@@ -239,12 +239,117 @@ def implementation_svg(root: Path) -> str:
     return "\n".join(output) + "\n"
 
 
+
+def implementation_classes_svg(root: Path) -> str:
+    """Generate a UML-style inventory and inheritance edges from real ASTs."""
+    tracked = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "-z", "--", "packages"],
+        capture_output=True,
+        check=True,
+    ).stdout.split(bytes([0]))
+    found = []
+    for raw in tracked:
+        if not raw:
+            continue
+        path = root / raw.decode("utf-8")
+        if path.suffix != ".py" or not path.is_file():
+            continue
+        module = ".".join(path.relative_to(root / "packages").with_suffix("").parts)
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+        except SyntaxError:
+            continue
+        for node in tree.body:
+            if not isinstance(node, ast.ClassDef):
+                continue
+            bases = [ast.unparse(base) for base in node.bases]
+            methods = [
+                entry.name
+                for entry in node.body
+                if isinstance(entry, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and not entry.name.startswith("_")
+            ]
+            found.append((module, node.name, bases, methods))
+    found.sort(key=lambda x: (x[0], x[1]))
+    columns = [[], [], []]
+    for record in found:
+        module = record[0]
+        if module.startswith("engine.model.game"):
+            col = 0
+        elif module.startswith("engine.model.pieces"):
+            col = 1
+        else:
+            col = 2
+        columns[col].append(record)
+    card_w, card_h, gap_y = 448, 124, 16
+    width = 1480
+    height = 146 + max((len(items) for items in columns), default=0) * (card_h + gap_y)
+    positions = {}
+    for column, entries in enumerate(columns):
+        for row, (_, name, _, _) in enumerate(entries):
+            positions[(column, row)] = (32 + column * 492, 104 + row * (card_h + gap_y))
+    output = [
+        f'{SVG_HEAD} viewBox="0 0 {width} {height}" width="{width}" height="{height}" '
+        'aria-label="Implementation class diagram extracted from Python AST">',
+        f'<rect width="{width}" height="{height}" fill="#ffffff"/>',
+        f'<text x="32" y="39" {FONT} font-size="24" font-weight="bold" fill="#101828">'
+        'Implemented Class Model (Generated)</text>',
+        f'<text x="32" y="70" {FONT} font-size="14" fill="#475467">'
+        f'{len(found)} classes found in tracked packages/ Python files; inheritance extracted from AST</text>',
+    ]
+    by_name = {}
+    for column, entries in enumerate(columns):
+        for row, (_, name, _, _) in enumerate(entries):
+            by_name.setdefault(name, []).append(positions[(column, row)])
+    for column, entries in enumerate(columns):
+        for row, (_, _, bases, _) in enumerate(entries):
+            x, y = positions[(column, row)]
+            for base in bases:
+                if base.split(".")[-1] not in by_name:
+                    continue
+                if len(by_name[base.split(".")[-1]]) != 1:
+                    continue
+                parent_x, parent_y = by_name[base.split(".")[-1]][0]
+                if (x, y) == (parent_x, parent_y):
+                    continue
+                x1, y1 = x + card_w / 2, y + card_h / 2
+                x2, y2 = parent_x + card_w / 2, parent_y + card_h / 2
+                output.append(
+                    f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
+                    'stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>'
+                )
+    for column, entries in enumerate(columns):
+        for row, (module, name, bases, methods) in enumerate(entries):
+            x, y = positions[(column, row)]
+            base_label = "Extends " + ", ".join(bases) if bases else "Class"
+            method_label = ", ".join(methods[:4]) if methods else "(no public methods)"
+            if len(methods) > 4:
+                method_label += ", ..."
+            output.extend([
+                f'<rect x="{x}" y="{y}" width="{card_w}" height="{card_h}" rx="9" '
+                'fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>',
+                f'<rect x="{x}" y="{y}" width="{card_w}" height="39" rx="9" '
+                'fill="#edf2ff"/>',
+                f'<text x="{x+14}" y="{y+26}" {FONT} font-size="17" font-weight="bold" '
+                f'fill="#101828">{escape(name)}</text>',
+                f'<text x="{x+14}" y="{y+60}" {FONT} font-size="11" fill="#475467">'
+                f'{escape(module)}</text>',
+                f'<text x="{x+14}" y="{y+80}" {FONT} font-size="12" fill="#344054">'
+                f'{escape(base_label[:61])}</text>',
+                f'<text x="{x+14}" y="{y+102}" {FONT} font-size="12" fill="#344054">'
+                f'{escape(method_label[:61])}</text>',
+            ])
+    output.append("</svg>")
+    return "\\n".join(output) + "\\n"
+
+
 def generated_assets(root: Path) -> dict[str, str]:
     """Produce diagrams consumed as virtual documentation assets."""
     reference = (root / SOURCE).read_text(encoding="utf-8")
     return {
         **reference_svgs(reference),
         "notes/diagrams/implementation.svg": implementation_svg(root),
+        "notes/diagrams/implementation-classes.svg": implementation_classes_svg(root),
     }
 
 

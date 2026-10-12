@@ -10,7 +10,10 @@ The diagram below is generated on each documentation build directly from the
 tracked files under `packages/` and their Python import statements.
 It reflects the code **as implemented**, not the assignment's reference model.
 
-![Actual codebase package architecture](diagrams/implementation.svg)
+![Actual codebase class model](diagrams/implementation-classes.svg)
+
+The companion [package-level dependency diagram](diagrams/implementation.svg)
+is also generated directly from tracked Python imports.
 
 The reference diagram is kept separately in
 [Reference Architecture Diagram](reference_diagram.md).
