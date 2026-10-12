@@ -487,7 +487,6 @@
       "fen": "q"
     },
     "king": {
-      "royal": true,
       "symbols": {
         "white": "♔",
         "black": "♚"

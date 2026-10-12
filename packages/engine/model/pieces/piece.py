@@ -12,7 +12,6 @@ class Piece:
         _attack_vectors: Offsets a piece may use to capture.
         _can_jump: Whether intermediate occupied squares are ignored.
         _repeat: Whether movement and attack offsets can repeat along rays.
-        _royal: Whether capture of this piece is subject to royal safety.
     """
 
     def __init__(
@@ -24,7 +23,6 @@ class Piece:
         can_jump: bool = False,
         name: Optional[str] = None,
         repeat: bool = False,
-        royal: bool = False,
         initial_vectors: Optional[List[Tuple[int, int]]] = None,
     ):
         """Define a piece using game-supplied movement capabilities.
@@ -37,7 +35,6 @@ class Piece:
             can_jump: Whether intermediate squares may be occupied.
             name: Display name (defaults to the kind).
             repeat: Whether vectors may repeat, as for a sliding piece.
-            royal: Whether royal safety restrictions apply to the piece.
             initial_vectors: Additional quiet offsets allowed only before its first move.
         """
         self.__color = color
@@ -48,7 +45,6 @@ class Piece:
         )
         self._can_jump = can_jump
         self._repeat = repeat
-        self._royal = royal
         self._initial_vectors = list(initial_vectors or [])
         self._has_moved = False
         self._name = name or str(piece_type)
@@ -72,10 +68,6 @@ class Piece:
     def canRepeat(self) -> bool:
         """Return whether a vector repeats along a ray."""
         return self._repeat
-
-    def isRoyal(self) -> bool:
-        """Return whether the piece participates in royal-safety checks."""
-        return self._royal
 
     def hasMoved(self) -> bool:
         """Return whether the piece has moved."""

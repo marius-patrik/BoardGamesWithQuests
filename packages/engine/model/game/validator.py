@@ -1,4 +1,4 @@
-"""Generic movement geometry and optional royal-safety primitives.
+"""Game-neutral movement geometry without game-specific outcome logic.
 
 A candidate is not a game-legal move until all game-specific rules permit it.
 In particular, castling, en-passant, mandatory captures and multi-jumps are
@@ -18,9 +18,9 @@ Square = Tuple[int, int]
 class MoveValidator:
     """Generate geometric candidates without depending on any named game or piece.
 
-    The optional royal-safety filter is driven by the piece's `isRoyal()`
-    capability. Game-legal authorization and outcomes deliberately fail closed
-    until the owning game installs its complete rules.
+    Rules own all game-specific legality, including royal roles and outcomes.
+    Game-legal authorization and outcomes fail closed until the owning game
+    installs its complete rules.
     """
 
     def __init__(self, board: Optional[Board] = None, move: Optional[Move] = None):
@@ -60,18 +60,6 @@ class MoveValidator:
             if not can_jump and board.get_piece_at(pos) is not None:
                 break
 
-    def find_royal(self, color: int, board: Optional[Board] = None) -> Optional[Square]:
-        """Find a royal piece declared by the game for the given side."""
-        b = board or self.board
-        if b is None:
-            return None
-        for row in range(b.rows):
-            for col in range(b.cols):
-                piece = b.get_piece_at((row, col))
-                if piece is not None and piece.getColor() == color and piece.isRoyal():
-                    return row, col
-        return None
-
     def is_square_attacked(
         self, target_square: Square, by_color: int, board: Optional[Board] = None
     ) -> bool:
@@ -93,12 +81,16 @@ class MoveValidator:
         return False
 
     def is_check(self, color: int, board: Optional[Board] = None) -> bool:
-        """Check configured royal safety for one side; no royal means no check."""
-        b = board or self.board
-        royal = self.find_royal(color, b)
-        if royal is None:
-            return False
-        return self.is_square_attacked(royal, -color, b)
+        """Reject game-specific check evaluation until rules are installed.
+
+        Args:
+            color: Side to evaluate.
+            board: Position to evaluate.
+
+        Raises:
+            NotImplementedError: Royal roles are defined by active game rules.
+        """
+        raise NotImplementedError("check evaluation requires configured game-specific rules")
 
     @staticmethod
     def _initial_path_clear(board: Board, origin: Square, offset: Square) -> bool:
@@ -170,31 +162,16 @@ class MoveValidator:
         return destinations
 
     def get_geometric_moves(self, start_pos: Square, board: Optional[Board] = None) -> List[Square]:
-        """Filter geometric candidates through configured royal safety only.
+        """Return geometric candidates without applying game-specific legality.
 
-        Full game legality requires additional rule evaluation, which the
-        incomplete game packages do not expose yet.
+        Args:
+            start_pos: Origin square.
+            board: Board to inspect.
+
+        Returns:
+            List[Square]: Geometric destinations, not legally authorized moves.
         """
-        b = board or self.board
-        if b is None:
-            return []
-        piece = b.get_piece_at(start_pos)
-        if piece is None:
-            return []
-        possible = self.get_pseudo_legal_moves(start_pos, b)
-        legal: List[Square] = []
-        for destination in possible:
-            captured = b.get_piece_at(destination)
-            b.set_piece_at(destination, piece)
-            b.set_piece_at(start_pos, None)
-            try:
-                safe = not self.is_check(piece.getColor(), b)
-            finally:
-                b.set_piece_at(start_pos, piece)
-                b.set_piece_at(destination, captured)
-            if safe:
-                legal.append(destination)
-        return legal
+        return self.get_pseudo_legal_moves(start_pos, board)
 
     def get_valid_moves(self, start_pos: Square, board: Optional[Board] = None) -> List[Square]:
         """Require a completed game-specific rule implementation for legal moves.
