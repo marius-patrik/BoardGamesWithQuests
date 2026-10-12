@@ -78,6 +78,10 @@ def load_definition(package: str) -> GameDefinition:
                 raise ConfigurationError(f"{package}: {key}.{kind} has invalid vectors")
         if any(type(piece.get(prop)) is not bool for prop in ("jump", "repeat")):
             raise ConfigurationError(f"{package}: {key} requires jump/repeat booleans")
+        if "royal" in piece and type(piece["royal"]) is not bool:
+            raise ConfigurationError(f"{package}: {key}.royal must be a boolean")
+        if "color_relative" in piece and type(piece["color_relative"]) is not bool:
+            raise ConfigurationError(f"{package}: {key}.color_relative must be a boolean")
     placements = board.get("starting_pieces")
     if not isinstance(placements, list):
         raise ConfigurationError(f"{package}: starting_pieces must be a list")

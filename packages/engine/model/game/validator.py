@@ -5,6 +5,7 @@ In particular, castling, en-passant, mandatory captures and multi-jumps are
 rules supplied by game packages, not special cases inferred from piece names.
 """
 
+import math
 from typing import List, Optional, Tuple
 
 from engine.model.game.board import Board
@@ -103,8 +104,6 @@ class MoveValidator:
         Nonlinear offsets that cannot be traced in a straight line are rejected
         unless the piece explicitly declares itself a jumper.
         """
-        import math
-
         dr, dc = offset
         count = math.gcd(abs(dr), abs(dc))
         if count == 0:
@@ -136,8 +135,6 @@ class MoveValidator:
         destinations: List[Square] = []
         for vector in piece.getDirections() + piece.getAttackDirections():
             if vector == (0, 0):
-                continue
-            if vector not in quiet and vector not in attacks:
                 continue
             for dest in self._walk(b, start_pos, vector, self._limit(piece, b)):
                 target = b.get_piece_at(dest)
