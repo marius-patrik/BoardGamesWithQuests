@@ -1,4 +1,1 @@
-"""Orthodox chess game package, with rules added in subsequent PRs."""
-
-GAME_AVAILABLE = True
-GAME_DEFAULT = True
+"""Game-specific chess implementation; declarative data in config.json."""
