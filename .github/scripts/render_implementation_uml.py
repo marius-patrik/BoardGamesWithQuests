@@ -20,6 +20,11 @@ import re
 import shutil
 import subprocess
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
+
 
 @dataclass(frozen=True)
 class UMLClass:
@@ -372,6 +377,20 @@ def render_component_diagram(root: Path) -> str:
                 }
             ):
                 dependencies.add((node, other))
+    # The plugin connection is not an import: the engine discovers games
+    # dynamically via project metadata. Draw it only when the distribution
+    # actually registers a concrete game package in pyproject.toml.
+    project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    plugins = (
+        project.get("project", {})
+        .get("entry-points", {})
+        .get("boardgameswithquests.games", {})
+    )
+    registrations = {
+        value.split(":", 1)[0].split(".", 1)[0]
+        for value in plugins.values()
+        if isinstance(value, str)
+    }
     # The engine __main__ and app belong to the application entrypoint.
     # Every displayed relationship still must come from actual imports.
     dot = [
@@ -409,6 +428,13 @@ def render_component_diagram(root: Path) -> str:
             dot.append(
                 f"{_quote(source)} -> {_quote(target)} "
                 '[style=dashed, arrowhead=vee, color="#475467"];'
+            )
+    for package in sorted(registrations & set(packages)):
+        if "engine.model" in components.get("engine", set()):
+            dot.append(
+                f'{_quote(package)} -> {_quote("engine.model")} '
+                '[style=dashed, arrowhead=vee, color="#2563eb", '
+                'label="entry point: game config", fontsize=10];'
             )
     dot.append("}")
     return _run_dot("\n".join(dot))
