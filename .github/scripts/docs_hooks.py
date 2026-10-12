@@ -180,6 +180,12 @@ def on_files(files: Files, config: Any) -> Files:
             files.append(File.generated(config, dest, content=body))
     # The actual reference diagram and code-derived architecture diagram are
     # generated on every build, so neither can silently diverge from its source.
+    # ProperDocs imports this hook by file path rather than as a package.
+    import sys
+
+    scripts = str(Path(__file__).resolve().parent)
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
     from generate_architecture_diagrams import generated_assets
 
     for dest, svg in generated_assets(ROOT).items():
