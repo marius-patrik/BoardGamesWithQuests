@@ -3,7 +3,7 @@
 from typing import Optional, Tuple, Dict, Any
 
 try:
-    from controller.controller import GameController
+    from engine.controller.controller import GameController
 except ImportError:
     from .controller import GameController
 

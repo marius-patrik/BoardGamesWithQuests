@@ -63,35 +63,9 @@ Breaking any of these is a rejected change regardless of quality.
 
 ---
 
-## 2. Target repository layout
+## 2. Package workspace (decision of 2026-10-12)
 
-```
-controller/   model/   view/        the engine
-model/                          parent classes + shared machinery
-games/
-  chess/                        default configuration, shipped
-    board.py                    rows, columns, starting placement
-    pieces/                     one file per piece
-    rules/                      one file per rule
-    quests/                     one file per quest
-    clocks/                     clock configuration
-    export/                     one file per export format
-  checkers/                     second configuration, shipped
-logs/                           game logs, configurable, git-ignored
-tests/  notes/  theme/  .github/
-```
-
-`model/` keeps the parent classes — `Piece`, `Rule`, `Quest`, `Board`, `Clock` —
-and the machinery every configuration shares: the move, the validator, the game
-manager, the timer, the logger, the player, the user and the notation base.
-
-**Everything in a configuration directory is a Python file.** It could not all be
-data: rules and quests carry logic, so one language avoids a format split and
-keeps the tree readable.
-
-**A configuration is a folder that can be copied.** `cp -r games/chess
-games/house`, change what differs, and a variant exists. Duplication is the
-extension mechanism. One game runs one board.
+packages/engine contains the shared model, controller, view and launcher; packages/chess and packages/checkers are sibling importable packages. The old src/ and games/ directories do not exist. Game package metadata provides discovery without an engine-maintained game-name list. The remaining stack branches predate this restructuring and must be migrated when subsequently rebased. Rebuild tests in #239 at the end.
 
 ---
 

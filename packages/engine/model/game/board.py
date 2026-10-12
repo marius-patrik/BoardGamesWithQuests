@@ -3,13 +3,13 @@
 from typing import Optional, List, Tuple
 
 try:
-    from model.pieces.pawn import Pawn
-    from model.pieces.rook import Rook
-    from model.pieces.horse import Horse
-    from model.pieces.bishop import Bishop
-    from model.pieces.queen import Queen
-    from model.pieces.king import King
-    from model.pieces.piece import Piece
+    from engine.model.pieces.pawn import Pawn
+    from engine.model.pieces.rook import Rook
+    from engine.model.pieces.horse import Horse
+    from engine.model.pieces.bishop import Bishop
+    from engine.model.pieces.queen import Queen
+    from engine.model.pieces.king import King
+    from engine.model.pieces.piece import Piece
 except ImportError:
     from ..pieces.pawn import Pawn
     from ..pieces.rook import Rook

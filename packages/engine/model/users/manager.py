@@ -3,7 +3,7 @@
 from typing import Dict, Optional, Any
 
 try:
-    from model.users.user import User
+    from engine.model.users.user import User
 except ImportError:
     from .user import User
 

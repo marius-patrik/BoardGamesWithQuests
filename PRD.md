@@ -145,7 +145,7 @@ counterpart in the diagram.
 
 ## 6. Repository layout
 
-The package sits at the repository root. There is no `src/` directory.
+The workspace uses packages/engine for shared model/controller/view, with separate sibling packages/chess and packages/checkers game packages. There is no src/ or games/ directory.
 
 ```
 controller/  model/  view/        the engine

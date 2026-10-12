@@ -27,7 +27,7 @@ jobs:
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
       - name: Syntax validation while test suite is being rebuilt (issue 239)
-        run: python -m compileall -q src
+        run: python -m compileall -q packages
 
       - name: Verify repository-wide virtual documentation
         run: |
@@ -36,7 +36,7 @@ jobs:
           from pathlib import Path
           root = Path.cwd()
           assert (root / "site/index.html").is_file()
-          assert (root / "site/model/game/board/index.html").is_file()
+          assert (root / "site/engine/model/game/board/index.html").is_file()
           assert not (root / ".docs").exists(), "documentation source folder must not exist"
           print("Repository-wide documentation verified.")
           PY
