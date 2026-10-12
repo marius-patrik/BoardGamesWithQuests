@@ -6,8 +6,9 @@ requires.
 
 ## Implemented architecture — automatically generated
 
-The diagram below is generated on each documentation build directly from the
-tracked files under `packages/` and their Python import statements.
+The diagrams below are generated on each documentation build directly from
+tracked Python files in `packages/`: class inheritance comes from the AST,
+and package dependencies come from actual imports.
 It reflects the code **as implemented**, not the assignment's reference model.
 
 ![Actual codebase class model](diagrams/implementation-classes.svg)
@@ -95,8 +96,10 @@ user request adds it.
     its subclasses.
   - `Quest` — a parent class with subclasses for the built-in quests, declaring
     `when`, `parameters()`, `progress()`, and `validate() -> bool`.
-  - A configuration — a named, persisted bundle of board, pieces, rules, quests
-    and clocks. `chess` is the default; `checkers` is the second.
+  - A configuration — a validated `config.json` in each importable game package,
+    covering all game metadata, board layout, pieces, clocks, exporters and
+    appearance. Python contains only the rule and quest implementations.
+    `chess` is the declared default; `checkers` is another sibling package.
   - `ExportWriter` subclasses, one per format, per configuration.
 - **Why this is mild rather than foreign**: the diagram already uses this idiom.
   It contains a generalization edge `Kůň → Figurka`, with `Figurka` drawn as the
@@ -132,10 +135,10 @@ user request adds it.
   legitimate inference from the diagram's generalisation idiom, but it is **not**
   something the diagram draws, so it is registered as section 7 rather than
   claimed as conformance.
-- **Deliberately not added**: a registration function such as `define_ruleset`, a
-  rule registry, or `CustomBoard` / `CustomPiece` / `CustomQuest` types. A
-  configuration is composed explicitly, so the set of rule types is closed and
-  greppable, and a new rule is a new file plus one reference. The `Custom*` types
+- **Deliberately not added**: a handwritten game list such as `define_ruleset`,
+  or `CustomBoard` / `CustomPiece` / `CustomQuest` types. Game packages are
+  discovered via Python entry points. Each game's data is configured in JSON;
+  rule and quest extensions are authored as Python code. The `Custom*` types
   would wrap data that is *already* custom — board dimensions and piece vectors
   are data, and new behaviour is expressed by a `Rule` subclass.
 - **Fallback**, recorded so the trade-off stays visible: if a stricter reading is
@@ -148,22 +151,22 @@ user request adds it.
 
 ### 5. Configurations Live in Sibling Game Packages
 
-- **Date**: 2026-10-02
+- **Updated**: 2026-10-12
 - **Context**: the diagram describes classes and their members. It does not say
   where concrete implementations live, and it draws each game concept as its own
   class rather than as a bundle.
-- **Deviation**: concrete implementations are grouped into configuration
-  importable sibling packages beside the engine — `packages/chess/` and
-  `packages/checkers/` — each holding `board.py`, `pieces/`, `rules/`,
-  `quests/`, `clocks/` and `export/`.
+- **Deviation**: concrete game implementations are grouped into importable
+  sibling packages beside the engine — `packages/chess/` and
+  `packages/checkers/`. Each has a root `config.json` for game/piece/board data;
+  rules and quests are implemented as game-local Python extensions.
   The engine retains only the parent classes and the shared machinery.
 - **Rationale**: it makes a configuration a copyable unit, so duplication is the
   extension mechanism, and it keeps the diagram's classes findable — one parent
   per concept, with variants beside it rather than scattered through the engine.
 - **Mitigation**: the engine's public surface is unchanged in substance.
-  `Figurka` is still the parent of the six pieces; only the location of the
-  subclasses moves, and a configuration is importable by path, so nothing about
-  how a piece is used changes.
+  `Figurka` is still the parent of the six pieces; the game-specific subclasses live in their respective packages once integrated.
+  A game's configuration is validated through package metadata and JSON,
+  rather than directly importing a path into the engine.
 - **Consequence recorded**: a configuration is a bundle, so the diagram's classes
   are not one-to-one with directories. The mapping is documented in `PRD.md`
   section 6.

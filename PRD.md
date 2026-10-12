@@ -155,16 +155,18 @@ packages/
 logs/              game logs, configurable, git-ignored
 ```
 
-**Inside a configuration directory:**
+**Inside a game package (target structure; rules and quests land in later PRs):**
 
-```
+```text
 packages/chess/
-  board.py      rows, columns, starting placement — one board per game
-  pieces/       one file per piece: identity, symbols, vectors
-  rules/        one file per rule: logic and configuration
-  quests/       one file per quest: logic and parameters
-  clocks/       clock configuration
+  __init__.py    importable game package
+  config.json    game metadata, board, piece data, clocks, notation, UI appearance
+  rules/         Python behavior extensions
+  quests/        Python behavior extensions
 ```
+
+The equivalent `packages/checkers/config.json` defines draughts data, not chess
+behavior. The two sibling packages remain independent of one another.
 
 Each game package has a root `config.json`. Board dimensions, placement, piece
 identity, glyphs, movement vectors, attack vectors, clocks, exported formats,
@@ -174,9 +176,11 @@ cannot be represented by these static values. The shared engine validates the
 JSON and discovers sibling packages via distribution entry points. This design
 supersedes the older all-Python configuration arrangement.
 
-**A configuration is a folder that can be copied.** `cp -r packages/chess packages/house`, change what differs, and a new variant exists. Duplication is the
-extension mechanism: to change the board, duplicate the configuration and change
-the board. One game runs one board. The new package must be declared in the distribution's game entry points to be installed and selectable.
+**A game variant is another importable package.** Copying `packages/chess/` to
+`packages/house/` creates a starting point, but the copied `config.json` must get
+a unique `name`, and its entry point must be declared in package metadata before
+installation or discovery. Changing board and piece data requires editing JSON;
+new rules or quests are authored as Python modules. One game runs one board.
 
 `packages/engine/model/` keeps the parent classes — `Piece`, `Rule`, `Quest`, `Board`, `Clock` —
 and the machinery every configuration needs, such as the move, the validator and

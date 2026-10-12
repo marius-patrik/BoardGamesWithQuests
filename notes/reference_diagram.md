@@ -20,8 +20,10 @@ The retained source is [the original diagrams.net file](diagrams/reference.drawi
 - **Pages**: `Page-1` — the full object model, and `MVC - GameView` — the MVC
   integration and the view bindings.
 
-**Status**: this diagram is the assignment specification. Anything it defines is
-implemented; anything it omits is out of scope unless a user request adds it.
+**Status**: this diagram is the assignment specification, **not** an inventory
+of completed gameplay. The independent [implementation diagram](object_model.md)
+reflects the current partial codebase; later feature PRs will implement the
+remaining requirements.
 
 ## What this document is
 

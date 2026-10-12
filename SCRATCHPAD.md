@@ -67,7 +67,7 @@ Breaking any of these is a rejected change regardless of quality.
 
 ## 2. Package workspace (decision of 2026-10-12)
 
-packages/engine contains the shared model, controller, view and launcher; packages/chess and packages/checkers are sibling importable packages. The old src/ and games/ directories do not exist. Game package metadata provides discovery without an engine-maintained game-name list. The remaining stack branches predate this restructuring and must be migrated when subsequently rebased. Rebuild tests in #239 at the end.
+packages/engine contains the shared model, controller, view and launcher; packages/chess and packages/checkers are sibling importable packages. The old src/ and games/ directories do not exist. Game entry points provide discovery without an engine-maintained game-name list. A validated config.json in each sibling package supplies all game data except rules and quests, which are executable Python modules. The temporary GUI placeholder was deleted: launch is deferred until the actual view is integrated. Original diagram SVGs come from the source .drawio; the implemented architecture diagrams are code-generated from AST. Descendant branches must migrate imports/configuration paths when rebased. Rebuild tests in #239 at the end.
 
 ---
 
@@ -330,15 +330,19 @@ Create a package workspace instead of a monolithic src/ directory:
   registered through standard distribution entry points. No games/ container.
 - The distribution is installable using pyproject.toml and setuptools; the
   original console command chesswithquests continues to invoke engine.app:main.
-- The chess package is the available default. The checkers package is declared
-  but remains unavailable until its implementation lands in the later stack.
+- Chess is the declared default; neither game claims to be playable before its
+  proper implementation is integrated. Root config.json holds game/piece data;
+  only rules and quests are Python implementations.
 - logs/ is ignored. Remaining descendant branches must migrate old src/games
   paths and imports during their later rebases; do not merge their legacy tests.
 
 **Verification**: package importability, editable and clean-wheel installs,
-python -m engine --check from an unrelated working directory, Black formatting,
-tracked-Python compilation, and the strict documentation build. Pytest is
-explicitly skipped until the final complete rewrite in issue #239.
+python -m engine --check from an unrelated working directory, validated chess
+and checkers config.json files, Black formatting, tracked-Python compilation,
+and strict documentation builds with both reference and generated diagrams.
+Pytest is explicitly skipped until the final complete rewrite in issue #239.
+The GUI placeholder must not be reintroduced during packaging; full Tk UX is
+implemented by the downstream view feature.
 
 ### PR 7 — README honesty
 
@@ -849,10 +853,10 @@ reason is what matters.
 | 11 | Five rule hooks | Four cover game logic exhaustively — turn-based logic can only forbid a move or end the game — plus `status` for display. Check is not a game end, so folding it into `outcome` would have blurred the semantics |
 | 12 | `Result` carries a precedence | Without it, two rules firing at once is ambiguous, and "any conceivable logic" collapses on the first collision |
 | 13 | A rule's `value` persists, its `state` resets | Otherwise saving a configuration would save a game's history |
-| 14 | No `define_ruleset` and no registry | A configuration is composed explicitly, so the rule type set is closed and greppable. A registry adds surface for nothing |
+| 14 | No hand-maintained game list or `define_ruleset` registry | Installed game packages are discovered from distribution entry points; rule and quest code belongs to those packages, not a centralized engine list |
 | 15 | No `CustomBoard`, `CustomPiece` or `CustomQuest` types | Board, piece and quest customisation is already complete through data; these classes would wrap data that is already custom and exist only for symmetry |
 | 16 | No condition class for quests | Two hierarchies would express the same thing. The pieces pattern settles it: `Pawn(Piece)` carries its own logic, with no strategy object underneath |
-| 17 | The whole configuration is one file tree in Python | It cannot all be data — rules and quests carry logic — and one language avoids a format split and the `tomllib` availability problem on Python 3.10 |
+| 17 | Data in each game package's root `config.json`; behavior in Python | Board, pieces, metadata, clocks, notation and appearance are JSON; only rule and quest implementations remain executable code. The engine validates the data. |
 | 18 | Game implementations live in sibling packages beside engine | Keeps game-specific implementations out of the reusable engine; packaged extensions are discoverable through entry points |
 | 19 | One board per game | Duplication is already the mechanism for every other change, so multiple boards would have been the one place it was not |
 | 20 | Piece symbols are declared data | The renderer and notation writer then hold no knowledge of piece types, which also removes the silent-pawn fallback |
