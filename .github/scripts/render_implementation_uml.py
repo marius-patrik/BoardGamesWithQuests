@@ -63,9 +63,7 @@ def _tracked_modules(root: Path) -> list[SourceModule]:
         relative = path.relative_to(root / "packages").with_suffix("")
         parts = relative.parts[:-1] if relative.parts[-1] == "__init__" else relative.parts
         name = ".".join(parts)
-        modules.append(
-            SourceModule(name, ast.parse(path.read_text(encoding="utf-8")), path)
-        )
+        modules.append(SourceModule(name, ast.parse(path.read_text(encoding="utf-8")), path))
     return sorted(modules, key=lambda item: item.module)
 
 
@@ -95,7 +93,10 @@ def _aliases(record: SourceModule) -> dict[str, str]:
 
 
 def _class_ref(
-    node: ast.AST, module: str, aliases: dict[str, str], known: set[str],
+    node: ast.AST,
+    module: str,
+    aliases: dict[str, str],
+    known: set[str],
     unambiguous: dict[str, str],
 ) -> str | None:
     """Resolve a class expression against a qualified class dictionary."""
@@ -116,14 +117,11 @@ def _annotation_classes(node: ast.AST, candidates: set[str]) -> set[str]:
     """Find candidate class names inside a forward-ref or generic annotation."""
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return {
-            name for name in candidates
+            name
+            for name in candidates
             if re.search(rf"(?<![\w.]){re.escape(name)}(?!\w)", node.value)
         }
-    return {
-        sub.id
-        for sub in ast.walk(node)
-        if isinstance(sub, ast.Name) and sub.id in candidates
-    }
+    return {sub.id for sub in ast.walk(node) if isinstance(sub, ast.Name) and sub.id in candidates}
 
 
 def _members(node: ast.ClassDef) -> tuple[tuple[str, ...], tuple[str, ...], set[str]]:
@@ -171,9 +169,11 @@ def class_model(root: Path) -> tuple[list[UMLClass], dict[str, set[tuple[str, st
                 fields, methods, _ = _members(node)
                 classes.append(
                     UMLClass(
-                        record.module, node.name,
+                        record.module,
+                        node.name,
                         tuple(ast.unparse(base) for base in node.bases),
-                        fields, methods,
+                        fields,
+                        methods,
                     )
                 )
                 nodes.append((record, node))
@@ -198,7 +198,10 @@ def class_model(root: Path) -> tuple[list[UMLClass], dict[str, set[tuple[str, st
             annotations = []
             if isinstance(part, ast.AnnAssign):
                 annotations.append(part.annotation)
-            if isinstance(part, (ast.FunctionDef, ast.AsyncFunctionDef)) and part.name == "__init__":
+            if (
+                isinstance(part, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and part.name == "__init__"
+            ):
                 annotations.extend(arg.annotation for arg in part.args.args if arg.annotation)
                 for element in ast.walk(part):
                     if isinstance(element, ast.AnnAssign):
@@ -285,7 +288,7 @@ def _class_label(cls: UMLClass, detailed: bool) -> str:
     else:
         lines.append(
             f'<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="9" COLOR="#475467">'
-            f'{len(cls.attributes)} fields | {len(cls.methods)} methods</FONT></TD></TR>'
+            f"{len(cls.attributes)} fields | {len(cls.methods)} methods</FONT></TD></TR>"
         )
     lines.append("</TABLE>")
     return "".join(lines)
@@ -301,7 +304,7 @@ def render_class_diagram(root: Path, detailed: bool = True) -> str:
         'graph [rankdir=TB, bgcolor="white", pad="0.38", nodesep="0.40", '
         'ranksep="1.05", splines=polyline, compound=true, outputorder=edgesfirst, '
         'fontname="DejaVu Sans", label="Implemented Object Model (Python AST)", '
-        'labelloc=t, labeljust=l, fontsize=24];',
+        "labelloc=t, labeljust=l, fontsize=24];",
         'node [shape=plain, fontname="DejaVu Sans", margin=0];',
         'edge [color="#667085", penwidth=1.5, arrowsize=0.85, fontname="DejaVu Sans"];',
     ]
@@ -322,12 +325,12 @@ def render_class_diagram(root: Path, detailed: bool = True) -> str:
         dot.append("}")
     for child, parent in sorted(relationships["inherits"]):
         dot.append(
-            f'{_quote(child)} -> {_quote(parent)} '
+            f"{_quote(child)} -> {_quote(parent)} "
             '[arrowhead=empty, color="#334155", penwidth=2, minlen=2];'
         )
     for owner, owned in sorted(relationships["references"]):
         dot.append(
-            f'{_quote(owner)} -> {_quote(owned)} '
+            f"{_quote(owner)} -> {_quote(owned)} "
             '[style=dashed, arrowhead=vee, color="#64748b", constraint=false];'
         )
     dot.append("}")
@@ -355,19 +358,28 @@ def render_component_diagram(root: Path) -> str:
                 if incoming[0] == "engine" and len(incoming) > 1
                 else incoming[0]
             )
-            if other != node and other != "engine" and other in {
-                "engine.model", "engine.controller", "engine.view",
-                "engine.app", "chess", "checkers"
-            }:
+            if (
+                other != node
+                and other != "engine"
+                and other
+                in {
+                    "engine.model",
+                    "engine.controller",
+                    "engine.view",
+                    "engine.app",
+                    "chess",
+                    "checkers",
+                }
+            ):
                 dependencies.add((node, other))
     # The engine __main__ and app belong to the application entrypoint.
     # Every displayed relationship still must come from actual imports.
     dot = [
         "digraph architecture {",
         'graph [rankdir=TB, bgcolor="white", pad="0.45", nodesep="0.8", ranksep="1.2", '
-        'splines=polyline, compound=true, outputorder=edgesfirst, '
+        "splines=polyline, compound=true, outputorder=edgesfirst, "
         'fontname="DejaVu Sans", fontsize=24, label="Implemented MVC + Game Packages", '
-        'labelloc=t, labeljust=l];',
+        "labelloc=t, labeljust=l];",
         'node [shape=plain, fontname="DejaVu Sans"];',
         'edge [color="#344054", penwidth=1.8, arrowsize=0.9];',
     ]
@@ -385,7 +397,7 @@ def render_component_diagram(root: Path) -> str:
                 'COLOR="#344054" BGCOLOR="white">',
                 f'<TR><TD BGCOLOR="#e5eaf8"><B>{label}</B></TD></TR>',
                 '<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="11" COLOR="#475467">'
-                '<<component>></FONT></TD></TR>',
+                "<<component>></FONT></TD></TR>",
                 "</TABLE>",
             ]
             dot.append(f"{_quote(component)} [label=<" + "".join(rows) + ">];")
@@ -395,7 +407,7 @@ def render_component_diagram(root: Path) -> str:
             x for entries in components.values() for x in entries
         }:
             dot.append(
-                f'{_quote(source)} -> {_quote(target)} '
+                f"{_quote(source)} -> {_quote(target)} "
                 '[style=dashed, arrowhead=vee, color="#475467"];'
             )
     dot.append("}")
