@@ -145,22 +145,20 @@ counterpart in the diagram.
 
 ## 6. Repository layout
 
-The workspace uses packages/engine for shared model/controller/view, with separate sibling packages/chess and packages/checkers game packages. There is no src/ or games/ directory.
+The workspace has an importable shared engine at `packages/engine/` and sibling `packages/chess/` and `packages/checkers/` game packages. Neither `src/` nor a containing `games/` directory exists.
 
-```
-controller/  model/  view/        the engine
-model/        the parent classes a configuration is written against,
-              plus the machinery every configuration shares
-games/
-  chess/      the default configuration, shipped
-  checkers/   the second configuration, shipped
-logs/         game logs, configurable, git-ignored
+```text
+packages/
+  engine/          shared model/, controller/, view/, and application entry point
+  chess/           orthodox chess game package (default)
+  checkers/        English draughts game package
+logs/              game logs, configurable, git-ignored
 ```
 
 **Inside a configuration directory:**
 
 ```
-games/chess/
+packages/chess/
   board.py      rows, columns, starting placement — one board per game
   pieces/       one file per piece: identity, symbols, vectors
   rules/        one file per rule: logic and configuration
@@ -175,12 +173,11 @@ the `tomllib` availability problem on Python 3.10.
 **A configuration is a folder that can be copied.** `cp -r games/chess
 games/house`, change what differs, and a new variant exists. Duplication is the
 extension mechanism: to change the board, duplicate the configuration and change
-the board. One game runs one board.
+the board. One game runs one board. The new package must be declared in the distribution's game entry points to be installed and selectable.
 
-`model/` keeps the parent classes — `Piece`, `Rule`, `Quest`, `Board`, `Clock` —
+`packages/engine/model/` keeps the parent classes — `Piece`, `Rule`, `Quest`, `Board`, `Clock` —
 and the machinery every configuration needs, such as the move, the validator and
-the game manager. Only configuration-specific implementations live in
-`games/`.
+the game manager. Only configuration-specific implementations live in sibling game packages.
 
 ## 7. Functional requirements
 
@@ -227,7 +224,7 @@ the game manager. Only configuration-specific implementations live in
 
 | ID | Requirement |
 |---|---|
-| FR-25 | A configuration is a directory under `games/` holding board, pieces, rules, quests and clocks. |
+| FR-25 | A configuration is an importable game package under `packages/` holding board, pieces, rules, quests and clocks. It is registered through packaging entry-point metadata. |
 | FR-26 | `chess` ships as the default: 8×8, the six standard pieces, every orthodox rule at its orthodox value, and default clocks. Playing orthodox chess requires no configuration. |
 | FR-27 | The default configuration cannot be edited or deleted. A variant starts by duplicating it. |
 | FR-28 | Configurations can be created, renamed, duplicated, edited and deleted. |
@@ -282,16 +279,16 @@ deviation in its own right — see `notes/object_model.md` section 7.
 | FR-48 | *Field - Field - Extra* — the game transcript header, derived from real state. Player names come from the users playing, the result from the game, the date from the game. No placeholder strings. |
 | FR-49 | *Stenographic* — the transcript in stenographic form, with compression that is either a standard choice or a configured one, drawn from the standard library codecs only. |
 | FR-50 | *The game transcript* — every move is recorded and readable, independently of any export format. |
-| FR-51 | A format that belongs to one game ships with that game. FEN and PGN are chess formats and therefore live in `games/chess/export/`; a game with no FEN representation has no FEN exporter, because the structure says so rather than a capability check. |
+| FR-51 | A format that belongs to one game ships with that game. FEN and PGN are chess formats and therefore live in `packages/chess/export/`; a game with no FEN representation has no FEN exporter, because the structure says so rather than a capability check. |
 | FR-52 | **FEN import exists as well as export**, because the round-trip requirement needs a reader. The diagram defines only writers, so a reader is a recorded deviation. |
 
 ### 7.8 Games shipped
 
 | ID | Requirement |
 |---|---|
-| FR-53 | `games/chess/` is a complete, correct orthodox chess configuration. |
-| FR-54 | `games/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings sliding any distance diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
-| FR-55 | Adding `games/checkers/` requires **no engine change**. If it does, the abstraction is wrong — and that is the point of shipping it. |
+| FR-53 | `packages/chess/` is a complete, correct orthodox chess configuration. |
+| FR-54 | `packages/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings sliding any distance diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
+| FR-55 | Adding `packages/checkers/` requires **no engine change**, only the game package and its distribution registration. If it does, the abstraction is wrong — and that is the point of shipping it. |
 
 ### 7.9 Application
 
