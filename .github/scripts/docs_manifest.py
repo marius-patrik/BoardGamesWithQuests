@@ -41,9 +41,7 @@ def main() -> None:
     args = parser.parse_args()
     site = args.site.resolve()
     content = manifest(site, Path(__file__).resolve().parents[2])
-    (site / "versions.json").write_text(
-        json.dumps(content, indent=2) + "\n", encoding="utf-8"
-    )
+    (site / "versions.json").write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
