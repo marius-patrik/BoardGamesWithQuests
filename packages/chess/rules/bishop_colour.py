@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 from engine.model.game.field import Field
 from engine.model.game.move import Move
 from engine.model.game.rule import Rule
-from chess.rules.attacks import square_color
+from .attacks import square_color
 
 
 class BishopColourRule(Rule):
