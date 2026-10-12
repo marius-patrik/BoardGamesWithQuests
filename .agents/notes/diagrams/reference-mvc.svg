@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="104 44 932 594" width="932" height="594" aria-label="Reference architecture: MVC - GameView">
+<rect x="-10000" y="-10000" width="30000" height="30000" fill="#ffffff"/>
+<polyline points="512.5,119.0 880.0,234.0" fill="none" stroke="#667085" stroke-width="1.7"/>
+<polyline points="512.5,145.0 705.0,546.0" fill="none" stroke="#667085" stroke-width="1.7"/>
+<polyline points="512.5,197.0 255.0,283.0" fill="none" stroke="#667085" stroke-width="1.7"/>
+<polyline points="512.5,171.0 260.0,123.0" fill="none" stroke="#667085" stroke-width="1.7"/>
+<rect x="410.0" y="80.0" width="205.0" height="242.0" fill="#fcfdff" stroke="#344054" stroke-width="1.2"/>
+<rect x="410.0" y="80.0" width="205.0" height="26" fill="#eef2ff"/>
+<text x="512.5" y="98.0" text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-weight="bold" font-size="13" fill="#1d2939">GameManagerController</text>
+<text x="414.0" y="121.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ game_manager: GameManager</text>
+<text x="414.0" y="147.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ herni_plocha: HerniPlocha</text>
+<text x="414.0" y="173.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ game_view: GameView</text>
+<text x="414.0" y="199.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ hrac_view: HracView</text>
+<path d="M410.0,214.0 h205.0" stroke="#98a2b3" stroke-width="1"/>
+<text x="414.0" y="233.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ vyber_pole(souradnice)</text>
+<rect x="760.0" y="80.0" width="240.0" height="308.0" fill="#fcfdff" stroke="#344054" stroke-width="1.2"/>
+<rect x="760.0" y="80.0" width="240.0" height="26" fill="#eef2ff"/>
+<text x="880.0" y="98.0" text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-weight="bold" font-size="13" fill="#1d2939">GameManager</text>
+<text x="764.0" y="121.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ herni_plocha: HerniPlocha</text>
+<text x="764.0" y="147.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ aktivni_hrac: int</text>
+<text x="764.0" y="173.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ hraci: List(Uzivatele)</text>
+<text x="764.0" y="199.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ revizor_tahu: RevizorTahu</text>
+<path d="M760.0,214.0 h240.0" stroke="#98a2b3" stroke-width="1"/>
+<text x="764.0" y="233.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ je_vlastni_figurka(souradnice): bool</text>
+<rect x="570.0" y="490.0" width="270.0" height="112.0" fill="#fcfdff" stroke="#344054" stroke-width="1.2"/>
+<rect x="570.0" y="490.0" width="270.0" height="26" fill="#eef2ff"/>
+<text x="705.0" y="508.0" text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-weight="bold" font-size="13" fill="#1d2939">HerniPlocha</text>
+<text x="574.0" y="531.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ hraci_plocha: List(List(Figurka))</text>
+<text x="574.0" y="557.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ rozmery: Tuple(int,int)</text>
+<path d="M570.0,572.0 h270.0" stroke="#98a2b3" stroke-width="1"/>
+<text x="574.0" y="591.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ vrat_obsah(souradnice): Figurka</text>
+<rect x="150.0" y="80.0" width="220.0" height="86.0" fill="#fcfdff" stroke="#344054" stroke-width="1.2"/>
+<rect x="150.0" y="80.0" width="220.0" height="26" fill="#eef2ff"/>
+<text x="260.0" y="98.0" text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-weight="bold" font-size="13" fill="#1d2939">GameVeiw</text>
+<text x="154.0" y="121.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ controller: GameManagerController</text>
+<path d="M150.0,136.0 h220.0" stroke="#98a2b3" stroke-width="1"/>
+<text x="154.0" y="155.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ aktualizuj_plochu: None</text>
+<rect x="140.0" y="240.0" width="230.0" height="86.0" fill="#fcfdff" stroke="#344054" stroke-width="1.2"/>
+<rect x="140.0" y="240.0" width="230.0" height="26" fill="#eef2ff"/>
+<text x="255.0" y="258.0" text-anchor="middle" font-family="DejaVu Sans,Arial,sans-serif" font-weight="bold" font-size="13" fill="#1d2939">HracGameView</text>
+<text x="144.0" y="281.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ controller: GameManagerController</text>
+<path d="M140.0,296.0 h230.0" stroke="#98a2b3" stroke-width="1"/>
+<text x="144.0" y="315.0" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#344054">+ akutalizuj_hrace(hrac): None</text>
+</svg>

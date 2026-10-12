@@ -27,7 +27,7 @@ jobs:
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
       - name: Syntax validation while test suite is being rebuilt (issue 239)
-        run: python -m compileall -q src
+        run: python -m compileall -q packages
 
       - name: Verify repository-wide virtual documentation
         run: |
@@ -36,7 +36,25 @@ jobs:
           from pathlib import Path
           root = Path.cwd()
           assert (root / "site/index.html").is_file()
-          assert (root / "site/model/game/board/index.html").is_file()
+          assert (root / "site/engine/model/game/board/index.html").is_file()
+          assert (root / "site/agents/notes/diagrams/reference-page1.svg").is_file()
+          assert (root / "site/agents/notes/diagrams/implementation-classes.svg").is_file()
+          # Prevent replacing real UML connectivity with a flat inventory SVG.
+          for diagram, min_edges in (("implementation.svg", 2), ("implementation-classes.svg", 5)):
+              svg = (root / "site/agents/notes/diagrams" / diagram).read_text()
+              assert svg.count('class="node"') >= 3, f"{diagram}: missing UML boxes"
+              assert svg.count('class="edge"') >= min_edges, f"{diagram}: no graph relationships"
+          assert (root / ".agents/AGENTS.md").is_file() and not (root / ".agents/AGENTS.md").is_symlink()
+          assert (root / ".agents/notes/PRD.md").is_file()
+          assert (root / ".agents/notes/GUI_mockup.svg").is_file()
+          assert not (root / ".agents/notes/diagrams/reference.drawio").exists()
+          assert (root / "CONTRIBUTING.md").is_symlink()
+          assert (root / "CONTRIBUTING.md").resolve() == (root / ".agents/AGENTS.md").resolve()
+          assert (root / ".agents/SCRATCHPAD.md").is_file()
+          for retired in ("AGENTS.md", "CLAUDE.md", ".claude", "PRD.md", "SCRATCHPAD.md", "GUI_mockup.svg", "notes"):
+              assert not (root / retired).exists() and not (root / retired).is_symlink(), retired
+          for retired in (".agents/CLAUDE.md",):
+              assert not (root / retired).exists() and not (root / retired).is_symlink(), retired
           assert not (root / ".docs").exists(), "documentation source folder must not exist"
           print("Repository-wide documentation verified.")
           PY

@@ -178,4 +178,30 @@ def on_files(files: Files, config: Any) -> Files:
     for dest, body in build_nav()[1]:
         if files.get_file_from_path(dest) is None:
             files.append(File.generated(config, dest, content=body))
+    # Only implementation UML is live-generated from code. Reference SVGs are
+    # the already-exported static diagrams from the external diagrams.net file.
+    # ProperDocs imports this hook by file path rather than as a package.
+    import sys
+
+    scripts = str(Path(__file__).resolve().parent)
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    from generate_architecture_diagrams import generated_assets
+
+    for dest, svg in generated_assets(ROOT).items():
+        current = files.get_file_from_path(dest)
+        if current is not None:
+            # Tracked snapshots are useful in GitHub, but must not override
+            # the current implementation's actual diagram on Pages.
+            files.remove(current)
+        files.append(File.generated(config, dest, content=svg))
+    # Reference diagram source stays external per maintainer review. Its
+    # committed SVG exports remain available in the generated documentation.
+    for name in ("reference-page1.svg", "reference-mvc.svg"):
+        dest = f"agents/notes/diagrams/{name}"
+        source = ROOT / ".agents/notes/diagrams" / name
+        current = files.get_file_from_path(dest)
+        if current is not None:
+            files.remove(current)
+        files.append(File.generated(config, dest, content=source.read_text(encoding="utf-8")))
     return files
