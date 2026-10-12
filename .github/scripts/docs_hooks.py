@@ -192,7 +192,10 @@ def on_files(files: Files, config: Any) -> Files:
         if files.get_file_from_path(dest) is None:
             files.append(File.generated(config, dest, content=svg))
     original = ROOT / ".agents/notes/diagrams/reference.drawio"
-    if original.is_file() and files.get_file_from_path("agents/notes/diagrams/reference.drawio") is None:
+    if (
+        original.is_file()
+        and files.get_file_from_path("agents/notes/diagrams/reference.drawio") is None
+    ):
         files.append(
             File.generated(
                 config,
