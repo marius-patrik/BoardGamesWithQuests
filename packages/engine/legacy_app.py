@@ -121,7 +121,7 @@ def _version() -> str:
         return "unknown"
 
 
-def build_window(root: Any, game: Optional[str] = None):
+def build_window(root: Any, game: Optional[str] = None) -> Any:
     """Populate a Tk root with the application window.
 
     Args:
