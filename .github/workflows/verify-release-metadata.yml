@@ -38,6 +38,10 @@ jobs:
           set -euo pipefail
           fixture="$RUNNER_TEMP/release-version-fixture"
           git clone --quiet --no-hardlinks "$GITHUB_WORKSPACE" "$fixture"
+          # Actions checks out the PR merge commit in detached HEAD. A plain local
+          # clone may otherwise silently test main instead of the proposed code.
+          git -C "$fixture" fetch --quiet "$GITHUB_WORKSPACE" HEAD
+          git -C "$fixture" checkout --quiet --detach FETCH_HEAD
           cd "$fixture"
           git config user.name "Release Verification"
           git config user.email "release-verification@example.invalid"
