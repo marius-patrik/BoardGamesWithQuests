@@ -165,6 +165,7 @@ def board_from_definition(definition: GameDefinition):
         # The supplied vectors are from White's perspective; Black mirrors the row.
         direction = 1 if color_name == "white" else -1
         for position in entry["squares"]:
+
             def vectors(field: str):
                 return [
                     (row * direction if spec.get("color_relative") else row, col)

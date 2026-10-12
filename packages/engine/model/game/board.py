@@ -157,4 +157,3 @@ class Board:
         self.board = new_board
         self.captured_white.clear()
         self.captured_black.clear()
-

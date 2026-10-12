@@ -141,9 +141,10 @@ class MoveValidator:
                 continue
             for dest in self._walk(b, start_pos, vector, self._limit(piece, b)):
                 target = b.get_piece_at(dest)
-                allowed = (
-                    (target is None and vector in quiet)
-                    or (target is not None and target.getColor() != piece.getColor() and vector in attacks)
+                allowed = (target is None and vector in quiet) or (
+                    target is not None
+                    and target.getColor() != piece.getColor()
+                    and vector in attacks
                 )
                 if allowed and dest not in seen:
                     seen.add(dest)
@@ -158,17 +159,17 @@ class MoveValidator:
                     b.is_within_bounds(*dest)
                     and dest not in seen
                     and (
-                        piece.canJump() and b.get_piece_at(dest) is None
-                        or not piece.canJump() and self._initial_path_clear(b, start_pos, vector)
+                        piece.canJump()
+                        and b.get_piece_at(dest) is None
+                        or not piece.canJump()
+                        and self._initial_path_clear(b, start_pos, vector)
                     )
                 ):
                     seen.add(dest)
                     destinations.append(dest)
         return destinations
 
-    def get_valid_moves(
-        self, start_pos: Square, board: Optional[Board] = None
-    ) -> List[Square]:
+    def get_valid_moves(self, start_pos: Square, board: Optional[Board] = None) -> List[Square]:
         """Filter geometric candidates through configured royal safety only.
 
         Full game legality requires additional rule evaluation, which the
@@ -232,7 +233,9 @@ class MoveValidator:
         This is a geometric diagnostic, not a final game outcome adjudication.
         """
         b = board or self.board
-        return bool(b is not None and self.is_check(color, b) and not self.get_all_valid_moves(color, b))
+        return bool(
+            b is not None and self.is_check(color, b) and not self.get_all_valid_moves(color, b)
+        )
 
     def is_stalemate(self, color: int, board: Optional[Board] = None) -> bool:
         """Return whether a declared royal has no basic moves and is not attacked.
