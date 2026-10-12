@@ -47,7 +47,7 @@
       }
     },
     "release": {
-      "$comment": "pyproject.toml here carries only tooling configuration, so there is nothing for `python -m build` to produce and the Python distribution uses the explicit packages/ workspace. A release here is a tag and its notes, with no assets.",
+      "$comment": "Development releases publish a Git tag and notes only until packaging assets are approved at the final behavior test gate (#239). Python distribution metadata derives from that same Git tag via setuptools-scm, with no static version to synchronize.",
       "python": {
         "enabled": false
       }

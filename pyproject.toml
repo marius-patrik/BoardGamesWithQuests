@@ -1,10 +1,11 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=69", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "chesswithquests"
-version = "0.1.0"
+dynamic = ["version"]
+# The Git release tag is the version source of truth, including for Python builds.
 description = "A board game engine in which the configuration is the product: chess and checkers share one engine."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,6 +37,9 @@ chesswithquests = "engine.app:main"
 [project.entry-points."boardgameswithquests.games"]
 chess = "chess"
 checkers = "checkers"
+
+[tool.setuptools_scm]
+# setuptools-scm reads Git tags directly; no manually maintained package version.
 
 [tool.setuptools]
 package-dir = {"" = "packages"}
