@@ -554,7 +554,7 @@ duplicating the folder.
 **Two things that break silently unless this PR owns them.** The docs build
 must stay green with the pieces gone from `model/pieces/` — PR 2 generates the
 nav so no config edit should be needed, but **verify it**, because a stale nav
-entry fails `--strict`. And `tests/test_structure.py` lists `model.pieces.*`, so
+entry fails `--strict`. and the legacy tests are retired (#239), so
 those entries become `games.chess.pieces.*` — unless PR 3 already deleted that
 file, so check which applies.
 
@@ -614,7 +614,7 @@ corresponding issue.
 
 **Needs**: 11. **Blocks**: 17, 19.
 
-One class per format extending `ExportWriter`, living in `games/<variant>/export/`.
+One class per format extending `ExportWriter`, living in `packages/<variant>/export/`.
 The `format_type` switch in `ChessNotationWriter.export` and the format-name
 string are deleted — that is the `Extends` relation the diagram draws. Ship the
 mechanism plus *letter* (algebraic) and the metadata header, both of which the
