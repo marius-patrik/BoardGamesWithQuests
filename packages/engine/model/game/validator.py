@@ -1,19 +1,12 @@
 """Move validation engine enforcing chess rules, checks, pins, and terminal conditions."""
 
-from typing import List, Tuple, Optional, Any
+from typing import Any, List, Optional, Tuple
 
-try:
-    from engine.model.game.board import Board
-    from engine.model.game.move import Move
-    from engine.model.pieces.piece import Piece
-    from engine.model.pieces.pawn import Pawn
-    from engine.model.pieces.king import King
-except ImportError:
-    from .board import Board
-    from .move import Move
-    from ..pieces.piece import Piece
-    from ..pieces.pawn import Pawn
-    from ..pieces.king import King
+from engine.model.game.board import Board
+from engine.model.game.move import Move
+from engine.model.pieces.king import King
+from engine.model.pieces.pawn import Pawn
+from engine.model.pieces.piece import Piece
 
 
 def _ray_length(board: Board) -> int:
@@ -25,7 +18,7 @@ def _ray_length(board: Board) -> int:
     Returns:
         int: The greater of the two dimensions, which no straight ray can exceed.
     """
-    return max(board.rows, board.cols)
+    return max(board.rows, board.cols) - 1
 
 
 def _is_single_step(piece: Piece) -> bool:
@@ -41,7 +34,7 @@ def _is_single_step(piece: Piece) -> bool:
 
 
 class MoveValidator:
-    """Validates piece movement legality, checks, checkmates, and stalemates."""
+    """Checks geometric moves and king safety; full rules are integrated later."""
 
     def __init__(self, board: Optional[Board] = None, move: Optional[Move] = None):
         """Initialize a MoveValidator instance.
@@ -107,6 +100,8 @@ class MoveValidator:
             return False
 
         tr, tc = target_square
+        if not b.is_within_bounds(tr, tc):
+            return False
         for r in range(b.rows):
             for c in range(b.cols):
                 piece = b.get_piece_at((r, c))
@@ -119,7 +114,7 @@ class MoveValidator:
                             return True
                     continue
 
-                directions = piece.getAttackDirections()
+                directions = piece.getAttackDirections() or []
                 can_jump = piece.canJump()
                 max_steps = 1 if (can_jump or _is_single_step(piece)) else _ray_length(b)
 
@@ -227,7 +222,7 @@ class MoveValidator:
     def get_valid_moves(
         self, start_pos: Tuple[int, int], board: Optional[Board] = None
     ) -> List[Tuple[int, int]]:
-        """Get strictly legal move destinations ensuring the friendly king is safe from check.
+        """Filter geometric destinations that would expose the friendly king to check.
 
         Args:
             start_pos: (row, col) origin coordinates.
@@ -254,11 +249,11 @@ class MoveValidator:
             b.set_piece_at(target_pos, piece)
             b.set_piece_at(start_pos, None)
 
-            in_check = self.is_check(color, b)
-
-            # Rollback
-            b.set_piece_at(start_pos, piece)
-            b.set_piece_at(target_pos, original_target)
+            try:
+                in_check = self.is_check(color, b)
+            finally:
+                b.set_piece_at(start_pos, piece)
+                b.set_piece_at(target_pos, original_target)
 
             if not in_check:
                 legal_moves.append(target_pos)
@@ -292,7 +287,7 @@ class MoveValidator:
         return all_moves
 
     def is_valid_move(self, move: Move, board: Optional[Board] = None) -> bool:
-        """Verify whether a specific Move is strictly legal.
+        """Check geometric validity and king safety for a candidate move.
 
         Args:
             move: Move instance to evaluate.
@@ -302,7 +297,7 @@ class MoveValidator:
             True if the move is legal, False otherwise.
         """
         b = board or self.board
-        if b is None or not move.validate():
+        if b is None or not move.validate(b):
             return False
         valid_destinations = self.get_valid_moves(move.start_pos, b)
         return move.end_pos in valid_destinations

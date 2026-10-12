@@ -59,6 +59,12 @@ class Move:
         Returns:
             True if basic validity checks pass, False otherwise.
         """
+        if any(
+            len(position) != 2 or any(type(coordinate) is not int for coordinate in position)
+            for position in (self.start_pos, self.end_pos)
+        ):
+            return False
+
         rows, cols = self._bounds(board)
         if not (0 <= self.start_pos[0] < rows and 0 <= self.start_pos[1] < cols):
             return False
@@ -84,13 +90,16 @@ class Move:
         Returns:
             True if the move executed successfully, False otherwise.
         """
-        if self.piece is None:
-            self.piece = board.get_piece_at(self.start_pos)
-        if self.piece is None:
+        if not self.validate(board):
             return False
 
-        self.captured_piece = board.get_piece_at(self.end_pos)
-        success = board.move_piece(self.start_pos, self.end_pos)
-        if success and self.promotion_piece is not None:
+        moving_piece = board.get_piece_at(self.start_pos)
+        captured_piece = board.get_piece_at(self.end_pos)
+        if not board.move_piece(self.start_pos, self.end_pos):
+            return False
+
+        self.piece = moving_piece
+        self.captured_piece = captured_piece
+        if self.promotion_piece is not None:
             board.replace_piece(self.end_pos, self.promotion_piece)
-        return success
+        return True

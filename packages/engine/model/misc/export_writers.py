@@ -1,13 +1,9 @@
 """Chess export writers converting games to PGN, FEN, and stenographic notation."""
 
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
-try:
-    from engine.model.misc.notation import pos_to_algebraic
-    from engine.model.misc.metadata import MetadataWriter
-except ImportError:
-    from .notation import pos_to_algebraic
-    from .metadata import MetadataWriter
+from engine.model.misc.metadata import MetadataWriter
+from engine.model.misc.notation import pos_to_algebraic
 
 
 class ExportWriter:
@@ -46,10 +42,6 @@ class ChessNotationWriter(ExportWriter):
         "pawn": "p",
     }
 
-    def __init__(self):
-        """Initialize a ChessNotationWriter instance."""
-        super().__init__()
-
     def to_stenographic(self, moves: List[Any]) -> str:
         """Convert a list of moves to stenographic coordinate format (e.g. 'e2e4 e7e5').
 
@@ -70,35 +62,36 @@ class ChessNotationWriter(ExportWriter):
         """Convert board state to Forsyth-Edwards Notation (FEN) string.
 
         Args:
-            board: Board instance. Its rows and cols decide how many ranks and files the
-                record carries, so a board of any size serialises.
+            board: Board instance. Rows and columns determine the placement size.
+                For non-8x8 boards the output is FEN-like, not standard chess FEN.
+                Castling, en-passant, and move-counter fields are placeholders.
             active_color: Active side color (1 for White, -1 for Black).
 
         Returns:
             FEN record string.
         """
-        ranks = []
-        for r in range(board.rows - 1, -1, -1):
+        ranks: List[str] = []
+        for row in range(board.rows - 1, -1, -1):
+            fragments: List[str] = []
             empty = 0
-            rank_str = ""
-            for c in range(board.cols):
-                piece = board.get_piece_at((r, c))
+            for col in range(board.cols):
+                piece = board.get_piece_at((row, col))
                 if piece is None:
                     empty += 1
-                else:
-                    if empty > 0:
-                        rank_str += str(empty)
-                        empty = 0
-                    ptype = piece.getType().lower() if hasattr(piece, "getType") else "p"
-                    char = self.PIECE_CHARS.get(ptype, "p")
-                    rank_str += (
-                        char.upper()
-                        if (piece.getColor() == 1 or piece.getColor() == "white")
-                        else char.lower()
-                    )
-            if empty > 0:
-                rank_str += str(empty)
-            ranks.append(rank_str)
+                    continue
+                if empty:
+                    fragments.append(str(empty))
+                    empty = 0
+                piece_type = piece.getType()
+                char = self.PIECE_CHARS.get(str(piece_type).lower())
+                if char is None:
+                    raise ValueError(f"FEN cannot represent piece type {piece_type!r}")
+                fragments.append(
+                    char.upper() if piece.getColor() in (1, "white") else char
+                )
+            if empty:
+                fragments.append(str(empty))
+            ranks.append("".join(fragments))
 
         board_fen = "/".join(ranks)
         turn = "w" if active_color == 1 else "b"
