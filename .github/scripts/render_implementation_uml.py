@@ -397,7 +397,7 @@ def render_component_diagram(root: Path) -> str:
                 'COLOR="#344054" BGCOLOR="white">',
                 f'<TR><TD BGCOLOR="#e5eaf8"><B>{label}</B></TD></TR>',
                 '<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="11" COLOR="#475467">'
-                "<<component>></FONT></TD></TR>",
+                "&lt;&lt;component&gt;&gt;</FONT></TD></TR>",
                 "</TABLE>",
             ]
             dot.append(f"{_quote(component)} [label=<" + "".join(rows) + ">];")
