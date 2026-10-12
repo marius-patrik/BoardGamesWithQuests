@@ -169,7 +169,6 @@ def reference_svgs(source: str) -> dict[str, str]:
     }
 
 
-
 def implementation_svg(root: Path) -> str:
     """Render connected UML components and dependencies from actual imports."""
     from render_implementation_uml import render_component_diagram
