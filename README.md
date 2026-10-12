@@ -8,7 +8,7 @@ configurations exist. Neither game's full rules/quests nor the real Tkinter GUI
 have been integrated yet. The former placeholder GUI was deliberately removed.
 The existing test suite was retired for a from-scratch rewrite after the
 development stack is integrated (issue #239). A green compilation/docs pipeline
-is not evidence of working gameplay.
+is not evidence of working gameplay. Automatic GitHub tags/releases are development snapshots until the final behavior test gate passes.
 
 ```text
 packages/
