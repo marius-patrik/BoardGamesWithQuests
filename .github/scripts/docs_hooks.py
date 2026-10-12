@@ -189,8 +189,12 @@ def on_files(files: Files, config: Any) -> Files:
     from generate_architecture_diagrams import generated_assets
 
     for dest, svg in generated_assets(ROOT).items():
-        if files.get_file_from_path(dest) is None:
-            files.append(File.generated(config, dest, content=svg))
+        current = files.get_file_from_path(dest)
+        if current is not None:
+            # Tracked snapshots are useful in GitHub, but must not override
+            # the current implementation's actual diagram on Pages.
+            files.remove(current)
+        files.append(File.generated(config, dest, content=svg))
     original = ROOT / ".agents/notes/diagrams/reference.drawio"
     if (
         original.is_file()
