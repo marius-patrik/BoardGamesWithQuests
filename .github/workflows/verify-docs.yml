@@ -26,6 +26,9 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
+      - name: Syntax validation while test suite is being rebuilt (issue 239)
+        run: python -m compileall -q src
+
       - name: Verify repository-wide virtual documentation
         run: |
           python .github/scripts/build_docs.py

@@ -202,8 +202,10 @@ full GUI interactions, installation, and relevant error handling. User identity
 must be tested only against a supported user experience; the current in-memory
 `UserManager` ID assignment is not proof that the GUI supports user accounts.
 
-Until the final test suite lands, shared CI compiles Python source but does not
-run unit tests. This is a temporary quality waiver, not an acceptance signal.
+Until the final test suite lands, the pinned shared CI still invokes pytest,
+which fails on zero collected tests. The separate documentation/compilation
+checks remain useful, but cannot substitute for behavioral coverage. This is
+an intentionally incomplete quality gate, not an acceptance signal.
 The final implementation is **not release-ready** until #239 reinstates tests
 on Python 3.10–3.13 and the complete matrix passes.
 
