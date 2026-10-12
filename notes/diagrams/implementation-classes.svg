@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 1480 1546" width="1480" height="1546" aria-label="Implementation class diagram extracted from Python AST">
+<rect width="1480" height="1546" fill="#ffffff"/>
+<text x="32" y="39" font-family="DejaVu Sans,Arial,sans-serif" font-size="24" font-weight="bold" fill="#101828">Implemented Class Model (Generated)</text>
+<text x="32" y="70" font-family="DejaVu Sans,Arial,sans-serif" font-size="14" fill="#475467">25 classes found in tracked packages/ Python files; inheritance extracted from AST</text>
+<line x1="748.0" y1="166.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
+<line x1="748.0" y1="306.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
+<line x1="748.0" y1="446.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
+<line x1="748.0" y1="586.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
+<line x1="748.0" y1="866.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
+<line x1="748.0" y1="1006.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
+<line x1="1240.0" y1="446.0" x2="1240.0" y2="586.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
+<rect x="32" y="104" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="104" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="130" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Board</text>
+<text x="46" y="164" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.board</text>
+<text x="46" y="184" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="206" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">is_within_bounds, get_piece_at, set_piece_at, move_piece, ...</text>
+<rect x="32" y="244" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="244" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="270" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">ConfigurationError</text>
+<text x="46" y="304" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.configuration</text>
+<text x="46" y="324" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends ValueError</text>
+<text x="46" y="346" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
+<rect x="32" y="384" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="384" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="410" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">GameDefinition</text>
+<text x="46" y="444" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.configuration</text>
+<text x="46" y="464" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="486" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
+<rect x="32" y="524" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="524" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="550" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">GameLogger</text>
+<text x="46" y="584" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.logger</text>
+<text x="46" y="604" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="626" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">create_file, log_move, get_moves, file_path</text>
+<rect x="32" y="664" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="664" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="690" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">GameManager</text>
+<text x="46" y="724" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.manager</text>
+<text x="46" y="744" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="766" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">start_turn, get_valid_moves, cancel_move, save_log, ...</text>
+<rect x="32" y="804" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="804" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="830" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Move</text>
+<text x="46" y="864" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.move</text>
+<text x="46" y="884" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="906" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">validate, execute</text>
+<rect x="32" y="944" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="944" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="970" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Player</text>
+<text x="46" y="1004" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.player</text>
+<text x="46" y="1024" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="1046" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">getColor, getUser, setUser, getEloRating</text>
+<rect x="32" y="1084" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="1084" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="1110" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Quest</text>
+<text x="46" y="1144" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.quest</text>
+<text x="46" y="1164" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="1186" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">validate, complete</text>
+<rect x="32" y="1224" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="1224" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="1250" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Timer</text>
+<text x="46" y="1284" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.timer</text>
+<text x="46" y="1304" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="1326" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">reset_time, tick, add_time, get_time, ...</text>
+<rect x="32" y="1364" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="32" y="1364" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="46" y="1390" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">MoveValidator</text>
+<text x="46" y="1424" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.validator</text>
+<text x="46" y="1444" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="46" y="1466" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">set_board, set_move, find_king, is_square_attacked, ...</text>
+<rect x="524" y="104" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="524" y="104" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="538" y="130" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Bishop</text>
+<text x="538" y="164" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.bishop</text>
+<text x="538" y="184" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
+<text x="538" y="206" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
+<rect x="524" y="244" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="524" y="244" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="538" y="270" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Horse</text>
+<text x="538" y="304" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.horse</text>
+<text x="538" y="324" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
+<text x="538" y="346" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
+<rect x="524" y="384" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="524" y="384" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="538" y="410" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">King</text>
+<text x="538" y="444" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.king</text>
+<text x="538" y="464" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
+<text x="538" y="486" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">hasMoved, setMoved</text>
+<rect x="524" y="524" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="524" y="524" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="538" y="550" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Pawn</text>
+<text x="538" y="584" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.pawn</text>
+<text x="538" y="604" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
+<text x="538" y="626" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">hasMoved, setMoved, getInitialVectors</text>
+<rect x="524" y="664" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="524" y="664" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="538" y="690" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Piece</text>
+<text x="538" y="724" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.piece</text>
+<text x="538" y="744" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="538" y="766" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">getDirections, getAttackDirections, canJump, getColor, ...</text>
+<rect x="524" y="804" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="524" y="804" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="538" y="830" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Queen</text>
+<text x="538" y="864" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.queen</text>
+<text x="538" y="884" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
+<text x="538" y="906" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
+<rect x="524" y="944" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="524" y="944" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="538" y="970" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Rook</text>
+<text x="538" y="1004" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.rook</text>
+<text x="538" y="1024" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
+<text x="538" y="1046" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">hasMoved, setMoved</text>
+<rect x="1016" y="104" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="1016" y="104" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="1030" y="130" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">GameController</text>
+<text x="1030" y="164" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.controller.controller</text>
+<text x="1030" y="184" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="1030" y="206" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">select_square, handle_square_click, reset_selection, new_game</text>
+<rect x="1016" y="244" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="1016" y="244" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="1030" y="270" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">WindowController</text>
+<text x="1030" y="304" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.controller.window_controller</text>
+<text x="1030" y="324" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="1030" y="346" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">start, stop, set_status, show_dialog, ...</text>
+<rect x="1016" y="384" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="1016" y="384" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="1030" y="410" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">ChessNotationWriter</text>
+<text x="1030" y="444" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.misc.export_writers</text>
+<text x="1030" y="464" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends ExportWriter</text>
+<text x="1030" y="486" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">to_stenographic, to_fen, to_pgn, export</text>
+<rect x="1016" y="524" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="1016" y="524" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="1030" y="550" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">ExportWriter</text>
+<text x="1030" y="584" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.misc.export_writers</text>
+<text x="1030" y="604" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="1030" y="626" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">export</text>
+<rect x="1016" y="664" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="1016" y="664" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="1030" y="690" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">MetadataWriter</text>
+<text x="1030" y="724" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.misc.metadata</text>
+<text x="1030" y="744" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="1030" y="766" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">set_header, get_header, format_pgn_headers, export</text>
+<rect x="1016" y="804" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="1016" y="804" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="1030" y="830" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">QuestManager</text>
+<text x="1030" y="864" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.misc.quest_manager</text>
+<text x="1030" y="884" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="1030" y="906" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">register_quest, get_quests, check_quests, get_completed_quest</text>
+<rect x="1016" y="944" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="1016" y="944" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="1030" y="970" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">UserManager</text>
+<text x="1030" y="1004" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.users.manager</text>
+<text x="1030" y="1024" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="1030" y="1046" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">register_user, get_user, link_player, log_action, ...</text>
+<rect x="1016" y="1084" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<rect x="1016" y="1084" width="448" height="39" rx="9" fill="#edf2ff"/>
+<text x="1030" y="1110" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">User</text>
+<text x="1030" y="1144" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.users.user</text>
+<text x="1030" y="1164" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
+<text x="1030" y="1186" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">add_quest, get_completed_quests, getEloRating</text>
+</svg>
