@@ -84,7 +84,7 @@ def _ref_page(diagram: ET.Element) -> str:
         if first is not None:
             x, y, w, h = position(first)
             start = (x + w / 2, y + h / 2)
-        elif geometry is not None and geometry.find("./mxPoint[@as='sourcePoint']") is not None:
+        elif (geometry is not None and geometry.find("./mxPoint[@as='sourcePoint']") is not None and all(geometry.find("./mxPoint[@as='sourcePoint']").get(axis) is not None for axis in ("x", "y"))):
             p = geometry.find("./mxPoint[@as='sourcePoint']")
             start = (float(p.get("x")), float(p.get("y")))
         else:
@@ -92,7 +92,7 @@ def _ref_page(diagram: ET.Element) -> str:
         if last is not None:
             x, y, w, h = position(last)
             end = (x + w / 2, y + h / 2)
-        elif geometry is not None and geometry.find("./mxPoint[@as='targetPoint']") is not None:
+        elif (geometry is not None and geometry.find("./mxPoint[@as='targetPoint']") is not None and all(geometry.find("./mxPoint[@as='targetPoint']").get(axis) is not None for axis in ("x", "y"))):
             p = geometry.find("./mxPoint[@as='targetPoint']")
             end = (float(p.get("x")), float(p.get("y")))
         else:
