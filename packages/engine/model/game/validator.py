@@ -227,24 +227,25 @@ class MoveValidator:
         )
 
     def is_checkmate(self, color: int, board: Optional[Board] = None) -> bool:
-        """Return whether the declared royal has no basic response while attacked.
+        """Do not adjudicate checkmate without a complete game rule set.
 
-        This is a geometric diagnostic, not a final game outcome adjudication.
+        Args:
+            color: Side to adjudicate.
+            board: Position to adjudicate.
+
+        Raises:
+            NotImplementedError: Royal-safety geometry cannot decide game outcomes.
         """
-        b = board or self.board
-        return bool(
-            b is not None and self.is_check(color, b) and not self.get_all_valid_moves(color, b)
-        )
+        raise NotImplementedError("checkmate requires game-specific rules and outcome resolution")
 
     def is_stalemate(self, color: int, board: Optional[Board] = None) -> bool:
-        """Return whether a declared royal has no basic moves and is not attacked.
+        """Do not adjudicate stalemate without the game's complete move rules.
 
-        Only a game's rules can declare an actual stalemate outcome.
+        Args:
+            color: Side to adjudicate.
+            board: Position to adjudicate.
+
+        Raises:
+            NotImplementedError: Geometric candidates are not a legal-move enumeration.
         """
-        b = board or self.board
-        return bool(
-            b is not None
-            and self.find_royal(color, b) is not None
-            and not self.is_check(color, b)
-            and not self.get_all_valid_moves(color, b)
-        )
+        raise NotImplementedError("stalemate requires game-specific rules and outcome resolution")
