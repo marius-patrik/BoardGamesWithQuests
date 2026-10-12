@@ -8,6 +8,9 @@ from importlib.metadata import entry_points
 import json
 from typing import Any
 
+from engine.model.game.board import Board
+from engine.model.pieces.piece import Piece
+
 GROUP = "boardgameswithquests.games"
 
 
@@ -144,7 +147,7 @@ def installed_definitions() -> list[GameDefinition]:
     return sorted(found.values(), key=lambda game: (not game.default, game.name))
 
 
-def board_from_definition(definition: GameDefinition):
+def board_from_definition(definition: GameDefinition) -> Board:
     """Construct a game-neutral board from a validated game definition.
 
     A package owns its initial position and piece capability data. The engine
@@ -156,9 +159,6 @@ def board_from_definition(definition: GameDefinition):
     Returns:
         Board: Board with exactly the configured dimensions and starting pieces.
     """
-    from engine.model.game.board import Board
-    from engine.model.pieces.piece import Piece
-
     rows, cols = definition.board["rows"], definition.board["columns"]
     placements = []
     for entry in definition.board["starting_pieces"]:
