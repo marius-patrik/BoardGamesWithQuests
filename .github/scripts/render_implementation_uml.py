@@ -382,9 +382,7 @@ def render_component_diagram(root: Path) -> str:
     # actually registers a concrete game package in pyproject.toml.
     project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
     plugins = (
-        project.get("project", {})
-        .get("entry-points", {})
-        .get("boardgameswithquests.games", {})
+        project.get("project", {}).get("entry-points", {}).get("boardgameswithquests.games", {})
     )
     registrations = {
         value.split(":", 1)[0].split(".", 1)[0]
