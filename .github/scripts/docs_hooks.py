@@ -195,4 +195,13 @@ def on_files(files: Files, config: Any) -> Files:
             # the current implementation's actual diagram on Pages.
             files.remove(current)
         files.append(File.generated(config, dest, content=svg))
+    # Reference diagram source stays external per maintainer review. Its
+    # committed SVG exports remain available in the generated documentation.
+    for name in ("reference-page1.svg", "reference-mvc.svg"):
+        dest = f"agents/notes/diagrams/{name}"
+        source = ROOT / ".agents/notes/diagrams" / name
+        current = files.get_file_from_path(dest)
+        if current is not None:
+            files.remove(current)
+        files.append(File.generated(config, dest, content=source.read_text(encoding="utf-8")))
     return files
