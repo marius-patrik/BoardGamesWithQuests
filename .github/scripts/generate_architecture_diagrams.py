@@ -340,7 +340,7 @@ def implementation_classes_svg(root: Path) -> str:
                 f'{escape(method_label[:61])}</text>',
             ])
     output.append("</svg>")
-    return "\\n".join(output) + "\\n"
+    return "\n".join(output) + "\n"
 
 
 def generated_assets(root: Path) -> dict[str, str]:
