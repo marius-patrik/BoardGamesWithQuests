@@ -1,162 +1,573 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 1480 1546" width="1480" height="1546" aria-label="Implementation class diagram extracted from Python AST">
-<rect width="1480" height="1546" fill="#ffffff"/>
-<text x="32" y="39" font-family="DejaVu Sans,Arial,sans-serif" font-size="24" font-weight="bold" fill="#101828">Implemented Class Model (Generated)</text>
-<text x="32" y="70" font-family="DejaVu Sans,Arial,sans-serif" font-size="14" fill="#475467">25 classes found in tracked packages/ Python files; inheritance extracted from AST</text>
-<line x1="748.0" y1="166.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
-<line x1="748.0" y1="306.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
-<line x1="748.0" y1="446.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
-<line x1="748.0" y1="586.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
-<line x1="748.0" y1="866.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
-<line x1="748.0" y1="1006.0" x2="748.0" y2="726.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
-<line x1="1240.0" y1="446.0" x2="1240.0" y2="586.0" stroke="#667085" stroke-width="1.5" opacity="0.45" stroke-dasharray="7 4"/>
-<rect x="32" y="104" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="104" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="130" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Board</text>
-<text x="46" y="164" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.board</text>
-<text x="46" y="184" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="206" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">is_within_bounds, get_piece_at, set_piece_at, move_piece, ...</text>
-<rect x="32" y="244" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="244" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="270" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">ConfigurationError</text>
-<text x="46" y="304" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.configuration</text>
-<text x="46" y="324" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends ValueError</text>
-<text x="46" y="346" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
-<rect x="32" y="384" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="384" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="410" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">GameDefinition</text>
-<text x="46" y="444" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.configuration</text>
-<text x="46" y="464" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="486" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
-<rect x="32" y="524" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="524" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="550" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">GameLogger</text>
-<text x="46" y="584" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.logger</text>
-<text x="46" y="604" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="626" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">create_file, log_move, get_moves, file_path</text>
-<rect x="32" y="664" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="664" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="690" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">GameManager</text>
-<text x="46" y="724" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.manager</text>
-<text x="46" y="744" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="766" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">start_turn, get_valid_moves, cancel_move, save_log, ...</text>
-<rect x="32" y="804" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="804" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="830" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Move</text>
-<text x="46" y="864" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.move</text>
-<text x="46" y="884" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="906" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">validate, execute</text>
-<rect x="32" y="944" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="944" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="970" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Player</text>
-<text x="46" y="1004" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.player</text>
-<text x="46" y="1024" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="1046" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">getColor, getUser, setUser, getEloRating</text>
-<rect x="32" y="1084" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="1084" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="1110" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Quest</text>
-<text x="46" y="1144" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.quest</text>
-<text x="46" y="1164" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="1186" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">validate, complete</text>
-<rect x="32" y="1224" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="1224" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="1250" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Timer</text>
-<text x="46" y="1284" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.timer</text>
-<text x="46" y="1304" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="1326" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">reset_time, tick, add_time, get_time, ...</text>
-<rect x="32" y="1364" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="32" y="1364" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="46" y="1390" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">MoveValidator</text>
-<text x="46" y="1424" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.game.validator</text>
-<text x="46" y="1444" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="46" y="1466" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">set_board, set_move, find_king, is_square_attacked, ...</text>
-<rect x="524" y="104" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="524" y="104" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="538" y="130" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Bishop</text>
-<text x="538" y="164" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.bishop</text>
-<text x="538" y="184" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
-<text x="538" y="206" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
-<rect x="524" y="244" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="524" y="244" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="538" y="270" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Horse</text>
-<text x="538" y="304" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.horse</text>
-<text x="538" y="324" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
-<text x="538" y="346" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
-<rect x="524" y="384" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="524" y="384" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="538" y="410" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">King</text>
-<text x="538" y="444" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.king</text>
-<text x="538" y="464" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
-<text x="538" y="486" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">hasMoved, setMoved</text>
-<rect x="524" y="524" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="524" y="524" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="538" y="550" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Pawn</text>
-<text x="538" y="584" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.pawn</text>
-<text x="538" y="604" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
-<text x="538" y="626" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">hasMoved, setMoved, getInitialVectors</text>
-<rect x="524" y="664" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="524" y="664" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="538" y="690" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Piece</text>
-<text x="538" y="724" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.piece</text>
-<text x="538" y="744" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="538" y="766" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">getDirections, getAttackDirections, canJump, getColor, ...</text>
-<rect x="524" y="804" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="524" y="804" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="538" y="830" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Queen</text>
-<text x="538" y="864" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.queen</text>
-<text x="538" y="884" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
-<text x="538" y="906" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">(no public methods)</text>
-<rect x="524" y="944" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="524" y="944" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="538" y="970" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">Rook</text>
-<text x="538" y="1004" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.pieces.rook</text>
-<text x="538" y="1024" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends Piece</text>
-<text x="538" y="1046" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">hasMoved, setMoved</text>
-<rect x="1016" y="104" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="1016" y="104" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="1030" y="130" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">GameController</text>
-<text x="1030" y="164" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.controller.controller</text>
-<text x="1030" y="184" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="1030" y="206" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">select_square, handle_square_click, reset_selection, new_game</text>
-<rect x="1016" y="244" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="1016" y="244" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="1030" y="270" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">WindowController</text>
-<text x="1030" y="304" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.controller.window_controller</text>
-<text x="1030" y="324" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="1030" y="346" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">start, stop, set_status, show_dialog, ...</text>
-<rect x="1016" y="384" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="1016" y="384" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="1030" y="410" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">ChessNotationWriter</text>
-<text x="1030" y="444" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.misc.export_writers</text>
-<text x="1030" y="464" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Extends ExportWriter</text>
-<text x="1030" y="486" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">to_stenographic, to_fen, to_pgn, export</text>
-<rect x="1016" y="524" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="1016" y="524" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="1030" y="550" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">ExportWriter</text>
-<text x="1030" y="584" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.misc.export_writers</text>
-<text x="1030" y="604" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="1030" y="626" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">export</text>
-<rect x="1016" y="664" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="1016" y="664" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="1030" y="690" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">MetadataWriter</text>
-<text x="1030" y="724" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.misc.metadata</text>
-<text x="1030" y="744" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="1030" y="766" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">set_header, get_header, format_pgn_headers, export</text>
-<rect x="1016" y="804" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="1016" y="804" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="1030" y="830" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">QuestManager</text>
-<text x="1030" y="864" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.misc.quest_manager</text>
-<text x="1030" y="884" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="1030" y="906" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">register_quest, get_quests, check_quests, get_completed_quest</text>
-<rect x="1016" y="944" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="1016" y="944" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="1030" y="970" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">UserManager</text>
-<text x="1030" y="1004" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.users.manager</text>
-<text x="1030" y="1024" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="1030" y="1046" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">register_user, get_user, link_player, log_action, ...</text>
-<rect x="1016" y="1084" width="448" height="124" rx="9" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
-<rect x="1016" y="1084" width="448" height="39" rx="9" fill="#edf2ff"/>
-<text x="1030" y="1110" font-family="DejaVu Sans,Arial,sans-serif" font-size="17" font-weight="bold" fill="#101828">User</text>
-<text x="1030" y="1144" font-family="DejaVu Sans,Arial,sans-serif" font-size="11" fill="#475467">engine.model.users.user</text>
-<text x="1030" y="1164" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">Class</text>
-<text x="1030" y="1186" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#344054">add_quest, get_completed_quests, getEloRating</text>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: classes Pages: 1 -->
+<svg width="4545pt" height="764pt"
+ viewBox="0.00 0.00 4544.72 763.72" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(27.36 736.36)">
+<title>classes</title>
+<polygon fill="white" stroke="transparent" points="-27.36,27.36 -27.36,-736.36 4517.36,-736.36 4517.36,27.36 -27.36,27.36"/>
+<text text-anchor="middle" x="253" y="-685.8" font-family="DejaVu Sans" font-size="24.00">Implemented Object Model (Python AST)</text>
+<g id="clust1" class="cluster">
+<title>cluster_0</title>
+<path fill="#f8faff" stroke="#b2bdd0" stroke-dasharray="5,2" d="M20,-8C20,-8 4470,-8 4470,-8 4476,-8 4482,-14 4482,-20 4482,-20 4482,-625 4482,-625 4482,-631 4476,-637 4470,-637 4470,-637 20,-637 20,-637 14,-637 8,-631 8,-625 8,-625 8,-20 8,-20 8,-14 14,-8 20,-8"/>
+<text text-anchor="middle" x="91" y="-619.4" font-family="DejaVu Sans" font-size="17.00">packages/engine/</text>
+</g>
+<!-- engine.controller.controller.GameController&#45;&gt;engine.model.game.manager.GameManager -->
+<g id="edge8" class="edge">
+<title>engine.controller.controller.GameController&#45;&gt;engine.model.game.manager.GameManager</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M4299.57,-569.03C4260.73,-619.18 4217.5,-675 4217.5,-675 4217.5,-675 3230.5,-675 3230.5,-675 3230.5,-675 3210.86,-645.01 3187.43,-609.24"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="3182.7,-602.01 3190.56,-607.03 3185.24,-605.43 3187.57,-608.99 3187.36,-609.12 3187.15,-609.26 3184.82,-605.71 3184.16,-611.22 3182.7,-602.01 3182.7,-602.01"/>
+</g>
+<!-- engine.controller.window_controller.WindowController&#45;&gt;engine.controller.controller.GameController -->
+<g id="edge9" class="edge">
+<title>engine.controller.window_controller.WindowController&#45;&gt;engine.controller.controller.GameController</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M4217.77,-491C4223.58,-491 4230.41,-491 4237.4,-491"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="4246.26,-491 4237.76,-494.83 4242.01,-491.25 4237.76,-491.25 4237.76,-491 4237.76,-490.75 4242.01,-490.75 4237.76,-487.18 4246.26,-491 4246.26,-491"/>
+</g>
+<!-- engine.model.game.board.Board&#45;&gt;engine.model.pieces.piece.Piece -->
+<g id="edge10" class="edge">
+<title>engine.model.game.board.Board&#45;&gt;engine.model.pieces.piece.Piece</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3799.82,-396.23C3789.69,-386.45 3783,-380 3783,-380 3783,-380 1766,-227 1766,-227 1766,-227 1147.66,-156.3 928.16,-131.21"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="919.58,-130.23 928.46,-127.39 923.83,-130.46 928.05,-130.94 928.02,-131.19 928,-131.44 923.77,-130.96 927.59,-134.99 919.58,-130.23 919.58,-130.23"/>
+</g>
+<!-- engine.model.game.manager.GameManager&#45;&gt;engine.model.game.board.Board -->
+<g id="edge11" class="edge">
+<title>engine.model.game.manager.GameManager&#45;&gt;engine.model.game.board.Board</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3182.7,-602.01C3208.15,-640.87 3230.5,-675 3230.5,-675 3230.5,-675 3768.5,-675 3768.5,-675 3768.5,-675 3796.21,-635.32 3825.9,-592.81"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="3830.87,-585.69 3829.14,-594.85 3828.64,-589.32 3826.21,-592.81 3826,-592.66 3825.8,-592.52 3828.23,-589.04 3822.87,-590.47 3830.87,-585.69 3830.87,-585.69"/>
+</g>
+<!-- engine.model.game.manager.GameManager&#45;&gt;engine.model.game.logger.GameLogger -->
+<g id="edge12" class="edge">
+<title>engine.model.game.manager.GameManager&#45;&gt;engine.model.game.logger.GameLogger</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3200.82,-491C3207.74,-491 3214.91,-491 3220.95,-491"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="3229.82,-491 3221.32,-494.83 3225.57,-491.25 3221.32,-491.25 3221.32,-491 3221.32,-490.75 3225.57,-490.75 3221.32,-487.18 3229.82,-491 3229.82,-491"/>
+</g>
+<!-- engine.model.game.manager.GameManager&#45;&gt;engine.model.game.move.Move -->
+<g id="edge13" class="edge">
+<title>engine.model.game.manager.GameManager&#45;&gt;engine.model.game.move.Move</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3019.36,-491C3012.23,-491 3004.92,-491 2998.98,-491"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="2990.07,-491 2998.57,-487.18 2994.32,-490.75 2998.57,-490.75 2998.57,-491 2998.57,-491.25 2994.32,-491.25 2998.57,-494.83 2990.07,-491 2990.07,-491"/>
+</g>
+<!-- engine.model.game.manager.GameManager&#45;&gt;engine.model.game.player.Player -->
+<g id="edge14" class="edge">
+<title>engine.model.game.manager.GameManager&#45;&gt;engine.model.game.player.Player</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3037.9,-602.01C3012.66,-640.87 2990.5,-675 2990.5,-675 2990.5,-675 2858.5,-675 2858.5,-675 2858.5,-675 2829.81,-620.85 2803.55,-571.31"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="2799.53,-563.72 2806.89,-569.44 2801.75,-567.36 2803.74,-571.12 2803.51,-571.23 2803.29,-571.35 2801.3,-567.59 2800.13,-573.02 2799.53,-563.72 2799.53,-563.72"/>
+</g>
+<!-- engine.model.game.manager.GameManager&#45;&gt;engine.model.game.timer.Timer -->
+<g id="edge15" class="edge">
+<title>engine.model.game.manager.GameManager&#45;&gt;engine.model.game.timer.Timer</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3037.9,-602.01C3012.66,-640.87 2990.5,-675 2990.5,-675 2990.5,-675 2531.5,-675 2531.5,-675 2531.5,-675 2496.89,-628 2462.65,-581.51"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="2457.6,-574.65 2465.72,-579.23 2460.33,-577.93 2462.85,-581.35 2462.64,-581.5 2462.44,-581.65 2459.92,-578.23 2459.56,-583.77 2457.6,-574.65 2457.6,-574.65"/>
+</g>
+<!-- engine.model.game.manager.GameManager&#45;&gt;engine.model.game.validator.MoveValidator -->
+<g id="edge16" class="edge">
+<title>engine.model.game.manager.GameManager&#45;&gt;engine.model.game.validator.MoveValidator</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3037.9,-602.01C3012.66,-640.87 2990.5,-675 2990.5,-675 2990.5,-675 2290.5,-675 2290.5,-675 2290.5,-675 2247.1,-627.61 2204.36,-580.93"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="2198.61,-574.65 2207.17,-578.34 2201.66,-577.62 2204.53,-580.75 2204.35,-580.92 2204.16,-581.09 2201.29,-577.96 2201.53,-583.51 2198.61,-574.65 2198.61,-574.65"/>
+</g>
+<!-- engine.model.game.validator.MoveValidator&#45;&gt;engine.model.game.board.Board -->
+<g id="edge17" class="edge">
+<title>engine.model.game.validator.MoveValidator&#45;&gt;engine.model.game.board.Board</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M2198.61,-574.65C2243.12,-623.26 2290.5,-675 2290.5,-675 2290.5,-675 3768.5,-675 3768.5,-675 3768.5,-675 3796.21,-635.32 3825.9,-592.81"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="3830.87,-585.69 3829.14,-594.85 3828.64,-589.32 3826.21,-592.81 3826,-592.66 3825.8,-592.52 3828.23,-589.04 3822.87,-590.47 3830.87,-585.69 3830.87,-585.69"/>
+</g>
+<!-- engine.model.game.validator.MoveValidator&#45;&gt;engine.model.game.move.Move -->
+<g id="edge18" class="edge">
+<title>engine.model.game.validator.MoveValidator&#45;&gt;engine.model.game.move.Move</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M2198.61,-574.65C2243.12,-623.26 2290.5,-675 2290.5,-675 2290.5,-675 2828.5,-675 2828.5,-675 2828.5,-675 2852.6,-628.57 2876.58,-582.36"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="2880.58,-574.65 2880.06,-583.96 2878.85,-578.54 2876.89,-582.31 2876.67,-582.2 2876.44,-582.08 2878.4,-578.31 2873.27,-580.44 2880.58,-574.65 2880.58,-574.65"/>
+</g>
+<!-- engine.model.misc.export_writers.ChessNotationWriter&#45;&gt;engine.model.misc.export_writers.ExportWriter -->
+<g id="edge1" class="edge">
+<title>engine.model.misc.export_writers.ChessNotationWriter&#45;&gt;engine.model.misc.export_writers.ExportWriter</title>
+<path fill="none" stroke="#334155" stroke-width="2" d="M1864,-423.87C1864,-354.65 1864,-247.01 1864,-180.85"/>
+<polygon fill="none" stroke="#334155" stroke-width="2" points="1866.98,-180.7 1864,-172.2 1861.03,-180.7 1866.98,-180.7"/>
+</g>
+<!-- engine.model.misc.quest_manager.QuestManager&#45;&gt;engine.model.game.quest.Quest -->
+<g id="edge19" class="edge">
+<title>engine.model.misc.quest_manager.QuestManager&#45;&gt;engine.model.game.quest.Quest</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M1523.55,-558.21C1556.83,-610.77 1597.5,-675 1597.5,-675 1597.5,-675 2502.5,-675 2502.5,-675 2502.5,-675 2528.6,-624.71 2553.52,-576.71"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="2557.5,-569.03 2556.98,-578.34 2555.76,-572.92 2553.81,-576.69 2553.58,-576.58 2553.36,-576.46 2555.32,-572.69 2550.19,-574.81 2557.5,-569.03 2557.5,-569.03"/>
+</g>
+<!-- engine.model.pieces.bishop.Bishop&#45;&gt;engine.model.pieces.piece.Piece -->
+<g id="edge2" class="edge">
+<title>engine.model.pieces.bishop.Bishop&#45;&gt;engine.model.pieces.piece.Piece</title>
+<path fill="none" stroke="#334155" stroke-width="2" d="M1255.73,-440.47C1233.17,-411.27 1209,-380 1209,-380 1209,-380 1031.33,-251.85 926.66,-176.35"/>
+<polygon fill="none" stroke="#334155" stroke-width="2" points="928.2,-173.8 919.57,-171.24 924.72,-178.62 928.2,-173.8"/>
+</g>
+<!-- engine.model.pieces.horse.Horse&#45;&gt;engine.model.pieces.piece.Piece -->
+<g id="edge3" class="edge">
+<title>engine.model.pieces.horse.Horse&#45;&gt;engine.model.pieces.piece.Piece</title>
+<path fill="none" stroke="#334155" stroke-width="2" d="M1090.08,-440.47C1068.31,-411.27 1045,-380 1045,-380 1045,-380 979.45,-292.55 924.76,-219.57"/>
+<polygon fill="none" stroke="#334155" stroke-width="2" points="926.98,-217.58 919.5,-212.56 922.22,-221.15 926.98,-217.58"/>
+</g>
+<!-- engine.model.pieces.king.King&#45;&gt;engine.model.pieces.piece.Piece -->
+<g id="edge4" class="edge">
+<title>engine.model.pieces.king.King&#45;&gt;engine.model.pieces.piece.Piece</title>
+<path fill="none" stroke="#334155" stroke-width="2" d="M948.08,-434.98C931.93,-382.46 907.12,-301.75 886.75,-235.51"/>
+<polygon fill="none" stroke="#334155" stroke-width="2" points="889.5,-234.35 884.16,-227.1 883.82,-236.09 889.5,-234.35"/>
+</g>
+<!-- engine.model.pieces.pawn.Pawn&#45;&gt;engine.model.pieces.piece.Piece -->
+<g id="edge5" class="edge">
+<title>engine.model.pieces.pawn.Pawn&#45;&gt;engine.model.pieces.piece.Piece</title>
+<path fill="none" stroke="#334155" stroke-width="2" d="M811.82,-423.87C818.79,-371.57 828.69,-297.33 836.92,-235.63"/>
+<polygon fill="none" stroke="#334155" stroke-width="2" points="839.89,-235.83 838.07,-227.01 833.99,-235.04 839.89,-235.83"/>
+</g>
+<!-- engine.model.pieces.queen.Queen&#45;&gt;engine.model.pieces.piece.Piece -->
+<g id="edge6" class="edge">
+<title>engine.model.pieces.queen.Queen&#45;&gt;engine.model.pieces.piece.Piece</title>
+<path fill="none" stroke="#334155" stroke-width="2" d="M666,-440.44C696.68,-387.98 746.14,-303.44 786.35,-234.72"/>
+<polygon fill="none" stroke="#334155" stroke-width="2" points="788.98,-236.11 790.7,-227.27 783.84,-233.11 788.98,-236.11"/>
+</g>
+<!-- engine.model.pieces.rook.Rook&#45;&gt;engine.model.pieces.piece.Piece -->
+<g id="edge7" class="edge">
+<title>engine.model.pieces.rook.Rook&#45;&gt;engine.model.pieces.piece.Piece</title>
+<path fill="none" stroke="#334155" stroke-width="2" d="M513,-435C533,-407.5 553,-380 553,-380 553,-380 689.04,-262.84 777.6,-186.58"/>
+<polygon fill="none" stroke="#334155" stroke-width="2" points="779.65,-188.73 784.15,-180.93 775.77,-184.22 779.65,-188.73"/>
+</g>
+<!-- engine.model.users.manager.UserManager&#45;&gt;engine.model.users.user.User -->
+<g id="edge20" class="edge">
+<title>engine.model.users.manager.UserManager&#45;&gt;engine.model.users.user.User</title>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M210.65,-491C204.56,-491 197.69,-491 191.15,-491"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="182.53,-491 191.03,-487.18 186.78,-490.75 191.03,-490.75 191.03,-491 191.03,-491.25 186.78,-491.25 191.03,-494.83 182.53,-491 182.53,-491"/>
+</g>
+<!-- engine.controller.controller.GameController -->
+<g id="node1" class="node">
+<title>engine.controller.controller.GameController</title>
+<polygon fill="#ffffff" stroke="transparent" points="4246.5,-413 4246.5,-569 4473.5,-569 4473.5,-413 4246.5,-413"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="4248,-541 4248,-568 4473,-568 4473,-541 4248,-541"/>
+<text text-anchor="start" x="4298.5" y="-551.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">GameController</text>
+<text text-anchor="start" x="4254" y="-527.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.controller.controller</text>
+<polyline fill="none" stroke="#344054" points="4473,-519 4248,-519 "/>
+<text text-anchor="start" x="4255" y="-504" font-family="DejaVu Sans" font-size="10.00">+ game_manager: GameManager</text>
+<text text-anchor="start" x="4255" y="-493" font-family="DejaVu Sans" font-size="10.00">+ selected_square: Optional[Tuple[int, int]]</text>
+<text text-anchor="start" x="4255" y="-482" font-family="DejaVu Sans" font-size="10.00">+ highlighted_moves: List[Tuple[int, int]]</text>
+<polyline fill="none" stroke="#344054" points="4473,-472 4248,-472 "/>
+<text text-anchor="start" x="4255" y="-457" font-family="DejaVu Sans" font-size="10.00">+ select_square(pos)</text>
+<text text-anchor="start" x="4255" y="-446" font-family="DejaVu Sans" font-size="10.00">+ handle_square_click(pos)</text>
+<text text-anchor="start" x="4255" y="-435" font-family="DejaVu Sans" font-size="10.00">+ reset_selection()</text>
+<text text-anchor="start" x="4255" y="-424" font-family="DejaVu Sans" font-size="10.00">+ new_game()</text>
+<polygon fill="none" stroke="#344054" points="4246.5,-413 4246.5,-569 4473.5,-569 4473.5,-413 4246.5,-413"/>
+</g>
+<!-- engine.controller.window_controller.WindowController -->
+<g id="node2" class="node">
+<title>engine.controller.window_controller.WindowController</title>
+<polygon fill="#ffffff" stroke="transparent" points="4026.5,-391 4026.5,-591 4217.5,-591 4217.5,-391 4026.5,-391"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="4028,-563 4028,-590 4217,-590 4217,-563 4028,-563"/>
+<text text-anchor="start" x="4051.5" y="-573.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">WindowController</text>
+<text text-anchor="start" x="4034" y="-549.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.controller.window_controller</text>
+<polyline fill="none" stroke="#344054" points="4217,-541 4028,-541 "/>
+<text text-anchor="start" x="4035" y="-526" font-family="DejaVu Sans" font-size="10.00">+ game_controller: GameController</text>
+<text text-anchor="start" x="4035" y="-515" font-family="DejaVu Sans" font-size="10.00">+ title: str</text>
+<text text-anchor="start" x="4035" y="-504" font-family="DejaVu Sans" font-size="10.00">+ is_running: bool</text>
+<text text-anchor="start" x="4035" y="-493" font-family="DejaVu Sans" font-size="10.00">+ status_message: str</text>
+<text text-anchor="start" x="4035" y="-482" font-family="DejaVu Sans" font-size="10.00">+ active_dialog: Optional[str]</text>
+<polyline fill="none" stroke="#344054" points="4217,-472 4028,-472 "/>
+<text text-anchor="start" x="4035" y="-457" font-family="DejaVu Sans" font-size="10.00">+ start()</text>
+<text text-anchor="start" x="4035" y="-446" font-family="DejaVu Sans" font-size="10.00">+ stop()</text>
+<text text-anchor="start" x="4035" y="-435" font-family="DejaVu Sans" font-size="10.00">+ set_status(message)</text>
+<text text-anchor="start" x="4035" y="-424" font-family="DejaVu Sans" font-size="10.00">+ show_dialog(message)</text>
+<text text-anchor="start" x="4035" y="-413" font-family="DejaVu Sans" font-size="10.00">+ close_dialog()</text>
+<text text-anchor="start" x="4035" y="-402" font-family="DejaVu Sans" font-size="10.00">+ on_square_clicked(position)</text>
+<polygon fill="none" stroke="#344054" points="4026.5,-391 4026.5,-591 4217.5,-591 4217.5,-391 4026.5,-391"/>
+</g>
+<!-- engine.model.game.board.Board -->
+<g id="node3" class="node">
+<title>engine.model.game.board.Board</title>
+<polygon fill="#ffffff" stroke="transparent" points="3797,-396.5 3797,-585.5 3997,-585.5 3997,-396.5 3797,-396.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="3798,-557 3798,-584 3996,-584 3996,-557 3798,-557"/>
+<text text-anchor="start" x="3873.5" y="-567.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Board</text>
+<text text-anchor="start" x="3804" y="-543.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.board</text>
+<polyline fill="none" stroke="#344054" points="3996,-535 3798,-535 "/>
+<text text-anchor="start" x="3805" y="-520" font-family="DejaVu Sans" font-size="10.00">+ dimensions</text>
+<text text-anchor="start" x="3805" y="-509" font-family="DejaVu Sans" font-size="10.00">+ board: List[List[Optional[Piece]]]</text>
+<text text-anchor="start" x="3805" y="-498" font-family="DejaVu Sans" font-size="10.00">+ captured_white: List[Piece]</text>
+<text text-anchor="start" x="3805" y="-487" font-family="DejaVu Sans" font-size="10.00">+ captured_black: List[Piece]</text>
+<polyline fill="none" stroke="#344054" points="3996,-477 3798,-477 "/>
+<text text-anchor="start" x="3805" y="-462" font-family="DejaVu Sans" font-size="10.00">+ is_within_bounds(row, col)</text>
+<text text-anchor="start" x="3805" y="-451" font-family="DejaVu Sans" font-size="10.00">+ get_piece_at(position)</text>
+<text text-anchor="start" x="3805" y="-440" font-family="DejaVu Sans" font-size="10.00">+ set_piece_at(position, piece)</text>
+<text text-anchor="start" x="3805" y="-429" font-family="DejaVu Sans" font-size="10.00">+ move_piece(start_pos, end_pos)</text>
+<text text-anchor="start" x="3805" y="-418" font-family="DejaVu Sans" font-size="10.00">+ replace_piece(position, new_piece)</text>
+<text text-anchor="start" x="3805" y="-407" font-family="DejaVu Sans" font-size="10.00">+ setup_default_board()</text>
+<polygon fill="none" stroke="#344054" points="3797,-396.5 3797,-585.5 3997,-585.5 3997,-396.5 3797,-396.5"/>
+</g>
+<!-- engine.model.game.configuration.ConfigurationError -->
+<g id="node4" class="node">
+<title>engine.model.game.configuration.ConfigurationError</title>
+<polygon fill="#ffffff" stroke="transparent" points="3600,-440.5 3600,-541.5 3768,-541.5 3768,-440.5 3600,-440.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="3601,-513 3601,-540 3767,-540 3767,-513 3601,-513"/>
+<text text-anchor="start" x="3610" y="-523.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">ConfigurationError</text>
+<text text-anchor="start" x="3607" y="-499.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.configuration</text>
+<polyline fill="none" stroke="#344054" points="3767,-491 3601,-491 "/>
+<text text-anchor="start" x="3608" y="-476" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polyline fill="none" stroke="#344054" points="3767,-466 3601,-466 "/>
+<text text-anchor="start" x="3608" y="-451" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polygon fill="none" stroke="#344054" points="3600,-440.5 3600,-541.5 3768,-541.5 3768,-440.5 3600,-440.5"/>
+</g>
+<!-- engine.model.game.configuration.GameDefinition -->
+<g id="node5" class="node">
+<title>engine.model.game.configuration.GameDefinition</title>
+<polygon fill="#ffffff" stroke="transparent" points="3397.5,-407.5 3397.5,-574.5 3570.5,-574.5 3570.5,-407.5 3397.5,-407.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="3399,-546 3399,-573 3570,-573 3570,-546 3399,-546"/>
+<text text-anchor="start" x="3423.5" y="-556.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">GameDefinition</text>
+<text text-anchor="start" x="3405" y="-532.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.configuration</text>
+<polyline fill="none" stroke="#344054" points="3570,-524 3399,-524 "/>
+<text text-anchor="start" x="3406" y="-509" font-family="DejaVu Sans" font-size="10.00">+ name: str</text>
+<text text-anchor="start" x="3406" y="-498" font-family="DejaVu Sans" font-size="10.00">+ package: str</text>
+<text text-anchor="start" x="3406" y="-487" font-family="DejaVu Sans" font-size="10.00">+ title: str</text>
+<text text-anchor="start" x="3406" y="-476" font-family="DejaVu Sans" font-size="10.00">+ default: bool</text>
+<text text-anchor="start" x="3406" y="-465" font-family="DejaVu Sans" font-size="10.00">+ playable: bool</text>
+<text text-anchor="start" x="3406" y="-454" font-family="DejaVu Sans" font-size="10.00">+ board: dict[str, Any]</text>
+<text text-anchor="start" x="3406" y="-443" font-family="DejaVu Sans" font-size="10.00">+ pieces: dict[str, dict[str, Any]]</text>
+<polyline fill="none" stroke="#344054" points="3570,-433 3399,-433 "/>
+<text text-anchor="start" x="3406" y="-418" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polygon fill="none" stroke="#344054" points="3397.5,-407.5 3397.5,-574.5 3570.5,-574.5 3570.5,-407.5 3397.5,-407.5"/>
+</g>
+<!-- engine.model.game.logger.GameLogger -->
+<g id="node6" class="node">
+<title>engine.model.game.logger.GameLogger</title>
+<polygon fill="#ffffff" stroke="transparent" points="3230,-418.5 3230,-563.5 3368,-563.5 3368,-418.5 3230,-418.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="3231,-535 3231,-562 3367,-562 3367,-535 3231,-535"/>
+<text text-anchor="start" x="3249" y="-545.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">GameLogger</text>
+<text text-anchor="start" x="3237" y="-521.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.logger</text>
+<polyline fill="none" stroke="#344054" points="3367,-513 3231,-513 "/>
+<text text-anchor="start" x="3238" y="-498" font-family="DejaVu Sans" font-size="10.00">+ filename: Optional[str]</text>
+<text text-anchor="start" x="3238" y="-487" font-family="DejaVu Sans" font-size="10.00">+ moves: List[Any]</text>
+<polyline fill="none" stroke="#344054" points="3367,-477 3231,-477 "/>
+<text text-anchor="start" x="3238" y="-462" font-family="DejaVu Sans" font-size="10.00">+ create_file(filename)</text>
+<text text-anchor="start" x="3238" y="-451" font-family="DejaVu Sans" font-size="10.00">+ log_move(move)</text>
+<text text-anchor="start" x="3238" y="-440" font-family="DejaVu Sans" font-size="10.00">+ get_moves()</text>
+<text text-anchor="start" x="3238" y="-429" font-family="DejaVu Sans" font-size="10.00">+ file_path()</text>
+<polygon fill="none" stroke="#344054" points="3230,-418.5 3230,-563.5 3368,-563.5 3368,-418.5 3230,-418.5"/>
+</g>
+<!-- engine.model.game.manager.GameManager -->
+<g id="node7" class="node">
+<title>engine.model.game.manager.GameManager</title>
+<polygon fill="#ffffff" stroke="transparent" points="3019.5,-380 3019.5,-602 3200.5,-602 3200.5,-380 3019.5,-380"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="3021,-574 3021,-601 3200,-601 3200,-574 3021,-574"/>
+<text text-anchor="start" x="3053" y="-584.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">GameManager</text>
+<text text-anchor="start" x="3027" y="-560.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.manager</text>
+<polyline fill="none" stroke="#344054" points="3200,-552 3021,-552 "/>
+<text text-anchor="start" x="3028" y="-537" font-family="DejaVu Sans" font-size="10.00">+ board: Board</text>
+<text text-anchor="start" x="3028" y="-526" font-family="DejaVu Sans" font-size="10.00">+ players: List[Player]</text>
+<text text-anchor="start" x="3028" y="-515" font-family="DejaVu Sans" font-size="10.00">+ active_player: int</text>
+<text text-anchor="start" x="3028" y="-504" font-family="DejaVu Sans" font-size="10.00">+ current_move: Optional[Move]</text>
+<text text-anchor="start" x="3028" y="-493" font-family="DejaVu Sans" font-size="10.00">+ timer: Timer</text>
+<text text-anchor="start" x="3028" y="-482" font-family="DejaVu Sans" font-size="10.00">+ game_logger: GameLogger</text>
+<text text-anchor="start" x="3028" y="-471" font-family="DejaVu Sans" font-size="10.00">+ move_validator: MoveValidator</text>
+<polyline fill="none" stroke="#344054" points="3200,-461 3021,-461 "/>
+<text text-anchor="start" x="3028" y="-446" font-family="DejaVu Sans" font-size="10.00">+ start_turn()</text>
+<text text-anchor="start" x="3028" y="-435" font-family="DejaVu Sans" font-size="10.00">+ get_valid_moves()</text>
+<text text-anchor="start" x="3028" y="-424" font-family="DejaVu Sans" font-size="10.00">+ cancel_move()</text>
+<text text-anchor="start" x="3028" y="-413" font-family="DejaVu Sans" font-size="10.00">+ save_log()</text>
+<text text-anchor="start" x="3028" y="-402" font-family="DejaVu Sans" font-size="10.00">+ get_state()</text>
+<text text-anchor="start" x="3028" y="-391" font-family="DejaVu Sans" font-size="10.00">+ make_move(move)</text>
+<polygon fill="none" stroke="#344054" points="3019.5,-380 3019.5,-602 3200.5,-602 3200.5,-380 3019.5,-380"/>
+</g>
+<!-- engine.model.game.move.Move -->
+<g id="node8" class="node">
+<title>engine.model.game.move.Move</title>
+<polygon fill="#ffffff" stroke="transparent" points="2858,-407.5 2858,-574.5 2990,-574.5 2990,-407.5 2858,-407.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="2859,-546 2859,-573 2989,-573 2989,-546 2859,-546"/>
+<text text-anchor="start" x="2902.5" y="-556.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Move</text>
+<text text-anchor="start" x="2865" y="-532.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.move</text>
+<polyline fill="none" stroke="#344054" points="2989,-524 2859,-524 "/>
+<text text-anchor="start" x="2866" y="-509" font-family="DejaVu Sans" font-size="10.00">+ start_pos</text>
+<text text-anchor="start" x="2866" y="-498" font-family="DejaVu Sans" font-size="10.00">+ end_pos</text>
+<text text-anchor="start" x="2866" y="-487" font-family="DejaVu Sans" font-size="10.00">+ piece</text>
+<text text-anchor="start" x="2866" y="-476" font-family="DejaVu Sans" font-size="10.00">+ move_type</text>
+<text text-anchor="start" x="2866" y="-465" font-family="DejaVu Sans" font-size="10.00">+ captured_piece</text>
+<text text-anchor="start" x="2866" y="-454" font-family="DejaVu Sans" font-size="10.00">+ promotion_piece</text>
+<polyline fill="none" stroke="#344054" points="2989,-444 2859,-444 "/>
+<text text-anchor="start" x="2866" y="-429" font-family="DejaVu Sans" font-size="10.00">+ validate(board)</text>
+<text text-anchor="start" x="2866" y="-418" font-family="DejaVu Sans" font-size="10.00">+ execute(board)</text>
+<polygon fill="none" stroke="#344054" points="2858,-407.5 2858,-574.5 2990,-574.5 2990,-407.5 2858,-407.5"/>
+</g>
+<!-- engine.model.game.player.Player -->
+<g id="node9" class="node">
+<title>engine.model.game.player.Player</title>
+<polygon fill="#ffffff" stroke="transparent" points="2693.5,-418.5 2693.5,-563.5 2828.5,-563.5 2828.5,-418.5 2693.5,-418.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="2695,-535 2695,-562 2828,-562 2828,-535 2695,-535"/>
+<text text-anchor="start" x="2736.5" y="-545.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Player</text>
+<text text-anchor="start" x="2701" y="-521.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.player</text>
+<polyline fill="none" stroke="#344054" points="2828,-513 2695,-513 "/>
+<text text-anchor="start" x="2702" y="-498" font-family="DejaVu Sans" font-size="10.00">+ color</text>
+<text text-anchor="start" x="2702" y="-487" font-family="DejaVu Sans" font-size="10.00">+ user</text>
+<polyline fill="none" stroke="#344054" points="2828,-477 2695,-477 "/>
+<text text-anchor="start" x="2702" y="-462" font-family="DejaVu Sans" font-size="10.00">+ getColor()</text>
+<text text-anchor="start" x="2702" y="-451" font-family="DejaVu Sans" font-size="10.00">+ getUser()</text>
+<text text-anchor="start" x="2702" y="-440" font-family="DejaVu Sans" font-size="10.00">+ setUser(user)</text>
+<text text-anchor="start" x="2702" y="-429" font-family="DejaVu Sans" font-size="10.00">+ getEloRating()</text>
+<polygon fill="none" stroke="#344054" points="2693.5,-418.5 2693.5,-563.5 2828.5,-563.5 2828.5,-418.5 2693.5,-418.5"/>
+</g>
+<!-- engine.model.game.quest.Quest -->
+<g id="node10" class="node">
+<title>engine.model.game.quest.Quest</title>
+<polygon fill="#ffffff" stroke="transparent" points="2531.5,-413 2531.5,-569 2664.5,-569 2664.5,-413 2531.5,-413"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="2533,-541 2533,-568 2664,-568 2664,-541 2533,-541"/>
+<text text-anchor="start" x="2575" y="-551.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Quest</text>
+<text text-anchor="start" x="2539" y="-527.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.quest</text>
+<polyline fill="none" stroke="#344054" points="2664,-519 2533,-519 "/>
+<text text-anchor="start" x="2540" y="-504" font-family="DejaVu Sans" font-size="10.00">+ name</text>
+<text text-anchor="start" x="2540" y="-493" font-family="DejaVu Sans" font-size="10.00">+ description</text>
+<text text-anchor="start" x="2540" y="-482" font-family="DejaVu Sans" font-size="10.00">+ condition_fn</text>
+<text text-anchor="start" x="2540" y="-471" font-family="DejaVu Sans" font-size="10.00">+ reward_points</text>
+<text text-anchor="start" x="2540" y="-460" font-family="DejaVu Sans" font-size="10.00">+ is_completed</text>
+<polyline fill="none" stroke="#344054" points="2664,-450 2533,-450 "/>
+<text text-anchor="start" x="2540" y="-435" font-family="DejaVu Sans" font-size="10.00">+ validate(context)</text>
+<text text-anchor="start" x="2540" y="-424" font-family="DejaVu Sans" font-size="10.00">+ complete()</text>
+<polygon fill="none" stroke="#344054" points="2531.5,-413 2531.5,-569 2664.5,-569 2664.5,-413 2531.5,-413"/>
+</g>
+<!-- engine.model.game.timer.Timer -->
+<g id="node11" class="node">
+<title>engine.model.game.timer.Timer</title>
+<polygon fill="#ffffff" stroke="transparent" points="2290,-407.5 2290,-574.5 2502,-574.5 2502,-407.5 2290,-407.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="2291,-546 2291,-573 2501,-573 2501,-546 2291,-546"/>
+<text text-anchor="start" x="2373" y="-556.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Timer</text>
+<text text-anchor="start" x="2297" y="-532.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.timer</text>
+<polyline fill="none" stroke="#344054" points="2501,-524 2291,-524 "/>
+<text text-anchor="start" x="2298" y="-509" font-family="DejaVu Sans" font-size="10.00">+ initial_time</text>
+<text text-anchor="start" x="2298" y="-498" font-family="DejaVu Sans" font-size="10.00">+ player_times: List[int]</text>
+<polyline fill="none" stroke="#344054" points="2501,-488 2291,-488 "/>
+<text text-anchor="start" x="2298" y="-473" font-family="DejaVu Sans" font-size="10.00">+ _get_player_index(player)</text>
+<text text-anchor="start" x="2298" y="-462" font-family="DejaVu Sans" font-size="10.00">+ reset_time()</text>
+<text text-anchor="start" x="2298" y="-451" font-family="DejaVu Sans" font-size="10.00">+ tick(player, elapsed_seconds)</text>
+<text text-anchor="start" x="2298" y="-440" font-family="DejaVu Sans" font-size="10.00">+ add_time(player, increment_seconds)</text>
+<text text-anchor="start" x="2298" y="-429" font-family="DejaVu Sans" font-size="10.00">+ get_time(player)</text>
+<text text-anchor="start" x="2298" y="-418" font-family="DejaVu Sans" font-size="10.00">+ is_expired(player)</text>
+<polygon fill="none" stroke="#344054" points="2290,-407.5 2290,-574.5 2502,-574.5 2502,-407.5 2290,-407.5"/>
+</g>
+<!-- engine.model.game.validator.MoveValidator -->
+<g id="node12" class="node">
+<title>engine.model.game.validator.MoveValidator</title>
+<polygon fill="#ffffff" stroke="transparent" points="1983,-407.5 1983,-574.5 2261,-574.5 2261,-407.5 1983,-407.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="1984,-546 1984,-573 2260,-573 2260,-546 1984,-546"/>
+<text text-anchor="start" x="2064.5" y="-556.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">MoveValidator</text>
+<text text-anchor="start" x="1990" y="-532.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.validator</text>
+<polyline fill="none" stroke="#344054" points="2260,-524 1984,-524 "/>
+<text text-anchor="start" x="1991" y="-509" font-family="DejaVu Sans" font-size="10.00">+ board</text>
+<text text-anchor="start" x="1991" y="-498" font-family="DejaVu Sans" font-size="10.00">+ move</text>
+<polyline fill="none" stroke="#344054" points="2260,-488 1984,-488 "/>
+<text text-anchor="start" x="1991" y="-473" font-family="DejaVu Sans" font-size="10.00">+ set_board(board)</text>
+<text text-anchor="start" x="1991" y="-462" font-family="DejaVu Sans" font-size="10.00">+ set_move(move)</text>
+<text text-anchor="start" x="1991" y="-451" font-family="DejaVu Sans" font-size="10.00">+ find_king(color, board)</text>
+<text text-anchor="start" x="1991" y="-440" font-family="DejaVu Sans" font-size="10.00">+ is_square_attacked(target_square, by_color, board)</text>
+<text text-anchor="start" x="1991" y="-429" font-family="DejaVu Sans" font-size="10.00">+ is_check(color, board)</text>
+<text text-anchor="start" x="1991" y="-418" font-family="DejaVu Sans" font-size="10.00">+ get_pseudo_legal_moves(start_pos, board)</text>
+<polygon fill="none" stroke="#344054" points="1983,-407.5 1983,-574.5 2261,-574.5 2261,-407.5 1983,-407.5"/>
+</g>
+<!-- engine.model.misc.export_writers.ChessNotationWriter -->
+<g id="node13" class="node">
+<title>engine.model.misc.export_writers.ChessNotationWriter</title>
+<polygon fill="#ffffff" stroke="transparent" points="1774,-424 1774,-558 1954,-558 1954,-424 1774,-424"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="1775,-530 1775,-557 1953,-557 1953,-530 1775,-530"/>
+<text text-anchor="start" x="1781" y="-540.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">ChessNotationWriter</text>
+<text text-anchor="start" x="1781" y="-516.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.misc.export_writers</text>
+<polyline fill="none" stroke="#344054" points="1953,-508 1775,-508 "/>
+<text text-anchor="start" x="1782" y="-493" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polyline fill="none" stroke="#344054" points="1953,-483 1775,-483 "/>
+<text text-anchor="start" x="1782" y="-468" font-family="DejaVu Sans" font-size="10.00">+ to_stenographic(moves)</text>
+<text text-anchor="start" x="1782" y="-457" font-family="DejaVu Sans" font-size="10.00">+ to_fen(board, active_color)</text>
+<text text-anchor="start" x="1782" y="-446" font-family="DejaVu Sans" font-size="10.00">+ to_pgn(moves, metadata)</text>
+<text text-anchor="start" x="1782" y="-435" font-family="DejaVu Sans" font-size="10.00">+ export(format_type)</text>
+<polygon fill="none" stroke="#344054" points="1774,-424 1774,-558 1954,-558 1954,-424 1774,-424"/>
+</g>
+<!-- engine.model.misc.export_writers.ExportWriter -->
+<g id="node14" class="node">
+<title>engine.model.misc.export_writers.ExportWriter</title>
+<polygon fill="#ffffff" stroke="transparent" points="1780,-71 1780,-172 1948,-172 1948,-71 1780,-71"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="1781,-143.5 1781,-170.5 1947,-170.5 1947,-143.5 1781,-143.5"/>
+<text text-anchor="start" x="1813" y="-154.3" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">ExportWriter</text>
+<text text-anchor="start" x="1787" y="-130.3" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.misc.export_writers</text>
+<polyline fill="none" stroke="#344054" points="1947,-121.5 1781,-121.5 "/>
+<text text-anchor="start" x="1788" y="-106.5" font-family="DejaVu Sans" font-size="10.00">+ field: str</text>
+<polyline fill="none" stroke="#344054" points="1947,-96.5 1781,-96.5 "/>
+<text text-anchor="start" x="1788" y="-81.5" font-family="DejaVu Sans" font-size="10.00">+ export()</text>
+<polygon fill="none" stroke="#344054" points="1780,-71 1780,-172 1948,-172 1948,-71 1780,-71"/>
+</g>
+<!-- engine.model.misc.metadata.MetadataWriter -->
+<g id="node15" class="node">
+<title>engine.model.misc.metadata.MetadataWriter</title>
+<polygon fill="#ffffff" stroke="transparent" points="1597,-424 1597,-558 1745,-558 1745,-424 1597,-424"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="1598,-530 1598,-557 1744,-557 1744,-530 1598,-530"/>
+<text text-anchor="start" x="1607.5" y="-540.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">MetadataWriter</text>
+<text text-anchor="start" x="1604" y="-516.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.misc.metadata</text>
+<polyline fill="none" stroke="#344054" points="1744,-508 1598,-508 "/>
+<text text-anchor="start" x="1605" y="-493" font-family="DejaVu Sans" font-size="10.00">+ headers: Dict[str, str]</text>
+<polyline fill="none" stroke="#344054" points="1744,-483 1598,-483 "/>
+<text text-anchor="start" x="1605" y="-468" font-family="DejaVu Sans" font-size="10.00">+ set_header(key, value)</text>
+<text text-anchor="start" x="1605" y="-457" font-family="DejaVu Sans" font-size="10.00">+ get_header(key, default)</text>
+<text text-anchor="start" x="1605" y="-446" font-family="DejaVu Sans" font-size="10.00">+ format_pgn_headers()</text>
+<text text-anchor="start" x="1605" y="-435" font-family="DejaVu Sans" font-size="10.00">+ export()</text>
+<polygon fill="none" stroke="#344054" points="1597,-424 1597,-558 1745,-558 1745,-424 1597,-424"/>
+</g>
+<!-- engine.model.misc.quest_manager.QuestManager -->
+<g id="node16" class="node">
+<title>engine.model.misc.quest_manager.QuestManager</title>
+<polygon fill="#ffffff" stroke="transparent" points="1394,-424 1394,-558 1568,-558 1568,-424 1394,-424"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="1395,-530 1395,-557 1567,-557 1567,-530 1395,-530"/>
+<text text-anchor="start" x="1422.5" y="-540.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">QuestManager</text>
+<text text-anchor="start" x="1401" y="-516.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.misc.quest_manager</text>
+<polyline fill="none" stroke="#344054" points="1567,-508 1395,-508 "/>
+<text text-anchor="start" x="1402" y="-493" font-family="DejaVu Sans" font-size="10.00">+ quests: List[Quest]</text>
+<polyline fill="none" stroke="#344054" points="1567,-483 1395,-483 "/>
+<text text-anchor="start" x="1402" y="-468" font-family="DejaVu Sans" font-size="10.00">+ register_quest(quest)</text>
+<text text-anchor="start" x="1402" y="-457" font-family="DejaVu Sans" font-size="10.00">+ get_quests()</text>
+<text text-anchor="start" x="1402" y="-446" font-family="DejaVu Sans" font-size="10.00">+ check_quests(context, user)</text>
+<text text-anchor="start" x="1402" y="-435" font-family="DejaVu Sans" font-size="10.00">+ get_completed_quests()</text>
+<polygon fill="none" stroke="#344054" points="1394,-424 1394,-558 1568,-558 1568,-424 1394,-424"/>
+</g>
+<!-- engine.model.pieces.bishop.Bishop -->
+<g id="node17" class="node">
+<title>engine.model.pieces.bishop.Bishop</title>
+<polygon fill="#ffffff" stroke="transparent" points="1223.5,-440.5 1223.5,-541.5 1364.5,-541.5 1364.5,-440.5 1223.5,-440.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="1225,-513 1225,-540 1364,-540 1364,-513 1225,-513"/>
+<text text-anchor="start" x="1268" y="-523.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Bishop</text>
+<text text-anchor="start" x="1231" y="-499.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.pieces.bishop</text>
+<polyline fill="none" stroke="#344054" points="1364,-491 1225,-491 "/>
+<text text-anchor="start" x="1232" y="-476" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polyline fill="none" stroke="#344054" points="1364,-466 1225,-466 "/>
+<text text-anchor="start" x="1232" y="-451" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polygon fill="none" stroke="#344054" points="1223.5,-440.5 1223.5,-541.5 1364.5,-541.5 1364.5,-440.5 1223.5,-440.5"/>
+</g>
+<!-- engine.model.pieces.horse.Horse -->
+<g id="node18" class="node">
+<title>engine.model.pieces.horse.Horse</title>
+<polygon fill="#ffffff" stroke="transparent" points="1059.5,-440.5 1059.5,-541.5 1194.5,-541.5 1194.5,-440.5 1059.5,-440.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="1061,-513 1061,-540 1194,-540 1194,-513 1061,-513"/>
+<text text-anchor="start" x="1104" y="-523.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Horse</text>
+<text text-anchor="start" x="1067" y="-499.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.pieces.horse</text>
+<polyline fill="none" stroke="#344054" points="1194,-491 1061,-491 "/>
+<text text-anchor="start" x="1068" y="-476" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polyline fill="none" stroke="#344054" points="1194,-466 1061,-466 "/>
+<text text-anchor="start" x="1068" y="-451" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polygon fill="none" stroke="#344054" points="1059.5,-440.5 1059.5,-541.5 1194.5,-541.5 1194.5,-440.5 1059.5,-440.5"/>
+</g>
+<!-- engine.model.pieces.king.King -->
+<g id="node19" class="node">
+<title>engine.model.pieces.king.King</title>
+<polygon fill="#ffffff" stroke="transparent" points="900,-435 900,-547 1030,-547 1030,-435 900,-435"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="901,-519 901,-546 1029,-546 1029,-519 901,-519"/>
+<text text-anchor="start" x="947.5" y="-529.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">King</text>
+<text text-anchor="start" x="907" y="-505.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.pieces.king</text>
+<polyline fill="none" stroke="#344054" points="1029,-497 901,-497 "/>
+<text text-anchor="start" x="908" y="-482" font-family="DejaVu Sans" font-size="10.00">+ _has_moved</text>
+<polyline fill="none" stroke="#344054" points="1029,-472 901,-472 "/>
+<text text-anchor="start" x="908" y="-457" font-family="DejaVu Sans" font-size="10.00">+ hasMoved()</text>
+<text text-anchor="start" x="908" y="-446" font-family="DejaVu Sans" font-size="10.00">+ setMoved(moved)</text>
+<polygon fill="none" stroke="#344054" points="900,-435 900,-547 1030,-547 1030,-435 900,-435"/>
+</g>
+<!-- engine.model.pieces.pawn.Pawn -->
+<g id="node20" class="node">
+<title>engine.model.pieces.pawn.Pawn</title>
+<polygon fill="#ffffff" stroke="transparent" points="735.5,-424 735.5,-558 870.5,-558 870.5,-424 735.5,-424"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="737,-530 737,-557 870,-557 870,-530 737,-530"/>
+<text text-anchor="start" x="782" y="-540.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Pawn</text>
+<text text-anchor="start" x="743" y="-516.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.pieces.pawn</text>
+<polyline fill="none" stroke="#344054" points="870,-508 737,-508 "/>
+<text text-anchor="start" x="744" y="-493" font-family="DejaVu Sans" font-size="10.00">+ _initial_vectors</text>
+<text text-anchor="start" x="744" y="-482" font-family="DejaVu Sans" font-size="10.00">+ _has_moved</text>
+<polyline fill="none" stroke="#344054" points="870,-472 737,-472 "/>
+<text text-anchor="start" x="744" y="-457" font-family="DejaVu Sans" font-size="10.00">+ hasMoved()</text>
+<text text-anchor="start" x="744" y="-446" font-family="DejaVu Sans" font-size="10.00">+ setMoved(moved)</text>
+<text text-anchor="start" x="744" y="-435" font-family="DejaVu Sans" font-size="10.00">+ getInitialVectors()</text>
+<polygon fill="none" stroke="#344054" points="735.5,-424 735.5,-558 870.5,-558 870.5,-424 735.5,-424"/>
+</g>
+<!-- engine.model.pieces.piece.Piece -->
+<g id="node21" class="node">
+<title>engine.model.pieces.piece.Piece</title>
+<polygon fill="#ffffff" stroke="transparent" points="784.5,-16 784.5,-227 919.5,-227 919.5,-16 784.5,-16"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="786,-198.5 786,-225.5 919,-225.5 919,-198.5 786,-198.5"/>
+<text text-anchor="start" x="831" y="-209.3" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Piece</text>
+<text text-anchor="start" x="792" y="-185.3" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.pieces.piece</text>
+<polyline fill="none" stroke="#344054" points="919,-176.5 786,-176.5 "/>
+<text text-anchor="start" x="793" y="-161.5" font-family="DejaVu Sans" font-size="10.00">+ __color</text>
+<text text-anchor="start" x="793" y="-150.5" font-family="DejaVu Sans" font-size="10.00">+ _type</text>
+<text text-anchor="start" x="793" y="-139.5" font-family="DejaVu Sans" font-size="10.00">+ _vectors</text>
+<text text-anchor="start" x="793" y="-128.5" font-family="DejaVu Sans" font-size="10.00">+ _attack_vectors</text>
+<text text-anchor="start" x="793" y="-117.5" font-family="DejaVu Sans" font-size="10.00">+ _can_jump</text>
+<text text-anchor="start" x="793" y="-106.5" font-family="DejaVu Sans" font-size="10.00">+ _name</text>
+<polyline fill="none" stroke="#344054" points="919,-96.5 786,-96.5 "/>
+<text text-anchor="start" x="793" y="-81.5" font-family="DejaVu Sans" font-size="10.00">+ getDirections()</text>
+<text text-anchor="start" x="793" y="-70.5" font-family="DejaVu Sans" font-size="10.00">+ getAttackDirections()</text>
+<text text-anchor="start" x="793" y="-59.5" font-family="DejaVu Sans" font-size="10.00">+ canJump()</text>
+<text text-anchor="start" x="793" y="-48.5" font-family="DejaVu Sans" font-size="10.00">+ getColor()</text>
+<text text-anchor="start" x="793" y="-37.5" font-family="DejaVu Sans" font-size="10.00">+ getType()</text>
+<text text-anchor="start" x="793" y="-26.5" font-family="DejaVu Sans" font-size="10.00">+ getName()</text>
+<polygon fill="none" stroke="#344054" points="784.5,-16 784.5,-227 919.5,-227 919.5,-16 784.5,-16"/>
+</g>
+<!-- engine.model.pieces.queen.Queen -->
+<g id="node22" class="node">
+<title>engine.model.pieces.queen.Queen</title>
+<polygon fill="#ffffff" stroke="transparent" points="567.5,-440.5 567.5,-541.5 706.5,-541.5 706.5,-440.5 567.5,-440.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="569,-513 569,-540 706,-540 706,-513 569,-513"/>
+<text text-anchor="start" x="611.5" y="-523.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Queen</text>
+<text text-anchor="start" x="575" y="-499.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.pieces.queen</text>
+<polyline fill="none" stroke="#344054" points="706,-491 569,-491 "/>
+<text text-anchor="start" x="576" y="-476" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polyline fill="none" stroke="#344054" points="706,-466 569,-466 "/>
+<text text-anchor="start" x="576" y="-451" font-family="DejaVu Sans" font-size="10.00">+ —</text>
+<polygon fill="none" stroke="#344054" points="567.5,-440.5 567.5,-541.5 706.5,-541.5 706.5,-440.5 567.5,-440.5"/>
+</g>
+<!-- engine.model.pieces.rook.Rook -->
+<g id="node23" class="node">
+<title>engine.model.pieces.rook.Rook</title>
+<polygon fill="#ffffff" stroke="transparent" points="408,-435 408,-547 538,-547 538,-435 408,-435"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="409,-519 409,-546 537,-546 537,-519 409,-519"/>
+<text text-anchor="start" x="453" y="-529.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">Rook</text>
+<text text-anchor="start" x="415" y="-505.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.pieces.rook</text>
+<polyline fill="none" stroke="#344054" points="537,-497 409,-497 "/>
+<text text-anchor="start" x="416" y="-482" font-family="DejaVu Sans" font-size="10.00">+ _has_moved</text>
+<polyline fill="none" stroke="#344054" points="537,-472 409,-472 "/>
+<text text-anchor="start" x="416" y="-457" font-family="DejaVu Sans" font-size="10.00">+ hasMoved()</text>
+<text text-anchor="start" x="416" y="-446" font-family="DejaVu Sans" font-size="10.00">+ setMoved(moved)</text>
+<polygon fill="none" stroke="#344054" points="408,-435 408,-547 538,-547 538,-435 408,-435"/>
+</g>
+<!-- engine.model.users.manager.UserManager -->
+<g id="node24" class="node">
+<title>engine.model.users.manager.UserManager</title>
+<polygon fill="#ffffff" stroke="transparent" points="211,-391 211,-591 379,-591 379,-391 211,-391"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="212,-563 212,-590 378,-590 378,-563 212,-563"/>
+<text text-anchor="start" x="242" y="-573.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">UserManager</text>
+<text text-anchor="start" x="218" y="-549.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.users.manager</text>
+<polyline fill="none" stroke="#344054" points="378,-541 212,-541 "/>
+<text text-anchor="start" x="219" y="-526" font-family="DejaVu Sans" font-size="10.00">+ users: Dict[int, User]</text>
+<text text-anchor="start" x="219" y="-515" font-family="DejaVu Sans" font-size="10.00">+ _next_id: int</text>
+<text text-anchor="start" x="219" y="-504" font-family="DejaVu Sans" font-size="10.00">+ user_log: str</text>
+<text text-anchor="start" x="219" y="-493" font-family="DejaVu Sans" font-size="10.00">+ user_history: str</text>
+<text text-anchor="start" x="219" y="-482" font-family="DejaVu Sans" font-size="10.00">+ player_map: Dict[int, Any]</text>
+<polyline fill="none" stroke="#344054" points="378,-472 212,-472 "/>
+<text text-anchor="start" x="219" y="-457" font-family="DejaVu Sans" font-size="10.00">+ register_user(user, user_id)</text>
+<text text-anchor="start" x="219" y="-446" font-family="DejaVu Sans" font-size="10.00">+ get_user(user_id)</text>
+<text text-anchor="start" x="219" y="-435" font-family="DejaVu Sans" font-size="10.00">+ link_player(user_id, player)</text>
+<text text-anchor="start" x="219" y="-424" font-family="DejaVu Sans" font-size="10.00">+ log_action(message)</text>
+<text text-anchor="start" x="219" y="-413" font-family="DejaVu Sans" font-size="10.00">+ record_history(entry)</text>
+<text text-anchor="start" x="219" y="-402" font-family="DejaVu Sans" font-size="10.00">+ execute_move(move, board)</text>
+<polygon fill="none" stroke="#344054" points="211,-391 211,-591 379,-591 379,-391 211,-391"/>
+</g>
+<!-- engine.model.users.user.User -->
+<g id="node25" class="node">
+<title>engine.model.users.user.User</title>
+<polygon fill="#ffffff" stroke="transparent" points="15.5,-407.5 15.5,-574.5 182.5,-574.5 182.5,-407.5 15.5,-407.5"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="17,-546 17,-573 182,-573 182,-546 17,-546"/>
+<text text-anchor="start" x="81" y="-556.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">User</text>
+<text text-anchor="start" x="23" y="-532.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.users.user</text>
+<polyline fill="none" stroke="#344054" points="182,-524 17,-524 "/>
+<text text-anchor="start" x="24" y="-509" font-family="DejaVu Sans" font-size="10.00">+ username</text>
+<text text-anchor="start" x="24" y="-498" font-family="DejaVu Sans" font-size="10.00">+ name</text>
+<text text-anchor="start" x="24" y="-487" font-family="DejaVu Sans" font-size="10.00">+ email</text>
+<text text-anchor="start" x="24" y="-476" font-family="DejaVu Sans" font-size="10.00">+ elo</text>
+<text text-anchor="start" x="24" y="-465" font-family="DejaVu Sans" font-size="10.00">+ completed_quests: List[Any]</text>
+<polyline fill="none" stroke="#344054" points="182,-455 17,-455 "/>
+<text text-anchor="start" x="24" y="-440" font-family="DejaVu Sans" font-size="10.00">+ add_quest(quest)</text>
+<text text-anchor="start" x="24" y="-429" font-family="DejaVu Sans" font-size="10.00">+ get_completed_quests()</text>
+<text text-anchor="start" x="24" y="-418" font-family="DejaVu Sans" font-size="10.00">+ getEloRating()</text>
+<polygon fill="none" stroke="#344054" points="15.5,-407.5 15.5,-574.5 182.5,-574.5 182.5,-407.5 15.5,-407.5"/>
+</g>
+</g>
 </svg>
