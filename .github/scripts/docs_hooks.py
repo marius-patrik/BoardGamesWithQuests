@@ -191,7 +191,13 @@ def on_files(files: Files, config: Any) -> Files:
     for dest, svg in generated_assets(ROOT).items():
         if files.get_file_from_path(dest) is None:
             files.append(File.generated(config, dest, content=svg))
-    original = ROOT / 'notes/diagrams/reference.drawio'
-    if original.is_file() and files.get_file_from_path('notes/diagrams/reference.drawio') is None:
-        files.append(File.generated(config, 'notes/diagrams/reference.drawio', content=original.read_text(encoding='utf-8')))
+    original = ROOT / "notes/diagrams/reference.drawio"
+    if original.is_file() and files.get_file_from_path("notes/diagrams/reference.drawio") is None:
+        files.append(
+            File.generated(
+                config,
+                "notes/diagrams/reference.drawio",
+                content=original.read_text(encoding="utf-8"),
+            )
+        )
     return files
