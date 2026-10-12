@@ -239,7 +239,6 @@ def implementation_svg(root: Path) -> str:
     return "\n".join(output) + "\n"
 
 
-
 def implementation_classes_svg(root: Path) -> str:
     """Generate a UML-style inventory and inheritance edges from real ASTs."""
     tracked = subprocess.run(
@@ -293,9 +292,9 @@ def implementation_classes_svg(root: Path) -> str:
         'aria-label="Implementation class diagram extracted from Python AST">',
         f'<rect width="{width}" height="{height}" fill="#ffffff"/>',
         f'<text x="32" y="39" {FONT} font-size="24" font-weight="bold" fill="#101828">'
-        'Implemented Class Model (Generated)</text>',
+        "Implemented Class Model (Generated)</text>",
         f'<text x="32" y="70" {FONT} font-size="14" fill="#475467">'
-        f'{len(found)} classes found in tracked packages/ Python files; inheritance extracted from AST</text>',
+        f"{len(found)} classes found in tracked packages/ Python files; inheritance extracted from AST</text>",
     ]
     by_name = {}
     for column, entries in enumerate(columns):
@@ -325,20 +324,22 @@ def implementation_classes_svg(root: Path) -> str:
             method_label = ", ".join(methods[:4]) if methods else "(no public methods)"
             if len(methods) > 4:
                 method_label += ", ..."
-            output.extend([
-                f'<rect x="{x}" y="{y}" width="{card_w}" height="{card_h}" rx="9" '
-                'fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>',
-                f'<rect x="{x}" y="{y}" width="{card_w}" height="39" rx="9" '
-                'fill="#edf2ff"/>',
-                f'<text x="{x+14}" y="{y+26}" {FONT} font-size="17" font-weight="bold" '
-                f'fill="#101828">{escape(name)}</text>',
-                f'<text x="{x+14}" y="{y+60}" {FONT} font-size="11" fill="#475467">'
-                f'{escape(module)}</text>',
-                f'<text x="{x+14}" y="{y+80}" {FONT} font-size="12" fill="#344054">'
-                f'{escape(base_label[:61])}</text>',
-                f'<text x="{x+14}" y="{y+102}" {FONT} font-size="12" fill="#344054">'
-                f'{escape(method_label[:61])}</text>',
-            ])
+            output.extend(
+                [
+                    f'<rect x="{x}" y="{y}" width="{card_w}" height="{card_h}" rx="9" '
+                    'fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>',
+                    f'<rect x="{x}" y="{y}" width="{card_w}" height="39" rx="9" '
+                    'fill="#edf2ff"/>',
+                    f'<text x="{x+14}" y="{y+26}" {FONT} font-size="17" font-weight="bold" '
+                    f'fill="#101828">{escape(name)}</text>',
+                    f'<text x="{x+14}" y="{y+60}" {FONT} font-size="11" fill="#475467">'
+                    f"{escape(module)}</text>",
+                    f'<text x="{x+14}" y="{y+80}" {FONT} font-size="12" fill="#344054">'
+                    f"{escape(base_label[:61])}</text>",
+                    f'<text x="{x+14}" y="{y+102}" {FONT} font-size="12" fill="#344054">'
+                    f"{escape(method_label[:61])}</text>",
+                ]
+            )
     output.append("</svg>")
     return "\n".join(output) + "\n"
 
