@@ -78,7 +78,10 @@ jobs:
           val = MoveValidator(large)
           assert (9, 9) in val.get_pseudo_legal_moves((0, 9))
           assert (0, 0) in val.get_pseudo_legal_moves((0, 9))
-          assert val.is_valid_move(Move((0, 9), (0, 0)), large)
+          assert (0, 0) in val.get_geometric_moves((0, 9), large)
+          rejects(lambda: val.is_valid_move(Move((0, 9), (0, 0)), large), NotImplementedError)
+          rejects(lambda: val.get_valid_moves((0, 9), large), NotImplementedError)
+          rejects(lambda: val.get_all_valid_moves(1, large), NotImplementedError)
           assert not Move((0, 9), (10, 0)).execute(large)
           assert large.get_piece_at((0, 9)) is not None
           rejects(lambda: large.apply_placement([((9, 9), Rook(1)), ((9, 9), Rook(-1))]), ValueError)
