@@ -1,0 +1,76 @@
+name: Review Game Boundaries (Temporary)
+
+on:
+  push:
+    branches: [feature/board-generalisation]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Exercise boundaries, not pretend to test gameplay
+        run: |
+          python - <<'PY'
+          import inspect
+          from engine.model.game.board import Board
+          from engine.model.game.configuration import board_from_definition, load_definition
+          from engine.model.game.validator import MoveValidator
+          from engine.model.game.move import Move
+          from engine.model.misc.export_writers import ExportWriter
+          from engine.model.pieces.piece import Piece
+          from engine.model.pieces.rook import Rook
+          from engine.model.pieces.pawn import Pawn
+
+          def rejects(fn, error):
+              try:
+                  fn()
+              except error:
+                  return
+              raise AssertionError(f"Expected {error.__name__}")
+
+          assert "royal" not in inspect.signature(Piece).parameters
+          assert not hasattr(Piece, "isRoyal")
+          assert "royal" not in load_definition("chess").pieces["king"]
+          assert inspect.isabstract(ExportWriter)
+          rejects(ExportWriter, TypeError)
+          assert all(piece is None for row in Board().board for piece in row)
+          for dims in ((5,7), (8,8), (10,10)):
+              board = Board(dims)
+              assert board.rows == dims[0] and board.cols == dims[1]
+          for name, size in (("chess", 32), ("checkers", 24)):
+              definition = load_definition(name)
+              assert not definition.playable and not definition.exports
+              board = board_from_definition(definition)
+              assert sum(x is not None for row in board.board for x in row) == size
+          board = board_from_definition(load_definition("chess"))
+          validator = MoveValidator(board)
+          rejects(lambda: validator.is_check(1, board), NotImplementedError)
+          rejects(lambda: validator.is_valid_move(Move((0,0), (1,0)), board), NotImplementedError)
+          rejects(lambda: validator.get_valid_moves((0,0), board), NotImplementedError)
+          rejects(lambda: validator.get_all_valid_moves(1, board), NotImplementedError)
+          rejects(lambda: validator.is_checkmate(1, board), NotImplementedError)
+          rejects(lambda: validator.is_stalemate(1, board), NotImplementedError)
+
+          rook = Rook(1)
+          long = Board((10,10), placement=[((0,9), rook)])
+          assert (9,9) in MoveValidator(long).get_pseudo_legal_moves((0,9), long)
+          assert (0,0) in MoveValidator(long).get_pseudo_legal_moves((0,9), long)
+          assert not long.move_piece((0,9), (0,9))
+          rejects(lambda: long.apply_placement([((0,9), rook), ((0,9), Rook(-1))]), ValueError)
+          assert long.get_piece_at((0,9)) is rook
+          pawn = Pawn(1)
+          small = Board((5,7), placement=[((0,0), pawn), ((1,0), Rook(-1))])
+          assert (2,0) not in MoveValidator(small).get_pseudo_legal_moves((0,0))
+          small.set_piece_at((1,0), None)
+          assert (2,0) in MoveValidator(small).get_pseudo_legal_moves((0,0))
+          print("Game-boundary behavior review passed.")
+          PY
