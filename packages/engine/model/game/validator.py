@@ -46,9 +46,7 @@ class MoveValidator:
         return max(board.rows, board.cols) - 1 if piece.canRepeat() else 1
 
     @staticmethod
-    def _walk(
-        board: Board, origin: Square, vector: Square, limit: int, can_jump: bool = False
-    ):
+    def _walk(board: Board, origin: Square, vector: Square, limit: int, can_jump: bool = False):
         """Yield destinations; a jumper may pass through occupied squares."""
         if vector == (0, 0):
             return
@@ -140,9 +138,7 @@ class MoveValidator:
         for vector in piece.getDirections() + piece.getAttackDirections():
             if vector == (0, 0):
                 continue
-            for dest in self._walk(
-                b, start_pos, vector, self._limit(piece, b), piece.canJump()
-            ):
+            for dest in self._walk(b, start_pos, vector, self._limit(piece, b), piece.canJump()):
                 target = b.get_piece_at(dest)
                 allowed = (target is None and vector in quiet) or (
                     target is not None
