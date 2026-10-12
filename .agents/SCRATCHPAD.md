@@ -7,8 +7,9 @@
 - `packages/engine/` contains partial shared model, controller, and launcher; `packages/chess/` and `packages/checkers/` contain JSON game declarations. The former `src/` and `games/` layouts are gone (merged [#220](https://github.com/marius-patrik/BoardGamesWithQuests/pull/220)).
 - The Tkinter view under `packages/engine/view/` is **not** implemented on `main`; the runnable UI exists only in the stacked feature work awaiting review. The current launcher intentionally must not pretend otherwise.
 - Full game rules, quest extensions, actual configuration editing and complete end-to-end gameplay are **not integrated on `main`**. JSON fixtures are not equivalent to implemented rule modules.
-- The old test suite was retired in [#222](https://github.com/marius-patrik/BoardGamesWithQuests/pull/222). There are **no behavioral gameplay tests on `main`**; syntax, format, docs and CI success do not establish game correctness. Rebuild the suite from scratch in [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239).
-- GitHub development releases may exist before the game is finished; do **not** describe them as validated gameplay releases.
+- The old test suite was retired in [#222](https://github.com/marius-patrik/BoardGamesWithQuests/pull/222). **Temporary testing exception:** there are no permanent behavioral gameplay tests on `main`. The shared CI skips absent tests and still checks compilation, formatting and strict docs; this is scaffolding validation only. Rebuild an independent behavior-driven suite against final APIs in [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239), exercising both games and Python 3.10–3.13.
+- **Temporary release gate:** GitHub tags and notes are development snapshots, not validated gameplay releases; Python distribution release assets remain disabled until the behavior gate in #239. Package metadata derives from Git tags via `setuptools-scm`, corrected in [#263](https://github.com/marius-patrik/BoardGamesWithQuests/pull/263).
+- **PR #218 (draft, not on `main`):** removes chess-specific default board setup, hard-coded piece-kind tests and misleading generic exporters. Game JSON definitions supply placement, unsupported formats are not advertised, and full legal-move/outcome calls fail explicitly pending the rule integration. A temporary Actions check exercised geometry and both game configurations; it does **not** replace the final suite. Review architecture/plan alignment before approval; reconcile and restack descendant PRs against these contracts.
 
 ## 2. Active dependency chain
 
@@ -16,7 +17,7 @@ The product track is tracked in [#129](https://github.com/marius-patrik/BoardGam
 
 | Stage | PR(s) as of the audit | Integration dependency |
 |---|---|---|
-| Core abstractions | [#218](https://github.com/marius-patrik/BoardGamesWithQuests/pull/218), [#217](https://github.com/marius-patrik/BoardGamesWithQuests/pull/217), [#219](https://github.com/marius-patrik/BoardGamesWithQuests/pull/219) | Merge or restack board, quests, then rules with correct package paths. |
+| Core abstractions | [#218](https://github.com/marius-patrik/BoardGamesWithQuests/pull/218), [#217](https://github.com/marius-patrik/BoardGamesWithQuests/pull/217), [#219](https://github.com/marius-patrik/BoardGamesWithQuests/pull/219) | Review #218's corrected contracts, then restack quests and rules without preserving incorrect interim behavior. |
 | Chess behavior and packaging | [#216](https://github.com/marius-patrik/BoardGamesWithQuests/pull/216), [#215](https://github.com/marius-patrik/BoardGamesWithQuests/pull/215) | Depend on the shared rule layer. |
 | Integration and UI | [#214](https://github.com/marius-patrik/BoardGamesWithQuests/pull/214), [#212](https://github.com/marius-patrik/BoardGamesWithQuests/pull/212), [#213](https://github.com/marius-patrik/BoardGamesWithQuests/pull/213) | Complete headless game loop before UI; keep review fixes on top. |
 | Stacked subsequent fixes and formats | [#160](https://github.com/marius-patrik/BoardGamesWithQuests/pull/160) through [#209](https://github.com/marius-patrik/BoardGamesWithQuests/pull/209) (selected PRs; see live open list) | Rebase sequentially; don't recreate the retired tests from older branches. |
@@ -26,7 +27,7 @@ The product track is tracked in [#129](https://github.com/marius-patrik/BoardGam
 
 ## 3. Delivery and reviews
 
-1. Resolve comments and rebase each stacked branch on its actual predecessor; update imports, JSON paths and package discovery for `packages/{engine,chess,checkers}` without retaining parallel legacy directory trees.
+1. Resolve comments and rebase each stacked branch on its actual predecessor; update imports, JSON paths and package discovery for `packages/{engine,chess,checkers}` without retaining parallel legacy directory trees. Do not merge incorrect transitional implementations: complete correct behavior or fail explicitly until it is implemented.
 2. Integrate independent core types before rules; integrate game-specific rule modules outside the engine, then wire the game manager, controller and view.
 3. Verify checkers as an independent sibling that does not require chess-specific engine code. [#163](https://github.com/marius-patrik/BoardGamesWithQuests/pull/163) corrects English-draughts rules; the old flying-king implementation must not be mislabeled as WCDF English draughts.
 4. Integrate settings, custom-authored rules/quests, notation, import/export and error handling. Do not duplicate scenario-specific logic in the shared engine.
@@ -61,6 +62,8 @@ The completion criteria are [PRD §7](notes/PRD.md#7-functional-requirements), [
 | `notes/reference_diagram.md` | Literal exported reference diagram facts | Implementation status or duplicate planning |
 | `notes/object_model.md` | Approved design deviations | Diagram box inventory or delivery checklist |
 | `notes/chess_rules.md` | Standard chess rules baseline | Engine architecture or task estimates |
-| `notes/PRD.md` | Final product requirements | Current PR delivery/status claims |
-| `SCRATCHPAD.md` | Current status, dependencies and integration gates | Full rulebook, redundant PRD or stale code line-number inventory |
-| `AGENTS.md` | Governing repository process | Per-feature implementation notes |
+| `notes/PRD.md` | Product requirements and acceptance criteria | Current PR delivery/status claims |
+| `notes/automation_architecture.md` | Durable agent automation architecture and rationale | Temporary run status, pins or progress checkpoints |
+| `SCRATCHPAD.md` | Current status, temporary test/release exceptions, dependencies and integration gates | Full rulebook, redundant PRD or stale code line-number inventory |
+| `AGENTS.md` | Operational rules for agents and contributors | Temporary statuses, release snapshots or architecture notes |
+| `README.md` | Evergreen project description, structure, usage and documentation links | Temporary milestones, test exceptions, unfinished PR plans or architectural decision logs |

@@ -1,35 +1,32 @@
 # BoardGamesWithQuests
 
-A Python board-game engine in active development. Chess and English draughts
-are separate game packages sharing an engine, controller and view architecture.
+A configurable desktop board-game application and shared Python engine. Chess
+and English draughts are independent game packages using the same engine,
+controller and view interfaces.
 
-**Current status:** The installable package workspace and declarative game
-configurations exist. Neither game's full rules/quests nor the real Tkinter GUI
-have been integrated yet. The former placeholder GUI was deliberately removed.
-The existing test suite was retired for a from-scratch rewrite after the
-development stack is integrated (issue #239). A green compilation/docs pipeline
-is not evidence of working gameplay. Automatic GitHub tags/releases are development snapshots until the final behavior test gate passes.
+## Project structure
 
 ```text
 packages/
-  engine/      Shared engine, controller, GUI contracts and launcher
-  chess/       Chess package with root config.json
-  checkers/    English draughts package with root config.json
+  engine/      Shared model, controller, view interfaces and launcher
+  chess/       Chess game package
+  checkers/    English draughts game package
 ```
 
-Game metadata, boards, piece definitions and movement data, clocks, formats and
-appearance are declared in each game's `config.json`. **Rules and quests** are
-Python behavior extensions that will be integrated in later pull requests.
-Installed games are discovered through Python distribution entry points.
+Each game declares board dimensions, starting positions, pieces, clocks and
+display settings in its `config.json`. Game-specific rules, quests and
+serialization belong to the game package. Installed games are discovered
+through Python distribution entry points.
+
+## Installation
 
 Install for development with `python -m pip install -e .`. Run
-`python -m engine --check` to inspect available game packages without starting
-a window. The `chesswithquests` console entry point is reserved for the
-complete application; it does not pretend the GUI exists while it is unfinished.
+`python -m engine --check` to inspect registered game packages.
 
-## Architecture and documentation
+## Documentation
 
-- [Original two-page reference diagram and source](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/reference_diagram.md)
-- [Actual codebase model — generated from tracked Python classes](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/object_model.md)
-- [Requirements and acceptance criteria](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PRD.md)
-- [Implementation sequencing](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md)
+- [Requirements and acceptance criteria](.agents/notes/PRD.md)
+- [Reference architecture diagram](.agents/notes/reference_diagram.md)
+- [Object-model decisions](.agents/notes/object_model.md)
+- [Development automation architecture](.agents/notes/automation_architecture.md)
+- [Current progress, integration sequence and release gates](.agents/SCRATCHPAD.md)
