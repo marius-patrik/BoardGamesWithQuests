@@ -132,15 +132,16 @@ user request adds it.
   *"we should generalize the configuration pattern across the whole engine"* and
   *"drop the conditions for quests"*.
 
-### 5. Configurations Live Outside the Package
+### 5. Configurations Live in Sibling Game Packages
 
 - **Date**: 2026-10-02
 - **Context**: the diagram describes classes and their members. It does not say
   where concrete implementations live, and it draws each game concept as its own
   class rather than as a bundle.
 - **Deviation**: concrete implementations are grouped into configuration
-  directories under `games/` — `games/chess/` and `games/checkers/` — each
-  holding `board.py`, `pieces/`, `rules/`, `quests/`, `clocks/` and `export/`.
+  importable sibling packages beside the engine — `packages/chess/` and
+  `packages/checkers/` — each holding `board.py`, `pieces/`, `rules/`,
+  `quests/`, `clocks/` and `export/`.
   The engine retains only the parent classes and the shared machinery.
 - **Rationale**: it makes a configuration a copyable unit, so duplication is the
   extension mechanism, and it keeps the diagram's classes findable — one parent
@@ -197,7 +198,7 @@ Recorded because the question is fair and the answer is not obvious.
   not branches in the validator.
 - **FEN and PGN belong to chess, not the engine.** The diagram's export writers
   box enumerates the formats, so all are implemented — but FEN and PGN are
-  chess formats and live in `games/chess/export/`. A game with no FEN
+  chess formats and live in `packages/chess/export/`. A game with no FEN
   representation has no FEN exporter, because the structure says so rather than
   a runtime capability check deciding.
 - **Experience is derived, not stored.** The mockup shows quests carrying an XP
@@ -217,7 +218,7 @@ Recorded because the question is fair and the answer is not obvious.
   `edgeLabel` on a free-standing line positioned beside the six piece boxes.
 - **Deviation**: the writers become a class hierarchy — an `ExportWriter` base
   with one subclass per format — and each subclass moves into the configuration
-  that needs it, so `games/chess/export/` holds `ExportAlgebraic`, `ExportPGN`,
+  that needs it, so `packages/chess/export/` holds `ExportAlgebraic`, `ExportPGN`,
   `ExportFEN`, `ExportStenographic` and `ExportMetadata`.
 - **Rationale**: the diagram's format list is a single parameter accepted by one
   writer, which means a format switch. Polymorphism removes the switch, and
