@@ -16,6 +16,7 @@ from engine.model.game.games import DEFAULT_GAME
 from engine.model.game.quest import Quest
 from engine.model.game.rule import Rule
 from chess.board import DIMENSIONS, build_board
+from chess.clocks.fischer import Fischer
 from chess.rules import build_rules
 
 
@@ -33,8 +34,9 @@ def build_configuration() -> Configuration:
         pieces=[],
         rules=build_rules(),
         quests=build_quests(),
-        clocks=[],
+        clocks=[Fischer()],
         exporters=[],
+        board_factory=build_board,
     )
 
 
