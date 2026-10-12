@@ -70,7 +70,8 @@ jobs:
           draughts = board_from_definition(checkers)
           assert sum(p is not None for row in draughts.board for p in row) == 24
           assert MoveValidator(draughts).find_royal(1) is None
-          assert not MoveValidator(draughts).is_stalemate(1)
+          rejects(lambda: MoveValidator(draughts).is_stalemate(1), NotImplementedError)
+          rejects(lambda: MoveValidator(board).is_checkmate(1), NotImplementedError)
 
           # Board dimensions, captures, repeat, jumping and blocked initial moves.
           large = Board((10, 10), placement=[((0, 9), Rook(1))])
