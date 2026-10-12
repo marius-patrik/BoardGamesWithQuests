@@ -1,11 +1,11 @@
 {
-  "$comment": "Everything about this repository that the shared pipeline needs and cannot detect. The pipeline lives in marius-patrik/DarkFactory and is pinned below; the workflows here are callers, not copies.",
+  "$comment": "DarkFactory repository configuration. Documentation is built from actions with a local docs UI; legacy gh-pages is only optional preview staging.",
   "identity": {
     "owner": "marius-patrik",
-    "repo": "ChessWithQuests",
-    "display_name": "ChessWithQuests",
-    "project_title": "ChessWithQuests",
-    "agent_slug": "chesswithquests-agent",
+    "repo": "BoardGamesWithQuests",
+    "display_name": "BoardGamesWithQuests",
+    "project_title": "BoardGamesWithQuests",
+    "agent_slug": "boardgameswithquests-agent",
     "default_branch": "main",
     "description": "School project of a chess game with customizable pieces, board, and quests.",
     "topics": [
@@ -47,7 +47,7 @@
       }
     },
     "release": {
-      "$comment": "pyproject.toml here carries only tooling configuration, so there is nothing for `python -m build` to produce and the Python distribution uses the explicit packages/ workspace. A release here is a tag and its notes, with no assets.",
+      "$comment": "Development releases publish a Git tag and notes only until packaging assets are approved at the final behavior test gate (#239). Python distribution metadata derives from that same Git tag via setuptools-scm, with no static version to synchronize.",
       "python": {
         "enabled": false
       }
@@ -170,13 +170,11 @@
     "global_title": "Global",
     "link_boards": [
       "Global",
-      "ChessWithQuests"
+      "BoardGamesWithQuests"
     ]
   },
   "pages": {
-    "build_type": "legacy",
-    "branch": "gh-pages",
-    "path": "/"
+    "build_type": "workflow"
   },
   "documentation": {
     "$comment": "Sites offered by the switcher's Project axis.",
@@ -190,8 +188,8 @@
         "url": "https://marius-patrik.github.io/omnis/"
       },
       {
-        "name": "ChessWithQuests",
-        "url": "https://marius-patrik.github.io/ChessWithQuests/"
+        "name": "BoardGamesWithQuests",
+        "url": "https://marius-patrik.github.io/BoardGamesWithQuests/"
       }
     ]
   },

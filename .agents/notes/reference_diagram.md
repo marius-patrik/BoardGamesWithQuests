@@ -12,18 +12,12 @@ from the implementation or redrawn from the prose inventory.
 
 The original source remains in [the external diagrams.net document](https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D). Only its exported reference SVGs are committed here; the `.drawio` file is deliberately excluded from the repository.
 
-## Link to the live diagram
-
-[Draw.io Architecture Diagram](https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D)
-
-- **File**: `Šachy - diagram tříd.drawio`
-- **Pages**: `Page-1` — the full object model, and `MVC - GameView` — the MVC
-  integration and the view bindings.
+- **Source file**: `Šachy - diagram tříd.drawio`, with the full model on `Page-1` and the integration sketch on `MVC - GameView`.
 
 **Status**: this diagram is the assignment specification, **not** an inventory
 of completed gameplay. The independent [implementation diagram](object_model.md)
-reflects the current partial codebase; later feature PRs will implement the
-remaining requirements.
+reflects the current partial codebase; later feature PRs must implement the
+remaining requirements. The rendered diagram is not evidence of implemented classes.
 
 ## What this document is
 
@@ -122,10 +116,10 @@ smoothing them over would make the deviations unverifiable.
 
 | Drawn | Note |
 |---|---|
-| `GameVeiw` | missing `r`. The class is `GameView`; the drawn spelling is not reproduced |
+| `GameVeiw` | `e` and `i` are transposed relative to `GameView`. This is a spelling error in the reference; `GameView` is the intended canonical class (not implemented on `main` yet) |
 | `check_Pat` | Czech *patová* — stalemate. Retained as the drawn operation name's meaning, spelled correctly in code |
 | `intger` | misspelling of `integer` on `get_stav()` |
-| `akutalizuj_hrace` | missing `l` |
+| `akutalizuj_hrace` | `u` and `t` are transposed relative to `aktualizuj_hrace` |
 | `Id_uzivatele: hrac` | a user id typed as a player |
 | `proveď_tah`, `over platnost` | Czech with diacritics inside member names |
 | `HracView` | **no class box exists.** It appears only as an attribute *type* on `GameManagerController`. The class is created as `PlayerView` — `object_model.md` section 15 |
@@ -134,8 +128,8 @@ smoothing them over would make the deviations unverifiable.
 
 - **Only `Kůň` is connected to `Figurka`.** The other five pieces have an edge
   with a source and **no target**, and each redeclares `vektor`, `vektor_utoku`
-  and `skok` rather than inheriting them. The intent is that all six extend
-  `Figurka`, and the code does that; the drawing is simply unfinished.
+  and `skok` rather than inheriting them. The intended target model has all six extend
+  `Figurka`; the drawing is unfinished. This does not assert current implementation conformance.
 - **`skok` is declared on the six subclasses, not on `Figurka`.** `Figurka` has
   `název`, `vektory`, `vektory_utoku` and `barva`.
 - **`Extends` is not a relationship.** It is an `edgeLabel` on a free-standing
@@ -192,4 +186,4 @@ listed here are already English in the diagram.
 | `GameVeiw` | `GameView` | diagram typo |
 | `HracGameView` | `PlayerGameView` | the `Hrac` part is Czech |
 
-The full alias table the code must satisfy is in `PRD.md` section 5.
+The normative alias table for the completed product is in [PRD §5](PRD.md#5-naming-requirements).

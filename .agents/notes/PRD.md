@@ -1,6 +1,6 @@
-# ChessWithQuests — Product Requirements Document
+# BoardGamesWithQuests — Product Requirements Document
 
-**Status:** Draft, awaiting review
+**Status:** Target requirements — not a statement of implemented features
 **Version:** 1.0
 
 Planning material — current state, work streams, risks, acceptance criteria and
@@ -12,7 +12,7 @@ product is and requires.
 ## 1. What the product is
 
 A desktop board game engine and application in Python, built as an MVC
-application, in which **the configuration is the product**. A stock 8×8 game
+application, in which **game configurations are a first-class product surface**. A stock 8×8 game
 with the standard pieces is one configuration among many: before a game starts,
 a player chooses the board, the starting position, every piece's movement, which
 rules are in force, the quests in play, and the time controls.
@@ -267,7 +267,7 @@ compartment of the **`ChessNotationWriter`** box enumerates the formats — *let
 *PGN*, *FEN*, *Field - Field - Extra*, *Stenographic* (standard or custom
 compression) — plus **the game transcript**, described as a single parameter.
 
-**All of them are implemented.** Nothing in this section is optional.
+**All must be implemented before declaring the game complete.** These are requirements, not assertions about the current code.
 
 The diagram's `export writers` box is a separate, near-empty box holding one
 field. It does **not** enumerate the formats, and **no edge in the diagram
@@ -294,7 +294,7 @@ deviation in its own right — see `object_model.md` section 7.
 | ID | Requirement |
 |---|---|
 | FR-53 | `packages/chess/` is a complete, correct orthodox chess configuration. |
-| FR-54 | `packages/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings sliding any distance diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
+| FR-54 | `packages/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings moving one square diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
 | FR-55 | Adding `packages/checkers/` requires **no engine change**, only the game package and its distribution registration. If it does, the abstraction is wrong — and that is the point of shipping it. |
 
 ### 7.9 Application

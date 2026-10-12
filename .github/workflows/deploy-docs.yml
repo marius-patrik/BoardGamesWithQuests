@@ -2,22 +2,91 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Preview Documentation"]
+    types: [completed]
 
-# The documentation build, the theme, the hooks and the version manifest all come from the pinned
-# pipeline. This file is a caller, not a copy.
-#
-# No `concurrency` here on purpose: the shared workflow already declares the `pages` group, and a
-# caller holding the same group deadlocks the run it is calling.
+# Preview workflow stages pr-*/ into gh-pages for compatibility; this workflow
+# publishes the combined site only through GitHub Pages' Actions deployment API.
 permissions:
-  contents: write
-  deployments: write
+  contents: read
+  pull-requests: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs-pages-actions
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    uses: marius-patrik/DarkFactory/.github/workflows/deploy-docs.yml@953fd972834baf3b5a2ad2122890f55ea3679943
-    with:
-      pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: "953fd972834baf3b5a2ad2122890f55ea3679943"
-    secrets: inherit
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out main (never checkout code from preview events)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install documentation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Build current documentation
+        run: python .github/scripts/build_docs.py
+
+      - name: Collect live preview builds from staging
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # gh-pages is staging for the existing reusable PR preview workflow,
+          # NOT the GitHub Pages publication source.
+          if git fetch origin gh-pages --depth=1; then
+            mkdir -p .published
+            git archive FETCH_HEAD | tar -x -C .published
+            for number in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
+              if [ -f ".published/pr-$number/index.html" ]; then
+                cp -a ".published/pr-$number" "site/pr-$number"
+              fi
+            done
+            if [ -d .published/branch ]; then
+              mkdir -p site/branch
+              for candidate in .published/branch/*; do
+                if [ -f "$candidate/index.html" ]; then
+                  cp -a "$candidate" site/branch/
+                fi
+              done
+            fi
+          else
+            echo "No legacy preview staging exists; deploying main only."
+          fi
+
+      - name: Write manifest from builds actually deployed
+        run: python .github/scripts/docs_manifest.py --site site
+
+      - name: Disable Jekyll
+        run: touch site/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy Pages from Actions
+        id: deployment
+        uses: actions/deploy-pages@v4
