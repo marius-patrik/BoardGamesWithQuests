@@ -46,8 +46,10 @@ class MoveValidator:
         return max(board.rows, board.cols) - 1 if piece.canRepeat() else 1
 
     @staticmethod
-    def _walk(board: Board, origin: Square, vector: Square, limit: int):
-        """Yield in-bounds destinations along a vector, stopping at occupied squares."""
+    def _walk(
+        board: Board, origin: Square, vector: Square, limit: int, can_jump: bool = False
+    ):
+        """Yield destinations; a jumper may pass through occupied squares."""
         if vector == (0, 0):
             return
         dr, dc = vector
@@ -56,7 +58,7 @@ class MoveValidator:
             if not board.is_within_bounds(*pos):
                 break
             yield pos
-            if board.get_piece_at(pos) is not None:
+            if not can_jump and board.get_piece_at(pos) is not None:
                 break
 
     def find_royal(self, color: int, board: Optional[Board] = None) -> Optional[Square]:
@@ -84,7 +86,9 @@ class MoveValidator:
                 if piece is None or piece.getColor() != by_color:
                     continue
                 for vector in piece.getAttackDirections():
-                    for pos in self._walk(b, (row, col), vector, self._limit(piece, b)):
+                    for pos in self._walk(
+                        b, (row, col), vector, self._limit(piece, b), piece.canJump()
+                    ):
                         if pos == target_square:
                             return True
         return False
@@ -136,7 +140,9 @@ class MoveValidator:
         for vector in piece.getDirections() + piece.getAttackDirections():
             if vector == (0, 0):
                 continue
-            for dest in self._walk(b, start_pos, vector, self._limit(piece, b)):
+            for dest in self._walk(
+                b, start_pos, vector, self._limit(piece, b), piece.canJump()
+            ):
                 target = b.get_piece_at(dest)
                 allowed = (target is None and vector in quiet) or (
                     target is not None
@@ -146,7 +152,7 @@ class MoveValidator:
                 if allowed and dest not in seen:
                     seen.add(dest)
                     destinations.append(dest)
-                if target is not None:
+                if target is not None and not piece.canJump():
                     break
 
         if not piece.hasMoved():
