@@ -1,4 +1,4 @@
-"""Rook chess piece implementation with orthogonal ray moves and moved state."""
+"""Rook: a ray mover along the ranks and files."""
 
 try:
     from .piece import Piece
@@ -10,7 +10,7 @@ except ImportError:
 
 
 class Rook(Piece):
-    """Rook piece with rank and file ray marching movement and castling readiness tracking."""
+    """Slides any distance along the ranks and files."""
 
     def __init__(self, color: int, piece_type: str = "rook"):
         """Initialize a Rook piece.
@@ -28,20 +28,3 @@ class Rook(Piece):
             can_jump=False,
             name="Rook",
         )
-        self._has_moved = False
-
-    def hasMoved(self) -> bool:
-        """Check whether the rook has moved from its initial square.
-
-        Returns:
-            bool: True if the rook has moved, False otherwise.
-        """
-        return self._has_moved
-
-    def setMoved(self, moved: bool = True) -> None:
-        """Update whether the rook has moved.
-
-        Args:
-            moved: New moved state flag (default: True).
-        """
-        self._has_moved = moved
