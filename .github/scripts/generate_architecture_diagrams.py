@@ -54,8 +54,10 @@ def _ref_page(diagram: ET.Element) -> str:
         return positions[ident]
 
     vertices = [
-        item for item in cells.values()
-        if item.get("vertex") == "1" and "edgeLabel" not in item.get("style", "")
+        item
+        for item in cells.values()
+        if item.get("vertex") == "1"
+        and "edgeLabel" not in item.get("style", "")
         and item.find("mxGeometry") is not None
     ]
     bounds = [position(item) for item in vertices]
@@ -100,11 +102,14 @@ def _ref_page(diagram: ET.Element) -> str:
             points = geometry.find("./Array[@as='points']")
             if points is not None:
                 waypoints = [
-                    (float(p.get("x")), float(p.get("y"))) for p in points
+                    (float(p.get("x")), float(p.get("y")))
+                    for p in points
                     if p.get("x") is not None and p.get("y") is not None
                 ]
         points = " ".join(f"{x:.1f},{y:.1f}" for x, y in [start, *waypoints, end])
-        output.append(f'<polyline points="{points}" fill="none" stroke="#667085" stroke-width="1.7"/>')
+        output.append(
+            f'<polyline points="{points}" fill="none" stroke="#667085" stroke-width="1.7"/>'
+        )
 
     for cell in vertices:
         x, y, w, h = position(cell)
@@ -155,7 +160,8 @@ def implementation_svg(root: Path) -> str:
     source_root = root / "packages"
     tracked = subprocess.run(
         ["git", "-C", str(root), "ls-files", "-z", "--", "packages/*.py", "packages/**/*.py"],
-        capture_output=True, check=True
+        capture_output=True,
+        check=True,
     ).stdout.split(bytes([0]))
     grouped = {}
     deps = Counter()
@@ -192,9 +198,9 @@ def implementation_svg(root: Path) -> str:
         'aria-label="Generated architecture of installed Python packages">',
         f'<rect width="{width}" height="{height}" fill="#ffffff"/>',
         f'<text x="40" y="44" {FONT} font-size="22" font-weight="bold" fill="#101828">'
-        'Implemented Python Package Architecture</text>',
+        "Implemented Python Package Architecture</text>",
         f'<text x="40" y="69" {FONT} font-size="12" fill="#475467">'
-        'Generated from tracked package files and Python import statements</text>',
+        "Generated from tracked package files and Python import statements</text>",
     ]
     for index, group in enumerate(order):
         y = 98 + index * 155
@@ -213,7 +219,7 @@ def implementation_svg(root: Path) -> str:
             description = "No top-level cross-package imports detected"
         output.append(
             f'<text x="61" y="{y+87}" {FONT} font-size="13" fill="#667085">'
-            f'{escape(description)}</text>'
+            f"{escape(description)}</text>"
         )
     output.append("</svg>")
     return "\n".join(output) + "\n"

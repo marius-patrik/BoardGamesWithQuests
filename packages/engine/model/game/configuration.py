@@ -64,10 +64,16 @@ def load_definition(package: str) -> GameDefinition:
             raise ConfigurationError(f"{package}: {key} needs white and black symbols")
         for kind in ("moves", "attacks"):
             vectors = piece.get(kind)
-            if not isinstance(vectors, list) or not vectors or any(
-                not isinstance(v, list) or len(v) != 2
-                or any(type(axis) is not int for axis in v) or v == [0, 0]
-                for v in vectors
+            if (
+                not isinstance(vectors, list)
+                or not vectors
+                or any(
+                    not isinstance(v, list)
+                    or len(v) != 2
+                    or any(type(axis) is not int for axis in v)
+                    or v == [0, 0]
+                    for v in vectors
+                )
             ):
                 raise ConfigurationError(f"{package}: {key}.{kind} has invalid vectors")
         if any(type(piece.get(prop)) is not bool for prop in ("jump", "repeat")):
@@ -85,9 +91,12 @@ def load_definition(package: str) -> GameDefinition:
         if not isinstance(squares, list):
             raise ConfigurationError(f"{package}: starting squares must be a list")
         for square in squares:
-            if not isinstance(square, list) or len(square) != 2 or any(
-                type(axis) is not int for axis in square
-            ) or not (0 <= square[0] < rows and 0 <= square[1] < cols):
+            if (
+                not isinstance(square, list)
+                or len(square) != 2
+                or any(type(axis) is not int for axis in square)
+                or not (0 <= square[0] < rows and 0 <= square[1] < cols)
+            ):
                 raise ConfigurationError(f"{package}: invalid square {square!r}")
             if tuple(square) in occupied:
                 raise ConfigurationError(f"{package}: duplicate square {square!r}")
@@ -105,8 +114,16 @@ def load_definition(package: str) -> GameDefinition:
     if not isinstance(appearance, dict):
         raise ConfigurationError(f"{package}: invalid appearance")
     return GameDefinition(
-        name, package, title, data["default"], data["playable"], board,
-        pieces, clock, tuple(exports), appearance
+        name,
+        package,
+        title,
+        data["default"],
+        data["playable"],
+        board,
+        pieces,
+        clock,
+        tuple(exports),
+        appearance,
     )
 
 
