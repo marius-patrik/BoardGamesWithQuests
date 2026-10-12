@@ -1,12 +1,6 @@
 """Bishop chess piece implementation with diagonal move vectors."""
 
-try:
-    from .piece import Piece
-except ImportError:
-    try:
-        from engine.model.pieces.piece import Piece
-    except ImportError:
-        from piece import Piece
+from engine.model.pieces.piece import Piece
 
 
 class Bishop(Piece):
@@ -21,6 +15,8 @@ class Bishop(Piece):
         """
         vectors = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
         super().__init__(
+            symbols=("♗", "♝"),
+            fen="B",
             color=color,
             piece_type=piece_type,
             vectors=vectors,

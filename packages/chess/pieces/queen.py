@@ -1,12 +1,6 @@
 """Queen chess piece implementation combining orthogonal and diagonal ray movements."""
 
-try:
-    from .piece import Piece
-except ImportError:
-    try:
-        from engine.model.pieces.piece import Piece
-    except ImportError:
-        from piece import Piece
+from engine.model.pieces.piece import Piece
 
 
 class Queen(Piece):
@@ -30,6 +24,8 @@ class Queen(Piece):
             (-1, -1),
         ]
         super().__init__(
+            symbols=("♕", "♛"),
+            fen="Q",
             color=color,
             piece_type=piece_type,
             vectors=vectors,

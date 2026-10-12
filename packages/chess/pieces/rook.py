@@ -1,12 +1,6 @@
 """Rook: a ray mover along the ranks and files."""
 
-try:
-    from .piece import Piece
-except ImportError:
-    try:
-        from engine.model.pieces.piece import Piece
-    except ImportError:
-        from piece import Piece
+from engine.model.pieces.piece import Piece
 
 
 class Rook(Piece):
@@ -21,6 +15,8 @@ class Rook(Piece):
         """
         vectors = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         super().__init__(
+            symbols=("♖", "♜"),
+            fen="R",
             color=color,
             piece_type=piece_type,
             vectors=vectors,
