@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 880 625" width="880" height="625" aria-label="Generated architecture of installed Python packages">
+<rect width="880" height="625" fill="#ffffff"/>
+<text x="40" y="44" font-family="DejaVu Sans,Arial,sans-serif" font-size="22" font-weight="bold" fill="#101828">Implemented Python Package Architecture</text>
+<text x="40" y="69" font-family="DejaVu Sans,Arial,sans-serif" font-size="12" fill="#475467">Generated from tracked package files and Python import statements</text>
+<rect x="40" y="98" rx="12" width="800" height="118" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<text x="61" y="133" font-family="DejaVu Sans,Arial,sans-serif" font-size="20" font-weight="bold" fill="#1d2939">packages/engine/</text>
+<text x="61" y="159" font-family="DejaVu Sans,Arial,sans-serif" font-size="14" fill="#475467">36 tracked Python modules</text>
+<text x="61" y="185" font-family="DejaVu Sans,Arial,sans-serif" font-size="13" fill="#667085">No top-level cross-package imports detected</text>
+<rect x="40" y="253" rx="12" width="800" height="118" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<text x="61" y="288" font-family="DejaVu Sans,Arial,sans-serif" font-size="20" font-weight="bold" fill="#1d2939">packages/checkers/</text>
+<text x="61" y="314" font-family="DejaVu Sans,Arial,sans-serif" font-size="14" fill="#475467">1 tracked Python module</text>
+<text x="61" y="340" font-family="DejaVu Sans,Arial,sans-serif" font-size="13" fill="#667085">No top-level cross-package imports detected</text>
+<rect x="40" y="408" rx="12" width="800" height="118" fill="#f8faff" stroke="#98a2b3" stroke-width="1.5"/>
+<text x="61" y="443" font-family="DejaVu Sans,Arial,sans-serif" font-size="20" font-weight="bold" fill="#1d2939">packages/chess/</text>
+<text x="61" y="469" font-family="DejaVu Sans,Arial,sans-serif" font-size="14" fill="#475467">1 tracked Python module</text>
+<text x="61" y="495" font-family="DejaVu Sans,Arial,sans-serif" font-size="13" fill="#667085">No top-level cross-package imports detected</text>
+</svg>
