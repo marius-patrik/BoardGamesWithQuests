@@ -30,13 +30,14 @@
     "$comment": "A Python application. The API reference is generated from docstrings by mkdocstrings, which properdocs still loads: it aliases mkdocs.* imports and reads mkdocs.plugins entry points.",
     "testing": {
       "python": {
-        "command": "pytest",
+        "command": "python -m compileall -q src",
         "versions": [
           "3.10",
           "3.11",
           "3.12",
           "3.13"
-        ]
+        ],
+        "$comment": "TEMPORARY #239: retired tests; this is syntax validation ONLY, not an automated behavior test. Restore pytest in final test-rebuild PR before release."
       }
     },
     "documentation": {

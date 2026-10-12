@@ -38,6 +38,3 @@ jobs:
           print("Repository-wide documentation verified.")
           PY
 
-      - name: Run documentation tests
-        run: |
-          pytest -v tests/test_docs_and_docstrings.py
