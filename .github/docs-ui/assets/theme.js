@@ -1,10 +1,8 @@
 /*
- * Omnis documentation theme behaviour.
+ * Documentation header, navigation, search and theme behaviour.
  *
- * Three small things, no dependencies: the colour-scheme toggle, the mobile navigation, and search
- * over the index the search plugin already emits. Search is a scored substring match rather than a
- * bundled index library — the corpus here is a few dozen pages, and a full-text engine would be more
- * bytes than the documents it searches.
+ * No framework dependencies: the colour-scheme toggle, mobile navigation, search over
+ * the existing index and repository/build selectors. Search uses a scored substring match.
  */
 
 (function () {

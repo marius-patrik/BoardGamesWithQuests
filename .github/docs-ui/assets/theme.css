@@ -1,5 +1,5 @@
 /*
- * Omnis documentation theme — shadcn/ui design system.
+ * Shared documentation visual system — shadcn/ui design tokens.
  *
  * The token block is the entire design surface: change a token and every component follows. Tokens
  * are bare HSL channels, the shadcn convention, so they compose with `hsl(var(--token) / <alpha>)`
