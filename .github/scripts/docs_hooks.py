@@ -203,7 +203,5 @@ def on_files(files: Files, config: Any) -> Files:
         current = files.get_file_from_path(dest)
         if current is not None:
             files.remove(current)
-        files.append(
-            File.generated(config, dest, content=source.read_text(encoding="utf-8"))
-        )
+        files.append(File.generated(config, dest, content=source.read_text(encoding="utf-8")))
     return files
