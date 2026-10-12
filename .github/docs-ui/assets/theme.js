@@ -244,8 +244,14 @@
   var manifestUrl = new URL("versions.json", siteRoot).href;
   var projectSelect = controls.querySelector("[data-switcher-projects]");
   var versionSelect = controls.querySelector("[data-switcher-versions]");
-  var versionGroup = controls.querySelector("[data-switcher-versions-group]");
-  var currentSite = new URL(siteRoot);
+  var activePath = buildRoot.slice(siteRoot.length).replace(/\/$/, "");
+  var activeLabel = activePath.startsWith("pr-")
+    ? "PR #" + activePath.slice(3)
+    : activePath.startsWith("branch/")
+    ? activePath.slice("branch/".length)
+    : "main";
+  // Show the correct build immediately, before the manifest is fetched.
+  versionSelect.options[0].textContent = activeLabel;
 
   function normalizedSite(value) {
     try {
@@ -295,18 +301,12 @@
         };
       });
 
-      // Select based on where the visitor actually is; a preview's manifest is shared
-      // with main and its 'current' property cannot identify the active preview.
-      var suffix = decodeURI(window.location.pathname).slice(currentSite.pathname.length);
-      var active = versionList.filter(function (entry) {
-        return !entry.path || suffix === entry.path || suffix.startsWith(entry.path + "/");
-      }).sort(function (left, right) {
-        return right.path.length - left.path.length;
-      })[0];
-      if (versionList.length > 1) {
-        populate(versionSelect, versionList, active ? active.id : "");
-        versionGroup.hidden = false;
+      // CSS locates the current build even on deep pages or when a newly
+      // published preview has not reached the root manifest yet.
+      if (!versionList.some(function (entry) { return entry.id === activePath; })) {
+        versionList.push({ name: activeLabel, path: activePath, id: activePath, url: buildRoot });
       }
+      populate(versionSelect, versionList, activePath);
 
       var projects = (manifest.projects || []).filter(function (entry) {
         return entry && typeof entry.name === "string" && typeof entry.url === "string";
