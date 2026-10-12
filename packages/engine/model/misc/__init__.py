@@ -1,1 +1,1 @@
-"""Miscellaneous utilities package providing notation writers, metadata, and quest managers."""
+"""Game-neutral model utilities; serialization belongs to game packages."""
