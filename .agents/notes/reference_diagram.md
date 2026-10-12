@@ -10,7 +10,7 @@ from the implementation or redrawn from the prose inventory.
 
 ![Original MVC integration diagram — Page 2](diagrams/reference-mvc.svg)
 
-The retained source is [the original diagrams.net file](diagrams/reference.drawio).
+The original source remains in [the external diagrams.net document](https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D). Only its exported reference SVGs are committed here; the `.drawio` file is deliberately excluded from the repository.
 
 ## Link to the live diagram
 

@@ -178,8 +178,8 @@ def on_files(files: Files, config: Any) -> Files:
     for dest, body in build_nav()[1]:
         if files.get_file_from_path(dest) is None:
             files.append(File.generated(config, dest, content=body))
-    # The actual reference diagram and code-derived architecture diagram are
-    # generated on every build, so neither can silently diverge from its source.
+    # Only implementation UML is live-generated from code. Reference SVGs are
+    # the already-exported static diagrams from the external diagrams.net file.
     # ProperDocs imports this hook by file path rather than as a package.
     import sys
 
@@ -195,16 +195,4 @@ def on_files(files: Files, config: Any) -> Files:
             # the current implementation's actual diagram on Pages.
             files.remove(current)
         files.append(File.generated(config, dest, content=svg))
-    original = ROOT / ".agents/notes/diagrams/reference.drawio"
-    if (
-        original.is_file()
-        and files.get_file_from_path("agents/notes/diagrams/reference.drawio") is None
-    ):
-        files.append(
-            File.generated(
-                config,
-                "agents/notes/diagrams/reference.drawio",
-                content=original.read_text(encoding="utf-8"),
-            )
-        )
     return files

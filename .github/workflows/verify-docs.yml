@@ -47,6 +47,9 @@ jobs:
           assert (root / ".agents/AGENTS.md").is_file() and not (root / ".agents/AGENTS.md").is_symlink()
           assert (root / ".agents/notes/PRD.md").is_file()
           assert (root / ".agents/notes/GUI_mockup.svg").is_file()
+          assert not (root / ".agents/notes/diagrams/reference.drawio").exists()
+          assert (root / "CONTRIBUTING.md").is_symlink()
+          assert (root / "CONTRIBUTING.md").resolve() == (root / ".agents/AGENTS.md").resolve()
           assert (root / ".agents/SCRATCHPAD.md").is_file()
           for retired in ("AGENTS.md", "CLAUDE.md", ".claude", "PRD.md", "SCRATCHPAD.md", "GUI_mockup.svg", "notes"):
               assert not (root / retired).exists() and not (root / retired).is_symlink(), retired
