@@ -107,7 +107,7 @@ Retire all 25 historical draft PRs once this consolidated draft PR is opened; po
 
 | Gate | Work | Proof to proceed |
 |---|---|---|
-| G0 — CORE COMPLETE | Consolidate PR ancestry/tree/issues and establish authoritative plan | App-authored draft #271; 25 historical PRs closed unmerged; all 26 associated old PR refs removed with SHA/ancestry verification. Project board #14 preserved and renamed. Current Plan issue #129 and test gate #239. **Global board #17 still needs PR #271 after temporary GitHub GraphQL rate exhaustion.** |
+| G0 — CORE COMPLETE | Consolidate PR ancestry/tree/issues and establish authoritative plan | App-authored draft #271; 25 historical PRs closed unmerged; all 26 associated old PR refs removed with SHA/ancestry verification. Project board #14 preserved and renamed. Current Plan issue #129 and test gate #239. **Global board #17 has #129 and #239 but still needs #271 after GitHub GraphQL rate exhaustion. Historical issue/PR Project 14 status fields also require a consistency sweep; event automation failed before the project title was repaired.** |
 | G1 | Validate JSON schema, five hooks, expression/condition vocabulary; Vercel + Supabase deploy feasibility | Both games expressible; a real Python API function imports engine and safely commits a fixture |
 | G2 | Rebuild engine rules/quests/config/move commit/clock/history | Headless legal move and state/restart probes; zero game-name logic |
 | G3 | Implement chess/checkers and format writers against G2, parallelized | Orthodox and WCDF scenarios run through same engine |
