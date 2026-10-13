@@ -25,7 +25,9 @@ def manifest(site: Path, repository: Path) -> dict:
     for path in previews:
         if path.name[3:].isdigit():
             versions.append({"name": f"PR #{path.name[3:]}", "path": path.name})
-    settings = json.loads((repository / "repo.dfconfig").read_text(encoding="utf-8")).get("repo", {})
+    settings = json.loads((repository / "repo.dfconfig").read_text(encoding="utf-8")).get(
+        "repo", {}
+    )
     projects = [
         {"name": entry["name"], "url": entry["url"]}
         for entry in settings.get("documentation", {}).get("projects", [])
