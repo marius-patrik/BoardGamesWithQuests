@@ -1,15 +1,14 @@
 # Development Automation Architecture
 
-**Status:** Durable operational design, not the current implementation/CI result. Runtime rules live in [AGENTS.md](../AGENTS.md), the delivery plan in [PLAN.md](PLAN.md), progress in [SCRATCHPAD.md](../SCRATCHPAD.md).
+DarkFactory supplies the shared agent, review, quality, project-board and release
+workflows. This repository owns one DarkFactory settings document,
+`repo.dfconfig`, and thin pinned GitHub Actions callers. Python packaging and
+specialized documentation tools can retain their own required configuration
+inputs without becoming competing DarkFactory settings. Provider secrets stay
+in GitHub secrets and are never exposed to generated documentation or browsers.
 
-## DarkFactory
-
-DarkFactory owns the shared GitHub Actions/agent pipeline. This repository owns thin installed callers, narrowly scoped project-specific workflows and **one configuration document: `repo.dfconfig`**. There is no active `.github/darkfactory.json` configuration after migration. Upstream is pinned to a verified immutable release commit, updated through the supported installation/update mechanism. Do not vendor a second orchestration runner.
-
-The approved workflow model includes issue/PR triage, review-gated draft PRs, CI, docs, updates and release; rejection of issues #124, #126, #167 and PR #170 means **do not remove** these services. Provider adapters and fallback behavior belong to shared DarkFactory, not the game engine. Credentials are only GitHub secrets and never exposed in client code or generated docs.
-
-## Integration and deployment
-
-The repository has one current implementation branch/PR; modular agent work may execute in isolated worktrees but integrates only after shared contracts are reconciled. The GitHub issue and review history remain auditable without maintaining active competing PR stacks. Public delivery uses Vercel web/API projects and Supabase; build/test/release gates require actual end-to-end evidence, not only successful documentation.
-
-Do not duplicate the current plan, transient status, or release numbers here.
+The source of truth for product behavior is [PRD](PRD.md); sequencing is
+[PLAN](PLAN.md); active verification belongs to [SCRATCHPAD](../SCRATCHPAD.md).
+Preserve established local and global project boards and the native review gate.
+Use a single integration PR with modular source commits. Hosted delivery is
+Vercel for frontend/API and Supabase for Auth/Postgres/Realtime.

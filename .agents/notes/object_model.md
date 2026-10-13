@@ -19,7 +19,7 @@
 | User | Supabase Auth identities, registered and anonymous guests, server-side membership/authorization, persistent history and ratings. | Original `UserManager` is not an auth provider and cannot authorize gameplay. |
 | Settings | React schema-driven forms for Board, Pieces, Rules, Quests, Clocks; **no Python/JS code editor**. | The original sketch did not depict extensible validated settings or web GUI. |
 | Presentation | Original GameView/PlayerView responsibilities remain but are React components; no duplicate Python view types are required solely to mirror the diagram. | Approved browser/Tauri platform change. |
-| Exporters | One trusted game-owned class per format extending a generic single-format interface; accurate PGN/SAN and six-field FEN **export only**. | No engine format switch. FEN import approved earlier is explicitly **withdrawn 2026-10-13**. |
+| Exporters | One trusted game-owned class per format extending a generic single-format interface; accurate PGN/SAN and six-field FEN **export only**. | No engine format switch. Only FEN export is part of the supported contract. |
 | Persistence/realtime | Atomic versioned persisted game state, moves and per-user progress in Supabase; authorized Realtime notifications with snapshot reconciliation. | No durable shared process memory in serverless runtime. |
 
 ## Original reference ambiguities
@@ -32,6 +32,6 @@
 
 ## Evidence boundary
 
-Code-generated implementation UML shows only what is currently checked out, not the final approved architecture or behavior. It must not be confused with the original fixed reference drawings. Final implementation graph and red/green comparison SVG require visual review. The initial consolidated branch retains corrected #218 code and selected historical game-owned source **candidates**, plus all older commits in git ancestry; that does **not** establish that Python JSON hooks or online play are already implemented.
+Code-generated implementation UML shows only what is currently checked out, not the final approved architecture or behavior. It must not be confused with the original fixed reference drawings. Final implementation graph and red/green comparison SVG require visual review. Only current source code proves implementation; retained Git ancestry cannot establish JSON-hook completeness or online play.
 
 See [PLAN.md](PLAN.md) for implementation gates and [SCRATCHPAD.md](../SCRATCHPAD.md) for verified progress.

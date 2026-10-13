@@ -77,20 +77,18 @@ The settings surface exposes Board/Pieces/Rules/Quests/Clocks as **schema-driven
 
 ## 8. DarkFactory, repository and licensing
 
-- **Only `repo.dfconfig` is configuration**; migrate valid settings out of `.github/darkfactory.json` and remove it after its consumers (workflow callers, docs scripts, CI) are reconciled. Retain DarkFactory agent and approval automation—issues #124, #126, #167 and PR #170 are rejected/closed. Do not blindly delete functioning project-specific setup.
-- Pin DarkFactory to the latest **verified** released immutable commit (identified at approval: v0.289.0; recheck on update). Use supported installer/update process and correctly retain global/local issue board behavior.
+- `repo.dfconfig` is the single DarkFactory configuration. Python packaging metadata in `pyproject.toml` and any documentation-tool configuration remain independent tool inputs unless DarkFactory explicitly supports their generation. Retain functioning repository agent, approval and release automation.
+- Pin DarkFactory to the latest **verified** released immutable commit and update through the supported installer. Use supported installer/update process and correctly retain global/local issue board behavior.
 - Use GPL-3.0 consistently in `LICENSE`, Python metadata and `repo.dfconfig`. Preserve version-from-tag (`setuptools-scm`), not static `0.1.0`. Update dependencies for FastAPI, Supabase and frontend/Tauri.
-- No duplicate workflows, stale workflow display names or wrong required checks. Preserve the existing GitHub Projects board #14 (renamed BoardGamesWithQuests; 211 original items) and Global #17; do not create a second empty board. Ensure the current PR and tracking issues belong to both boards, subject to actual API rate limits. Document required CI coverage and approval gates.
+- No duplicate workflows, stale workflow display names or wrong required checks. Preserve the existing GitHub Projects board #14 (renamed BoardGamesWithQuests; 211 original items) and Global project #17; do not create a second empty board. Ensure the current PR and tracking issues belong to both boards, subject to actual API rate limits. Document required CI coverage and approval gates.
 
-## 9. Stack consolidation and source disposition
+## 9. Integration and source authority
 
-**Consolidation complete:** [draft #271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271) is the only active implementation PR. The consolidated commit has corrected #218 and the final historical #209 as parents, preserving all 25 superseded PR histories, while the working tree retains the corrected foundation and only selected **unverified** chess/checkers piece/export candidates. The original gameplay, rules, quests, runtime and Tkinter implementations are *not* accepted merely because their commits remain reachable; each useful capability still needs semantic recovery or reimplementation against the agreed JSON/browser/server architecture.
-
-Review the entire legacy source chain against current JSON, engine and UI decisions; do not paste it blindly. For each source feature: retain, adapt, reimplement, or reject with evidence. Old Tkinter, local Python code-authoring, FEN importer, stale docs, static packaging, duplicate startup and agent-deletion changes are rejected as active architecture. A merged ancestry is **not** proof that all historical code was integrated.
-
-**Closed and cleaned up (2026-10-13):** all 25 old draft PRs are unmerged historical references pointing to #271, and all 26 associated branch refs (including withdrawn #170) were safely removed after exact-SHA/ancestry checks. One-time maintenance workflows were removed. Two unrelated divergent `rebuild/*` recovery refs contain unique history and remain preserved pending a separate evidence-based disposition.
-
-**Issues:** #129 is the authoritative consolidated Plan issue; #239 stays open as final tests. Existing old plan/request issues are superseded (not completed) and link #129/new PR. Their historical comments remain in GitHub. Do not leave obsolete Tkinter/Python/FEN-import/agent-removal requests in the live backlog.
+The single active implementation branch and draft PR implement the current PRD.
+Reference branches and closed issue discussions are provenance, not implementation
+instructions. Review useful algorithms against the current engine contract rather
+than importing executable game-specific rules or retired UI code. Package
+configurations are JSON-only; exported formats are trusted serializers.
 
 ## 10. Artifact alignment
 
@@ -108,7 +106,7 @@ Review the entire legacy source chain against current JSON, engine and UI decisi
 
 | Gate | Work | Proof to proceed |
 |---|---|---|
-| G0 — CORE COMPLETE | Consolidate PR ancestry/tree/issues and establish authoritative plan | App-authored draft #271; 25 historical PRs closed unmerged; all 26 associated old PR refs removed with SHA/ancestry verification. Project board #14 preserved and renamed. Current Plan issue #129 and test gate #239. **External Projects exception:** Global #17 contains #129 and #239 but PR #271 attachment remains unverified; previous GraphQL quota exhaustion and a later `gh project` “unknown owner type” failure blocked the attempted update. Historical issue/PR status fields on Project #14 still require a consistency audit. Do not claim full board alignment.** |
+| G0 — RECONCILED | Keep one integration PR, preserve all source ancestry and reconcile tracking | PR and source ancestry unified. Project board Global linkage must still be independently confirmed. |
 | G1 | Validate JSON schema, five hooks, expression/condition vocabulary; Vercel + Supabase deploy feasibility | All three games expressible; a real Python API function imports engine and safely commits a fixture |
 | G2 | Rebuild engine rules/quests/config/move commit/clock/history | Headless legal move and state/restart probes; zero game-name logic |
 | G3 | Implement chess/checkers and format writers against G2, parallelized | Orthodox and WCDF scenarios run through same engine |
@@ -119,9 +117,14 @@ Review the entire legacy source chain against current JSON, engine and UI decisi
 
 Use modular commits/workstreams on the **single shared integration branch**. Agent orchestration may work in isolated worktrees but must sequence integration at contract boundaries and avoid colliding writes. Final permanent tests are rebuilt from zero at G6; targeted temporary probes throughout are mandatory, not mistaken for a complete suite.
 
-## 12. Known blocking findings to close
+## 12. Remaining critical implementation risks
 
-Independent source reviews (2026-10-12) found: inactive installed game entry point and a GUI `engine` NameError; wrong `default_configuration_name(root)` call and missing `DEFAULT_GAME`; generic export interface contrary to FR-43; duplicate runtime loaders; game-specific validator checks; direct unvalidated move execution; per-player quest completion leakage; duplicate user ID overwrite; timer invalid-ID/negative-time acceptance; code/doc/license pin conflicts; stale generated diagrams, no conclusive behavior tests. Additionally the old branch restored static `0.1.0`, old `theme/`, removed approved workflows and resurrected Python authoring. The new architecture must remedy all root causes, not merely bypass tests. Refer to [#129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129) and linked closed original PR discussions for provenance.
+- The JSON rules/effects vocabulary must express the complete chess and both draughts rulebooks.
+- Every legal move, quest and outcome must be applied through one authoritative,
+  reconstructible session transaction, with no user-registry shortcuts.
+- No release until public API deployment, two-user play, concurrency, guest
+  shared-IP quota and the full independent behavior suite are verified.
+- Authentication, persistence and provider configurations are not yet live.
 
 ## 13. Definition of done
 

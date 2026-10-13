@@ -1,7 +1,7 @@
 # BoardGamesWithQuests — Product Requirements Document
 
 **Status:** Approved target requirements; **not a claim of existing implementation**.  
-**Version:** 2.0 — online JSON-driven architecture, 2026-10-13.  
+**Version:** 2.1 — online JSON-driven architecture.  
 **Execution authority:** [PLAN.md](PLAN.md), [#129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129). Progress: [SCRATCHPAD.md](../SCRATCHPAD.md). Deviations: [object_model.md](object_model.md). Original diagrams: [reference_diagram.md](reference_diagram.md).
 
 ## 1. Product
@@ -28,7 +28,7 @@ The complete user interface is a **React/Rsbuild** website, publicly hosted on *
 - No external chess rules library replacing the hand-implemented engine, unless separately approved. Modern approved runtime libraries for web/API/Supabase are allowed.
 - All public multiplayer state changes are authenticated, authorized, atomic and durable.
 - Existing source/reference UML is preserved as original evidence; intentional divergence is registered in `object_model.md`.
-- Permanent tests must assert real gameplay, API, UI and persistence behavior. The retired test suite is not revived; rebuild at #239.
+- Permanent tests must assert real gameplay, API, UI and persistence behavior. Permanent behavior tests are rebuilt at the final test gate.
 
 ## 4. Configuration and extension model
 
@@ -138,12 +138,10 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 | FR-44 | *Letter* — the move is rendered in algebraic notation with piece letters, capture markers, promotion and castling notation. |
 | FR-45 | *PGN* — real PGN: a seven-tag roster **derived from the game** (event, site, date, round, both players, result), and movetext in Standard Algebraic Notation, including piece disambiguation, castling notation, promotion, and check and mate suffixes. |
 | FR-46 | *FEN* — all six fields are **computed from the game state**: placement, side to move, castling rights, en passant square, halfmove clock and fullmove number. No field is hard-coded. |
-| FR-47 | **WITHDRAWN (2026-10-13):** FEN import/round-trip is not a product requirement; verify accurate FEN export against known positions instead. |
 | FR-48 | Game transcript metadata derives from actual event/site/date/players/result state; never hardcode placeholders. |
 | FR-49 | Stenographic game transcript export uses a standard or explicitly configured standard-library codec; no user-authored executable compression. |
 | FR-50 | An authoritative durable transcript records every move and relevant event separately from export formats. |
 | FR-51 | A format that belongs to one game ships with that game. FEN and PGN are chess formats and therefore live in `packages/chess/export/`; a game with no FEN representation has no FEN exporter, because the structure says so rather than a capability check. |
-| FR-52 | **WITHDRAWN (2026-10-13):** Do not implement or advertise a FEN reader; only the six-field FEN exporter in FR-46 remains. |
 
 ### 7.8 Shipped games
 
