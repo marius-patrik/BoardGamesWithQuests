@@ -9,6 +9,7 @@ import json
 from typing import Any
 
 from engine.model.game.board import Board
+from engine.model.game.capture_geometry import CapturePolicy
 from engine.model.pieces.piece import Piece
 from engine.model.game.schema import validate_hooks
 
@@ -143,6 +144,13 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
             raise ConfigurationError(f"{package}: {key} requires jump/repeat booleans")
         if "color_relative" in piece and type(piece["color_relative"]) is not bool:
             raise ConfigurationError(f"{package}: {key}.color_relative must be a boolean")
+        if "capture_policy" in piece:
+            try:
+                CapturePolicy.from_json(piece["capture_policy"])
+            except (ValueError, TypeError) as error:
+                raise ConfigurationError(
+                    f"{package}: {key}.capture_policy is invalid: {error}"
+                ) from error
     placements = board.get("starting_pieces")
     if not isinstance(placements, list):
         raise ConfigurationError(f"{package}: starting_pieces must be a list")
