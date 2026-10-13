@@ -70,7 +70,7 @@ A simultaneous movement of the King and a Rook of the same color along the playe
 - **Mandatory Requirements**:
   1. Neither the King nor the chosen Rook has moved earlier in the game.
   2. All squares between the King and the Rook must be empty.
-  3. The King is **not** currently in check.
+  3. The King is **not** in check at the start of castling.
   4. The square the King passes across is **not** attacked by an enemy piece.
   5. The square the King lands upon is **not** attacked by an enemy piece.
 
@@ -81,7 +81,7 @@ A simultaneous movement of the King and a Rook of the same color along the playe
 
 ### Pawn Promotion
 - When a pawn reaches the eighth rank (Rank 8 for White, Rank 1 for Black), it is immediately converted to a Queen, Rook, Bishop, or Knight of the same color as chosen by the player.
-- Promotion takes effect instantly and is not constrained by whether pieces of that type were previously captured (e.g. multiple Queens are permitted).
+- Promotion takes effect instantly and is not constrained by whether pieces of that type have been captured (e.g. multiple Queens are permitted).
 
 ---
 

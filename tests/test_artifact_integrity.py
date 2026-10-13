@@ -12,12 +12,14 @@ DOCS = [
     ".agents/notes/PRD.md",
     ".agents/notes/object_model.md",
     ".agents/notes/json_contract.md",
+    ".agents/notes/chess_rules.md",
+    ".agents/notes/reference_diagram.md",
     "packages/server/README.md",
     "packages/web/README.md",
     "packages/desktop/README.md",
 ]
 CHRONOLOGY = re.compile(
-    r"\b(?:historical|legacy|retired|superseded|formerly|previously|currently)\b",
+    r"\b(?:historical|legacy|retired|superseded|formerly|previously|currently|current|original|obsolete)\b",
     flags=re.IGNORECASE,
 )
 

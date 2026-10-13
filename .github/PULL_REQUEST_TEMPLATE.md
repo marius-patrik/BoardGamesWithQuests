@@ -19,6 +19,11 @@ Closes #
 
 ## Verification evidence
 
+- [ ] Changed interfaces, JSON schema, migrations, examples, docs, diagrams and deployment settings agree
+- [ ] Every altered behavior has tests at the supported API/engine/browser/database boundary
+- [ ] Tests assert successful outcomes, negative input, wrong identity, edge limits and shared-state races
+- [ ] Real provider contract and browser integration are verified, not simulated by mocks
+- [ ] Reviewed at least one regression that fails against the defective behavior
 - [ ] Relevant actual product behavior exercised and results linked
 - [ ] Required DarkFactory `quality` and `verify-bound-issue` checks pass
 - [ ] Project-specific documentation and release checks pass

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 # GitHub Pages is deployed from reviewed main through its Actions deployment
-# API; the retired preview-docs caller and gh-pages staging are not inputs.
+# Docs are published exclusively from tracked source through Actions.
 permissions:
   contents: read
   pages: write
@@ -37,7 +37,7 @@ jobs:
       - name: Install documentation dependencies
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Build current docs from tracked repository sources
+      - name: Build docs from tracked repository sources
         run: python .github/scripts/build_docs.py
 
       - name: Write manifest of actual deployed versions/projects

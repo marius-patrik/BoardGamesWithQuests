@@ -2,7 +2,7 @@
 
 Use this file only for **unfulfilled executable work**, blockers with a
 reproduction command, assigned agents and immediately actionable dependencies.
-Do not append progress chronology, dated releases, narrative recaps, superseded
+Do not append progress chronology, dated releases, narrative recaps, replaced
 instructions or manually duplicated CI statuses.
 
 **Authority:** [PRD](notes/PRD.md) · [PLAN](notes/PLAN.md) ·
