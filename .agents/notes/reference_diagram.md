@@ -152,7 +152,7 @@ smoothing them over would make the deviations unverifiable.
 because it is the full object model and page 2 is the integration sketch — see the approved [object-model decisions](object_model.md).
 
 Page-1 also writes `rozmery: Tuple = (8,8)`, hard-coding the default board size.
-That default is kept; nothing may rely on it.
+This default is part of the **original drawing only**. The approved implementation requires all domain dimensions to be supplied explicitly through JSON; see [object_model.md](object_model.md).
 
 ---
 
@@ -178,7 +178,7 @@ listed here are already English in the diagram.
 | `User Manager` | `UserManager` | |
 | `Quest` | `Quest` | already English |
 | `Kwest` | `Quest` | appears only inside `splnene_kwesty` |
-| `Timer` | `Timer` | the configurable parent is `Clock` — `object_model.md` section 13 |
+| `Timer` | `Timer` | the configurable parent is `Clock` — [object_model.md](object_model.md) |
 | `GameManagerController` | `GameManagerController` | already English; the diagram has no `GameController` or `WindowController` box |
 | `GameVeiw` | `GameView` | diagram typo |
 | `HracGameView` | `PlayerGameView` | the `Hrac` part is Czech |
