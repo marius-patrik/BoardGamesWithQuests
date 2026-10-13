@@ -112,10 +112,10 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
     if not isinstance(board, dict):
         raise ConfigurationError(f"{package}: missing board definition")
     rows, cols = board.get("rows"), board.get("columns")
-    if not all(type(v) is int and 1 <= v <= 256 for v in (rows, cols)):
+    if not all(type(v) is int and 1 <= v <= 256 for v in (rows, cols)) or rows * cols > 4096:
         raise ConfigurationError(f"{package}: board dimensions are invalid")
     pieces = data.get("pieces")
-    if not isinstance(pieces, dict) or not pieces:
+    if not isinstance(pieces, dict) or not pieces or len(pieces) > 128:
         raise ConfigurationError(f"{package}: pieces must be a nonempty object")
     for key, piece in pieces.items():
         if not isinstance(key, str) or not isinstance(piece, dict):
@@ -131,10 +131,11 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
             if (
                 not isinstance(vectors, list)
                 or not vectors
+                or len(vectors) > 32
                 or any(
                     not isinstance(v, list)
                     or len(v) != 2
-                    or any(type(axis) is not int for axis in v)
+                    or any(type(axis) is not int or abs(axis) > max(rows, cols) for axis in v)
                     or v == [0, 0]
                     for v in vectors
                 )
@@ -155,6 +156,8 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
     if not isinstance(placements, list):
         raise ConfigurationError(f"{package}: starting_pieces must be a list")
     occupied: set[tuple[int, int]] = set()
+    if len(placements) > 128:
+        raise ConfigurationError(f"{package}: too many starting piece groups")
     for placement in placements:
         if not isinstance(placement, dict) or placement.get("piece") not in pieces:
             raise ConfigurationError(f"{package}: unknown piece in starting position")
@@ -174,9 +177,11 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
             if tuple(square) in occupied:
                 raise ConfigurationError(f"{package}: duplicate square {square!r}")
             occupied.add(tuple(square))
+            if len(occupied) > 2048:
+                raise ConfigurationError(f"{package}: too many starting pieces")
     clock = data.get("clock")
     if not isinstance(clock, dict) or any(
-        type(clock.get(key)) is not int or clock[key] < 0
+        type(clock.get(key)) is not int or not 0 <= clock[key] <= 315360000
         for key in ("initial_seconds", "increment_seconds")
     ):
         raise ConfigurationError(f"{package}: invalid clock")
