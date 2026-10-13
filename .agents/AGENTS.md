@@ -1,70 +1,105 @@
-# Repository Development Rules
+# Repository Engineering Rules
 
-## Evidence and safety
-Report verification accurately. Compilation, documentation generation, formatting,
-type checks and smoke checks never establish product behavior. Do not merge known
-incorrect interim implementations or advertise unavailable features. Reject unsafe
-inputs explicitly and keep unfinished work isolated from supported paths.
+## Source authority
 
-## Source of truth and documentation
-Product requirements live in the PRD, architecture decisions in the object model,
-delivery sequencing in the Plan and transient verification state in the scratchpad.
-Keep active documentation **forward-looking and evergreen**: no historical narration,
-migration chronicles, superseded instructions, past milestones, stale dates or
-temporary issue/PR numbers. Preserve provenance in Git history and issue discussions.
-Remove completed migration tasks from active instructions. Do not replace a general
-rule with an explanation of a one-time event. Never duplicate a plan in another file.
-Preserve immutable external assignment/reference material exactly as supplied.
+The PRD defines product requirements; architecture decisions define system
+boundaries; PLAN defines unfulfilled work; SCRATCHPAD carries actionable work
+notes. Source code, schema, tests, live services and independently reproduced
+behavior determine whether a requirement is implemented. Never equate a
+successful build, mock, screenshot or status label with working functionality.
 
-## Documentation quality and naming
-Write code and documentation in English, with Google-style docstrings and type
-annotations as appropriate. Generate documentation from tracked sources and fail
-the strict documentation build on warnings. Never commit generated docs source.
-Compare design changes against the preserved reference diagram and document each
-intentional architectural deviation with its rationale.
+## Timeless artifacts
 
-## Contributions, branches and review
-Never push directly to protected main. Use focused Conventional Commits of the form
-`type(scope): subject` (feat, fix, refactor, test, docs, chore, ci).
-Keep PRs draft until ready; require green applicable checks, an up-to-date base,
-independent implementation review and explicit native maintainer approval.
-Every PR binds the appropriate tracked issue and reconciles plan deviations before
-merging. Use bot-authored PRs through the installed DarkFactory pipeline when owner
-approval requires a distinct author identity.
+Every committed artifact must describe only an authoritative contract,
+implementation, decision, enduring requirement, or outstanding actionable task.
+Never retain chronology, dated progress reports, version comparisons, migration
+stories, abandoned designs, overwritten proposals, supersession notes, or
+narratives about how the implementation used to work. Remove replaced material
+instead of appending an explanation. Omit temporal qualifiers from headings,
+links, comments and prose. Git commit history and issue discussions preserve
+provenance. SQL migrations and immutable external assignment figures are
+functional exceptions only to the extent required for reproducibility.
 
-## Planning and traceability
-New independent requests normally get a Request issue preserving the original
-user text plus an explicit interpretation; require confirmation before scheduling
-implementation. Create a child Plan issue tied to the request when supported.
-A maintainer-approved consolidation may use an existing Plan issue without
-duplicating the backlog. Record acceptance evidence against requirements;
-do not treat issue closure as proof that tests or deployment passed.
+## Atomic artifact alignment — mandatory on every change
 
-## CI and automation
-Keep a single DarkFactory configuration at `repo.dfconfig`; retain Python
-packaging and tool-specific configuration files where the corresponding tools
-require them. Agent runners and approval logic should be shared, pinned to
-immutable verified releases; this repository owns only thin callers and genuinely
-project-specific verification. Stable checks include `quality` and
-`verify-bound-issue` plus applicable docs, Python, browser, security and API
-tests. Do not substitute compilation for functional test coverage without
-explicitly marking that absence. Keep every integration review thread addressed
-before requesting approval. Preserve the established project boards and taxonomies.
+Treat each change as a dependency graph, not a source edit. In the same
+implementation chunk, update **all affected artifacts**: public interfaces,
+schemas, migrations, bundled JSON, engine and server behavior, frontend types,
+documentation, architecture decisions, diagrams, usage examples, test fixtures,
+behavioral tests, CI jobs, deployment configuration, issue/PR acceptance criteria
+and release metadata. Delete stale references and redundant implementations.
+Regenerate derived diagrams from source. Audit links and example commands.
+Do not close a chunk, request review or merge while related artifacts disagree.
+Never postpone corresponding behavior tests or docs synchronization to an
+unspecified cleanup milestone. A PR must list impact surfaces and independent
+reviewers verify the complete change graph.
 
-## Domain and security architecture
-Games, movements, rules, hooks, quests, clocks, configuration and outcomes are
-validated bounded JSON. Never allow user-authored executable Python, JavaScript,
-dynamic plugin imports, arbitrary expressions or eval. Implement only trusted
-generic primitives in the engine, without branches on game identities. Provide
-all game-significant values explicitly. Only an authoritative game transaction
-may authorize and commit state changes; user/profile managers cannot mutate
-boards. Every hosted mutation verifies the authenticated identity, participant
-membership, current revision and legal state, then commits atomically and durably.
-Never expose Supabase secret/service credentials to clients. Enforce participant-
-scoped RLS and safe Realtime resynchronization, including anonymous guests.
+## Behavior-driven testing contract
 
-## Verification gates
-Cover negative cases, simultaneous actions and the real user-visible workflow.
-If a package or external service cannot be validated, record an explicit blocker
-rather than claiming completion. Enforce required status checks and review gates
-before final merge or a public playable release.
+Tests must specify observable **inputs, actions and outcomes** through supported
+interfaces: legal and illegal game actions, HTTP responses, database effects,
+UI interactions, authentication decisions, event order, exported notation and
+user-visible recovery. Prefer an external actor or black-box consumer viewpoint,
+not assertions about code structure, class existence, imports, literals,
+formatting, mocked call counts or private implementation details.
+
+For every behavior change, cover:
+- A representative successful user flow with explicit meaningful assertions.
+- Boundary values and malformed/hostile input; failure must be safe and specific.
+- Relevant state transitions, turn alternation, clocks, quests and terminal
+  outcomes, with no state mutation on rejected operations.
+- Identity isolation, wrong participant, missing permissions and revoked access.
+- Race conditions, simultaneous submissions, duplicates, stale revisions and
+  transaction rollback when shared mutable state is involved.
+- Persistence after process restart, retries, lost messages and reconnect.
+- A regression reproducing each resolved defect before the fix.
+
+Use parametrized fixture scenarios for each game definition, including castling,
+en passant, promotion and repetition; English capture chains; and international
+maximal capture, backward captures, flying kings and capture obstruction.
+Configuration tests must drive real JSON through the validator and interpreter.
+
+Use test doubles only at genuinely nondeterministic third-party boundaries;
+never mock the behavior being claimed as verified. Back each adapter contract
+with real integration tests against its actual provider. Public network, browser
+and database acceptance tests verify service behavior, not response shape alone.
+If an external integration cannot run, mark the gate **blocked**; do not replace
+it with a mocked pass or silently skip mandatory tests.
+
+All tests must be deterministic, isolated, independent of execution order and
+must clean up state. Tests must fail for an intentionally broken implementation.
+Every scenario has a link to its requirement or documented defect. Include
+independent adversarial review. Treat mutation/fault injection as additional
+evidence where practical. A syntax check, import smoke test or bare compilation
+never counts toward behavior acceptance.
+
+Require test coverage with each production change. CI runs the real behavior
+suite and fails if it is missing, skipped in place of mandatory coverage, or
+reports unverified external requirements as passing. Run the relevant
+integration and end-to-end gates before approving a production release.
+
+## Architecture and security
+
+All game-authored rules, boards, piece behavior, clocks, quests, hooks and
+outcomes are bounded validated JSON, never executable Python/JavaScript,
+eval/exec, dynamic imports or arbitrary extensions. The shared engine contains
+only game-neutral trusted primitives and a single authoritative legal-commit
+boundary. No game-identity special cases, implicit board dimensions or clock
+defaults. The host verifies Supabase JWT identity, participant membership,
+turn, legal state and expected revision before an atomic durable commit.
+Supabase privileged credentials never reach public clients. Use participant-
+scoped authorization, safe Realtime reconciliation and database RLS.
+
+## Repository collaboration
+
+Use focused Conventional Commits, an issue-bound integration PR and independent
+review rounds. Keep `main` protected; no direct pushes or automatic integration
+without maintainer approval. Keep one `repo.dfconfig` for DarkFactory. Native
+build-tool metadata may exist where its ecosystem requires it; do not duplicate
+authority. Keep workflows pinned to verified immutable versions. Preserve the
+project boards, GPL licensing and supplied reference diagrams.
+
+If an external operation is blocked or a new paid resource is required,
+continue independent work and record the actual blocker without fabricating
+success. Require green relevant CI, behavioral evidence, security review and
+maintainer approval before deployment is declared complete.

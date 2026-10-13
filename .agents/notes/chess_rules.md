@@ -1,6 +1,6 @@
 # FIDE Chess Rules Reference
 
-This is the **target rules baseline for the chess configuration**, summarized from FIDE Laws of Chess. It is not a claim of current implementation or a substitute for the official FIDE rules. It describes orthodox chess on an 8×8 board.
+This defines the chess rules required by the declarative game configuration, summarized from the FIDE Laws of Chess. The official FIDE rules govern conformance. It describes orthodox chess on an 8×8 board.
 
 **Two things this document is not:**
 

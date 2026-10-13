@@ -1,18 +1,18 @@
 # Server
 
-ASGI: `api/index.py` at the repository root imports `server.app:app`.
-Deploy the API Vercel project with the **repository root** as its project root;
-the separate web project uses `packages/web`.
+Python ASGI application: `api/index.py` imports `server.app:app`.
+Deploy the Vercel API project with the repository root as its project root,
+including the `packages/` Python path and root `pyproject.toml`.
 
-There are no gameplay endpoints yet. `/health` explicitly reports
-`playable: false`. Public read-only `/games` enumerates installed versioned
-JSON definitions with each game's honest `playable` flag. Supabase Auth/JWT authorization, Postgres
-transactions, RLS, migrations and Realtime are G4 implementation work.
-Python dependencies come from the repository-root `pyproject.toml`.
+The `/health` route reports availability without pretending game readiness.
+The `/games` route reads and validates the three JSON configurations and
+returns `playable=false` until complete rules pass independent acceptance.
 
-## Vercel bootstrap
+All mutations must verify the Supabase Auth identity and game participation,
+then run generic domain legality through a server-only PostgreSQL transaction.
+The private `bgwq` schema holds immutable config snapshots, revisions
+and events. No service-role credentials are permitted in browser code.
 
-Project: `boardgameswithquests-api` (`prj_7kdxZvwbxItXRjRTblmz2s0xFw3h`).
-Initial deployment `dpl_2TmHrJJ2qNXT54cbum4BDtmrFqwU` reports READY, but the
-Vercel Authentication gate still prevents external anonymous route verification.
-No production game endpoints are available.
+API address: `https://boardgameswithquests-api.vercel.app`.
+Behavioral acceptance: `tests/`, the live HTTP CI job and the private
+Supabase transaction fixture.

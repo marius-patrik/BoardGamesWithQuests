@@ -1,8 +1,6 @@
 # BoardGamesWithQuests — Product Requirements Document
 
-**Status:** Approved target requirements; **not a claim of existing implementation**.  
-**Version:** 2.1 — online JSON-driven architecture.  
-**Execution authority:** [PLAN.md](PLAN.md), [#129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129). Progress: [SCRATCHPAD.md](../SCRATCHPAD.md). Deviations: [object_model.md](object_model.md). Original diagrams: [reference_diagram.md](reference_diagram.md).
+**Execution authority:** [PLAN.md](PLAN.md), [#129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129). Execution: [PLAN.md](PLAN.md). Deviations: [object_model.md](object_model.md). Reference diagrams: [reference_diagram.md](reference_diagram.md).
 
 ## 1. Product
 
@@ -27,8 +25,8 @@ The complete user interface is a **React/Rsbuild** website, publicly hosted on *
 - No hard-coded game identity, royal king logic, pawn names or default board dimensions in shared engine. Domain-significant values are supplied explicitly.
 - No external chess rules library replacing the hand-implemented engine, unless separately approved. Modern approved runtime libraries for web/API/Supabase are allowed.
 - All public multiplayer state changes are authenticated, authorized, atomic and durable.
-- Existing source/reference UML is preserved as original evidence; intentional divergence is registered in `object_model.md`.
-- Permanent tests must assert real gameplay, API, UI and persistence behavior. Permanent behavior tests are rebuilt at the final test gate.
+- Existing source/reference UML is preserved as reference evidence; intentional divergence is registered in `object_model.md`.
+- Permanent tests must assert real gameplay, API, UI and persistence behavior. Behavioral tests accompany every implementation chunk and are integrated into the permanent acceptance suite.
 
 ## 4. Configuration and extension model
 
@@ -40,7 +38,7 @@ Forms for Board, Pieces, Rules, Quests and Clocks derive their allowed fields an
 
 ## 5. Naming and source UML
 
-English canonical names are used for shared domain types; the original Czech naming and reference mapping remain in [reference_diagram.md](reference_diagram.md). Where the existing non-UI Python implementation needs Czech aliases, they bind to the same canonical domain class, not a parallel runtime. Canonical chess knight is `Knight`, not `Horse` or `Tower`. Original `GameView`/`PlayerView` are now **React component responsibilities**, not classes to keep inside `engine/view`. See [object_model.md](object_model.md) for rationale and traceability.
+English canonical names are used for shared domain types; the source-reference Czech naming and reference mapping remain in [reference_diagram.md](reference_diagram.md). Where the engine Python implementation needs Czech aliases, they bind to the same canonical domain class, not a parallel runtime. Canonical chess knight is `Knight`, not `Horse` or `Tower`. `GameView`/`PlayerView` are **React component responsibilities**, not classes to keep inside `engine/view`. See [object_model.md](object_model.md) for rationale and traceability.
 
 ## 6. Package boundaries
 
@@ -48,13 +46,14 @@ English canonical names are used for shared domain types; the original Czech nam
 packages/
   engine/     generic Python board, moves, declarative rule/quest runtime, lifecycle
   chess/      immutable chess config.json and game-owned format writers
-  checkers/   immutable WCDF checkers config.json and game-owned format writers
+  english_draughts/      immutable English draughts JSON definition
+  international_checkers/ immutable 10×10 draughts JSON definition
   server/     FastAPI/Vercel, authorization, Supabase transactions and API
   web/        React/TypeScript/Rsbuild/Bun UI, typed API client
   desktop/    Tauri wrapper loading hosted web app
 ```
 
-Python domain orchestration stays in `engine`. UI/window controllers and Tkinter do not. Supabase Auth owns account credentials; server owns player authorization; engine owns rule/turn legality. Source files held by the historical stack are not automatically delivered by being present in Git history.
+Python domain orchestration stays in `engine`. UI/window controllers and Tkinter do not. Supabase Auth owns account credentials; server owns player authorization; engine owns rule/turn legality. Source files held by the source reference are not automatically delivered by being present in Git history.
 
 ## 7. Functional requirements
 
@@ -65,7 +64,7 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 | FR-1 | Board dimensions are configurable in rows and columns. |
 | FR-2 | The starting position is either the shipped one or edited square by square. |
 | FR-3 | A piece declares a name, a white symbol, a black symbol, movement vectors, attack vectors, a jump flag and a `kind` label. A piece may be added to the palette and placed on the board. |
-| FR-4 | Symbols are **unicode chess glyphs declared as data**. The board renderer and the notation writer hold no knowledge of piece types; both read what the piece declares. |
+| FR-4 | Symbols are **unicode chess glyphs declared as data**. The board renderer and the notation writer hno knowledge of piece types; both read what the piece declares. |
 | FR-5 | A piece may additionally declare an optional FEN character. Without one it has no FEN representation. |
 | FR-6 | Clocks declare an initial time and an increment. |
 | FR-7 | A game runs under exactly one configuration and exactly one board. |
@@ -93,7 +92,7 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 | FR-19 | Quest logic is JSON configuration interpreted by trusted generic engine primitives. No separate user-authored condition class, source code module, or Python plugin is required. |
 | FR-20 | Quests declare identity, name, description, parameters, timing, progress measurement, completion criteria and reward as schema-validated JSON. |
 | FR-21 | A quest declares evaluation timing (`after_move` or `at_game_end`), or another explicitly supported lifecycle trigger defined in the schema. |
-| FR-22 | A quest exposes progress as current and target, not only a completion boolean. |
+| FR-22 | A quest exposes progress as active and target, not only a completion boolean. |
 | FR-23 | Configured quests are held per game; their progress and completion are isolated per player; completed achievements are persisted against the user's account. |
 | FR-24 | Total experience is **derived** from the quests a user has completed, so the user type gains no new field. |
 
@@ -101,7 +100,7 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 
 | ID | Requirement |
 |---|---|
-| FR-25 | Shipped `chess` and `checkers` are independently registered Python packages with a root `config.json`; board, pieces, rules, quests and clocks are JSON. The engine owns their schema and generic interpreter, not executable game-authored configuration. |
+| FR-25 | Shipped `chess`, `english_draughts`, and `international_checkers` are independently registered Python packages with a root `config.json`; board, pieces, rules, quests and clocks are JSON. The engine owns their schema and generic interpreter, not executable game-authored configuration. |
 | FR-26 | The immutable shipped chess definition provides orthodox 8×8 pieces, setup, rules and clocks as JSON. The UI may preselect this definition; constructing a playable engine session always receives its selected configuration explicitly. |
 | FR-27 | Shipped default definitions cannot be edited/deleted; a variant begins as a validated copy. |
 | FR-28 | Users can create, rename, duplicate, edit and delete user-owned game variants through JSON-backed settings. |
@@ -166,9 +165,9 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 
 | ID | Requirement |
 |---|---|
-| FR-60 | Supabase Auth registers, authenticates and identifies persistent and anonymous guests. Profiles have username/display name where applicable and historical rating/quest data; player assignments reference stable identities; duplicate IDs and unauthorized links are rejected. |
+| FR-60 | Supabase Auth registers, authenticates and identifies persistent and anonymous guests. Profiles have username/display name where applicable and rating and quest records; player assignments reference stable identities; duplicate IDs and unauthorized links are rejected. |
 | FR-61 | The generic validator exposes candidate/legal moves and state/outcome queries through JSON-configured rules; royal/check semantics are game configuration data, never piece-name tests in engine. |
-| FR-62 | One GameManager owns the current board, active player, two positions, move, configured clocks, history, rule/quest state and validator, and serializes a consistent session snapshot for durable storage. |
+| FR-62 | One GameManager owns the active board, active player, two positions, move, configured clocks, history, rule/quest state and validator, and serializes a consistent session snapshot for durable storage. |
 | FR-63 | Game clocks use explicit time controls and participant IDs, trusted timestamps, invalid-input rejection and recoverable state independent of continuously running functions. |
 | FR-64 | A durable append-only game transcript records moves, action types, events and results without accidental truncation; authenticated clients can retrieve it. |
 | FR-65 | React UI interaction chooses squares and sends a move intent to FastAPI; the Python engine controller authorizes and commits through its single public domain operation. |
@@ -189,12 +188,12 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 | FR-75 | The sole GUI is React + TypeScript + Rsbuild + Bun + Tailwind + shadcn/ui + Motion + Lucide/lucide-animated; the server supplies generated typed OpenAPI contracts. |
 | FR-76 | The Tauri desktop package loads the **same deployed web UI**, does not maintain another frontend or bundle a Python server, and uses minimal native capabilities. |
 | FR-77 | Two Vercel projects deploy the frontend and Python API from compatible reviewed Git revisions; Supabase is the only persistent hosted service. Hosting aims to stay within free tiers, verified before public release. |
-| FR-78 | The public application supports exactly two participants per individual game, create/join invitation, separate concurrent games and correct resilience; it has no additional classroom room or leaderboard. |
-| FR-79 | The public deployment must be usable for the class presentation: guests on a shared IP, real browsers, concurrent games, match completion, clock correctness and reconnection tested against quotas. |
-| FR-80 | The permanent suite is rebuilt from zero against final behavior after integration (#239); no green CI/diagram/build result alone certifies playability. |
+| FR-78 | The public application supports exactly two participants per individual game, create/join invitation, separate conactive games and correct resilience; it has no additional classroom room or leaderboard. |
+| FR-79 | The public deployment must be usable for the class presentation: guests on a shared IP, real browsers, conactive games, match completion, clock correctness and reconnection tested against quotas. |
+| FR-80 | Each behavior change delivers automated user-observable and adversarial tests. The permanent suite (#239) extends these through real network/browser/database end-to-end verification; a green build or diagram cannot certify gameplay. |
 | FR-81 | Shipped configurations are immutable; authenticated users can save editable JSON variants, and each game pins an immutable validated config snapshot. |
 | FR-82 | Repository and release artifacts have one active plan, correct GPL-3.0 metadata, one `repo.dfconfig`, updated DarkFactory pin, aligned code and accurate diagrams, with explicit approval before merge. |
 
 ## 8. Acceptance evidence
 
-Deliver a complete public two-player game from guest sign-in through game creation/joining, alternating legal moves, correct result, persisted history, reconnection and serverless function restart. Exercise real rule/quest JSON customization, saved variants, orthodox chess and WCDF checkers, correct PGN/SAN and FEN export, GUI behavior, account isolation, access policies, atomic double-submit handling, clocks, Tauri wrapper, classrooms on shared network, and verified Vercel/Supabase free-tier quotas. Final permanent behavior suite is #239. **No documentation check or code compilation substitutes for this evidence.**
+Deliver a complete public two-player game from guest sign-in through game creation/joining, alternating legal moves, correct result, persisted history, reconnection and serverless function restart. Exercise real rule/quest JSON customization, saved variants, orthodox chess and WCDF checkers, correct PGN/SAN and FEN export, GUI behavior, account isolation, access policies, atomic double-submit handling, clocks, Tauri wrapper, classrooms on shared network, and verified Vercel/Supabase free-tier quotas. Behavioral verification is required throughout delivery and for final acceptance in #239. **No documentation check or code compilation substitutes for this evidence.**

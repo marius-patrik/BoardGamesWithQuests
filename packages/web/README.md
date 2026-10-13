@@ -1,16 +1,22 @@
-# Web frontend
+# Web application
 
-Single intended React/Rsbuild interface, shared by browser and hosted Tauri
-wrapper. The source bootstrap is intentionally not a playable game.
+React and TypeScript are built with Rsbuild and Bun.
+The browser UI is the **sole** frontend for web and Tauri; only the trusted
+Python engine authorizes legal moves.
 
-Run `bun install` from this directory to generate the Bun lockfile before
-enabling web CI/deployment. The frontend has no Supabase keys, authentication or
-game APIs wired yet. Public development builds must not be advertised as playable.
-The production web project will use this directory as its Vercel root.
+Install and run in `packages/web`:
 
-## Vercel bootstrap
+```sh
+bun install --frozen-lockfile
+bun run dev
+bun run typecheck
+bun run build
+```
 
-Project: `boardgameswithquests-web` (`prj_iWSGkCmiCeh1uliqVN06b5QWPAAx`).
-Initial deployment `dpl_2Sy36YSuA7Yx91cPuMEny3nWrv1P` reports READY, but
-Vercel Authentication prevents public unauthenticated access. The rendered
-page is intentionally a non-playable placeholder and cannot be used for class.
+The Vercel project `boardgameswithquests-web` builds this directory and
+publishes `dist/`. Production site:
+`https://boardgameswithquests-web.vercel.app`.
+
+Auth, board interaction, settings forms, game state, clocks, quests and Realtime
+must be tested through actual browser-visible outcomes. The scaffold does not
+provide gameplay until those requirements are fulfilled.

@@ -2,7 +2,7 @@
 
 ## Configuration ownership
 
-Version 2 is the current validated JSON envelope. The parser accepts at most
+Version 2 is a validated JSON envelope. The parser accepts at most
 256 KiB and rejects duplicate or unknown top-level fields, invalid clocks,
 unknown pieces, overlapping placements and executable extensions.
 Board dimensions, placements, movement vectors, appearance, captures, rules,

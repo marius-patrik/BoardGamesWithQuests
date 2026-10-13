@@ -81,8 +81,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Bun
-        # The paper capability resolves its entrypoint with a repository script, so the typst
-        # job needs bun too even though it is not a bun job.
+        # Ensure repository script entrypoints can run under Bun.
         if: matrix.packageManager == 'bun' || matrix.ecosystem == 'typst'
         uses: oven-sh/setup-bun@v2
 
@@ -130,18 +129,13 @@ jobs:
 
       - name: Set up Deno
         if: matrix.ecosystem == 'deno'
-        # `v2.0.5`, not `v2`. That action publishes no floating `v2` tag - only `v2.0.x` - so `@v2` did not
-        # resolve, and a repository with a Deno project got a step that failed before it could run.
-        # Nothing caught it because nothing resolves an action reference: every pin here had been a tag
-        # that was assumed to exist. Verified against the action's own refs, where `refs/tags/v2` is absent
-        # and `refs/tags/v2.0.5` is `22d081ff2d3a40755e97629de92e3bcbfa7cf2ed`.
+        # Pin to a verified immutable action version.
         uses: denoland/setup-deno@v2.0.5 # 22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
         with:
           deno-version: v2.x
 
       - name: Set up Typst
-        # The paper package's own test compiles the manuscript, so its job needs typst even
-        # though it is a node job.
+        # Provide Typst to manuscript compilation jobs.
         if: matrix.ecosystem == 'typst' || matrix.cwd == 'paper'
         uses: typst-community/setup-typst@v5
 
@@ -243,7 +237,7 @@ jobs:
           python-version: "3.12"
       - name: Install project documentation dependencies
         run: python -m pip install -r requirements-dev.txt
-      # DarkFactory's v0.289.2 native documentation validator requires a .darkfactory/ADRs.md
+      # Documentation validation uses the repository source layout.
       # layout and rejects this project's maintainer-approved .agents/notes + properdocs
       # hierarchy. Preserve that hierarchy; use this repository's actual strict docs contract.
       - name: Build and verify project-specific documentation

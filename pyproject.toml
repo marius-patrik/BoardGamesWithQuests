@@ -22,8 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Games/Entertainment :: Board Games",
 ]
-# The currently integrated engine core has no third-party runtime imports. FastAPI and
-# Supabase dependencies belong to packages/server once that package is implemented.
+# API runtime dependencies are declared for build reproducibility.
 dependencies = ["fastapi==0.143.0"]
 
 [project.urls]

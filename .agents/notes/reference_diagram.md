@@ -1,16 +1,16 @@
 # Reference Architecture Diagram
 
-## Original reference diagrams
+## Supplied reference diagrams
 
-These SVGs are rendered from the **original, two-page diagrams.net file**,
+These SVGs are rendered from the **supplied, two-page diagrams.net file**,
 preserving the class labels, relationships and geometry; they are not generated
 from the implementation or redrawn from the prose inventory.
 
-![Original class diagram — Page 1](diagrams/reference-page1.svg)
+![Supplied class diagram — Page 1](diagrams/reference-page1.svg)
 
-![Original MVC integration diagram — Page 2](diagrams/reference-mvc.svg)
+![Supplied MVC integration diagram — Page 2](diagrams/reference-mvc.svg)
 
-The original source remains in [the external diagrams.net document](https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D). Only its exported reference SVGs are committed here; the `.drawio` file is deliberately excluded from the repository.
+The supplied source remains in [the external diagrams.net document](https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D). Only its exported reference SVGs are committed here; the `.drawio` file is deliberately excluded from the repository.
 
 - **Source file**: `Šachy - diagram tříd.drawio`, with the full model on `Page-1` and the integration sketch on `MVC - GameView`.
 
@@ -127,7 +127,7 @@ smoothing them over would make the deviations unverifiable.
 - **Only `Kůň` is connected to `Figurka`.** The other five pieces have an edge
   with a source and **no target**, and each redeclares `vektor`, `vektor_utoku`
   and `skok` rather than inheriting them. The intended target model has all six extend
-  `Figurka`; the drawing is unfinished. This does not assert current implementation conformance.
+  `Figurka`; the drawing is unspecified. This does not assert implemented implementation conformance.
 - **`skok` is declared on the six subclasses, not on `Figurka`.** `Figurka` has
   `název`, `vektory`, `vektory_utoku` and `barva`.
 - **`Extends` is not a relationship.** It is an `edgeLabel` on a free-standing
@@ -152,7 +152,7 @@ smoothing them over would make the deviations unverifiable.
 because it is the full object model and page 2 is the integration sketch — see the approved [object-model decisions](object_model.md).
 
 Page-1 also writes `rozmery: Tuple = (8,8)`, hard-coding the default board size.
-This default is part of the **original drawing only**. The approved implementation requires all domain dimensions to be supplied explicitly through JSON; see [object_model.md](object_model.md).
+This default is part of the **supplied drawing only**. The approved implementation requires all domain dimensions to be supplied explicitly through JSON; see [object_model.md](object_model.md).
 
 ---
 
@@ -183,4 +183,4 @@ listed here are already English in the diagram.
 | `GameVeiw` | `GameView` | diagram typo |
 | `HracGameView` | `PlayerGameView` | the `Hrac` part is Czech |
 
-The normative alias table for the completed product is in [PRD §5](PRD.md#5-naming-and-source-uml).
+The normative alias table for the delivered product is in [PRD §5](PRD.md#5-naming-and-source-uml).
