@@ -34,7 +34,8 @@ Documentation = "https://marius-patrik.github.io/BoardGamesWithQuests/"
 
 [project.entry-points."boardgameswithquests.games"]
 chess = "chess"
-checkers = "checkers"
+english_draughts = "english_draughts"
+international_checkers = "international_checkers"
 
 [tool.setuptools_scm]
 # setuptools-scm reads Git tags directly; no manually maintained package version.
@@ -44,11 +45,12 @@ package-dir = {"" = "packages"}
 
 [tool.setuptools.packages.find]
 where = ["packages"]
-include = ["engine*", "chess*", "checkers*"]
+include = ["engine*", "chess*", "english_draughts*", "international_checkers*"]
 
 [tool.setuptools.package-data]
 chess = ["config.json"]
-checkers = ["config.json"]
+english_draughts = ["config.json"]
+international_checkers = ["config.json"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

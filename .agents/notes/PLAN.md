@@ -7,7 +7,7 @@
 
 ## 1. Goal and constraints
 
-Finish a **playable, correct online two-player** chess/checkers app, game-neutral Python engine, JSON-only game configuration, public free-tier web deployment and Tauri desktop wrapper. Classmates must be able to visit the public URL, enter as guests, create/join a game, play to a result, and reconnect without losing state. Registered accounts also work. No leaderboard, classroom lobby, tournaments, separate rooms, separate desktop GUI or other unrequested product features.
+Finish a **playable, correct online two-player** chess/English/international draughts app, game-neutral Python engine, JSON-only game configuration, public free-tier web deployment and Tauri desktop wrapper. Classmates must be able to visit the public URL, enter as guests, create/join a game, play to a result, and reconnect without losing state. Registered accounts also work. No leaderboard, classroom lobby, tournaments, separate rooms, separate desktop GUI or other unrequested product features.
 
 **Principle:** No knowingly incorrect interim production behavior, duplicate configuration architecture, UI pretending to be playable, or unsupported feature advertising. All game-significant defaults come from explicit configuration. Original supplied reference drawings are immutable; changes require documented, approved deviations. Tests measure behavior.
 
@@ -17,7 +17,8 @@ Finish a **playable, correct online two-player** chess/checkers app, game-neutra
 packages/
   engine/     Python board/pieces, declarative rules/quests/hooks, moves, lifecycle
   chess/      config.json, game-owned serializers; no engine chess special cases
-  checkers/   config.json, game-owned serializers; no engine checkers special cases
+  english_draughts/      config.json for WCDF English draughts
+  international_checkers/ config.json for international draughts
   server/     Python FastAPI, Supabase integration, player authorization, game transactions
   web/        React + TypeScript + Rsbuild + Bun + Tailwind + shadcn/ui + Motion + Lucide Animated
   desktop/    Tauri wrapper loading the same deployed web URL; no second frontend
@@ -33,7 +34,7 @@ Every shipped game uses validated **`config.json`** specifying board dimensions/
 
 **No user-authored executable code:** no Python or JS editor for rules/quests, dynamic imports of user-supplied modules, unsafe eval/exec, or writable executable config directories. Declarative JSON composes **trusted generic Python primitives**; extensible rules/quests are data, not user code. Generic behavior includes board queries, selections, vectors/attacks, captures, ownership, turns, logical AND/OR/NOT, comparisons/counts, rule state, conditional effects, progress/rewards and outcome proposals.
 
-Keep the five conceptual hooks: `permits_move`, `available_moves`, `outcome`, `on_move_made`, `status`. Rules propose and the engine coordinates. Design a bounded and typed JSON AST/schema (no arbitrary string expressions); validate nesting, supported ops, target references and complexity. Test representative complex chess/checkers rules *before* freezing schema, especially castling, en passant, pawn promotion, attack/check, repetition, mandatory multi-capture and outcome precedence. If an operation is missing, generalize primitives rather than hardcode a game identifier. No promise of arbitrary computation from finite JSON primitives.
+Keep the five conceptual hooks: `permits_move`, `available_moves`, `outcome`, `on_move_made`, `status`. Rules propose and the engine coordinates. Design a bounded and typed JSON AST/schema (no arbitrary string expressions); validate nesting, supported ops, target references and complexity. Test representative complex chess/English/international draughts rules *before* freezing schema, especially castling, en passant, pawn promotion, attack/check, repetition, mandatory multi-capture and outcome precedence. If an operation is missing, generalize primitives rather than hardcode a game identifier. No promise of arbitrary computation from finite JSON primitives.
 
 ## 4. Shared engine and game conformance
 
@@ -46,7 +47,7 @@ Keep the five conceptual hooks: `permits_move`, `available_moves`, `outcome`, `o
 - **Quests:** JSON hook definitions, per-player per-game progress, persistent user completions, XP derived from rewards. One player's completion cannot complete another player's instance.
 - **History:** one authoritative event/move record. Logs never truncate by accident; no chess-only generic headers.
 - **Chess:** orthodox movement, castling, en passant, promotion, check/mate/stalemate, draws/claims as applicable, timer, resignation and custom configurations. Chess rule conformance checked against `chess_rules.md`.
-- **Checkers:** WCDF English draughts (single-step kings, mandatory captures/chains, crowning, correct outcomes), independently of chess. Adding this game changes no generic engine source.
+- **Draughts:** Separate WCDF English (8×8, short kings) and international (10×10, flying kings, backward captures, maximum-capture obligation) JSON definitions. Multi-hop captures, crowning and results are generic hook behavior.
 - **Exports:** FR-43 one format-specific trusted writer per game format; engine has no format switch. Correct PGN/SAN, six-field FEN **export only**, letter notation, transcript/metadata, applicable checkers and stenographic variants. No FEN import/round-trip requirement; compare output to known positions.
 
 ## 5. Backend, authentication, persistence, realtime
@@ -108,7 +109,7 @@ Review the entire legacy source chain against current JSON, engine and UI decisi
 | Gate | Work | Proof to proceed |
 |---|---|---|
 | G0 — CORE COMPLETE | Consolidate PR ancestry/tree/issues and establish authoritative plan | App-authored draft #271; 25 historical PRs closed unmerged; all 26 associated old PR refs removed with SHA/ancestry verification. Project board #14 preserved and renamed. Current Plan issue #129 and test gate #239. **External Projects exception:** Global #17 contains #129 and #239 but PR #271 attachment remains unverified; previous GraphQL quota exhaustion and a later `gh project` “unknown owner type” failure blocked the attempted update. Historical issue/PR status fields on Project #14 still require a consistency audit. Do not claim full board alignment.** |
-| G1 | Validate JSON schema, five hooks, expression/condition vocabulary; Vercel + Supabase deploy feasibility | Both games expressible; a real Python API function imports engine and safely commits a fixture |
+| G1 | Validate JSON schema, five hooks, expression/condition vocabulary; Vercel + Supabase deploy feasibility | All three games expressible; a real Python API function imports engine and safely commits a fixture |
 | G2 | Rebuild engine rules/quests/config/move commit/clock/history | Headless legal move and state/restart probes; zero game-name logic |
 | G3 | Implement chess/checkers and format writers against G2, parallelized | Orthodox and WCDF scenarios run through same engine |
 | G4 | FastAPI/Supabase and React UI in parallel against frozen typed contracts | End-to-end two-user real browser session; auth, clocks, quests, configuration persistence |

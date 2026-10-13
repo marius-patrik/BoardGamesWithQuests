@@ -1,6 +1,6 @@
 # BoardGamesWithQuests
 
-BoardGamesWithQuests is a configurable two-player chess and English-draughts project built around a reusable, game-neutral Python engine. The approved application architecture uses declarative **JSON** for boards, pieces, rules, quests and clocks; FastAPI on Vercel Functions for authoritative moves; Supabase for authentication, durable state and Realtime; and one React web interface shared with a Tauri desktop wrapper.
+BoardGamesWithQuests is a configurable two-player chess and draughts project built around a reusable, game-neutral Python engine. The approved application architecture uses declarative **JSON** for boards, pieces, rules, quests and clocks; FastAPI on Vercel Functions for authoritative moves; Supabase for authentication, durable state and Realtime; and one React web interface shared with a Tauri desktop wrapper.
 
 The architecture described here is the **product target**, not a claim that the application is already playable. Actual implementation and verification status belongs in the [scratchpad](.agents/SCRATCHPAD.md).
 
@@ -9,8 +9,9 @@ The architecture described here is the **product target**, not a claim that the 
 ```text
 packages/
   engine/     Python domain model and declarative rule/quest interpreter
-  chess/      Orthodox chess config.json and supported exporters
-  checkers/   WCDF English draughts config.json and supported exporters
+  chess/                 Orthodox chess JSON definition
+  english_draughts/      WCDF English draughts JSON definition
+  international_checkers/ International draughts JSON definition
   server/     FastAPI Python Functions, Supabase game transaction API
   web/        React + TypeScript + Rsbuild + Bun + shadcn/ui + Tailwind
   desktop/    Tauri wrapper loading the deployed web application

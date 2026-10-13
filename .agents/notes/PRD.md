@@ -6,7 +6,7 @@
 
 ## 1. Product
 
-A configurable online **two-player** board-game app, with Python engine shared by orthodox chess and WCDF English draughts. Players select or create validated JSON variants: board, starting position, piece movements and glyphs, active rules and quests, and clocks. Chess is the preselected shipped game, not an implicit engine constructor default. Checkers demonstrates engine neutrality: no checkers-specific engine branch.
+A configurable online **two-player** board-game app, with Python engine shared by orthodox chess, WCDF English draughts and international draughts. Players select or create validated JSON variants: board, starting position, piece movements and glyphs, active rules and quests, and clocks. Chess is the preselected shipped game, not an implicit engine constructor default. Both draughts variants demonstrate engine neutrality: neither uses a game-identity branch.
 
 The complete user interface is a **React/Rsbuild** website, publicly hosted on **Vercel**. **Tauri** is a thin desktop wrapper loading that same website. **FastAPI Python Functions on Vercel** run all authoritative game logic. **Supabase** provides persistent game data, Auth (registered and guest identities), and Realtime event updates. Each game has precisely two participant slots; creating/joining a match needs no separate room concept. No leaderboard, tournament or other unrequested features.
 
@@ -32,7 +32,7 @@ The complete user interface is a **React/Rsbuild** website, publicly hosted on *
 
 ## 4. Configuration and extension model
 
-`packages/chess/config.json` and `packages/checkers/config.json` are immutable shipped definitions. Both use the **same versioned declarative schema**, with board placements, piece declarations, rule/quest hooks/conditions, game outcomes, symbols, clock controls, metadata and applicable export formats. Copying/creating a variant means copying validated **data**, not creating/importing a new Python module. User variants persist in Supabase.
+`packages/chess/config.json`, `packages/english_draughts/config.json` and `packages/international_checkers/config.json` are immutable shipped definitions. Both use the **same versioned declarative schema**, with board placements, piece declarations, rule/quest hooks/conditions, game outcomes, symbols, clock controls, metadata and applicable export formats. Copying/creating a variant means copying validated **data**, not creating/importing a new Python module. User variants persist in Supabase.
 
 The engine's five conceptual rule hooks are `permits_move`, `available_moves`, `outcome`, `on_move_made`, `status`. The engine implements generic interpreters for typed conditions, logical composition, comparisons, counts, board queries, movement vectors, per-session state and authorized effects. A rule does not commit a move; the game manager owns the final transition. Quests are similarly declarative, report progress and rewards, and are scoped per player. No user-authored rule/quest subclass or executable configuration path.
 
@@ -150,8 +150,10 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 | ID | Requirement |
 |---|---|
 | FR-53 | `packages/chess/` is a complete, correct orthodox chess configuration. |
-| FR-54 | `packages/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings moving one square diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
+| FR-54 | `packages/english_draughts/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings moving one square diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
 | FR-55 | Adding/checking the checkers JSON definition requires no conditional branch in generic engine behavior; game-specific implementations never leak into the engine. |
+
+| FR-83 | `packages/international_checkers/` ships a separate 10×10 international draughts JSON definition: 20 men per side, backward captures, flying kings, compulsory maximum-piece capture sequences and international crowning/outcome behavior. No executable piece/rule subclass. |
 
 ### 7.9 Application and runtime
 

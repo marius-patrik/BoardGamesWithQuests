@@ -1,1 +1,1 @@
-"""Chess piece package defining move vectors, leaping rules, and piece representations."""
+"""Generic piece representation; game capabilities are JSON data."""
