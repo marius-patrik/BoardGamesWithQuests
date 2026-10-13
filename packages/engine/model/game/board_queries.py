@@ -80,8 +80,7 @@ class BoardQueries:
         steps = math.gcd(abs(dr), abs(dc))
         step_r, step_c = dr // steps, dc // steps
         return all(
-            self._board.get_piece_at((start[0] + step_r * i, start[1] + step_c * i))
-            is None
+            self._board.get_piece_at((start[0] + step_r * i, start[1] + step_c * i)) is None
             for i in range(1, steps + 1)
         )
 
