@@ -177,7 +177,7 @@ jobs:
             bash -lc "$DF_ACTION_COMMAND"
           fi
 
-  docs-check:
+docs-check:
     name: docs-check
     runs-on: ubuntu-latest
     steps:
@@ -185,78 +185,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Detect combined configuration docs block
-        id: docs
-        env:
-          DF_CONFIG_DIR: ${{ env.DF_CONFIG_DIR }}
-        run: |
-          ROOT_REPO=false
-          ROOT_CONFIG=false
-          ROOT_EMPTY=false
-          FOLDER_REPO=false
-          FOLDER_CONFIG=false
-          FOLDER_EMPTY=false
-          [ -f "$GITHUB_WORKSPACE/repo.dfconfig" ] && ROOT_REPO=true
-          [ -f "$GITHUB_WORKSPACE/config.dfconfig" ] && ROOT_CONFIG=true
-          [ -f "$GITHUB_WORKSPACE/.dfconfig" ] && ROOT_EMPTY=true
-          CONFIG_DIR="${DF_CONFIG_DIR:-.darkfactory}"
-          case "$CONFIG_DIR" in
-            /*) FOLDER="$(realpath -m "$CONFIG_DIR")" ;;
-            *) FOLDER="$(realpath -m "$GITHUB_WORKSPACE/$CONFIG_DIR")" ;;
-          esac
-          if [ "$FOLDER" != "$GITHUB_WORKSPACE" ]; then
-            [ -f "$FOLDER/repo.dfconfig" ] && FOLDER_REPO=true
-            [ -f "$FOLDER/config.dfconfig" ] && FOLDER_CONFIG=true
-            [ -f "$FOLDER/.dfconfig" ] && FOLDER_EMPTY=true
-          fi
-          COUNT=0
-          for PRESENT in "$ROOT_REPO" "$ROOT_CONFIG" "$ROOT_EMPTY" "$FOLDER_REPO" "$FOLDER_CONFIG" "$FOLDER_EMPTY"; do
-            [ "$PRESENT" = true ] && COUNT=$((COUNT + 1))
-          done
-          if [ "$COUNT" -gt 1 ]; then
-            echo "Ambiguous DarkFactory configuration: keep only one repo.dfconfig, config.dfconfig, or .dfconfig candidate." >&2
-            exit 1
-          fi
-          if [ "$COUNT" -eq 1 ]; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Check out pinned DarkFactory runtime
-        if: steps.docs.outputs.present == 'true' && github.repository != 'marius-patrik/DarkFactory'
-        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          repository: "marius-patrik/DarkFactory"
-          ref: "b5bdba739bf989f965af51c9efd88ee89617075c"
-          path: .darkfactory-runtime
-
-      - name: Set up Bun
-        if: steps.docs.outputs.present == 'true'
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install DarkFactory runtime
-        if: steps.docs.outputs.present == 'true'
+          python-version: "3.12"
+      - name: Install project documentation dependencies
+        run: python -m pip install -r requirements-dev.txt
+      # DarkFactory's v0.289.0 native documentation validator requires a .darkfactory/ADRs.md
+      # layout and rejects this project's maintainer-approved .agents/notes + properdocs
+      # hierarchy. Preserve that hierarchy; use this repository's actual strict docs contract.
+      - name: Build and verify project-specific documentation
         run: |
-          ROOT="$GITHUB_WORKSPACE"
-          if [ -d "$GITHUB_WORKSPACE/.darkfactory-runtime" ]; then
-            ROOT="$GITHUB_WORKSPACE/.darkfactory-runtime"
-          fi
-          bun install --frozen-lockfile --cwd "$ROOT"
-
-      - name: Build native documentation
-        if: steps.docs.outputs.present == 'true'
-        run: |
-          ROOT="$GITHUB_WORKSPACE"
-          if [ -d "$GITHUB_WORKSPACE/.darkfactory-runtime" ]; then
-            ROOT="$GITHUB_WORKSPACE/.darkfactory-runtime"
-          fi
-          bun "$ROOT/scripts/build-docs.ts" --repo-root "$GITHUB_WORKSPACE" --check
-
-      - name: No documentation configured
-        if: steps.docs.outputs.present != 'true'
-        run: echo "No combined configuration docs block; native documentation check is not applicable."
+          python .github/scripts/build_docs.py
+          python .github/scripts/docs_manifest.py --site site
 
   quality:
     name: quality
