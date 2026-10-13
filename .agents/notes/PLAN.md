@@ -87,7 +87,7 @@ Original stack **25 open PRs** from #218 through #209 at planning time, with the
 
 Review the entire legacy source chain against current JSON, engine and UI decisions; do not paste it blindly. For each source feature: retain, adapt, reimplement, or reject with evidence. Old Tkinter, local Python code-authoring, FEN importer, stale docs, static packaging, duplicate startup and agent-deletion changes are rejected as active architecture. A merged ancestry is **not** proof that all historical code was integrated.
 
-Retire all 25 historical draft PRs once this consolidated draft PR is opened; post supersession links and preserve them as closed historical records. Delete obsolete refs only through an authorized safe branch-deletion capability, after verification that the consolidated merge commit is reachable and source history preserved. Do not force-reset old refs to fake deletion.
+Retire all 25 historical draft PRs once this consolidated draft PR is opened; post supersession links and preserve them as closed historical records. **Completed 2026-10-13:** all 26 obsolete PR-branch refs (including rejected #170) were removed by one-time GitHub Actions cleanup only after exact-SHA and commit-ancestry checks succeeded. Original commits remain reachable via the consolidated merge history; the temporary cleanup workflow was removed.
 
 **Issues:** #129 is the authoritative consolidated Plan issue; #239 stays open as final tests. Existing old plan/request issues are superseded (not completed) and link #129/new PR. Their historical comments remain in GitHub. Do not leave obsolete Tkinter/Python/FEN-import/agent-removal requests in the live backlog.
 
@@ -107,7 +107,7 @@ Retire all 25 historical draft PRs once this consolidated draft PR is opened; po
 
 | Gate | Work | Proof to proceed |
 |---|---|---|
-| G0 | Consolidate PR ancestry/tree/issues and install this authoritative plan | One new draft PR; 25 old PRs superseded; historical work preserved; no branches falsely claimed deleted |
+| G0 — COMPLETE | Consolidate PR ancestry/tree/issues and install this authoritative plan | DarkFactory App-authored draft #271; 25 historical PRs superseded, 26 old PR branch refs safely deleted; all commits preserved in ancestry; #129 and #239 own the open product work |
 | G1 | Validate JSON schema, five hooks, expression/condition vocabulary; Vercel + Supabase deploy feasibility | Both games expressible; a real Python API function imports engine and safely commits a fixture |
 | G2 | Rebuild engine rules/quests/config/move commit/clock/history | Headless legal move and state/restart probes; zero game-name logic |
 | G3 | Implement chess/checkers and format writers against G2, parallelized | Orthodox and WCDF scenarios run through same engine |
