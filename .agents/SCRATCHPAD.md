@@ -16,7 +16,7 @@
   and verified every result on a subsequent read.
 - DarkFactory v0.289.2 pinned on the integration/managed configuration paths.
 
-## G1 — implemented; final checks required
+## G1 — complete (contract and deployment feasibility)
 
 - JSON version 2 strictly validates declared board/pieces, quests, rule hooks,
   bounded ASTs, typed references, capture policies and clock constraints.
@@ -25,7 +25,8 @@
   captures, deferred captured-piece obstruction and maximum capture checks.
   Generic snapshot/position/rights/castling/transient-target/promotion and
   outcome precedence primitives are exercised through
-  `scripts/probe_g1_semantics.py`. The separate negative-input/AST probe is
+  `scripts/probe_g1_semantics.py`, including outcome priority tie rejection and
+  safe dynamic move references. The separate negative-input/AST probe is
   `scripts/probe_json_contract.py`.
 - These are **G1 expressiveness probes, not G3 complete legal game rules**.
   Chess, English draughts and international draughts all remain
@@ -55,8 +56,10 @@
 - Shared-school-IP anonymous sign-in quota (normally 30/hour/IP, configurable)
   remains a real capacity risk. G4 enables guest login; G7 must verify
   classroom-size anonymous sign-in capacity before public presentation.
-- Await the final green aggregate quality check on the current PR head to
-  certify the G1 code checkpoint.
+- The G1 Python 3.10–3.13 behavior probes and Python formatting passed in
+  Actions run `38421495549`. The cross-package aggregate quality run is
+  still subject to its independent Rust checks; never equate those probes with
+  the final complete game-suite gate #239.
 
 ## Next: G2/G3
 

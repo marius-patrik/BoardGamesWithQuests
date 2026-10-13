@@ -107,7 +107,7 @@ configurations are JSON-only; exported formats are trusted serializers.
 | Gate | Work | Proof to proceed |
 |---|---|---|
 | G0 — COMPLETE | Keep one integration PR, preserve source ancestry, and reconcile tracking | Recovery refs absorbed and retired, one draft PR, Global #17 membership verified; local project #14 all 216 current items independently read and 81 statuses reconciled and verified by Actions run 38397182126. |
-| G1 | Validate JSON schema, five hooks, expression/condition vocabulary; Vercel + Supabase deploy feasibility | All three games expressible; a real Python API function imports engine and safely commits a fixture |
+| G1 — COMPLETE | Freeze typed JSON rules/quests/references, prove generic chess and both draughts primitives, verify Vercel and Supabase transaction feasibility | Python G1 scenario/negative probes, public FastAPI + web smoke test, live private Supabase CAS/RLS/immutable config fixture. Backend-to-DB integration and complete game legality remain G2–G4. |
 | G2 | Rebuild engine rules/quests/config/move commit/clock/history | Headless legal move and state/restart probes; zero game-name logic |
 | G3 | Implement chess, English draughts and international draughts with game-specific formats against G2 | FIDE, WCDF and international scenarios run through the same engine |
 | G4 | FastAPI/Supabase and React UI in parallel against frozen typed contracts | End-to-end two-user real browser session; auth, clocks, quests, configuration persistence |
