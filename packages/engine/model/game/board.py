@@ -10,15 +10,12 @@ class Board:
 
     Game-specific placements and movement rules do not belong to board storage.
     A board begins empty unless its creator provides an explicit placement.
-    `DEFAULT_DIMENSIONS` is a convenience only, not a game constraint.
+    Every board dimension is provided by its configuration.
     """
-
-    #: Default size for callers that do not provide a game configuration.
-    DEFAULT_DIMENSIONS: Tuple[int, int] = (8, 8)
 
     def __init__(
         self,
-        dimensions: Tuple[int, int] = DEFAULT_DIMENSIONS,
+        dimensions: Tuple[int, int],
         placement: Optional[Iterable[Tuple[Tuple[int, int], Piece]]] = None,
     ):
         """Initialize a board.

@@ -29,9 +29,12 @@ class UserManager:
         Returns:
             Assigned user ID integer.
         """
+        if user_id is not None and (type(user_id) is not int or user_id < 1):
+            raise ValueError("user ID must be a positive integer")
         uid = user_id if user_id is not None else self._next_id
-        if user_id is None:
-            self._next_id += 1
+        if uid in self.users:
+            raise ValueError(f"user ID {uid} is already registered")
+        self._next_id = max(self._next_id, uid + 1)
         self.users[uid] = user
         self.log_action(f"User registered: {user.username} (id: {uid})")
         return uid
@@ -54,6 +57,12 @@ class UserManager:
             user_id: Registered user ID.
             player: Player instance to link.
         """
+        if user_id not in self.users:
+            raise ValueError("cannot link an unregistered user")
+        if user_id in self.player_map and self.player_map[user_id] is not player:
+            raise ValueError("user already linked to a different player")
+        if any(linked is player for uid, linked in self.player_map.items() if uid != user_id):
+            raise ValueError("player already linked to a different user")
         self.player_map[user_id] = player
 
     def log_action(self, message: str) -> None:
@@ -73,18 +82,10 @@ class UserManager:
         self.user_history += entry + "\n"
 
     def execute_move(self, move: Optional[Any] = None, board: Optional[Any] = None) -> bool:
-        """Execute a move in the context of user management and record history.
+        """Refuse gameplay mutations through the identity registry.
 
-        Args:
-            move: Optional Move instance to execute.
-            board: Optional Board instance.
-
-        Returns:
-            True if executed or move is None, False if execution failed.
+        Moves must be authorized and committed by the game session's single
+        domain boundary; this registry cannot validate the active configuration,
+        turn, or authenticated participant.
         """
-        if move is not None and board is not None:
-            success = move.execute(board) if hasattr(move, "execute") else False
-            if success:
-                self.record_history(f"Executed move: {move}")
-            return success
-        return True
+        raise PermissionError("moves must be committed through GameManager")

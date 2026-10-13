@@ -19,7 +19,7 @@ class GameLogger:
             self.create_file(filename)
 
     def create_file(self, filename: str) -> None:
-        """Create or overwrite a log file with an initial header.
+        """Ensure an optional local log exists without truncating existing history.
 
         Args:
             filename: Target file path.
@@ -28,8 +28,8 @@ class GameLogger:
         dirname = os.path.dirname(filename)
         if dirname:
             os.makedirs(dirname, exist_ok=True)
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write("# Chess Game Log\n")
+        with open(filename, "a", encoding="utf-8"):
+            pass
 
     def log_move(self, move: Any) -> None:
         """Record a played move in memory and append to file if configured.

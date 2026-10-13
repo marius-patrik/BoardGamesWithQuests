@@ -21,36 +21,30 @@ except ImportError:
 class GameManager:
     """Core game orchestrator managing turns, clocks, moves, and terminal game conditions."""
 
-    STATE_IN_PROGRESS = 0
-    STATE_CHECK = 1
-    STATE_CHECKMATE = 2
-    STATE_STALEMATE = 3
-    STATE_TIMEOUT = 4
-
     def __init__(
         self,
-        board: Optional[Board] = None,
-        players: Optional[List[Player]] = None,
-        timer: Optional[Timer] = None,
+        board: Board,
+        players: List[Player],
+        timer: Timer,
         logger: Optional[GameLogger] = None,
         validator: Optional[MoveValidator] = None,
     ):
-        """Initialize a GameManager instance.
+        """Create a session with explicit board, two players and clock.
 
-        Args:
-            board: Optional Board instance (defaults to standard 8x8 Board).
-            players: Optional list of Player instances (defaults to White and Black players).
-            timer: Optional Timer instance (defaults to standard 600s timer).
-            logger: Optional GameLogger instance.
-            validator: Optional MoveValidator instance.
+        The active game configuration must be supplied by the caller; implicit
+        chess-specific board, timer and participant defaults are prohibited.
         """
-        self.board: Board = board or Board()
-        self.players: List[Player] = players or [Player(1), Player(-1)]
-        self.active_player: int = 1
+        if board is None or timer is None or len(players) != 2:
+            raise ValueError("board, clock and exactly two players are required")
+        if players[0].getColor() == players[1].getColor():
+            raise ValueError("players must control distinct sides")
+        self.board = board
+        self.players = list(players)
+        self.active_player = self.players[0].getColor()
         self.current_move: Optional[Move] = None
-        self.timer: Timer = timer or Timer()
-        self.game_logger: GameLogger = logger or GameLogger()
-        self.move_validator: MoveValidator = validator or MoveValidator(self.board)
+        self.timer = timer
+        self.game_logger = logger if logger is not None else GameLogger()
+        self.move_validator = validator if validator is not None else MoveValidator(board)
 
     def start_turn(self) -> Optional[Move]:
         """Begin a new turn, clearing any pending move selection.
@@ -79,22 +73,9 @@ class GameManager:
         """Save the game log (stub implementation)."""
         pass
 
-    def get_state(self) -> int:
-        """Evaluate and return the current state of the game.
-
-        Returns:
-            Integer state constant: STATE_TIMEOUT, STATE_CHECKMATE,
-            STATE_STALEMATE, STATE_CHECK, or STATE_IN_PROGRESS.
-        """
-        if self.timer.is_expired(self.active_player):
-            return self.STATE_TIMEOUT
-        if self.move_validator.is_checkmate(self.active_player, self.board):
-            return self.STATE_CHECKMATE
-        if self.move_validator.is_stalemate(self.active_player, self.board):
-            return self.STATE_STALEMATE
-        if self.move_validator.is_check(self.active_player, self.board):
-            return self.STATE_CHECK
-        return self.STATE_IN_PROGRESS
+    def get_state(self) -> Any:
+        """Fail closed until JSON-configured outcome evaluation is integrated."""
+        raise NotImplementedError("game result requires configured outcome hooks")
 
     def make_move(self, move: Move) -> bool:
         """Validate and execute a move, log it, and switch the active player.

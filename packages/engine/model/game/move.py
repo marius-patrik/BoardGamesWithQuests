@@ -33,7 +33,7 @@ class Move:
         self.promotion_piece = promotion_piece
 
     @staticmethod
-    def _bounds(board: Optional[Any]) -> Tuple[int, int]:
+    def _bounds(board: Any) -> Tuple[int, int]:
         """Return the (rows, cols) a move is measured against.
 
         Args:
@@ -42,11 +42,7 @@ class Move:
         Returns:
             Tuple[int, int]: The board dimensions the move must fit inside.
         """
-        if board is not None:
-            return board.rows, board.cols
-        from engine.model.game.board import Board
-
-        return Board.DEFAULT_DIMENSIONS
+        return board.rows, board.cols
 
     def validate(self, board: Optional[Any] = None) -> bool:
         """Validate geometric boundaries and basic board rules for this move.
@@ -65,6 +61,8 @@ class Move:
         ):
             return False
 
+        if board is None:
+            return False
         rows, cols = self._bounds(board)
         if not (0 <= self.start_pos[0] < rows and 0 <= self.start_pos[1] < cols):
             return False

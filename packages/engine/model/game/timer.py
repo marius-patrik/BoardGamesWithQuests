@@ -6,12 +6,17 @@ from typing import List, Union
 class Timer:
     """Manages player turn clocks, increments, countdown ticks, and expiration."""
 
-    def __init__(self, initial_time: int = 600):
+    def __init__(self, initial_time: int, increment_seconds: int = 0):
         """Initialize game timers.
 
         Args:
             initial_time: Initial time per player in seconds (default: 600).
         """
+        if type(initial_time) is not int or initial_time < 0:
+            raise ValueError("initial_time must be a non-negative integer")
+        if type(increment_seconds) is not int or increment_seconds < 0:
+            raise ValueError("increment_seconds must be a non-negative integer")
+        self.increment_seconds = increment_seconds
         self.initial_time = initial_time
         self.player_times: List[int] = [initial_time, initial_time]
 
@@ -24,13 +29,11 @@ class Timer:
         Returns:
             0 or 1 index.
         """
-        if player == 1 or player == "white":
+        if type(player) is int and player == 1 or player == "white":
             return 0
-        elif player == -1 or player == "black":
+        if type(player) is int and player == -1 or player == "black":
             return 1
-        elif player in (0, 1):
-            return player
-        return 0
+        raise ValueError(f"unknown player identifier: {player!r}")
 
     def reset_time(self) -> None:
         """Reset both player clocks to the initial time."""
@@ -44,6 +47,8 @@ class Timer:
             elapsed_seconds: Number of seconds to deduct (default: 1).
         """
         idx = self._get_player_index(player)
+        if type(elapsed_seconds) is not int or elapsed_seconds < 0:
+            raise ValueError("elapsed_seconds must be a non-negative integer")
         self.player_times[idx] = max(0, self.player_times[idx] - elapsed_seconds)
 
     def add_time(self, player: int, increment_seconds: int) -> None:
@@ -54,6 +59,8 @@ class Timer:
             increment_seconds: Seconds to add to player's clock.
         """
         idx = self._get_player_index(player)
+        if type(increment_seconds) is not int or increment_seconds < 0:
+            raise ValueError("increment_seconds must be a non-negative integer")
         self.player_times[idx] += increment_seconds
 
     def get_time(self, player: int) -> int:
