@@ -185,6 +185,48 @@ at-game-end quest timing, configured progress measurements and complete
 game-specific repetition identity remain required extensions listed in the actionable workspace. The session does
 not certify any complete FIDE or draughts rulebook.
 
+## Aggregate evaluation ceilings
+
+Each locked legal-move read or submission shares one trusted ceiling of
+250,000 deterministic work units across candidate enumeration, capture search,
+JSON/state copying, rule/query evaluation, effects, quests and outcome phases.
+Every replayed action retains the same 250,000-unit child ceiling and fresh
+operation-local cache. Children charge a monotonic shared parent, whose bound
+is derived as `MAX_EVENTS × MAX_EVALUATION_WORK + MAX_REPLAY_INITIAL_WORK`.
+The initial allowance covers twice the 65,536 snapshot value-node limit plus
+4 MiB of text in 64-character blocks. Consequently every accepted history
+within the supported event limit retains a sufficient aggregate replay budget;
+replay cannot use that parent allowance to bypass an action's own ceiling.
+Reservations check every counter before consuming any, so a failed parent or
+child reservation changes neither counter. Units reserve traversed cells,
+nodes, rays, candidate creation and copy work, with text cost in 64-character
+blocks. These ceilings are engine security constants, not game-authored JSON
+settings. Piece-owned `max_nodes` independently bounds each capture search.
+
+Capture routes are memoized only within the locked operation, keyed by exact
+board dimensions, side and every occupied square's kind, side and movement
+flag. The immutable configuration is pinned to the session. Cache storage is
+bounded to 256 entries and returned routes are detached copies; changing board
+state cannot reuse another position's routes. Resources clear after success,
+retry or failure and do not enter serialized snapshots.
+
+Capture exploration shares its aggregate budget across pieces, ray traversal,
+search nodes and position copies, with complete chains bounded to 128 hops.
+Candidate capacity is checked incrementally before retaining more than 4,096
+intents. Exhaustion raises `EvaluationBudgetExceeded`, a query-resolution
+error; other search/result limits likewise fail closed. No search returns a
+truncated route set or legal-move prefix, and preview enumeration does not
+silently skip aggregate-budget failures. Rejected operations publish no state.
+Snapshot recovery reports resource exhaustion as a typed transition error.
+
+A structurally valid definition can exceed its action execution ceiling and is
+rejected without accepting an unrecoverable transition. Reconstruction validates
+each action under its submission ceiling, including hostile supplied histories.
+Replay performance and verified checkpointing or efficient reconstruction remain
+classroom-release gates before exposing arbitrary snapshot recovery through an
+external API. These optimizations must preserve accepted-state recoverability,
+exact retries, corruption detection and the per-action hostile-input ceiling.
+
 ## Game-neutral primitive expressiveness
 
 The rule vocabulary supports direct board occupancy, geometric attack and path

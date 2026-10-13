@@ -7,15 +7,21 @@ new state. Persistence adapters must additionally enforce database compare-and-s
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from dataclasses import asdict
+from contextlib import contextmanager
 import json
 from threading import RLock
 from typing import Any
 
 from engine.model.game.board import Board
 from engine.model.game.board_queries import BoardQueries
-from engine.model.game.capture_geometry import CaptureEnumerator, CapturePolicy
+from engine.model.game.capture_geometry import (
+    CaptureEnumerator,
+    CapturePolicy,
+    EvaluationBudget,
+    MAX_EVALUATION_WORK,
+)
 from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
 from engine.model.game.configuration import (
     GameDefinition,
@@ -32,6 +38,43 @@ from engine.model.pieces.piece import Piece
 
 MAX_EVENTS = 4096
 MAX_SNAPSHOT_BYTES = 4194304
+# Immutable snapshots have at most 65,536 value nodes; mapping keys add at most
+# one traversal unit per value, and serialized text bounds its 64-character work.
+MAX_REPLAY_INITIAL_WORK = 2 * 65536 + MAX_SNAPSHOT_BYTES // 64
+MAX_REPLAY_WORK = MAX_EVENTS * MAX_EVALUATION_WORK + MAX_REPLAY_INITIAL_WORK
+
+
+def _json_work(value: Any) -> int:
+    """Measure deterministic JSON traversal and text-copy work.
+
+    Args:
+        value: Bounded validated JSON or its immutable representation.
+
+    Returns:
+        Nodes plus one work unit per 64 text characters.
+    """
+    if isinstance(value, Mapping):
+        return 1 + sum(1 + _json_work(child) for child in value.values())
+    if isinstance(value, (list, tuple)):
+        return 1 + sum(_json_work(child) for child in value)
+    return 1 + (len(value) // 64 if isinstance(value, str) else 0)
+
+
+class OperationEvaluation:
+    """Own one aggregate work budget and exact-position capture cache.
+
+    Args:
+        budget: Trusted ceiling shared by every phase of one locked operation.
+    """
+
+    def __init__(self, budget: EvaluationBudget) -> None:
+        """Initialize operation-local bounded capture storage.
+
+        Args:
+            budget: Shared deterministic work counter.
+        """
+        self.budget = budget
+        self.capture_cache: dict[tuple[Any, ...], tuple[Any, ...]] = {}
 
 
 class TransitionError(ValueError):
@@ -80,6 +123,8 @@ class GameManager:
             raise TransitionError("a session requires explicit move authorization rules")
         self._definition = definition
         self._lock = RLock()
+        self._evaluation: OperationEvaluation | None = None
+        self._rule_work = _json_work(definition.rules)
         config = {
             "schema_version": 2,
             "name": definition.name,
@@ -128,6 +173,38 @@ class GameManager:
         state["position_history"].append(self._position_key(state))
         self._state = freeze_json(state)
 
+    @contextmanager
+    def _operation(self, budget: EvaluationBudget | None = None) -> Iterator[None]:
+        """Scope resources for one action, including an enclosing child replay counter.
+
+        Args:
+            budget: Optional explicit trusted counter for replay or verification.
+
+        Yields:
+            None while operation-local resources are active.
+        """
+        previous = self._evaluation
+        if previous is None:
+            self._evaluation = OperationEvaluation(
+                budget if budget is not None else EvaluationBudget(MAX_EVALUATION_WORK)
+            )
+        try:
+            yield
+        finally:
+            self._evaluation = previous
+
+    def _charge(self, units: int = 1) -> None:
+        """Reserve aggregate work before an operation phase executes.
+
+        Args:
+            units: Deterministic nonnegative work estimate.
+
+        Raises:
+            QueryResolutionError: Trusted aggregate operation budget is exhausted.
+        """
+        if self._evaluation is not None:
+            self._evaluation.budget.consume(units)
+
     @property
     def definition(self) -> GameDefinition:
         """Read the immutable configuration pinned when the session was created.
@@ -163,8 +240,7 @@ class GameManager:
         if type(value) is not int or not 0 <= value <= 2**53 - 1:
             raise TransitionError("timestamp must be nonnegative integer milliseconds")
 
-    @staticmethod
-    def _placement(board: Board) -> list[dict[str, Any]]:
+    def _placement(self, board: Board) -> list[dict[str, Any]]:
         """Serialize pieces in stable row-major order, including movement rights.
 
         Args:
@@ -173,6 +249,7 @@ class GameManager:
         Returns:
             Detached JSON piece records.
         """
+        self._charge(board.rows * board.cols)
         return [
             {
                 "square": [row, col],
@@ -239,6 +316,9 @@ class GameManager:
         Returns:
             A board with independent piece instances.
         """
+        self._charge(
+            self.definition.board["rows"] * self.definition.board["columns"] + len(state["board"])
+        )
         return Board(
             (self.definition.board["rows"], self.definition.board["columns"]),
             placement=[
@@ -282,22 +362,44 @@ class GameManager:
             Complete ordered routes from configured capture policies.
 
         Raises:
-            TransitionError: Enumeration exceeds bounded search resources.
+            QueryResolutionError: Enumeration exceeds bounded search resources.
         """
+        placement = self._placement(board)
+        key = (
+            board.rows,
+            board.cols,
+            side,
+            tuple(
+                (tuple(record["square"]), record["kind"], record["side"], record["moved"])
+                for record in placement
+            ),
+        )
+        if self._evaluation is not None and key in self._evaluation.capture_cache:
+            cached = self._evaluation.capture_cache[key]
+            self._charge(_json_work(cached))
+            return thaw_json(cached)
         routes: list[dict[str, Any]] = []
-        for record in self._placement(board):
+        budget = self._evaluation.budget if self._evaluation is not None else None
+        enumerator = CaptureEnumerator(board, budget)
+        for record in placement:
+            self._charge()
             if record["side"] != side:
                 continue
             spec = self.definition.pieces[record["kind"]]
             if "capture_policy" in spec:
                 routes.extend(
-                    CaptureEnumerator(board).enumerate(
+                    enumerator.enumerate(
                         tuple(record["square"]),
                         CapturePolicy.from_json(spec["capture_policy"]),
                     )
                 )
             if len(routes) > 128:
-                raise TransitionError("capture path result exceeds bounded resources")
+                raise QueryResolutionError("capture path result exceeds bounded resources")
+        if self._evaluation is not None:
+            if len(self._evaluation.capture_cache) >= 256:
+                self._evaluation.capture_cache.pop(next(iter(self._evaluation.capture_cache)))
+            self._charge(_json_work(routes))
+            self._evaluation.capture_cache[key] = freeze_json(routes)
         return routes
 
     def _context(
@@ -324,6 +426,7 @@ class GameManager:
         Returns:
             Trusted query registry and detached reference bindings.
         """
+        self._charge(_json_work(state))
         selectors = {"active": side, "opponent": -side}
         query_state = {
             "rule_state": state["rule_state"],
@@ -385,14 +488,38 @@ class GameManager:
                     "move.captures": len(captures),
                 }
             )
-        return (
-            {
-                **BoardQueries(board, side).bindings(),
-                **SnapshotQueries(query_state).bindings(),
-                "turn": BoardQueries(board, state["active_side"]).turn,
-            },
-            references,
-        )
+        self._charge(_json_work(query_state))
+        queries = {
+            **BoardQueries(board, side).bindings(),
+            **SnapshotQueries(query_state).bindings(),
+            "turn": BoardQueries(board, state["active_side"]).turn,
+        }
+
+        def bounded_query(operation: Any) -> Any:
+            """Wrap a trusted query with its traversal reservation.
+
+            Args:
+                operation: Registered read-only query.
+
+            Returns:
+                Query callable sharing the aggregate work ceiling.
+            """
+
+            def invoke(params: Mapping[str, Any]) -> Any:
+                """Execute a query after reserving its bounded traversal work.
+
+                Args:
+                    params: Validated declarative parameters.
+
+                Returns:
+                    The query's independently validated JSON result.
+                """
+                self._charge(board.rows * board.cols + _json_work(query_state))
+                return operation(params)
+
+            return invoke
+
+        return {name: bounded_query(operation) for name, operation in queries.items()}, references
 
     def _candidate(
         self, state: dict[str, Any], board: Board, move: Move, side: int
@@ -430,6 +557,9 @@ class GameManager:
                 raise TransitionError("capture intent must contain one complete legal chain")
         elif len(move.hops) != 1:
             raise TransitionError("piece does not declare chained capture capability")
+        self._charge(
+            len(piece.getDirections() + piece.getAttackDirections()) * max(board.rows, board.cols)
+        )
         if move.end_pos not in MoveValidator(board).get_geometric_moves(move.start_pos):
             raise TransitionError("move is not a configured geometric candidate")
         return [list(move.end_pos)] if board.get_piece_at(move.end_pos) is not None else []
@@ -460,6 +590,7 @@ class GameManager:
         Returns:
             Immutable effects in declared order.
         """
+        self._charge(self._rule_work)
         queries, references = self._context(state, board, side, move, captures, now_ms, counts)
         return (
             HookInterpreter(thaw_json(self.definition.rules), queries, references)
@@ -522,6 +653,7 @@ class GameManager:
         """
         emitted: list[dict[str, Any]] = []
         for effect in effects:
+            self._charge(_json_work(effect.params))
             params = thaw_json(effect.params)
             op = effect.op
             if op in {"set_state", "set_rights"}:
@@ -607,6 +739,7 @@ class GameManager:
         Raises:
             TransitionError: Geometry, permission, clock or configured effects fail.
         """
+        self._charge(_json_work(state))
         state = thaw_json(freeze_json(state))
         elapsed = now_ms - state["clocks"]["anchor_ms"] if side == state["active_side"] else 0
         if elapsed < 0 or elapsed >= state["clocks"]["remaining_ms"][str(side)]:
@@ -655,6 +788,7 @@ class GameManager:
         queries, references = self._context(state, board, side, move, captures, now_ms)
         evaluator = ConditionEvaluator(queries, references)
         for quest in self.definition.quests:
+            self._charge(_json_work(quest))
             if evaluator.evaluate(thaw_json(quest["when"])):
                 self._complete_quest(state, actor_id, quest["id"])
         return state, board, captures, effects, event
@@ -678,18 +812,29 @@ class GameManager:
             if record["side"] != side:
                 continue
             start = tuple(record["square"])
+            piece = board.get_piece_at(start)
+            self._charge(
+                len(piece.getDirections() + piece.getAttackDirections())
+                * max(board.rows, board.cols)
+            )
             for end in MoveValidator(board).get_geometric_moves(start):
                 if (
                     "capture_policy" in self.definition.pieces[record["kind"]]
                     and board.get_piece_at(end) is not None
                 ):
                     continue
+                self._charge()
+                if len(candidates) >= 4096:
+                    raise QueryResolutionError(
+                        "candidate move enumeration exceeds bounded resources"
+                    )
                 candidates.append(Move(start, end))
         for route in self._paths(board, side):
             hops = tuple(tuple(step["landing"]) for step in route["steps"])
+            self._charge(len(hops))
+            if len(candidates) >= 4096:
+                raise QueryResolutionError("candidate move enumeration exceeds bounded resources")
             candidates.append(Move(tuple(route["start"]), hops[-1], hops))
-        if len(candidates) > 4096:
-            raise TransitionError("candidate move enumeration exceeds bounded resources")
         legal: list[Move] = []
         for move in candidates:
             try:
@@ -713,7 +858,8 @@ class GameManager:
         Returns:
             Authorized intents for the active participant at the stored clock anchor.
         """
-        with self._lock:
+        with self._lock, self._operation():
+            self._charge(_json_work(self._state))
             state = thaw_json(self._state)
             return self._legal_moves(state, state["active_side"], state["clocks"]["anchor_ms"])
 
@@ -759,11 +905,13 @@ class GameManager:
             or not isinstance(move, Move)
         ):
             raise TransitionError("revision and move intent are required")
-        with self._lock:
+        with self._lock, self._operation():
+            self._charge(_json_work(self._state))
             state = thaw_json(self._state)
             if actor_id not in state["participants"].values():
                 raise TransitionError("actor is not a game participant")
             for event in state["events"]:
+                self._charge()
                 if event["action_id"] == action_id:
                     if (
                         event["actor"] == actor_id
@@ -810,6 +958,7 @@ class GameManager:
                     raise TransitionError("outcome winner must be a participant")
                 state["outcome"] = result
             event["outcome"] = state["outcome"]
+            self._charge(_json_work(state))
             encoded = json.dumps(state, allow_nan=False, separators=(",", ":"))
             if len(encoded.encode("utf-8")) > MAX_SNAPSHOT_BYTES:
                 raise TransitionError("snapshot exceeds bounded persistence size")
@@ -848,14 +997,20 @@ class GameManager:
             )
             if not isinstance(data["events"], list) or len(data["events"]) > MAX_EVENTS:
                 raise TransitionError("snapshot requires bounded durable event history")
+            aggregate = EvaluationBudget(MAX_REPLAY_WORK)
+            aggregate.consume(_json_work(data))
             for event in data["events"]:
-                restored.submit(
-                    event["actor"],
-                    event["expected_revision"],
-                    event["action_id"],
-                    Move.from_json(event["move"]),
-                    event["at_ms"],
-                )
+                # Each action retains exactly its submission ceiling and isolated cache.
+                # The parent cannot reset and is derived from all supported action ceilings.
+                child = EvaluationBudget(MAX_EVALUATION_WORK, parent=aggregate)
+                with restored._lock, restored._operation(child):
+                    restored.submit(
+                        event["actor"],
+                        event["expected_revision"],
+                        event["action_id"],
+                        Move.from_json(event["move"]),
+                        event["at_ms"],
+                    )
             recovered = json.dumps(restored.get_state(), sort_keys=True, allow_nan=False)
             supplied = json.dumps(data, sort_keys=True, allow_nan=False)
             if recovered != supplied:

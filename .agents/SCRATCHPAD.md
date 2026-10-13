@@ -24,6 +24,13 @@ instructions or manually duplicated CI statuses.
 
 ## Engine dependencies
 
+- Verify reconstruction performance under classroom load and implement verified
+  checkpoints or efficient replay before exposing snapshot recovery publicly.
+  Preserve accepted-history reconstruction, exact retries and corruption checks;
+  retain per-action ceilings and a monotonic aggregate derived from supported
+  event capacity. Test lengthy orthodox and draughts sessions against service
+  execution limits without replacing denied hostile work with a larger action budget.
+
 - Add bounded configured `available_moves` offers and prospective-state safety
   evaluation so castling, en passant and royal safety pass the same transition
   boundary as ordinary moves. Bind optional promotion choices to legal offers;
