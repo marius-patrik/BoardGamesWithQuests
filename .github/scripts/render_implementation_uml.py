@@ -5,7 +5,7 @@ the reference diagrams.net class drawing: separate class compartments, parent
 triangles, typed associations, and explicit component boundaries.
 
 No class, relationship or component is declared by hand. The only fixed nodes
-are the three architectural package lanes (engine, chess, checkers); their
+are the package lanes observed from current source; their
 contents are discovered from source files. SVG layout is performed by Graphviz.
 """
 
@@ -350,8 +350,7 @@ def render_component_diagram(root: Path) -> str:
     dependencies: set[tuple[str, str]] = set()
     for module in modules:
         parts = module.module.split(".")
-        # Component resolution is purely directory based: engine/model,
-        # engine/controller, engine/view, engine/app, chess, checkers.
+        # Group engine internals by first child; other packages by name.
         node = ".".join(parts[:2]) if parts[0] == "engine" and len(parts) > 1 else parts[0]
         components[parts[0]].add(node)
         for alias in _aliases(module).values():
@@ -367,14 +366,7 @@ def render_component_diagram(root: Path) -> str:
                 other != node
                 and other != "engine"
                 and other
-                in {
-                    "engine.model",
-                    "engine.controller",
-                    "engine.view",
-                    "engine.app",
-                    "chess",
-                    "checkers",
-                }
+                in (set(packages) | {f"engine.{name}" for name in ("model", "controller", "view", "app")})
             ):
                 dependencies.add((node, other))
     # The plugin connection is not an import: the engine discovers games

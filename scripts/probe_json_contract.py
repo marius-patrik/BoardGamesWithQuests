@@ -14,11 +14,11 @@ for name, count in (
     assert not definition.playable
     assert not definition.rules and not definition.quests
     board = board_from_definition(definition)
-    assert sum(
-        board.get_piece_at((row, col)) is not None
-        for row in range(board.rows)
-        for col in range(board.cols)
-    ) == count
+    placed = 0
+    for row in range(board.rows):
+        for col in range(board.cols):
+            placed += board.get_piece_at((row, col)) is not None
+    assert placed == count
 
 when = {
     "op": "all",
