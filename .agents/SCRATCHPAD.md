@@ -15,13 +15,11 @@
 - UI, API and desktop package skeletons are tracked independently from real operation.
 - Permanent gameplay test coverage and public deployment are absent; green
   compilation/docs checks do not certify gameplay.
-- PR #271 membership on Global project #17 is confirmed by an authenticated
-  GraphQL read after mutation. All 211 items on project #14 were audited:
-  24 closed issues still show In Progress, 15 show ToDo, and 21 closed PRs
-  show In Progress. Reconciliation is scripted, but last write run could not
-  execute because the owner-scoped token exhausted its GitHub API rate limit.
-  The seven closed-not-planned issues incorrectly labeled Done are corrected.
-  G0 therefore remains **partial** until a successful project field write/read audit.
+- G0 complete: PR #271 is verified on Global #17 and local #14. Both recovery
+  branches were absorbed and deleted. GitHub Actions run 38397182126 scanned
+  all 216 current project #14 items, corrected 81 outdated statuses from
+  GitHub's actual states, and verified the results by re-reading all items.
+  The temporary reconciliation workflow was then removed.
 - DarkFactory v0.289.2 is pinned in CI and both live and dedicated configuration
   branches; native tool config generation is tracked upstream in DF #2149.
 - CI builds the actual static Rsbuild web bundle and imports the FastAPI ASGI
