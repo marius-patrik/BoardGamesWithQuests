@@ -132,11 +132,7 @@ def condition(expr: Any, depth: int = 0, budget: list[int] | None = None) -> Non
         if set(expr) != {"op"}:
             raise ValueError("literal condition has unexpected keys")
     elif op in ("all", "any"):
-        if (
-            set(expr) != {"op", "args"}
-            or not isinstance(expr["args"], list)
-            or not expr["args"]
-        ):
+        if set(expr) != {"op", "args"} or not isinstance(expr["args"], list) or not expr["args"]:
             raise ValueError("logical condition needs nonempty args")
         for child in expr["args"]:
             condition(child, depth + 1, budget)
@@ -195,10 +191,7 @@ def validate_hooks(rules: Any, quests: Any) -> None:
             _check_params(effect["params"])
     quest_ids: set[str] = set()
     for quest in quests:
-        if (
-            not isinstance(quest, dict)
-            or set(quest) != {"id", "description", "when", "reward"}
-        ):
+        if not isinstance(quest, dict) or set(quest) != {"id", "description", "when", "reward"}:
             raise ValueError("quest fields must be id/description/when/reward")
         qid = quest["id"]
         if not isinstance(qid, str) or not qid or qid in quest_ids:

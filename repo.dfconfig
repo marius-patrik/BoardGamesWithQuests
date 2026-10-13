@@ -1,6 +1,6 @@
 {
   "repo": {
-    "$comment": "DarkFactory repository configuration. Documentation is built from actions with a local docs UI; legacy gh-pages is only optional preview staging.",
+    "$comment": "DarkFactory repository configuration. Documentation is deployed from GitHub Actions and has a project-specific docs UI.",
     "identity": {
       "owner": "marius-patrik",
       "repo": "BoardGamesWithQuests",
@@ -30,7 +30,7 @@
       "initial": "0.1.0"
     },
     "environment": {
-      "$comment": "Current Python engine and documentation. Target adds FastAPI on Vercel Functions, React/Rsbuild/Bun and Tauri, whose checks are configured as the actual packages land. The Python artifact release remains disabled pending the behavior gate #239.",
+      "$comment": "Python and documentation actions. Python artifact publishing remains disabled until the behavior release gate.",
       "testing": {
         "python": {
           "command": "pytest",
