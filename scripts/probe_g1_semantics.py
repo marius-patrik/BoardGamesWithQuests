@@ -205,4 +205,45 @@ draw = rule(
 assert call([draw], snap.bindings(), "outcome") == ["propose_outcome"]
 assert snap.repetition_count({"scope": "position"}) == 3
 
+# Dynamic references resolve solely against a trusted, typed current move.
+from engine.model.game.schema import validate_hooks
+
+move_refs = {"move.start": [7, 4], "move.end": [7, 6]}
+move_rule = rule(
+    "generic_move",
+    "on_move_made",
+    {
+        "op": "compare",
+        "relation": "eq",
+        "left": {"ref": "move.start"},
+        "right": [7, 4],
+    },
+    "move_piece",
+)
+move_rule["effects"][0]["params"] = {
+    "start": {"ref": "move.start"},
+    "end": {"ref": "move.end"},
+}
+planned = HookInterpreter([move_rule], {}, move_refs).evaluate("on_move_made")
+assert planned.matched_rule_ids == ("generic_move",)
+assert dict(planned.effects[0].params) == {"start": [7, 4], "end": [7, 6]}
+assert move_refs == {"move.start": [7, 4], "move.end": [7, 6]}
+for invalid in (
+    {"ref": "__globals__.builtins"},
+    {"ref": "move.__class__"},
+    {"ref": "game.private._secret"},
+):
+    malformed = rule(
+        "bad_reference",
+        "permits_move",
+        {"op": "compare", "relation": "eq", "left": invalid, "right": 1},
+        "permit",
+    )
+    try:
+        validate_hooks([malformed], [])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("unsafe reference accepted")
+
 print("G1 generic capture, temporal, geometry and declarative hook probes passed")
