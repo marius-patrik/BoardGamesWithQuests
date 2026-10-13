@@ -1,0 +1,29 @@
+name: Reconcile Global Project Membership
+on:
+  push:
+    branches: [feature/product-integration]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
+    steps:
+      - name: Link canonical integration PR to user-owned Global project
+        run: |
+          set -euo pipefail
+          test -n "${GH_TOKEN:-}" || { echo "::error::GH_PROJECT_TOKEN is missing"; exit 1; }
+          project_id="$(gh api graphql -f query='query($owner: String!, $number: Int!) { user(login: $owner) { projectV2(number: $number) { id } } }' -f owner='marius-patrik' -F number=17 --jq '.data.user.projectV2.id')"
+          test -n "$project_id" && test "$project_id" != null
+          pr_id="$(gh api repos/marius-patrik/BoardGamesWithQuests/pulls/271 --jq '.node_id')"
+          test -n "$pr_id"
+          existing="$(gh api graphql -f query='query($id: ID!) { node(id: $id) { ... on PullRequest { projectItems(first: 100) { nodes { id project { id } } } } } }' -f id="$pr_id" --jq '.data.node.projectItems.nodes[].project.id' || true)"
+          if ! grep -Fxq "$project_id" <<<"$existing"; then
+            gh api graphql -f query='mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }' -f projectId="$project_id" -f contentId="$pr_id" --jq '.data.addProjectV2ItemById.item.id'
+          fi
+          linked="$(gh api graphql -f query='query($id: ID!) { node(id: $id) { ... on PullRequest { projectItems(first: 100) { nodes { project { id } } } } } }' -f id="$pr_id" --jq '.data.node.projectItems.nodes[].project.id')"
+          grep -Fxq "$project_id" <<<"$linked"
+          echo "PR #271 confirmed on Global project #17."
