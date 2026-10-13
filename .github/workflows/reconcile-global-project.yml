@@ -64,3 +64,6 @@ jobs:
             or (.kind == "PullRequest" and .state == "CLOSED" and .merged == false and .status == "Done")
           )] | .[:100]' "$audit"
           echo "Audit complete: no historical status was rewritten."
+
+      - name: Reconcile project 14 status taxonomy from actual GitHub states
+        run: python .github/scripts/reconcile_project14.py
