@@ -28,10 +28,12 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
         capture_output=True,
     )
     files = [root / Path(p.decode("utf-8")) for p in result.stdout.split(b"\0") if p]
-    return sorted(
-        (p for p in files if p.is_file() and not p.is_symlink() and p.suffix.lower() in {".md", ".py"}),
-        key=lambda p: p.relative_to(root).as_posix(),
-    )
+    tracked = [
+        p
+        for p in files
+        if p.is_file() and not p.is_symlink() and p.suffix.lower() in {".md", ".py"}
+    ]
+    return sorted(tracked, key=lambda p: p.relative_to(root).as_posix())
 
 
 def python_roots(root: Path = ROOT) -> list[Path]:
