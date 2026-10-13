@@ -2,7 +2,7 @@
 
 A configurable two-player chess and English-draughts game built around a **game-neutral Python engine**. The target application has a single React web GUI, a FastAPI serverless API, Supabase accounts/game storage and a Tauri desktop wrapper that loads the **same hosted web app**.
 
-**Development status:** The final JSON-driven online game is **not implemented or playable yet**. The single draft [integration PR #267](https://github.com/marius-patrik/BoardGamesWithQuests/pull/267) is in progress; don't treat current compilation, docs or tags as a playable release.
+**Current implementation status and release readiness:** See [.agents/SCRATCHPAD.md](.agents/SCRATCHPAD.md). A successful documentation build alone is not evidence of playable behavior.
 
 ## Target packages
 

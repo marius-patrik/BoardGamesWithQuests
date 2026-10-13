@@ -15,9 +15,7 @@ The original source remains in [the external diagrams.net document](https://app.
 - **Source file**: `Šachy - diagram tříd.drawio`, with the full model on `Page-1` and the integration sketch on `MVC - GameView`.
 
 **Status**: this diagram is the assignment specification, **not** an inventory
-of completed gameplay. The independent [implementation diagram](object_model.md)
-reflects the current partial codebase; later feature PRs must implement the
-remaining requirements. The rendered diagram is not evidence of implemented classes.
+of completed gameplay. The approved deviations from the reference are recorded in [object_model.md](object_model.md). The [canonical plan](PLAN.md) owns implementation scope; any live-generated implementation diagram depicts the checked-out code, not proof of conforming behavior.
 
 ## What this document is
 
@@ -116,13 +114,13 @@ smoothing them over would make the deviations unverifiable.
 
 | Drawn | Note |
 |---|---|
-| `GameVeiw` | `e` and `i` are transposed relative to `GameView`. This is a spelling error in the reference; `GameView` is the intended canonical class (not implemented on `main` yet) |
+| `GameVeiw` | `e` and `i` are transposed relative to `GameView`. This is a spelling error in the reference; `GameView` is the intended canonical translation |
 | `check_Pat` | Czech *patová* — stalemate. Retained as the drawn operation name's meaning, spelled correctly in code |
 | `intger` | misspelling of `integer` on `get_stav()` |
 | `akutalizuj_hrace` | `u` and `t` are transposed relative to `aktualizuj_hrace` |
 | `Id_uzivatele: hrac` | a user id typed as a player |
 | `proveď_tah`, `over platnost` | Czech with diacritics inside member names |
-| `HracView` | **no class box exists.** It appears only as an attribute *type* on `GameManagerController`. The class is created as `PlayerView` — `object_model.md` section 15 |
+| `HracView` | **no class box exists.** It appears only as an attribute *type* on `GameManagerController`. The approved browser implementation maps this view responsibility to React components; see `object_model.md` |
 
 ### Structural inconsistency
 

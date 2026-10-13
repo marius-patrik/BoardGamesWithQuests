@@ -75,8 +75,10 @@ All commits must strictly adhere to the Conventional Commits specification:
 - **Allowed Types**: `feat`, `fix` (mapped from `bug`), `chore`, `docs`, `refactor`, `test`, `ci`.
 - **Allowed Area Scopes & Labels**:
   - `area:model`: Core domain model, board representation, piece logic, quest rules.
-  - `area:view`: GUI rendering, display, windows, visual assets.
-  - `area:controller`: Input handling, event routing, game state controller.
+  - `area:game`: Chess/checkers JSON definitions and game-owned serialization.
+  - `area:server`: FastAPI, Supabase authorization, transactions and persistence.
+  - `area:web`: React UI, settings, client state and browser interactions.
+  - `area:desktop`: Tauri wrapper and native packaging.
   - `area:ci`: GitHub Actions workflows, Docker containers, runner scripts.
   - `area:docs`: Documentation, MkDocs configuration, docstrings.
 

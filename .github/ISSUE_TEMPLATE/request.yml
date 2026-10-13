@@ -14,7 +14,7 @@ body:
     attributes:
       label: "Verbatim User Request"
       description: "Enter the exact user request or problem description."
-      placeholder: "e.g. Add support for move validation highlights on the GUI chessboard."
+      placeholder: "e.g. Add legal-move highlighting to the React game board."
     validations:
       required: true
 
@@ -24,9 +24,11 @@ body:
       label: "Area / Component"
       description: "Select the primary area of the codebase affected."
       options:
-        - "model (area:model)"
-        - "view (area:view)"
-        - "controller (area:controller)"
+        - "engine/model (area:model)"
+        - "chess/checkers (area:game)"
+        - "server/API (area:server)"
+        - "web/React (area:web)"
+        - "desktop/Tauri (area:desktop)"
         - "ci (area:ci)"
         - "docs (area:docs)"
     validations:
@@ -53,7 +55,7 @@ body:
     attributes:
       label: "Proposed Acceptance Criteria"
       description: "What conditions must be satisfied for this request to be considered complete?"
-      placeholder: "- [ ] Feature behaves as specified\n- [ ] Unit tests added in tests/\n- [ ] MkDocs build passes with --strict"
+      placeholder: "- [ ] Feature behaves as specified\n- [ ] Relevant behavioral/API/UI tests pass\n- [ ] Documentation and CI are accurate"
     validations:
       required: false
 
