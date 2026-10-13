@@ -67,7 +67,11 @@ def _bounded_json(value: Any, depth: int = 0, budget: list[int] | None = None) -
     budget[0] -= 1
     if budget[0] < 0 or depth > MAX_DEPTH:
         raise ValueError("configuration expression exceeds complexity limits")
-    if value is None or type(value) in (bool, int):
+    if value is None or type(value) is bool:
+        return
+    if type(value) is int:
+        if value.bit_length() > 64:
+            raise ValueError("integer exceeds bounded range")
         return
     if type(value) is float:
         if not math.isfinite(value):
