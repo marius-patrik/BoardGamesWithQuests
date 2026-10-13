@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 from engine.model.game.board_queries import BoardQueries
-from engine.model.game.board_queries import BoardQueries
 from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
 from engine.model.game.configuration import (
     ConfigurationError,
