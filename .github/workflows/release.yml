@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: marius-patrik/DarkFactory
-          ref: 953fd972834baf3b5a2ad2122890f55ea3679943
+          ref: b5bdba739bf989f965af51c9efd88ee89617075c
           path: .darkfactory
       - id: resolve
         name: Ensure every untagged main change creates a development release
@@ -48,9 +48,9 @@ jobs:
 
   release:
     needs: resolve
-    uses: marius-patrik/DarkFactory/.github/workflows/release.yml@953fd972834baf3b5a2ad2122890f55ea3679943
+    uses: marius-patrik/DarkFactory/.github/workflows/release.yml@b5bdba739bf989f965af51c9efd88ee89617075c
     with:
       pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: "953fd972834baf3b5a2ad2122890f55ea3679943"
+      pipeline-ref: "b5bdba739bf989f965af51c9efd88ee89617075c"
       bump: ${{ inputs.bump || needs.resolve.outputs.fallback_bump }}
     secrets: inherit
