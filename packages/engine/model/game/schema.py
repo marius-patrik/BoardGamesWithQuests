@@ -59,6 +59,35 @@ EFFECTS = frozenset(
 )
 RELATIONS = frozenset({"eq", "ne", "lt", "lte", "gt", "gte", "in"})
 
+REF_ROOTS = frozenset({"move", "player", "clock", "board", "game", "quest", "event", "rule"})
+
+
+def validate_reference(value: Any) -> None:
+    """Allow bounded typed references into the trusted hook context only."""
+    if not isinstance(value, str) or len(value) > 96:
+        raise ValueError("reference must be a short string")
+    path = value.split(".")
+    if not 2 <= len(path) <= 4 or path[0] not in REF_ROOTS:
+        raise ValueError("unrecognized reference root or path depth")
+    if any(not part.isidentifier() or part.startswith("_") for part in path):
+        raise ValueError("reference contains an invalid identifier")
+
+
+def validate_embedded_references(value: Any) -> None:
+    """Validate reference nodes inside query or effect parameters."""
+    if isinstance(value, dict):
+        if "ref" in value:
+            if set(value) != {"ref"}:
+                raise ValueError("a reference node may contain only ref")
+            validate_reference(value["ref"])
+        else:
+            for child in value.values():
+                validate_embedded_references(child)
+    elif isinstance(value, list):
+        for child in value:
+            validate_embedded_references(child)
+
+
 
 def _bounded_json(value: Any, depth: int = 0, budget: list[int] | None = None) -> None:
     """Enforce typed finite JSON without executable or unbounded structures."""
@@ -101,11 +130,15 @@ def _check_params(value: Any) -> None:
     if not isinstance(value, dict):
         raise ValueError("query/effect params must be an object")
     _bounded_json(value)
+    validate_embedded_references(value)
 
 
 def _value(value: Any, depth: int) -> None:
     """Validate a scalar literal or a whitelisted query value."""
     if isinstance(value, dict):
+        if set(value) == {"ref"}:
+            validate_reference(value["ref"])
+            return
         if (
             set(value) != {"query", "params"}
             or not isinstance(value["query"], str)
