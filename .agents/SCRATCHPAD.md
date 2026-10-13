@@ -1,69 +1,28 @@
-# Execution Status and Integration Plan
+# Integration Status
 
-**Checked against `main` on 2026-10-12.** This file records **current status, sequencing and release gates only**. Do not use it as a second PRD, chess rulebook or object-model transcription. Requirements live in [PRD](notes/PRD.md); architecture decisions in [object model](notes/object_model.md); diagram facts in [reference](notes/reference_diagram.md); process in [AGENTS](AGENTS.md). Detailed acceptance criteria and discussions belong to the linked issues and PRs, not duplicated here.
+**2026-10-13 — source-backed status, not a second roadmap.** The sole current plan is [notes/PLAN.md](notes/PLAN.md); product requirements are [PRD](notes/PRD.md), deviations in [object_model](notes/object_model.md), operational rules in [AGENTS](AGENTS.md).
 
-## 1. Status on main
+## Consolidation (in progress)
 
-- `packages/engine/` contains partial shared model, controller, and launcher; `packages/chess/` and `packages/checkers/` contain JSON game declarations. The former `src/` and `games/` layouts are gone (merged [#220](https://github.com/marius-patrik/BoardGamesWithQuests/pull/220)).
-- The Tkinter view under `packages/engine/view/` is **not** implemented on `main`; the runnable UI exists only in the stacked feature work awaiting review. The current launcher intentionally must not pretend otherwise.
-- Full game rules, quest extensions, actual configuration editing and complete end-to-end gameplay are **not integrated on `main`**. JSON fixtures are not equivalent to implemented rule modules.
-- The old test suite was retired in [#222](https://github.com/marius-patrik/BoardGamesWithQuests/pull/222). **Temporary testing exception:** there are no permanent behavioral gameplay tests on `main`. The shared CI skips absent tests and still checks compilation, formatting and strict docs; this is scaffolding validation only. Rebuild an independent behavior-driven suite against final APIs in [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239), exercising both games and Python 3.10–3.13.
-- **Temporary release gate:** GitHub tags and notes are development snapshots, not validated gameplay releases; Python distribution release assets remain disabled until the behavior gate in #239. Package metadata derives from Git tags via `setuptools-scm`, corrected in [#263](https://github.com/marius-patrik/BoardGamesWithQuests/pull/263).
-- **PR #218 (draft, not on `main`):** removes chess-specific default board setup, hard-coded piece-kind tests and misleading generic exporters. Game JSON definitions supply placement, unsupported formats are not advertised, and full legal-move/outcome calls fail explicitly pending the rule integration. A temporary Actions check exercised geometry and both game configurations; it does **not** replace the final suite. Review feedback on `Piece.isRoyal` was addressed by keeping royal roles in game-defined rules rather than on shared pieces. Review architecture/plan alignment before approval; reconcile and restack descendant PRs against these contracts.
+- **Plan:** [#129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129).
+- **Sole active draft PR:** [#267](https://github.com/marius-patrik/BoardGamesWithQuests/pull/267), branch `feature/product-integration`, base `main`.
+- Original **25** draft implementation PRs #218–#209 closed *unmerged* as superseded; previously rejected #170 remains closed. Their code history is preserved by a merge commit with current #218 and the previous full-stack #209 as parents. Old remote branch refs cannot yet be deleted using the connected GitHub API and require an authorized cleanup step after verification.
+- Old open product/Plan issues were marked superseded rather than falsely completed; completed flattening #142 was marked completed. Only #129 and final behavior-gate [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239) stay open.
+- The consolidated tree starts with the corrected #218 game-neutral foundation plus **unverified** historical chess/checkers piece/export candidates. It deliberately **does not** revive broken Tkinter, executable user rule/quest code, competing historical runtime loaders, rejected agent removal, or obsolete docs/CI versions. Preserving ancestry **does not equal integrating all behavior**.
 
-## 2. Active dependency chain
+## Actual product state
 
-The product track is tracked in [#129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129), UI in [#125](https://github.com/marius-patrik/BoardGamesWithQuests/issues/125), and preparatory work in [#131](https://github.com/marius-patrik/BoardGamesWithQuests/issues/131). Actual open PRs are the authority for merge state and stack base; do not treat this table as a frozen list of GitHub branches.
+**Not playable, not deployed, not verified, and not approved for merge.** The Python engine remains incomplete for declarative JSON hooks, orthodox chess, WCDF checkers, per-user quests, online transactions, authentication, GUI, and end-to-end gameplay. Any green compile/format/docs check is only the stated check. The user approved a complete architecture change to JSON-only rules/quests, React, FastAPI on Vercel Functions, Supabase and a hosted Tauri web wrapper; these are **targets**, not delivered functionality.
 
-| Stage | PR(s) as of the audit | Integration dependency |
-|---|---|---|
-| Core abstractions | [#218](https://github.com/marius-patrik/BoardGamesWithQuests/pull/218), [#217](https://github.com/marius-patrik/BoardGamesWithQuests/pull/217), [#219](https://github.com/marius-patrik/BoardGamesWithQuests/pull/219) | Review #218's corrected contracts, then restack quests and rules without preserving incorrect interim behavior. |
-| Chess behavior and packaging | [#216](https://github.com/marius-patrik/BoardGamesWithQuests/pull/216), [#215](https://github.com/marius-patrik/BoardGamesWithQuests/pull/215) | Depend on the shared rule layer. |
-| Integration and UI | [#214](https://github.com/marius-patrik/BoardGamesWithQuests/pull/214), [#212](https://github.com/marius-patrik/BoardGamesWithQuests/pull/212), [#213](https://github.com/marius-patrik/BoardGamesWithQuests/pull/213) | Complete headless game loop before UI; keep review fixes on top. |
-| Stacked subsequent fixes and formats | [#160](https://github.com/marius-patrik/BoardGamesWithQuests/pull/160) through [#209](https://github.com/marius-patrik/BoardGamesWithQuests/pull/209) (selected PRs; see live open list) | Rebase sequentially; don't recreate the retired tests from older branches. |
-| Final behavior gate | [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239) | Only after final integrated APIs and UI are stable. |
+## Immediate gates
 
-**Important:** Several older stacked branches still contain pre-#220 paths and tests. Their historical claims of hundreds of passing tests describe old revisions. Neither those results nor the text of a draft PR is proof for current `main`.
+1. Confirm consolidated branch contains merged history and correct retained source files; audit historical PR comments/requirements for recoverable algorithms, without importing rejected runtime code.
+2. Finalize typed bounded JSON behavior AST/schema and demonstrate chess/checkers expressiveness; validate Vercel Python/Supabase connection and atomic test transaction.
+3. Build final generic engine, games, web/API and persistence through the [single plan](notes/PLAN.md).
+4. Rebuild permanent behavior tests only after final API/UI integration in [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239); temporary smoke/probes during development are required.
+5. Align all docs/diagrams, provider settings, GitHub issues, labels and PR; perform independent review and real classroom public deployment tests.
+6. Explicit maintainer approval before merge. **No approval has occurred.**
 
-## 3. Delivery and reviews
+## Known blocking risks
 
-1. Resolve comments and rebase each stacked branch on its actual predecessor; update imports, JSON paths and package discovery for `packages/{engine,chess,checkers}` without retaining parallel legacy directory trees. Do not merge incorrect transitional implementations: complete correct behavior or fail explicitly until it is implemented.
-2. Integrate independent core types before rules; integrate game-specific rule modules outside the engine, then wire the game manager, controller and view.
-3. Verify checkers as an independent sibling that does not require chess-specific engine code. [#163](https://github.com/marius-patrik/BoardGamesWithQuests/pull/163) corrects English-draughts rules; the old flying-king implementation must not be mislabeled as WCDF English draughts.
-4. Integrate settings, custom-authored rules/quests, notation, import/export and error handling. Do not duplicate scenario-specific logic in the shared engine.
-5. Rebuild a new behavioral suite in #239 against the **final** public APIs, across Python 3.10–3.13 and actual Tkinter UI flows. Independently verify both chess and checkers rule conformance, exporters and complete games.
-6. Run all required CI checks and obtain the maintainer's approval before merging. Claims about gameplay depend on behavior tests, not on docs/compile checks.
-
-## 4. Acceptance and release gate
-
-The completion criteria are [PRD §7](notes/PRD.md#7-functional-requirements), [the architecture deviations](notes/object_model.md), and the concrete linked integration issues. Minimum verifiable end-to-end evidence:
-
-- Real installation and game discovery; two independent games load from their sibling packages with no engine game-name switch.
-- Correct rules, game outcomes, configurable board dimensions, chained moves, clocks, quests and user tracking on exercised scenarios.
-- View interaction through a real window: select, move, update, start, finish and configuration editing (not screenshots or import-only tests).
-- Round-trip import/export behavior for applicable formats, especially chess PGN/SAN and FEN; no engine-wide chess-specific formats.
-- Exact conformance to the intended architectural relationships or a recorded and approved deviation.
-- Fresh automated tests on supported Python versions and passing documentation/CI.
-
-**Do not conflate automatic development tagging/releases with a finished-product certification.** Before marketing a release as playable and correct, #239 and the relevant integration gates must be green.
-
-## 5. Key risks and unblocked decisions
-
-- A green docs pipeline can conceal a nonfunctional UI and absent rules. Treat syntax/docs checks as scaffolding validation only.
-- Early branches import from old `src/` or `games/` and can resurrect legacy tests if mechanically rebased. Review diffs against `main` before merge.
-- English draughts kings move one step; the flying-king variant is a different ruleset. Verify #163 rather than changing PRD to match the old bug.
-- FIDE draw rules distinguish claims from automatic termination; SAN notation and FEN metadata are not plain destination-square strings.
-- Do not reintroduce abandoned migration paths or superseded designs as live instructions.
-
-## 6. Document ownership
-
-| Authority | Contains | Must not contain |
-|---|---|---|
-| `notes/reference_diagram.md` | Literal exported reference diagram facts | Implementation status or duplicate planning |
-| `notes/object_model.md` | Approved design deviations | Diagram box inventory or delivery checklist |
-| `notes/chess_rules.md` | Standard chess rules baseline | Engine architecture or task estimates |
-| `notes/PRD.md` | Product requirements and acceptance criteria | Current PR delivery/status claims |
-| `notes/automation_architecture.md` | Durable agent automation architecture and rationale | Temporary run status, pins or progress checkpoints |
-| `SCRATCHPAD.md` | Current status, temporary test/release exceptions, dependencies and integration gates | Full rulebook, redundant PRD or stale code line-number inventory |
-| `AGENTS.md` | Operational rules for agents and contributors | Temporary statuses, release snapshots or architecture notes |
-| `README.md` | Evergreen project description, structure, usage and documentation links | Temporary milestones, test exceptions, unfinished PR plans or architectural decision logs |
+Original full-stack code has broken startup/import and incompatible config methods, game-specific validator coupling, unauthorized move paths, per-player quest state leakage, invalid IDs/timers and exporter contract violations; it restored obsolete `theme/` and static package version. These are not fixed merely by retaining the old history. The new draft PR was opened through the connected GitHub account rather than bot-authored `open-pr` workflow; reconcile that procedural exception before approval. Original source and PR discussion remain accessible via closed historical PRs.
