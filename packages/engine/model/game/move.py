@@ -1,107 +1,107 @@
-"""Move representation tracking positions, piece transitions, captures, and promotions."""
+"""Immutable, game-neutral ordered-hop move intents.
 
-from typing import Tuple, Optional, Any
+An intent contains no piece objects, capture assertions or executable behavior.
+The authoritative game manager derives captures and applies validated transitions.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Mapping
+
+Square = tuple[int, int]
 
 
+@dataclass(frozen=True)
 class Move:
-    """Encapsulates a chess move with coordinates, piece states, and execution logic."""
+    """A source, ordered landing sequence and optional configured promotion.
 
-    def __init__(
-        self,
-        start_pos: Tuple[int, int],
-        end_pos: Tuple[int, int],
-        piece: Optional[Any] = None,
-        move_type: str = "normal",
-        captured_piece: Optional[Any] = None,
-        promotion_piece: Optional[Any] = None,
-    ):
-        """Initialize a Move instance.
+    Args:
+        start_pos: Nonnegative source coordinates.
+        end_pos: Final landing coordinates.
+        hops: Complete ordered landing sequence; empty means one hop.
+        promotion: Configuration-owned replacement kind, or None.
 
-        Args:
-            start_pos: Starting (row, col) coordinates.
-            end_pos: Destination (row, col) coordinates.
-            piece: Moving piece instance, or None to infer from board.
-            move_type: Type of move (e.g. "normal", "castling", "en_passant").
-            captured_piece: Captured piece instance if any.
-            promotion_piece: New piece instance if move involves pawn promotion.
+    Raises:
+        ValueError: Coordinates, sequence or promotion are malformed.
+    """
+
+    start_pos: Square
+    end_pos: Square
+    hops: tuple[Square, ...] = ()
+    promotion: str | None = None
+
+    def __post_init__(self) -> None:
+        """Copy coordinates and reject ambiguous or malformed intents.
+
+        Raises:
+            ValueError: A coordinate, sequence or promotion is invalid.
         """
-        self.start_pos = tuple(start_pos)
-        self.end_pos = tuple(end_pos)
-        self.piece = piece
-        self.move_type = move_type
-        self.captured_piece = captured_piece
-        self.promotion_piece = promotion_piece
-
-    @staticmethod
-    def _bounds(board: Any) -> Tuple[int, int]:
-        """Return the (rows, cols) a move is measured against.
-
-        Args:
-            board: The board the move is played on, or None to use `Board`'s default size.
-
-        Returns:
-            Tuple[int, int]: The board dimensions the move must fit inside.
-        """
-        return board.rows, board.cols
-
-    def validate(self, board: Optional[Any] = None) -> bool:
-        """Validate geometric boundaries and basic board rules for this move.
-
-        Args:
-            board: Optional Board instance to verify piece existence and target color. Its
-                dimensions decide what is in bounds, so a move may be validated on a board
-                of any size.
-
-        Returns:
-            True if basic validity checks pass, False otherwise.
-        """
-        if any(
-            len(position) != 2 or any(type(coordinate) is not int for coordinate in position)
-            for position in (self.start_pos, self.end_pos)
+        if not isinstance(self.hops, (tuple, list)) or len(self.hops) > 128:
+            raise ValueError("move hops must be a bounded sequence")
+        for square in (self.start_pos, self.end_pos, *self.hops):
+            if (
+                not isinstance(square, (tuple, list))
+                or len(square) != 2
+                or any(type(axis) is not int or axis < 0 for axis in square)
+            ):
+                raise ValueError("move coordinates must be nonnegative integer pairs")
+        start, end = tuple(self.start_pos), tuple(self.end_pos)
+        hops = tuple(tuple(square) for square in self.hops) or (end,)
+        if hops[-1] != end or any(a == b for a, b in zip((start, *hops), hops)):
+            raise ValueError("move landings must end at destination without empty hops")
+        if self.promotion is not None and (
+            not isinstance(self.promotion, str) or not 1 <= len(self.promotion) <= 100
         ):
-            return False
+            raise ValueError("promotion must name a configured piece kind")
+        object.__setattr__(self, "start_pos", start)
+        object.__setattr__(self, "end_pos", end)
+        object.__setattr__(self, "hops", hops)
 
-        if board is None:
-            return False
-        rows, cols = self._bounds(board)
-        if not (0 <= self.start_pos[0] < rows and 0 <= self.start_pos[1] < cols):
-            return False
-        if not (0 <= self.end_pos[0] < rows and 0 <= self.end_pos[1] < cols):
-            return False
-        if self.start_pos == self.end_pos:
-            return False
-        if board is not None:
-            moving = board.get_piece_at(self.start_pos)
-            if moving is None:
-                return False
-            target = board.get_piece_at(self.end_pos)
-            if target is not None and target.getColor() == moving.getColor():
-                return False
-        return True
+    def to_json(self) -> dict[str, Any]:
+        """Return detached JSON data with every landing preserved.
+
+        Returns:
+            Exact move intent fields suitable for transport and persistence.
+        """
+        return {
+            "start": list(self.start_pos),
+            "hops": [list(square) for square in self.hops],
+            "promotion": self.promotion,
+        }
+
+    @classmethod
+    def from_json(cls, value: Mapping[str, Any]) -> Move:
+        """Parse the closed transport contract without trusting capture claims.
+
+        Args:
+            value: JSON object containing start, hops and promotion.
+
+        Returns:
+            An immutable validated intent.
+
+        Raises:
+            ValueError: Fields, JSON coordinate types or sequence are invalid.
+        """
+        if not isinstance(value, dict) or set(value) != {"start", "hops", "promotion"}:
+            raise ValueError("move requires exactly start, hops and promotion")
+        hops = value["hops"]
+        if (
+            not isinstance(value["start"], list)
+            or not isinstance(hops, list)
+            or not hops
+            or any(not isinstance(square, list) for square in hops)
+        ):
+            raise ValueError("move coordinates must be JSON arrays")
+        return cls(value["start"], hops[-1], hops, value["promotion"])
 
     def execute(self, board: Any) -> bool:
-        """Reject direct mutation outside the authoritative game session."""
-        raise PermissionError("moves must be committed through GameManager")
-
-    def _apply_validated(self, board: Any) -> bool:
-        """Execute this move on the given board.
+        """Reject mutation outside the authoritative transition boundary.
 
         Args:
-            board: Board instance on which the move is applied.
+            board: Any attempted mutation target.
 
-        Returns:
-            True if the move executed successfully, False otherwise.
+        Raises:
+            PermissionError: Intents cannot mutate a board directly.
         """
-        if not self.validate(board):
-            return False
-
-        moving_piece = board.get_piece_at(self.start_pos)
-        captured_piece = board.get_piece_at(self.end_pos)
-        if not board.move_piece(self.start_pos, self.end_pos):
-            return False
-
-        self.piece = moving_piece
-        self.captured_piece = captured_piece
-        if self.promotion_piece is not None:
-            board.replace_piece(self.end_pos, self.promotion_piece)
-        return True
+        raise PermissionError("moves must be committed through GameManager")

@@ -5,6 +5,19 @@
 Version 2 is a validated JSON envelope. The parser accepts at most
 256 KiB and rejects duplicate or unknown top-level fields, invalid clocks,
 unknown pieces, overlapping placements and executable extensions.
+Nested board, placement, piece, symbol, clock and appearance objects reject
+unknown fields. Appearance accepts optional `light_square` and `dark_square`
+hex colors. Pieces accept optional `notation`, single-letter `fen`,
+`color_relative`, `capture_policy` and `initial_moves`; initial quiet offsets
+are available only before the piece moves and mirror by side when configured.
+Malformed encodings and excessive nesting produce a configuration error.
+The same byte limit applies to directly validated decoded documents.
+Validated definitions detach from caller data and recursively freeze objects
+and arrays. `freeze_json` protects the same invariant for resolved effect plans;
+`thaw_json` creates detached dictionaries/lists for serialization or editing.
+A complete document permits 65,536 nodes and 32 levels; expression limits below
+remain smaller independently of board size.
+
 Board dimensions, placements, movement vectors, appearance, captures, rules,
 quests and clocks are data owned by each game configuration.
 
@@ -37,9 +50,140 @@ are resolved into copied JSON values, not Python attributes or executable code.
 
 `HookInterpreter` evaluates rules in declared order, creates a typed
 `HookEvaluation` and returns an ordered immutable effect plan. Evaluation does
-not authorize or mutate a game. Applying effects, deterministic conflict/
-outcome priority, event persistence and atomic gameplay commits are separate
-G2 requirements. No missing query is implicitly false, legal or complete.
+not authorize or mutate a game. Effect parameter keys and types are checked
+before evaluation and again after resolving references. Parameters are:
+
+| Effect | Required parameters | Optional parameters |
+| --- | --- | --- |
+| `permit`, `deny` | none | `reason`, `target` |
+| `offer_move`, `move_piece` | `start`, `end` | none |
+| `capture_piece` | `square` | none |
+| `replace_piece` | `square`, `kind` | none |
+| `set_state` | `name`, `value` | none |
+| `increment_state` | `name`, `amount` | none |
+| `record_event` | `name` | `payload` |
+| `propose_outcome` | `kind`, `cause`, `winner`, `priority` | none |
+| `complete_quest` | `quest`, `player` | none |
+| `set_clock` | `player`, `seconds` | none |
+| `set_rights` | `name`, `value` | none |
+
+Coordinates are integer pairs; participant values are nonempty identities or
+explicit side values; clocks, counters and priorities are bounded integers;
+rights are booleans. State values and event payloads remain bounded JSON.
+Board bounds, membership and transition legality require session validation.
+The domain session applies supported transition effects to isolated candidate
+state, resolves declared outcomes and publishes only a completely validated
+transition. Durable database commits require the server persistence adapter.
+No missing query is implicitly false, legal or complete.
+
+## Scoped snapshot queries
+
+`SnapshotQueries` accepts a detached finite JSON snapshot of at most 1 MiB,
+with nesting bounded to 64 levels. Each result is a defensive copy. Unknown
+fields required by a query, malformed selectors and incorrect types are errors;
+missing values never grant permission. JSON equality and membership compare
+nested values by exact type, including distinctions between booleans, integers
+and floating-point values.
+
+`active` and `opponent` identify the evaluating participant and their opponent;
+they do not change the canonical `turn` query. `turn` reports the participant
+side whose move is due in the evaluated game state. Named lookups use
+`{"name":"identifier"}` for `rule_state`, `special_rights`,
+`temporary_target` and `move_attribute`. Captures use an explicit
+`capture_paths` object with exactly `active` and `opponent` arrays. Each route
+contains `start` and nonempty ordered `steps`, with `landing` and `captured`
+coordinates per step; repeated captures of one square are rejected.
+
+| Query | Parameters | Snapshot field and result |
+| --- | --- | --- |
+| `capture_paths` | `side` | Whether the selected complete route array is nonempty |
+| `capture_count` | `scope: candidate` or `maximum` | Candidate capture count or maximum evaluating-participant route length |
+| `promotion_options` | `side` | Explicit side-indexed configured piece-kind list |
+| `clock_remaining` | `side` | Explicit side-indexed nonnegative seconds |
+| `legal_move_count` | `side` | Explicit side-indexed computed legal count |
+| `participant` | `side` | Stable `id` and integer `side` from participants |
+| `quest_progress` | `side`, `name` | Participant quest's `active`, `target`, `completed` |
+| `repetition_count` | `scope: position` | Exact observed-position key occurrences in position history |
+| `halfmove_count` | none | Explicit nonnegative halfmove count |
+| `history_count` | none | Number of committed event records |
+| `last_action` | none | Last action object or explicit null |
+| `position` | none | Explicit canonical position data object |
+
+These queries read authoritative inputs; supplying a count or key does not
+prove that its producing algorithm implements a shipped game's rules.
+
+## Authoritative domain session
+
+`GameManager(definition, game_id, participant_ids, started_at_ms)` requires
+an explicitly validated definition containing a `permits_move` hook and exactly
+two distinct participant identities. A synthetic test definition can exercise
+the session while shipped configurations remain non-playable. No constructor
+selects an implicit game, board or clock.
+
+A move intent serializes as exactly `start`, `hops`, and `promotion`.
+`hops` is the nonempty ordered landing sequence; its final element defines the
+destination. Coordinates are nonnegative integer pairs, consecutive empty hops
+are invalid, and the caller cannot assert captures or carry mutable piece
+objects. A capture-policy move must match one complete server-enumerated route.
+The session derives captures from board state, applies them as one action and
+marks the moving piece as moved. Quiet candidates use declared movement and
+initial vectors. Authorization requires an explicit `permit`; any `deny`
+rejects the candidate. Geometric availability alone never authorizes a move.
+Legal enumeration prepares the same isolated movement, clock, post-move effects
+and quest evaluation used by submission; candidates with failing transition
+effects are excluded without changing the observed session. Outcome arbitration
+runs after preparation and cannot substitute for complete rulebook legality.
+
+`submit(actor_id, expected_revision, action_id, move, now_ms)` accepts a
+trusted host identity and timestamp. Membership, turn, revision, terminal state,
+clock and configured legality are checked before publishing state. An exact
+retry with the same actor, action identifier, expected revision and intent
+returns the accepted event without charging the clock or appending history.
+Reusing an action identifier for a different request is rejected. Rejected
+requests and failing effects discard the entire candidate, including clock,
+quest, board, rights, history and result changes. The in-process lock protects
+one manager instance; database compare-and-swap is required across instances.
+
+The snapshot version is `1`. Fields are `game_id`, pinned `config`,
+`participants` keyed by `1` and `-1`, `started_at_ms`, `active_side`, `board`,
+`captured`, `rule_state`, `special_rights`, `temporary_targets`, `clocks`,
+`quest_progress`, `outcome`, `revision`, `halfmove_count`, `events` and
+`position_history`, alongside `version`. Board records carry square, configured
+kind, side and moved flag. Clocks store per-side `remaining_ms`, `anchor_ms`
+and `increment_ms`; timestamps and elapsed time use trusted integer milliseconds.
+Quest progress is keyed by stable participant identity. Snapshots are detached
+JSON, bounded to 4 MiB and the immutable document limits; event histories are
+bounded to 4,096 accepted actions.
+
+Each accepted action advances one revision and appends one event containing
+`revision`, `expected_revision`, `actor`, `action_id`, `at_ms`, `move`,
+`captured`, emitted `effects` and `outcome` (a resolved result or null).
+Post-move rules and quests inspect the accepted
+revision, appended action, updated halfmove count and next canonical turn.
+Post-move rules and quests bind `active` to the mover and `opponent` to the
+other participant. Outcome evaluation binds `active` to the participant whose
+turn follows the move and `opponent` to the mover. Position history records the
+fully effected position before quest and outcome evaluation.
+Ordered transition effects operate on isolated state. A `move_piece` effect
+requires an empty destination; effects capturing an occupied square must first
+use `capture_piece`, so capture records cannot be lost through overwriting.
+Capture effects append the captured square to the accepted event, preserve the
+captured kind/side in the session and reset the halfmove count.
+Clock and quest effects accept a stable participant identity or explicit side
+`1`/`-1`, resolved to that session's participant identity.
+Outcome hooks only propose results, with participant-bound winner identities
+and deterministic priority/conflict handling.
+
+`get_state()` returns a detached snapshot. `from_snapshot()` creates an
+independent session from the pinned configuration and initial identities,
+replays accepted intents using recorded timestamps, and rejects any supplied
+state that differs from deterministic replay. This proves domain reconstruction;
+it does not certify Supabase persistence or remote concurrency.
+
+Special move offers, promotion authorization, timeout adjudication,
+at-game-end quest timing, configured progress measurements and complete
+game-specific repetition identity remain required extensions listed in the actionable workspace. The session does
+not certify any complete FIDE or draughts rulebook.
 
 ## Game-neutral primitive expressiveness
 
@@ -64,9 +208,9 @@ The executable primitives in `scripts/probe_g1_semantics.py` demonstrate:
 | International draughts | 10×10 flying king paths, backward man capture, deferred capture blocking and maximum-piece capture comparison |
 
 These are **primitive/design proofs**, not complete rulebook conformance:
-FIDE legal move enumeration/check safety, castling move effects, en-passant
-execution, all promotions and draws, international capture edge cases, clocks
-and outcomes must pass full G2/G3 behavior and G6 independent tests before any
+FIDE legal move enumeration/check safety, castling, en-passant execution,
+all promotions and draws, international capture edge cases, complete clock
+adjudication and game outcomes must pass G2/G3 behavior and G6 independent tests before any
 game's `playable` flag becomes true. No production path falls back to
 geometric pseudo-moves when rules are absent.
 

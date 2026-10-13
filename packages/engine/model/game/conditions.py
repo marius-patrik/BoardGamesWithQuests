@@ -64,18 +64,53 @@ class ConditionEvaluator:
             return self._query(expression["query"], expression["params"])
         return expression
 
+    @staticmethod
+    def _equal(left: Any, right: Any) -> bool:
+        """Compare JSON values recursively without boolean or numeric coercion.
+
+        Args:
+            left: First validated JSON value.
+            right: Second validated JSON value.
+
+        Returns:
+            Whether every corresponding value has the same type and value.
+        """
+        if type(left) is not type(right):
+            return False
+        if isinstance(left, list):
+            return len(left) == len(right) and all(
+                ConditionEvaluator._equal(a, b) for a, b in zip(left, right)
+            )
+        if isinstance(left, dict):
+            return left.keys() == right.keys() and all(
+                ConditionEvaluator._equal(value, right[key]) for key, value in left.items()
+            )
+        return left == right
+
     def _compare(self, relation: str, left: Any, right: Any) -> bool:
-        """Apply an explicitly selected comparison without coercion."""
+        """Apply an explicitly selected comparison without JSON type coercion.
+
+        Args:
+            relation: Validated equality, membership or numeric comparison.
+            left: Resolved left JSON operand.
+            right: Resolved right JSON operand.
+
+        Returns:
+            Whether the requested typed relation holds.
+
+        Raises:
+            QueryResolutionError: Operands are incompatible with the relation.
+        """
         if relation == "eq":
-            return type(left) is type(right) and left == right
+            return self._equal(left, right)
         if relation == "ne":
-            return type(left) is not type(right) or left != right
+            return not self._equal(left, right)
         if relation == "in":
             if isinstance(right, list):
-                return left in right
+                return any(self._equal(left, item) for item in right)
             if isinstance(right, str) and isinstance(left, str):
                 return left in right
-            if isinstance(right, dict) and isinstance(left, (str, int, float, bool)):
+            if isinstance(right, dict) and isinstance(left, str):
                 return left in right
             raise QueryResolutionError("membership requires compatible JSON types")
         if type(left) not in (int, float) or type(right) not in (int, float):

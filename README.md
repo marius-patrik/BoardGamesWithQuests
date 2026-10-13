@@ -3,9 +3,9 @@
 A JSON-driven two-player board-game platform for orthodox chess, English
 draughts and international draughts. One game-neutral Python engine interprets
 bounded JSON boards, piece capabilities, rules, quests, clocks and outcomes.
-FastAPI serves authoritative play from Vercel Python Functions; Supabase
-provides authentication, database and Realtime. The React/Rsbuild web app is
-also the UI for a remote Tauri 2 desktop wrapper.
+The delivery architecture places authoritative FastAPI play on Vercel Python
+Functions, with Supabase authentication, database and Realtime. One
+React/Rsbuild web app supplies the browser and remote Tauri 2 desktop UI.
 
 Three shipped configurations are intentionally non-playable until complete
 legal-rule integration passes the behavior suite. The public website and
@@ -21,7 +21,7 @@ read-only API catalog do not offer simulated gameplay.
 - `packages/web/` — React/TypeScript/Rsbuild/Bun browser interface.
 - `packages/desktop/` — Tauri remote-WebView wrapper.
 - `supabase/migrations/` — reproducible private persistence and access migrations.
-- `tests/` — externally observable domain/API/database behavior verification.
+- `tests/` — behavioral definition, interpreter, capture, session and read-only HTTP tests.
 
 ## Interfaces
 
@@ -44,3 +44,20 @@ all public catalog entries expose `playable=false`.
 
 The game reference diagrams are supplied design inputs; source-derived
 diagrams are generated independently. GPL-3.0-only governs the source.
+
+## Behavioral verification
+
+Install the Python package and development requirements, then run `pytest`.
+The suite exercises validated JSON, immutable effect contracts, ordered-hop
+intents, actor/turn/revision rejection, atomic domain rollback, exact retries,
+clock transitions, participant-scoped quests and deterministic session replay.
+Synthetic declarative scenarios exercise these contracts without claiming
+complete shipped-game legality. HTTP tests cover health and the read-only
+catalog; they do not certify multiplayer.
+
+The executable `scripts/probe_g1_semantics.py` and
+`scripts/probe_json_contract.py` supplement the permanent suite with primitive
+expressiveness checks. Real Supabase transactions and authorization, public
+multiplayer HTTP requests, two-browser gameplay, Realtime recovery, Tauri and
+classroom shared-IP capacity each require their own integration gate. A passing
+local suite does not certify those external requirements or a complete game.

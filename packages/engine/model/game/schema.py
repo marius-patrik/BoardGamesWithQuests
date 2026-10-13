@@ -7,6 +7,8 @@ execute the validated operation set; no arbitrary string is ever evaluated as co
 from __future__ import annotations
 
 from typing import Any
+from collections.abc import Mapping
+from types import MappingProxyType
 import math
 
 MAX_DEPTH = 12
@@ -60,6 +62,140 @@ EFFECTS = frozenset(
 RELATIONS = frozenset({"eq", "ne", "lt", "lte", "gt", "gte", "in"})
 
 REF_ROOTS = frozenset({"move", "player", "clock", "board", "game", "quest", "event", "rule"})
+
+
+def freeze_json(value: Any, depth: int = 0, budget: list[int] | None = None) -> Any:
+    """Copy JSON into recursively immutable mappings and tuples.
+
+    Args:
+        value: JSON-compatible value to detach from its source.
+        depth: Internal recursion depth.
+        budget: Shared internal document node budget.
+
+    Returns:
+        Immutable JSON value, with objects as read-only mappings and arrays as tuples.
+
+    Raises:
+        ValueError: Data is not finite JSON or exceeds document bounds.
+    """
+    if budget is None:
+        budget = [65536]
+    budget[0] -= 1
+    if depth > 32 or budget[0] < 0:
+        raise ValueError("JSON document exceeds complexity limits")
+    if value is None or type(value) in (bool, str):
+        return value
+    if type(value) is int and value.bit_length() <= 64:
+        return value
+    if type(value) is float and math.isfinite(value):
+        return value
+    if isinstance(value, Mapping) and all(type(key) is str for key in value):
+        return MappingProxyType(
+            {key: freeze_json(child, depth + 1, budget) for key, child in value.items()}
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(freeze_json(child, depth + 1, budget) for child in value)
+    raise ValueError("document must contain finite bounded JSON data")
+
+
+def thaw_json(value: Any) -> Any:
+    """Copy immutable JSON into independently writable serialization values.
+
+    Args:
+        value: Value produced by :func:`freeze_json`, or ordinary JSON data.
+
+    Returns:
+        Detached dictionaries, lists and JSON scalar values.
+    """
+    if isinstance(value, Mapping):
+        return {key: thaw_json(child) for key, child in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [thaw_json(child) for child in value]
+    return value
+
+
+def validate_effect(op: str, params: Any, allow_references: bool = True) -> None:
+    """Validate the exact data contract of one trusted effect operation.
+
+    Args:
+        op: Whitelisted generic operation name.
+        params: Operation parameters as a JSON object.
+        allow_references: Whether unresolved typed references may appear as values.
+
+    Raises:
+        ValueError: Operation, parameter keys, types or literal bounds are invalid.
+    """
+    _check_params(params)
+    contracts = {
+        "permit": (set(), {"reason", "target"}),
+        "deny": (set(), {"reason", "target"}),
+        "offer_move": ({"start", "end"}, set()),
+        "move_piece": ({"start", "end"}, set()),
+        "capture_piece": ({"square"}, set()),
+        "replace_piece": ({"square", "kind"}, set()),
+        "set_state": ({"name", "value"}, set()),
+        "increment_state": ({"name", "amount"}, set()),
+        "record_event": ({"name"}, {"payload"}),
+        "propose_outcome": ({"kind", "cause", "winner", "priority"}, set()),
+        "complete_quest": ({"quest", "player"}, set()),
+        "set_clock": ({"player", "seconds"}, set()),
+        "set_rights": ({"name", "value"}, set()),
+    }
+    if op not in contracts:
+        raise ValueError("unknown effect operation")
+    required, optional = contracts[op]
+    if not required <= set(params) or not set(params) <= required | optional:
+        raise ValueError(f"{op} has missing or unknown parameters")
+    for name, value in params.items():
+        if isinstance(value, dict) and set(value) == {"ref"}:
+            if not allow_references:
+                raise ValueError("resolved effects cannot contain references")
+            validate_reference(value["ref"])
+            continue
+        if name in {"start", "end", "square", "target"}:
+            if (
+                not isinstance(value, list)
+                or len(value) != 2
+                or any(type(axis) is not int or not 0 <= axis <= 255 for axis in value)
+            ):
+                raise ValueError(f"{op}.{name} needs a bounded JSON square")
+        elif name in {"reason", "name", "kind", "cause", "quest"}:
+            if not isinstance(value, str) or not value or len(value) > 128:
+                raise ValueError(f"{op}.{name} must be a nonempty bounded string")
+        elif name in {"player", "winner"}:
+            if value is None and name == "winner":
+                continue
+            if not (
+                (type(value) is int and value in (-1, 1))
+                or (isinstance(value, str) and value and len(value) <= 128)
+            ):
+                raise ValueError(f"{op}.{name} needs a participant identity")
+        elif name == "priority":
+            if type(value) is not int or not -1000 <= value <= 1000:
+                raise ValueError("outcome priority must be a bounded integer")
+        elif name == "amount":
+            if type(value) is not int or not -(2**63) < value < 2**63:
+                raise ValueError("state increment must be a bounded integer")
+        elif name == "seconds":
+            if type(value) is not int or not 0 <= value <= 315360000:
+                raise ValueError("clock seconds must be a nonnegative bounded integer")
+        elif name == "value" and op == "set_rights" and type(value) is not bool:
+            raise ValueError("special right must be boolean")
+        elif name == "payload" and not isinstance(value, dict):
+            raise ValueError("event payload must be a JSON object")
+    if not allow_references:
+
+        def reject_reference(value: Any) -> None:
+            if isinstance(value, dict):
+                if "ref" in value:
+                    raise ValueError("resolved effects cannot contain references")
+                for child in value.values():
+                    reject_reference(child)
+            elif isinstance(value, list):
+                for child in value:
+                    reject_reference(child)
+
+        reject_reference(params)
 
 
 def validate_reference(value: Any) -> None:
@@ -198,7 +334,15 @@ def condition(expr: Any, depth: int = 0, budget: list[int] | None = None) -> Non
 
 
 def validate_hooks(rules: Any, quests: Any) -> None:
-    """Validate finite rule/quest definitions with no executable extensions."""
+    """Validate finite rule/quest definitions and operation-specific effects.
+
+    Args:
+        rules: Untrusted decoded JSON hook definitions.
+        quests: Untrusted decoded JSON quest definitions.
+
+    Raises:
+        ValueError: Fields, references, types or expression bounds are invalid.
+    """
     if not isinstance(rules, list) or len(rules) > MAX_RULES:
         raise ValueError("rules must be a bounded list")
     if not isinstance(quests, list) or len(quests) > MAX_QUESTS:
@@ -224,7 +368,7 @@ def validate_hooks(rules: Any, quests: Any) -> None:
                 or effect["op"] not in EFFECTS
             ):
                 raise ValueError("unknown effect or malformed effect fields")
-            _check_params(effect["params"])
+            validate_effect(effect["op"], effect["params"])
     quest_ids: set[str] = set()
     for quest in quests:
         if not isinstance(quest, dict) or set(quest) != {"id", "description", "when", "reward"}:

@@ -18,9 +18,8 @@ Square = Tuple[int, int]
 class MoveValidator:
     """Generate geometric candidates without depending on any named game or piece.
 
-    Rules own all game-specific legality, including royal roles and outcomes.
-    Game-legal authorization and outcomes fail closed until the owning game
-    installs its complete rules.
+    GameManager applies JSON authorization and outcome rules. This component
+    provides geometry only and cannot independently authorize a transition.
     """
 
     def __init__(self, board: Optional[Board] = None, move: Optional[Move] = None):
@@ -79,18 +78,6 @@ class MoveValidator:
                         if pos == target_square:
                             return True
         return False
-
-    def is_check(self, color: int, board: Optional[Board] = None) -> bool:
-        """Reject game-specific check evaluation until rules are installed.
-
-        Args:
-            color: Side to evaluate.
-            board: Position to evaluate.
-
-        Raises:
-            NotImplementedError: Royal roles are defined by active game rules.
-        """
-        raise NotImplementedError("check evaluation requires configured game-specific rules")
 
     @staticmethod
     def _initial_path_clear(board: Board, origin: Square, offset: Square) -> bool:
@@ -172,63 +159,3 @@ class MoveValidator:
             List[Square]: Geometric destinations, not legally authorized moves.
         """
         return self.get_pseudo_legal_moves(start_pos, board)
-
-    def get_valid_moves(self, start_pos: Square, board: Optional[Board] = None) -> List[Square]:
-        """Require a completed game-specific rule implementation for legal moves.
-
-        Args:
-            start_pos: Source square.
-            board: Position to validate against.
-
-        Raises:
-            NotImplementedError: Geometric destinations alone are not legal moves.
-        """
-        raise NotImplementedError("legal moves require game-specific rules")
-
-    def get_all_valid_moves(self, color: int, board: Optional[Board] = None) -> List[Move]:
-        """Reject legal-move enumeration until the active game supplies its rules.
-
-        Args:
-            color: The active player's side.
-            board: Position to validate against.
-
-        Raises:
-            NotImplementedError: The rules have not been implemented yet.
-        """
-        raise NotImplementedError("legal move enumeration requires game-specific rules")
-
-    def is_valid_move(self, move: Move, board: Optional[Board] = None) -> bool:
-        """Reject final move authorization without the active game's complete rules.
-
-        Args:
-            move: Requested move.
-            board: Position to validate against.
-
-        Raises:
-            NotImplementedError: Geometric movement cannot authorize a game move.
-        """
-        raise NotImplementedError("legal move authorization requires game-specific rules")
-
-    def is_checkmate(self, color: int, board: Optional[Board] = None) -> bool:
-        """Do not adjudicate checkmate without a complete game rule set.
-
-        Args:
-            color: Side to adjudicate.
-            board: Position to adjudicate.
-
-        Raises:
-            NotImplementedError: Royal-safety geometry cannot decide game outcomes.
-        """
-        raise NotImplementedError("checkmate requires game-specific rules and outcome resolution")
-
-    def is_stalemate(self, color: int, board: Optional[Board] = None) -> bool:
-        """Do not adjudicate stalemate without the game's complete move rules.
-
-        Args:
-            color: Side to adjudicate.
-            board: Position to adjudicate.
-
-        Raises:
-            NotImplementedError: Geometric candidates are not a legal-move enumeration.
-        """
-        raise NotImplementedError("stalemate requires game-specific rules and outcome resolution")

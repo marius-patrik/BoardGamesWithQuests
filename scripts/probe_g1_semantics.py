@@ -22,11 +22,18 @@ def piece(side: int, kind: str, *, flying: bool = False) -> Piece:
 
 def rule(name: str, hook: str, condition: dict, effect: str) -> dict:
     """Build one validated JSON-style rule with a generic effect."""
+    params = {}
+    if effect == "replace_piece":
+        params = {"square": [0, 0], "kind": "queen"}
+    elif effect == "propose_outcome":
+        params = {"kind": "draw", "cause": "repetition", "winner": None, "priority": 10}
+    elif effect == "move_piece":
+        params = {"start": [7, 4], "end": [7, 6]}
     return {
         "id": name,
         "hook": hook,
         "when": condition,
-        "effects": [{"op": effect, "params": {}}],
+        "effects": [{"op": effect, "params": params}],
     }
 
 
@@ -59,7 +66,7 @@ short_moves = english_paths[0]["steps"]
 assert short_moves[0]["landing"] == [3, 4]
 assert short_moves[1]["landing"] == [1, 6]
 english_data = {
-    "capture_paths": english_paths,
+    "capture_paths": {"active": english_paths, "opponent": []},
     "move_attributes": {"captures": 0, "distance": 1},
 }
 capture_rule = rule(
@@ -110,7 +117,7 @@ assert any(
     )
 )
 maximal = {
-    "capture_paths": international_paths,
+    "capture_paths": {"active": international_paths, "opponent": []},
     "move_attributes": {"captures": 1},
 }
 max_rule = rule(
@@ -205,7 +212,7 @@ assert call([draw], snap.bindings(), "outcome") == ["propose_outcome"]
 assert snap.repetition_count({"scope": "position"}) == 3
 
 # Dynamic references resolve solely against a trusted, typed current move.
-from engine.model.game.schema import validate_hooks
+from engine.model.game.schema import thaw_json, validate_hooks
 
 move_refs = {"move.start": [7, 4], "move.end": [7, 6]}
 move_rule = rule(
@@ -225,7 +232,7 @@ move_rule["effects"][0]["params"] = {
 }
 planned = HookInterpreter([move_rule], {}, move_refs).evaluate("on_move_made")
 assert planned.matched_rule_ids == ("generic_move",)
-assert dict(planned.effects[0].params) == {"start": [7, 4], "end": [7, 6]}
+assert thaw_json(planned.effects[0].params) == {"start": [7, 4], "end": [7, 6]}
 assert move_refs == {"move.start": [7, 4], "move.end": [7, 6]}
 for invalid in (
     {"ref": "__globals__.builtins"},

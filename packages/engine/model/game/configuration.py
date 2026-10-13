@@ -7,11 +7,12 @@ from importlib import resources
 from importlib.metadata import entry_points
 import json
 from typing import Any
+from collections.abc import Mapping
 
 from engine.model.game.board import Board
 from engine.model.game.capture_geometry import CapturePolicy
 from engine.model.pieces.piece import Piece
-from engine.model.game.schema import validate_hooks
+from engine.model.game.schema import freeze_json, thaw_json, validate_hooks
 
 GROUP = "boardgameswithquests.games"
 
@@ -22,20 +23,44 @@ class ConfigurationError(ValueError):
 
 @dataclass(frozen=True)
 class GameDefinition:
-    """Immutable metadata for a game implementation package."""
+    """Immutable configuration snapshot owned by one selected game.
+
+    Args:
+        name: Configuration identity.
+        package: Trusted installed package or custom-source identifier.
+        title: Display name.
+        default: Whether the catalog preselects this definition.
+        playable: Whether its complete rulebook is verified.
+        board: Dimensions and starting placements.
+        pieces: Declared movement and appearance capabilities.
+        clock: Explicit time controls.
+        exports: Trusted game-owned format declarations.
+        appearance: Board colors.
+        rules: Declarative hook definitions.
+        quests: Declarative quest definitions.
+    """
 
     name: str
     package: str
     title: str
     default: bool
     playable: bool
-    board: dict[str, Any]
-    pieces: dict[str, dict[str, Any]]
-    clock: dict[str, Any]
+    board: Mapping[str, Any]
+    pieces: Mapping[str, Mapping[str, Any]]
+    clock: Mapping[str, Any]
     exports: tuple[str, ...]
-    appearance: dict[str, Any]
-    rules: tuple[dict[str, Any], ...]
-    quests: tuple[dict[str, Any], ...]
+    appearance: Mapping[str, Any]
+    rules: tuple[Mapping[str, Any], ...]
+    quests: tuple[Mapping[str, Any], ...]
+
+    def __post_init__(self) -> None:
+        """Detach and recursively freeze every configuration-owned JSON value.
+
+        Raises:
+            ValueError: Nested values are not finite bounded JSON.
+        """
+        for field in ("board", "pieces", "clock", "appearance", "rules", "quests", "exports"):
+            object.__setattr__(self, field, freeze_json(getattr(self, field)))
 
 
 MAX_GAME_JSON_BYTES = 262144
@@ -68,12 +93,23 @@ def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 
 def parse_definition_json(raw_json: str, package: str = "<custom>") -> GameDefinition:
-    """Validate an untrusted data-only game definition, without dynamic imports."""
+    """Validate an untrusted data-only game definition without dynamic imports.
+
+    Args:
+        raw_json: Untrusted UTF-8-compatible JSON document.
+        package: Source identifier used in validation errors.
+
+    Returns:
+        Detached immutable validated configuration.
+
+    Raises:
+        ConfigurationError: Text, fields, types or complexity are invalid.
+    """
     if not isinstance(raw_json, str):
         raise ConfigurationError("configuration must be a JSON document")
-    if len(raw_json.encode("utf-8")) > MAX_GAME_JSON_BYTES:
-        raise ConfigurationError("configuration exceeds maximum JSON byte size")
     try:
+        if len(raw_json.encode("utf-8")) > MAX_GAME_JSON_BYTES:
+            raise ConfigurationError("configuration exceeds maximum JSON byte size")
         data = json.loads(
             raw_json,
             object_pairs_hook=_unique_json_object,
@@ -81,9 +117,12 @@ def parse_definition_json(raw_json: str, package: str = "<custom>") -> GameDefin
                 ValueError(f"invalid JSON numeric constant: {constant}")
             ),
         )
-    except (ValueError, UnicodeError) as error:
+    except (ValueError, UnicodeError, RecursionError) as error:
         raise ConfigurationError(f"{package}: invalid JSON: {error}") from error
-    return validate_definition(data, package)
+    try:
+        return validate_definition(data, package)
+    except (ValueError, TypeError, RecursionError) as error:
+        raise ConfigurationError(f"{package}: invalid configuration: {error}") from error
 
 
 def load_definition(package: str) -> GameDefinition:
@@ -96,20 +135,45 @@ def load_definition(package: str) -> GameDefinition:
 
 
 def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
-    """Validate typed JSON data against one versioned game-neutral contract."""
+    """Validate typed JSON data against the closed game-neutral contract.
+
+    Args:
+        data: Untrusted decoded JSON object.
+        package: Source identifier used in validation errors.
+
+    Returns:
+        Detached immutable validated configuration.
+
+    Raises:
+        ConfigurationError: Definition fields, values or complexity are invalid.
+    """
     if not isinstance(data, dict) or set(data) != TOP_LEVEL_FIELDS:
         raise ConfigurationError(f"{package}: missing or unknown top-level fields")
+    try:
+        encoded = json.dumps(
+            data, allow_nan=False, ensure_ascii=False, separators=(",", ":")
+        ).encode("utf-8")
+    except (TypeError, ValueError, OverflowError, RecursionError, UnicodeError) as error:
+        raise ConfigurationError(f"{package}: configuration must be finite UTF-8 JSON") from error
+    if len(encoded) > MAX_GAME_JSON_BYTES:
+        raise ConfigurationError(f"{package}: configuration exceeds maximum JSON byte size")
     if type(data["schema_version"]) is not int:
         raise ConfigurationError(f"{package}: schema version must be an integer")
     if not isinstance(data, dict) or data.get("schema_version") != 2:
         raise ConfigurationError(f"{package}: unsupported config schema version")
+    try:
+        # A document budget differs from the deliberately smaller per-expression budget.
+        detached = thaw_json(freeze_json(data))
+    except ValueError as error:
+        raise ConfigurationError(f"{package}: {error}") from error
+    data = detached
     name, title = data.get("name"), data.get("title")
-    if not all(isinstance(v, str) and v for v in (name, title)):
+    if not all(isinstance(v, str) and v and len(v) <= 256 for v in (name, title)):
         raise ConfigurationError(f"{package}: name and title must be strings")
     if not all(type(data.get(v)) is bool for v in ("default", "playable")):
         raise ConfigurationError(f"{package}: default and playable must be booleans")
     board = data.get("board")
-    if not isinstance(board, dict):
+    if not isinstance(board, dict) or set(board) != {"rows", "columns", "starting_pieces"}:
         raise ConfigurationError(f"{package}: missing board definition")
     rows, cols = board.get("rows"), board.get("columns")
     if not all(type(v) is int and 1 <= v <= 256 for v in (rows, cols)) or rows * cols > 4096:
@@ -120,13 +184,38 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
     for key, piece in pieces.items():
         if not isinstance(key, str) or not isinstance(piece, dict):
             raise ConfigurationError(f"{package}: malformed piece")
+        required = {"symbols", "moves", "attacks", "jump", "repeat"}
+        optional = {"color_relative", "capture_policy", "notation", "fen", "initial_moves"}
+        if not required <= set(piece) or not set(piece) <= required | optional:
+            raise ConfigurationError(f"{package}: {key} has missing or unknown fields")
+        if not key or len(key) > 128:
+            raise ConfigurationError(f"{package}: invalid piece identifier")
+        if "notation" in piece and (
+            not isinstance(piece["notation"], str) or len(piece["notation"]) > 16
+        ):
+            raise ConfigurationError(f"{package}: invalid notation symbol")
+        if "fen" in piece and (
+            not isinstance(piece["fen"], str)
+            or len(piece["fen"]) != 1
+            or not piece["fen"].isascii()
+            or not piece["fen"].isalpha()
+        ):
+            raise ConfigurationError(f"{package}: FEN symbol must be one ASCII letter")
         symbols = piece.get("symbols")
-        if not isinstance(symbols, dict) or any(
-            not isinstance(symbols.get(color), str) or not symbols[color]
-            for color in ("white", "black")
+        if (
+            not isinstance(symbols, dict)
+            or set(symbols) != {"white", "black"}
+            or any(
+                not isinstance(symbols.get(color), str)
+                or not symbols[color]
+                or len(symbols[color]) > 32
+                for color in ("white", "black")
+            )
         ):
             raise ConfigurationError(f"{package}: {key} needs white and black symbols")
-        for kind in ("moves", "attacks"):
+        for kind in ("moves", "attacks", "initial_moves"):
+            if kind == "initial_moves" and kind not in piece:
+                continue
             vectors = piece.get(kind)
             if (
                 not isinstance(vectors, list)
@@ -159,7 +248,12 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
     if len(placements) > 128:
         raise ConfigurationError(f"{package}: too many starting piece groups")
     for placement in placements:
-        if not isinstance(placement, dict) or placement.get("piece") not in pieces:
+        if (
+            not isinstance(placement, dict)
+            or set(placement) != {"piece", "color", "squares"}
+            or not isinstance(placement.get("piece"), str)
+            or placement["piece"] not in pieces
+        ):
             raise ConfigurationError(f"{package}: unknown piece in starting position")
         if placement.get("color") not in ("white", "black"):
             raise ConfigurationError(f"{package}: invalid team")
@@ -180,16 +274,34 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
             if len(occupied) > 2048:
                 raise ConfigurationError(f"{package}: too many starting pieces")
     clock = data.get("clock")
-    if not isinstance(clock, dict) or any(
-        type(clock.get(key)) is not int or not 0 <= clock[key] <= 315360000
-        for key in ("initial_seconds", "increment_seconds")
+    if (
+        not isinstance(clock, dict)
+        or set(clock) != {"initial_seconds", "increment_seconds"}
+        or any(
+            type(clock.get(key)) is not int or not 0 <= clock[key] <= 315360000
+            for key in ("initial_seconds", "increment_seconds")
+        )
     ):
         raise ConfigurationError(f"{package}: invalid clock")
     exports = data.get("exports", [])
-    if not isinstance(exports, list) or any(not isinstance(v, str) for v in exports):
+    if (
+        not isinstance(exports, list)
+        or len(exports) > 32
+        or any(not isinstance(v, str) or not v or len(v) > 128 for v in exports)
+    ):
         raise ConfigurationError(f"{package}: invalid exports")
     appearance = data.get("appearance", {})
-    if not isinstance(appearance, dict):
+    if (
+        not isinstance(appearance, dict)
+        or not set(appearance) <= {"light_square", "dark_square"}
+        or any(
+            not isinstance(value, str)
+            or len(value) != 7
+            or value[0] != "#"
+            or any(char not in "0123456789abcdefABCDEF" for char in value[1:])
+            for value in appearance.values()
+        )
+    ):
         raise ConfigurationError(f"{package}: invalid appearance")
     try:
         validate_hooks(data.get("rules"), data.get("quests"))
@@ -203,13 +315,13 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         title,
         data["default"],
         data["playable"],
-        board,
-        pieces,
-        clock,
+        freeze_json(board),
+        freeze_json(pieces),
+        freeze_json(clock),
         tuple(exports),
-        appearance,
-        tuple(data["rules"]),
-        tuple(data["quests"]),
+        freeze_json(appearance),
+        freeze_json(data["rules"]),
+        freeze_json(data["quests"]),
     )
 
 
@@ -249,7 +361,15 @@ def board_from_definition(definition: GameDefinition) -> Board:
         direction = 1 if color_name == "white" else -1
         for position in entry["squares"]:
 
-            def vectors(field: str):
+            def vectors(field: str) -> list[tuple[int, int]]:
+                """Resolve the configured vectors relative to the piece side.
+
+                Args:
+                    field: Validated piece vector field.
+
+                Returns:
+                    Side-relative movement offsets.
+                """
                 return [
                     (row * direction if spec.get("color_relative") else row, col)
                     for row, col in spec[field]
@@ -259,6 +379,7 @@ def board_from_definition(definition: GameDefinition) -> Board:
                 color,
                 kind,
                 vectors=vectors("moves"),
+                initial_vectors=vectors("initial_moves") if "initial_moves" in spec else [],
                 attack_vectors=vectors("attacks"),
                 can_jump=spec["jump"],
                 repeat=spec["repeat"],
