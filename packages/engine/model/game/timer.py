@@ -10,7 +10,7 @@ class Timer:
         """Initialize game timers.
 
         Args:
-            initial_time: Initial time per player in seconds (default: 600).
+            initial_time: Initial time per player in seconds.
         """
         if type(initial_time) is not int or initial_time < 0:
             raise ValueError("initial_time must be a non-negative integer")
@@ -24,7 +24,7 @@ class Timer:
         """Resolve player identifier to clock array index.
 
         Args:
-            player: 1/"white" for index 0, -1/"black" for index 1, or 0/1 integer index.
+            player: 1/"white" for index 0, or -1/"black" for index 1.
 
         Returns:
             0 or 1 index.
@@ -43,7 +43,7 @@ class Timer:
         """Deduct elapsed seconds from a player's clock.
 
         Args:
-            player: Player identifier (1 for White, -1 for Black, or index).
+            player: Player identifier (1 for White, -1 for Black).
             elapsed_seconds: Number of seconds to deduct (default: 1).
         """
         idx = self._get_player_index(player)

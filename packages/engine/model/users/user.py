@@ -20,8 +20,8 @@ class User:
             username: Unique account handle.
             name: Full name of the user.
             email: User's contact email.
-            elo: Current skill rating (default: 1200).
-            completed_quests: Optional list of previously completed quests.
+            elo: Skill rating (default: 1200).
+            completed_quests: Optional list of earned quest identifiers.
         """
         self.username = username
         self.name = name
@@ -47,9 +47,9 @@ class User:
         return list(self.completed_quests)
 
     def getEloRating(self) -> int:
-        """Get the user's current Elo rating.
+        """Get the user's Elo rating.
 
         Returns:
-            Current integer Elo rating.
+            Integer Elo rating.
         """
         return self.elo

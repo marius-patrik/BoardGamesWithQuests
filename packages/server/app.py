@@ -6,7 +6,7 @@ from engine.model.game.configuration import installed_definitions
 
 app = FastAPI(
     title="BoardGamesWithQuests API",
-    description="Authoritative multiplayer API; currently bootstrapped only.",
+    description="Game catalog, service health and authoritative multiplayer API.",
     version="0.0.0",
 )
 
