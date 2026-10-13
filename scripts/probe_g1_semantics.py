@@ -7,6 +7,7 @@ The subsequent G2/G3 gates will compose these primitives into full rulebooks.
 from engine.model.game.board import Board
 from engine.model.game.board_queries import BoardQueries
 from engine.model.game.capture_geometry import CaptureEnumerator, CapturePolicy
+from engine.model.game.configuration import load_definition
 from engine.model.game.hooks import HookInterpreter
 from engine.model.game.snapshot_queries import SnapshotQueries
 from engine.model.pieces.piece import Piece
@@ -47,7 +48,8 @@ def comparison(name: str, relation: str, value: object) -> dict:
 man = piece(1, "man")
 enemy = piece(-1, "man")
 english = Board((8, 8), [((5, 2), man), ((4, 3), enemy), ((2, 5), enemy)])
-short = CapturePolicy.from_json({"flying": False, "land_anywhere": False, "max_nodes": 200})
+english_def = load_definition("english_draughts")
+short = CapturePolicy.from_json(english_def.pieces["man"]["capture_policy"])
 english_paths = CaptureEnumerator(english).enumerate((5, 2), short)
 assert english_paths and max(len(path["steps"]) for path in english_paths) == 2
 assert english.get_piece_at((5, 2)) is man
@@ -76,11 +78,16 @@ english_data["move_attributes"]["captures"] = 2
 assert call([capture_rule], SnapshotQueries(english_data).bindings(), "permits_move") == []
 # Single-step (short) king capture never offers a square beyond adjacent landing.
 king_short = Board((8, 8), [((5, 2), piece(1, "king")), ((4, 3), enemy)])
-king_paths = CaptureEnumerator(king_short).enumerate((5, 2), short)
+king_paths = CaptureEnumerator(king_short).enumerate(
+    (5, 2), CapturePolicy.from_json(english_def.pieces["king"]["capture_policy"])
+)
 assert {tuple(step["landing"]) for path in king_paths for step in path["steps"]} == {(3, 4)}
 
 # International draughts: flying king and backward man capture.
-flying = CapturePolicy.from_json({"flying": True, "land_anywhere": True, "max_nodes": 400})
+international_def = load_definition("international_checkers")
+flying = CapturePolicy.from_json(
+    international_def.pieces["king"]["capture_policy"]
+)
 international = Board(
     (10, 10),
     [
@@ -99,7 +106,9 @@ assert any(
 reverse = Board((10, 10), [((3, 4), piece(1, "man")), ((4, 5), enemy)])
 assert any(
     path["steps"][0]["landing"] == [5, 6]
-    for path in CaptureEnumerator(reverse).enumerate((3, 4), short)
+    for path in CaptureEnumerator(reverse).enumerate(
+        (3, 4), CapturePolicy.from_json(international_def.pieces["man"]["capture_policy"])
+    )
 )
 maximal = {
     "capture_paths": international_paths,
