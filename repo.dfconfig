@@ -22,7 +22,7 @@
     },
     "upstream": {
       "repo": "marius-patrik/DarkFactory",
-      "ref": "12a2507ba6499b3236c17d3c977c55a480ed5200"
+      "ref": "4726c2a686878a80b8ed982a74e54df598f1104c"
     },
     "versioning": {
       "mode": "pridever",
@@ -192,8 +192,8 @@
       "verify-bound-issue"
     ],
     "board": {
-      "global_title": "Global",
-      "link_boards": [
+      "global": "Global",
+      "boards": [
         "Global",
         "BoardGamesWithQuests"
       ]
