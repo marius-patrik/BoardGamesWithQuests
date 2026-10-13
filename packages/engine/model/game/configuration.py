@@ -1,4 +1,4 @@
-"""Validated JSON game configuration. Rules and quests remain code extensions."""
+"""Validated, data-only game configuration with bounded JSON hooks."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from typing import Any
 
 from engine.model.game.board import Board
 from engine.model.pieces.piece import Piece
+from engine.model.game.schema import validate_hooks
 
 GROUP = "boardgameswithquests.games"
 
@@ -32,6 +33,8 @@ class GameDefinition:
     clock: dict[str, Any]
     exports: tuple[str, ...]
     appearance: dict[str, Any]
+    rules: tuple[dict[str, Any], ...]
+    quests: tuple[dict[str, Any], ...]
 
 
 def load_definition(package: str) -> GameDefinition:
@@ -40,7 +43,7 @@ def load_definition(package: str) -> GameDefinition:
         data = json.loads(resources.files(package).joinpath("config.json").read_text("utf-8"))
     except (ModuleNotFoundError, OSError, ValueError) as error:
         raise ConfigurationError(f"{package}: missing or invalid config.json: {error}") from error
-    if not isinstance(data, dict) or data.get("schema_version") != 1:
+    if not isinstance(data, dict) or data.get("schema_version") != 2:
         raise ConfigurationError(f"{package}: unsupported config schema version")
     name, title = data.get("name"), data.get("title")
     if not all(isinstance(v, str) and v for v in (name, title)):
@@ -118,6 +121,12 @@ def load_definition(package: str) -> GameDefinition:
     appearance = data.get("appearance", {})
     if not isinstance(appearance, dict):
         raise ConfigurationError(f"{package}: invalid appearance")
+    try:
+        validate_hooks(data.get("rules"), data.get("quests"))
+    except ValueError as error:
+        raise ConfigurationError(f"{package}: invalid declarative behavior: {error}") from error
+    if data["playable"] and not data["rules"]:
+        raise ConfigurationError(f"{package}: playable game must declare rules")
     return GameDefinition(
         name,
         package,
@@ -129,6 +138,8 @@ def load_definition(package: str) -> GameDefinition:
         clock,
         tuple(exports),
         appearance,
+        tuple(data["rules"]),
+        tuple(data["quests"]),
     )
 
 

@@ -24,7 +24,7 @@ classifiers = [
 ]
 # The currently integrated engine core has no third-party runtime imports. FastAPI and
 # Supabase dependencies belong to packages/server once that package is implemented.
-dependencies = []
+dependencies = ["fastapi==0.143.0"]
 
 [project.urls]
 Homepage = "https://github.com/marius-patrik/BoardGamesWithQuests"
@@ -45,7 +45,7 @@ package-dir = {"" = "packages"}
 
 [tool.setuptools.packages.find]
 where = ["packages"]
-include = ["engine*", "chess*", "english_draughts*", "international_checkers*"]
+include = ["engine*", "server*", "chess*", "english_draughts*", "international_checkers*"]
 
 [tool.setuptools.package-data]
 chess = ["config.json"]

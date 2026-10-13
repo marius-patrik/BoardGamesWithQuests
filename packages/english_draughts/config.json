@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "name": "english_draughts",
   "title": "English Draughts",
   "default": false,
@@ -211,5 +211,7 @@
   "appearance": {
     "light_square": "#E8DABC",
     "dark_square": "#70573F"
-  }
+  },
+  "rules": [],
+  "quests": []
 }

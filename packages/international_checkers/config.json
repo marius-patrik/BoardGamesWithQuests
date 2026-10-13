@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "name": "international_checkers",
   "title": "International Draughts",
   "default": false,
@@ -275,5 +275,7 @@
   "appearance": {
     "light_square": "#E8DABC",
     "dark_square": "#70573F"
-  }
+  },
+  "rules": [],
+  "quests": []
 }
