@@ -21,21 +21,22 @@ class CapturePolicy:
 
     flying: bool
     land_anywhere: bool
+    deferred_removal: bool
     max_nodes: int = 4096
 
     @classmethod
     def from_json(cls, obj: Mapping[str, Any]) -> "CapturePolicy":
         """Require typed, explicitly declared capture semantics."""
-        if set(obj) != {"flying", "land_anywhere", "max_nodes"}:
-            raise QueryResolutionError("capture policy requires three explicit fields")
-        if type(obj["flying"]) is not bool or type(obj["land_anywhere"]) is not bool:
+        if set(obj) != {"flying", "land_anywhere", "deferred_removal", "max_nodes"}:
+            raise QueryResolutionError("capture policy requires four explicit fields")
+        if any(type(obj[key]) is not bool for key in ("flying", "land_anywhere", "deferred_removal")):
             raise QueryResolutionError("capture booleans must be explicit")
         if obj["land_anywhere"] and not obj["flying"]:
             raise QueryResolutionError("extended landings require flying captures")
         n = obj["max_nodes"]
         if type(n) is not int or not 1 <= n <= 10000:
             raise QueryResolutionError("capture enumeration budget is invalid")
-        return cls(obj["flying"], obj["land_anywhere"], n)
+        return cls(obj["flying"], obj["land_anywhere"], obj["deferred_removal"], n)
 
 
 class CaptureEnumerator:
@@ -61,7 +62,9 @@ class CaptureEnumerator:
         routes: list[dict[str, Any]] = []
         visited = 0
 
-        def candidates(pos: tuple[int, int], placement: dict) -> list[tuple]:
+        def candidates(
+            pos: tuple[int, int], placement: dict, already_captured: frozenset
+        ) -> list[tuple]:
             found = []
             for dr, dc in actor.getAttackDirections():
                 if (dr, dc) == (0, 0):
@@ -75,7 +78,7 @@ class CaptureEnumerator:
                         obstacle = placement.get((r, c))
                         if obstacle is None:
                             continue
-                        if obstacle.getColor() == actor.getColor():
+                        if obstacle.getColor() == actor.getColor() or (r, c) in already_captured:
                             break
                         captured = (r, c)
                         nr, nc = r + dr, c + dc
@@ -94,17 +97,23 @@ class CaptureEnumerator:
                     if (
                         target is not None
                         and target.getColor() != actor.getColor()
+                        and enemy not in already_captured
                         and landing not in placement
                     ):
                         found.append((landing, enemy))
             return found
 
-        def dfs(pos: tuple[int, int], placement: dict, steps: list[dict]) -> None:
+        def dfs(
+            pos: tuple[int, int],
+            placement: dict,
+            steps: list[dict],
+            already_captured: frozenset,
+        ) -> None:
             nonlocal visited
             visited += 1
             if visited > policy.max_nodes:
                 raise QueryResolutionError("capture search exceeded configured node budget")
-            next_moves = candidates(pos, placement)
+            next_moves = candidates(pos, placement, already_captured)
             if not next_moves and steps:
                 routes.append({"start": list(start), "steps": [dict(step) for step in steps]})
                 if len(routes) > 128:
@@ -112,12 +121,13 @@ class CaptureEnumerator:
             for landing, captured in next_moves:
                 after = placement.copy()
                 after.pop(pos)
-                after.pop(captured)
+                if not policy.deferred_removal:
+                    after.pop(captured)
                 after[landing] = actor
                 step = {"landing": list(landing), "captured": list(captured)}
-                dfs(landing, after, [*steps, step])
+                dfs(landing, after, [*steps, step], already_captured | {captured})
 
-        dfs(start, occupied, [])
+        dfs(start, occupied, [], frozenset())
         return routes
 
     def for_side(self, side: int, policies: Mapping[str, CapturePolicy]) -> list[dict]:
