@@ -1,20 +1,21 @@
 [build-system]
-requires = ["setuptools>=69", "setuptools-scm>=8"]
+requires = ["setuptools>=77", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "chesswithquests"
 dynamic = ["version"]
 # The Git release tag is the version source of truth, including for Python builds.
-description = "A board game engine in which the configuration is the product: chess and checkers share one engine."
+description = "Game-neutral Python engine for JSON-configurable chess and checkers, powering an online React application."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "NONE" }
+license = "GPL-3.0-only"
 authors = [{ name = "marius-patrik" }]
-keywords = ["chess", "checkers", "board game", "engine", "mvc", "quests"]
+keywords = ["chess", "checkers", "board game", "engine", "json rules", "quests", "web"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -22,8 +23,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Games/Entertainment :: Board Games",
 ]
-# The runtime uses the standard library and tkinter, and nothing else. `python-chess` is
-# banned: FEN, PGN, SAN and coordinate conversion are hand-rolled in this repository.
+# The currently integrated engine core has no third-party runtime imports. FastAPI and
+# Supabase dependencies belong to packages/server once that package is implemented.
 dependencies = []
 
 [project.urls]
@@ -31,8 +32,6 @@ Homepage = "https://github.com/marius-patrik/BoardGamesWithQuests"
 Documentation = "https://marius-patrik.github.io/BoardGamesWithQuests/"
 "Architecture diagram" = "https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D"
 
-[project.gui-scripts]
-chesswithquests = "engine.app:main"
 
 [project.entry-points."boardgameswithquests.games"]
 chess = "chess"

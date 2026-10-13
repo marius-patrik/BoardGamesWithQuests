@@ -16,7 +16,7 @@ English is canonical for all code, method names, variables, comments, docstrings
 Keep commits modular, focused, and descriptive. When implementing components from specifications, maintain one commit per class or component. All commits across all branches must strictly follow the Conventional Commits specification: `<type>(<scope>): <description>` (e.g. `feat(model): implement knight movement rules`).
 
 ### 6. CI Readiness & Verification
-Every push must maintain green status on GitHub Actions CI across all matrix Python versions (`3.10`, `3.11`, `3.12`, `3.13`).
+Every pull request must satisfy the current required `quality` and `verify-bound-issue` checks, plus relevant project-specific documentation, Python, Bun/TypeScript and API checks. Python 3.10–3.13 engine compatibility remains a target where supported; Vercel runtime support and deploy correctness are verified independently. A draft PR with missing coverage or red checks remains **unmergeable**.
 
 ### 7. Branch & Pull Request Workflow
 All changes, features, refactors, and bug fixes must be developed on dedicated topic/feature branches and submitted through GitHub Pull Requests. Direct commits and pushes to the `main` branch are strictly prohibited:
@@ -24,11 +24,11 @@ All changes, features, refactors, and bug fixes must be developed on dedicated t
 - **Bot-Authored PRs**: Pull requests must be authored by `github-actions[bot]` via `.github/workflows/open-pr.yml` (e.g. using `python3 .github/scripts/open_pr.py` or `gh workflow run open-pr.yml`) to ensure repository maintainers are not registered as authors and can natively review and approve them.
 - **Draft Status**: Every pull request must be opened in Draft status (`--draft`) and remain in draft throughout development and review until explicitly approved.
 - **Up-to-Date with Main**: Every pull request branch must contain the latest `main` branch before merge (`strict: true` required status checks).
-- **Required CI Checks**: Every pull request requires all GitHub Actions CI checks (`CI` matrix across Python versions, `Verify Docs Layout`, `Verify Bound Issue`, and `Auto Format`) to pass green before merging.
+- **Required CI Checks**: Every pull request requires all GitHub Actions CI checks (stable DarkFactory `quality` and `verify-bound-issue` contexts, `Verify Docs Layout`, plus applicable browser/API checks) to pass green before merging.
 - **Branch Protection**: The `main` branch must remain protected at all times with required status checks, branch up-to-date enforcement, and pull request review enforcement.
 
 ### 8. Automated Code Formatting
-All Python code must conform to Black formatting standards (`tool.black` configuration with line length 100). The GitHub Actions bot automatically formats the entire codebase on every push across branches and commits any formatting adjustments.
+Python code must conform to Black (line length 100), and TypeScript must conform to the frontend's configured formatting and lint rules. Formatting is validated by current CI; do not claim a retired auto-format workflow is automatically committing fixes.
 
 ### 9. Issue Binding, Branch Auto-Deletion & Project Board Taxonomy
 - **Issue Binding**: Every pull request must bind a tracked GitHub issue using closing keywords in the PR description (e.g. `Closes #123`, `Fixes #123`, or `Resolves #123`).
@@ -54,16 +54,16 @@ Pull requests require official GitHub review approval before merging. The `main`
 - **Post-Merge Reconciliation**: Upon merge, the automation directly updates Project 14 statuses for both the PR and all bound issues to `Done`, adds the `Done` label, and verifies bound issues are closed.
 
 ### 12. User Request Decomposition, Verbatim Prompting & Confirmation Gate
-Every incoming user prompt or task must immediately be converted into one or more tracked GitHub issues labeled `Request` before any planning, branching, or code changes begin:
+Every new independent user request normally becomes a tracked `Request` issue before implementation. When the maintainer explicitly approves consolidating an existing tracked program, the approved single Plan issue (#129 in the current program) may supersede historical requests without spawning redundant active issues:
 - **Issue Template**: Use `.github/ISSUE_TEMPLATE/request.yml` for structured request filing.
 - **Decomposition**: A single user message containing multiple distinct tasks must be decomposed into multiple focused `Request` issues.
 - **Verbatim Wording**: Each `Request` issue body must contain the exact, verbatim wording of the user request.
 - **Interpretation Section**: Below the verbatim wording, each `Request` issue must include an `### Interpretation` section clearly specifying how the request is understood, the architectural scope, and proposed verification.
-- **Confirmation Gate**: The interpretation requires explicit user confirmation (e.g. commenting `approve`) before any implementation plan gets made.
+- **Confirmation Gate**: The interpretation requires explicit user confirmation before its plan becomes actionable. A maintainer's explicit instruction to implement the already discussed consolidated plan constitutes confirmation for that one consolidated issue.
 - **Child Plan Issues**: Once the interpretation is confirmed by the user, a separate child issue is automatically created with the `Plan` label natively linked via GitHub sub-issues (`--parent <request_id>`), containing the detailed implementation plan. All subsequent code branches and pull requests bind to the plan issue.
 
 ### 13. Agent Automation Operations
-- Run coding agents through `.github/workflows/agent.yml`, using the shared workflow pinned in `.github/darkfactory.json`; do not vendor a competing runner.
+- Run coding agents through `.github/workflows/agent.yml`, using the shared workflow pinned by `repo.dfconfig`; do not vendor a competing runner.
 - Keep agent CLI selection and fallback order declarative. Skip unavailable harnesses or credentials, and pass provider secrets explicitly to called workflows.
 - Classify unlabelled issues as `Request` with the appropriate type and area, and post an interpretation for confirmation.
 - Respond to feedback on Request issues, Plan issues and pull requests. After plan approval, create a feature branch, implement and review the change, and open a bot-authored Draft PR.
@@ -82,3 +82,9 @@ All commits must strictly adhere to the Conventional Commits specification:
 
 ### 15. No Incorrect Interim Implementations
 **Never merge a knowingly incorrect, misleading, or architecturally wrong temporary implementation on the assumption that a later PR will fix or replace it.** Each merged change must be correct for the behavior it exposes and comply with the accepted architecture. If the correct behavior is not yet implemented, leave it unavailable and fail explicitly rather than returning fabricated results, silently substituting placeholder behavior, or advertising unsupported features. Partial work is permissible only when the limitation is explicit and existing supported behavior stays correct. Review entire affected components and integration points, not only the diff. Track unfinished integration work in `SCRATCHPAD.md`; durable design belongs under `notes/`.
+
+### 16. Declarative Game Logic and Hosted Security
+All gameplay configuration, including rule hooks, quest conditions/effects, movements and clocks, is validated JSON. Never execute user-provided Python/JavaScript, import user-owned executable modules or accept arbitrary code expressions as configuration. Engine Python may implement only trusted generic primitives. Hosted moves require verified player identity, explicit turn legality, atomic durable commits and secure per-game subscriptions. Keep provider secret credentials server-side; use RLS and explicit guest access constraints. This is an architecture rule, not a claim of current implementation.
+
+### 17. One Active Delivery Plan
+For the approved consolidation, [.agents/notes/PLAN.md](notes/PLAN.md) is the single authoritative execution plan, [#129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129) its issue, [#267](https://github.com/marius-patrik/BoardGamesWithQuests/pull/267) the sole active draft PR, and [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239) the final behavioral gate. The scratchpad records **current state only**; closed historical issues/PRs do not override the plan. No merge until verified and approved.

@@ -4,14 +4,14 @@ on:
   pull_request:
     paths:
       - pyproject.toml
-      - .github/darkfactory.json
+      - repo.dfconfig
       - .github/workflows/release.yml
       - .github/workflows/verify-release-metadata.yml
   push:
     branches: [main]
     paths:
       - pyproject.toml
-      - .github/darkfactory.json
+      - repo.dfconfig
       - .github/workflows/release.yml
       - .github/workflows/verify-release-metadata.yml
   workflow_dispatch:
@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install the build and versioning backends
-        run: python -m pip install 'setuptools>=69' 'setuptools-scm>=8' build
+        run: python -m pip install 'setuptools>=77' 'setuptools-scm>=8' build
       - name: Verify two consecutive Git tags produce matching wheel versions
         shell: bash
         run: |
