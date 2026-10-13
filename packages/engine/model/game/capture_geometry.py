@@ -106,9 +106,7 @@ class CaptureEnumerator:
                 raise QueryResolutionError("capture search exceeded configured node budget")
             next_moves = candidates(pos, placement)
             if not next_moves and steps:
-                routes.append(
-                    {"start": list(start), "steps": [dict(step) for step in steps]}
-                )
+                routes.append({"start": list(start), "steps": [dict(step) for step in steps]})
                 if len(routes) > 128:
                     raise QueryResolutionError("too many capture routes")
             for landing, captured in next_moves:
