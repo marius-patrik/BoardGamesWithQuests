@@ -1,0 +1,37 @@
+name: One-time Project Board Reconciliation
+
+on:
+  push:
+    branches: [feature/product-integration]
+    paths: [.github/workflows/reconcile-project-board.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    if: github.repository == 'marius-patrik/BoardGamesWithQuests'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
+    steps:
+      - name: Ensure project-specific GitHub Projects V2 board exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::GH_PROJECT_TOKEN not configured; cannot inspect or create project board"
+            exit 1
+          fi
+          gh auth status
+          boards="$(gh project list --owner marius-patrik --format json --limit 100)"
+          echo "$boards" | jq -r '.projects[] | "Project #\(.number): \(.title)"'
+          found="$(echo "$boards" | jq -r '.projects[] | select(.title == "BoardGamesWithQuests") | .number' | head -n1)"
+          if [[ -z "$found" ]]; then
+            echo "Creating the per-repository BoardGamesWithQuests project (not a duplicate of Global)."
+            gh project create --owner marius-patrik --title BoardGamesWithQuests --format json
+          else
+            echo "BoardGamesWithQuests project already exists: #$found"
+          fi
+          echo "Final accessible boards:"
+          gh project list --owner marius-patrik --format json --limit 100 | jq -r '.projects[] | "Project #\(.number): \(.title)"'
