@@ -54,8 +54,8 @@
 <!-- engine.model.game.hooks.HookInterpreter&#45;&gt;engine.model.game.conditions.ConditionEvaluator -->
 <g id="edge7" class="edge">
 <title>engine.model.game.hooks.HookInterpreter&#45;&gt;engine.model.game.conditions.ConditionEvaluator</title>
-<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3203.7,-183.21C3233.25,-237.32 3273.5,-311 3273.5,-311 3273.5,-311 4067.5,-311 4067.5,-311 4067.5,-311 4103.81,-252.65 4135.53,-201.67"/>
-<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="4140.18,-194.21 4138.93,-203.45 4138.14,-197.95 4135.9,-201.56 4135.69,-201.43 4135.47,-201.29 4137.72,-197.69 4132.44,-199.41 4140.18,-194.21 4140.18,-194.21"/>
+<path fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5,2" d="M3203.7,-183.21C3233.25,-237.32 3273.5,-311 3273.5,-311 3273.5,-311 4067.5,-311 4067.5,-311 4067.5,-311 4098.93,-260.5 4128.85,-212.41"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.5" points="4133.44,-205.03 4132.2,-214.27 4131.41,-208.77 4129.16,-212.38 4128.95,-212.25 4128.74,-212.12 4130.98,-208.51 4125.7,-210.23 4133.44,-205.03 4133.44,-205.03"/>
 </g>
 <!-- engine.model.game.manager.GameManager&#45;&gt;engine.model.game.board.Board -->
 <g id="edge8" class="edge">
@@ -230,18 +230,20 @@
 <!-- engine.model.game.conditions.ConditionEvaluator -->
 <g id="node7" class="node">
 <title>engine.model.game.conditions.ConditionEvaluator</title>
-<polygon fill="#ffffff" stroke="transparent" points="4096.5,-60 4096.5,-194 4267.5,-194 4267.5,-60 4096.5,-60"/>
-<polygon fill="#e5eaf8" stroke="transparent" points="4098,-166 4098,-193 4267,-193 4267,-166 4098,-166"/>
-<text text-anchor="start" x="4107" y="-176.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">ConditionEvaluator</text>
-<text text-anchor="start" x="4104" y="-152.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.conditions</text>
-<polyline fill="none" stroke="#344054" points="4267,-144 4098,-144 "/>
-<text text-anchor="start" x="4105" y="-129" font-family="DejaVu Sans" font-size="10.00">+ _queries</text>
+<polygon fill="#ffffff" stroke="transparent" points="4096.5,-49 4096.5,-205 4267.5,-205 4267.5,-49 4096.5,-49"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="4098,-177 4098,-204 4267,-204 4267,-177 4098,-177"/>
+<text text-anchor="start" x="4107" y="-187.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">ConditionEvaluator</text>
+<text text-anchor="start" x="4104" y="-163.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.conditions</text>
+<polyline fill="none" stroke="#344054" points="4267,-155 4098,-155 "/>
+<text text-anchor="start" x="4105" y="-140" font-family="DejaVu Sans" font-size="10.00">+ _queries</text>
+<text text-anchor="start" x="4105" y="-129" font-family="DejaVu Sans" font-size="10.00">+ _references</text>
 <polyline fill="none" stroke="#344054" points="4267,-119 4098,-119 "/>
-<text text-anchor="start" x="4105" y="-104" font-family="DejaVu Sans" font-size="10.00">+ _query(name, params)</text>
-<text text-anchor="start" x="4105" y="-93" font-family="DejaVu Sans" font-size="10.00">+ _value(expression)</text>
-<text text-anchor="start" x="4105" y="-82" font-family="DejaVu Sans" font-size="10.00">+ _compare(relation, left, right)</text>
-<text text-anchor="start" x="4105" y="-71" font-family="DejaVu Sans" font-size="10.00">+ evaluate(expression)</text>
-<polygon fill="none" stroke="#344054" points="4096.5,-60 4096.5,-194 4267.5,-194 4267.5,-60 4096.5,-60"/>
+<text text-anchor="start" x="4105" y="-104" font-family="DejaVu Sans" font-size="10.00">+ resolve(value)</text>
+<text text-anchor="start" x="4105" y="-93" font-family="DejaVu Sans" font-size="10.00">+ _query(name, params)</text>
+<text text-anchor="start" x="4105" y="-82" font-family="DejaVu Sans" font-size="10.00">+ _value(expression)</text>
+<text text-anchor="start" x="4105" y="-71" font-family="DejaVu Sans" font-size="10.00">+ _compare(relation, left, right)</text>
+<text text-anchor="start" x="4105" y="-60" font-family="DejaVu Sans" font-size="10.00">+ evaluate(expression)</text>
+<polygon fill="none" stroke="#344054" points="4096.5,-49 4096.5,-205 4267.5,-205 4267.5,-49 4096.5,-49"/>
 </g>
 <!-- engine.model.game.conditions.QueryResolutionError -->
 <g id="node8" class="node">
