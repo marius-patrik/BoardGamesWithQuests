@@ -29,7 +29,9 @@ class CapturePolicy:
         """Require typed, explicitly declared capture semantics."""
         if set(obj) != {"flying", "land_anywhere", "deferred_removal", "max_nodes"}:
             raise QueryResolutionError("capture policy requires four explicit fields")
-        if any(type(obj[key]) is not bool for key in ("flying", "land_anywhere", "deferred_removal")):
+        if any(
+            type(obj[key]) is not bool for key in ("flying", "land_anywhere", "deferred_removal")
+        ):
             raise QueryResolutionError("capture booleans must be explicit")
         if obj["land_anywhere"] and not obj["flying"]:
             raise QueryResolutionError("extended landings require flying captures")
