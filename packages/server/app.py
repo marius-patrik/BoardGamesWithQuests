@@ -2,6 +2,8 @@
 
 from fastapi import FastAPI
 
+from engine.model.game.configuration import installed_definitions
+
 app = FastAPI(
     title="BoardGamesWithQuests API",
     description="Authoritative multiplayer API; currently bootstrapped only.",
@@ -13,3 +15,14 @@ app = FastAPI(
 def health() -> dict[str, str | bool]:
     """Report process availability without claiming gameplay readiness."""
     return {"status": "bootstrap", "playable": False}
+
+
+@app.get("/games", tags=["catalog"])
+def game_catalog() -> dict[str, list[dict[str, str | bool]]]:
+    """List installed JSON definitions without granting or simulating gameplay."""
+    return {
+        "games": [
+            {"id": game.name, "title": game.title, "playable": game.playable}
+            for game in installed_definitions()
+        ]
+    }
