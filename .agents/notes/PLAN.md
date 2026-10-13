@@ -80,7 +80,7 @@ The settings surface exposes Board/Pieces/Rules/Quests/Clocks as **schema-driven
 - `repo.dfconfig` is the single DarkFactory configuration. Python packaging metadata in `pyproject.toml` and any documentation-tool configuration remain independent tool inputs unless DarkFactory explicitly supports their generation. Retain functioning repository agent, approval and release automation.
 - Pin DarkFactory to the latest **verified** released immutable commit and update through the supported installer. Use supported installer/update process and correctly retain global/local issue board behavior.
 - Use GPL-3.0 consistently in `LICENSE`, Python metadata and `repo.dfconfig`. Preserve version-from-tag (`setuptools-scm`), not static `0.1.0`. Update dependencies for FastAPI, Supabase and frontend/Tauri.
-- No duplicate workflows, stale workflow display names or wrong required checks. Preserve the existing GitHub Projects board #14 (renamed BoardGamesWithQuests; 211 original items) and Global project #17; do not create a second empty board. Ensure the current PR and tracking issues belong to both boards, subject to actual API rate limits. Document required CI coverage and approval gates.
+- No duplicate workflows, stale workflow display names or wrong required checks. Preserve the existing GitHub Projects board #14 (BoardGamesWithQuests; 211 items audited) and Global project #17; do not create a duplicate board. The current PR is confirmed on both boards. Reconcile historical local statuses only from verified closure/merge evidence, after Projects token quota is available. Document required CI coverage and approval gates.
 
 ## 9. Integration and source authority
 
@@ -106,10 +106,10 @@ configurations are JSON-only; exported formats are trusted serializers.
 
 | Gate | Work | Proof to proceed |
 |---|---|---|
-| G0 — RECONCILED | Keep one integration PR, preserve all source ancestry and reconcile tracking | PR and source ancestry unified. Project board Global linkage must still be independently confirmed. |
+| G0 — PARTIAL | Keep one integration PR, preserve all source ancestry and reconcile tracking | Recovery refs absorbed/deleted, one draft PR, Global membership verified. Local project #14 status reconciliation still requires a successful authenticated run. |
 | G1 | Validate JSON schema, five hooks, expression/condition vocabulary; Vercel + Supabase deploy feasibility | All three games expressible; a real Python API function imports engine and safely commits a fixture |
 | G2 | Rebuild engine rules/quests/config/move commit/clock/history | Headless legal move and state/restart probes; zero game-name logic |
-| G3 | Implement chess/checkers and format writers against G2, parallelized | Orthodox and WCDF scenarios run through same engine |
+| G3 | Implement chess, English draughts and international draughts with game-specific formats against G2 | FIDE, WCDF and international scenarios run through the same engine |
 | G4 | FastAPI/Supabase and React UI in parallel against frozen typed contracts | End-to-end two-user real browser session; auth, clocks, quests, configuration persistence |
 | G5 | Tauri wrapper, CI release/deployment, docs/diagram and issue alignment | Hosted web+desktop work, provenance checked |
 | G6 | Fresh behavioral suite #239, security and independent audit | Required Python/browser/API/DB/deploy tests pass, no unresolved critical defects |
@@ -128,4 +128,4 @@ Use modular commits/workstreams on the **single shared integration branch**. Age
 
 ## 13. Definition of done
 
-One complete and game-neutral JSON-driven Python engine; both games correct; no executable user configs; strict legal move/auth boundary; sound per-user quests/history; correct format writers; secure registered+guest identity and atomic Supabase persistence; fully functional responsive React GUI and hosted Tauri wrapper; public class-ready Vercel deployments on the approved free tiers; aligned licenses/CI/DarkFactory/docs/diagrams/issues; entire permanent behavior-driven suite #239 passing; independently reviewed evidence; explicit maintainer approval of the single consolidated PR. No claim of completion before those checks.
+One complete and game-neutral JSON-driven Python engine; all three game definitions correct; no executable user configs; strict legal move/auth boundary; sound per-user quests/history; correct format writers; secure registered+guest identity and atomic Supabase persistence; fully functional responsive React GUI and hosted Tauri wrapper; public class-ready Vercel deployments on the approved free tiers; aligned licenses/CI/DarkFactory/docs/diagrams/issues; entire permanent behavior-driven suite #239 passing; independently reviewed evidence; explicit maintainer approval of the single consolidated PR. No claim of completion before those checks.

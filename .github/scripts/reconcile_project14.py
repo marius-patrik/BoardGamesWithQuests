@@ -148,9 +148,7 @@ def main() -> None:
     """Apply deterministic project status corrections and verify every write."""
     data = query(METADATA, owner=OWNER, number=PROJECT)["user"]["projectV2"]
     project_id = data["id"]
-    status = next(
-        field for field in data["fields"]["nodes"] if field and field["name"] == "Status"
-    )
+    status = next(field for field in data["fields"]["nodes"] if field and field["name"] == "Status")
     options = {option["name"]: option["id"] for option in status["options"]}
     changes = []
     count = 0

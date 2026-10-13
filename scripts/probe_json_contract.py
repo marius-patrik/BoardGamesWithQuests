@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 
 from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
-from engine.model.game.hooks import HookInterpreter
 from engine.model.game.configuration import board_from_definition, load_definition
-from engine.model.game.schema import condition, validate_hooks
+from engine.model.game.hooks import HookInterpreter
 from engine.model.game.quest import Quest
+from engine.model.game.schema import condition, validate_hooks
 from engine.model.misc.quest_manager import QuestManager
 
 for name, count in (
@@ -29,12 +29,11 @@ fixture = json.loads((Path(__file__).parent / "fixtures/g1_hooks.json").read_tex
 rules = fixture["rules"]
 quests = fixture["quests"]
 when = rules[0]["when"]
-engine_queries = ConditionEvaluator(
-    {
-        "capture_paths": lambda params: params["player"] == "active",
-        "capture_count": lambda params: 2 if params["candidate"] == "move" else 0,
-    }
-)
+queries = {
+    "capture_paths": lambda params: params["player"] == "active",
+    "capture_count": lambda params: 2 if params["candidate"] == "move" else 0,
+}
+engine_queries = ConditionEvaluator(queries)
 assert engine_queries.evaluate(when)
 assert not engine_queries.evaluate({"op": "not", "arg": when})
 assert engine_queries.evaluate({"op": "any", "args": [{"op": "false"}, when]})
@@ -46,10 +45,10 @@ else:
     raise AssertionError("missing condition primitive must fail closed")
 
 validate_hooks(rules, quests)
-matched = HookInterpreter(rules, engine_queries._queries).evaluate("permits_move")
+matched = HookInterpreter(rules, queries).evaluate("permits_move")
 assert matched.matched_rule_ids == ("capture",)
 assert [effect.op for effect in matched.effects] == ["deny"]
-assert HookInterpreter(rules, engine_queries._queries).evaluate("outcome").effects == ()
+assert HookInterpreter(rules, queries).evaluate("outcome").effects == ()
 
 for invalid in (
     {"op": "__import__", "args": []},

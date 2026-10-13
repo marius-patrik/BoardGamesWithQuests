@@ -1,9 +1,14 @@
 # Desktop wrapper
 
-Tauri 2 will load the **same publicly deployed HTTPS website** as the browser.
-This package reserves the native wrapper boundary; the final host URL has not
-been deployed or verified, so no Tauri executable is presented as working.
+This is a **Tauri 2 source bootstrap**, not a built or released desktop app.
+Its Rust entry creates exactly one WebView of the **same hosted React website**
+used by browser clients; no Python server or duplicated frontend is bundled.
 
-The eventual WebView must restrict remote navigation and native capabilities,
-and must work with Supabase authentication. No bundled Python server or
-second React frontend is permitted.
+The launch requires an explicit `BGWQ_WEB_URL` environment variable set to
+the *final verified HTTPS origin*. Invalid or absent values fail closed; a
+placeholder development server is never silently substituted.
+
+The remote URL, login callback handling, native capabilities, window navigation,
+platform packaging and security test are all G5 tasks. No Tauri build has been
+executed and no hosted target is yet configured. `bundle.active=false` prevents
+this bootstrap from being marketed as a finished installer.

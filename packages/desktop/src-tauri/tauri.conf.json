@@ -4,12 +4,9 @@
   "version": "0.0.0",
   "identifier": "dev.boardgameswithquests.app",
   "app": {
-    "windows": [
-      {
-        "title": "BoardGamesWithQuests",
-        "width": 1080,
-        "height": 720
-      }
-    ]
+    "windows": []
+  },
+  "bundle": {
+    "active": false
   }
 }
