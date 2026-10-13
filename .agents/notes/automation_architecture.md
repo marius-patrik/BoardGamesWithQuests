@@ -13,6 +13,9 @@ Strict builds publish live implementation diagrams and required reference assets
 authoritative specifications are linked to their checked-out Git revision.
 GitHub Pages deployment runs from reviewed `main` through Actions.
 
+Bun 1.4.2 executes the pinned DarkFactory runtime and accepts its version-2
+lockfile with frozen dependency installation.
+
 Pinned DarkFactory quality discovery must include Python 3.10–3.13 behavior
 tests, Black, Rust tests/lint/formatting and web types/lint/formatting. The local
 acceptance adapter validates discovery and same-run execution artifacts before

@@ -9,5 +9,8 @@
     "formatter": {
       "quoteStyle": "double"
     }
+  },
+  "files": {
+    "includes": ["**", "!!**/dist", "!!**/node_modules"]
   }
 }

@@ -1,6 +1,7 @@
 # Web application
 
-React and TypeScript are built with Rsbuild and Bun.
+React and TypeScript are built with Rsbuild and Bun 1.4.2.
+The committed Bun lockfile fixes dependency resolution for frozen installation.
 The browser UI is the **sole** frontend for web and Tauri; only the trusted
 Python engine authorizes legal moves.
 

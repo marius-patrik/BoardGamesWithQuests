@@ -60,3 +60,6 @@ event.json
 .darkfactory/
 
 logs/
+
+# Installed JavaScript dependencies
+node_modules/
