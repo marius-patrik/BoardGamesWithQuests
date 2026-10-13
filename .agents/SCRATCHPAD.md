@@ -57,8 +57,9 @@ maintainer approval and the complete release gate.
 - Three game definitions load and generic hook AST dispatch is probed with
   synthetic inputs; no original-engine legality is inferred from this.
 - Read-only Vercel FastAPI and React builds report READY; Vercel project-level
-  deployment protection was disabled. The `hosted-bootstrap` CI job now
-  requires public web and health/catalog responses and is awaiting execution.
+  deployment protection was disabled. The `hosted-bootstrap` job passed in Actions run 38407455440, verifying
+  public HTTP 200 JSON health/catalog (`playable=false` for all three) and
+  successful public web HTML from both Vercel deployments.
 - No dedicated Supabase project is configured. A separate project requires
   maintainer selection of the Supabase organization and explicit cost
   confirmation before creation. There is no real Postgres transaction fixture.
