@@ -1,32 +1,30 @@
 # BoardGamesWithQuests
 
-A configurable two-player chess and English-draughts game built around a **game-neutral Python engine**. The target application has a single React web GUI, a FastAPI serverless API, Supabase accounts/game storage and a Tauri desktop wrapper that loads the **same hosted web app**.
+BoardGamesWithQuests is a configurable two-player chess and English-draughts project built around a reusable, game-neutral Python engine. The approved application architecture uses declarative **JSON** for boards, pieces, rules, quests and clocks; FastAPI on Vercel Functions for authoritative moves; Supabase for authentication, durable state and Realtime; and one React web interface shared with a Tauri desktop wrapper.
 
-**Current implementation status and release readiness:** See [.agents/SCRATCHPAD.md](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md). A successful documentation build alone is not evidence of playable behavior.
+The architecture described here is the **product target**, not a claim that the application is already playable. Actual implementation and verification status belongs in the [scratchpad](.agents/SCRATCHPAD.md).
 
-## Target packages
+## Package boundaries
 
 ```text
 packages/
-  engine/     Generic Python board/game/rule/quest execution
-  chess/      Chess config.json and applicable format writers
-  checkers/   WCDF English draughts config.json and applicable writers
-  server/     Python FastAPI on Vercel Functions
-  web/        React + TypeScript + Rsbuild + Bun + Tailwind + shadcn/ui
-  desktop/    Tauri wrapper of the same hosted website
+  engine/     Python domain model and declarative rule/quest interpreter
+  chess/      Orthodox chess config.json and supported exporters
+  checkers/   WCDF English draughts config.json and supported exporters
+  server/     FastAPI Python Functions, Supabase game transaction API
+  web/        React + TypeScript + Rsbuild + Bun + shadcn/ui + Tailwind
+  desktop/    Tauri wrapper loading the deployed web application
 ```
 
-Everything configurable about pieces, boards, rules, quests and clocks comes from validated **JSON**. Game-owned code does not become a user-authored Python extension surface. The shared engine must never hardcode chess/checkers special cases. The production target uses **Supabase Auth (registered and guest identities), Postgres and Realtime**; authoritative moves execute in Python on Vercel. No leaderboard, classroom room system or separate desktop GUI is planned.
+Game configuration is validated data, **never executable user-authored code**. The engine authorizes rules and turns; the server verifies users and commits durable game state. A game has exactly two participants. Supabase Auth supports registered users and guests. The public website is the primary application; desktop users access the same hosted interface.
 
-## Documentation and status
+## Project documentation
 
-- [Canonical completion plan](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PLAN.md)
-- [Product requirements](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PRD.md)
-- [Approved deviations from original reference](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/object_model.md)
-- [Original UML and source reference](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/reference_diagram.md)
-- [Chess rule baseline](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/chess_rules.md)
-- [Current implementation status](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md)
-- [Operational development rules](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/AGENTS.md)
-- [Consolidated Plan issue #129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129)
-
-Current legacy Python smoke/discovery behavior is not the final web application and is not a gameplay acceptance test. Follow the single plan for implementation and deployment instructions as they become verified.
+- [Completion plan](.agents/notes/PLAN.md)
+- [Product requirements](.agents/notes/PRD.md)
+- [Approved object-model deviations](.agents/notes/object_model.md)
+- [Original reference diagram](.agents/notes/reference_diagram.md)
+- [Chess rules baseline](.agents/notes/chess_rules.md)
+- [Current progress and verification evidence](.agents/SCRATCHPAD.md)
+- [Operational development guidelines](.agents/AGENTS.md)
+- [DarkFactory automation architecture](.agents/notes/automation_architecture.md)
