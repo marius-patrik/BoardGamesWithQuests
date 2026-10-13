@@ -1,6 +1,6 @@
 # Declarative game behavior contract
 
-The current parser accepts schema version 2 with finite `rules` and `quests`
+The versioned parser accepts schema version 2 with finite `rules` and `quests`
 arrays. Expressions are typed objects, never Python/JavaScript expressions.
 The five hooks are `permits_move`, `available_moves`, `outcome`,
 `on_move_made` and `status`. A rule has
@@ -41,3 +41,10 @@ Supabase's published anonymous sign-in quota is **30 requests/hour per IP**
 are configurable, but acceptable classroom capacity must be tested on the
 actual Free-plan project before claiming readiness. Provider projects and
 database transactions/RLS have not been provisioned.
+
+## Effect planning
+
+`HookInterpreter` evaluates matching rules in source-JSON order and returns
+a pure `HookEvaluation`. The result cannot modify the board or authorize moves:
+effect conflict resolution and atomic application are G2 work. The G1 fixture is
+`scripts/fixtures/g1_hooks.json`, not executable game-specific Python code.

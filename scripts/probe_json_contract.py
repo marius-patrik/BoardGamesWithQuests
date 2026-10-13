@@ -1,6 +1,10 @@
 """Targeted G1 schema probes; not the permanent gameplay test suite."""
 
+import json
+from pathlib import Path
+
 from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
+from engine.model.game.hooks import HookInterpreter
 from engine.model.game.configuration import board_from_definition, load_definition
 from engine.model.game.schema import condition, validate_hooks
 from engine.model.game.quest import Quest
@@ -21,18 +25,10 @@ for name, count in (
             placed += board.get_piece_at((row, col)) is not None
     assert placed == count
 
-when = {
-    "op": "all",
-    "args": [
-        {"op": "test", "query": "capture_paths", "params": {"player": "active"}},
-        {
-            "op": "compare",
-            "relation": "gte",
-            "left": {"query": "capture_count", "params": {"candidate": "move"}},
-            "right": 1,
-        },
-    ],
-}
+fixture = json.loads((Path(__file__).parent / "fixtures/g1_hooks.json").read_text("utf-8"))
+rules = fixture["rules"]
+quests = fixture["quests"]
+when = rules[0]["when"]
 engine_queries = ConditionEvaluator(
     {
         "capture_paths": lambda params: params["player"] == "active",
@@ -49,17 +45,11 @@ except QueryResolutionError:
 else:
     raise AssertionError("missing condition primitive must fail closed")
 
-validate_hooks(
-    [
-        {
-            "id": "capture",
-            "hook": "permits_move",
-            "when": when,
-            "effects": [{"op": "deny", "params": {"reason": "capture_required"}}],
-        }
-    ],
-    [{"id": "capture_quest", "description": "Capture a piece", "when": when, "reward": 10}],
-)
+validate_hooks(rules, quests)
+matched = HookInterpreter(rules, engine_queries._queries).evaluate("permits_move")
+assert matched.matched_rule_ids == ("capture",)
+assert [effect.op for effect in matched.effects] == ["deny"]
+assert HookInterpreter(rules, engine_queries._queries).evaluate("outcome").effects == ()
 
 for invalid in (
     {"op": "__import__", "args": []},

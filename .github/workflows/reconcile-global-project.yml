@@ -1,69 +1,21 @@
-name: Reconcile Global Project Membership
+name: G0 Project Status Reconciliation
 on:
   push:
     branches: [feature/product-integration]
   workflow_dispatch:
 permissions:
   contents: read
-  pull-requests: read
 jobs:
   reconcile:
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'chore(projects): rerun') }}
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
     steps:
-      - name: Link canonical integration PR to user-owned Global project
-        run: |
-          set -euo pipefail
-          test -n "${GH_TOKEN:-}" || { echo "::error::GH_PROJECT_TOKEN is missing"; exit 1; }
-          project_id="$(gh api graphql -f query='query($owner: String!, $number: Int!) { user(login: $owner) { projectV2(number: $number) { id } } }' -f owner='marius-patrik' -F number=17 --jq '.data.user.projectV2.id')"
-          test -n "$project_id" && test "$project_id" != null
-          pr_id="$(gh api repos/marius-patrik/BoardGamesWithQuests/pulls/271 --jq '.node_id')"
-          test -n "$pr_id"
-          existing="$(gh api graphql -f query='query($id: ID!) { node(id: $id) { ... on PullRequest { projectItems(first: 100) { nodes { id project { id } } } } } }' -f id="$pr_id" --jq '.data.node.projectItems.nodes[].project.id' || true)"
-          if ! grep -Fxq "$project_id" <<<"$existing"; then
-            gh api graphql -f query='mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }' -f projectId="$project_id" -f contentId="$pr_id" --jq '.data.addProjectV2ItemById.item.id'
-          fi
-          linked="$(gh api graphql -f query='query($id: ID!) { node(id: $id) { ... on PullRequest { projectItems(first: 100) { nodes { project { id } } } } } }' -f id="$pr_id" --jq '.data.node.projectItems.nodes[].project.id')"
-          grep -Fxq "$project_id" <<<"$linked"
-          echo "PR #271 confirmed on Global project #17."
-
-      - name: Audit preserved project 14 statuses without making destructive assumptions
-        run: |
-          set -euo pipefail
-          query='query($owner: String!, $number: Int!, $after: String) { user(login: $owner) { projectV2(number: $number) { items(first: 100, after: $after) { pageInfo { hasNextPage endCursor } nodes { content { __typename ... on Issue { number state stateReason url } ... on PullRequest { number state merged url } } fieldValues(first: 30) { nodes { ... on ProjectV2ItemFieldSingleSelectValue { name field { ... on ProjectV2SingleSelectField { name } } } } } } } } } }'
-          cursor=''
-          audit="$RUNNER_TEMP/project14.jsonl"
-          : > "$audit"
-          for page in 1 2 3 4 5 6; do
-            args=(-f query="$query" -f owner=marius-patrik -F number=14)
-            if [ -n "$cursor" ]; then args+=(-f after="$cursor"); fi
-            result="$(gh api graphql "${args[@]}")"
-            jq -c '.data.user.projectV2.items.nodes[] | {
-              kind: .content.__typename,
-              number: .content.number,
-              url: .content.url,
-              state: .content.state,
-              reason: .content.stateReason,
-              merged: .content.merged,
-              status: ([.fieldValues.nodes[]? | select(.field.name == "Status") | .name] | first // "")
-            }' <<<"$result" >> "$audit"
-            more="$(jq -r '.data.user.projectV2.items.pageInfo.hasNextPage' <<<"$result")"
-            [ "$more" = true ] || break
-            cursor="$(jq -r '.data.user.projectV2.items.pageInfo.endCursor' <<<"$result")"
-          done
-          echo "Project #14 item and status counts:"
-          jq -s 'group_by(.kind + ":" + .state + ":" + (.status // "")) | map({
-            description: (.[0].kind + ":" + .[0].state + ":" + .[0].status),
-            count: length
-          })' "$audit"
-          echo "Items needing manual status judgment:"
-          jq -s '[.[] | select(
-            (.kind == "Issue" and .state == "OPEN" and .status == "Done")
-            or (.kind == "Issue" and .state == "CLOSED" and .reason == "NOT_PLANNED" and .status == "Done")
-            or (.kind == "PullRequest" and .state == "CLOSED" and .merged == false and .status == "Done")
-          )] | .[:100]' "$audit"
-          echo "Audit complete: no historical status was rewritten."
-
-      - name: Reconcile project 14 status taxonomy from actual GitHub states
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/product-integration
+      - name: Verify project-scoped credentials exist
+        run: test -n "${GH_TOKEN:-}"
+      - name: Reconcile project 14 from actual GitHub closure evidence
         run: python .github/scripts/reconcile_project14.py

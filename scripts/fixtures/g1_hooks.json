@@ -1,0 +1,49 @@
+{
+  "rules": [
+    {
+      "id": "capture",
+      "hook": "permits_move",
+      "when": {
+        "op": "all",
+        "args": [
+          {
+            "op": "test",
+            "query": "capture_paths",
+            "params": {
+              "player": "active"
+            }
+          },
+          {
+            "op": "compare",
+            "relation": "gte",
+            "left": {
+              "query": "capture_count",
+              "params": {
+                "candidate": "move"
+              }
+            },
+            "right": 1
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "deny",
+          "params": {
+            "reason": "capture_required"
+          }
+        }
+      ]
+    }
+  ],
+  "quests": [
+    {
+      "id": "capture_quest",
+      "description": "Capture a piece",
+      "when": {
+        "op": "true"
+      },
+      "reward": 10
+    }
+  ]
+}
