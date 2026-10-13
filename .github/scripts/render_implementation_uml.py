@@ -348,6 +348,10 @@ def render_component_diagram(root: Path) -> str:
     packages = sorted({module.module.split(".")[0] for module in modules})
     components: dict[str, set[str]] = defaultdict(set)
     dependencies: set[tuple[str, str]] = set()
+    allowed_dependencies = set(packages)
+    allowed_dependencies.update(
+        f"engine.{name}" for name in ("model", "controller", "view", "app")
+    )
     for module in modules:
         parts = module.module.split(".")
         # Group engine internals by first child; other packages by name.
@@ -365,8 +369,7 @@ def render_component_diagram(root: Path) -> str:
             if (
                 other != node
                 and other != "engine"
-                and other
-                in (set(packages) | {f"engine.{name}" for name in ("model", "controller", "view", "app")})
+                and other in allowed_dependencies
             ):
                 dependencies.add((node, other))
     # The plugin connection is not an import: the engine discovers games
