@@ -47,9 +47,7 @@ def comparison(name: str, relation: str, value: object) -> dict:
 man = piece(1, "man")
 enemy = piece(-1, "man")
 english = Board((8, 8), [((5, 2), man), ((4, 3), enemy), ((2, 5), enemy)])
-short = CapturePolicy.from_json(
-    {"flying": False, "land_anywhere": False, "max_nodes": 200}
-)
+short = CapturePolicy.from_json({"flying": False, "land_anywhere": False, "max_nodes": 200})
 english_paths = CaptureEnumerator(english).enumerate((5, 2), short)
 assert english_paths and max(len(path["steps"]) for path in english_paths) == 2
 assert english.get_piece_at((5, 2)) is man
@@ -73,22 +71,16 @@ capture_rule = rule(
     },
     "deny",
 )
-assert call([capture_rule], SnapshotQueries(english_data).bindings(), "permits_move") == [
-    "deny"
-]
+assert call([capture_rule], SnapshotQueries(english_data).bindings(), "permits_move") == ["deny"]
 english_data["move_attributes"]["captures"] = 2
 assert call([capture_rule], SnapshotQueries(english_data).bindings(), "permits_move") == []
 # Single-step (short) king capture never offers a square beyond adjacent landing.
 king_short = Board((8, 8), [((5, 2), piece(1, "king")), ((4, 3), enemy)])
 king_paths = CaptureEnumerator(king_short).enumerate((5, 2), short)
-assert {tuple(step["landing"]) for path in king_paths for step in path["steps"]} == {
-    (3, 4)
-}
+assert {tuple(step["landing"]) for path in king_paths for step in path["steps"]} == {(3, 4)}
 
 # International draughts: flying king and backward man capture.
-flying = CapturePolicy.from_json(
-    {"flying": True, "land_anywhere": True, "max_nodes": 400}
-)
+flying = CapturePolicy.from_json({"flying": True, "land_anywhere": True, "max_nodes": 400})
 international = Board(
     (10, 10),
     [
@@ -126,9 +118,7 @@ max_rule = rule(
 )
 assert call([max_rule], SnapshotQueries(maximal).bindings(), "permits_move") == []
 maximal["move_attributes"]["captures"] = 2
-assert call([max_rule], SnapshotQueries(maximal).bindings(), "permits_move") == [
-    "permit"
-]
+assert call([max_rule], SnapshotQueries(maximal).bindings(), "permits_move") == ["permit"]
 
 # Chess: position history, rights, attacked transit squares, en passant and
 # promotion are generic metadata/geometry rather than chess engine branches.
