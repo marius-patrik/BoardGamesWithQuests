@@ -6,11 +6,11 @@ state is an error, never a guessed right, target or outcome.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Mapping
 from typing import Any
 
 from engine.model.game.conditions import QueryResolutionError
-from engine.model.game.schema import _bounded_json
 
 
 class SnapshotQueries:
@@ -18,7 +18,12 @@ class SnapshotQueries:
 
     def __init__(self, snapshot: Mapping[str, Any]):
         """Validate the complete bounded snapshot before exposing queries."""
-        _bounded_json(dict(snapshot))
+        try:
+            serialized = json.dumps(dict(snapshot), allow_nan=False)
+        except (TypeError, ValueError, OverflowError, RecursionError) as error:
+            raise QueryResolutionError("snapshot must be finite JSON") from error
+        if len(serialized.encode("utf-8")) > 1048576:
+            raise QueryResolutionError("snapshot query context exceeds 1 MiB")
         self._snapshot = dict(snapshot)
 
     @staticmethod
@@ -81,7 +86,11 @@ class SnapshotQueries:
             raise QueryResolutionError("only the exact current position scope is supported")
         key = self._field("position_key")
         positions = self._field("position_history")
-        if not isinstance(key, str) or not isinstance(positions, list):
+        if (
+            not isinstance(key, str)
+            or not isinstance(positions, list)
+            or len(positions) > 4096
+        ):
             raise QueryResolutionError("invalid position history")
         if any(not isinstance(item, str) for item in positions):
             raise QueryResolutionError("position history must contain canonical strings")
@@ -133,7 +142,7 @@ class SnapshotQueries:
     def history_count(self, params: Mapping[str, Any]) -> int:
         self._key(params, set(), set())
         history = self._field("events")
-        if not isinstance(history, list):
+        if not isinstance(history, list) or len(history) > 4096:
             raise QueryResolutionError("history must be an array")
         return len(history)
 
