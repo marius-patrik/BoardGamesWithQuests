@@ -79,7 +79,7 @@ The settings surface exposes Board/Pieces/Rules/Quests/Clocks as **schema-driven
 - **Only `repo.dfconfig` is configuration**; migrate valid settings out of `.github/darkfactory.json` and remove it after its consumers (workflow callers, docs scripts, CI) are reconciled. Retain DarkFactory agent and approval automation—issues #124, #126, #167 and PR #170 are rejected/closed. Do not blindly delete functioning project-specific setup.
 - Pin DarkFactory to the latest **verified** released immutable commit (identified at approval: v0.289.0; recheck on update). Use supported installer/update process and correctly retain global/local issue board behavior.
 - Use GPL-3.0 consistently in `LICENSE`, Python metadata and `repo.dfconfig`. Preserve version-from-tag (`setuptools-scm`), not static `0.1.0`. Update dependencies for FastAPI, Supabase and frontend/Tauri.
-- No duplicate workflows, stale workflow display names or wrong required checks. Document required CI coverage and approval gates.
+- No duplicate workflows, stale workflow display names or wrong required checks. Preserve the existing GitHub Projects board #14 (renamed BoardGamesWithQuests; 211 original items) and Global #17; do not create a second empty board. Ensure the current PR and tracking issues belong to both boards, subject to actual API rate limits. Document required CI coverage and approval gates.
 
 ## 9. Stack consolidation and source disposition
 
@@ -107,7 +107,7 @@ Retire all 25 historical draft PRs once this consolidated draft PR is opened; po
 
 | Gate | Work | Proof to proceed |
 |---|---|---|
-| G0 — COMPLETE | Consolidate PR ancestry/tree/issues and install this authoritative plan | DarkFactory App-authored draft #271; 25 historical PRs superseded, 26 old PR branch refs safely deleted; all commits preserved in ancestry; #129 and #239 own the open product work |
+| G0 — CORE COMPLETE | Consolidate PR ancestry/tree/issues and establish authoritative plan | App-authored draft #271; 25 historical PRs closed unmerged; all 26 associated old PR refs removed with SHA/ancestry verification. Project board #14 preserved and renamed. Current Plan issue #129 and test gate #239. **Global board #17 still needs PR #271 after temporary GitHub GraphQL rate exhaustion.** |
 | G1 | Validate JSON schema, five hooks, expression/condition vocabulary; Vercel + Supabase deploy feasibility | Both games expressible; a real Python API function imports engine and safely commits a fixture |
 | G2 | Rebuild engine rules/quests/config/move commit/clock/history | Headless legal move and state/restart probes; zero game-name logic |
 | G3 | Implement chess/checkers and format writers against G2, parallelized | Orthodox and WCDF scenarios run through same engine |
