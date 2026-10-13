@@ -177,7 +177,7 @@ jobs:
             bash -lc "$DF_ACTION_COMMAND"
           fi
 
-docs-check:
+  docs-check:
     name: docs-check
     runs-on: ubuntu-latest
     steps:
