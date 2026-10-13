@@ -1,4 +1,4 @@
-name: One-time Project Board Reconciliation
+name: One-time Existing Project Board Preservation
 
 on:
   push:
@@ -15,23 +15,24 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
     steps:
-      - name: Ensure project-specific GitHub Projects V2 board exists
+      - name: Keep existing populated board and remove only newly created empty duplicate
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -z "$GH_TOKEN" ]]; then
-            echo "::error::GH_PROJECT_TOKEN not configured; cannot inspect or create project board"
-            exit 1
-          fi
-          gh auth status
-          boards="$(gh project list --owner marius-patrik --format json --limit 100)"
-          echo "$boards" | jq -r '.projects[] | "Project #\(.number): \(.title)"'
-          found="$(echo "$boards" | jq -r '.projects[] | select(.title == "BoardGamesWithQuests") | .number' | head -n1)"
-          if [[ -z "$found" ]]; then
-            echo "Creating the per-repository BoardGamesWithQuests project (not a duplicate of Global)."
-            gh project create --owner marius-patrik --title BoardGamesWithQuests --format json
-          else
-            echo "BoardGamesWithQuests project already exists: #$found"
-          fi
-          echo "Final accessible boards:"
+          [[ -n "$GH_TOKEN" ]] || { echo "::error::GH_PROJECT_TOKEN missing"; exit 1; }
+          old="$(gh project view 14 --owner marius-patrik --format json)"
+          recent="$(gh project view 22 --owner marius-patrik --format json)"
+          old_title="$(jq -r .title <<< "$old")"
+          new_title="$(jq -r .title <<< "$recent")"
+          recent_count="$(jq -r '.items.totalCount // 0' <<< "$recent")"
+          old_count="$(jq -r '.items.totalCount // 0' <<< "$old")"
+          echo "Existing project #14: $old_title ($old_count items)"
+          echo "Accidentally duplicated project #22: $new_title ($recent_count items)"
+          [[ "$old_title" == "ChessWithQuests" ]] || { echo "::error::Original project unexpected"; exit 1; }
+          [[ "$new_title" == "BoardGamesWithQuests" && "$recent_count" == "0" ]] || { echo "::error::Duplicate not safely empty"; exit 1; }
+          echo "Delete only empty duplicate #22 created in the preceding reconciliation."
+          gh project delete 22 --owner marius-patrik
+          echo "Rename pre-existing project #14 to the repository's approved name."
+          gh project edit 14 --owner marius-patrik --title BoardGamesWithQuests --format json
+          echo "Final project inventory:"
           gh project list --owner marius-patrik --format json --limit 100 | jq -r '.projects[] | "Project #\(.number): \(.title)"'
