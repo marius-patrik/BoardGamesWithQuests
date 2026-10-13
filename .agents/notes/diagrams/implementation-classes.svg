@@ -214,17 +214,18 @@
 <!-- engine.model.game.capture_geometry.CapturePolicy -->
 <g id="node6" class="node">
 <title>engine.model.game.capture_geometry.CapturePolicy</title>
-<polygon fill="#ffffff" stroke="transparent" points="4296.5,-65.5 4296.5,-188.5 4487.5,-188.5 4487.5,-65.5 4296.5,-65.5"/>
-<polygon fill="#e5eaf8" stroke="transparent" points="4298,-160 4298,-187 4487,-187 4487,-160 4298,-160"/>
-<text text-anchor="start" x="4337.5" y="-170.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">CapturePolicy</text>
-<text text-anchor="start" x="4304" y="-146.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.capture_geometry</text>
-<polyline fill="none" stroke="#344054" points="4487,-138 4298,-138 "/>
-<text text-anchor="start" x="4305" y="-123" font-family="DejaVu Sans" font-size="10.00">+ flying: bool</text>
-<text text-anchor="start" x="4305" y="-112" font-family="DejaVu Sans" font-size="10.00">+ land_anywhere: bool</text>
-<text text-anchor="start" x="4305" y="-101" font-family="DejaVu Sans" font-size="10.00">+ max_nodes: int</text>
-<polyline fill="none" stroke="#344054" points="4487,-91 4298,-91 "/>
-<text text-anchor="start" x="4305" y="-76" font-family="DejaVu Sans" font-size="10.00">+ from_json(obj)</text>
-<polygon fill="none" stroke="#344054" points="4296.5,-65.5 4296.5,-188.5 4487.5,-188.5 4487.5,-65.5 4296.5,-65.5"/>
+<polygon fill="#ffffff" stroke="transparent" points="4296.5,-60 4296.5,-194 4487.5,-194 4487.5,-60 4296.5,-60"/>
+<polygon fill="#e5eaf8" stroke="transparent" points="4298,-166 4298,-193 4487,-193 4487,-166 4298,-166"/>
+<text text-anchor="start" x="4337.5" y="-176.8" font-family="DejaVu Sans" font-weight="bold" font-size="14.00">CapturePolicy</text>
+<text text-anchor="start" x="4304" y="-152.8" font-family="DejaVu Sans" font-size="9.00" fill="#475467">engine.model.game.capture_geometry</text>
+<polyline fill="none" stroke="#344054" points="4487,-144 4298,-144 "/>
+<text text-anchor="start" x="4305" y="-129" font-family="DejaVu Sans" font-size="10.00">+ flying: bool</text>
+<text text-anchor="start" x="4305" y="-118" font-family="DejaVu Sans" font-size="10.00">+ land_anywhere: bool</text>
+<text text-anchor="start" x="4305" y="-107" font-family="DejaVu Sans" font-size="10.00">+ deferred_removal: bool</text>
+<text text-anchor="start" x="4305" y="-96" font-family="DejaVu Sans" font-size="10.00">+ max_nodes: int</text>
+<polyline fill="none" stroke="#344054" points="4487,-86 4298,-86 "/>
+<text text-anchor="start" x="4305" y="-71" font-family="DejaVu Sans" font-size="10.00">+ from_json(obj)</text>
+<polygon fill="none" stroke="#344054" points="4296.5,-60 4296.5,-194 4487.5,-194 4487.5,-60 4296.5,-60"/>
 </g>
 <!-- engine.model.game.conditions.ConditionEvaluator -->
 <g id="node7" class="node">
