@@ -10,6 +10,7 @@ from engine.model.game.capture_geometry import CaptureEnumerator, CapturePolicy
 from engine.model.game.configuration import load_definition
 from engine.model.game.hooks import HookInterpreter
 from engine.model.game.snapshot_queries import SnapshotQueries
+from engine.model.game.outcomes import resolve_outcome
 from engine.model.pieces.piece import Piece
 
 
@@ -243,5 +244,35 @@ for invalid in (
         pass
     else:
         raise AssertionError("unsafe reference accepted")
+
+# Game-neutral outcome conflicts use declared priorities, not game-name branches.
+outcome_rules = [
+    rule("claim_draw", "outcome", {"op": "true"}, "propose_outcome"),
+    rule("forced_win", "outcome", {"op": "true"}, "propose_outcome"),
+]
+outcome_rules[0]["effects"][0]["params"] = {
+    "kind": "draw",
+    "cause": "repetition",
+    "winner": None,
+    "priority": 10,
+}
+outcome_rules[1]["effects"][0]["params"] = {
+    "kind": "win",
+    "cause": "forced_terminal",
+    "winner": 1,
+    "priority": 20,
+}
+outcome_plan = HookInterpreter(outcome_rules, {}).evaluate("outcome")
+result = resolve_outcome(outcome_plan.effects)
+assert result is not None and result.kind == "win" and result.priority == 20
+outcome_rules[0]["effects"][0]["params"]["priority"] = 20
+from engine.model.game.conditions import QueryResolutionError
+
+try:
+    resolve_outcome(HookInterpreter(outcome_rules, {}).evaluate("outcome").effects)
+except QueryResolutionError:
+    pass
+else:
+    raise AssertionError("conflicting equally prioritized outcomes must fail closed")
 
 print("G1 generic capture, temporal, geometry and declarative hook probes passed")
