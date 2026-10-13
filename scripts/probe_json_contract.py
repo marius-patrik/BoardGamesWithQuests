@@ -131,6 +131,17 @@ for invalid in (
     else:
         raise AssertionError(f"accepted invalid declarative operation {invalid!r}")
 
+scenario_file = Path(__file__).parent / "fixtures/g1_rule_scenarios.json"
+scenario_set = json.loads(scenario_file.read_text("utf-8"))
+for scenario in scenario_set["scenarios"]:
+    assert scenario["game"] in ("chess", "english_draughts", "international_checkers")
+    query_name = scenario["query"]
+    query_result = scenario["expected"]
+    bindings = {query_name: lambda params, result=query_result: result}
+    plan = HookInterpreter([scenario["rule"]], bindings).evaluate(scenario["rule"]["hook"])
+    assert (len(plan.matched_rule_ids) == 1) is query_result
+    assert len(plan.effects) == (1 if query_result else 0)
+
 quest = Quest("capture", "Capture", {"op": "true"}, 5)
 progress = QuestManager([quest])
 progress.complete("game1", "player1", quest.name)
