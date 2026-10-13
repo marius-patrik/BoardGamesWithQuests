@@ -11,8 +11,10 @@
       "description": "Configurable chess/checkers app with declarative JSON game rules, React frontend, and Python backend on Vercel.",
       "topics": [
         "chess",
+        "checkers",
         "python",
-        "mvc",
+        "typescript",
+        "react",
         "game",
         "education"
       ],
@@ -28,7 +30,7 @@
       "initial": "0.1.0"
     },
     "environment": {
-      "$comment": "A Python application. The API reference is generated from docstrings by mkdocstrings, which properdocs still loads: it aliases mkdocs.* imports and reads mkdocs.plugins entry points.",
+      "$comment": "Current Python engine and documentation. Target adds FastAPI on Vercel Functions, React/Rsbuild/Bun and Tauri, whose checks are configured as the actual packages land. The Python artifact release remains disabled pending the behavior gate #239.",
       "testing": {
         "python": {
           "command": "pytest",
@@ -53,10 +55,10 @@
       }
     },
     "areas": {
-      "$comment": "ChessWithQuests's own domains. Declaration order is match order.",
+      "$comment": "Logical ownership/triage areas; declarations do not claim that target functionality is complete.",
       "$default": "core",
       "rules": {
-        "description": "Move generation, check and mate detection, chess rule conformance",
+        "description": "JSON-declared generic rule hooks, validators and rule composition",
         "keywords": [
           "rule",
           "rules",
@@ -70,7 +72,7 @@
         ]
       },
       "pieces": {
-        "description": "Piece definitions, movement and attack vectors, custom pieces",
+        "description": "Declarative pieces, movement/attack capabilities and symbols",
         "keywords": [
           "piece",
           "pieces",
@@ -84,7 +86,7 @@
         ]
       },
       "quests": {
-        "description": "Quest system, objectives, progression and rewards",
+        "description": "JSON-declared quests, per-player state, rewards and completion",
         "keywords": [
           "quest",
           "quests",
@@ -95,7 +97,7 @@
         ]
       },
       "board": {
-        "description": "Board representation, custom board configurations, coordinates",
+        "description": "Game-neutral board, coordinates, variants and placements",
         "keywords": [
           "board",
           "square",
@@ -103,19 +105,6 @@
           "coordinate",
           "layout",
           "configuration"
-        ]
-      },
-      "view": {
-        "description": "Desktop UI, rendering, input handling",
-        "keywords": [
-          "view",
-          "ui",
-          "gui",
-          "render",
-          "window",
-          "input",
-          "display",
-          "sprite"
         ]
       },
       "docs": {
@@ -151,6 +140,50 @@
           "config",
           "state",
           "engine"
+        ]
+      },
+      "game": {
+        "description": "Chess/checkers configuration JSON and game-owned export formats",
+        "keywords": [
+          "chess",
+          "checkers",
+          "draughts",
+          "wcdf",
+          "fen",
+          "pgn",
+          "game"
+        ]
+      },
+      "server": {
+        "description": "FastAPI, Supabase auth, transactional game persistence and Realtime",
+        "keywords": [
+          "server",
+          "api",
+          "fastapi",
+          "supabase",
+          "auth",
+          "database",
+          "realtime"
+        ]
+      },
+      "web": {
+        "description": "React/Rsbuild/TypeScript/Bun user interface and configuration forms",
+        "keywords": [
+          "react",
+          "web",
+          "typescript",
+          "rsbuild",
+          "bun",
+          "frontend"
+        ]
+      },
+      "desktop": {
+        "description": "Tauri native wrapper for the hosted web UI",
+        "keywords": [
+          "tauri",
+          "desktop",
+          "webview",
+          "native"
         ]
       }
     },
