@@ -3,7 +3,7 @@ requires = ["setuptools>=77", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "chesswithquests"
+name = "boardgameswithquests"
 dynamic = ["version"]
 # The Git release tag is the version source of truth, including for Python builds.
 description = "Game-neutral Python engine for JSON-configurable chess and checkers, powering an online React application."
@@ -14,7 +14,7 @@ authors = [{ name = "marius-patrik" }]
 keywords = ["chess", "checkers", "board game", "engine", "json rules", "quests", "web"]
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
