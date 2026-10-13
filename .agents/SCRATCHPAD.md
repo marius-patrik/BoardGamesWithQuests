@@ -1,67 +1,70 @@
-# Current Integration Status
+# Current integration verification
 
-**Authoritative work:** [PLAN](notes/PLAN.md) · [PRD](notes/PRD.md) ·
-[Object model](notes/object_model.md) · [Implementation PR](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271) ·
-[Plan issue](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129) ·
-[Final behavior suite](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239).
+**Source of truth:** [PLAN](notes/PLAN.md) · [PRD](notes/PRD.md) ·
+[JSON contract](notes/json_contract.md) ·
+[Integration PR #271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271) ·
+[Completion issue #129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129) ·
+[Final behavior gate #239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239).
 
-## Verified state
+## G0 — complete
 
-- One draft integration PR targets main; no maintainer approval to merge.
-- Source ancestry includes the recovery chain, while active sources use JSON-owned
-  game definitions. Git ancestry is not proof that its code was integrated.
-- Python board geometry and config discovery exist. Legal rules, quests, result
-  evaluation, game exports, authentication, transactions and the GUI are incomplete.
-- UI, API and desktop package skeletons are tracked independently from real operation.
-- Permanent gameplay test coverage and public deployment are absent; green
-  compilation/docs checks do not certify gameplay.
-- G0 complete: PR #271 is verified on Global #17 and local #14. Both recovery
-  branches were absorbed and deleted. GitHub Actions run 38397182126 scanned
-  all 216 current project #14 items, corrected 81 outdated statuses from
-  GitHub's actual states, and verified the results by re-reading all items.
-  The temporary reconciliation workflow was then removed.
-- DarkFactory v0.289.2 is pinned in CI and both live and dedicated configuration
-  branches; native tool config generation is tracked upstream in DF #2149.
-- CI builds the actual static Rsbuild web bundle and imports the FastAPI ASGI
-  health route. Authentication, real moves and public hosting remain absent.
-- G1 includes a bounded condition evaluator and deterministic non-mutating
-  hook effect planner; these do not yet prove chess or draughts legality.
+- Single draft integration PR, no maintainer approval or merge into main.
+- Both recovery branches retained in integration Git ancestry and deleted as refs.
+- All 22 inline review threads addressed and resolved.
+- Global GitHub Project #17 and local Project #14 links verified.
+- Actions run `38397182126` audited 216 project items, reconciled 81 statuses,
+  and verified every result on a subsequent read.
+- DarkFactory v0.289.2 pinned on the integration/managed configuration paths.
 
-## Execution gate
+## G1 — implemented; final checks required
 
-Complete bounded JSON schema and representative three-game expressiveness probes;
-verify FastAPI/Vercel packaging, Supabase transaction and anonymous sign-in
-classroom quota feasibility. Then implement domain rules, game conformance, secure
-server/UI, desktop packaging and end-to-end tests. Do not merge before explicit
-maintainer approval and the complete release gate.
+- JSON version 2 strictly validates declared board/pieces, quests, rule hooks,
+  bounded ASTs, typed references, capture policies and clock constraints.
+- Pure evaluators plan effects without mutating the authoritative game.
+  Generic capture geometry supports short/flying kings, multi-hops, backward
+  captures, deferred captured-piece obstruction and maximum capture checks.
+  Generic snapshot/position/rights/castling/transient-target/promotion and
+  outcome precedence primitives are exercised through
+  `scripts/probe_g1_semantics.py`. The separate negative-input/AST probe is
+  `scripts/probe_json_contract.py`.
+- These are **G1 expressiveness probes, not G3 complete legal game rules**.
+  Chess, English draughts and international draughts all remain
+  `playable=false`.
+- Public Vercel Hobby frontend and FastAPI host are READY. Actions
+  `hosted-bootstrap` passed unauthenticated live HTTP probes against
+  `https://boardgameswithquests-api.vercel.app/health`,
+  `https://boardgameswithquests-api.vercel.app/games` and
+  `https://boardgameswithquests-web.vercel.app/`.
+- Reused the existing Supabase `reactgame` project, reference
+  `wdthdcdoqdtywngwvddk`, at the user's direction; resumed it from
+  INACTIVE to ACTIVE_HEALTHY. No new paid project was created.
+- Deployed isolated **private** `bgwq` schema migrations
+  `20261013145509_private_game_persistence` and
+  `20261013151643_immutable_game_snapshot`. No unrelated tables altered.
+  Both tables have RLS enabled; anonymous/authenticated roles cannot access
+  the schema, tables or private revision function.
+- Actual Supabase SQL transaction probes succeeded: approved participant
+  advances revision + inserts exactly one event; outsider and stale submissions
+  are rejected without state changes; config/participant identity mutation
+  is forbidden. Both temporary test rows were removed; DB contains zero
+  `bgwq.games` entries after probes.
+- The Supabase security advisor reports pre-existing exposed `public`
+  tables from the reused project. They were **not altered**; G4 must audit
+  their exposure before publishing the project's client key. Private
+  `bgwq` RLS-with-no-policy notices are expected for server-only tables.
+- Shared-school-IP anonymous sign-in quota (normally 30/hour/IP, configurable)
+  remains a real capacity risk. G4 enables guest login; G7 must verify
+  classroom-size anonymous sign-in capacity before public presentation.
+- Await the final green aggregate quality check on the current PR head to
+  certify the G1 code checkpoint.
 
-## Hosting bootstrap verified
+## Next: G2/G3
 
-- Vercel Hobby project `boardgameswithquests-api` was created (ID
-  `prj_7kdxZvwbxItXRjRTblmz2s0xFw3h`); deployment
-  `dpl_2TmHrJJ2qNXT54cbum4BDtmrFqwU` from commit `c7a47fcc`
-  is reported READY by Vercel.
-- Vercel Hobby project `boardgameswithquests-web` was created (ID
-  `prj_iWSGkCmiCeh1uliqVN06b5QWPAAx`); deployment
-  `dpl_2Sy36YSuA7Yx91cPuMEny3nWrv1P` from the same commit
-  is reported READY by Vercel.
-- Both projects currently have Vercel Authentication protection enabled;
-  external unauthenticated HTTP reachability and working API routes were not
-  demonstrated. READY is a build/deploy result, **not proof of online gameplay**.
-- Supabase has no BGwQ project yet. Existing unrelated projects were left
-  untouched. New project creation requires choosing an organization and
-  confirming provider costs. No database schema, Auth, or Realtime deployed.
-
-## G1 acceptance status
-
-- Three game definitions load and generic hook AST dispatch is probed with
-  synthetic inputs; no original-engine legality is inferred from this.
-- Read-only Vercel FastAPI and React builds report READY; Vercel project-level
-  deployment protection was disabled. The `hosted-bootstrap` job passed in Actions run 38407455440, verifying
-  public HTTP 200 JSON health/catalog (`playable=false` for all three) and
-  successful public web HTML from both Vercel deployments.
-- No dedicated Supabase project is configured. A separate project requires
-  maintainer selection of the Supabase organization and explicit cost
-  confirmation before creation. There is no real Postgres transaction fixture.
-- **G1 not complete:** the nine scenarios prove dispatch shape, not FIDE or
-  draughts rulebook semantics, capture chains, or atomic persisted state.
+G2 must implement generic state reconstruction, trusted authenticated move
+authorization, full effect execution, clocks, quests, outcome adjudication and
+an atomic game/domain transaction invoking the already-probed SQL boundary.
+G3 must provide complete FIDE and both draughts rulebooks using only game JSON
+plus trusted generic primitives and correct game-owned exporters.
+G4 adds Supabase registered/anonymous Auth, secure backend connection,
+Realtime and the React two-participant client. G6/G7 remain mandatory.
+No merge or claim of playable class deployment before G7 and maintainer approval.
