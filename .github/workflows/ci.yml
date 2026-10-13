@@ -176,8 +176,30 @@ jobs:
             python -m compileall -q "$GITHUB_WORKSPACE/packages"
             PYTHONPATH="$GITHUB_WORKSPACE/packages" python "$GITHUB_WORKSPACE/scripts/probe_json_contract.py"
           else
+            if [[ "$DF_ACTION_COMMAND" == black\ --check* ]]; then
+              black --diff --line-length 100 . || true
+            fi
             bash -lc "$DF_ACTION_COMMAND"
           fi
+
+  web-build:
+    name: web-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.1"
+      - name: Install frontend dependencies
+        working-directory: packages/web
+        run: bun install --frozen-lockfile
+      - name: Build actual production web bundle
+        working-directory: packages/web
+        run: bun run build
+      - name: Verify generated web entry
+        run: test -s packages/web/dist/index.html
 
   docs-check:
     name: docs-check
@@ -204,7 +226,7 @@ jobs:
   quality:
     name: quality
     if: always()
-    needs: [detect, quality-run, docs-check]
+    needs: [detect, quality-run, docs-check, web-build]
     runs-on: ubuntu-latest
     steps:
       - name: Enforce detected quality result
@@ -213,9 +235,11 @@ jobs:
           DF_HAS_ACTIONS: ${{ needs.detect.outputs.has-actions }}
           DF_QUALITY_RESULT: ${{ needs.quality-run.result }}
           DF_DOCS_RESULT: ${{ needs.docs-check.result }}
+          DF_WEB_BUILD_RESULT: ${{ needs.web-build.result }}
         run: |
           test "$DF_DETECT_RESULT" = "success"
           test "$DF_DOCS_RESULT" = "success"
+          test "$DF_WEB_BUILD_RESULT" = "success"
           if [ "$DF_HAS_ACTIONS" = "true" ]; then
             test "$DF_QUALITY_RESULT" = "success"
           else

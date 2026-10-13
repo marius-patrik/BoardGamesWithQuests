@@ -3,5 +3,5 @@ import { pluginReact } from "@rsbuild/plugin-react";
 
 export default defineConfig({
   plugins: [pluginReact()],
-  html: { title: "BoardGamesWithQuests" },
+  html: { title: "BoardGamesWithQuests", template: "./public/index.html" },
 });
