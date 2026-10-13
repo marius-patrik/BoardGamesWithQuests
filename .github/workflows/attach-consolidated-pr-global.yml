@@ -17,4 +17,5 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$GH_TOKEN"
+          gh project view 17 --owner marius-patrik --format json --jq '{title,id,number}'
           gh project item-add 17 --owner marius-patrik --url 'https://github.com/marius-patrik/BoardGamesWithQuests/pull/271' --format json | jq -c '{id,title}'
