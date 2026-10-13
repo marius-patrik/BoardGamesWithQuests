@@ -211,6 +211,23 @@ jobs:
       - name: Verify generated web entry
         run: test -s packages/web/dist/index.html
 
+  hosted-bootstrap:
+    name: hosted-bootstrap
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify publicly reachable Python and web bootstrap
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --retry-delay 1 --max-time 25 \
+            https://boardgameswithquests-api.vercel.app/health > "$RUNNER_TEMP/health.json"
+          jq -e '.status == "bootstrap" and .playable == false' "$RUNNER_TEMP/health.json"
+          curl -fsSL --retry 3 --retry-delay 1 --max-time 25 \
+            https://boardgameswithquests-api.vercel.app/games > "$RUNNER_TEMP/games.json"
+          jq -e '(.games | length) == 3 and (.games | all(.playable == false))' "$RUNNER_TEMP/games.json"
+          curl -fsSL --retry 3 --retry-delay 1 --max-time 25 \
+            https://boardgameswithquests-web.vercel.app/ > "$RUNNER_TEMP/index.html"
+          grep -Fq 'BoardGamesWithQuests' "$RUNNER_TEMP/index.html"
+
   docs-check:
     name: docs-check
     runs-on: ubuntu-latest
@@ -236,7 +253,7 @@ jobs:
   quality:
     name: quality
     if: always()
-    needs: [detect, quality-run, docs-check, web-build]
+    needs: [detect, quality-run, docs-check, web-build, hosted-bootstrap]
     runs-on: ubuntu-latest
     steps:
       - name: Enforce detected quality result
@@ -246,10 +263,12 @@ jobs:
           DF_QUALITY_RESULT: ${{ needs.quality-run.result }}
           DF_DOCS_RESULT: ${{ needs.docs-check.result }}
           DF_WEB_BUILD_RESULT: ${{ needs.web-build.result }}
+          DF_HOSTED_RESULT: ${{ needs.hosted-bootstrap.result }}
         run: |
           test "$DF_DETECT_RESULT" = "success"
           test "$DF_DOCS_RESULT" = "success"
           test "$DF_WEB_BUILD_RESULT" = "success"
+          test "$DF_HOSTED_RESULT" = "success"
           if [ "$DF_HAS_ACTIONS" = "true" ]; then
             test "$DF_QUALITY_RESULT" = "success"
           else
