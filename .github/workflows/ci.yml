@@ -174,6 +174,7 @@ jobs:
           if [ "$DF_ACTION_COMMAND" = "pytest" ] && [ ! -d "$GITHUB_WORKSPACE/tests" ]; then
             echo "::notice::No permanent tests yet (issue #239); compile instead of claiming pytest coverage."
             python -m compileall -q "$GITHUB_WORKSPACE/packages"
+            PYTHONPATH="$GITHUB_WORKSPACE/packages" python "$GITHUB_WORKSPACE/scripts/probe_json_contract.py"
           else
             bash -lc "$DF_ACTION_COMMAND"
           fi
