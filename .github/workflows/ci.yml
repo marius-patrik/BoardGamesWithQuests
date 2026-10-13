@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: "marius-patrik/DarkFactory"
-          ref: "b5bdba739bf989f965af51c9efd88ee89617075c"
+          ref: "12a2507ba6499b3236c17d3c977c55a480ed5200"
           path: .darkfactory-runtime
 
       - name: Set up Bun
@@ -193,7 +193,7 @@ jobs:
           python-version: "3.12"
       - name: Install project documentation dependencies
         run: python -m pip install -r requirements-dev.txt
-      # DarkFactory's v0.289.0 native documentation validator requires a .darkfactory/ADRs.md
+      # DarkFactory's v0.289.2 native documentation validator requires a .darkfactory/ADRs.md
       # layout and rejects this project's maintainer-approved .agents/notes + properdocs
       # hierarchy. Preserve that hierarchy; use this repository's actual strict docs contract.
       - name: Build and verify project-specific documentation

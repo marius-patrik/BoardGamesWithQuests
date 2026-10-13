@@ -366,11 +366,7 @@ def render_component_diagram(root: Path) -> str:
                 if incoming[0] == "engine" and len(incoming) > 1
                 else incoming[0]
             )
-            if (
-                other != node
-                and other != "engine"
-                and other in allowed_dependencies
-            ):
+            if other != node and other != "engine" and other in allowed_dependencies:
                 dependencies.add((node, other))
     # The plugin connection is not an import: the engine discovers games
     # dynamically via project metadata. Draw it only when the distribution
