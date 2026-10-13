@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 
+from engine.model.game.board_queries import BoardQueries
 from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
 from engine.model.game.configuration import board_from_definition, load_definition
 from engine.model.game.hooks import HookInterpreter
@@ -24,6 +25,34 @@ for name, count in (
         for col in range(board.cols):
             placed += board.get_piece_at((row, col)) is not None
     assert placed == count
+    board_facts = ConditionEvaluator(BoardQueries(board, active_side=1).bindings())
+    assert board_facts.evaluate(
+        {
+            "op": "compare",
+            "relation": "eq",
+            "left": {"query": "board_dimension", "params": {"axis": "rows"}},
+            "right": board.rows,
+        }
+    )
+    assert board_facts.evaluate(
+        {
+            "op": "compare",
+            "relation": "eq",
+            "left": {"query": "turn", "params": {}},
+            "right": 1,
+        }
+    )
+    assert not board_facts.evaluate(
+        {"op": "test", "query": "path_clear", "params": {"source": [0, 0], "target": [0, 0]}}
+    )
+    try:
+        board_facts.evaluate(
+            {"op": "test", "query": "piece_at", "params": {"square": [board.rows, 0]}}
+        )
+    except QueryResolutionError:
+        pass
+    else:
+        raise AssertionError("out-of-bounds board query must fail closed")
 
 fixture = json.loads((Path(__file__).parent / "fixtures/g1_hooks.json").read_text("utf-8"))
 rules = fixture["rules"]
