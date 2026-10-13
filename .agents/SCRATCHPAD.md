@@ -5,8 +5,8 @@
 ## Consolidation (in progress)
 
 - **Plan:** [#129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129).
-- **Sole active draft PR:** [#267](https://github.com/marius-patrik/BoardGamesWithQuests/pull/267), branch `feature/product-integration`, base `main`.
-- Original **25** draft implementation PRs #218–#209 closed *unmerged* as superseded; previously rejected #170 remains closed. Their code history is preserved by a merge commit with current #218 and the previous full-stack #209 as parents. Old remote branch refs cannot yet be deleted using the connected GitHub API and require an authorized cleanup step after verification.
+- **Sole active draft PR:** [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/267), branch `feature/product-integration`, base `main`.
+- Original **25** draft implementation PRs #218–#209 closed *unmerged* as superseded; previously rejected #170 remains closed. Their code history is preserved by a merge commit with current #218 and the previous full-stack #209 as parents. All 26 obsolete PR branch refs (including rejected #170) were safely deleted through a one-time GitHub Actions workflow after verifying each head SHA was reachable from the consolidated commit. The cleanup workflow itself was then removed; the source history remains in commit ancestry. Unrelated historic refs were not part of this authorized cleanup.
 - Old open product/Plan issues were marked superseded rather than falsely completed; completed flattening #142 was marked completed. Only #129 and final behavior-gate [#239](https://github.com/marius-patrik/BoardGamesWithQuests/issues/239) stay open.
 - The consolidated tree starts with the corrected #218 game-neutral foundation plus **unverified** historical chess/checkers piece/export candidates. It deliberately **does not** revive broken Tkinter, executable user rule/quest code, competing historical runtime loaders, rejected agent removal, or obsolete docs/CI versions. Preserving ancestry **does not equal integrating all behavior**.
 
@@ -25,4 +25,4 @@
 
 ## Known blocking risks
 
-Original full-stack code has broken startup/import and incompatible config methods, game-specific validator coupling, unauthorized move paths, per-player quest state leakage, invalid IDs/timers and exporter contract violations; it restored obsolete `theme/` and static package version. These are not fixed merely by retaining the old history. The new draft PR was opened through the connected GitHub account rather than bot-authored `open-pr` workflow; reconcile that procedural exception before approval. Original source and PR discussion remain accessible via closed historical PRs.
+Original full-stack code has broken startup/import and incompatible config methods, game-specific validator coupling, unauthorized move paths, per-player quest state leakage, invalid IDs/timers and exporter contract violations; it restored obsolete `theme/` and static package version. These are not fixed merely by retaining the old history. The owner-authored draft #267 was closed and replaced by reviewable DarkFactory App-authored draft #271; the one-time reissue workflow was removed after verified success. Original source and PR discussion remain accessible via closed historical PRs.
