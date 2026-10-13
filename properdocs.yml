@@ -1,5 +1,5 @@
 site_name: BoardGamesWithQuests
-site_description: Configurable board-game engine with quests and generated API documentation
+site_description: JSON-configurable Python chess/checkers engine, React web app, Supabase and generated source documentation
 site_author: marius-patrik
 repo_name: marius-patrik/BoardGamesWithQuests
 repo_url: https://github.com/marius-patrik/BoardGamesWithQuests
