@@ -1,0 +1,36 @@
+name: Regenerate Implementation Diagrams
+
+on:
+  pull_request:
+    types: [synchronize]
+permissions:
+  contents: write
+jobs:
+  regenerate:
+    if: github.event.pull_request.number == 271 && github.event.pull_request.head.ref == 'feature/product-integration'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/product-integration
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate diagrams from current source only
+        run: |
+          set -euo pipefail
+          command -v dot || (sudo apt-get update && sudo apt-get install -y graphviz)
+          python .github/scripts/generate_architecture_diagrams.py
+          test -s .agents/notes/diagrams/implementation.svg
+          test -s .agents/notes/diagrams/implementation-classes.svg
+      - name: Commit generated SVG snapshots to integration branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .agents/notes/diagrams/implementation.svg .agents/notes/diagrams/implementation-classes.svg
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(diagrams): regenerate source-derived implementation SVGs"
+            git push origin HEAD:feature/product-integration
+          fi
