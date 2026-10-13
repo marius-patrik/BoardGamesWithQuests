@@ -7,3 +7,6 @@ Pygments>=2.17
 # Python 3.10 lacks tomllib; later Python versions use the standard library.
 tomli>=2.0; python_version < '3.11'
 mkdocstrings[python]>=0.25.0
+
+# ASGI HTTP client used by the behavioral API tests.
+httpx>=0.28,<1
