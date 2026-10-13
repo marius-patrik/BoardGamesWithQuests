@@ -52,6 +52,20 @@ effect conflict resolution and atomic application are G2 work. The G1 fixture is
 ## Live deployment gate
 
 The first FastAPI and Rsbuild packages now have Vercel Hobby project IDs and
-builds reported READY from the same `c7a47fcc` revision. Both deployments
-are behind Vercel Authentication; public access, function responses and Supabase
-connectivity remain unverified. Do not mark G1 complete based only on READY.
+builds reported READY from the same `c7a47fcc` revision. Both Vercel Authentication project gates were disabled. The CI `hosted-bootstrap` job now checks public HTTP health, catalog and web responses. Supabase integration is not provisioned. Do not mark G1 complete based only on READY.
+
+## Expressiveness evidence and limitations
+
+`scripts/fixtures/g1_rule_scenarios.json` enumerates nine typed hook
+scenarios covering chess royal safety, en passant, promotion and repetition;
+English draughts mandatory capture and king distance; and international
+maximum capture, flying kings and backward captures. Its probes inject
+**synthetic query outputs**. They verify safe declarative dispatch, not the
+underlying geometry or rulebook; they do **not** satisfy G1's complete
+expressiveness or authoritative persisted-transition gate. All shipped
+games remain correctly marked `playable: false`.
+
+The remaining gating dependencies are a dedicated Supabase project selected
+and cost-confirmed by the maintainer, a verified atomic database transaction
+fixture using a real authenticated participant, and representative complete
+three-game legality fixture execution through generic primitives.
