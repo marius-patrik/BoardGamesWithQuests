@@ -7,9 +7,10 @@ contains import paths, callable names, source code or executable extensions.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from copy import deepcopy
 from typing import Any
 
-from engine.model.game.schema import QUERIES, _bounded_json, condition
+from engine.model.game.schema import QUERIES, _bounded_json, condition, validate_reference
 
 Query = Callable[[Mapping[str, Any]], Any]
 
@@ -21,25 +22,47 @@ class QueryResolutionError(ValueError):
 class ConditionEvaluator:
     """Evaluate validated JSON conditions against registered read-only queries."""
 
-    def __init__(self, queries: Mapping[str, Query]):
+    def __init__(
+        self, queries: Mapping[str, Query], references: Mapping[str, Any] | None = None
+    ):
         """Register only recognized, trusted query primitives."""
         invalid = set(queries).difference(QUERIES)
         if invalid:
             raise QueryResolutionError(f"unknown query registrations: {sorted(invalid)}")
         self._queries = dict(queries)
+        for name, value in (references or {}).items():
+            validate_reference(name)
+            _bounded_json(value)
+        self._references = deepcopy(dict(references or {}))
+
+    def resolve(self, value: Any) -> Any:
+        """Resolve typed JSON reference nodes, never evaluating text as code."""
+        if isinstance(value, dict):
+            if set(value) == {"ref"}:
+                name = value["ref"]
+                validate_reference(name)
+                if name not in self._references:
+                    raise QueryResolutionError(f"unbound reference: {name}")
+                return deepcopy(self._references[name])
+            return {key: self.resolve(child) for key, child in value.items()}
+        if isinstance(value, list):
+            return [self.resolve(child) for child in value]
+        return value
 
     def _query(self, name: str, params: Mapping[str, Any]) -> Any:
         """Resolve one whitelisted query or reject the unavailable operation."""
         primitive = self._queries.get(name)
         if primitive is None:
             raise QueryResolutionError(f"query is not implemented: {name}")
-        value = primitive(params)
+        value = primitive(self.resolve(dict(params)))
         _bounded_json(value)
         return value
 
     def _value(self, expression: Any) -> Any:
         """Resolve an immutable literal or a declared query reference."""
         if isinstance(expression, dict):
+            if set(expression) == {"ref"}:
+                return self.resolve(expression)
             return self._query(expression["query"], expression["params"])
         return expression
 
