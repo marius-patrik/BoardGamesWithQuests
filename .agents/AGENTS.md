@@ -27,7 +27,7 @@ All changes, features, refactors, and bug fixes must be developed on dedicated t
 - **Required CI Checks**: Every pull request requires all GitHub Actions CI checks (stable DarkFactory `quality` and `verify-bound-issue` contexts, `Verify Docs Layout`, plus applicable browser/API checks) to pass green before merging.
 - **Branch Protection**: The `main` branch must remain protected at all times with required status checks, branch up-to-date enforcement, and pull request review enforcement.
 
-### 8. Automated Code Formatting
+### 8. Code Formatting
 Python code must conform to Black (line length 100), and TypeScript must conform to the frontend's configured formatting and lint rules. Formatting is validated by current CI; do not claim a retired auto-format workflow is automatically committing fixes.
 
 ### 9. Issue Binding, Branch Auto-Deletion & Project Board Taxonomy

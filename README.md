@@ -2,7 +2,7 @@
 
 A configurable two-player chess and English-draughts game built around a **game-neutral Python engine**. The target application has a single React web GUI, a FastAPI serverless API, Supabase accounts/game storage and a Tauri desktop wrapper that loads the **same hosted web app**.
 
-**Current implementation status and release readiness:** See [.agents/SCRATCHPAD.md](.agents/SCRATCHPAD.md). A successful documentation build alone is not evidence of playable behavior.
+**Current implementation status and release readiness:** See [.agents/SCRATCHPAD.md](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md). A successful documentation build alone is not evidence of playable behavior.
 
 ## Target packages
 
@@ -20,13 +20,13 @@ Everything configurable about pieces, boards, rules, quests and clocks comes fro
 
 ## Documentation and status
 
-- [Canonical completion plan](.agents/notes/PLAN.md)
-- [Product requirements](.agents/notes/PRD.md)
-- [Approved deviations from original reference](.agents/notes/object_model.md)
-- [Original UML and source reference](.agents/notes/reference_diagram.md)
-- [Chess rule baseline](.agents/notes/chess_rules.md)
-- [Current implementation status](.agents/SCRATCHPAD.md)
-- [Operational development rules](.agents/AGENTS.md)
+- [Canonical completion plan](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PLAN.md)
+- [Product requirements](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PRD.md)
+- [Approved deviations from original reference](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/object_model.md)
+- [Original UML and source reference](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/reference_diagram.md)
+- [Chess rule baseline](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/chess_rules.md)
+- [Current implementation status](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md)
+- [Operational development rules](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/AGENTS.md)
 - [Consolidated Plan issue #129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129)
 
 Current legacy Python smoke/discovery behavior is not the final web application and is not a gameplay acceptance test. Follow the single plan for implementation and deployment instructions as they become verified.

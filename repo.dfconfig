@@ -190,6 +190,13 @@
       "year": "2026"
     }
   },
-  "docs": {},
+  "docs": {
+    "version": 1,
+    "site": {
+      "name": "BoardGamesWithQuests",
+      "description": "JSON-driven chess and checkers Python engine and React application"
+    },
+    "home": "README.md"
+  },
   "providers": {}
 }

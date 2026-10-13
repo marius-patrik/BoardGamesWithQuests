@@ -184,4 +184,4 @@ listed here are already English in the diagram.
 | `GameVeiw` | `GameView` | diagram typo |
 | `HracGameView` | `PlayerGameView` | the `Hrac` part is Czech |
 
-The normative alias table for the completed product is in [PRD §5](PRD.md#5-naming-requirements).
+The normative alias table for the completed product is in [PRD §5](PRD.md#5-naming-and-source-uml).
