@@ -114,7 +114,7 @@ def _value(value: Any, depth: int) -> None:
             raise ValueError("value expression needs a recognized query and params")
         _check_params(value["params"])
         return
-    if value is None or type(value) in (bool, int, float, str):
+    if value is None or type(value) in (bool, int, float, str, list):
         _bounded_json(value, depth)
         return
     raise ValueError("value must be literal or a typed query")
