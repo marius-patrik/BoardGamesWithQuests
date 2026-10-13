@@ -6,7 +6,12 @@ from pathlib import Path
 from engine.model.game.board_queries import BoardQueries
 from engine.model.game.board_queries import BoardQueries
 from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
-from engine.model.game.configuration import board_from_definition, load_definition
+from engine.model.game.configuration import (
+    ConfigurationError,
+    board_from_definition,
+    load_definition,
+    parse_definition_json,
+)
 from engine.model.game.hooks import HookInterpreter
 from engine.model.game.quest import Quest
 from engine.model.game.schema import condition, validate_hooks
@@ -72,6 +77,22 @@ except QueryResolutionError:
     pass
 else:
     raise AssertionError("untrusted piece selectors must fail closed")
+
+built_in = (Path(__file__).parent.parent / "packages/chess/config.json").read_text("utf-8")
+assert parse_definition_json(built_in).name == "chess"
+for unsafe in (
+    built_in.replace('"schema_version": 2', '"schema_version": 2, "schema_version": 2'),
+    built_in.replace('"schema_version": 2', '"schema_version": 2, "unrecognized": true'),
+    built_in.replace('"schema_version": 2', '"schema_version": NaN'),
+    built_in.replace('"schema_version": 2', '"schema_version": 2.0'),
+    " " * 262145,
+):
+    try:
+        parse_definition_json(unsafe)
+    except ConfigurationError:
+        pass
+    else:
+        raise AssertionError("accepted malformed or unbounded game JSON")
 
 fixture = json.loads((Path(__file__).parent / "fixtures/g1_hooks.json").read_text("utf-8"))
 rules = fixture["rules"]

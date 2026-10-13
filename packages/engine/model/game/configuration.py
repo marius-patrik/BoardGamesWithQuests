@@ -37,17 +37,69 @@ class GameDefinition:
     quests: tuple[dict[str, Any], ...]
 
 
-def load_definition(package: str) -> GameDefinition:
-    """Load a sibling package's root config.json without loading rules or quests."""
+MAX_GAME_JSON_BYTES = 262144
+TOP_LEVEL_FIELDS = frozenset(
+    {
+        "schema_version",
+        "name",
+        "title",
+        "default",
+        "playable",
+        "board",
+        "pieces",
+        "clock",
+        "exports",
+        "appearance",
+        "rules",
+        "quests",
+    }
+)
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Reject duplicate keys rather than silently overriding validated fields."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ConfigurationError(f"duplicate JSON field: {key}")
+        result[key] = value
+    return result
+
+
+def parse_definition_json(raw_json: str, package: str = "<custom>") -> GameDefinition:
+    """Validate an untrusted data-only game definition, without dynamic imports."""
+    if not isinstance(raw_json, str):
+        raise ConfigurationError("configuration must be a JSON document")
+    if len(raw_json.encode("utf-8")) > MAX_GAME_JSON_BYTES:
+        raise ConfigurationError("configuration exceeds maximum JSON byte size")
     try:
         data = json.loads(
-            resources.files(package).joinpath("config.json").read_text("utf-8"),
-            parse_constant=lambda value: (_ for _ in ()).throw(
-                ValueError(f"invalid JSON numeric constant: {value}")
+            raw_json,
+            object_pairs_hook=_unique_json_object,
+            parse_constant=lambda constant: (_ for _ in ()).throw(
+                ValueError(f"invalid JSON numeric constant: {constant}")
             ),
         )
-    except (ModuleNotFoundError, OSError, ValueError) as error:
-        raise ConfigurationError(f"{package}: missing or invalid config.json: {error}") from error
+    except (ValueError, UnicodeError) as error:
+        raise ConfigurationError(f"{package}: invalid JSON: {error}") from error
+    return validate_definition(data, package)
+
+
+def load_definition(package: str) -> GameDefinition:
+    """Load trusted built-in package JSON, using the same validator as user data."""
+    try:
+        raw_json = resources.files(package).joinpath("config.json").read_text("utf-8")
+    except (ModuleNotFoundError, OSError) as error:
+        raise ConfigurationError(f"{package}: missing config.json: {error}") from error
+    return parse_definition_json(raw_json, package)
+
+
+def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
+    """Validate typed JSON data against one versioned game-neutral contract."""
+    if not isinstance(data, dict) or set(data) != TOP_LEVEL_FIELDS:
+        raise ConfigurationError(f"{package}: missing or unknown top-level fields")
+    if type(data["schema_version"]) is not int:
+        raise ConfigurationError(f"{package}: schema version must be an integer")
     if not isinstance(data, dict) or data.get("schema_version") != 2:
         raise ConfigurationError(f"{package}: unsupported config schema version")
     name, title = data.get("name"), data.get("title")
