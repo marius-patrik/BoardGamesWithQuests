@@ -12,9 +12,7 @@ def test_catalog_returns_real_nonplayable_configurations() -> None:
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("application/json")
     games = response.json()["games"]
-    assert {g["id"] for g in games} == {
-        "chess", "english_draughts", "international_checkers"
-    }
+    assert {g["id"] for g in games} == {"chess", "english_draughts", "international_checkers"}
     assert all(g["title"] and g["playable"] is False for g in games)
 
 

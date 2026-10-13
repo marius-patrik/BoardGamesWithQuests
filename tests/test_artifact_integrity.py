@@ -27,9 +27,7 @@ CHRONOLOGY = re.compile(
 def test_documents_define_interfaces_without_chronology() -> None:
     offending = []
     for relative in DOCS:
-        for line_number, line in enumerate(
-            (ROOT / relative).read_text("utf-8").splitlines(), 1
-        ):
+        for line_number, line in enumerate((ROOT / relative).read_text("utf-8").splitlines(), 1):
             if CHRONOLOGY.search(line):
                 offending.append(f"{relative}:{line_number}")
     assert not offending, "time-dependent narratives: " + ", ".join(offending)
@@ -39,9 +37,7 @@ def test_markdown_navigation_links_point_to_existing_artifacts() -> None:
     broken = []
     for relative in DOCS:
         source = ROOT / relative
-        for target in re.findall(
-            r"(?<!!)\[[^]]+\]\(([^)]+)\)", source.read_text("utf-8")
-        ):
+        for target in re.findall(r"(?<!!)\[[^]]+\]\(([^)]+)\)", source.read_text("utf-8")):
             destination = target.split("#", 1)[0]
             if not destination or "://" in destination:
                 continue

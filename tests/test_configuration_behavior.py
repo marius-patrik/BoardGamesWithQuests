@@ -33,10 +33,12 @@ def test_shipped_json_creates_expected_piece_placement(
     board = board_from_definition(definition)
     assert (board.rows, board.cols) == (rows, cols)
     assert definition.playable is False
-    assert sum(
-        board.get_piece_at((row, col)) is not None
-        for row in range(rows) for col in range(cols)
-    ) == count
+    assert (
+        sum(
+            board.get_piece_at((row, col)) is not None for row in range(rows) for col in range(cols)
+        )
+        == count
+    )
 
 
 @pytest.mark.parametrize(
@@ -47,15 +49,20 @@ def test_shipped_json_creates_expected_piece_placement(
         ("playable", "true"),
         ("clock", {"initial_seconds": -1, "increment_seconds": 0}),
         ("clock", {"initial_seconds": True, "increment_seconds": 0}),
-        ("rules", [
-            {"id": "inject", "hook": "on_move_made", "when": {"op": "true"},
-             "effects": [{"op": "__import__", "params": {}}]}
-        ]),
+        (
+            "rules",
+            [
+                {
+                    "id": "inject",
+                    "hook": "on_move_made",
+                    "when": {"op": "true"},
+                    "effects": [{"op": "__import__", "params": {}}],
+                }
+            ],
+        ),
     ],
 )
-def test_untrusted_values_are_rejected_without_affecting_game(
-    field: str, value: object
-) -> None:
+def test_untrusted_values_are_rejected_without_affecting_game(field: str, value: object) -> None:
     config = chess_config()
     config[field] = value
     with pytest.raises(ConfigurationError):
@@ -73,7 +80,8 @@ def test_duplicate_piece_coordinates_fail_before_board_creation() -> None:
 
 
 @pytest.mark.parametrize(
-    "raw", [
+    "raw",
+    [
         "null",
         '{"schema_version":2,"schema_version":2}',
         '{"schema_version":NaN}',
