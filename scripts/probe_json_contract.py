@@ -1,5 +1,6 @@
 """Targeted G1 schema probes; not the permanent gameplay test suite."""
 
+from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
 from engine.model.game.configuration import board_from_definition, load_definition
 from engine.model.game.schema import condition, validate_hooks
 from engine.model.game.quest import Quest
@@ -32,6 +33,22 @@ when = {
         },
     ],
 }
+engine_queries = ConditionEvaluator(
+    {
+        "capture_paths": lambda params: params["player"] == "active",
+        "capture_count": lambda params: 2 if params["candidate"] == "move" else 0,
+    }
+)
+assert engine_queries.evaluate(when)
+assert not engine_queries.evaluate({"op": "not", "arg": when})
+assert engine_queries.evaluate({"op": "any", "args": [{"op": "false"}, when]})
+try:
+    ConditionEvaluator({}).evaluate(when)
+except QueryResolutionError:
+    pass
+else:
+    raise AssertionError("missing condition primitive must fail closed")
+
 validate_hooks(
     [
         {

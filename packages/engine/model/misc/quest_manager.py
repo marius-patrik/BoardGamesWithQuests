@@ -40,7 +40,7 @@ class QuestManager:
         return list(self.quests.values())
 
     def complete(self, game_id: str, player_id: str, quest_name: str) -> QuestCompletion:
-        """Record one validated completion idempotently for a specific participant.
+        """Record one validated completion at most once for a specific participant.
 
         This method records *only* an already authorized completion. Eligibility
         must first be established by configured hooks in the authoritative game.
