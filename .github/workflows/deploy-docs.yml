@@ -4,15 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Preview Documentation"]
-    types: [completed]
 
-# Preview workflow stages pr-*/ into gh-pages for compatibility; this workflow
-# publishes the combined site only through GitHub Pages' Actions deployment API.
+# GitHub Pages is deployed from reviewed main through its Actions deployment
+# API; the retired preview-docs caller and gh-pages staging are not inputs.
 permissions:
   contents: read
-  pull-requests: read
   pages: write
   id-token: write
 
@@ -22,13 +18,12 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Check out main (never checkout code from preview events)
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           ref: main
@@ -40,40 +35,12 @@ jobs:
           python-version: "3.12"
 
       - name: Install documentation dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
+        run: python -m pip install -r requirements-dev.txt
 
-      - name: Build current documentation
+      - name: Build current docs from tracked repository sources
         run: python .github/scripts/build_docs.py
 
-      - name: Collect live preview builds from staging
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # gh-pages is staging for the existing reusable PR preview workflow,
-          # NOT the GitHub Pages publication source.
-          if git fetch origin gh-pages --depth=1; then
-            mkdir -p .published
-            git archive FETCH_HEAD | tar -x -C .published
-            for number in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
-              if [ -f ".published/pr-$number/index.html" ]; then
-                cp -a ".published/pr-$number" "site/pr-$number"
-              fi
-            done
-            if [ -d .published/branch ]; then
-              mkdir -p site/branch
-              for candidate in .published/branch/*; do
-                if [ -f "$candidate/index.html" ]; then
-                  cp -a "$candidate" site/branch/
-                fi
-              done
-            fi
-          else
-            echo "No legacy preview staging exists; deploying main only."
-          fi
-
-      - name: Write manifest from builds actually deployed
+      - name: Write manifest of actual deployed versions/projects
         run: python .github/scripts/docs_manifest.py --site site
 
       - name: Disable Jekyll
