@@ -219,7 +219,12 @@
       "jump": false,
       "repeat": false,
       "notation": "",
-      "color_relative": true
+      "color_relative": true,
+      "capture_policy": {
+        "flying": false,
+        "land_anywhere": false,
+        "max_nodes": 4096
+      }
     },
     "king": {
       "symbols": {
@@ -264,7 +269,12 @@
       ],
       "jump": false,
       "repeat": true,
-      "notation": ""
+      "notation": "",
+      "capture_policy": {
+        "flying": true,
+        "land_anywhere": true,
+        "max_nodes": 4096
+      }
     }
   },
   "clock": {
