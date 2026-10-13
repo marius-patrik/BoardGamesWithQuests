@@ -80,6 +80,10 @@ class Move:
         return True
 
     def execute(self, board: Any) -> bool:
+        """Reject direct mutation outside the authoritative game session."""
+        raise PermissionError("moves must be committed through GameManager")
+
+    def _apply_validated(self, board: Any) -> bool:
         """Execute this move on the given board.
 
         Args:

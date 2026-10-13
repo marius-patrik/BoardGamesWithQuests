@@ -1,81 +1,37 @@
-"""Engine entry point. The complete GUI is delivered in a later feature PR."""
+"""Headless package inspection entry point; the user interface runs on the web."""
 
 import argparse
 import sys
-from typing import Any, List, Optional
+from typing import List, Optional
 
-from engine.model.game.configuration import (
-    ConfigurationError,
-    installed_definitions,
-    named_definition,
-)
-from engine.model.game.games import default_configuration_name
+from engine.model.game.configuration import ConfigurationError, installed_definitions
 
 
 def build_arguments(argv: Optional[List[str]] = None) -> argparse.Namespace:
-    """Parse game selection and installation diagnostics."""
-    parser = argparse.ArgumentParser(prog="chesswithquests")
-    parser.add_argument("--game", default=None, help="registered game package")
-    parser.add_argument("--check", action="store_true", help="inspect packages without a GUI")
+    """Parse inspection options without exposing a non-existent local GUI."""
+    parser = argparse.ArgumentParser(prog="boardgameswithquests")
+    parser.add_argument("--check", action="store_true", help="inspect installed game definitions")
     return parser.parse_args(argv)
 
 
 def report_installation() -> str:
-    """Report installed game packages and whether gameplay has been implemented."""
-    from importlib.metadata import PackageNotFoundError, version
-
-    try:
-        current_version = version("chesswithquests")
-    except PackageNotFoundError:
-        current_version = "unknown"
-    lines = [f"ChessWithQuests {current_version}", "game packages:"]
+    """Describe installed games without implying working gameplay."""
+    lines = ["BoardGamesWithQuests game packages:"]
     for game in installed_definitions():
-        lines.append(
-            f"  {game.name}: {game.title} ({'ready' if game.playable else 'not implemented'})"
-        )
+        state = "ready" if game.playable else "not implemented"
+        lines.append(f"  {game.name}: {game.title} ({state})")
     return "\n".join(lines)
 
 
-def build_window(root: Any, game: str) -> Any:
-    """Delegate to the actual application view, not a placeholder shell."""
-    from engine.view.app import build_application
-
-    return build_application(root, game)
-
-
 def main(argv: Optional[List[str]] = None) -> int:
-    """Inspect installed games or launch the fully implemented application."""
+    """Check definitions or explicitly reject unsupported headless gameplay."""
     args = build_arguments(argv)
     try:
         if args.check:
             print(report_installation())
             return 0
-        name = args.game or default_configuration_name()
-        if name is None:
-            raise ConfigurationError("no default game is registered")
-        game = named_definition(name)
-        if not game.playable:
-            print(f"{game.title} is not implemented yet", file=sys.stderr)
-            return 4
     except ConfigurationError as error:
-        print(f"invalid game configuration: {error}", file=sys.stderr)
+        print(f"Invalid configuration: {error}", file=sys.stderr)
         return 4
-
-    try:
-        import tkinter as tk
-    except ImportError as error:
-        print(f"tkinter unavailable: {error}", file=sys.stderr)
-        return 2
-    try:
-        root = tk.Tk()
-    except tk.TclError as error:
-        print(f"cannot open a window: {error}", file=sys.stderr)
-        return 3
-    try:
-        window = build_window(root, game.name)
-    except (ImportError, AttributeError) as error:
-        root.destroy()
-        print(f"full application view has not been implemented: {error}", file=sys.stderr)
-        return 4
-    window.mainloop()
-    return 0
+    print("No local GUI exists. Gameplay requires the web/API application.", file=sys.stderr)
+    return 4

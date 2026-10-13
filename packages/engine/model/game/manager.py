@@ -34,7 +34,7 @@ class GameManager:
         The active game configuration must be supplied by the caller; implicit
         chess-specific board, timer and participant defaults are prohibited.
         """
-        if board is None or timer is None or len(players) != 2:
+        if board is None or timer is None or players is None or len(players) != 2:
             raise ValueError("board, clock and exactly two players are required")
         if players[0].getColor() == players[1].getColor():
             raise ValueError("players must control distinct sides")
@@ -92,7 +92,7 @@ class GameManager:
         if piece is None or piece.getColor() != self.active_player:
             return False
 
-        success = move.execute(self.board)
+        success = move._apply_validated(self.board)
         if not success:
             return False
 

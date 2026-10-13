@@ -1,50 +1,36 @@
-"""Quest module defining achievement objectives, condition evaluation, and completion state."""
+"""Immutable declarative quest metadata; evaluation belongs to the rules interpreter."""
 
-from typing import Optional, Callable, Any
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Mapping
 
 
+@dataclass(frozen=True)
 class Quest:
-    """Represents a gameplay quest or achievement objective with rewards."""
+    """A game-supplied JSON quest definition, not shared completion state.
 
-    def __init__(
-        self,
-        name: str,
-        description: str = "",
-        condition_fn: Optional[Callable[[Any], bool]] = None,
-        reward_points: int = 10,
-    ):
-        """Initialize a Quest instance.
+    Args:
+        name: Identifier of the quest within its configuration.
+        description: Text shown to participants.
+        condition: Validated expression AST, evaluated by the generic engine.
+        reward_points: Non-negative experience reward.
+    """
 
-        Args:
-            name: Title of the quest.
-            description: Detailed goal description.
-            condition_fn: Callable evaluating whether the quest is met in a context.
-            reward_points: Score or experience points awarded upon completion.
-        """
-        self.name = name
-        self.description = description
-        self.condition_fn = condition_fn
-        self.reward_points = reward_points
-        self.is_completed = False
+    name: str
+    description: str
+    condition: Mapping[str, Any]
+    reward_points: int
 
-    def validate(self, context: Optional[Any] = None) -> bool:
-        """Evaluate quest conditions against provided game context.
+    def __post_init__(self) -> None:
+        """Reject invalid definitions before progress instances exist."""
+        if not self.name or not isinstance(self.name, str):
+            raise ValueError("quest name must be nonempty")
+        if not isinstance(self.condition, Mapping):
+            raise TypeError("quest condition must be declarative JSON")
+        if type(self.reward_points) is not int or self.reward_points < 0:
+            raise ValueError("quest reward must be a non-negative integer")
 
-        Args:
-            context: Context passed to condition_fn (e.g. GameManager state).
-
-        Returns:
-            True if quest is satisfied or was already completed, False otherwise.
-        """
-        if self.is_completed:
-            return True
-        if self.condition_fn is not None:
-            result = bool(self.condition_fn(context))
-            if result:
-                self.is_completed = True
-            return result
-        return self.is_completed
-
-    def complete(self) -> None:
-        """Mark this quest as explicitly completed."""
-        self.is_completed = True
+    def validate(self, context: Any = None) -> bool:
+        """Fail closed until the versioned condition interpreter is connected."""
+        raise NotImplementedError("quest evaluation requires validated JSON hooks")
