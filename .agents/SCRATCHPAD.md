@@ -15,7 +15,11 @@
 - UI, API and desktop package skeletons are tracked independently from real operation.
 - Permanent gameplay test coverage and public deployment are absent; green
   compilation/docs checks do not certify gameplay.
-- PR review feedback and GitHub Projects Global attachment need verification.
+- PR #271 membership on Global project #17 is confirmed by an authenticated
+  GraphQL read after mutation. Project #14 historical status fields need audit.
+- DarkFactory v0.289.2 is pinned in CI and both live and dedicated configuration
+  branches; native tool config generation is tracked upstream in DF #2149.
+- CI builds the static Rsbuild web bundle; all gameplay endpoints remain absent.
 
 ## Execution gate
 

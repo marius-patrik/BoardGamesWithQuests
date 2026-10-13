@@ -10,9 +10,10 @@ The five hooks are `permits_move`, `available_moves`, `outcome`,
 Queries and effects are restricted to the explicit whitelists in
 `packages/engine/model/game/schema.py`.
 
-**Contract stage:** validation is implemented; interpreting conditions,
-generating special moves, mutating state through effects and proving three
-game-rule expressiveness are **not** implemented. The shipped configurations
+**Contract stage:** bounded validation and pure condition interpretation of
+trusted generic queries are implemented. The actual game-specific query
+primitives, legal move generation, effects, outcomes and three-game behavioral
+expressiveness are **not** yet implemented. The shipped configurations
 therefore declare empty rules and `playable=false`.
 
 G1 acceptance requires executable scenarios for chess (check, castling,
@@ -27,3 +28,16 @@ Hosting feasibility: Vercel supports Python FastAPI ASGI functions with Python
 monorepo engine and respect the 500 MB uncompressed limit. Supabase anonymous
 sign-ins currently default to **30 requests per hour per IP**, a possible
 classroom shared-IP blocker. Both are unverified with a live project.
+
+## Provider feasibility boundary
+
+Vercel's Python runtime supports the root `api/index.py` ASGI entry, reads the
+root `pyproject.toml`, supports Python 3.12–3.14 and limits a Python function
+to 500 MB uncompressed. The scoped React/Rsbuild production bundle now passes
+CI; a real hosted API deployment has **not** been verified.
+
+Supabase's published anonymous sign-in quota is **30 requests/hour per IP**
+(with burst capacity up to 30); shared school Wi-Fi may exhaust it. Rate limits
+are configurable, but acceptable classroom capacity must be tested on the
+actual Free-plan project before claiming readiness. Provider projects and
+database transactions/RLS have not been provisioned.

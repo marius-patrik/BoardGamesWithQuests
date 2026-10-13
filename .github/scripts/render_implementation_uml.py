@@ -349,9 +349,7 @@ def render_component_diagram(root: Path) -> str:
     components: dict[str, set[str]] = defaultdict(set)
     dependencies: set[tuple[str, str]] = set()
     allowed_dependencies = set(packages)
-    allowed_dependencies.update(
-        f"engine.{name}" for name in ("model", "controller", "view", "app")
-    )
+    allowed_dependencies.update(f"engine.{name}" for name in ("model", "controller", "view", "app"))
     for module in modules:
         parts = module.module.split(".")
         # Group engine internals by first child; other packages by name.

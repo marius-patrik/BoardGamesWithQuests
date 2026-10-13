@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from engine.model.game.schema import QUERIES, condition
+from engine.model.game.schema import QUERIES, _bounded_json, condition
 
 Query = Callable[[Mapping[str, Any]], Any]
 
@@ -33,7 +33,9 @@ class ConditionEvaluator:
         primitive = self._queries.get(name)
         if primitive is None:
             raise QueryResolutionError(f"query is not implemented: {name}")
-        return primitive(params)
+        value = primitive(params)
+        _bounded_json(value)
+        return value
 
     def _value(self, expression: Any) -> Any:
         """Resolve an immutable literal or a declared query reference."""
@@ -48,9 +50,13 @@ class ConditionEvaluator:
         if relation == "ne":
             return type(left) is not type(right) or left != right
         if relation == "in":
-            if isinstance(right, (list, tuple, str, dict)):
+            if isinstance(right, list):
                 return left in right
-            raise QueryResolutionError("membership requires a collection")
+            if isinstance(right, str) and isinstance(left, str):
+                return left in right
+            if isinstance(right, dict) and isinstance(left, (str, int, float, bool)):
+                return left in right
+            raise QueryResolutionError("membership requires compatible JSON types")
         if type(left) not in (int, float) or type(right) not in (int, float):
             raise QueryResolutionError("ordered comparison requires numeric operands")
         if relation == "lt":
