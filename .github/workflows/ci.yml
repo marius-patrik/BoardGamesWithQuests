@@ -183,6 +183,7 @@ jobs:
             echo "::notice::No permanent tests yet (issue #239); compile instead of claiming pytest coverage."
             python -m compileall -q "$GITHUB_WORKSPACE/packages" "$GITHUB_WORKSPACE/api"
             PYTHONPATH="$GITHUB_WORKSPACE/packages" python "$GITHUB_WORKSPACE/scripts/probe_json_contract.py"
+            PYTHONPATH="$GITHUB_WORKSPACE/packages" python "$GITHUB_WORKSPACE/scripts/probe_g1_semantics.py"
             PYTHONPATH="$GITHUB_WORKSPACE/packages:$GITHUB_WORKSPACE" python -c \
               "from api.index import app; from server.app import game_catalog; assert any(route.path == '/health' for route in app.routes); games=game_catalog()['games']; assert len(games)==3; assert all(not x['playable'] for x in games)"
           else
