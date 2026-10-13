@@ -175,6 +175,9 @@ jobs:
             echo "::notice::No permanent tests yet (issue #239); compile instead of claiming pytest coverage."
             python -m compileall -q "$GITHUB_WORKSPACE/packages"
           else
+            if [[ "$DF_ACTION_COMMAND" == black\ --check* ]]; then
+              black --diff --line-length 100 . || true
+            fi
             bash -lc "$DF_ACTION_COMMAND"
           fi
 

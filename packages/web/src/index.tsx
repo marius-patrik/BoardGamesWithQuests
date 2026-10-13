@@ -1,5 +1,5 @@
+import type React from "react";
 import { createRoot } from "react-dom/client";
-import React from "react";
 
 function App(): React.JSX.Element {
   return (
