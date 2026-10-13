@@ -40,7 +40,12 @@ class GameDefinition:
 def load_definition(package: str) -> GameDefinition:
     """Load a sibling package's root config.json without loading rules or quests."""
     try:
-        data = json.loads(resources.files(package).joinpath("config.json").read_text("utf-8"))
+        data = json.loads(
+            resources.files(package).joinpath("config.json").read_text("utf-8"),
+            parse_constant=lambda value: (_ for _ in ()).throw(
+                ValueError(f"invalid JSON numeric constant: {value}")
+            ),
+        )
     except (ModuleNotFoundError, OSError, ValueError) as error:
         raise ConfigurationError(f"{package}: missing or invalid config.json: {error}") from error
     if not isinstance(data, dict) or data.get("schema_version") != 2:

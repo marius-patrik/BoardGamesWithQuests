@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Hashable, Iterable
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -54,14 +54,13 @@ class QuestManager:
         if quest_name in seen:
             raise ValueError("quest already completed for this participant")
         seen.add(quest_name)
-        return QuestCompletion(game_id, player_id, quest_name, self.quests[quest_name].reward_points)
+        return QuestCompletion(
+            game_id, player_id, quest_name, self.quests[quest_name].reward_points
+        )
 
     def get_completed_quests(self, game_id: str, player_id: str) -> list[Quest]:
         """Get completions for exactly one game and participant."""
-        return [
-            self.quests[name]
-            for name in sorted(self.completed.get((game_id, player_id), set()))
-        ]
+        return [self.quests[name] for name in sorted(self.completed.get((game_id, player_id), set()))]
 
     def check_quests(self, context: Any, user: Any = None) -> list[Quest]:
         """Reject unconfigured quest evaluation instead of sharing completion."""

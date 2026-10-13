@@ -170,6 +170,7 @@ jobs:
           DF_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
         run: |
           cd "$GITHUB_WORKSPACE/$DF_ACTION_CWD"
+          export PATH="$PWD/node_modules/.bin:$PATH"
           if [ "$DF_ACTION_COMMAND" = "pytest" ] && [ ! -d "$GITHUB_WORKSPACE/tests" ]; then
             echo "::notice::No permanent tests yet (issue #239); compile instead of claiming pytest coverage."
             python -m compileall -q "$GITHUB_WORKSPACE/packages"

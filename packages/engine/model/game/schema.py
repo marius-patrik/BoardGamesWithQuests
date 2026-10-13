@@ -6,29 +6,57 @@ execute the validated operation set; no arbitrary string is ever evaluated as co
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any
+import math
 
 MAX_DEPTH = 12
 MAX_NODES = 256
 MAX_RULES = 128
 MAX_QUESTS = 128
-HOOKS = frozenset(
-    {"permits_move", "available_moves", "outcome", "on_move_made", "status"}
+HOOKS = frozenset({"permits_move", "available_moves", "outcome", "on_move_made", "status"})
+QUERIES = frozenset(
+    {
+        "piece_at",
+        "pieces_matching",
+        "path_clear",
+        "squares_attacked",
+        "capture_paths",
+        "capture_count",
+        "legal_move_count",
+        "repetition_count",
+        "halfmove_count",
+        "clock_remaining",
+        "rule_state",
+        "move_attribute",
+        "board_dimension",
+        "participant",
+        "turn",
+        "history_count",
+        "last_action",
+        "position",
+        "promotion_options",
+        "special_rights",
+        "temporary_target",
+        "quest_progress",
+    }
 )
-QUERIES = frozenset({
-    "piece_at", "pieces_matching", "path_clear", "squares_attacked",
-    "capture_paths", "capture_count", "legal_move_count",
-    "repetition_count", "halfmove_count", "clock_remaining",
-    "rule_state", "move_attribute", "board_dimension",
-    "participant", "turn", "history_count", "last_action",
-    "position", "promotion_options", "special_rights",
-    "temporary_target", "quest_progress",
-})
-EFFECTS = frozenset({
-    "permit", "deny", "offer_move", "move_piece", "capture_piece",
-    "replace_piece", "set_state", "increment_state", "record_event",
-    "propose_outcome", "complete_quest", "set_clock", "set_rights",
-})
+EFFECTS = frozenset(
+    {
+        "permit",
+        "deny",
+        "offer_move",
+        "move_piece",
+        "capture_piece",
+        "replace_piece",
+        "set_state",
+        "increment_state",
+        "record_event",
+        "propose_outcome",
+        "complete_quest",
+        "set_clock",
+        "set_rights",
+    }
+)
 RELATIONS = frozenset({"eq", "ne", "lt", "lte", "gt", "gte", "in"})
 
 
@@ -39,7 +67,11 @@ def _bounded_json(value: Any, depth: int = 0, budget: list[int] | None = None) -
     budget[0] -= 1
     if budget[0] < 0 or depth > MAX_DEPTH:
         raise ValueError("configuration expression exceeds complexity limits")
-    if value is None or type(value) in (bool, int, float):
+    if value is None or type(value) in (bool, int):
+        return
+    if type(value) is float:
+        if not math.isfinite(value):
+            raise ValueError("non-finite JSON number")
         return
     if isinstance(value, str):
         if len(value) > 1024:
@@ -52,9 +84,7 @@ def _bounded_json(value: Any, depth: int = 0, budget: list[int] | None = None) -
             _bounded_json(child, depth + 1, budget)
         return
     if isinstance(value, dict):
-        if len(value) > 64 or any(
-            not isinstance(k, str) or len(k) > 100 for k in value
-        ):
+        if len(value) > 64 or any(not isinstance(k, str) or len(k) > 100 for k in value):
             raise ValueError("invalid configuration object keys")
         for child in value.values():
             _bounded_json(child, depth + 1, budget)
@@ -72,7 +102,11 @@ def _check_params(value: Any) -> None:
 def _value(value: Any, depth: int) -> None:
     """Validate a scalar literal or a whitelisted query value."""
     if isinstance(value, dict):
-        if set(value) != {"query", "params"} or value["query"] not in QUERIES:
+        if (
+            set(value) != {"query", "params"}
+            or not isinstance(value["query"], str)
+            or value["query"] not in QUERIES
+        ):
             raise ValueError("value expression needs a recognized query and params")
         _check_params(value["params"])
         return
@@ -92,11 +126,17 @@ def condition(expr: Any, depth: int = 0, budget: list[int] | None = None) -> Non
     if not isinstance(expr, dict):
         raise ValueError("condition must be a tagged object")
     op = expr.get("op")
+    if not isinstance(op, str):
+        raise ValueError("condition operation must be a string")
     if op in ("true", "false"):
         if set(expr) != {"op"}:
             raise ValueError("literal condition has unexpected keys")
     elif op in ("all", "any"):
-        if set(expr) != {"op", "args"} or not isinstance(expr["args"], list) or not expr["args"]:
+        if (
+            set(expr) != {"op", "args"}
+            or not isinstance(expr["args"], list)
+            or not expr["args"]
+        ):
             raise ValueError("logical condition needs nonempty args")
         for child in expr["args"]:
             condition(child, depth + 1, budget)
@@ -105,11 +145,19 @@ def condition(expr: Any, depth: int = 0, budget: list[int] | None = None) -> Non
             raise ValueError("not condition needs one argument")
         condition(expr["arg"], depth + 1, budget)
     elif op == "test":
-        if set(expr) != {"op", "query", "params"} or expr["query"] not in QUERIES:
+        if (
+            set(expr) != {"op", "query", "params"}
+            or not isinstance(expr["query"], str)
+            or expr["query"] not in QUERIES
+        ):
             raise ValueError("test condition needs a recognized query")
         _check_params(expr["params"])
     elif op == "compare":
-        if set(expr) != {"op", "relation", "left", "right"} or expr["relation"] not in RELATIONS:
+        if (
+            set(expr) != {"op", "relation", "left", "right"}
+            or not isinstance(expr["relation"], str)
+            or expr["relation"] not in RELATIONS
+        ):
             raise ValueError("comparison has unknown relation or fields")
         _value(expr["left"], depth + 1)
         _value(expr["right"], depth + 1)
@@ -127,7 +175,7 @@ def validate_hooks(rules: Any, quests: Any) -> None:
     for rule in rules:
         if not isinstance(rule, dict) or set(rule) != {"id", "hook", "when", "effects"}:
             raise ValueError("rule fields must be id/hook/when/effects")
-        if rule["hook"] not in HOOKS:
+        if not isinstance(rule["hook"], str) or rule["hook"] not in HOOKS:
             raise ValueError("unknown rule hook")
         if not isinstance(rule["id"], str) or not rule["id"] or rule["id"] in ids:
             raise ValueError("duplicate or invalid rule id")
@@ -137,12 +185,20 @@ def validate_hooks(rules: Any, quests: Any) -> None:
         if not isinstance(effects, list) or len(effects) > 32:
             raise ValueError("rule effects must be a bounded list")
         for effect in effects:
-            if not isinstance(effect, dict) or set(effect) != {"op", "params"} or effect["op"] not in EFFECTS:
+            if (
+                not isinstance(effect, dict)
+                or set(effect) != {"op", "params"}
+                or not isinstance(effect["op"], str)
+                or effect["op"] not in EFFECTS
+            ):
                 raise ValueError("unknown effect or malformed effect fields")
             _check_params(effect["params"])
     quest_ids: set[str] = set()
     for quest in quests:
-        if not isinstance(quest, dict) or set(quest) != {"id", "description", "when", "reward"}:
+        if (
+            not isinstance(quest, dict)
+            or set(quest) != {"id", "description", "when", "reward"}
+        ):
             raise ValueError("quest fields must be id/description/when/reward")
         qid = quest["id"]
         if not isinstance(qid, str) or not qid or qid in quest_ids:
