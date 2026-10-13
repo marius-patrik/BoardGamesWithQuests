@@ -30,11 +30,16 @@ class HookEvaluation:
 class HookInterpreter:
     """Compile and evaluate bounded game JSON without applying effects."""
 
-    def __init__(self, rules: list[dict[str, Any]], queries: Mapping[str, Query]):
+    def __init__(
+        self,
+        rules: list[dict[str, Any]],
+        queries: Mapping[str, Query],
+        references: Mapping[str, Any] | None = None,
+    ):
         """Validate rules and copy their JSON data out of the mutable editor."""
         validate_hooks(rules, [])
         self._rules = tuple(deepcopy(rules))
-        self._conditions = ConditionEvaluator(queries)
+        self._conditions = ConditionEvaluator(queries, references)
 
     def evaluate(self, hook: str) -> HookEvaluation:
         """Collect matching effects in declared order, without authorizing them."""
@@ -48,7 +53,7 @@ class HookInterpreter:
             if self._conditions.evaluate(rule["when"]):
                 matched.append(rule["id"])
                 effects.extend(
-                    PlannedEffect(effect["op"], deepcopy(effect["params"]))
+                    PlannedEffect(effect["op"], self._conditions.resolve(effect["params"]))
                     for effect in rule["effects"]
                 )
         return HookEvaluation(tuple(matched), tuple(effects))
