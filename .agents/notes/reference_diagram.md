@@ -61,14 +61,14 @@ Its operation compartment is prose rather than named operations, and enumerates:
 described as arriving "as a single parameter".
 
 The **`export writers`** box does **not** contain this list. It holds one field.
-Both facts are load-bearing: see `object_model.md` section 7.
+Both facts are load-bearing: see the [approved object-model deviations](object_model.md).
 
 ### Free-standing notes on Page-1
 
 - **Validation timing**, still posed as an open question in the diagram:
   *"Validace tahu — Rozhodněme se, zda je lepší rozhodnout o proveditelnosti tahu
   pro každou figuru před tahem, nebo bezprostředně po kliknutí na konkrétní a pro
-  konkrétní figuru."* Resolved by `object_model.md` section 2 and FR-15.
+  konkrétní figuru."* Resolved by [object_model.md](object_model.md) and [PRD FR-15](PRD.md).
 - *"Integer bude buď 1 nebo -1 podle barvy"*
 - *"Pro pěšáka se vektor vynásobí barvou"*
 
@@ -149,8 +149,7 @@ smoothing them over would make the deviations unverifiable.
 | operations on the game manager | six | one |
 
 `List(Hrac)` and `List(Uzivatele)` cannot both hold. Page-1 is followed,
-because it is the full object model and page 2 is the integration sketch — see
-`object_model.md` section 14.
+because it is the full object model and page 2 is the integration sketch — see the approved [object-model decisions](object_model.md).
 
 Page-1 also writes `rozmery: Tuple = (8,8)`, hard-coding the default board size.
 That default is kept; nothing may rely on it.
