@@ -86,11 +86,7 @@ class SnapshotQueries:
             raise QueryResolutionError("only the exact current position scope is supported")
         key = self._field("position_key")
         positions = self._field("position_history")
-        if (
-            not isinstance(key, str)
-            or not isinstance(positions, list)
-            or len(positions) > 4096
-        ):
+        if not isinstance(key, str) or not isinstance(positions, list) or len(positions) > 4096:
             raise QueryResolutionError("invalid position history")
         if any(not isinstance(item, str) for item in positions):
             raise QueryResolutionError("position history must contain canonical strings")
