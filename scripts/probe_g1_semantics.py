@@ -85,9 +85,7 @@ assert {tuple(step["landing"]) for path in king_paths for step in path["steps"]}
 
 # International draughts: flying king and backward man capture.
 international_def = load_definition("international_checkers")
-flying = CapturePolicy.from_json(
-    international_def.pieces["king"]["capture_policy"]
-)
+flying = CapturePolicy.from_json(international_def.pieces["king"]["capture_policy"])
 international = Board(
     (10, 10),
     [
