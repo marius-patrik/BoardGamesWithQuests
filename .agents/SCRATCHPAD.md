@@ -34,3 +34,20 @@ verify FastAPI/Vercel packaging, Supabase transaction and anonymous sign-in
 classroom quota feasibility. Then implement domain rules, game conformance, secure
 server/UI, desktop packaging and end-to-end tests. Do not merge before explicit
 maintainer approval and the complete release gate.
+
+## Hosting bootstrap verified
+
+- Vercel Hobby project `boardgameswithquests-api` was created (ID
+  `prj_7kdxZvwbxItXRjRTblmz2s0xFw3h`); deployment
+  `dpl_2TmHrJJ2qNXT54cbum4BDtmrFqwU` from commit `c7a47fcc`
+  is reported READY by Vercel.
+- Vercel Hobby project `boardgameswithquests-web` was created (ID
+  `prj_iWSGkCmiCeh1uliqVN06b5QWPAAx`); deployment
+  `dpl_2Sy36YSuA7Yx91cPuMEny3nWrv1P` from the same commit
+  is reported READY by Vercel.
+- Both projects currently have Vercel Authentication protection enabled;
+  external unauthenticated HTTP reachability and working API routes were not
+  demonstrated. READY is a build/deploy result, **not proof of online gameplay**.
+- Supabase has no BGwQ project yet. Existing unrelated projects were left
+  untouched. New project creation requires choosing an organization and
+  confirming provider costs. No database schema, Auth, or Realtime deployed.

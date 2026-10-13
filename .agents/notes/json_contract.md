@@ -48,3 +48,10 @@ database transactions/RLS have not been provisioned.
 a pure `HookEvaluation`. The result cannot modify the board or authorize moves:
 effect conflict resolution and atomic application are G2 work. The G1 fixture is
 `scripts/fixtures/g1_hooks.json`, not executable game-specific Python code.
+
+## Live deployment gate
+
+The first FastAPI and Rsbuild packages now have Vercel Hobby project IDs and
+builds reported READY from the same `c7a47fcc` revision. Both deployments
+are behind Vercel Authentication; public access, function responses and Supabase
+connectivity remain unverified. Do not mark G1 complete based only on READY.

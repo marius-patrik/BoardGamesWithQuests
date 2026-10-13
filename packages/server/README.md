@@ -9,3 +9,10 @@ There are no gameplay endpoints yet. `/health` explicitly reports
 JSON definitions with each game's honest `playable` flag. Supabase Auth/JWT authorization, Postgres
 transactions, RLS, migrations and Realtime are G4 implementation work.
 Python dependencies come from the repository-root `pyproject.toml`.
+
+## Vercel bootstrap
+
+Project: `boardgameswithquests-api` (`prj_7kdxZvwbxItXRjRTblmz2s0xFw3h`).
+Initial deployment `dpl_2TmHrJJ2qNXT54cbum4BDtmrFqwU` reports READY, but the
+Vercel Authentication gate still prevents external anonymous route verification.
+No production game endpoints are available.
