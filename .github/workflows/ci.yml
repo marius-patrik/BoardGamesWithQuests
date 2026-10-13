@@ -179,7 +179,11 @@ jobs:
             PYTHONPATH="$GITHUB_WORKSPACE/packages" python "$GITHUB_WORKSPACE/scripts/probe_json_contract.py"
             PYTHONPATH="$GITHUB_WORKSPACE/packages" python "$GITHUB_WORKSPACE/scripts/probe_g1_semantics.py"
           else
-            bash -lc "$DF_ACTION_COMMAND"
+            if [[ "$DF_ACTION_COMMAND" == black\ --check* ]]; then
+              black --check --diff --line-length 100 .
+            else
+              bash -lc "$DF_ACTION_COMMAND"
+            fi
           fi
 
   web-build:
