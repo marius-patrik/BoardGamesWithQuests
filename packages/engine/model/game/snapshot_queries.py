@@ -24,7 +24,11 @@ class SnapshotQueries:
     @staticmethod
     def _key(params: Mapping[str, Any], allowed: set[str], required: set[str]) -> None:
         """Refuse ambiguous or unknown query parameters."""
-        if not isinstance(params, Mapping) or not required <= set(params) or not set(params) <= allowed:
+        if (
+            not isinstance(params, Mapping)
+            or not required <= set(params)
+            or not set(params) <= allowed
+        ):
             raise QueryResolutionError("unrecognized or missing snapshot query parameters")
 
     def _field(self, field: str) -> Any:
