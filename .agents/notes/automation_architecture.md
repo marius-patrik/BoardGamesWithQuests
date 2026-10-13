@@ -1,37 +1,15 @@
-# Agent Automation Architecture
+# Development Automation Architecture
 
-This document records **durable automation design decisions**, not operational
-instructions or run status. Operating rules belong in
-[AGENTS.md](../AGENTS.md), current work in
-[SCRATCHPAD.md](../SCRATCHPAD.md), and executable settings in
-`.github/darkfactory.json` and the workflows themselves.
+**Status:** Durable operational design, not the current implementation/CI result. Runtime rules live in [AGENTS.md](../AGENTS.md), the delivery plan in [PLAN.md](PLAN.md), progress in [SCRATCHPAD.md](../SCRATCHPAD.md).
 
-## Shared workflow boundary
+## DarkFactory
 
-Agent execution is owned by the shared
-[DarkFactory](https://github.com/marius-patrik/DarkFactory) pipeline. The
-repository owns a thin GitHub Actions caller, project configuration, and
-explicitly supplied credentials. This avoids divergence between local copies
-of orchestration and containers. The upstream commit pin is configured, not
-repeated here.
+DarkFactory owns the shared GitHub Actions/agent pipeline. This repository owns thin installed callers, narrowly scoped project-specific workflows and **one configuration document: `repo.dfconfig`**. There is no active `.github/darkfactory.json` configuration after migration. Upstream is pinned to a verified immutable release commit, updated through the supported installation/update mechanism. Do not vendor a second orchestration runner.
 
-## Harness independence
+The approved workflow model includes issue/PR triage, review-gated draft PRs, CI, docs, updates and release; rejection of issues #124, #126, #167 and PR #170 means **do not remove** these services. Provider adapters and fallback behavior belong to shared DarkFactory, not the game engine. Credentials are only GitHub secrets and never exposed in client code or generated docs.
 
-Coding-agent tools are declarative adapters rather than hard-coded branches
-inside the pipeline. Each adapter describes a binary, arguments and a model
-fallback chain. The runtime can advance to another available harness when one
-is exhausted. Missing binaries or credentials do not invalidate the remaining
-harnesses. A prior single-vendor runner could block delivery when that
-provider's quota was exhausted; cross-harness fallback addresses that
-architectural limitation.
+## Integration and deployment
 
-Provider credentials are repository secrets explicitly forwarded across
-called workflow boundaries; GitHub does not forward them automatically.
+The repository has one current implementation branch/PR; modular agent work may execute in isolated worktrees but integrates only after shared contracts are reconciled. The GitHub issue and review history remain auditable without maintaining active competing PR stacks. Public delivery uses Vercel web/API projects and Supabase; build/test/release gates require actual end-to-end evidence, not only successful documentation.
 
-## Conversational lifecycle
-
-Issues, plans, and pull requests form the tracked interaction surface.
-Incoming requests are interpreted and confirmed, approved plans lead to work
-on dedicated branches, and PR feedback drives revisions. Draft review and
-merge gates are enforced through repository automation. The exact operational
-requirements are specified in [AGENTS.md](../AGENTS.md).
+Do not duplicate the current plan, transient status, or release numbers here.
