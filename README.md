@@ -1,32 +1,32 @@
 # BoardGamesWithQuests
 
-A configurable desktop board-game application and shared Python engine. Chess
-and English draughts are independent game packages using the same engine,
-controller and view interfaces.
+A configurable two-player chess and English-draughts game built around a **game-neutral Python engine**. The target application has a single React web GUI, a FastAPI serverless API, Supabase accounts/game storage and a Tauri desktop wrapper that loads the **same hosted web app**.
 
-## Project structure
+**Development status:** The final JSON-driven online game is **not implemented or playable yet**. The single draft [integration PR #267](https://github.com/marius-patrik/BoardGamesWithQuests/pull/267) is in progress; don't treat current compilation, docs or tags as a playable release.
+
+## Target packages
 
 ```text
 packages/
-  engine/      Shared model, controller, view interfaces and launcher
-  chess/       Chess game package
-  checkers/    English draughts game package
+  engine/     Generic Python board/game/rule/quest execution
+  chess/      Chess config.json and applicable format writers
+  checkers/   WCDF English draughts config.json and applicable writers
+  server/     Python FastAPI on Vercel Functions
+  web/        React + TypeScript + Rsbuild + Bun + Tailwind + shadcn/ui
+  desktop/    Tauri wrapper of the same hosted website
 ```
 
-Each game declares board dimensions, starting positions, pieces, clocks and
-display settings in its `config.json`. Game-specific rules, quests and
-serialization belong to the game package. Installed games are discovered
-through Python distribution entry points.
+Everything configurable about pieces, boards, rules, quests and clocks comes from validated **JSON**. Game-owned code does not become a user-authored Python extension surface. The shared engine must never hardcode chess/checkers special cases. The production target uses **Supabase Auth (registered and guest identities), Postgres and Realtime**; authoritative moves execute in Python on Vercel. No leaderboard, classroom room system or separate desktop GUI is planned.
 
-## Installation
+## Documentation and status
 
-Install for development with `python -m pip install -e .`. Run
-`python -m engine --check` to inspect registered game packages.
+- [Canonical completion plan](.agents/notes/PLAN.md)
+- [Product requirements](.agents/notes/PRD.md)
+- [Approved deviations from original reference](.agents/notes/object_model.md)
+- [Original UML and source reference](.agents/notes/reference_diagram.md)
+- [Chess rule baseline](.agents/notes/chess_rules.md)
+- [Current implementation status](.agents/SCRATCHPAD.md)
+- [Operational development rules](.agents/AGENTS.md)
+- [Consolidated Plan issue #129](https://github.com/marius-patrik/BoardGamesWithQuests/issues/129)
 
-## Documentation
-
-- [Requirements and acceptance criteria](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PRD.md)
-- [Reference architecture diagram](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/reference_diagram.md)
-- [Object-model decisions](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/object_model.md)
-- [Development automation architecture](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/automation_architecture.md)
-- [Current progress, integration sequence and release gates](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md)
+Current legacy Python smoke/discovery behavior is not the final web application and is not a gameplay acceptance test. Follow the single plan for implementation and deployment instructions as they become verified.
