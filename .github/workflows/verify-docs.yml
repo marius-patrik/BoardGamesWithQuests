@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.12"
           cache: "pip"
@@ -26,22 +26,21 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
-      - name: Syntax validation while test suite is being rebuilt (issue 239)
-        run: python -m compileall -q packages
-
       - name: Verify repository-wide virtual documentation
         run: |
           python .github/scripts/build_docs.py
           python - <<'PY'
           from pathlib import Path
           root = Path.cwd()
+          assert (root / "mkdocs.yml").is_file()
+          assert not (root / "properdocs.yml").exists()
           assert (root / "site/index.html").is_file()
           homepage = (root / "site/index.html").read_text()
           assert 'data-switcher-projects' in homepage
           assert 'data-switcher-versions' in homepage
           assert 'data-switcher-versions-group' in homepage
           assert (root / "site/assets/theme.css").is_file()
-          assert not (root / "theme").exists(), "theme assets now live under .github/docs-ui"
+          assert not (root / "theme").exists(), "theme assets belong under .github/docs-ui"
           assert (root / ".github/docs-ui/main.html").is_file()
           import subprocess
           subprocess.run(["python", ".github/scripts/docs_manifest.py", "--site", "site"], check=True)
@@ -64,10 +63,10 @@ jobs:
           assert (root / "CONTRIBUTING.md").is_symlink()
           assert (root / "CONTRIBUTING.md").resolve() == (root / ".agents/AGENTS.md").resolve()
           assert (root / ".agents/SCRATCHPAD.md").is_file()
-          for retired in ("AGENTS.md", "CLAUDE.md", ".claude", "PRD.md", "SCRATCHPAD.md", "GUI_mockup.svg", "notes"):
-              assert not (root / retired).exists() and not (root / retired).is_symlink(), retired
-          for retired in (".agents/CLAUDE.md",):
-              assert not (root / retired).exists() and not (root / retired).is_symlink(), retired
+          for unsupported in ("AGENTS.md", "CLAUDE.md", ".claude", "PRD.md", "SCRATCHPAD.md", "GUI_mockup.svg", "notes"):
+              assert not (root / unsupported).exists() and not (root / unsupported).is_symlink(), unsupported
+          for unsupported in (".agents/CLAUDE.md",):
+              assert not (root / unsupported).exists() and not (root / unsupported).is_symlink(), unsupported
           assert not (root / ".docs").exists(), "documentation source folder must not exist"
           print("Repository-wide documentation verified.")
           PY

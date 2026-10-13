@@ -27,6 +27,7 @@ The complete user interface is a **React/Rsbuild** website, publicly hosted on *
 - All public multiplayer state changes are authenticated, authorized, atomic and durable.
 - Existing source/reference UML is preserved as reference evidence; intentional divergence is registered in `object_model.md`.
 - Permanent tests must assert real gameplay, API, UI and persistence behavior. Behavioral tests accompany every implementation chunk and are integrated into the permanent acceptance suite.
+- MkDocs, Material and mkdocstrings generate all documentation pages and navigation from Python source/docstrings. Strict builds have zero warnings or errors; repository specifications remain source references rather than static documentation pages or manual indices.
 
 ## 4. Configuration and extension model
 

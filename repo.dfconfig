@@ -45,7 +45,7 @@
       "documentation": {
         "python": {
           "command": "python .github/scripts/build_docs.py",
-          "source": "repository Markdown and Python docstrings"
+          "source": "Python source docstrings with generated API pages and navigation"
         }
       },
       "release": {
@@ -189,7 +189,15 @@
     },
     "required_checks": [
       "quality",
-      "verify-bound-issue"
+      "pipeline / pipeline (3.10)",
+      "pipeline / pipeline (3.11)",
+      "pipeline / pipeline (3.12)",
+      "pipeline / pipeline (3.13)",
+      "pipeline / rust",
+      "pipeline / web",
+      "pipeline / docs",
+      "verify-docs",
+      "verify / verify-bound-issue"
     ],
     "board": {
       "global_title": "Global",
@@ -222,14 +230,6 @@
       "holder": "marius-patrik",
       "year": "2026"
     }
-  },
-  "docs": {
-    "version": 1,
-    "site": {
-      "name": "BoardGamesWithQuests",
-      "description": "JSON-driven chess and checkers Python engine and React application"
-    },
-    "home": "README.md"
   },
   "providers": {}
 }

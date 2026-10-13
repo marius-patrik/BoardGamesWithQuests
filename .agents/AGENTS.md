@@ -20,6 +20,18 @@ links, comments and prose. Git commit history and issue discussions preserve
 provenance. SQL migrations and immutable external assignment figures are
 functional exceptions only to the extent required for reproducibility.
 
+## Source-generated documentation
+
+MkDocs, Material and mkdocstrings generate all documentation pages, homepage
+content and navigation from tracked Python package source and Google-style
+docstrings. `mkdocs build --strict` and the ephemeral-source build wrapper must
+succeed with zero warnings and errors. Never commit static documentation pages,
+manual indices or documentation source directories. Retain authoritative
+specifications, architecture decisions and required source references in their
+repository locations; the site links to the exact checked-out Git revision.
+Generate implementation diagrams from source and preserve supplied reference
+figures as assets. Graphviz is a required build prerequisite.
+
 ## Atomic artifact alignment — mandatory on every change
 
 Treat each change as a dependency graph, not a source edit. In the same

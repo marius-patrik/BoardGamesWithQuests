@@ -61,3 +61,27 @@ expressiveness checks. Real Supabase transactions and authorization, public
 multiplayer HTTP requests, two-browser gameplay, Realtime recovery, Tauri and
 classroom shared-IP capacity each require their own integration gate. A passing
 local suite does not certify those external requirements or a complete game.
+
+## Source documentation
+
+Install Graphviz and the Python package with its development requirements:
+
+```sh
+python -m pip install -e . -r requirements-dev.txt
+mkdocs build --strict
+```
+
+MkDocs, Material and mkdocstrings generate every documentation page, homepage
+and navigation entry from tracked Python package source and Google-style
+docstrings. `python .github/scripts/build_docs.py` provides the same strict
+build through an ephemeral source directory. No static documentation pages,
+manual indices or documentation source directories are committed. Authoritative
+specifications remain in `.agents/notes/` and are linked to the checked-out Git
+revision rather than copied into the site. Architecture diagrams are generated
+from source, and supplied reference figures remain available as required assets.
+
+CI requires behavioral tests on Python 3.10–3.13, formatting, Rust quality
+checks, web quality checks, production web compilation and strict documentation.
+The aggregate quality gate rejects missing discovery, unsupported mandatory
+commands and absent, skipped or failed execution evidence. GitHub Actions
+deploys the documentation from reviewed `main` through the Pages workflow.

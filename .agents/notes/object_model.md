@@ -21,7 +21,7 @@
 | Quests | Independent per-user, per-game progress, durable achievements and experience derived from completed rewards. |
 | Outcomes | Configured terminal proposals resolved by deterministic declared precedence; ambiguous top-priority conflicts fail closed. |
 | Export | One trusted game-owned serializer per format; PGN/SAN/FEN computed from authoritative game events and state. |
-| Documentation | Source-derived implementation diagrams, strict docs, one PRD/plan and one permanent behavioral acceptance suite. |
+| Documentation | MkDocs/Material/mkdocstrings generate pages, homepage and navigation exclusively from tracked Python source/docstrings; strict builds retain live UML and required reference assets, link specifications to the checked-out Git revision, and commit no documentation source directory or static pages. |
 
 ## Domain transition ownership
 
