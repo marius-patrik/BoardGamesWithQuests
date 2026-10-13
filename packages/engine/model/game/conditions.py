@@ -22,9 +22,7 @@ class QueryResolutionError(ValueError):
 class ConditionEvaluator:
     """Evaluate validated JSON conditions against registered read-only queries."""
 
-    def __init__(
-        self, queries: Mapping[str, Query], references: Mapping[str, Any] | None = None
-    ):
+    def __init__(self, queries: Mapping[str, Query], references: Mapping[str, Any] | None = None):
         """Register only recognized, trusted query primitives."""
         invalid = set(queries).difference(QUERIES)
         if invalid:
