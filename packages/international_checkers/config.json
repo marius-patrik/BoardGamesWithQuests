@@ -223,7 +223,8 @@
       "capture_policy": {
         "flying": false,
         "land_anywhere": false,
-        "max_nodes": 4096
+        "max_nodes": 4096,
+        "deferred_removal": true
       }
     },
     "king": {
@@ -273,7 +274,8 @@
       "capture_policy": {
         "flying": true,
         "land_anywhere": true,
-        "max_nodes": 4096
+        "max_nodes": 4096,
+        "deferred_removal": true
       }
     }
   },
