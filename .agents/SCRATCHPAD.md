@@ -51,3 +51,16 @@ maintainer approval and the complete release gate.
 - Supabase has no BGwQ project yet. Existing unrelated projects were left
   untouched. New project creation requires choosing an organization and
   confirming provider costs. No database schema, Auth, or Realtime deployed.
+
+## G1 acceptance status
+
+- Three game definitions load and generic hook AST dispatch is probed with
+  synthetic inputs; no original-engine legality is inferred from this.
+- Read-only Vercel FastAPI and React builds report READY; Vercel project-level
+  deployment protection was disabled. The `hosted-bootstrap` CI job now
+  requires public web and health/catalog responses and is awaiting execution.
+- No dedicated Supabase project is configured. A separate project requires
+  maintainer selection of the Supabase organization and explicit cost
+  confirmation before creation. There is no real Postgres transaction fixture.
+- **G1 not complete:** the nine scenarios prove dispatch shape, not FIDE or
+  draughts rulebook semantics, capture chains, or atomic persisted state.
