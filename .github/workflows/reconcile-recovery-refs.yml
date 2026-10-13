@@ -1,0 +1,26 @@
+name: Reconcile Recovery Refs
+on:
+  pull_request:
+    types: [synchronize]
+permissions:
+  contents: write
+jobs:
+  dispose:
+    if: github.event.pull_request.number == 271 && github.event.pull_request.head.ref == 'feature/product-integration'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Delete only absorbed and exact recovery refs
+        env:
+          CHAIN: ef29e22ab38cf23d7ea2df08810862a434f87d82
+          BASE: b45d2e0f65b0fd36cd48dd8abfabbec33c3ee9d0
+        run: |
+          set -euo pipefail
+          git fetch origin +refs/heads/rebuild/chain-tip:refs/remotes/origin/rebuild/chain-tip +refs/heads/rebuild/true-base:refs/remotes/origin/rebuild/true-base
+          test "$(git rev-parse refs/remotes/origin/rebuild/chain-tip)" = "$CHAIN"
+          test "$(git rev-parse refs/remotes/origin/rebuild/true-base)" = "$BASE"
+          git merge-base --is-ancestor "$CHAIN" HEAD
+          git merge-base --is-ancestor "$BASE" "$CHAIN"
+          git push origin --delete refs/heads/rebuild/chain-tip refs/heads/rebuild/true-base
