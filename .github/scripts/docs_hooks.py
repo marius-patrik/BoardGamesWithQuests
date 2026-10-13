@@ -29,7 +29,7 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
     )
     files = [root / Path(p.decode("utf-8")) for p in result.stdout.split(b"\0") if p]
     return sorted(
-        (p for p in files if p.is_file() and p.suffix.lower() in {".md", ".py"}),
+        (p for p in files if p.is_file() and not p.is_symlink() and p.suffix.lower() in {".md", ".py"}),
         key=lambda p: p.relative_to(root).as_posix(),
     )
 
@@ -99,7 +99,13 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str]]:
             if path.name.lower() == "readme.md" and len(relative.parts) > 1:
                 dest = public_path(relative.parent.joinpath("index.md"))
             if dest not in pages or path.name.lower() != "readme.md":
-                pages[dest] = path.read_text(encoding="utf-8")
+                content = path.read_text(encoding="utf-8")
+                # GitHub resolves .agents/* relative to repository root, while
+                # Pages publishes hidden paths under their public agents/* name.
+                # Normalize virtual homepage only; leave tracked README intact.
+                if relative.as_posix() == "README.md":
+                    content = content.replace("](.agents/", "](agents/")
+                pages[dest] = content
             continue
 
         dotted = import_name(path, roots)
