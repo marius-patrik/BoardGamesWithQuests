@@ -104,7 +104,12 @@ class SnapshotQueries:
             paths = self._field("capture_paths")
             if not isinstance(paths, list):
                 raise QueryResolutionError("capture paths are not computed")
-            value = max((len(path) for path in paths), default=0)
+            if any(
+                not isinstance(path, dict) or not isinstance(path.get("steps"), list)
+                for path in paths
+            ):
+                raise QueryResolutionError("malformed capture route")
+            value = max((len(path["steps"]) for path in paths), default=0)
         else:
             raise QueryResolutionError("unknown capture scope")
         if type(value) is not int or value < 0:
