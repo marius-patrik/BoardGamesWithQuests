@@ -8,6 +8,7 @@ from typing import Any
 
 from engine.model.game.board import Board
 from engine.model.game.conditions import QueryResolutionError
+from engine.model.game.validator import MoveValidator
 
 
 class BoardQueries:
@@ -68,8 +69,9 @@ class BoardQueries:
     def path_clear(self, params: Mapping[str, Any]) -> bool:
         """Check a straight geometric ray, independently of game legality.
 
-        A ray may run horizontally, vertically or diagonally. Source is excluded
-        and the target is included. A non-straight offset cannot be a clear ray.
+        A ray may run horizontally, vertically or diagonally. Both source and
+        target are excluded: an occupied destination must remain capturable.
+        A non-straight offset cannot be a clear ray.
         """
         self._fields(params, {"source", "target"})
         start = self._square(params["source"])
@@ -81,8 +83,57 @@ class BoardQueries:
         step_r, step_c = dr // steps, dc // steps
         return all(
             self._board.get_piece_at((start[0] + step_r * i, start[1] + step_c * i)) is None
-            for i in range(1, steps + 1)
+            for i in range(1, steps)
         )
+
+    def pieces_matching(self, params: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """Enumerate pieces in stable row-major order with JSON-only filters."""
+        if not set(params).issubset({"side", "kind"}):
+            raise QueryResolutionError("pieces_matching accepts only side and kind")
+        side = params.get("side")
+        if side == "active":
+            side = self._active_side
+        elif side == "opponent":
+            side = -self._active_side
+        elif side is not None and (type(side) is not int or side not in (-1, 1)):
+            raise QueryResolutionError("invalid piece side selector")
+        kind = params.get("kind")
+        if kind is not None and (not isinstance(kind, str) or not kind):
+            raise QueryResolutionError("piece kind must be a nonempty string")
+        found: list[dict[str, Any]] = []
+        for row in range(self._board.rows):
+            for col in range(self._board.cols):
+                piece = self._board.get_piece_at((row, col))
+                if piece is None:
+                    continue
+                if side is not None and piece.getColor() != side:
+                    continue
+                if kind is not None and piece.getType() != kind:
+                    continue
+                found.append(
+                    {
+                        "square": [row, col],
+                        "kind": str(piece.getType()),
+                        "side": piece.getColor(),
+                        "moved": piece.hasMoved(),
+                    }
+                )
+                if len(found) > 128:
+                    raise QueryResolutionError("query exceeds the bounded JSON result size")
+        return found
+
+    def squares_attacked(self, params: Mapping[str, Any]) -> bool:
+        """Evaluate generic geometric attack vectors, not game-legal checks."""
+        self._fields(params, {"target", "by_side"})
+        target = self._square(params["target"])
+        side = params["by_side"]
+        if side == "active":
+            side = self._active_side
+        elif side == "opponent":
+            side = -self._active_side
+        elif type(side) is not int or side not in (-1, 1):
+            raise QueryResolutionError("invalid attacking side")
+        return MoveValidator(self._board).is_square_attacked(target, side)
 
     def bindings(self) -> dict[str, Callable[[Mapping[str, Any]], Any]]:
         """Register only the implemented read-only primitives."""
@@ -91,4 +142,6 @@ class BoardQueries:
             "board_dimension": self.board_dimension,
             "turn": self.turn,
             "path_clear": self.path_clear,
+            "pieces_matching": self.pieces_matching,
+            "squares_attacked": self.squares_attacked,
         }

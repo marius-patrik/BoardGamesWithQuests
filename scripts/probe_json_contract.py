@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from engine.model.game.board_queries import BoardQueries
+from engine.model.game.board_queries import BoardQueries
 from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
 from engine.model.game.configuration import board_from_definition, load_definition
 from engine.model.game.hooks import HookInterpreter
@@ -53,6 +54,24 @@ for name, count in (
         pass
     else:
         raise AssertionError("out-of-bounds board query must fail closed")
+
+chess_board = board_from_definition(load_definition("chess"))
+chess_facts = BoardQueries(chess_board, 1)
+assert chess_facts.board_dimension({"axis": "rows"}) == 8
+assert len(chess_facts.pieces_matching({"side": "active"})) == 16
+assert len(chess_facts.pieces_matching({"kind": "pawn"})) == 16
+assert chess_facts.piece_at({"square": [0, 0]})["kind"] == "rook"
+assert not chess_facts.path_clear({"source": [0, 0], "target": [7, 0]})
+# The occupied endpoint is deliberately ignored so geometric captures can
+# eventually use the same path query as quiet sliding moves.
+assert chess_facts.path_clear({"source": [0, 0], "target": [1, 0]})
+assert chess_facts.squares_attacked({"target": [2, 2], "by_side": "opponent"}) is True
+try:
+    chess_facts.pieces_matching({"side": "__import__"})
+except QueryResolutionError:
+    pass
+else:
+    raise AssertionError("untrusted piece selectors must fail closed")
 
 fixture = json.loads((Path(__file__).parent / "fixtures/g1_hooks.json").read_text("utf-8"))
 rules = fixture["rules"]
