@@ -88,7 +88,6 @@ def validate_embedded_references(value: Any) -> None:
             validate_embedded_references(child)
 
 
-
 def _bounded_json(value: Any, depth: int = 0, budget: list[int] | None = None) -> None:
     """Enforce typed finite JSON without executable or unbounded structures."""
     if budget is None:
