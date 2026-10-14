@@ -34,7 +34,17 @@ class ConditionEvaluator:
         self._references = deepcopy(dict(references or {}))
 
     def resolve(self, value: Any) -> Any:
-        """Resolve typed JSON reference nodes, never evaluating text as code."""
+        """Resolve bounded references and nested whitelisted query-value nodes.
+
+        Args:
+            value: Schema-validated literal or typed data expression.
+
+        Returns:
+            Detached JSON data with references and queries resolved.
+
+        Raises:
+            QueryResolutionError: A reference or required query is unavailable or invalid.
+        """
         if isinstance(value, dict):
             if set(value) == {"ref"}:
                 name = value["ref"]
@@ -42,6 +52,8 @@ class ConditionEvaluator:
                 if name not in self._references:
                     raise QueryResolutionError(f"unbound reference: {name}")
                 return deepcopy(self._references[name])
+            if set(value) == {"query", "params"}:
+                return deepcopy(self._query(value["query"], value["params"]))
             return {key: self.resolve(child) for key, child in value.items()}
         if isinstance(value, list):
             return [self.resolve(child) for child in value]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib import resources
 from importlib.metadata import entry_points
 import json
@@ -12,7 +12,13 @@ from collections.abc import Mapping
 from engine.model.game.board import Board
 from engine.model.game.capture_geometry import CapturePolicy
 from engine.model.pieces.piece import Piece
-from engine.model.game.schema import freeze_json, thaw_json, validate_hooks
+from engine.model.game.schema import (
+    _bounded_json,
+    condition,
+    freeze_json,
+    thaw_json,
+    validate_hooks,
+)
 
 GROUP = "boardgameswithquests.games"
 
@@ -38,6 +44,9 @@ class GameDefinition:
         appearance: Board colors.
         rules: Declarative hook definitions.
         quests: Declarative quest definitions.
+        initial_state: Immutable initial rule values, rights and temporary targets.
+        halfmove_reset: Optional additional reset condition evaluated on original state.
+        declared_optional_fields: Frozen parser metadata preserving optional JSON field presence.
     """
 
     name: str
@@ -52,6 +61,15 @@ class GameDefinition:
     appearance: Mapping[str, Any]
     rules: tuple[Mapping[str, Any], ...]
     quests: tuple[Mapping[str, Any], ...]
+    initial_state: Mapping[str, Any] = field(
+        default_factory=lambda: {
+            "rule_state": {},
+            "special_rights": {},
+            "temporary_targets": {},
+        }
+    )
+    halfmove_reset: Mapping[str, Any] | None = None
+    declared_optional_fields: frozenset[str] = frozenset()
 
     def __post_init__(self) -> None:
         """Detach and recursively freeze every configuration-owned JSON value.
@@ -59,7 +77,22 @@ class GameDefinition:
         Raises:
             ValueError: Nested values are not finite bounded JSON.
         """
-        for field in ("board", "pieces", "clock", "appearance", "rules", "quests", "exports"):
+        if not self.declared_optional_fields <= {"initial_state", "halfmove_reset"}:
+            raise ValueError("unknown declared optional configuration fields")
+        object.__setattr__(
+            self, "declared_optional_fields", frozenset(self.declared_optional_fields)
+        )
+        for field in (
+            "board",
+            "pieces",
+            "clock",
+            "appearance",
+            "rules",
+            "quests",
+            "exports",
+            "initial_state",
+            "halfmove_reset",
+        ):
             object.__setattr__(self, field, freeze_json(getattr(self, field)))
 
 
@@ -147,7 +180,11 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
     Raises:
         ConfigurationError: Definition fields, values or complexity are invalid.
     """
-    if not isinstance(data, dict) or set(data) != TOP_LEVEL_FIELDS:
+    if (
+        not isinstance(data, dict)
+        or not TOP_LEVEL_FIELDS <= set(data)
+        or not set(data) <= TOP_LEVEL_FIELDS | {"initial_state", "halfmove_reset"}
+    ):
         raise ConfigurationError(f"{package}: missing or unknown top-level fields")
     try:
         encoded = json.dumps(
@@ -185,7 +222,14 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         if not isinstance(key, str) or not isinstance(piece, dict):
             raise ConfigurationError(f"{package}: malformed piece")
         required = {"symbols", "moves", "attacks", "jump", "repeat"}
-        optional = {"color_relative", "capture_policy", "notation", "fen", "initial_moves"}
+        optional = {
+            "color_relative",
+            "capture_policy",
+            "notation",
+            "fen",
+            "initial_moves",
+            "promotion",
+        }
         if not required <= set(piece) or not set(piece) <= required | optional:
             raise ConfigurationError(f"{package}: {key} has missing or unknown fields")
         if not key or len(key) > 128:
@@ -241,6 +285,23 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
                 raise ConfigurationError(
                     f"{package}: {key}.capture_policy is invalid: {error}"
                 ) from error
+    for key, piece in pieces.items():
+        if "promotion" not in piece:
+            continue
+        promotion = piece["promotion"]
+        if (
+            not isinstance(promotion, dict)
+            or set(promotion) != {"rank", "options", "mode", "stop_capture"}
+            or promotion["rank"] != "far"
+            or promotion["mode"] not in ("choice", "automatic")
+            or type(promotion["stop_capture"]) is not bool
+            or not isinstance(promotion["options"], list)
+            or not 1 <= len(promotion["options"]) <= 32
+            or any(not isinstance(kind, str) or kind not in pieces for kind in promotion["options"])
+            or len(set(promotion["options"])) != len(promotion["options"])
+            or (promotion["mode"] == "automatic" and len(promotion["options"]) != 1)
+        ):
+            raise ConfigurationError(f"{package}: {key} has invalid promotion policy")
     placements = board.get("starting_pieces")
     if not isinstance(placements, list):
         raise ConfigurationError(f"{package}: starting_pieces must be a list")
@@ -309,6 +370,36 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         raise ConfigurationError(f"{package}: invalid declarative behavior: {error}") from error
     if data["playable"] and not data["rules"]:
         raise ConfigurationError(f"{package}: playable game must declare rules")
+    initial_state = data.get(
+        "initial_state", {"rule_state": {}, "special_rights": {}, "temporary_targets": {}}
+    )
+    if not isinstance(initial_state, dict) or set(initial_state) != {
+        "rule_state",
+        "special_rights",
+        "temporary_targets",
+    }:
+        raise ConfigurationError("initial state requires rule state, rights and temporary targets")
+    try:
+        _bounded_json(initial_state)
+        if any(not isinstance(value, dict) for value in initial_state.values()):
+            raise ValueError("initial state fields must be objects")
+        if any(not name or len(name) > 128 for values in initial_state.values() for name in values):
+            raise ValueError("initial state keys must be bounded nonempty strings")
+        if any(type(value) is not bool for value in initial_state["special_rights"].values()):
+            raise ValueError("initial rights must be booleans")
+        for square in initial_state["temporary_targets"].values():
+            if square is not None and (
+                not isinstance(square, list)
+                or len(square) != 2
+                or any(type(axis) is not int for axis in square)
+                or not (0 <= square[0] < rows and 0 <= square[1] < cols)
+            ):
+                raise ValueError("initial temporary target must be an in-bounds square or null")
+        halfmove_reset = data.get("halfmove_reset")
+        if halfmove_reset is not None:
+            condition(halfmove_reset)
+    except ValueError as error:
+        raise ConfigurationError(f"{package}: invalid initial lifecycle policy: {error}") from error
     return GameDefinition(
         name,
         package,
@@ -322,6 +413,9 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         freeze_json(appearance),
         freeze_json(data["rules"]),
         freeze_json(data["quests"]),
+        freeze_json(initial_state),
+        freeze_json(halfmove_reset),
+        frozenset(set(data) & {"initial_state", "halfmove_reset"}),
     )
 
 

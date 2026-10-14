@@ -117,8 +117,22 @@ class CaptureEnumerator:
         self.board = board
         self.budget = budget if budget is not None else EvaluationBudget(MAX_EVALUATION_WORK)
 
-    def enumerate(self, start: tuple[int, int], policy: CapturePolicy) -> list[dict[str, Any]]:
-        """Produce bounded complete multi-hop capture paths from one square."""
+    def enumerate(
+        self, start: tuple[int, int], policy: CapturePolicy, stop_rank: int | None = None
+    ) -> list[dict[str, Any]]:
+        """Produce complete bounded paths with an optional configured crowning stop.
+
+        Args:
+            start: Source coordinates.
+            policy: Validated capture geometry and removal policy.
+            stop_rank: Configured crowning row that ends a chain, or None.
+
+        Returns:
+            Complete routes without mutation of the supplied board.
+
+        Raises:
+            QueryResolutionError: Coordinates, chain depth or work limits are invalid.
+        """
         if not self.board.is_within_bounds(*start):
             raise QueryResolutionError("capture source is out of bounds")
         actor = self.board.get_piece_at(start)
@@ -189,7 +203,11 @@ class CaptureEnumerator:
             visited += 1
             if visited > policy.max_nodes:
                 raise QueryResolutionError("capture search exceeded configured node budget")
-            next_moves = candidates(pos, placement, already_captured)
+            next_moves = (
+                []
+                if steps and pos[0] == stop_rank
+                else candidates(pos, placement, already_captured)
+            )
             if not next_moves and steps:
                 routes.append({"start": list(start), "steps": [dict(step) for step in steps]})
                 if len(routes) > 128:

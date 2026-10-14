@@ -16,7 +16,7 @@
 | Frontend | One React/TypeScript/Rsbuild/Bun interface with schema-driven settings and source-defined glyphs. |
 | Desktop | Tauri 2 WebView loads the identical verified HTTPS frontend, with no duplicated UI or bundled Python. |
 | Geometry | MoveValidator owns geometric candidates and attack queries; GameManager owns configured legality, transition publication and outcomes. |
-| Movement | Immutable intents contain ordered landings and an optional promotion kind. Generic geometry derives complete capture routes; final authorization and configured effects belong to GameManager. Shipped rulebooks must define promotion and special-move legality. |
+| Movement | Immutable intents contain ordered landings and an optional promotion kind. Generic geometry derives complete capture routes; final authorization and configured effects belong to GameManager. JSON offers and configured far-rank policies define special-move and promotion behavior; shipped rulebooks must supply complete legality. |
 | Rules | Five typed declarative hooks; all effects pass the central authorized state transition. No executable authored extensions. |
 | Quests | Independent per-user, per-game progress, durable achievements and experience derived from completed rewards. |
 | Outcomes | Configured terminal proposals resolved by deterministic declared precedence; ambiguous top-priority conflicts fail closed. |
@@ -41,7 +41,12 @@ revisions are rejected. Post-move evaluation reads accepted history and the next
 canonical turn while participant selectors bind to the evaluating actor.
 Outcome selectors bind to the next participant; post-move and quest selectors
 bind to the mover. The canonical turn remains the next participant in both
-evaluation contexts. Game-owned side effects cannot silently overwrite captured pieces. Terminal
+evaluation contexts. Game-owned side effects cannot silently overwrite captured pieces. The session
+prepares offers, promotion and transition effects once on an isolated board,
+then evaluates configured permission against the observed snapshot and explicit
+projected geometry. Configured roles select safety predicates; no piece name
+identifies royalty. Initial rights/targets and additional halfmove-reset
+conditions belong to the immutable definition and deterministic replay. Terminal
 proposal conflicts fail closed and winners must resolve to session participants.
 
 Snapshots pin configuration and initial identities and reproduce state by

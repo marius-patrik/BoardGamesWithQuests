@@ -8,7 +8,7 @@ unknown pieces, overlapping placements and executable extensions.
 Nested board, placement, piece, symbol, clock and appearance objects reject
 unknown fields. Appearance accepts optional `light_square` and `dark_square`
 hex colors. Pieces accept optional `notation`, single-letter `fen`,
-`color_relative`, `capture_policy` and `initial_moves`; initial quiet offsets
+`color_relative`, `capture_policy`, `initial_moves` and `promotion`; initial quiet offsets
 are available only before the piece moves and mirror by side when configured.
 Malformed encodings and excessive nesting produce a configuration error.
 The same byte limit applies to directly validated decoded documents.
@@ -23,7 +23,8 @@ quests and clocks are data owned by each game configuration.
 
 The top-level keys are `schema_version`, `name`, `title`, `default`,
 `playable`, `board`, `pieces`, `clock`, `exports`, `appearance`,
-`rules`, `quests`. The engine never branches on `name` or `piece_type`.
+`rules`, `quests`, with optional `initial_state` and `halfmove_reset`.
+The engine never branches on `name` or `piece_type`.
 Games remain marked non-playable until their complete G3 rulebooks are verified.
 
 ## Hooks, conditions and effects
@@ -47,6 +48,10 @@ References may enter only a recognized trusted context root:
 `rule`; identifiers must be safe, at most four path components, and refer
 to actually bound values. Unbound/unknown references fail closed. All references
 are resolved into copied JSON values, not Python attributes or executable code.
+Query/effect parameters also accept recursively nested typed
+`{"query":"operation","params":{...}}` nodes. Operation names, expression
+shapes, references and bounds are checked before evaluation; resolved effect
+parameters are checked again. Strings are never interpreted as expressions.
 
 `HookInterpreter` evaluates rules in declared order, creates a typed
 `HookEvaluation` and returns an ordered immutable effect plan. Evaluation does
@@ -56,7 +61,8 @@ before evaluation and again after resolving references. Parameters are:
 | Effect | Required parameters | Optional parameters |
 | --- | --- | --- |
 | `permit`, `deny` | none | `reason`, `target` |
-| `offer_move`, `move_piece` | `start`, `end` | none |
+| `move_piece` | `start`, `end` | none |
+| `offer_move` | `start`, `end` | `hops`, `promotion`, `effects` |
 | `capture_piece` | `square` | none |
 | `replace_piece` | `square`, `kind` | none |
 | `set_state` | `name`, `value` | none |
@@ -66,6 +72,7 @@ before evaluation and again after resolving references. Parameters are:
 | `complete_quest` | `quest`, `player` | none |
 | `set_clock` | `player`, `seconds` | none |
 | `set_rights` | `name`, `value` | none |
+| `set_target` | `name`, `value` (square or null) | none |
 
 Coordinates are integer pairs; participant values are nonempty identities or
 explicit side values; clocks, counters and priorities are bounded integers;
@@ -111,6 +118,69 @@ coordinates per step; repeated captures of one square are rejected.
 
 These queries read authoritative inputs; supplying a count or key does not
 prove that its producing algorithm implements a shipped game's rules.
+
+## Declarative special movement and lifecycle
+
+`available_moves` emits only `offer_move` effects. Each resolved offer has an
+owned in-bounds `start` and `end`, optional ordered `hops` ending at `end`, an
+optional configured promotion choice and at most 32 validated auxiliary effects.
+Auxiliary operations are `move_piece`, `capture_piece`, `replace_piece`,
+`set_state`, `increment_state`, `set_rights`, `set_target` and `record_event`.
+The engine derives the moving participant and actual occupied captures. Clients
+submit the same three-field intent and cannot assert auxiliary movement or
+captured pieces. Duplicate offers for one intent are ambiguous and fail closed,
+even when their effect plans are identical. Matching offers own their candidate;
+invalid auxiliary effects cannot fall back to ordinary geometry.
+
+Before publication the session prepares the isolated board, captures, automatic
+or selected promotion, auxiliary effects and `on_move_made` effects exactly once.
+It evaluates `permits_move` against the observed snapshot with access to that
+fully projected board. An explicit permit is required and any denial wins in
+all rule orders. Legal previews and replay use the same preparation boundary.
+`available_moves` cannot request recursive legal counts or an unavailable
+projected board; those queries produce a resolution error.
+
+Geometric board queries accept optional `phase: before` or `after`.
+`pieces_safe` requires explicit `kind`, `side` and `phase`, and checks all pieces
+with that configured role against opposing geometric attacks. A missing role
+returns false. The phase selects the pre-transition or fully prepared board, including
+auxiliary captures and movement; no royal type is hard-coded. `turn` remains the
+canonical snapshot turn and does not accept a board-phase selector. All attack
+traversal shares the aggregate operation work budget.
+
+| Value query | Exact parameters | Result and failure policy |
+| --- | --- | --- |
+| `integer` | `operation`, `left`, `right` | Signed int64 `add`, `subtract` or `floor_divide`; booleans, invalid operations, zero divisors and overflow are errors |
+| `square_offset` | `square`, `offset` | In-bounds source translated by an integer pair bounded to ±255; out-of-board result is null, malformed operands are errors |
+| `json_value` | `value`, `path` | One to four string keys or integer indices 0–127, with explicit -1 selecting the last array element; missing entries/container mismatch return null, malformed paths are errors |
+
+A null value is data, never an implicit permission. Conditions must explicitly
+match their intended non-null facts before an offer or permit can be emitted.
+These bounded operations derive coordinates and last-action facts from JSON;
+they provide no executable expressions, imports, arbitrary attributes or loops.
+
+`initial_state` contains exactly `rule_state`, `special_rights` and
+`temporary_targets` objects. State values are bounded JSON; rights are booleans;
+targets are in-bounds squares or null. They are frozen in the selected definition
+and initialize independent session state. Existing targets expire to null on
+an accepted action before configured auxiliary/post-move `set_target` effects
+create replacements. A rejected transition does not expire or replace targets.
+
+Optional `halfmove_reset` supplies an additional condition evaluated against
+the pre-transition board and snapshot, with server-derived base and offered captures,
+before post-move hooks. Any capture resets the counter; the condition can reset
+it for another configured movement. Post-move capture effects also reset it.
+Otherwise an accepted action increments the counter once.
+
+Per-piece `promotion` declares exactly `rank: far`, `options`, `mode` and
+`stop_capture`. Options name existing configured kinds. Mode `choice` requires
+an explicit offered choice on the final far-rank landing; legal enumeration
+includes each choice. Mode `automatic` requires one option and accepts no client
+promotion choice. Side 1 reaches row 0; side -1 reaches `rows - 1`, matching the
+configured board convention. When `stop_capture` is true, capture enumeration
+ends at the first far-rank landing and crowns there. When false, the moving
+piece continues its complete chain and crowns only if its final landing reaches
+the far rank. Crossing that rank and finishing elsewhere does not crown.
 
 ## Authoritative domain session
 
@@ -178,11 +248,14 @@ and deterministic priority/conflict handling.
 independent session from the pinned configuration and initial identities,
 replays accepted intents using recorded timestamps, and rejects any supplied
 state that differs from deterministic replay. This proves domain reconstruction;
-it does not certify Supabase persistence or remote concurrency.
+it does not certify Supabase persistence or remote concurrency. Snapshot version 1
+preserves whether optional policy fields were explicitly declared: omitted fields
+remain omitted, while explicitly declared defaults remain pinned. Frozen parser
+metadata tracks presence and is never a game-authored or serialized config field.
 
-Special move offers, promotion authorization, timeout adjudication,
-at-game-end quest timing, configured progress measurements and complete
-game-specific repetition identity remain required extensions listed in the actionable workspace. The session does
+Timeout adjudication, status-hook consumption, at-game-end quest timing,
+configured progress measurements and complete game-specific repetition identity
+remain required extensions listed in the actionable workspace. The session does
 not certify any complete FIDE or draughts rulebook.
 
 ## Aggregate evaluation ceilings
