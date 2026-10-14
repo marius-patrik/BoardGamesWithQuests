@@ -173,7 +173,9 @@ it for another configured movement. Post-move capture effects also reset it.
 Otherwise an accepted action increments the counter once.
 
 Per-piece `promotion` declares exactly `rank: far`, `options`, `mode` and
-`stop_capture`. Options name existing configured kinds. Mode `choice` requires
+`stop_capture`. Options name existing configured kinds. Piece identifiers and
+move promotion choices share a maximum of 128 characters; longer identifiers
+are rejected before any transition. Mode `choice` requires
 an explicit offered choice on the final far-rank landing; legal enumeration
 includes each choice. Mode `automatic` requires one option and accepts no client
 promotion choice. Side 1 reaches row 0; side -1 reaches `rows - 1`, matching the
