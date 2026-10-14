@@ -1,0 +1,15 @@
+{
+  "managedBy": "DarkFactory",
+  "schema": 2,
+  "slug": "marius-patrik/BoardGamesWithQuests",
+  "sourceBranch": "main",
+  "release": {
+    "tag": "v0.291.4",
+    "sha": "4eb98c408eada7edd6366e46897fc54ea6b42ec1",
+    "digest": "94d9c6282fdf2a2d893c0519ca8eac5729f04353d63c11c34b4944d365aeed54"
+  },
+  "fileHashes": {
+    "repo.dfconfig": "6b034faadd7f209142105cca2965ae2e46da22b323cb4b0e15cb2a2188ba6fb9",
+    ".github/workflows/darkfactory-control.yml": "97b6dc2c2ac292e18b36271e2fae1326c54d4ed5ab1114590637c21c3f124321"
+  }
+}
