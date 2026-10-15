@@ -23,7 +23,11 @@ quests and clocks are data owned by each game configuration.
 
 The top-level keys are `schema_version`, `name`, `title`, `default`,
 `playable`, `board`, `pieces`, `clock`, `exports`, `appearance`,
-`rules`, `quests`, with optional `initial_state` and `halfmove_reset`.
+`rules`, `quests`, with optional `initial_state`, `halfmove_reset` and `starting_side`.
+`starting_side` is the strict integer 1 or -1 and defaults to 1. It selects the
+initial active participant and clock without changing side identities. Explicit
+field presence is pinned in the snapshot; omitted defaults preserve replay of
+existing snapshots.
 The engine never branches on `name` or `piece_type`.
 Games remain marked non-playable until their complete G3 rulebooks are verified.
 
