@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: "marius-patrik/DarkFactory"
-          ref: "12a2507ba6499b3236c17d3c977c55a480ed5200"
+          ref: "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
           path: .darkfactory-runtime
 
       - name: Set up Bun

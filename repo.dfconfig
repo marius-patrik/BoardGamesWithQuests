@@ -22,7 +22,7 @@
     },
     "upstream": {
       "repo": "marius-patrik/DarkFactory",
-      "ref": "12a2507ba6499b3236c17d3c977c55a480ed5200"
+      "ref": "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
     },
     "versioning": {
       "mode": "pridever",
@@ -51,6 +51,14 @@
       "release": {
         "python": {
           "enabled": false
+        }
+      },
+      "setup": {
+        "python": {
+          "command": "python -m pip install -e . -r requirements-dev.txt && if [ \"$(uname -s)\" = Linux ]; then sudo apt-get update && sudo apt-get install -y --no-install-recommends graphviz; fi"
+        },
+        "rust": {
+          "command": "if [ \"$(uname -s)\" = Linux ]; then sudo apt-get update && sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev patchelf; fi"
         }
       }
     },
@@ -200,8 +208,8 @@
       "verify / verify-bound-issue"
     ],
     "board": {
-      "global_title": "Global",
-      "link_boards": [
+      "global": "Global",
+      "boards": [
         "Global",
         "BoardGamesWithQuests"
       ]

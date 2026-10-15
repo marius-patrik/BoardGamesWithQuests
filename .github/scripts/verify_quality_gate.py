@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import re
 import json
 from pathlib import Path
 import sys
@@ -52,6 +54,56 @@ def read_object(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"report must be an object: {path}")
     return data
+
+
+def validate_installation(repo: Path) -> None:
+    """Check consumer installation integrity and immutable local workflow dependencies.
+
+    Args:
+        repo: Repository with the installed controller and receipt.
+
+    Raises:
+        ValueError: Installed bytes, runtime pin or action references disagree.
+    """
+    receipt = read_object(repo / ".darkfactory/installation.json")
+    config = read_object(repo / "repo.dfconfig")
+    release, hashes = receipt.get("release"), receipt.get("fileHashes")
+    settings = config.get("repo")
+    if (
+        not isinstance(release, dict)
+        or not isinstance(hashes, dict)
+        or not isinstance(settings, dict)
+    ):
+        raise ValueError("installation receipt and repository settings are required")
+    revision = release.get("sha")
+    if not isinstance(revision, str) or not re.fullmatch(r"[a-f0-9]{40}", revision):
+        raise ValueError("installed runtime requires an immutable SHA")
+    upstream = settings.get("upstream")
+    if not isinstance(upstream, dict) or release.get("sha") != upstream.get("ref"):
+        raise ValueError("installed runtime disagrees with repository pin")
+    paths = {"repo.dfconfig", ".github/workflows/darkfactory-control.yml"}
+    if set(hashes) != paths:
+        raise ValueError("installation must attest configuration and controller")
+    for relative in paths:
+        actual = hashlib.sha256((repo / relative).read_bytes()).hexdigest()
+        if hashes[relative] != actual:
+            raise ValueError(f"installed file differs from receipt: {relative}")
+    for workflow in (repo / ".github/workflows").glob("*.yml"):
+        for line in workflow.read_text(encoding="utf-8").splitlines():
+            match = re.match(r"^\s*(?:-\s*)?uses:\s*(\S+)", line)
+            if match is None:
+                continue
+            target = match[1].strip("\"'")
+            if target.startswith("./"):
+                if ".." in Path(target).parts:
+                    raise ValueError("local workflow dependency escapes repository")
+                continue
+            if target.startswith("marius-patrik/DarkFactory/") and not target.endswith(
+                "@" + revision
+            ):
+                raise ValueError("workflow runtime disagrees with installation pin")
+            if not re.fullmatch(r"[^@]+@[a-f0-9]{40}", target):
+                raise ValueError(f"workflow dependency requires immutable SHA: {workflow.name}")
 
 
 def validate_plan(plan: dict[str, Any], repo: Path) -> list[str]:
@@ -144,6 +196,7 @@ def main() -> int:
         Zero for accepted evidence; one for missing or rejected evidence.
     """
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--installation", action="store_true")
     parser.add_argument("--plan", type=Path)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--results", type=Path)
@@ -152,7 +205,12 @@ def main() -> int:
     parser.add_argument("--result")
     args = parser.parse_args()
     try:
-        if args.record is not None:
+        if args.installation:
+            if any((args.plan, args.record, args.results, args.id, args.result)):
+                raise ValueError("installation verification cannot replace execution evidence")
+            validate_installation(args.repo)
+            print("Accepted immutable workflow dependencies and coherent installation receipt.")
+        elif args.record is not None:
             if not args.id or args.result not in {"success", "failure", "cancelled", "skipped"}:
                 raise ValueError("record requires an action id and recognized job result")
             args.record.write_text(

@@ -213,3 +213,109 @@ def test_malformed_gap_does_not_become_an_optional_success(tmp_path: Path) -> No
     plan["gaps"] = [{"packageId": "python:."}]
     path, results = evidence(tmp_path, plan)
     assert run_gate(tmp_path, path, results).returncode == 1
+
+
+def installation_fixture(tmp_path: Path) -> None:
+    """Create an actual immutable workflow and a receipt over its exact bytes."""
+    import hashlib
+
+    workflows = tmp_path / ".github/workflows"
+    workflows.mkdir(parents=True)
+    (tmp_path / ".darkfactory").mkdir()
+    revision = "a" * 40
+    config = {"repo": {"upstream": {"ref": revision}}}
+    (tmp_path / "repo.dfconfig").write_text(json.dumps(config))
+    (workflows / "darkfactory-control.yml").write_text(
+        "jobs:\n  verify:\n    steps:\n      - uses: vendor/action@" + revision + "\n"
+    )
+    hashes = {
+        path: hashlib.sha256((tmp_path / path).read_bytes()).hexdigest()
+        for path in ("repo.dfconfig", ".github/workflows/darkfactory-control.yml")
+    }
+    (tmp_path / ".darkfactory/installation.json").write_text(
+        json.dumps({"release": {"sha": revision}, "fileHashes": hashes})
+    )
+
+
+def test_installation_cli_accepts_coherent_bytes_and_immutable_dependencies(tmp_path):
+    installation_fixture(tmp_path)
+    result = subprocess.run(
+        [sys.executable, str(GATE), "--installation", "--repo", str(tmp_path)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize(
+    "fault", ["config", "controller", "pin", "mutable", "missing", "escape", "runtime"]
+)
+def test_installation_cli_rejects_drift_and_unsafe_workflow_inputs(tmp_path, fault):
+    installation_fixture(tmp_path)
+    if fault == "config":
+        with (tmp_path / "repo.dfconfig").open("a") as stream:
+            stream.write("\n")
+    elif fault == "controller":
+        with (tmp_path / ".github/workflows/darkfactory-control.yml").open("a") as stream:
+            stream.write("# changed\n")
+    elif fault == "pin":
+        path = tmp_path / ".darkfactory/installation.json"
+        receipt = json.loads(path.read_text())
+        receipt["release"]["sha"] = "b" * 40
+        path.write_text(json.dumps(receipt))
+    elif fault == "missing":
+        (tmp_path / ".darkfactory/installation.json").unlink()
+    else:
+        target = "vendor/action@v1" if fault == "mutable" else "./../outside/action"
+        if fault == "runtime":
+            target = "marius-patrik/DarkFactory/.github/workflows/agent.yml@" + "b" * 40
+        (tmp_path / ".github/workflows/extra.yml").write_text(
+            "jobs:\n  probe:\n    uses: " + target + "\n"
+        )
+    before = {str(path): path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
+    result = subprocess.run(
+        [sys.executable, str(GATE), "--installation", "--repo", str(tmp_path)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1 and "rejected" in result.stderr
+    assert {
+        str(path): path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()
+    } == before
+
+
+@pytest.mark.parametrize("branch", ["feature/format", "review/$(touch injected)", "main"])
+def test_formatter_push_preserves_literal_branch_and_protects_default(tmp_path, branch):
+    """Execute the workflow shell against hostile branch data and a Git boundary."""
+    import os
+
+    workflow = (GATE.parents[1] / "workflows/auto-format.yml").read_text()
+    step = workflow.split("      - name: Commit tracked formatting changes\n", 1)[1]
+    script = "\n".join(line[10:] for line in step.split("        run: |\n", 1)[1].splitlines())
+    git = tmp_path / "git"
+    git.write_text(
+        "#!/bin/sh\n"
+        'if [ "$1" = diff ]; then exit 1; fi\n'
+        'if [ "$1" = push ]; then printf "%s\\n" "$@" > "$PUSH_LOG"; fi\n'
+    )
+    git.chmod(0o755)
+    log = tmp_path / "push.log"
+    result = subprocess.run(
+        ["bash", "-e", "-c", script],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+            "FORMAT_BRANCH": branch,
+            "DEFAULT_BRANCH": "main",
+            "PUSH_LOG": str(log),
+        },
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert not (tmp_path / "injected").exists()
+    if branch == "main":
+        assert not log.exists()
+    else:
+        assert log.read_text().splitlines() == ["push", "origin", f"HEAD:{branch}"]

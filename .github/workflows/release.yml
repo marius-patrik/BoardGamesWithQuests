@@ -19,13 +19,13 @@ jobs:
     outputs:
       fallback_bump: ${{ steps.resolve.outputs.bump }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: marius-patrik/DarkFactory
-          ref: 12a2507ba6499b3236c17d3c977c55a480ed5200
+          ref: 368eb9d75d5d828e7ac17fe590d4dc17b028cebc
           path: .darkfactory
       - id: resolve
         name: Ensure every untagged main change creates a development release
@@ -48,9 +48,9 @@ jobs:
 
   release:
     needs: resolve
-    uses: marius-patrik/DarkFactory/.github/workflows/release.yml@12a2507ba6499b3236c17d3c977c55a480ed5200
+    uses: marius-patrik/DarkFactory/.github/workflows/release.yml@368eb9d75d5d828e7ac17fe590d4dc17b028cebc
     with:
       pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: "12a2507ba6499b3236c17d3c977c55a480ed5200"
+      pipeline-ref: "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
       bump: ${{ inputs.bump || needs.resolve.outputs.fallback_bump }}
     secrets: inherit
