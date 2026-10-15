@@ -17,7 +17,7 @@ instructions or manually duplicated CI statuses.
   references, architecture decisions, generated diagrams and delivery checks.
 - Verify complete game legality and all user-visible gameplay before setting
   any shipped definition's `playable` property to true.
-- Configure authenticated Supabase integration and game-server authorization.
+- Complete genuine registered/guest Supabase identity verification and participant-scoped game-server authorization.
 - Perform real two-participant, race/retry and reconnect acceptance, desktop
   tests and classroom guest-capacity rehearsal.
 - Keep PR #271 draft until all gates pass and the maintainer approves.
@@ -75,6 +75,13 @@ instructions or manually duplicated CI statuses.
   a build or headless session cannot satisfy public delivery.
 
 ## External constraints
+
+- Genuine registered/guest identity acceptance requires configured
+  `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, registered and guest access tokens
+  and their expected UUIDs. Run `PYTHONPATH=packages python -m server.auth
+  --verify-provider`; missing credentials are an explicit blocked gate.
+  HTTP tests with isolated network transport verify local failure/privacy
+  behavior and cannot certify actual provider accounts or anonymous sign-ins.
 
 - Supabase project `wdthdcdoqdtywngwvddk` holds the private `bgwq`
   persistence boundary. It also contains private protected account records;

@@ -8,7 +8,7 @@
 | Engine | One headless Python package with game-neutral geometry, JSON hook evaluation, rules, outcomes, quests and authoritative domain commits. No game-name branching. |
 | Configuration | Each game and user variant is bounded, validated, versioned JSON; active matches pin immutable snapshots. |
 | Games | Independent `chess`, `english_draughts` and `international_checkers` packages declare movements and rulebooks as JSON data only. |
-| Participants | Exactly two verified Supabase Auth identities per game; accounts may be guest or registered. |
+| Participants | Exactly two verified Supabase Auth identities per game; accounts may be guest or registered. `GET /me` verifies a bounded Bearer token through the approved project Auth user endpoint and exposes only canonical UUID and guest classification; no unchecked JWT or user metadata supplies authority. |
 | State | GameManager pins immutable JSON configuration and owns detached versioned board, canonical turn, rights, clocks, per-participant quests, accepted events, terminal result and revision. |
 | Persistence | Supabase PostgreSQL holds authoritative durable JSON state with atomic revision checks; no process-memory authority. |
 | Database security | The `bgwq` namespace is private, migrations are versioned, database access is server-only; browser privileges and JWTs are narrowly scoped. |

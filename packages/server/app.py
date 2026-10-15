@@ -1,6 +1,16 @@
-"""FastAPI application boundary; gameplay routes are not available yet."""
+"""FastAPI catalog and provider-verified identity boundary."""
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
+
+import httpx
+
+from server.auth import (
+    AuthenticationRejected,
+    AuthenticationUnavailable,
+    SupabaseAuth,
+    auth_transport,
+    bearer_token,
+)
 
 from engine.model.game.configuration import installed_definitions
 
@@ -26,3 +36,36 @@ def game_catalog() -> dict[str, list[dict[str, str | bool]]]:
             for game in installed_definitions()
         ]
     }
+
+
+@app.get("/me", tags=["identity"])
+async def current_identity(
+    request: Request,
+    response: Response,
+    transport: httpx.AsyncBaseTransport | None = Depends(auth_transport),
+) -> dict[str, str | bool]:
+    """Return only the identity verified by Supabase Auth for this bearer request.
+
+    Args:
+        request: HTTP request containing the caller's Authorization header.
+        response: HTTP response carrying the identity-cache isolation policy.
+        transport: External HTTP boundary; the default performs real verified-TLS requests.
+
+    Returns:
+        Canonical provider identifier and strict registered/guest classification.
+
+    Raises:
+        HTTPException: 401 for rejected credentials; 503 when verification is unavailable.
+    """
+    privacy = {"Cache-Control": "no-store", "Vary": "Authorization"}
+    response.headers.update(privacy)
+    try:
+        token = bearer_token(request.headers.getlist("authorization"))
+        identity = await SupabaseAuth.from_environment(transport).authenticate(token)
+        return identity.to_json()
+    except AuthenticationRejected:
+        raise HTTPException(
+            401, "Authentication required", headers={**privacy, "WWW-Authenticate": "Bearer"}
+        ) from None
+    except AuthenticationUnavailable:
+        raise HTTPException(503, "Authentication service unavailable", headers=privacy) from None
