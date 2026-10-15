@@ -8,10 +8,10 @@
 | Engine | One headless Python package with game-neutral geometry, JSON hook evaluation, rules, outcomes, quests and authoritative domain commits. No game-name branching. |
 | Configuration | Each game and user variant is bounded, validated, versioned JSON; active matches pin immutable snapshots. |
 | Games | Independent `chess`, `english_draughts` and `international_checkers` packages declare movements and rulebooks as JSON data only. |
-| Participants | Exactly two verified Supabase Auth identities per game; accounts may be guest or registered. `GET /me` verifies a bounded Bearer token through the approved project Auth user endpoint and exposes only canonical UUID and guest classification; no unchecked JWT or user metadata supplies authority. |
+| Participants | Pending games hold one authenticated creator; activation fills the second distinct Auth UUID once. Activated domain sessions have exactly two verified participants; accounts may be guest or registered. `GET /me` verifies a bounded Bearer token through the approved project Auth user endpoint and exposes only canonical UUID and guest classification; no unchecked JWT or user metadata supplies authority. |
 | State | GameManager pins immutable JSON configuration and owns detached versioned board, canonical turn, rights, clocks, per-participant quests, accepted events, terminal result and revision. |
-| Persistence | Supabase PostgreSQL holds authoritative durable JSON state with atomic revision checks; no process-memory authority. |
-| Database security | The `bgwq` namespace is private, migrations are versioned, database access is server-only; browser privileges and JWTs are narrowly scoped. |
+| Persistence | Private Supabase game rows own pending/active lifecycle, immutable config and participant assignments. A database genesis event at revision zero precedes domain events. Row-locked atomic commits enforce revision, identity, request scopes and snapshot/event agreement. |
+| Database security | The `bgwq` namespace uses RLS and service-only invoker functions. Restrictive participant/actor FKs check Auth identity existence without Auth read grants, cascades or unrelated data mutations. Browser roles cannot access private tables or functions. |
 | Transport | FastAPI runs on Vercel Python Functions; Realtime events prompt authenticated refetch of authoritative snapshots. |
 | Frontend | One React/TypeScript/Rsbuild/Bun interface with schema-driven settings and source-defined glyphs. |
 | Desktop | Tauri 2 WebView loads the identical verified HTTPS frontend, with no duplicated UI or bundled Python. |
@@ -53,8 +53,17 @@ Snapshots pin configuration and initial identities and reproduce state by
 replaying accepted events with recorded timestamps. This domain replay and an
 in-process lock do not replace the server's authenticated Supabase transaction.
 The durable adapter must compare expected revisions atomically across processes
-and retain immutable action events. Public multiplayer, provider authorization
-and complete game conformance require independent integration evidence.
+and retain immutable action events. Creation keys are scoped to the creator;
+activation and domain keys are separately scoped within the game. The database
+activation event does not enter the engine's move history.
+
+A durable adapter validates retries against reconstructed state. An accepted
+event at or before the loaded revision is returned with authoritative state
+without another commit; the latest snapshot cannot accompany an accepted event at the requested
+revision in a low-level SQL retry. Database metadata and identity checks do not
+replace engine legality or verified JWT ownership. Public multiplayer, provider
+authorization and complete game conformance require independent integration
+evidence.
 
 ## Source reference constraints
 

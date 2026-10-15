@@ -62,9 +62,17 @@ instructions or manually duplicated CI statuses.
 
 ## Delivery dependencies
 
-- Connect domain snapshots/events to authenticated Supabase-backed atomic
-  commits. Verify real JWT identities, participant isolation, stale/duplicate
-  requests, concurrent server instances, rollback and process reconstruction.
+- Implement the authenticated durable game adapter over the private pending,
+  activation and domain transaction functions. Bind every actor to verified
+  Supabase identity, recover creation/genesis data for retries and detect a
+  reconstructed already-accepted event before attempting another commit.
+  Return its accepted event and latest authoritative snapshot. Verify real
+  HTTP participant isolation, stale/conflicting keys, concurrent server
+  instances, rollback and restart recovery.
+- Execute the reviewed forward lifecycle migration and
+  `scripts/fixtures/provider_session_atomicity.sql` against the hosted project.
+  Confirm private grants, Auth FKs, state/event rollback and unchanged protected
+  records. Local PostgreSQL proves SQL behavior, not hosted Auth/HTTP access.
 - Implement registered/guest identity flows, owned variants, game creation and
   joining with exactly two participants; provide generated API/frontend types.
 - Build authoritative React gameplay and schema-driven settings, then exercise
