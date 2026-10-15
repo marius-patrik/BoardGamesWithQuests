@@ -79,7 +79,11 @@ class GameDefinition:
         Raises:
             ValueError: Nested values are not finite bounded JSON.
         """
-        if not self.declared_optional_fields <= {"initial_state", "halfmove_reset", "starting_side"}:
+        if not self.declared_optional_fields <= {
+            "initial_state",
+            "halfmove_reset",
+            "starting_side",
+        }:
             raise ValueError("unknown declared optional configuration fields")
         if type(self.starting_side) is not int or self.starting_side not in (-1, 1):
             raise ValueError("starting side must be explicit integer 1 or -1")
