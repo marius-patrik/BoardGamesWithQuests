@@ -17,6 +17,10 @@ ROOT = Path(__file__).resolve().parents[1]
 def definition(*, capture=False, effects=(), deny=False, outcome=False):
     data = json.loads((ROOT / "packages/english_draughts/config.json").read_text())
     data["name"] = "neutral-session"
+    for option in ("starting_side", "halfmove_reset", "position_identity", "initial_state"):
+        data.pop(option, None)
+    for piece in data["pieces"].values():
+        piece.pop("promotion", None)
     data["board"] = {
         "rows": 6,
         "columns": 6,

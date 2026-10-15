@@ -121,8 +121,8 @@
   "pieces": {
     "man": {
       "symbols": {
-        "white": "⛀",
-        "black": "⛂"
+        "white": "\u26c0",
+        "black": "\u26c2"
       },
       "moves": [
         [
@@ -136,20 +136,12 @@
       ],
       "attacks": [
         [
-          1,
-          1
-        ],
-        [
-          1,
+          -1,
           -1
         ],
         [
           -1,
           1
-        ],
-        [
-          -1,
-          -1
         ]
       ],
       "jump": false,
@@ -161,12 +153,20 @@
         "land_anywhere": false,
         "max_nodes": 4096,
         "deferred_removal": false
+      },
+      "promotion": {
+        "rank": "far",
+        "options": [
+          "king"
+        ],
+        "mode": "automatic",
+        "stop_capture": true
       }
     },
     "king": {
       "symbols": {
-        "white": "⛁",
-        "black": "⛃"
+        "white": "\u26c1",
+        "black": "\u26c3"
       },
       "moves": [
         [
@@ -224,6 +224,121 @@
     "light_square": "#E8DABC",
     "dark_square": "#70573F"
   },
-  "rules": [],
-  "quests": []
+  "rules": [
+    {
+      "id": "legal_geometry",
+      "hook": "permits_move",
+      "when": {
+        "op": "true"
+      },
+      "effects": [
+        {
+          "op": "permit",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "compulsory_capture",
+      "hook": "permits_move",
+      "when": {
+        "op": "all",
+        "args": [
+          {
+            "op": "compare",
+            "left": {
+              "query": "capture_count",
+              "params": {
+                "scope": "maximum"
+              }
+            },
+            "relation": "gt",
+            "right": 0
+          },
+          {
+            "op": "compare",
+            "left": {
+              "query": "capture_count",
+              "params": {
+                "scope": "candidate"
+              }
+            },
+            "relation": "eq",
+            "right": 0
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "deny",
+          "params": {
+            "reason": "A capture is compulsory"
+          }
+        }
+      ]
+    },
+    {
+      "id": "last_move_wins",
+      "hook": "outcome",
+      "when": {
+        "op": "compare",
+        "left": {
+          "query": "legal_move_count",
+          "params": {
+            "side": "active"
+          }
+        },
+        "relation": "eq",
+        "right": 0
+      },
+      "effects": [
+        {
+          "op": "propose_outcome",
+          "params": {
+            "kind": "win",
+            "cause": "no_legal_moves",
+            "winner": {
+              "query": "json_value",
+              "params": {
+                "value": {
+                  "query": "participant",
+                  "params": {
+                    "side": "opponent"
+                  }
+                },
+                "path": [
+                  "id"
+                ]
+              }
+            },
+            "priority": 100
+          }
+        }
+      ]
+    }
+  ],
+  "quests": [],
+  "halfmove_reset": {
+    "op": "compare",
+    "left": {
+      "query": "json_value",
+      "params": {
+        "value": {
+          "query": "piece_at",
+          "params": {
+            "square": {
+              "ref": "move.start"
+            },
+            "phase": "before"
+          }
+        },
+        "path": [
+          "kind"
+        ]
+      }
+    },
+    "relation": "eq",
+    "right": "man"
+  },
+  "starting_side": -1
 }

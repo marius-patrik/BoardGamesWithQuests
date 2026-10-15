@@ -24,6 +24,9 @@ def definition(*, hostile: bool = False):
         (Path(__file__).parents[1] / "packages/english_draughts/config.json").read_text()
     )
     source["pieces"] = {"man": source["pieces"]["man"]}
+    source.pop("starting_side", None)
+    source.pop("halfmove_reset", None)
+    source["pieces"]["man"].pop("promotion", None)
     source["pieces"]["man"].update(moves=[[0, 1]], attacks=[[1, 0]], color_relative=False)
     if not hostile:
         source["pieces"]["man"].pop("capture_policy")

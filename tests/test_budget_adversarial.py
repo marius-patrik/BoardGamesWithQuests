@@ -19,6 +19,9 @@ def data(*, hostile: bool = False) -> dict:
     result = json.loads((ROOT / "packages/english_draughts/config.json").read_text())
     result.update(name="budget-contract", title="Budget authority", playable=False)
     mover = result["pieces"]["man"]
+    result.pop("starting_side", None)
+    result.pop("halfmove_reset", None)
+    mover.pop("promotion", None)
     mover.update(moves=[[0, 1], [0, -1]], attacks=[[1, 0]], color_relative=False)
     if not hostile:
         mover.pop("capture_policy")

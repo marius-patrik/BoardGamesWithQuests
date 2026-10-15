@@ -24,6 +24,11 @@ instructions or manually duplicated CI statuses.
 
 ## Engine dependencies
 
+- Reject or adjudicate configured terminal starting positions before session
+  activation. Cover no-legal-move starts, configured starting side, replay and
+  database genesis compatibility; a session with no moves and no result must
+  not become publicly playable.
+
 - Verify reconstruction performance under classroom load and implement verified
   checkpoints or efficient replay before exposing snapshot recovery publicly.
   Preserve accepted-history reconstruction, exact retries and corruption checks;
@@ -50,6 +55,10 @@ instructions or manually duplicated CI statuses.
   measurable active/target
   progress, completion and per-account reward persistence. Verify one completion
   across retries, terminal events, transaction rollback and reconstruction.
+- Complete English draughts draw claims, agreed draws, clock outcomes and
+  independent complete-game acceptance before enabling its playable flag.
+  Preserve the tested forward-only men, compulsory full captures, short kings,
+  capture-stopping crowning and last-move-wins JSON behavior.
 - Compose and independently verify all shipped rulebooks. Cover chess special
   moves/draw claims/material outcomes, English mandatory chains/crowning and
   international maximum capture/deferred blocking/crowning. Keep configurations
