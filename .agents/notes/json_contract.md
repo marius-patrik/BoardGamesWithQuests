@@ -392,7 +392,7 @@ This adapter flow requires genuine authenticated HTTP/database integration;
 the SQL consumer scenario alone does not certify the public adapter.
 
 The forward lifecycle migration is
-`supabase/migrations/20261013202238_private_session_lifecycle.sql`.
+`supabase/migrations/20261015082152_private_session_lifecycle.sql`.
 `tests/test_private_transactions.py` executes real isolated PostgreSQL
 transactions, concurrent connections and faults through the private functions.
 Snapshot validation enforces the engine recovery envelope of 65,536 JSON nodes
