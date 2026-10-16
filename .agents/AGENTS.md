@@ -49,11 +49,14 @@ reviewers verify the complete change graph.
 ## Behavior-driven testing contract
 
 Tests must specify observable **inputs, actions and outcomes** through supported
-interfaces: legal and illegal game actions, HTTP responses, database effects,
-UI interactions, authentication decisions, event order, exported notation and
-user-visible recovery. Prefer an external actor or black-box consumer viewpoint,
-not assertions about code structure, class existence, imports, literals,
-formatting, mocked call counts or private implementation details.
+user-facing or external-provider interfaces: legal and illegal game actions, HTTP
+responses, database effects, UI interactions, authentication decisions, event
+order, exported notation and user-visible recovery. **Tests of isolated local
+implementation behavior are prohibited as verification or acceptance evidence.**
+Do not assert private method/class internals, mocked interactions, importability,
+syntactic structure, placeholders or deliberately unsupported behavior in place
+of externally visible requirements. The test path must cross the supported
+system boundary and verify real results, errors, persistence and isolation.
 
 For every behavior change, cover:
 - A representative successful user flow with explicit meaningful assertions.
@@ -69,11 +72,14 @@ For every behavior change, cover:
 Use parametrized fixture scenarios for each game definition, including castling,
 en passant, promotion and repetition; English capture chains; and international
 maximal capture, backward captures, flying kings and capture obstruction.
-Configuration tests must drive real JSON through the validator and interpreter.
+Configuration acceptance must submit real JSON through the supported consumer
+configuration boundary, exercise the trusted validator and interpreter, and
+observe the resulting permitted/rejected game behavior. If that boundary is not
+available, report the acceptance gate as BLOCKED.
 
-Use test doubles only at genuinely nondeterministic third-party boundaries;
-never mock the behavior being claimed as verified. Back each adapter contract
-with real integration tests against its actual provider. Public network, browser
+Test doubles may diagnose genuinely nondeterministic boundaries, but may not
+satisfy acceptance checks. Back every provider adapter contract with a real
+integration check against its actual external service. Public network, browser
 and database acceptance tests verify service behavior, not response shape alone.
 If an external integration cannot run, mark the gate **blocked**; do not replace
 it with a mocked pass or silently skip mandatory tests.
@@ -101,6 +107,19 @@ defaults. The host verifies Supabase JWT identity, participant membership,
 turn, legal state and expected revision before an atomic durable commit.
 Supabase privileged credentials never reach public clients. Use participant-
 scoped authorization, safe Realtime reconciliation and database RLS.
+
+## No disposable production paths
+
+Do not add or retain bootstrap-only endpoints, placeholder UIs, speculative
+scaffolds, intermediate servers, throwaway CLIs, fake progress states or tests
+that certify deliberate absence of functionality. Every committed production
+path must be intended for the final composition and serve real supported behavior.
+If functionality cannot yet be delivered, leave it out of the mergeable change
+and report its acceptance as blocked; do not ship temporary substitutes.
+
+Use Python namespace packages where package boundaries contain no executable
+initialization. Remove empty/docstring-only `__init__.py` files; verify imports,
+resources and package discovery against installed distributions and deployments.
 
 ## Repository collaboration
 
