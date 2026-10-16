@@ -16,7 +16,8 @@
     "allowSyntheticDefaultImports": true,
     "types": [
       "react",
-      "react-dom"
+      "react-dom",
+      "node"
     ],
     "baseUrl": ".",
     "paths": {

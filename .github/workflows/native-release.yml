@@ -163,10 +163,26 @@ jobs:
           bun -e 'const p="src-tauri/tauri.conf.json"; const v=await Bun.file(p).json(); v.version=process.env.RELEASE_TAG.slice(1); await Bun.write(p, JSON.stringify(v,null,2)+"\n")'
           bun tauri ios init --ci
           bun tauri ios build --ci --no-sign --target aarch64-sim
+      - name: Package unsigned iOS simulator release asset
+        id: simulator
+        env:
+          TAG: ${{ needs.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          output="$RUNNER_TEMP/boardgameswithquests-${TAG}-ios-simulator-unsigned.zip"
+          cd packages/native/src-tauri/gen/apple/build
+          zip -q -r "$output" .
+          echo "path=$output" >> "$GITHUB_OUTPUT"
+      - name: Attach clearly labeled simulator archive to existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.resolve.outputs.tag }}
+          ASSET: ${{ steps.simulator.outputs.path }}
+        run: gh release upload "$TAG" "$ASSET" --clobber
       - uses: actions/upload-artifact@v4
         with:
           name: ios-simulator-unsigned-${{ needs.resolve.outputs.tag }}
-          path: packages/native/src-tauri/gen/apple/build/
+          path: ${{ steps.simulator.outputs.path }}
           if-no-files-found: error
       # A distributable device IPA additionally requires Apple team signing,
       # provisioning profiles and an approved iOS distribution workflow.
