@@ -35,6 +35,6 @@ are not evidence that gameplay or store distribution works.
 
 ## References
 
-- [Original source UML](.agents/notes/reference_diagram.md)
-- [Requirements (awaiting alignment with this migration)](.agents/notes/PRD.md)
-- [Tracked implementation plan](.agents/SCRATCHPAD.md)
+- [Original source UML](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/reference_diagram.md)
+- [Requirements (awaiting alignment with this migration)](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/PRD.md)
+- [Tracked implementation plan](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/SCRATCHPAD.md)
