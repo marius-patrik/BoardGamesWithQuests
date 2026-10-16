@@ -3,7 +3,7 @@
 from typing import List, Optional, Any
 
 try:
-    from engine.model.game.quest import Quest
+    from server.engine.model.game.quest import Quest
 except ImportError:
     from ..game.quest import Quest
 

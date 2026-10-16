@@ -3,8 +3,8 @@
 from typing import List, Optional, Any
 
 try:
-    from engine.model.misc.notation import pos_to_algebraic
-    from engine.model.misc.metadata import MetadataWriter
+    from server.engine.model.misc.notation import pos_to_algebraic
+    from server.engine.model.misc.metadata import MetadataWriter
 except ImportError:
     from .notation import pos_to_algebraic
     from .metadata import MetadataWriter
