@@ -56,9 +56,9 @@ Projected move outcome proposals join terminal arbitration. Position-identity
 capture probes preserve configured legality and the shared work budget while
 excluding the built-in action-clock eligibility check.
 Move events retain their version-1 shape; terminal events add the exact action
-and carry a null move. Replay accepts both envelopes. An agreed draw handshake
-and SQL validation of terminal envelopes require separate implementation before
-remote terminal submission is exposed. Configured `starting_side` controls the
+and carry a null move. Replay and private SQL accept both envelopes. An agreed
+draw handshake and authenticated HTTP terminal acceptance require implementation
+and verification before remote exposure. Configured `starting_side` controls the
 opening turn. Optional `position_identity` selects movement flags, rule values,
 rights and legally effective targets for repetition under the same work ceiling.
 

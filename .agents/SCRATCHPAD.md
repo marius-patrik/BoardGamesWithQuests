@@ -64,10 +64,9 @@ instructions or manually duplicated CI statuses.
   moves/draw claims/material outcomes, English mandatory chains/crowning and
   international maximum capture/deferred blocking/crowning. Keep configurations
   non-playable until their complete behavioral gates pass.
-- Update SQL event validation/atomic commit to accept version-1 move envelopes and
-  terminal envelopes (`action`, null `move`, empty captures/effects). Validate
-  request/outcome/snapshot agreement and retries against real Supabase before
-  exposing terminal submissions; retain the SQL migration for its own chunk.
+- Verify hosted terminal SQL, authenticated HTTP actions and trusted server time
+  before exposing terminal submissions. Preserve exact event envelopes, atomic
+  outcome/snapshot agreement, rollback and retry semantics through the adapter.
 - Implement game-owned SAN/PGN/FEN writers using authoritative state and history.
   Verify actual exports, metadata, ambiguity, promotions and terminal notation.
 

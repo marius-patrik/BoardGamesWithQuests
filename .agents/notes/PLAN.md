@@ -47,8 +47,8 @@ Use the behavioral standard in [AGENTS](../AGENTS.md).
   leave the snapshot unchanged.
 - Verify closed move/resign/claim_draw/timeout submissions, both event envelopes,
   configured starting side and selected position identity through replay.
-- Implement participant-authorized agreed draw offer/acceptance and SQL terminal
-  event validation as separate bounded dependencies before remote exposure.
+- Implement participant-authorized agreed draw offer/acceptance. Verify both
+  private SQL event envelopes through authenticated HTTP before remote exposure.
 - Preserve game-neutral movement, ray attacks, captures, promotion, path
   enumeration, terminal detection, repetition and configured result precedence.
 - Test every supported operation through external domain behavior, including
