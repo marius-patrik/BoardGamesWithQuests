@@ -104,7 +104,13 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str]]:
 
         dotted = import_name(path, roots)
         if dotted is not None:
-            dest = dotted.replace(".", "/") + ("/index.md" if path.name == "__init__.py" else ".md")
+            if path.name == "__init__.py":
+                dest = f"{dotted.replace('.', '/')}/index.md"
+            elif path.stem == "index":
+                # Avoid collision with a sibling package __init__.py page.
+                dest = f"{dotted.replace('.', '/')}_module.md"
+            else:
+                dest = dotted.replace(".", "/") + ".md"
             body = f"# {display_name(path.parent.name if path.name == '__init__.py' else path.stem)}\n\n::: {dotted}\n"
         else:
             dest = public_path(relative.with_suffix(".md"))
