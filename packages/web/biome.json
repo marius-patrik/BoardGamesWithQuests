@@ -1,11 +1,11 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
-  "files": {
-    "includes": [
-      "src/**/*.ts",
-      "src/**/*.tsx",
-      "rsbuild.config.ts",
-      "postcss.config.mjs"
-    ]
-  }
+	"$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+	"files": {
+		"includes": [
+			"src/**/*.ts",
+			"src/**/*.tsx",
+			"rsbuild.config.ts",
+			"postcss.config.mjs"
+		]
+	}
 }
