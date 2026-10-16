@@ -30,7 +30,7 @@ MIGRATIONS = (
     "20261013151643_immutable_game_snapshot.sql",
     "20261013192000_isolate_unrelated_records.sql",
     "20261015082152_private_session_lifecycle.sql",
-    "20261015082615_terminal_action_compatibility.sql",
+    "20261016091616_terminal_action_compatibility.sql",
 )
 
 

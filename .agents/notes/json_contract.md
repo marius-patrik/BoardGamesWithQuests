@@ -477,7 +477,7 @@ the SQL consumer scenario alone does not certify the public adapter.
 The forward lifecycle migration is
 `supabase/migrations/20261015082152_private_session_lifecycle.sql`.
 Terminal compatibility is defined by
-`supabase/migrations/20261015082615_terminal_action_compatibility.sql` and
+`supabase/migrations/20261016091616_terminal_action_compatibility.sql` and
 `tests/test_terminal_transactions.py`, which consumes actual engine outputs for
 resignation, timeout and ordinary/projected claims. The terminal suite covers
 both opening sides, authorization, strict clocks, immutable state, malformed
