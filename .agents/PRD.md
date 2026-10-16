@@ -1,354 +1,675 @@
-# BoardGamesWithQuests — Product Requirements Document
+# BoardGamesWithQuests — Product & Architecture Specification
 
-**Status:** Target requirements — not a statement of implemented features
-**Version:** 1.0
+## 1. Product
 
-Planning material — current state, work streams, risks, acceptance criteria and
-the decision log — lives in `../SCRATCHPAD.md`. This document states only what the
-product is and requires.
+BoardGamesWithQuests is a two-player online board-game application with configurable, declaratively defined rules and quests. A single hosted React application is used in browsers and inside a Tauri native wrapper. A stateless Python service authoritatively evaluates gameplay; Supabase persists identity, game state, events, account data, and progression.
 
----
+### 1.1 Product capabilities
 
-## 1. What the product is
+- Exactly two distinct authenticated users participate in a game. No separate room abstraction, matchmaking, spectators, bots, tournaments, social feed, or leaderboard.
+- A player may use a Supabase anonymous guest account or a registered account; converting a guest to a registered user preserves the same identity and history.
+- Three built-in games are selectable: orthodox chess (default), English draughts (8×8), and international draughts (10×10). Each is a full JSON definition interpreted by the same engine.
+- A user can create, duplicate, edit, rename, and delete personally owned variants using visual forms for board, pieces, rules, quests, and clocks. Built-ins are immutable. No user-supplied Python, JavaScript, plugins, paths, or executable expressions.
+- The creator selects a definition and time control, creates a pending game, and shares its opaque URL. A different user joins the existing game; joining starts play.
+- Players see board, side, coordinates, legal-move hints, captured pieces, move history, both clocks, status, quests, results, and account progression. A full capture chain is one move.
+- Accepted moves, outcomes, clocks, quest progress, awards, ratings, definitions, and history survive page reloads, client replacement, and function restarts.
+- Both clients receive private realtime revision notifications and reload authoritative state when needed. HTTP alone remains sufficient to play.
+- Players can resign, offer/accept a draw, claim a rules-supported draw, and flag a timed-out opponent. Complete games are read-only and exportable.
+- Chess supports SAN/PGN, FEN position import/export, coordinate/letter transcripts, and compressed transcript output. Draughts supports PDN where the shipped definition provides notation.
+- One responsive, accessible UI supports mouse, touch, keyboard, screen readers, and mobile displays.
 
-A desktop board game engine and application in Python, built as an MVC
-application, in which **game configurations are a first-class product surface**. A stock 8×8 game
-with the standard pieces is one configuration among many: before a game starts,
-a player chooses the board, the starting position, every piece's movement, which
-rules are in force, the quests in play, and the time controls.
+The user-controlled definition governs the game. UI components and generic engine code never branch on a game title to decide what is legal.
 
-Two games ship with the engine:
+### 1.2 Game lifecycle
 
-1. **Chess** — orthodox chess, which is the default configuration.
-2. **Checkers** — English draughts, which shares the engine and changes no
-   engine code.
+`pending`: a creator exists, a complete validated definition is pinned, no other participant or active clock exists. The creator receives a share URL. A pending game expires after 24 hours if nobody joins.
 
-The second exists to demonstrate the abstraction. If checkers needs an engine
-change that chess did not, the abstraction is wrong — so building it is also a
-test of the engine's generality.
+`active`: a verified, distinct joiner has atomically claimed the second seat. Creator is side `1`, joiner side `-1`; the selected definition determines which side moves first. An activation event records the initial state at revision `0`.
 
-## 2. Users and what they need
+`finished`: an authoritative rules result, resignation, accepted draw, or timeout has ended play. No new actions are accepted apart from exact idempotent retries.
 
-| User | Need |
-|---|---|
-| **The player** | Configure a variant quickly, then play it without friction: see the board, the turn, both clocks, what has been captured, and what is still to do |
-| **The grader** | See an object model that conforms to the supplied Czech architecture diagram, with every deviation declared and justified |
-| **The maintainer** | Behaviour covered by tests that exercise real code paths, not tests that restate the rulebook |
+`expired`: a pending invitation has expired without ever becoming an active game. It has no result or rating impact.
 
-## 3. Constraints
+Each accepted domain action increases the revision by exactly one; a complete capture sequence, promotion, or castling transition remains one action. Pending expiration and joining are mutually exclusive under a database row lock.
 
-Three things are fixed and are not up for debate.
+## 2. Runtime architecture
 
-**Already covered by `../AGENTS.md`, which is what governs — this document does not
-restate them:** object-model conformance (Rule 3), language (Rule 4), delivery
-(Rule 7) and the pull-request review trail (Rule 11).
+```mermaid
+flowchart LR
+    B[Browser] --> W[React web on Vercel]
+    N[Tauri: desktop and mobile] --> W
+    W -->|same-origin /api/v1| A[FastAPI on Vercel]
+    W -.->|private revision notices| R[Supabase Realtime]
+    A --> U[Supabase Auth]
+    A --> D[(Supabase PostgreSQL)]
+    A --> E[Pure declarative game engine]
+    E --> A
+    A -.->|post-commit notice| R
+    R -.-> W
+```
 
-**Not covered by `../AGENTS.md`, stated here:** the three below.
+**Web:** Bun, React, TypeScript, Rsbuild, Tailwind, shadcn/ui, Motion. Static files are hosted on Vercel. Only the web project contains UI. The browser handles selection, drag/touch interaction, form drafts, rendering, client-side countdown animation, and API subscriptions; it cannot commit state or resolve outcomes.
 
-### 3.1 Libraries
+**Native:** Bun tooling + Tauri 2/Rust host, packaging the hosted web origin as a constrained WebView. The same production UI and HTTP API are used on Windows, macOS, Linux, Android, and iOS. There is no local engine, embedded server, duplicated frontend, or independent game store.
 
-**Standard library plus `tkinter` only. No third-party runtime dependency. No
-chess library.**
+**API:** Python + FastAPI/Pydantic in a separate Vercel project. It verifies the Supabase identity, enforces participant access, validates and authorizes requests, starts database transactions, invokes the pure engine, commits accepted transitions, and serves read projections and exports. Instances are stateless.
 
-- Notation, position encoding and all coordinate conversion are hand-rolled and
-  stay hand-rolled. `python-chess` is not used.
-- `tkinter` is the GUI toolkit and the only one. No PyQt, PySide, wxPython,
-  Kivy, pygame or webview shell.
-- `tkinter` is standard library and adds no dependency, but it is absent from
-  some Linux Python distributions unless `python3-tk` is installed separately.
-- Development tooling (`pytest`, `black`, `properdocs`, `mkdocstrings`) is exempt
-  and never ships.
+**Engine:** Python package contained inside the server package. It has no I/O, network access, database client, authentication provider, web framework, user scripts, or persistent process state. Every transition is deterministic given the pinned definition, snapshot, actor, action, and trusted timestamp.
 
-### 3.2 Tests
+**Database:** Supabase Auth maintains `auth.users`. Private PostgreSQL schema `bgwq` owns all application records. A server-only PostgreSQL connection through the supported transaction pooler performs multi-record atomic writes. No browser direct access to game tables.
 
-Tests exercise **code invariants** and **feature flow**. Tests do not assert on
-rules, rule text, workflow YAML, notes content, README content or any other
-repository metadata, and a test that would still pass if the product were
-deleted does not belong in the suite.
+**Realtime:** Supabase private Broadcast distributes scoped revision hints, not state or commands. Clients recover lost, duplicated, delayed, or reordered notifications by reading the API. Realtime transport never participates in transaction correctness.
 
-Two whole categories of test are therefore wrong and must not be replaced like
-for like:
+**Origin:** The web Vercel project rewrites `/api/*` to the API Vercel project, retaining the public web origin. Mutations require cookies, a valid Origin, and CSRF protection; direct access to the API origin must not bypass identity or Origin rules. Both deployments use compatible contract versions.
 
-- **Import smoke tests.** `importlib.import_module(name) is not None` proves a
-  module parses. It proves nothing about behaviour and is deleted outright
-  rather than kept in a reduced form.
-- **Metadata assertions.** Tests that open `../AGENTS.md`, workflow YAML, `notes/`
-  or `README.md` and assert substrings police the rulebook, not the product.
+## 3. Source tree and package boundaries
 
-The tests that survive drive real behaviour: a move is played and its effect
-asserted, a rule is exercised and its outcome asserted, an invariant such as "no
-third-party import anywhere under the project source" is asserted against the
-code itself.
+```text
+.
+├── .agents/
+│   └── PRD.md
+├── README.md                       -> .agents/PRD.md (Git symlink)
+├── package.json                    # Bun workspace; web + native
+├── bun.lock                        # one locked JS dependency graph
+├── packages/
+│   ├── server/
+│   │   ├── pyproject.toml          # Python version, dependencies, package metadata
+│   │   ├── requirements.txt        # Vercel Python deployment dependencies
+│   │   ├── vercel.json
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   ├── index.py            # Vercel-discovered ASGI app export
+│   │   │   ├── app.py              # FastAPI application + middleware
+│   │   │   ├── routes/
+│   │   │   │   ├── auth.py
+│   │   │   │   ├── accounts.py
+│   │   │   │   ├── definitions.py
+│   │   │   │   ├── variants.py
+│   │   │   │   └── games.py
+│   │   │   ├── contracts/          # Pydantic request/response DTOs
+│   │   │   ├── security/           # Auth, CSRF, permission policy
+│   │   │   ├── persistence/        # SQL transactions, queries, mapping
+│   │   │   └── notifications/      # Realtime sender and token authorization
+│   │   ├── engine/
+│   │   │   ├── definition.py       # Parser, type checker, normalized definitions
+│   │   │   ├── schema.py           # Versioned declarative JSON grammar
+│   │   │   ├── geometry.py         # Squares, vectors, rays, attacks
+│   │   │   ├── candidates.py       # Candidate/capture-path enumeration
+│   │   │   ├── interpreter.py      # Typed conditions, queries, effects, hooks
+│   │   │   ├── transition.py       # Pure init/legal/status/apply/replay
+│   │   │   ├── clocks.py           # Trusted timestamp arithmetic
+│   │   │   ├── quests.py           # Progress and award intents
+│   │   │   ├── notation.py         # Format-independent export dispatch
+│   │   │   └── contracts.py        # Immutable engine DTOs
+│   │   ├── definitions/
+│   │   │   ├── chess.json
+│   │   │   ├── english_draughts.json
+│   │   │   └── international_draughts.json
+│   │   ├── formats/
+│   │   │   ├── chess.py            # PGN, SAN, FEN and transcript codecs
+│   │   │   └── draughts.py         # PDN and transcript codecs
+│   │   └── supabase/
+│   │       ├── config.toml
+│   │       └── migrations/
+│   │           └── <timestamp>_initial_schema.sql
+│   ├── web/
+│   │   ├── package.json
+│   │   ├── vercel.json
+│   │   ├── rsbuild.config.ts
+│   │   ├── tsconfig.json
+│   │   ├── components.json         # shadcn component generator
+│   │   ├── index.html
+│   │   └── src/
+│   │       ├── main.tsx
+│   │       ├── app/                # Navigation, session, query/reconnect logic
+│   │       ├── api/                # Generated OpenAPI types + typed transport
+│   │       ├── games/              # Board, actions, clocks, history, quests
+│   │       ├── variants/           # Schema-driven config builder
+│   │       ├── accounts/           # Guest/login/profile/progression
+│   │       ├── components/ui/      # Shared shadcn components
+│   │       ├── styles/
+│   │       └── assets/
+│   └── native/
+│       ├── package.json
+│       └── src-tauri/
+│           ├── Cargo.toml
+│           ├── tauri.conf.json
+│           ├── capabilities/default.json
+│           ├── icons/
+│           └── src/main.rs
+└── tests/                          # Black-box contracts and actual actor flows
+    ├── engine/
+    ├── api/
+    ├── database/
+    ├── browser/
+    └── native/
+```
 
-### 3.3 Execution of authored code
+**Dependency direction:**
+- `server/engine` may import only its own pure types and approved deterministic libraries. It neither imports `server/api` nor knows Supabase.
+- `server/api` imports `engine`, `definitions`, `formats`, and its private provider/persistence adapters. It is the sole authority for identity, authorization, state mutation, and public serialization.
+- `definitions` are data. Built-in game behavior never requires a game-specific Python class. Formatters may implement presentation conventions but may not change domain rules.
+- `server/supabase` defines the persistence schema. SQL and the Python persistence adapter must agree on keys, constraints, privileges, and transaction boundaries.
+- `web` consumes only versioned HTTP/realtime contracts; generated transport types derive from FastAPI OpenAPI. It does not import Python code, implement game legality, or depend on private SQL layout.
+- `native` depends on the hosted web origin and Tauri APIs only. It does not fork React and grants the remote origin no unnecessary native capabilities.
+- Shared business state is never written to localStorage, IndexedDB, device files, or process-global variables.
 
-The application loads and runs Python the player writes in the rule and quest
-editors. This is a deliberate property of the product, not an accident, and it
-is bounded on purpose: code loads **only** from within the variant directory
-being edited, never from an arbitrary path, an environment variable or user
-input elsewhere. The editor validates before the code is allowed to join the
-configuration, so a syntax error is caught in the editor rather than at game
-start.
+## 4. Declarative definition schema
 
-## 4. The configuration pattern
+All games, including shipped games and editable variants, use one validated JSON document. Its `schema_version` is `1`. Values are immutable within an active game: creation copies and hashes the fully resolved definition. The interpreter supports no executable author code.
 
-One pattern applies to the whole engine, and the settings screen reuses it
-everywhere.
+### 4.1 Top-level structure
 
-**Every configurable type declares its fields. The view renders them.**
+```ts
+type Side = 1 | -1;
+type Square = [row: number, column: number]; // zero-based integer coordinates
+type Definition = {
+  schema_version: 1;
+  key: string;                 // e.g. "chess", stable builtin key
+  name: string;
+  board: {
+    rows: number;              // integer 2..32
+    columns: number;           // integer 2..32
+    playable_squares?: Square[]; // omitted = entire rectangle
+    initial: Array<{ at: Square; piece: string; side: Side }>;
+  };
+  pieces: Array<{
+    id: string;
+    name: string;
+    glyphs: { "1": string; "-1": string };
+    notation?: string;
+    moves: Movement[];
+    attacks?: Movement[];      // omitted = the capture geometry
+    capture: "none" | "optional" | "mandatory";
+    promotion?: {
+      at: "far_rank" | { rows: number[] };
+      into: string[];
+      timing: "on_reach" | "after_turn";
+    };
+  }>;
+  starting_side: Side;
+  clock: { initial_ms: number; increment_ms: number };
+  initial_rule_state: Record<string, JsonValue>;
+  rules: Rule[];
+  quests: Quest[];
+  notation: Array<"pgn" | "fen" | "letter" | "coordinate" | "stenographic" | "pdn">;
+  appearance: {
+    light_square: string;
+    dark_square: string;
+    board_label?: string;
+  };
+};
+type Movement = {
+  delta: Square;               // side-relative row vector
+  range: number | "ray";
+  mode: "quiet" | "capture" | "both";
+  jump?: boolean;
+  only_unmoved?: boolean;
+};
+type Rule = {
+  id: string;
+  enabled: boolean;
+  priority: number;
+  hook: "available_moves" | "permits_move" | "on_move_made" | "outcome" | "status";
+  when: Condition;
+  effects: Effect[];
+};
+type Quest = {
+  id: string;
+  name: string;
+  description: string;
+  when: "after_move" | "at_game_end";
+  target: number;              // positive integer
+  reward: number;              // nonnegative integer
+  progress: Query;             // per-actor pure integer query
+  complete_when: Condition;
+};
+type JsonValue = null | boolean | number | string | JsonValue[] | { [k: string]: JsonValue };
+type Value = JsonValue | { ref: string } | Query;
+type Query = { query: string; args: Record<string, Value> };
+type Condition =
+  | { op: "true" | "false" }
+  | { op: "all" | "any"; items: Condition[] }
+  | { op: "not"; item: Condition }
+  | { op: "compare"; comparator: "eq" | "ne" | "lt" | "lte" | "gt" | "gte" | "in"; left: Value; right: Value };
+type Effect = { effect: string; args: Record<string, Value> };
+```
+
+Only documented field names and enumerations are accepted, with validation of exact type (including bool distinct from integer). Every identifier in a definition has unique, deterministic meaning. All board coordinates and movement ranges must be within structural limits. A valid definition must initialize a coherent game and allow its configured start rules to be evaluated. The editor is generated from these same schema descriptions, not separately hardcoded game forms.
+
+### 4.2 Interpreter primitives
+
+**References:** `actor.id`, `actor.side`, `turn.side`, `move.start`, `move.hops`, `move.promotion`, `position.before`, `position.after`, `board.rows`, `board.columns`, `clock.remaining`, `rule.state.*`, `quest.progress.*`, `history.revision`, `result`. Unknown references are errors.
+
+**Queries:** `piece_at`, `pieces_matching`, `path_clear`, `squares_attacked`, `capture_paths`, `capture_count`, `legal_action_count`, `repetition_count`, `halfmove_count`, `clock_remaining`, `rule_state`, `special_rights`, `temporary_target`, `position_identity`, `quest_progress`, `last_event`. Each has an explicit typed argument/result definition in `engine/schema.py`. Queries read only the explicitly selected observed or simulated position.
+
+**Effects:** `permit`, `deny`, `offer_move`, `move_piece`, `capture_piece`, `replace_piece`, `set_rule_state`, `increment_rule_state`, `set_rights`, `set_temporary_target`, `propose_result`, `emit_event_metadata`, `complete_quest`. Every effect has a type-checked payload, deterministic ordering, and a hook-specific permission set. Effects operate on a proposed isolated transition, never on the authoritative input object.
+
+**Hook sequence:** geometrical candidates → `available_moves` offers → complete hypothetical board transition → `permits_move` → `on_move_made` → quest evaluation → `outcome` arbitration → read-only `status`. A move requires affirmative permission and no denial. Configured priority resolves outcomes; an unresolvable conflict rejects the action. Hooks cannot directly alter account data, service clocks, participant identity, or database records.
+
+Required generic geometry includes directional and side-relative vectors, rays, leapers, first-move conditions, forced and maximal capture-path selection, short/flying kings, deferred capture removal, en passant-style temporary targets, promotion, auxiliary relocation (castling), king-safety attacks, and configurable repetition identities. These are interpreter capabilities, never chess-name switches.
+
+### 4.3 Safety and determinism
+
+- Definition ≤ 256 KiB, JSON depth ≤ 32, AST depth ≤ 12, ≤ 256 AST nodes per rule/quest, ≤ 128 rules and 128 quests, board ≤ 32×32, capture path ≤ 128 hops, generated candidates ≤ 4,096, snapshot ≤ 4 MiB.
+- One evaluation has a deterministic budget of 250,000 primitive work units. A hit causes a typed rejection; never accept a truncated move list or partial transition.
+- No reflection, dynamic imports, user-defined callable hooks, code evaluation, filesystem/network queries, or hidden mutable singleton state.
+- Serialization uses RFC 8785 canonical JSON and SHA-256 for definition, snapshot, and request digests. Engine results for identical inputs are identical.
+
+## 5. Engine state and contract
+
+### 5.1 Engine interface
 
 ```python
-Field(name, kind, label, default, ...)
-
-class Configurable:
-    @classmethod
-    def spec(cls) -> list[Field]: ...
+validate_definition(document: bytes) -> Definition
+initialize(definition: Definition, game_id: UUID,
+           creator: UUID, joiner: UUID, at_ms: int) -> Snapshot
+legal_actions(definition: Definition, snapshot: Snapshot,
+              actor: UUID, at_ms: int) -> list[LegalAction]
+status(definition: Definition, snapshot: Snapshot,
+       actor: UUID, at_ms: int) -> Status
+apply(definition: Definition, snapshot: Snapshot, actor: UUID,
+      action: Action, at_ms: int) -> Transition
+reconstruct(definition: Definition, activation: Event,
+            events: list[Event]) -> Snapshot
 ```
 
-| Configurable | Declares |
-|---|---|
-| `Board` | rows, columns, placement |
-| `Piece` | name, symbols, movement vectors, attack vectors, jump flag, kind, optional FEN character |
-| `Clock` | initial time, increment |
-| `Rule` subclass | its own value fields; `enabled` is added by the framework |
-| `Quest` subclass | its `parameters()`; `name`, `description` and `reward` are added by the framework |
+The engine trusts neither client claims nor prior in-process state. `apply` is pure and returns a new immutable snapshot, one domain event, proposed award intents, and an optional terminal settlement intent. The API determines authorization, revision, idempotency and server time before calling it.
 
-**Data-driven things are forms assembled from the declaration. Code-driven logic
-is edited as code.** There is one form renderer, so adding a field kind is one
-widget and every surface inherits it.
+### 5.2 Canonical persisted snapshot
 
-## 5. Naming requirements
-
-Czech aliases required, English canonical, no diacritics:
-
-| Diagram | Canonical | Czech alias |
-|---|---|---|
-| `Figurka` | `Piece` | `Figurka` |
-| `Pěšák` | `Pawn` | `Pesak` |
-| `Věž` | `Rook` | `Vez` |
-| `Kůň` | `Knight` | `Kun` |
-| `Střelec` | `Bishop` | `Strelec` |
-| `Dáma` | `Queen` | `Dama` |
-| `Král` | `King` | `Kral` |
-| `HerníPlocha` | `Board` | `HerniPlocha` |
-| `Tah` | `Move` | `Tah` |
-| `Hrac` | `Player` | `Hrac` |
-| `RevizorTahu` | `MoveValidator` | `RevizorTahu` |
-| `Uzivatel` | `User` | `Uzivatel` |
-| `Kwest` | `Quest` | `Kwest` |
-| `HracView` | `PlayerView` | `HracView` |
-| `HracGameView` | `PlayerGameView` | `HracGameView` |
-
-`Knight` is the canonical name for the L-shaped jumping piece, not `Horse`;
-`Kun` is its Czech alias. `Tower` is not a name this project uses and has no
-counterpart in the diagram.
-
-## 6. Repository layout
-
-The workspace has an importable shared engine at `packages/engine/` and sibling `packages/chess/` and `packages/checkers/` game packages. Neither `src/` nor a containing `games/` directory exists.
-
-```text
-packages/
-  engine/          shared model/, controller/, view/, and application entry point
-  chess/           orthodox chess game package (default)
-  checkers/        English draughts game package
-logs/              game logs, configurable, git-ignored
+```ts
+type Snapshot = {
+  schema_version: 1;
+  revision: number;                // activation = 0
+  game_id: string;
+  definition_digest: string;       // lowercase SHA-256 hex in API JSON
+  players: { "1": string; "-1": string }; // immutable Supabase Auth UUIDs
+  board: Array<{ at: Square; piece: string; side: Side; moved: boolean }>;
+  active_side: Side;
+  captured: Array<{ piece: string; side: Side; at_revision: number }>;
+  rule_state: Record<string, JsonValue>;
+  special_rights: Record<string, JsonValue>;
+  temporary_targets: Record<string, JsonValue>;
+  position_counts: Record<string, number>; // repetition identity -> appearances
+  halfmove_count: number;
+  quests: Record<string, Record<string, { current: number; target: number; completed: boolean }>>;
+  clocks: {
+    "1": { remaining_ms: number; increment_ms: number };
+    "-1": { remaining_ms: number; increment_ms: number };
+    anchor_ms: number;             // when active side last started clock
+  };
+  draw_offer_by: string | null;
+  result: GameResult | null;
+};
+type GameResult = {
+  kind: "win" | "draw";
+  winner_id: string | null;        // null exactly when drawn
+  reason: string;                 // validated rule/cause identifier
+};
+type Action =
+  | { type: "move"; move: { start: Square; hops: Square[]; promotion: string | null } }
+  | { type: "resign" }
+  | { type: "offer_draw" }
+  | { type: "accept_draw" }
+  | { type: "claim_draw"; rule_id: string; intended_move: ActionMove | null }
+  | { type: "timeout" };
+type ActionMove = { start: Square; hops: Square[]; promotion: string | null };
 ```
 
-**Inside a game package (target structure; rules and quests land in later PRs):**
+All state necessary to determine legal moves, repetition, clocks, outcomes and per-player quests lives in this snapshot and the immutable pinned definition. Events hold full accepted history; snapshots do not duplicate the transcript. Stored snapshots and events must agree on revision and SHA-256 digest at every commit.
 
-```text
-packages/chess/
-  __init__.py    importable game package
-  config.json    game metadata, board, piece data, clocks, notation, UI appearance
-  rules/         Python behavior extensions
-  quests/        Python behavior extensions
+### 5.3 Rules and timers
+
+Chess must satisfy official orthodox FIDE gameplay including check, mate, stalemate, promotion choices, castling, en passant, repetition, move counters, claimable/automatic draws and timeout-without-mating-material. English draughts must enforce forced complete captures, short kings, and crowning ending the turn. International draughts must enforce 10×10 play, backward captures by men, flying kings, maximum-capture path, deferred capture blockers, and end-of-turn promotion. Each shipped game includes quests and appropriate notation formats.
+
+Clocks use integer milliseconds and database-trusted UTC timestamps. They are initialized only on joining; elapsed time is charged to the side whose clock is running. An accepted legal move charges its time, applies its increment once, and starts the opponent's clock. A rejected/duplicate action never charges again or grants an increment. Read projections include server time and the remaining time computed for that instant; client ticking is visual only. On any authorized game read or action after expiry, the API resolves any due flag-fall within an atomic transaction; no resident timer or paid scheduler is necessary. A draw offer does not pause either clock.
+
+Every action is a complete legal command. Capture paths list all landing squares. A terminal transition evaluates final quests and persists any awards and both ratings in the same database transaction as the final game event.
+
+## 6. Persistent data model: Supabase PostgreSQL
+
+### 6.1 Ownership
+
+Supabase Auth is the identity authority. Application SQL objects live in private schema `bgwq`. All application table mutations are performed through the authenticated FastAPI service; no table is exposed to client roles. Guest and registered accounts both reference `auth.users.id`. No duplicate password/user-auth table exists.
+
+The application contains **exactly six authoritative tables**:
+
+| Table | Responsibility |
+| --- | --- |
+| `profiles` | Public-facing profile attributes for an Auth user |
+| `game_variants` | User-owned validated JSON definitions and revisions |
+| `games` | Membership, pinned definition, lifecycle, canonical snapshot and result |
+| `game_events` | Immutable ordered activation/domain events and idempotency records |
+| `achievement_awards` | Permanent account XP credits earned in eligible games |
+| `game_ratings` | Per-user rating and results for each rated built-in ruleset |
+
+Individual in-game quest counters are in `games.snapshot.quests`. Lifetime XP is derived by summing `achievement_awards.points`; there is no separately mutable `total_xp` column. Custom variants are unranked and cannot mint permanent XP, preventing author-controlled ratings/reward farming.
+
+### 6.2 Complete initial SQL schema
+
+```sql
+CREATE SCHEMA IF NOT EXISTS bgwq;
+
+CREATE TABLE bgwq.profiles (
+  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE RESTRICT,
+  display_name text NOT NULL CHECK (char_length(btrim(display_name)) BETWEEN 1 AND 64),
+  username text NULL CHECK (username ~ '^[a-z0-9_]{3,32}$'),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX profiles_username_unique
+  ON bgwq.profiles (lower(username)) WHERE username IS NOT NULL;
+
+CREATE TABLE bgwq.game_variants (
+  id uuid PRIMARY KEY,
+  owner_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  name text NOT NULL CHECK (char_length(btrim(name)) BETWEEN 1 AND 80),
+  base_key text NOT NULL,
+  definition_version integer NOT NULL CHECK (definition_version = 1),
+  definition jsonb NOT NULL CHECK (jsonb_typeof(definition) = 'object'),
+  definition_digest bytea NOT NULL CHECK (octet_length(definition_digest) = 32),
+  revision bigint NOT NULL DEFAULT 1 CHECK (revision >= 1),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX variants_owner_name_unique
+  ON bgwq.game_variants (owner_id, lower(name));
+
+CREATE TABLE bgwq.games (
+  id uuid PRIMARY KEY,
+  creator_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  joiner_id uuid NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  created_action_id text NOT NULL CHECK (char_length(created_action_id) BETWEEN 1 AND 128),
+  join_action_id text NULL CHECK (char_length(join_action_id) BETWEEN 1 AND 128),
+  source_variant_id uuid NULL REFERENCES bgwq.game_variants(id) ON DELETE SET NULL,
+  definition_key text NOT NULL,
+  rated_ruleset_key text NULL,
+  config_snapshot jsonb NOT NULL CHECK (jsonb_typeof(config_snapshot) = 'object'),
+  config_digest bytea NOT NULL CHECK (octet_length(config_digest) = 32),
+  status text NOT NULL CHECK (status IN ('pending', 'active', 'finished', 'expired')),
+  revision bigint NOT NULL DEFAULT 0 CHECK (revision >= 0),
+  snapshot jsonb NULL CHECK (snapshot IS NULL OR jsonb_typeof(snapshot) = 'object'),
+  snapshot_digest bytea NULL CHECK (snapshot_digest IS NULL OR octet_length(snapshot_digest) = 32),
+  result jsonb NULL CHECK (result IS NULL OR jsonb_typeof(result) = 'object'),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  started_at timestamptz NULL,
+  finished_at timestamptz NULL,
+  pending_expires_at timestamptz NOT NULL,
+  rating_settled_at timestamptz NULL,
+  UNIQUE (creator_id, created_action_id),
+  CHECK (joiner_id IS NULL OR joiner_id <> creator_id),
+  CHECK (
+    (status IN ('pending', 'expired')
+      AND joiner_id IS NULL AND snapshot IS NULL
+      AND snapshot_digest IS NULL AND started_at IS NULL
+      AND result IS NULL AND revision = 0 AND join_action_id IS NULL)
+    OR
+    (status = 'active'
+      AND joiner_id IS NOT NULL AND join_action_id IS NOT NULL
+      AND snapshot IS NOT NULL AND snapshot_digest IS NOT NULL
+      AND started_at IS NOT NULL AND result IS NULL
+      AND finished_at IS NULL)
+    OR
+    (status = 'finished'
+      AND joiner_id IS NOT NULL AND join_action_id IS NOT NULL
+      AND snapshot IS NOT NULL AND snapshot_digest IS NOT NULL
+      AND started_at IS NOT NULL AND finished_at IS NOT NULL
+      AND result IS NOT NULL)
+  ),
+  CHECK (rating_settled_at IS NULL OR (status = 'finished' AND rated_ruleset_key IS NOT NULL))
+);
+CREATE INDEX games_creator_idx ON bgwq.games (creator_id, created_at DESC);
+CREATE INDEX games_joiner_idx ON bgwq.games (joiner_id, created_at DESC)
+  WHERE joiner_id IS NOT NULL;
+
+CREATE TABLE bgwq.game_events (
+  game_id uuid NOT NULL REFERENCES bgwq.games(id) ON DELETE RESTRICT,
+  revision bigint NOT NULL CHECK (revision >= 0),
+  actor_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  action_id text NOT NULL CHECK (char_length(action_id) BETWEEN 1 AND 128),
+  expected_revision bigint NULL,
+  event_type text NOT NULL CHECK (event_type IN (
+    'activation', 'move', 'resign', 'offer_draw',
+    'accept_draw', 'claim_draw', 'timeout'
+  )),
+  request_digest bytea NOT NULL CHECK (octet_length(request_digest) = 32),
+  payload jsonb NOT NULL CHECK (jsonb_typeof(payload) = 'object'),
+  previous_digest bytea NULL CHECK (previous_digest IS NULL OR octet_length(previous_digest) = 32),
+  state_digest bytea NOT NULL CHECK (octet_length(state_digest) = 32),
+  committed_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (game_id, revision),
+  UNIQUE (game_id, action_id),
+  CHECK (
+    (revision = 0 AND event_type = 'activation' AND expected_revision IS NULL)
+    OR
+    (revision > 0 AND event_type <> 'activation' AND expected_revision = revision - 1)
+  )
+);
+
+CREATE TABLE bgwq.achievement_awards (
+  game_id uuid NOT NULL REFERENCES bgwq.games(id) ON DELETE RESTRICT,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  quest_id text NOT NULL,
+  points integer NOT NULL CHECK (points >= 0),
+  earned_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (game_id, user_id, quest_id)
+);
+CREATE INDEX awards_user_idx ON bgwq.achievement_awards (user_id, earned_at DESC);
+
+CREATE TABLE bgwq.game_ratings (
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  ruleset_key text NOT NULL,
+  rating integer NOT NULL DEFAULT 1200 CHECK (rating >= 0),
+  played integer NOT NULL DEFAULT 0 CHECK (played >= 0),
+  wins integer NOT NULL DEFAULT 0 CHECK (wins >= 0),
+  draws integer NOT NULL DEFAULT 0 CHECK (draws >= 0),
+  losses integer NOT NULL DEFAULT 0 CHECK (losses >= 0),
+  last_game_id uuid NULL REFERENCES bgwq.games(id) ON DELETE RESTRICT,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, ruleset_key),
+  CHECK (played = wins + draws + losses)
+);
 ```
 
-The equivalent `packages/checkers/config.json` defines draughts data, not chess
-behavior. The two sibling packages remain independent of one another.
+Database privileges and row-scope policy are part of this schema: revoke schema usage, table DML and function execution from `PUBLIC`, `anon`, and `authenticated`; enable RLS on all application tables; grant only the dedicated backend connection role the minimal operations required for its service transactions. Private Realtime authorization is enforced on `realtime.messages` against verified game membership. Stored events are append-only; database privileges and immutability triggers reject event mutation. Server-only persistence functions enforce snapshot/config immutability, legal status transitions, participant association of awards, and revision/event/hash equality beyond the simple declarative checks shown above.
 
-Each game package has a root `config.json`. Board dimensions, placement, piece
-identity, glyphs, movement vectors, attack vectors, clocks, exported formats,
-appearance, default selection and other configurable values are data. **Only
-rules and quests are executable Python extensions**, because their behavior
-cannot be represented by these static values. The shared engine validates the
-JSON and discovers sibling packages via distribution entry points. This design
-supersedes the older all-Python configuration arrangement.
+Application write authorization is **not** based on browser-issued JWT metadata or author-supplied JSON. A game can never be shared between more than its creator and joiner. A user's UUID and history survive anonymous-account upgrade.
 
-**A game variant is another importable package.** Copying `packages/chess/` to
-`packages/house/` creates a starting point, but the copied `config.json` must get
-a unique `name`, and its entry point must be declared in package metadata before
-installation or discovery. Changing board and piece data requires editing JSON;
-new rules or quests are authored as Python modules. One game runs one board.
+### 6.3 Atomic transactions
 
-`packages/engine/model/` keeps the parent classes — `Piece`, `Rule`, `Quest`, `Board`, `Clock` —
-and the machinery every configuration needs, such as the move, the validator and
-the game manager. Only configuration-specific implementations live in sibling game packages.
+**Create:** resolve verified identity and selected definition; reject unauthorized/invalid data; pin full JSON and SHA-256; insert one pending row. `(creator_id, created_action_id)` is the idempotency key, and exact retries return the same game.
 
-## 7. Functional requirements
+**Join:** lock the pending row `FOR UPDATE`; validate trusted expiry and distinct joiner; create engine snapshot; insert revision-zero activation event; set joiner and active state in one transaction. Competing joins cannot both succeed.
 
-### 7.1 Configurable data
+**Action:** validate cookie and actor; lock game row; check `(game_id, action_id)` before stale revision checks. Same actor/request/expected revision digest returns the original accepted response; different payload reuse is `409`. Verify participant, expected revision, status, current database timestamp, and complete move. Run engine while holding the game lock. Update snapshot/revision/result, insert exactly one immutable event, add awards, and settle both ratings atomically. Any error rolls back everything.
 
-| ID | Requirement |
-|---|---|
-| FR-1 | Board dimensions are configurable in rows and columns. |
-| FR-2 | The starting position is either the shipped one or edited square by square. |
-| FR-3 | A piece declares a name, a white symbol, a black symbol, movement vectors, attack vectors, a jump flag and a `kind` label. A piece may be added to the palette and placed on the board. |
-| FR-4 | Symbols are **unicode chess glyphs declared as data**. The board renderer and the notation writer hold no knowledge of piece types; both read what the piece declares. |
-| FR-5 | A piece may additionally declare an optional FEN character. Without one it has no FEN representation. |
-| FR-6 | Clocks declare an initial time and an increment. |
-| FR-7 | A game runs under exactly one configuration and exactly one board. |
+**Settlement:** only official built-in rulesets award persistent XP and ratings. Ratings start at 1200; standard two-player Elo expected-score formula uses `K = 32` and signed, zero-sum integer adjustment. Lock the two rating rows in stable UUID order, calculate both deltas from pregame ratings, and commit once alongside `games.rating_settled_at`. Unrated variants still have game-local quests/results but never update permanent XP/rating.
 
-### 7.2 Rules — the code-driven layer
+**Recovery:** the pinned definition plus activation and ordered events can reconstruct a complete snapshot. Normal reads/actions use the transactionally maintained latest snapshot, with digest/revision validation; they do not replay all events. Recovery replay is available for integrity checks. On commit, the API sends a private revision notification; notification failure is not a failed gameplay transaction.
 
-| ID | Requirement |
-|---|---|
-| FR-8 | A `Rule` is the parent class for game logic. It carries a configured `value` and per-game `state`, and implements five hooks, each with a permissive default: `permits_move(position, move) -> bool`, `available_moves(position, piece) -> Iterable[Move]`, `outcome(position) -> Optional[Result]`, `on_move_made(position, move) -> None`, and `status(position) -> Optional[str]`. |
-| FR-9 | **Four of the five hooks are exhaustive for turn-based game logic**, which can only forbid a move or end the game: `permits_move` and `available_moves` cover forbidding a move, `outcome` covers ending the game, and `on_move_made` carries the bookkeeping the other three depend on. The fifth, `status`, is **display rather than logic** — it reports something worth showing, such as `Check`, while the game continues. |
-| FR-10 | **No rule owns behaviour.** The validator asks and rules answer: a rule may permit or forbid, never cause; a rule may propose an outcome, never impose one. |
-| FR-11 | An outcome is a `Result` carrying a kind (win, loss, draw), a **precedence**, and an optional winner. Decisive outcomes outrank draws; equal precedence resolves by a declared order. |
-| FR-12 | A rule's configured `value` is persisted. Its runtime `state` — counters, history — resets each game and is never persisted. |
-| FR-13 | A move may consist of **several hops**. A capture chain in checkers is one move the player makes, not several. |
-| FR-14 | No piece type is special to the engine. Whether a position has a king is a rule, not a lookup by type name. |
-| FR-15 | Board size is not restricted to 8×8. Rank-relative rules are **generalised, not disabled**: the home rank and the castling and knight-forward files are derived from the configured board. |
-| FR-16 | Every orthodox rule in `chess_rules.md` is expressible in those hooks: castling, en passant, promotion, check, checkmate, stalemate, insufficient material, the fifty-move rule, threefold repetition, mutual-agreement draw, and loss on time only where the opponent retains mating material. |
-| FR-17 | Logic beyond any shipped set is expressible without extending the engine: a piece that may move to any square satisfies `available_moves`; a piece that must capture if able satisfies `permits_move`; a game that ends when a named piece is lost satisfies `outcome`. |
+**Clock finalization:** authorized reads and actions resolve an expired clock under the same row-lock protocol. Race results are determined by database timestamps and commit order, never device time. No continuous per-game server process is required.
 
-### 7.3 Quests — also code-driven
+## 7. Public FastAPI contract
 
-| ID | Requirement |
-|---|---|
-| FR-18 | A `Quest` is a parent class with subclasses for the built-in quests, following the same pattern as `Rule`. Its `validate() -> bool` takes no arguments, exactly as the reference diagram draws it. |
-| FR-19 | There is no separate condition class. A quest carries its own logic; the pattern is identical to `Rule`'s. |
-| FR-20 | A quest declares `name`, `description`, a `reward`, and its `parameters()`, which is what the settings form asks the player for. |
-| FR-21 | Every quest declares a **`when`**: `after_move` or `at_game_end`. |
-| FR-22 | A quest reports **progress** as current and target, not only a boolean, so a card can render `3/5`. |
-| FR-23 | **Quest scope is split explicitly.** Quests in play for the current game are held by the quest manager. Quests a user has completed are held by the user. |
-| FR-24 | Total experience is **derived** from the quests a user has completed, so the user type gains no new field. |
+All HTTP calls use the web-origin prefix `/api/v1`. Bodies and responses are strict JSON and use snake_case, except file downloads. Authentication is an HttpOnly, Secure, SameSite=Lax session cookie backed by Supabase Auth; mutation requires a valid `Origin` plus session-bound `X-CSRF-Token`. `GET /session` issues/refreshes the CSRF handshake. Private responses use `Cache-Control: no-store`. `Authorization` is never inferred from a player ID in a request body.
 
-### 7.4 Configurations
+### 7.1 Shared transport types
 
-| ID | Requirement |
-|---|---|
-| FR-25 | A configuration is an importable game package under `packages/` holding board, pieces, rules, quests and clocks. It is registered through packaging entry-point metadata. |
-| FR-26 | `chess` ships as the default: 8×8, the six standard pieces, every orthodox rule at its orthodox value, and default clocks. Playing orthodox chess requires no configuration. |
-| FR-27 | The default configuration cannot be edited or deleted. A variant starts by duplicating it. |
-| FR-28 | Configurations can be created, renamed, duplicated, edited and deleted. |
-| FR-29 | Configurations persist as directories and survive a restart without an account. |
+```ts
+type UUID = string;               // UUID canonical lowercase format
+type Digest = string;             // lowercase 64-character SHA-256 hex
+type ISOTime = string;            // UTC RFC3339, server-generated
+type ApiError = {
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
+  request_id: string;
+};
+type Me = {
+  id: UUID;
+  anonymous: boolean;
+  display_name: string;
+  username: string | null;
+};
+type DefinitionSummary = {
+  key: string;
+  name: string;
+  built_in: boolean;
+  version: number;
+  digest: Digest;
+  board: { rows: number; columns: number };
+};
+type Variant = {
+  id: UUID;
+  owner_id: UUID;
+  name: string;
+  base_key: string;
+  revision: number;
+  definition: Definition;
+  digest: Digest;
+  created_at: ISOTime;
+  updated_at: ISOTime;
+};
+type Invitation = {
+  game_id: UUID;
+  status: "pending" | "active" | "finished" | "expired";
+  definition: DefinitionSummary;
+  creator: { id: UUID; display_name: string };
+  expires_at: ISOTime;
+  join_allowed: boolean;
+};
+type GameView = {
+  id: UUID;
+  status: "pending" | "active" | "finished" | "expired";
+  revision: number;
+  definition: DefinitionSummary;
+  creator: { id: UUID; display_name: string };
+  joiner: { id: UUID; display_name: string } | null;
+  snapshot: Snapshot | null;
+  result: GameResult | null;
+  server_time: ISOTime;
+  created_at: ISOTime;
+  started_at: ISOTime | null;
+  finished_at: ISOTime | null;
+};
+type GameEvent = {
+  game_id: UUID;
+  revision: number;
+  actor_id: UUID;
+  action_id: string;
+  event_type: string;
+  at: ISOTime;
+  action: Action | null;          // null for activation
+  effects: JsonValue[];
+  next_state_digest: Digest;
+};
+type Page<T> = { items: T[]; next_cursor: string | null };
+type GameActionRequest = {
+  expected_revision: number;
+  action_id: string;              // client-generated UUID or 1..128 stable key
+  action: Action;
+};
+type GameActionResponse = {
+  event: GameEvent;
+  game: GameView;
+};
+type LegalActionsResponse = {
+  revision: number;
+  actions: ActionMove[];
+  status: string[];
+  server_time: ISOTime;
+};
+```
 
-### 7.5 Settings surface
+Snapshots and other private records are never returned to third parties. `GameView` is available only to the two participants; pre-join users receive `Invitation`, not a game snapshot. Unknown IDs and foreign private resources are concealed with `404` when appropriate.
 
-| ID | Requirement |
-|---|---|
-| FR-30 | A selector in the corner chooses **which configuration is being edited**. It appears in settings only. |
-| FR-31 | Below it are sections, one per configurable surface: **Board, Pieces, Rules, Quests, Clocks**. |
-| FR-32 | **All data-based configuration is form-exposed**, assembled from each type's declaration by one renderer. |
-| FR-33 | The Rules and Quests sections offer a code editor for authoring logic, which writes into the configuration directory. |
-| FR-34 | The editor validates before the code may join the configuration, reporting errors in the editor rather than at game start. |
-| FR-35 | Settings can be saved, reset to the shipped defaults, or cancelled. |
+### 7.2 Routes
 
-### 7.6 Game start and view
+| Method | Path | Request | Response / authority |
+| --- | --- | --- | --- |
+| GET | `/session` | — | `{me: Me\|null, csrf_token: string}`; sets any required CSRF cookie |
+| POST | `/auth/guest` | `{display_name: string}` | `{me: Me}`, establishes real anonymous Auth session |
+| POST | `/auth/register` | `{email: string, password: string, display_name: string}` | `{me: Me, verification_required: boolean}`, provider-owned |
+| POST | `/auth/login` | `{email: string, password: string}` | `{me: Me}`, sets session |
+| POST | `/auth/upgrade` | `{email: string, password: string}` | `{me: Me, verification_required: boolean}`, same-UUID conversion |
+| POST | `/auth/logout` | `{}` | `204`; revoke session and clear cookies |
+| GET | `/me` | — | `Me`, authenticated |
+| PATCH | `/me` | `{display_name?: string, username?: string\|null}` | `Me`, owner only |
+| GET | `/me/games` | `?cursor&limit` | `Page<GameView>`, participant games only |
+| GET | `/me/awards` | `?cursor&limit` | `Page<{game_id, quest_id, points, earned_at}>` |
+| GET | `/me/ratings` | — | `{items: [{ruleset_key,rating,played,wins,draws,losses}]}` |
+| GET | `/definitions` | — | `{items: DefinitionSummary[]}`, validated immutable built-ins |
+| GET | `/definitions/{key}` | — | `Definition`, built-in only |
+| GET | `/variants` | `?cursor&limit` | `Page<Variant>`, owner only |
+| POST | `/variants` | `{name,base_key,definition}` | `Variant`, validated and owned; `201` |
+| GET | `/variants/{id}` | — | `Variant`, owner only |
+| PATCH | `/variants/{id}` | `{expected_revision,name?,definition?}` | `Variant`; compare-and-swap |
+| DELETE | `/variants/{id}` | — | `204`; pinned games retain config copy |
+| POST | `/variants/{id}/duplicate` | `{name}` | `Variant`, owner only; `201` |
+| POST | `/games` | `{definition:{kind:"builtin"\|"variant",key:string},action_id:string,clock?:{initial_ms,increment_ms}}` | `{game_id,status:"pending",invite_url,revision:0}`; `201` |
+| GET | `/games/{id}/invitation` | — | `Invitation`; sanitized preview |
+| POST | `/games/{id}/join` | `{action_id:string}` | `GameView`, atomically starts match |
+| GET | `/games/{id}` | — | `GameView`, participant only; ETag is revision/digest |
+| GET | `/games/{id}/legal-actions` | — | `LegalActionsResponse`, participant only |
+| POST | `/games/{id}/actions` | `GameActionRequest` | `GameActionResponse`; atomic change |
+| GET | `/games/{id}/events` | `?after_revision&limit` | `Page<GameEvent>`, participant only |
+| GET | `/games/{id}/exports/{format}` | — | authenticated file download; format must be declared |
+| POST | `/games/{id}/realtime-token` | `{}` | `{channel,access_token,expires_at}`, participant-only short-lived token |
+| GET | `/openapi.json` | — | generated OpenAPI 3.x with these exact DTOs |
 
-| ID | Requirement |
-|---|---|
-| FR-36 | Starting a game presents a modal offering a **configuration selector**, a **Settings** button and a **Start** button. |
-| FR-37 | The board renders with coordinates, symbols, the active player's squares highlighted, and legal-move highlights on selection. |
-| FR-38 | Each player panel shows identity, clock, and captured and lost pieces. |
-| FR-39 | The turn is indicated. |
-| FR-40 | Move history is visible. |
-| FR-41 | Status and alerts appear in a footer. |
-| FR-42 | Quests appear as cards showing progress and reward. |
+Request objects reject unknown fields; all cursors are opaque, limits default 50 and max 100; identifiers are server-validated. API errors use the `ApiError` envelope. Expected status codes: `400` invalid protocol, `401` no/expired session, `403` forbidden, `404` unknown or concealed resource, `409` idempotency/revision/join conflict, `410` expired invite, `422` invalid definition or legal action, `429` rate limit, `503` provider outage. Conflict replies include current revision only for authorized participants. The server returns the same accepted event on exact idempotent retries.
 
-### 7.7 Notation and export
+### 7.3 Session, security, realtime
 
-The reference diagram is the specification for this area. The operation
-compartment of the **`ChessNotationWriter`** box enumerates the formats — *letter*,
-*PGN*, *FEN*, *Field - Field - Extra*, *Stenographic* (standard or custom
-compression) — plus **the game transcript**, described as a single parameter.
+- Real Supabase anonymous Auth sessions back guest IDs; never use a global guest secret or client-chosen UUID. Provider identity verification occurs on every protected request.
+- API owns refresh-cookie rotation, login/logout, session revocation and same-UUID guest upgrade. Passwords are handled by Supabase Auth and never stored in `bgwq`.
+- All private Postgres data is inaccessible to the browser's Supabase `anon` and `authenticated` roles. The client may talk to Supabase Realtime only using ephemeral short-lived channel authorization.
+- A private channel is named from the opaque game ID. A subscriber must be a verified participant according to a server-controlled Realtime membership policy. Notifications contain only `{game_id,revision,state_digest,event_type}` and are emitted after SQL commit.
+- On reconnect or a missing revision, the client fetches the authoritative `GET /games/{id}` and any missing events. The server never trusts channel messages or browser state as commands.
+- Validate request size, rate limits by identity and endpoint, authenticated read membership, JSON budgets, SQL timeouts, allowed origins, and Tauri remote-navigation policy.
 
-**All must be implemented before declaring the game complete.** These are requirements, not assertions about the current code.
+## 8. Web UX architecture
 
-The diagram's `export writers` box is a separate, near-empty box holding one
-field. It does **not** enumerate the formats, and **no edge in the diagram
-connects any writer to any other writer or to that box**. `Extends` in the
-diagram is a legend label on a free-standing line beside the piece row, not a
-relationship. Deriving one class per format from a base class is therefore a
-deviation in its own right — see `object_model.md` section 7.
+The UI is one React application with these routes:
 
-| ID | Requirement |
-|---|---|
-| FR-43 | Export is one class per format, extending a base exporter named `ExportWriter`, living in the configuration that uses it. There is no format switch and no format-name string anywhere in the engine. |
-| FR-44 | *Letter* — the move is rendered in algebraic notation with piece letters, capture markers, promotion and castling notation. |
-| FR-45 | *PGN* — real PGN: a seven-tag roster **derived from the game** (event, site, date, round, both players, result), and movetext in Standard Algebraic Notation, including piece disambiguation, castling notation, promotion, and check and mate suffixes. |
-| FR-46 | *FEN* — all six fields are **computed from the game state**: placement, side to move, castling rights, en passant square, halfmove clock and fullmove number. No field is hard-coded. |
-| FR-47 | *FEN* round-trips: import a position, build it, export it, obtain the identical string. Asserted for the start position, a mid-game position carrying both castling rights, and one carrying an en passant square. |
-| FR-48 | *Field - Field - Extra* — the game transcript header, derived from real state. Player names come from the users playing, the result from the game, the date from the game. No placeholder strings. |
-| FR-49 | *Stenographic* — the transcript in stenographic form, with compression that is either a standard choice or a configured one, drawn from the standard library codecs only. |
-| FR-50 | *The game transcript* — every move is recorded and readable, independently of any export format. |
-| FR-51 | A format that belongs to one game ships with that game. FEN and PGN are chess formats and therefore live in `packages/chess/export/`; a game with no FEN representation has no FEN exporter, because the structure says so rather than a capability check. |
-| FR-52 | **FEN import exists as well as export**, because the round-trip requirement needs a reader. The diagram defines only writers, so a reader is a recorded deviation. |
+| Route | Screen |
+| --- | --- |
+| `/` | Landing, available built-ins, create and recent games |
+| `/auth` | Guest, login and registration |
+| `/games/new` | Definition, time controls and create |
+| `/games/:id` | Invitation before join; live/finished board for participants |
+| `/variants` | Owned variants, duplicate/create |
+| `/variants/:id/edit` | Schema-driven editor: Board, Pieces, Rules, Quests, Clocks |
+| `/account` | Profile, played games, quest awards/total XP, ratings |
 
-### 7.8 Games shipped
+The board renders from definition data, supports multi-hop capture path building, underpromotion selection, permitted-square highlights, coordinate labels, drag/touch/keyboard, turn and status messages. It renders clock time from server time and trusted anchors. Quest progress cards show `current/target` and reward for each participant.
 
-| ID | Requirement |
-|---|---|
-| FR-53 | `packages/chess/` is a complete, correct orthodox chess configuration. |
-| FR-54 | `packages/checkers/` is a complete, correct English draughts configuration: twelve pieces a side, men moving one square forward diagonally, kings moving one square diagonally, **mandatory capture including chains**, promotion to king on reaching the far rank, and a win by immobilisation or by losing all pieces. |
-| FR-55 | Adding `packages/checkers/` requires **no engine change**, only the game package and its distribution registration. If it does, the abstraction is wrong — and that is the point of shipping it. |
+Definition forms are generated from the typed JSON schema and its query/effect descriptors. No scripting editor, arbitrary code extension, or editable built-in content. Saving invalid config leaves the last valid persisted revision unchanged and shows field-scoped errors. A game's pinned definition remains immutable when the original user variant changes or is deleted.
 
-### 7.9 Application
+The application maintains a session-scoped API cache and reconnect logic, never a competing persistent game model. Conflicts display an error and reload a newer authoritative revision. Private API payloads are not persisted in client storage.
 
-| ID | Requirement |
-|---|---|
-| FR-56 | The game log directory is **configurable**. It defaults to `logs/` at the repository root, is created on demand, and is git-ignored. |
-| FR-57 | The package is installable and declares its metadata and runtime dependencies, of which there are none beyond the standard library. |
-| FR-58 | The application starts from a documented entry point and a complete game can be played to a result. |
-| FR-59 | The entry point is a module the packaging declares, so `python -m <entrypoint>` starts a window. |
+## 9. Native application
 
-### 7.10 Diagram surface
+Tauri 2 loads the hosted web application's HTTPS origin using `frontendDist` configured as a remote URL. It creates the same web UI on Windows, macOS, Linux, Android and iOS with platform-specific runtime/container configuration and minimum permissions. No second React build, database, offline game logic, embedded Python, or secret Supabase credential.
 
-Every class and member the diagram defines is listed here with the requirement
-that delivers it. Nothing in the diagram is left without coverage, and anything
-this project adds beyond the diagram is registered in `object_model.md`.
+Only the intended HTTPS origin is allowed in the WebView; external URLs open in the operating-system browser. Auth cookies and identity recovery must work in each supported WebView platform. API and session behavior is identical to the browser client. The window provides a comprehensible offline/network-error state but does not offer offline play.
 
-| Diagram member | Delivered by |
-|---|---|
-| `HerníPlocha` · `rozmery`, `herni_deska`, `vyhozene_figurky_b`, `vyhozene_figurky_c` | FR-1, FR-2 |
-| `HerníPlocha` · `vrat_obsah`, `posun_figurky`, `nahrad_figurku` | FR-37, FR-15, FR-16 |
-| `Figurka` · `název`, `barva(tým)`, `vektory`, `vektory_utoku` | FR-3, FR-4, FR-5 |
-| `Pěšák` `Věž` `Kůň` `Král` `Dáma` `Střelec` | FR-3 |
-| `Hrac` · `barva`, `uzivatel`, `getEloRating` | FR-59 |
-| `Tah` · `vychozi pozice`, `cilova pozice`, `figurka`, `typ tahu` | FR-15, FR-16, FR-52 |
-| `Tah` · `over platnost()`, `proved tah()` | FR-15 |
-| `RevizorTahu` · `herni_plocha`, `tah` | FR-15 |
-| `RevizorTahu` · `simulate_Move()`, `check_Šach()`, `check_Mat`, `check_Pat` | FR-8, FR-16, FR-19, FR-60 |
-| `GameManager` · `plocha`, `aktivni_hrac`, `hraci`, `aktualni_tah`, `casovac`, `game_logger`, `revizor_tahu` | FR-61 |
-| `GameManager` · `zacni_tah()`, `mozne_tahy()`, `zrus_tah()`, `uloz_log()`, `get_stav()` | FR-61 |
-| `GameManager` · `najdi_uzivatele(id)` | FR-59 |
-| `Timer` · `cas_hrac`, `nuluj_cas()`, `pocitej_cas()` | FR-6, FR-62 |
-| `GameLogger` · `soubor`, `uloz_tah()`, `vytvor_soubor()` | FR-50, FR-63 |
-| `Uzivatel` · `uzivatelske_jmeno`, `jmeno`, `email`, `elo`, `splnene_kwesty`, `pridej_quest()` | FR-59, FR-24 |
-| `User Manager` · `Id_uzivatele`, `log_uzivatelu`, `historie_uzivatele`, `proveď_tah()` | FR-59 |
-| `Quest` · `nazev`, `popis`, `validate()` | FR-18, FR-20 |
-| `QuestManager` | FR-23 |
-| `ChessNotationWriter` · format list, `item` | FR-43 to FR-52 |
-| `MetadataWriter` | FR-48 |
-| `export writers` · `field` | FR-43 |
-| `GameManagerController` · `vyber_pole()` | FR-64 |
-| `GameView` · `controller`, `aktualizuj_plochu()` | FR-37, FR-65 |
-| `HracGameView` · `controller`, `akutalizuj_hrace()` | FR-38, FR-66 |
-| `HracView` | FR-38 |
+Installable release artifacts target Windows, macOS, Linux, Android and iOS. Packaging or distribution that requires signing credentials must not pretend an unsigned binary is installable on a restricted platform.
 
-### 7.11 Requirements added to close gaps in diagram coverage
+## 10. Deployment topology and environment
 
-| ID | Requirement |
-|---|---|
-| FR-60 | A user has a username, display name, email and an ELO rating, is registered and looked up by identifier, is linked to the player it controls, and the player's rating is readable from that link. The user directory records its users, its action log and its history. |
-| FR-61 | The validator's four drawn operations are preserved. `simulate_Move()` returns the moves available to the active player; `check` reports whether the royal piece is attacked; checkmate and stalemate are reported as outcomes through `Result`. The royal piece is identified by whatever the configuration declares, never by a type name. |
-| FR-62 | The game manager holds the board, the active player, the players, the current move, the clock, the logger and the validator, and exposes starting a turn, listing available moves, cancelling a move, writing the log, and reporting the game state. |
-| FR-63 | A clock holds per-player time, resets, and counts down for the given player. |
-| FR-64 | A log creates its file on demand, records each move with its move type, and exposes the recorded moves. |
-| FR-65 | The controller selects a square and dispatches it to the game manager. |
-| FR-66 | The game view refreshes the board when the controller reports a change. |
-| FR-67 | The player view refreshes that player when the controller reports a change. |
+**Vercel web project:** root directory `packages/web`. Bun locked install and Rsbuild produce static assets. A server-side Vercel rewrite proxies `/api/*` to the independent API deployment; client navigation falls back to `index.html`. HTTPS and origin-scoped session cookies are mandatory.
+
+**Vercel API project:** root directory `packages/server`. Vercel's Python runtime discovers `api/index.py` exposing one FastAPI `app`. It bundles `engine`, `definitions`, `formats`, and private Python adapters; no mounted persistent volume or active game process is assumed. The API does not depend on a long-lived connection or background scheduler.
+
+**Supabase:** enable Auth anonymous sign-in and registered identity, private PostgreSQL `bgwq` schema, transaction pooler and private authenticated Realtime. Configure required Auth redirects and API secrets in protected environments, not static assets. Only explicit app migrations create `bgwq` tables; provider-managed schemas remain under Supabase ownership.
+
+**Environment contract:**
+- Web build: `PUBLIC_API_BASE=/api/v1` and the public Supabase Realtime endpoint/key (publishable only).
+- API: `SUPABASE_URL`, provider-safe server Auth credential, private pooled `DATABASE_URL`, `WEB_ORIGIN`, `SESSION_COOKIE_SECRET`, and an approved Realtime-sending credential.
+- Native: the single production `WEB_ORIGIN`, embedded as a non-secret remote URL.
+- No application secret, SQL password, signed session key, or provider service credential is embedded in JS bundles or Tauri resources.
+
+The system must support at least 30 distinct guest/registered players concurrently using 15 two-player games from a shared classroom IP within free-tier constraints. All accepted actions remain atomic under serverless restarts, multiple API instances, network interruptions, and racing clients.
