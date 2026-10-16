@@ -1,6 +1,6 @@
 [package]
 name = "boardgameswithquests-native"
-version = "0.1.0"
+version = "0.7.0"
 description = "BoardGamesWithQuests remote web application wrapper"
 authors = ["marius-patrik"]
 edition = "2021"

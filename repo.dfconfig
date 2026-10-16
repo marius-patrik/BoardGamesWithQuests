@@ -33,7 +33,7 @@
       "$comment": "Python and documentation actions. Python artifact publishing remains disabled until the behavior release gate.",
       "testing": {
         "python": {
-          "command": "python -m pip install -e . -r requirements-dev.txt && python -m pytest",
+          "command": "pytest",
           "versions": [
             "3.10",
             "3.11",
