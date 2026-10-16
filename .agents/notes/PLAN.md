@@ -45,6 +45,10 @@ Use the behavioral standard in [AGENTS](../AGENTS.md).
 - Commit one action, clock update, per-player quest progress and events through
   one atomic persistence boundary. Rejected/duplicate/stale/unauthorized actions
   leave the snapshot unchanged.
+- Verify closed move/resign/claim_draw/timeout submissions, both event envelopes,
+  configured starting side and selected position identity through replay.
+- Implement participant-authorized agreed draw offer/acceptance and SQL terminal
+  event validation as separate bounded dependencies before remote exposure.
 - Preserve game-neutral movement, ray attacks, captures, promotion, path
   enumeration, terminal detection, repetition and configured result precedence.
 - Test every supported operation through external domain behavior, including

@@ -13,6 +13,7 @@ import math
 
 MAX_DEPTH = 12
 MAX_NODES = 256
+MAX_JSON_TEXT_BYTES = 262144
 MAX_RULES = 128
 MAX_QUESTS = 128
 HOOKS = frozenset({"permits_move", "available_moves", "outcome", "on_move_made", "status"})

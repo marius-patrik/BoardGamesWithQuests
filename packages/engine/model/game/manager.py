@@ -24,6 +24,7 @@ from engine.model.game.capture_geometry import (
 )
 from engine.model.game.conditions import ConditionEvaluator, QueryResolutionError
 from engine.model.game.configuration import (
+    MAX_GAME_JSON_BYTES,
     GameDefinition,
     board_from_definition,
     validate_definition,
@@ -75,6 +76,8 @@ class OperationEvaluation:
         """
         self.budget = budget
         self.capture_cache: dict[tuple[Any, ...], tuple[Any, ...]] = {}
+        self.identity_cache: dict[str, str] = {}
+        self.identity_probe_depth = 0
 
 
 class TransitionError(ValueError):
@@ -148,6 +151,11 @@ class GameManager:
             or definition.halfmove_reset is not None
         ):
             config["halfmove_reset"] = thaw_json(definition.halfmove_reset)
+        if (
+            "position_identity" in definition.declared_optional_fields
+            or definition.position_identity is not None
+        ):
+            config["position_identity"] = thaw_json(definition.position_identity)
         if "starting_side" in definition.declared_optional_fields or definition.starting_side != 1:
             config["starting_side"] = definition.starting_side
         initial = definition.clock["initial_seconds"] * 1000
@@ -342,7 +350,7 @@ class GameManager:
         )
 
     @staticmethod
-    def _position_key(state: Mapping[str, Any]) -> str:
+    def _raw_position_key(state: Mapping[str, Any]) -> str:
         """Canonicalize rule-significant board and explicit rights for repetition.
 
         Args:
@@ -361,6 +369,96 @@ class GameManager:
             sort_keys=True,
             separators=(",", ":"),
         )
+
+    def _position_key(self, state: Mapping[str, Any]) -> str:
+        """Normalize only configured rule-significant state and legally effective targets.
+
+        Args:
+            state: Detached authoritative or isolated prospective state.
+
+        Returns:
+            Canonical position identity, preserving raw identity when policy is absent.
+
+        Raises:
+            QueryResolutionError: Selected state, legality probes or resources are invalid.
+        """
+        policy = self.definition.position_identity
+        if policy is None:
+            return self._raw_position_key(state)
+        if self._evaluation is None:
+            with self._lock, self._operation():
+                return self._position_key(state)
+        if self._evaluation.identity_probe_depth:
+            raise QueryResolutionError("recursive position identity is not available")
+        self._charge(_json_work(state))
+        cache_key = json.dumps(thaw_json(state), sort_keys=True, separators=(",", ":"))
+        if cache_key in self._evaluation.identity_cache:
+            return self._evaluation.identity_cache[cache_key]
+        targets: dict[str, Any] = {}
+        for target in policy["targets"]:
+            name = target["name"]
+            value = state["temporary_targets"][name]
+            if value is not None and target["legal_capture"]:
+                self._evaluation.identity_probe_depth += 1
+                try:
+                    value = value if self._legal_target_capture(thaw_json(state), value) else None
+                finally:
+                    self._evaluation.identity_probe_depth -= 1
+            targets[name] = value
+        position = {
+            "board": [
+                {
+                    key: value
+                    for key, value in record.items()
+                    if key != "moved" or record["kind"] in policy["moved_kinds"]
+                }
+                for record in state["board"]
+            ],
+            "active_side": state["active_side"],
+            "rule_state": {name: state["rule_state"][name] for name in policy["rule_state"]},
+            "rights": {name: state["special_rights"][name] for name in policy["rights"]},
+            "targets": targets,
+        }
+        result = json.dumps(thaw_json(position), sort_keys=True, separators=(",", ":"))
+        if len(self._evaluation.identity_cache) >= 256:
+            self._evaluation.identity_cache.pop(next(iter(self._evaluation.identity_cache)))
+        self._evaluation.identity_cache[cache_key] = result
+        return result
+
+    def _legal_target_capture(self, state: dict[str, Any], target: list[int]) -> bool:
+        """Probe full configured capture legality without appending recursive position history.
+
+        Args:
+            state: Isolated observed position.
+            target: In-bounds temporary target.
+
+        Returns:
+            Whether a complete authorized capturing intent ends on the target.
+
+        Raises:
+            QueryResolutionError: Probe requests recursive identity or exceeds resources.
+        """
+        side = state["active_side"]
+        board = self._board(state)
+        for move in self._candidates(state, board, side, state["clocks"]["anchor_ms"]):
+            if move.end_pos != tuple(target):
+                continue
+            try:
+                _, _, captures, _, _ = self._prepare_move(
+                    state,
+                    side,
+                    state["participants"][str(side)],
+                    state["revision"],
+                    "position-probe",
+                    move,
+                    state["clocks"]["anchor_ms"],
+                    enforce_clock=False,
+                )
+            except TransitionError:
+                continue
+            if captures:
+                return True
+        return False
 
     def _paths(self, board: Board, side: int) -> list[dict[str, Any]]:
         """Enumerate complete capture chains only for pieces declaring that policy.
@@ -429,6 +527,9 @@ class GameManager:
         counts: dict[str, int] | None = None,
         before_board: Board | None = None,
         projected_board: Board | None = None,
+        action: dict[str, Any] | None = None,
+        expired_side: int | None = None,
+        event_actor: str | None = None,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Bind read-only queries and references to one explicit evaluation state.
 
@@ -485,7 +586,11 @@ class GameManager:
                 // 1000
                 for name, color in selectors.items()
             },
-            "position_key": self._position_key(state),
+            "position_key": (
+                None
+                if self._evaluation is not None and self._evaluation.identity_probe_depth
+                else self._position_key(state)
+            ),
             "position_history": state["position_history"],
             "position": {"board": state["board"], "active_side": state["active_side"]},
             "halfmove_count": state["halfmove_count"],
@@ -509,6 +614,13 @@ class GameManager:
             "board.rows": board.rows,
             "board.columns": board.cols,
             "clock.remaining": query_state["clocks"]["active"],
+            "player.opponent.id": state["participants"][str(-side)],
+            "event.type": (
+                action["type"] if action is not None else ("move" if move is not None else None)
+            ),
+            "event.claim": action.get("claim") if action is not None else None,
+            "event.actor": event_actor or state["participants"][str(side)],
+            "event.expired_side": expired_side,
         }
         if move is not None:
             references.update(
@@ -753,6 +865,9 @@ class GameManager:
         counts: dict[str, int] | None = None,
         before_board: Board | None = None,
         projected_board: Board | None = None,
+        action: dict[str, Any] | None = None,
+        expired_side: int | None = None,
+        event_actor: str | None = None,
     ) -> tuple[PlannedEffect, ...]:
         """Evaluate configured rules without mutating their inputs.
 
@@ -773,7 +888,18 @@ class GameManager:
         """
         self._charge(self._rule_work)
         queries, references = self._context(
-            state, board, side, move, captures, now_ms, counts, before_board, projected_board
+            state,
+            board,
+            side,
+            move,
+            captures,
+            now_ms,
+            counts,
+            before_board,
+            projected_board,
+            action,
+            expired_side,
+            event_actor,
         )
         return (
             HookInterpreter(thaw_json(self.definition.rules), queries, references)
@@ -909,6 +1035,8 @@ class GameManager:
         action_id: str,
         move: Move,
         now_ms: int,
+        *,
+        enforce_clock: bool = True,
     ) -> tuple[dict[str, Any], Board, list[list[int]], tuple[PlannedEffect, ...], dict[str, Any]]:
         """Prepare the same complete isolated transition for execution and legal previews.
 
@@ -920,6 +1048,8 @@ class GameManager:
             action_id: Stable action identifier.
             move: Complete candidate intent.
             now_ms: Trusted evaluation timestamp.
+            enforce_clock: Require action-time eligibility; position identity probes
+                evaluate capture legality independently of the built-in clock deadline.
 
         Returns:
             Isolated state, board, captures, effects and event before outcome arbitration.
@@ -930,7 +1060,7 @@ class GameManager:
         self._charge(_json_work(state))
         state = thaw_json(freeze_json(state))
         elapsed = now_ms - state["clocks"]["anchor_ms"] if side == state["active_side"] else 0
-        if elapsed < 0 or elapsed >= state["clocks"]["remaining_ms"][str(side)]:
+        if enforce_clock and (elapsed < 0 or elapsed >= state["clocks"]["remaining_ms"][str(side)]):
             raise TransitionError("participant clock does not permit an action")
         self._charge(_json_work(state))
         observed = thaw_json(freeze_json(state))
@@ -1022,7 +1152,8 @@ class GameManager:
         )
         event["effects"] = emitted
         state["board"] = self._placement(board)
-        state["position_history"].append(self._position_key(state))
+        if self._evaluation is None or not self._evaluation.identity_probe_depth:
+            state["position_history"].append(self._position_key(state))
         queries, references = self._context(
             state,
             board,
@@ -1040,20 +1171,23 @@ class GameManager:
                 self._complete_quest(state, actor_id, quest["id"])
         return state, board, captures, effects, event
 
-    def _legal_moves(self, state: dict[str, Any], side: int, now_ms: int) -> list[Move]:
-        """Enumerate configured candidates and require declarative authorization.
+    def _candidates(
+        self, state: dict[str, Any], board: Board, side: int, now_ms: int
+    ) -> list[Move]:
+        """Build one bounded shared candidate set for authorization and identity probes.
 
         Args:
-            state: Detached position under evaluation.
-            side: Evaluation participant side.
-            now_ms: Trusted time for read-only rules.
+            state: Isolated observed snapshot.
+            board: Corresponding board.
+            side: Evaluating participant side.
+            now_ms: Trusted query timestamp.
 
         Returns:
-            Complete authorized intents in stable order.
+            Geometric, complete capture and declaratively offered intents.
+
+        Raises:
+            QueryResolutionError: Candidate or aggregate work bounds are exhausted.
         """
-        if state["outcome"] is not None:
-            return []
-        board = self._board(state)
         candidates: list[Move] = []
         for record in state["board"]:
             if record["side"] != side:
@@ -1101,6 +1235,23 @@ class GameManager:
                         "candidate move enumeration exceeds bounded resources"
                     )
                 candidates.append(move)
+        return candidates
+
+    def _legal_moves(self, state: dict[str, Any], side: int, now_ms: int) -> list[Move]:
+        """Enumerate configured candidates and require declarative authorization.
+
+        Args:
+            state: Detached position under evaluation.
+            side: Evaluation participant side.
+            now_ms: Trusted time for read-only rules.
+
+        Returns:
+            Complete authorized intents in stable order.
+        """
+        if state["outcome"] is not None:
+            return []
+        board = self._board(state)
+        candidates = self._candidates(state, board, side, now_ms)
         legal: list[Move] = []
         for move in candidates:
             try:
@@ -1138,106 +1289,333 @@ class GameManager:
         with self._lock:
             return thaw_json(self._state)
 
+    @staticmethod
+    def _action(action: Any) -> dict[str, Any]:
+        """Parse a closed action DTO without accepting state or result assertions.
+
+        Args:
+            action: Untrusted JSON move, resignation, claim or timeout request.
+
+        Returns:
+            Detached canonical action data.
+
+        Raises:
+            TransitionError: Type, keys, claim or move intent is malformed.
+        """
+        if not isinstance(action, dict) or not isinstance(action.get("type"), str):
+            raise TransitionError("action must be a typed JSON object")
+        contracts = {
+            "move": {"type", "move"},
+            "resign": {"type"},
+            "timeout": {"type"},
+            "claim_draw": {"type", "claim", "intended_move"},
+        }
+        if action["type"] not in contracts or set(action) != contracts[action["type"]]:
+            raise TransitionError("action has unknown or missing fields")
+        result = dict(action)
+        try:
+            if action["type"] == "move":
+                result["move"] = Move.from_json(action["move"]).to_json()
+            elif action["type"] == "claim_draw":
+                claim = action["claim"]
+                if (
+                    not isinstance(claim, str)
+                    or not claim
+                    or len(claim) > MAX_GAME_JSON_BYTES
+                    or len(claim.encode("utf-8")) > MAX_GAME_JSON_BYTES
+                ):
+                    raise ValueError("claim must name a bounded configured outcome rule")
+                if action["intended_move"] is not None:
+                    result["intended_move"] = Move.from_json(action["intended_move"]).to_json()
+            return thaw_json(freeze_json(result))
+        except (ValueError, TypeError, KeyError) as error:
+            raise TransitionError(f"invalid action intent: {error}") from error
+
     def submit(
+        self, actor_id: str, expected_revision: int, action_id: str, move: Move, now_ms: int
+    ) -> dict[str, Any]:
+        """Submit a move through the shared authoritative action coordinator.
+
+        Args:
+            actor_id: Authenticated participant identity.
+            expected_revision: Revision observed when constructing the request.
+            action_id: Stable retry identifier.
+            move: Immutable complete move intent.
+            now_ms: Trusted server timestamp in milliseconds.
+
+        Returns:
+            Detached accepted move event, retaining its snapshot version 1 shape.
+
+        Raises:
+            TransitionError: Identity, revision, intent, clock or effects are invalid.
+            QueryResolutionError: Required rule facts or evaluation resources are unavailable.
+        """
+        if not isinstance(move, Move):
+            raise TransitionError("move intent is required")
+        return self.submit_action(
+            actor_id, expected_revision, action_id, {"type": "move", "move": move.to_json()}, now_ms
+        )
+
+    def _result(
+        self, effects: tuple[PlannedEffect, ...], state: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        """Resolve proposals and bind winners to actual session identities.
+
+        Args:
+            effects: Validated outcome proposals.
+            state: Isolated candidate session.
+
+        Returns:
+            Canonical result data or None when no proposal exists.
+
+        Raises:
+            TransitionError: A winner is not a participant.
+            QueryResolutionError: Proposals conflict or are malformed.
+        """
+        outcome = resolve_outcome(effects)
+        if outcome is None:
+            return None
+        result = asdict(outcome)
+        winner = result["winner"]
+        if type(winner) is int and winner in (-1, 1):
+            result["winner"] = state["participants"][str(winner)]
+        elif winner is not None and winner not in state["participants"].values():
+            raise TransitionError("outcome winner must be a participant")
+        return result
+
+    def _terminal_action(
+        self,
+        state: dict[str, Any],
+        actor_id: str,
+        expected_revision: int,
+        action_id: str,
+        action: dict[str, Any],
+        now_ms: int,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Prepare an explicit configured terminal action without committing a claim probe.
+
+        Args:
+            state: Detached observed authoritative session.
+            actor_id: Verified submitting identity.
+            expected_revision: Observed revision.
+            action_id: Stable request identifier.
+            action: Canonical resignation, draw-claim or timeout DTO.
+            now_ms: Trusted server timestamp.
+
+        Returns:
+            Isolated terminal state and its exact request event.
+
+        Raises:
+            TransitionError: Turn, clock, claim or terminal eligibility fails.
+            QueryResolutionError: Required facts, proposals or resource bounds fail.
+        """
+        active = state["active_side"]
+        side = next(
+            int(key) for key, identity in state["participants"].items() if identity == actor_id
+        )
+        elapsed = now_ms - state["clocks"]["anchor_ms"]
+        if elapsed < 0:
+            raise TransitionError("authoritative timestamp cannot run backwards")
+        expired = elapsed >= state["clocks"]["remaining_ms"][str(active)]
+        if action["type"] == "timeout" and not expired:
+            raise TransitionError("timeout requires the authoritative active clock deadline")
+        if action["type"] == "claim_draw" and (side != active or expired):
+            raise TransitionError("draw claim requires the active participant before expiry")
+        original_board = self._board(state)
+        evaluation = thaw_json(freeze_json(state))
+        board = original_board
+        intended = None
+        captures: list[list[int]] = []
+        projected_effects: tuple[PlannedEffect, ...] = ()
+        if action["type"] == "claim_draw" and action["intended_move"] is not None:
+            intended = Move.from_json(action["intended_move"])
+            evaluation, board, captures, projected_effects, _ = self._prepare_move(
+                state, side, actor_id, expected_revision, action_id, intended, now_ms
+            )
+        state["clocks"]["remaining_ms"][str(active)] = max(
+            0, state["clocks"]["remaining_ms"][str(active)] - elapsed
+        )
+        state["clocks"]["anchor_ms"] = now_ms
+        state["revision"] += 1
+        event = {
+            "revision": state["revision"],
+            "expected_revision": expected_revision,
+            "actor": actor_id,
+            "action_id": action_id,
+            "at_ms": now_ms,
+            "move": None,
+            "captured": [],
+            "effects": [],
+            "outcome": None,
+            "action": action,
+        }
+        state["events"].append(event)
+        evaluation["events"] = thaw_json(freeze_json(state["events"]))
+        evaluation["revision"] = state["revision"]
+        evaluation["clocks"] = thaw_json(freeze_json(state["clocks"]))
+        counts = {
+            "active": len(self._legal_moves(evaluation, side, now_ms)),
+            "opponent": len(self._legal_moves(evaluation, -side, now_ms)),
+        }
+        expired_side = active if expired else None
+        if action["type"] == "claim_draw":
+            selected = [
+                rule
+                for rule in self.definition.rules
+                if rule["hook"] == "outcome" and rule["id"] == action["claim"]
+            ]
+            if len(selected) != 1:
+                raise TransitionError("draw claim must name one configured outcome rule")
+            queries, references = self._context(
+                evaluation,
+                board,
+                side,
+                intended,
+                captures,
+                now_ms,
+                counts,
+                original_board,
+                board,
+                action,
+                expired_side,
+            )
+            self._charge(_json_work(selected))
+            plan = HookInterpreter(thaw_json(selected), queries, references).evaluate("outcome")
+            claimed = self._result(plan.effects, state)
+            if (
+                not plan.matched_rule_ids
+                or claimed is None
+                or claimed["kind"] != "draw"
+                or claimed["winner"] is not None
+            ):
+                raise TransitionError("named draw claim is not eligible")
+        terminal = self._evaluate(
+            "outcome",
+            evaluation,
+            board,
+            side,
+            intended,
+            captures,
+            now_ms,
+            counts,
+            original_board,
+            board,
+            action,
+            expired_side,
+        )
+        if any(effect.op != "propose_outcome" for effect in terminal):
+            raise TransitionError("terminal outcome hook may only propose results")
+        result = self._result((*projected_effects, *terminal), state)
+        if result is None:
+            raise TransitionError("terminal action requires a configured result")
+        if action["type"] == "claim_draw" and (
+            result["kind"] != "draw" or result["winner"] is not None
+        ):
+            raise TransitionError("draw claim is overridden by a decisive proposal")
+        state["outcome"] = result
+        event["outcome"] = result
+        return state, event
+
+    def submit_action(
         self,
         actor_id: str,
         expected_revision: int,
         action_id: str,
-        move: Move,
+        action: dict[str, Any],
         now_ms: int,
     ) -> dict[str, Any]:
-        """Authorize and atomically publish one move, or return its exact retry.
+        """Authorize one typed action and publish atomically, or return its exact retry.
 
         Args:
-            actor_id: Authenticated identity supplied by the trusted server.
-            expected_revision: Revision observed when the intent was created.
-            action_id: Stable client identifier reused only for the same request.
-            move: Complete immutable move intent.
-            now_ms: Trusted server timestamp; retry timestamps do not recharge clocks.
+            actor_id: Authenticated participant identity supplied by the host.
+            expected_revision: Revision observed when creating the action.
+            action_id: Stable identifier reused only with an identical request.
+            action: Exact object: type/move for move; type alone for resign or
+                timeout; type/claim/intended_move for claim_draw. Claim names one
+                configured outcome rule; intended_move is a move intent or null.
+                Terminal outcomes require configured proposals. Move events retain
+                the version-1 envelope; terminal events add action with a null move.
+            now_ms: Trusted server timestamp; retry timestamps do not alter state.
 
         Returns:
-            Detached event recording the accepted action and resulting revision.
+            Detached accepted event with a durable result where configured.
 
         Raises:
-            TransitionError: Identity, revision, turn, clock, intent or effects fail.
-            QueryResolutionError: Required configured queries cannot safely resolve.
+            TransitionError: Identity, turn, revision, clock or request is invalid.
+            QueryResolutionError: Rule data or trusted evaluation resources are invalid.
         """
         self._identifier(actor_id)
         self._identifier(action_id)
         self._timestamp(now_ms)
-        if (
-            type(expected_revision) is not int
-            or expected_revision < 0
-            or not isinstance(move, Move)
-        ):
-            raise TransitionError("revision and move intent are required")
+        if type(expected_revision) is not int or expected_revision < 0:
+            raise TransitionError("expected revision must be a nonnegative integer")
+        request = self._action(action)
         with self._lock, self._operation():
-            self._charge(_json_work(self._state))
+            self._charge(_json_work(self._state) + _json_work(request))
             state = thaw_json(self._state)
             if actor_id not in state["participants"].values():
                 raise TransitionError("actor is not a game participant")
             for event in state["events"]:
                 self._charge()
+                saved_request = event.get("action", {"type": "move", "move": event["move"]})
                 if event["action_id"] == action_id:
                     if (
                         event["actor"] == actor_id
                         and event["expected_revision"] == expected_revision
-                        and event["move"] == move.to_json()
+                        and saved_request == request
                     ):
                         return thaw_json(freeze_json(event))
                     raise TransitionError("action identifier has a conflicting request")
-            side = state["active_side"]
             if expected_revision != state["revision"]:
                 raise TransitionError("stale game revision")
             if state["outcome"] is not None:
                 raise TransitionError("game has a terminal result")
-            if actor_id != state["participants"][str(side)]:
-                raise TransitionError("actor does not control the active turn")
-            elapsed = now_ms - state["clocks"]["anchor_ms"]
-            if elapsed < 0:
-                raise TransitionError("authoritative timestamp cannot run backwards")
-            if elapsed >= state["clocks"]["remaining_ms"][str(side)]:
-                raise TransitionError("active participant clock has expired")
             if len(state["events"]) >= MAX_EVENTS:
                 raise TransitionError("session event limit reached")
-            state, board, captures, effects, event = self._prepare_move(
-                state, side, actor_id, expected_revision, action_id, move, now_ms
-            )
-            counts = None
-            if any(rule["hook"] == "outcome" for rule in self.definition.rules):
-                counts = {
-                    "active": len(self._legal_moves(state, -side, now_ms)),
-                    "opponent": len(self._legal_moves(state, side, now_ms)),
-                }
-            terminal = self._evaluate(
-                "outcome",
-                state,
-                board,
-                -side,
-                move,
-                captures,
-                now_ms,
-                counts,
-                projected_board=board,
-            )
-            if any(effect.op != "propose_outcome" for effect in terminal):
-                raise TransitionError("outcome hook must only propose terminal results")
-            outcome = resolve_outcome((*effects, *terminal))
-            if outcome is not None:
-                result = asdict(outcome)
-                winner = result["winner"]
-                if type(winner) is int and winner in (-1, 1):
-                    result["winner"] = state["participants"][str(winner)]
-                elif winner is not None and winner not in state["participants"].values():
-                    raise TransitionError("outcome winner must be a participant")
-                state["outcome"] = result
-            event["outcome"] = state["outcome"]
+            if request["type"] != "move":
+                state, event = self._terminal_action(
+                    state, actor_id, expected_revision, action_id, request, now_ms
+                )
+            else:
+                move = Move.from_json(request["move"])
+                side = state["active_side"]
+                if actor_id != state["participants"][str(side)]:
+                    raise TransitionError("actor does not control the active turn")
+                elapsed = now_ms - state["clocks"]["anchor_ms"]
+                if elapsed < 0:
+                    raise TransitionError("authoritative timestamp cannot run backwards")
+                if elapsed >= state["clocks"]["remaining_ms"][str(side)]:
+                    raise TransitionError("active participant clock has expired")
+                state, board, captures, effects, event = self._prepare_move(
+                    state, side, actor_id, expected_revision, action_id, move, now_ms
+                )
+                counts = None
+                if any(rule["hook"] == "outcome" for rule in self.definition.rules):
+                    counts = {
+                        "active": len(self._legal_moves(state, -side, now_ms)),
+                        "opponent": len(self._legal_moves(state, side, now_ms)),
+                    }
+                terminal = self._evaluate(
+                    "outcome",
+                    state,
+                    board,
+                    -side,
+                    move,
+                    captures,
+                    now_ms,
+                    counts,
+                    projected_board=board,
+                    event_actor=actor_id,
+                )
+                if any(effect.op != "propose_outcome" for effect in terminal):
+                    raise TransitionError("outcome hook must only propose terminal results")
+                state["outcome"] = self._result((*effects, *terminal), state)
+                event["outcome"] = state["outcome"]
             self._charge(_json_work(state))
             encoded = json.dumps(state, allow_nan=False, separators=(",", ":"))
             if len(encoded.encode("utf-8")) > MAX_SNAPSHOT_BYTES:
                 raise TransitionError("snapshot exceeds bounded persistence size")
-            frozen = freeze_json(state)
-            self._state = frozen
+            self._state = freeze_json(state)
             return thaw_json(freeze_json(event))
 
     @classmethod
@@ -1278,11 +1656,11 @@ class GameManager:
                 # The parent cannot reset and is derived from all supported action ceilings.
                 child = EvaluationBudget(MAX_EVALUATION_WORK, parent=aggregate)
                 with restored._lock, restored._operation(child):
-                    restored.submit(
+                    restored.submit_action(
                         event["actor"],
                         event["expected_revision"],
                         event["action_id"],
-                        Move.from_json(event["move"]),
+                        event.get("action", {"type": "move", "move": event["move"]}),
                         event["at_ms"],
                     )
             recovered = json.dumps(restored.get_state(), sort_keys=True, allow_nan=False)

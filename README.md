@@ -51,6 +51,9 @@ Install the Python package and development requirements, then run `pytest`.
 The suite exercises validated JSON, immutable effect contracts, ordered-hop
 intents, actor/turn/revision rejection, atomic domain rollback, exact retries,
 clock transitions, participant-scoped quests and deterministic session replay.
+Closed move/resign/claim_draw/timeout submissions share one domain boundary;
+configured position identity and opening side survive replay. Agreed draw
+handshakes and SQL terminal-envelope validation remain actionable dependencies.
 Synthetic declarative scenarios exercise these contracts without claiming
 complete shipped-game legality. HTTP tests cover health and the read-only
 catalog; they do not certify multiplayer.

@@ -10,7 +10,13 @@ from collections.abc import Callable, Mapping
 from copy import deepcopy
 from typing import Any
 
-from engine.model.game.schema import QUERIES, _bounded_json, condition, validate_reference
+from engine.model.game.schema import (
+    MAX_JSON_TEXT_BYTES,
+    QUERIES,
+    _bounded_json,
+    condition,
+    validate_reference,
+)
 
 Query = Callable[[Mapping[str, Any]], Any]
 
@@ -30,7 +36,14 @@ class ConditionEvaluator:
         self._queries = dict(queries)
         for name, value in (references or {}).items():
             validate_reference(name)
-            _bounded_json(value)
+            if name == "event.claim" and isinstance(value, str):
+                if (
+                    len(value) > MAX_JSON_TEXT_BYTES
+                    or len(value.encode("utf-8")) > MAX_JSON_TEXT_BYTES
+                ):
+                    raise ValueError("claim reference exceeds the configuration byte bound")
+            else:
+                _bounded_json(value)
         self._references = deepcopy(dict(references or {}))
 
     def resolve(self, value: Any) -> Any:

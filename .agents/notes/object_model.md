@@ -25,9 +25,10 @@
 
 ## Domain transition ownership
 
-`GameManager.submit` is the sole domain action boundary. The host supplies a
+`GameManager.submit_action` is the sole domain action boundary; `submit` delegates
+move intents to it. Closed actions are move, resign, claim_draw and timeout. The host supplies a
 verified stable participant identity, expected revision, idempotent action
-identifier, immutable move intent and trusted timestamp. The manager validates
+identifier, closed action intent and trusted timestamp. The manager validates
 geometry and configured authorization, applies effects to isolated candidate
 state and publishes only the complete accepted transition. Direct intent
 execution is denied. A rejected action or effect failure changes no observable
@@ -48,6 +49,18 @@ projected geometry. Configured roles select safety predicates; no piece name
 identifies royalty. Initial rights/targets and additional halfmove-reset
 conditions belong to the immutable definition and deterministic replay. Terminal
 proposal conflicts fail closed and winners must resolve to session participants.
+
+Terminal requests use configured outcomes and trusted clock expiry. Intended-move
+claims evaluate an isolated legal projection without committing movement or quests.
+Projected move outcome proposals join terminal arbitration. Position-identity
+capture probes preserve configured legality and the shared work budget while
+excluding the built-in action-clock eligibility check.
+Move events retain their version-1 shape; terminal events add the exact action
+and carry a null move. Replay accepts both envelopes. An agreed draw handshake
+and SQL validation of terminal envelopes require separate implementation before
+remote terminal submission is exposed. Configured `starting_side` controls the
+opening turn. Optional `position_identity` selects movement flags, rule values,
+rights and legally effective targets for repetition under the same work ceiling.
 
 Snapshots pin configuration and initial identities and reproduce state by
 replaying accepted events with recorded timestamps. This domain replay and an

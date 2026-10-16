@@ -23,7 +23,8 @@ quests and clocks are data owned by each game configuration.
 
 The top-level keys are `schema_version`, `name`, `title`, `default`,
 `playable`, `board`, `pieces`, `clock`, `exports`, `appearance`,
-`rules`, `quests`, with optional `initial_state`, `halfmove_reset` and `starting_side`.
+`rules`, `quests`, with optional `initial_state`, `halfmove_reset`, `starting_side` and
+`position_identity`.
 `starting_side` is the strict integer 1 or -1 and defaults to 1. It selects the
 initial active participant and clock without changing side identities. Explicit
 field presence is pinned in the snapshot; omitted defaults preserve replay of
@@ -167,14 +168,14 @@ they provide no executable expressions, imports, arbitrary attributes or loops.
 `temporary_targets` objects. State values are bounded JSON; rights are booleans;
 targets are in-bounds squares or null. They are frozen in the selected definition
 and initialize independent session state. Existing targets expire to null on
-an accepted action before configured auxiliary/post-move `set_target` effects
+an accepted move before configured auxiliary/post-move `set_target` effects
 create replacements. A rejected transition does not expire or replace targets.
 
 Optional `halfmove_reset` supplies an additional condition evaluated against
 the pre-transition board and snapshot, with server-derived base and offered captures,
 before post-move hooks. Any capture resets the counter; the condition can reset
 it for another configured movement. Post-move capture effects also reset it.
-Otherwise an accepted action increments the counter once.
+Otherwise an accepted move increments the counter once.
 
 Per-piece `promotion` declares exactly `rank: far`, `options`, `mode` and
 `stop_capture`. Options name existing configured kinds. Piece identifiers and
@@ -210,15 +211,49 @@ and quest evaluation used by submission; candidates with failing transition
 effects are excluded without changing the observed session. Outcome arbitration
 runs after preparation and cannot substitute for complete rulebook legality.
 
-`submit(actor_id, expected_revision, action_id, move, now_ms)` accepts a
-trusted host identity and timestamp. Membership, turn, revision, terminal state,
-clock and configured legality are checked before publishing state. An exact
-retry with the same actor, action identifier, expected revision and intent
-returns the accepted event without charging the clock or appending history.
-Reusing an action identifier for a different request is rejected. Rejected
-requests and failing effects discard the entire candidate, including clock,
-quest, board, rights, history and result changes. The in-process lock protects
-one manager instance; database compare-and-swap is required across instances.
+`submit_action(actor_id, expected_revision, action_id, action, now_ms)` is the
+single action boundary. The host supplies verified identity and trusted integer
+milliseconds. Actions are closed objects with exactly these fields:
+
+| Type | Required fields |
+| --- | --- |
+| `move` | `type`, `move` (the three-field move intent) |
+| `resign` | `type` |
+| `claim_draw` | `type`, `claim` (configured outcome-rule ID), `intended_move` (move intent or null) |
+| `timeout` | `type` |
+
+Unknown actions, missing/extra fields and client assertions of winners, elapsed
+time or expired side are rejected. `submit(..., move, ...)` delegates to the
+same boundary. Membership, revision, terminal state and request identity apply
+to every action. Moves require the active participant before clock expiry.
+Resignation may be submitted by either participant; timeout may be reported by
+either participant at or after the active clock deadline. Draw claims require
+the active participant before expiry and exactly one named outcome rule whose
+condition matches and proposes a draw with no winner. Claim IDs retain the
+configuration's nonempty string contract, bounded by 256 KiB of UTF-8 rather
+than the shorter session/action identifier limit. All matching outcome rules
+still participate in arbitration; an overriding decisive result rejects a claim.
+
+Terminal hooks receive `event.type`, `event.claim` (null outside claims),
+`event.actor` and authoritative `event.expired_side` (null before expiry).
+For terminal evaluation, participant selectors bind to the submitting actor;
+canonical turn remains the observed turn, or the projected next turn for an
+intended-move claim. Resignation/timeout require a configured outcome, including
+any material conditions; the engine does not invent a result. An intended move
+is fully prepared and authorized in isolation for claim evaluation. Its outcome
+proposals participate in arbitration with the outcome hook; a decisive result
+rejects the draw claim without publishing the projection. Accepting
+the claim leaves the board, captures, rights, targets, canonical turn, halfmove
+count, position history and quests unchanged. Terminal actions charge only the
+running clock, anchor it at the trusted timestamp and award no increment.
+They do not run post-move hooks or quests.
+
+An exact retry with identical actor, action ID, expected revision and canonical
+action returns the accepted event without charging clocks or appending history.
+Conflicting identifiers, rejected requests and failing effects publish no state.
+The in-process lock protects one manager instance; database compare-and-swap is
+required across instances. Agreed draw offer/acceptance is a separate required
+handshake and is not an accepted action type.
 
 The snapshot version is `1`. Fields are `game_id`, pinned `config`,
 `participants` keyed by `1` and `-1`, `started_at_ms`, `active_side`, `board`,
@@ -234,6 +269,11 @@ bounded to 4,096 accepted actions.
 Each accepted action advances one revision and appends one event containing
 `revision`, `expected_revision`, `actor`, `action_id`, `at_ms`, `move`,
 `captured`, emitted `effects` and `outcome` (a resolved result or null).
+Move events retain this exact version-1 envelope, without an `action` field.
+Terminal events additionally contain the canonical `action`, with `move: null`,
+empty `captured` and `effects`, and the resolved `outcome`. Replay and retries
+interpret events without `action` as moves. SQL persistence must explicitly
+accept and verify both envelopes before terminal actions are exposed remotely.
 Post-move rules and quests inspect the accepted
 revision, appended action, updated halfmove count and next canonical turn.
 Post-move rules and quests bind `active` to the mover and `opponent` to the
@@ -259,9 +299,25 @@ preserves whether optional policy fields were explicitly declared: omitted field
 remain omitted, while explicitly declared defaults remain pinned. Frozen parser
 metadata tracks presence and is never a game-authored or serialized config field.
 
-Timeout adjudication, status-hook consumption, at-game-end quest timing,
-configured progress measurements and complete game-specific repetition identity
-remain required extensions listed in the actionable workspace. The session does
+Optional `position_identity` is null or an exact object with `moved_kinds`,
+`rule_state`, `rights` and `targets`. The first three are unique lists of at most
+64 declared piece kinds or initialized state/right names. Targets are at most
+32 unique initialized target selections, each exactly `{name, legal_capture}`
+with a boolean eligibility flag. Identity always includes board occupancy,
+kinds, sides and canonical turn. It includes movement flags only for selected
+kinds and only selected rule values, rights and targets. With `legal_capture`
+true, a non-null target contributes only if a complete configured legal capture
+ends there; otherwise it normalizes to null. The built-in action-clock deadline
+does not affect this positional probe; configured authorization, capture effects
+and projected safety still apply. Probes share the operation budget,
+cannot recursively derive identity, and never publish moves. Missing/null policy
+preserves raw identity including all movement flags, rights and targets.
+The initial position and each fully effected move contribute to history;
+terminal actions do not add positions. Policy selection and full shipped-game
+repetition correctness still require rulebook verification.
+
+Status-hook consumption, at-game-end quest timing and configured progress
+measurements remain required extensions listed in the actionable workspace. The session does
 not certify any complete FIDE or draughts rulebook.
 
 ## Aggregate evaluation ceilings

@@ -76,7 +76,7 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 |---|---|
 | FR-8 | The engine interprets JSON-defined rule instances through five generic hooks: `permits_move`, `available_moves`, `outcome`, `on_move_made`, and `status`. A rule contains declarative configured parameters and isolated per-game state. The hooks are implemented by trusted generic engine operations; users do not write subclasses. |
 | FR-9 | `permits_move` and `available_moves` restrict/describe allowed actions, `outcome` proposes a result, `on_move_made` updates configured per-session state, and `status` supplies display information. Side effects are bounded, schema-validated declarative effects, never arbitrary executable code. |
-| FR-10 | Rules propose permitted actions, status and outcomes; a single engine coordinator authorizes moves, commits transitions and resolves outcomes. No rule implementation may bypass the central commit boundary. |
+| FR-10 | Rules propose permitted actions, status and outcomes; a single engine coordinator authorizes closed move/resign/claim_draw/timeout actions, commits transitions and resolves configured outcomes. Agreed draw requires a separate offer/acceptance handshake. No rule implementation may bypass the central commit boundary. |
 | FR-11 | `Result` records kind, winner, reason and precedence. Conflict resolution is deterministic, with appropriate decisive/draw policy and tie order. |
 | FR-12 | Configured rule parameters are stored in immutable JSON game-definition snapshots; mutable rule state is isolated by game and must be serialized for serverless restart recovery. A newly created game resets runtime state. |
 | FR-13 | A move may consist of **several hops**. A capture chain in checkers is one move the player makes, not several. |
@@ -168,9 +168,9 @@ Python domain orchestration stays in `engine`. UI/window controllers and Tkinter
 |---|---|
 | FR-60 | Supabase Auth registers, authenticates and identifies persistent and anonymous guests. Profiles have username/display name where applicable and rating and quest records; player assignments reference stable identities; duplicate IDs and unauthorized links are rejected. |
 | FR-61 | The generic validator exposes candidate/legal moves and state/outcome queries through JSON-configured rules; royal/check semantics are game configuration data, never piece-name tests in engine. |
-| FR-62 | One GameManager owns the active board, active player, two positions, move, configured clocks, history, rule/quest state and validator, and serializes a consistent session snapshot for durable storage. |
+| FR-62 | One GameManager owns the active board, active player, two positions, move, configured clocks, history, rule/quest state and validator, and serializes a consistent session snapshot for durable storage. The selected definition pins starting_side and optional position_identity policies. |
 | FR-63 | Game clocks use explicit time controls and participant IDs, trusted timestamps, invalid-input rejection and recoverable state independent of continuously running functions. |
-| FR-64 | A durable append-only game transcript records moves, action types, events and results without accidental truncation; authenticated clients can retrieve it. |
+| FR-64 | A durable append-only game transcript records moves, action types, events and results without accidental truncation; move events retain their version-1 envelope and terminal events additionally carry the canonical action with a null move; authenticated clients can retrieve it. |
 | FR-65 | React UI interaction chooses squares and sends a move intent to FastAPI; the Python engine controller authorizes and commits through its single public domain operation. |
 | FR-66 | The React board view subscribes/refetches persisted authoritative state after committed changes, reconnection and missed Realtime messages. |
 | FR-67 | The React player panels similarly refresh from authoritative player identity, clock, captures and quest progress. |
