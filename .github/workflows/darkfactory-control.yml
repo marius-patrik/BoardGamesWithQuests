@@ -64,6 +64,13 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+      - name: Install native Linux system libraries
+        if: matrix.ecosystem == 'rust' && runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev \
+            libgtk-3-dev libglib2.0-dev libssl-dev pkg-config patchelf
       - if: matrix.ecosystem == 'go'
         uses: actions/setup-go@v5
         with:
