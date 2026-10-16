@@ -54,7 +54,7 @@ packages/
 \`\`\`
 
 
-Python domain orchestration stays in `server/engine`. UI/window controllers and Tkinter do not. Supabase Auth owns account credentials; server owns player authorization; engine owns rule/turn legality. Source files held by the source reference are not automatically delivered by being present in Git history.
+Python domain orchestration stays in `server/engine`, including the preserved `server/engine/controller/` package. Its existing `GameController` coordinates selections and moves; the legacy `WindowController` is retained as source but is not a deployed UI runtime. There is no Tkinter view or launcher. Supabase Auth owns account credentials; server owns participant authorization; engine owns rule and turn legality. Future serverless execution must not rely on controller instances surviving between requests.
 
 ## 7. Functional requirements
 
