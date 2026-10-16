@@ -1,4 +1,5 @@
 """HTTP ASGI boundary behavior tests for the server bootstrap."""
+
 import asyncio
 import json
 
@@ -21,19 +22,23 @@ async def request(path: str):
     async def send(message):
         sent.append(message)
 
-    await app({
-        "type": "http",
-        "asgi": {"version": "3.0"},
-        "http_version": "1.1",
-        "method": "GET",
-        "scheme": "http",
-        "path": path,
-        "raw_path": path.encode("ascii"),
-        "query_string": b"",
-        "headers": [(b"accept", b"application/json")],
-        "client": ("127.0.0.1", 12345),
-        "server": ("127.0.0.1", 8000),
-    }, receive, send)
+    await app(
+        {
+            "type": "http",
+            "asgi": {"version": "3.0"},
+            "http_version": "1.1",
+            "method": "GET",
+            "scheme": "http",
+            "path": path,
+            "raw_path": path.encode("ascii"),
+            "query_string": b"",
+            "headers": [(b"accept", b"application/json")],
+            "client": ("127.0.0.1", 12345),
+            "server": ("127.0.0.1", 8000),
+        },
+        receive,
+        send,
+    )
     status = next(m["status"] for m in sent if m["type"] == "http.response.start")
     body = b"".join(m.get("body", b"") for m in sent if m["type"] == "http.response.body")
     return status, json.loads(body)
