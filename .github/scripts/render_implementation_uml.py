@@ -4,14 +4,13 @@ Both views are diagrams, not an inventory of file names. Their notation mirrors
 the reference diagrams.net class drawing: separate class compartments, parent
 triangles, typed associations, and explicit component boundaries.
 
-No class, relationship or component is declared by hand. The only fixed nodes
-are the three architectural package lanes (engine, chess, checkers); their
-contents are discovered from source files. SVG layout is performed by Graphviz.
+No class, relationship or component is declared by hand. Package nodes are derived from tracked Python source and native/web manifests. SVG layout is performed by Graphviz.
 """
 
 from __future__ import annotations
 
 import ast
+import json
 from collections import defaultdict
 from dataclasses import dataclass
 from html import escape
@@ -343,97 +342,78 @@ def render_class_diagram(root: Path, detailed: bool = True) -> str:
 
 
 def render_component_diagram(root: Path) -> str:
-    """Render an MVC/package UML component graph from observed import statements."""
+    """Build components and dependencies from tracked source and actual manifests."""
     modules = _tracked_modules(root)
-    packages = sorted({module.module.split(".")[0] for module in modules})
-    components: dict[str, set[str]] = defaultdict(set)
+
+    def component(name: str) -> str:
+        parts = name.split(".")
+        if parts[:3] == ["server", "engine", "model"] and len(parts) >= 4:
+            return ".".join(parts[:4])
+        if parts[0] == "server" and len(parts) >= 2:
+            return ".".join(parts[:2])
+        return parts[0]
+
+    groups: dict[str, set[str]] = defaultdict(set)
+    for item in modules:
+        groups[item.module.split(".")[0]].add(component(item.module))
+
+    # Non-Python package nodes exist only if their tracked manifests exist.
+    if (root / "packages/web/package.json").is_file():
+        groups["web"].add("web")
+    if (root / "packages/native/src-tauri/tauri.conf.json").is_file():
+        groups["native"].add("native")
+    if (root / "packages/server/supabase/config.toml").is_file():
+        groups["server"].add("server.supabase")
+
+    known = set().union(*groups.values()) if groups else set()
     dependencies: set[tuple[str, str]] = set()
-    for module in modules:
-        parts = module.module.split(".")
-        # Component resolution is purely directory based: engine/model,
-        # engine/controller, engine/view, engine/app, chess, checkers.
-        node = ".".join(parts[:2]) if parts[0] == "engine" and len(parts) > 1 else parts[0]
-        components[parts[0]].add(node)
-        for alias in _aliases(module).values():
-            incoming = alias.split(".")
-            if incoming[0] not in packages:
-                continue
-            other = (
-                ".".join(incoming[:2])
-                if incoming[0] == "engine" and len(incoming) > 1
-                else incoming[0]
-            )
-            if (
-                other != node
-                and other != "engine"
-                and other
-                in {
-                    "engine.model",
-                    "engine.controller",
-                    "engine.view",
-                    "engine.app",
-                    "chess",
-                    "checkers",
-                }
-            ):
-                dependencies.add((node, other))
-    # The plugin connection is not an import: the engine discovers games
-    # dynamically via project metadata. Draw it only when the distribution
-    # actually registers a concrete game package in pyproject.toml.
-    project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
-    plugins = (
-        project.get("project", {}).get("entry-points", {}).get("boardgameswithquests.games", {})
-    )
-    registrations = {
-        value.split(":", 1)[0].split(".", 1)[0]
-        for value in plugins.values()
-        if isinstance(value, str)
-    }
-    # The engine __main__ and app belong to the application entrypoint.
-    # Every displayed relationship still must come from actual imports.
+    for item in modules:
+        source = component(item.module)
+        for target in _aliases(item).values():
+            destination = component(target)
+            if source != destination and destination in known:
+                dependencies.add((source, destination))
+
+    # The Tauri manifest itself proves the native shell uses a remote site.
+    native = root / "packages/native/src-tauri/tauri.conf.json"
+    if {"native", "web"} <= known and native.is_file():
+        manifest = json.loads(native.read_text(encoding="utf-8"))
+        remote = manifest.get("build", {}).get("frontendDist", "")
+        if isinstance(remote, str) and remote.startswith("https://"):
+            dependencies.add(("native", "web"))
+
     dot = [
         "digraph architecture {",
-        'graph [rankdir=TB, bgcolor="white", pad="0.45", nodesep="0.8", ranksep="1.2", '
-        "splines=polyline, compound=true, outputorder=edgesfirst, "
-        'fontname="DejaVu Sans", fontsize=24, label="Implemented MVC + Game Packages", '
+        'graph [rankdir=TB, bgcolor="white", pad="0.45", nodesep="0.8", '
+        'ranksep="1.2", splines=polyline, outputorder=edgesfirst, '
+        'fontname="DejaVu Sans", fontsize=22, label="Tracked package architecture", '
         "labelloc=t, labeljust=l];",
         'node [shape=plain, fontname="DejaVu Sans"];',
-        'edge [color="#344054", penwidth=1.8, arrowsize=0.9];',
+        'edge [color="#344054", penwidth=1.6, arrowsize=0.8];',
     ]
-    for i, package in enumerate(packages):
+    for index, (package, nodes) in enumerate(sorted(groups.items())):
         dot.append(
-            f'subgraph cluster_package_{i} {{ label={_quote("packages/" + package + "/")}; '
+            f'subgraph cluster_{index} {{ label={_quote("packages/" + package + "/")}; '
             'style=rounded; color="#98a2b3"; bgcolor="#f8faff"; fontsize=18;'
         )
-        for component in sorted(components[package]):
-            if component == "engine":
-                continue
-            label = _html(component)
-            rows = [
-                '<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="12" '
-                'COLOR="#344054" BGCOLOR="white">',
-                f'<TR><TD BGCOLOR="#e5eaf8"><B>{label}</B></TD></TR>',
-                '<TR><TD ALIGN="LEFT"><FONT POINT-SIZE="11" COLOR="#475467">'
-                "&lt;&lt;component&gt;&gt;</FONT></TD></TR>",
-                "</TABLE>",
-            ]
-            dot.append(f"{_quote(component)} [label=<" + "".join(rows) + ">];")
+        for name in sorted(nodes):
+            label = _html(name)
+            dot.append(
+                f'{_quote(name)} [label=<<TABLE BORDER="1" CELLBORDER="0" '
+                'CELLSPACING="0" CELLPADDING="12" COLOR="#344054" BGCOLOR="white">'
+                f'<TR><TD BGCOLOR="#e5eaf8"><B>{label}</B></TD></TR>'
+                '<TR><TD>&lt;&lt;component&gt;&gt;</TD></TR></TABLE>>];'
+            )
         dot.append("}")
     for source, target in sorted(dependencies):
-        if source in {x for entries in components.values() for x in entries} and target in {
-            x for entries in components.values() for x in entries
-        }:
+        if (source, target) == ("native", "web"):
             dot.append(
-                f"{_quote(source)} -> {_quote(target)} "
-                '[style=dashed, arrowhead=vee, color="#475467"];'
+                f'{_quote(source)} -> {_quote(target)} '
+                '[style=dashed, label="remote HTTPS UI", arrowhead=vee];'
             )
-    for package in sorted(registrations & set(packages)):
-        if "engine.model" in components.get("engine", set()):
-            dot.append(
-                f'{_quote(package)} -> {_quote("engine.model")} '
-                '[style=dashed, arrowhead=vee, color="#2563eb", '
-                'label="entry point: game config", fontsize=10];'
-            )
+        else:
+            dot.append(f'{_quote(source)} -> {_quote(target)} '
+                       '[style=dashed, arrowhead=vee];')
     dot.append("}")
     return _run_dot("\n".join(dot))
 
