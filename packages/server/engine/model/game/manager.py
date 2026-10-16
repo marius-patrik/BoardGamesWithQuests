@@ -3,12 +3,12 @@
 from typing import List, Optional, Any
 
 try:
-    from engine.model.game.board import Board
-    from engine.model.game.move import Move
-    from engine.model.game.player import Player
-    from engine.model.game.timer import Timer
-    from engine.model.game.logger import GameLogger
-    from engine.model.game.validator import MoveValidator
+    from server.engine.model.game.board import Board
+    from server.engine.model.game.move import Move
+    from server.engine.model.game.player import Player
+    from server.engine.model.game.timer import Timer
+    from server.engine.model.game.logger import GameLogger
+    from server.engine.model.game.validator import MoveValidator
 except ImportError:
     from .board import Board
     from .move import Move

@@ -3,11 +3,11 @@
 from typing import List, Tuple, Optional, Any
 
 try:
-    from engine.model.game.board import Board
-    from engine.model.game.move import Move
-    from engine.model.pieces.piece import Piece
-    from engine.model.pieces.pawn import Pawn
-    from engine.model.pieces.king import King
+    from server.engine.model.game.board import Board
+    from server.engine.model.game.move import Move
+    from server.engine.model.pieces.piece import Piece
+    from server.engine.model.pieces.pawn import Pawn
+    from server.engine.model.pieces.king import King
 except ImportError:
     from .board import Board
     from .move import Move
