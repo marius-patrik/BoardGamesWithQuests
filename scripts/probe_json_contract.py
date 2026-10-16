@@ -12,6 +12,7 @@ from engine.model.game.configuration import (
     parse_definition_json,
 )
 from engine.model.game.hooks import HookInterpreter
+from engine.model.game.manager import GameManager, TransitionError
 from engine.model.game.quest import Quest
 from engine.model.game.schema import condition, validate_hooks
 from engine.model.misc.quest_manager import QuestManager
@@ -22,15 +23,15 @@ for name, count in (
     ("international_checkers", 40),
 ):
     definition = load_definition(name)
-    assert not definition.playable
-    assert not definition.rules and not definition.quests
     board = board_from_definition(definition)
     placed = 0
     for row in range(board.rows):
         for col in range(board.cols):
             placed += board.get_piece_at((row, col)) is not None
     assert placed == count
-    board_facts = ConditionEvaluator(BoardQueries(board, active_side=1).bindings())
+    board_facts = ConditionEvaluator(
+        BoardQueries(board, active_side=definition.starting_side).bindings()
+    )
     assert board_facts.evaluate(
         {
             "op": "compare",
@@ -44,7 +45,7 @@ for name, count in (
             "op": "compare",
             "relation": "eq",
             "left": {"query": "turn", "params": {}},
-            "right": 1,
+            "right": definition.starting_side,
         }
     )
     assert not board_facts.evaluate(
@@ -58,6 +59,33 @@ for name, count in (
         pass
     else:
         raise AssertionError("out-of-bounds board query must fail closed")
+
+    if any(rule["hook"] == "permits_move" for rule in definition.rules):
+        session = GameManager(definition, "schema-probe", ("first", "second"), 1000)
+        initial = session.get_state()
+        assert initial["active_side"] == definition.starting_side
+        choices = session.get_valid_moves()
+        assert choices, "configured opening must expose an authorized action"
+        actor = initial["participants"][str(initial["active_side"])]
+        try:
+            session.submit("outsider", 0, "denied", choices[0], 1001)
+        except TransitionError:
+            pass
+        else:
+            raise AssertionError("nonparticipant must not move")
+        assert session.get_state() == initial
+        event = session.submit(actor, 0, "opening", choices[0], 1001)
+        accepted = session.get_state()
+        assert event["actor"] == actor and event["revision"] == 1
+        assert accepted["board"] != initial["board"] and accepted["events"] == [event]
+        assert GameManager.from_snapshot(accepted).get_state() == accepted
+    else:
+        try:
+            GameManager(definition, "schema-probe", ("first", "second"), 1000)
+        except TransitionError:
+            pass
+        else:
+            raise AssertionError("a session requires explicit move authorization")
 
 chess_board = board_from_definition(load_definition("chess"))
 chess_facts = BoardQueries(chess_board, 1)
