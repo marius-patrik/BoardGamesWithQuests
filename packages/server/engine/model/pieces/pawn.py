@@ -6,7 +6,7 @@ try:
     from .piece import Piece
 except ImportError:
     try:
-        from engine.model.pieces.piece import Piece
+        from server.engine.model.pieces.piece import Piece
     except ImportError:
         from piece import Piece
 
