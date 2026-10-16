@@ -1,0 +1,17 @@
+{
+  "name": "@bgwq/native",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.0",
+  "scripts": {
+    "tauri": "tauri",
+    "icon": "tauri icon src-tauri/icons/icon.svg",
+    "desktop": "tauri build",
+    "android": "tauri android build",
+    "ios": "tauri ios build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.0"
+  }
+}

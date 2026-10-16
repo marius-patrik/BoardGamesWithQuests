@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.tauri.app/capability/2",
+  "identifier": "default",
+  "description": "Remote web app receives no native command capabilities.",
+  "windows": [
+    "main"
+  ],
+  "remote": {
+    "urls": [
+      "https://boardgameswithquests-web.vercel.app"
+    ]
+  },
+  "permissions": []
+}
