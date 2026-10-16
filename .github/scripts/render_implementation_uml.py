@@ -402,18 +402,17 @@ def render_component_diagram(root: Path) -> str:
                 f'{_quote(name)} [label=<<TABLE BORDER="1" CELLBORDER="0" '
                 'CELLSPACING="0" CELLPADDING="12" COLOR="#344054" BGCOLOR="white">'
                 f'<TR><TD BGCOLOR="#e5eaf8"><B>{label}</B></TD></TR>'
-                '<TR><TD>&lt;&lt;component&gt;&gt;</TD></TR></TABLE>>];'
+                "<TR><TD>&lt;&lt;component&gt;&gt;</TD></TR></TABLE>>];"
             )
         dot.append("}")
     for source, target in sorted(dependencies):
         if (source, target) == ("native", "web"):
             dot.append(
-                f'{_quote(source)} -> {_quote(target)} '
+                f"{_quote(source)} -> {_quote(target)} "
                 '[style=dashed, label="remote HTTPS UI", arrowhead=vee];'
             )
         else:
-            dot.append(f'{_quote(source)} -> {_quote(target)} '
-                       '[style=dashed, arrowhead=vee];')
+            dot.append(f"{_quote(source)} -> {_quote(target)} " "[style=dashed, arrowhead=vee];")
     dot.append("}")
     return _run_dot("\n".join(dot))
 
