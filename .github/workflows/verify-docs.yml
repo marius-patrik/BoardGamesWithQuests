@@ -49,7 +49,7 @@ jobs:
           manifest = json.loads((root / "site/versions.json").read_text())
           assert manifest["versions"][0] == {"name": "main", "path": ""}
           assert any(p["name"] == "BoardGamesWithQuests" for p in manifest["projects"])
-          assert (root / "site/engine/model/game/board/index.html").is_file()
+          assert (root / "site/server/engine/model/game/board/index.html").is_file()
           assert (root / "site/agents/notes/diagrams/reference-page1.svg").is_file()
           assert (root / "site/agents/notes/diagrams/implementation-classes.svg").is_file()
           # Prevent replacing real UML connectivity with a flat inventory SVG.
