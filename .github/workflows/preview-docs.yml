@@ -1,20 +1,107 @@
 name: Preview Documentation
 
-# A caller, not a copy: every job body comes from the pinned pipeline commit, so adopting
-# an update is a one-line change here and the diff shows exactly what moved.
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
 permissions:
-  contents: write
-  deployments: write
-  pull-requests: write
+  contents: read
+
+concurrency:
+  group: docs-preview-staging
+  cancel-in-progress: false
 
 jobs:
-  preview-docs:
-    uses: marius-patrik/DarkFactory/.github/workflows/preview-docs.yml@953fd972834baf3b5a2ad2122890f55ea3679943
-    with:
-      pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: "953fd972834baf3b5a2ad2122890f55ea3679943"
-    secrets: inherit
+  preview:
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: write
+    steps:
+      - name: Check out requested source revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Set up documentation Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install documentation dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Build documentation from PR source
+        run: |
+          python .github/scripts/build_docs.py
+          test -f site/index.html
+          touch site/.nojekyll
+
+      - name: Stage PR documentation and register deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          gh auth setup-git
+          mkdir "$RUNNER_TEMP/docs-staging"
+          cd "$RUNNER_TEMP/docs-staging"
+          git init
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          if git ls-remote --exit-code origin refs/heads/gh-pages >/dev/null 2>&1; then
+            git fetch --depth 1 origin gh-pages
+            git checkout -b gh-pages FETCH_HEAD
+          else
+            git checkout --orphan gh-pages
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf "pr-$PR"
+          cp -a "$GITHUB_WORKSPACE/site" "pr-$PR"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(preview): publish PR $PR"
+            git push origin HEAD:gh-pages
+          fi
+          payload=$(jq -n --arg sha "$HEAD_SHA" --arg env "pr-$PR" \
+            '{ref:$sha,environment:$env,auto_merge:false,transient_environment:true,required_contexts:[],description:"Documentation preview"}')
+          deployment_id=$(gh api "repos/$GITHUB_REPOSITORY/deployments" \
+            --method POST --input <(printf '%s' "$payload") --jq .id)
+          page_url="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/pr-$PR/"
+          gh api "repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses" \
+            -f state=success -f environment_url="$page_url" \
+            -f description="PR documentation staged for Pages publishing"
+
+  teardown:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: write
+    steps:
+      - name: Remove staged PR documentation and deactivate deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          gh auth setup-git
+          if gh api "repos/$GITHUB_REPOSITORY/branches/gh-pages" >/dev/null 2>&1; then
+            git clone --quiet --depth 1 --branch gh-pages \
+              "https://github.com/$GITHUB_REPOSITORY.git" "$RUNNER_TEMP/docs-staging"
+            cd "$RUNNER_TEMP/docs-staging"
+            if [ -d "pr-$PR" ]; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git rm -rq "pr-$PR"
+              git commit -m "docs(preview): remove PR $PR"
+              git push origin HEAD:gh-pages
+            fi
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/deployments?environment=pr-$PR" \
+            --jq '.[].id' | while read -r deployment_id; do
+              gh api "repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses" \
+                -f state=inactive -f description="PR preview removed"
+            done

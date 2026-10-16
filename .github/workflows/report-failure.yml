@@ -1,9 +1,15 @@
 name: Report Pipeline Failure
 
-# Watches the other workflows and turns a failure into an issue, so a red run cannot scroll away.
 on:
   workflow_run:
-    workflows: [CI, Deploy Documentation, Release, Autonomous Agent]
+    workflows:
+      - DarkFactory Runtime
+      - Deploy Documentation
+      - Open Pull Request
+      - Project Board Automation
+      - Release
+      - Run Autonomous Agent
+      - Verify Docs Layout
     types: [completed]
 
 permissions:
@@ -12,8 +18,9 @@ permissions:
 
 jobs:
   report-failure:
-    uses: marius-patrik/DarkFactory/.github/workflows/report-failure.yml@953fd972834baf3b5a2ad2122890f55ea3679943
+    if: github.event.workflow_run.head_branch == github.event.repository.default_branch
+    uses: marius-patrik/DarkFactory/.github/workflows/report-failure.yml@368eb9d75d5d828e7ac17fe590d4dc17b028cebc
     with:
       pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: "953fd972834baf3b5a2ad2122890f55ea3679943"
+      pipeline-ref: "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
     secrets: inherit
