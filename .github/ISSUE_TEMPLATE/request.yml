@@ -1,66 +1,61 @@
 name: "User Request"
-description: "File a user request for new features, bug fixes, or enhancements."
+description: "Request a product change, correction, refactor, or documentation update."
 title: "Request: "
 labels: ["Request"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thank you for submitting a request!
-        This repository uses an autonomous agent workflow. New requests are automatically analyzed, classified, and planned upon approval.
-
   - type: textarea
     id: verbatim_request
     attributes:
-      label: "Verbatim User Request"
-      description: "Enter the exact user request or problem description."
-      placeholder: "e.g. Add support for move validation highlights on the GUI chessboard."
+      label: "User request"
+      description: "Include the complete request without changing its meaning."
+      placeholder: "Describe the desired externally observable outcome."
     validations:
       required: true
 
   - type: dropdown
     id: area
     attributes:
-      label: "Area / Component"
-      description: "Select the primary area of the codebase affected."
+      label: "Primary area"
+      description: "Select the main responsibility affected."
       options:
-        - "model (area:model)"
-        - "view (area:view)"
-        - "controller (area:controller)"
-        - "ci (area:ci)"
-        - "docs (area:docs)"
+        - "engine (area:model)"
+        - "games and exporters (area:game)"
+        - "server and persistence (area:server)"
+        - "web interface (area:web)"
+        - "desktop application (area:desktop)"
+        - "CI and DarkFactory (area:ci)"
+        - "documentation and architecture (area:docs)"
     validations:
       required: true
 
   - type: dropdown
     id: type
     attributes:
-      label: "Request Type"
-      description: "Select the type of change."
+      label: "Change type"
       options:
-        - "feat (new feature)"
-        - "bug (bug fix)"
-        - "refactor (refactoring / code health)"
-        - "docs (documentation)"
-        - "chore (maintenance / dependencies)"
-        - "test (test improvements)"
-        - "ci (pipeline / automation)"
+        - "feat"
+        - "fix"
+        - "refactor"
+        - "docs"
+        - "test"
+        - "chore"
+        - "ci"
     validations:
       required: true
 
   - type: textarea
     id: acceptance_criteria
     attributes:
-      label: "Proposed Acceptance Criteria"
-      description: "What conditions must be satisfied for this request to be considered complete?"
-      placeholder: "- [ ] Feature behaves as specified\n- [ ] Unit tests added in tests/\n- [ ] MkDocs build passes with --strict"
+      label: "Behavioral acceptance criteria"
+      description: "Describe the supported actor, input, actions, expected outcomes, failure cases, and verification boundary."
+      placeholder: "What must a user or external consumer demonstrably be able to do?"
     validations:
-      required: false
+      required: true
 
   - type: textarea
-    id: additional_context
+    id: dependencies
     attributes:
-      label: "Additional Context"
-      description: "Any other details, error traces, or references."
+      label: "Dependencies and constraints"
+      description: "List related issues, architecture contracts, provider requirements, and known blockers."
     validations:
       required: false
