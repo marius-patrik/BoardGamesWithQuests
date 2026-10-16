@@ -4,7 +4,7 @@ from importlib import resources
 from pathlib import Path
 from typing import List, Optional
 
-from engine.model.game.configuration import installed_definitions, named_definition
+from server.engine.model.game.configuration import installed_definitions, named_definition
 
 
 def available_games() -> List[str]:
