@@ -4,7 +4,7 @@ try:
     from .rook import Rook
 except ImportError:
     try:
-        from engine.model.pieces.rook import Rook
+        from server.engine.model.pieces.rook import Rook
     except ImportError:
         from rook import Rook
 
