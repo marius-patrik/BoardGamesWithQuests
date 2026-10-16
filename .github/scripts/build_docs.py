@@ -5,8 +5,6 @@ committing a fake docs directory, build an ephemeral config and empty docs_dir i
 the OS temporary directory. The hook reads tracked content from the actual repo root.
 """
 
-import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -17,28 +15,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def ensure_graphviz() -> None:
-    """Install the renderer on Linux CI runners if the base image omitted it.
-
-    Local development intentionally requires the system Graphviz package:
-    documentation must show real UML edges, not silently fall back to a list.
-    """
-    if shutil.which("dot"):
-        return
-    if os.environ.get("CI", "").lower() != "true" or sys.platform != "linux":
-        raise RuntimeError(
-            "Graphviz 'dot' is required for generated UML. Install graphviz locally."
-        )
-    installer = [] if os.geteuid() == 0 else ["sudo"]
-    subprocess.run([*installer, "apt-get", "update", "-qq"], check=True)
-    subprocess.run([*installer, "apt-get", "install", "-y", "-qq", "graphviz"], check=True)
-    if not shutil.which("dot"):
-        raise RuntimeError("Graphviz did not become available after installation.")
-
-
 def build() -> None:
     """Render the site without creating a documentation source directory in Git."""
-    ensure_graphviz()
     with tempfile.TemporaryDirectory(prefix="repo-docs-") as temporary:
         work = Path(temporary)
         source = work / "source"
@@ -67,6 +45,14 @@ def build() -> None:
             cwd=ROOT,
             check=True,
         )
+        # Strictly require every AST artifact to be present in the built site.
+        for asset in (
+            "architecture/ast/repository.json",
+            "architecture/ast/repository.mmd",
+            "architecture/ast/viewer.html",
+        ):
+            if not (ROOT / "site" / asset).is_file():
+                raise RuntimeError(f"AST artifact missing from published site: {asset}")
 
 
 if __name__ == "__main__":

@@ -118,6 +118,21 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str]]:
             raise ValueError(f"Documentation page collision at {dest}: {relative}")
         pages[dest] = body
 
+    # The full repository AST is a dynamic, lossless documentation artifact:
+    # complete JSON, one Mermaid graph and a lazily expanding HTML renderer.
+    # It is generated from the Git index; no source roots are assumed.
+    ast_page = "architecture/ast/index.md"
+    if ast_page in pages:
+        raise ValueError(f"AST documentation route already exists: {ast_page}")
+    pages[ast_page] = (
+        "# Repository AST\n\n"
+        "Every tracked source file is represented, including syntax in all supported "
+        "languages and assets without parsers. No AST nodes are omitted. "
+        "Cross-file import relationships are linked when statically resolvable.\n\n"
+        "[Browse the complete tree](viewer.html) · "
+        "[Single Mermaid AST diagram](repository.mmd) · "
+        "[Lossless JSON and source bytes](repository.json)\n"
+    )
     if "index.md" not in pages:
         name = display_name(root.name)
         pages["index.md"] = f"# {name}\n"
@@ -178,30 +193,28 @@ def on_files(files: Files, config: Any) -> Files:
     for dest, body in build_nav()[1]:
         if files.get_file_from_path(dest) is None:
             files.append(File.generated(config, dest, content=body))
-    # Only implementation UML is live-generated from code. Reference SVGs are
-    # the already-exported static diagrams from the external diagrams.net file.
-    # ProperDocs imports this hook by file path rather than as a package.
+    # All source files and syntax nodes are discovered by the parser, not a
+    # curated list of repository packages or language-specific templates.
     import sys
 
     scripts = str(Path(__file__).resolve().parent)
     if scripts not in sys.path:
         sys.path.insert(0, scripts)
-    from generate_architecture_diagrams import generated_assets
+    from repository_ast import generated_assets, tracked_paths
 
-    for dest, svg in generated_assets(ROOT).items():
-        current = files.get_file_from_path(dest)
-        if current is not None:
-            # Tracked snapshots are useful in GitHub, but must not override
-            # the current implementation's actual diagram on Pages.
-            files.remove(current)
-        files.append(File.generated(config, dest, content=svg))
-    # Reference diagram source stays external per maintainer review. Its
-    # committed SVG exports remain available in the generated documentation.
-    for name in ("reference-page1.svg", "reference-mvc.svg"):
-        dest = f"agents/notes/diagrams/{name}"
-        source = ROOT / ".agents/notes/diagrams" / name
+    for dest, source in generated_assets(ROOT).items():
         current = files.get_file_from_path(dest)
         if current is not None:
             files.remove(current)
-        files.append(File.generated(config, dest, content=source.read_text(encoding="utf-8")))
+        files.append(File.generated(config, dest, content=source))
+    # Preserve every tracked SVG at its source-derived publication path.
+    # Their existence is discovered, never hard-coded by directory or filename.
+    for path in tracked_paths(ROOT):
+        if path.suffix.lower() != ".svg":
+            continue
+        dest = public_path(path.relative_to(ROOT))
+        current = files.get_file_from_path(dest)
+        if current is not None:
+            files.remove(current)
+        files.append(File.generated(config, dest, content=path.read_text(encoding="utf-8")))
     return files

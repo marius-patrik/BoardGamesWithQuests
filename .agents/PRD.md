@@ -3,9 +3,8 @@
 **Status:** Target requirements — not a statement of implemented features
 **Version:** 1.0
 
-Planning material — current state, work streams, risks, acceptance criteria and
-the decision log — lives in `../SCRATCHPAD.md`. This document states only what the
-product is and requires.
+Implementation work and acceptance progress are tracked in GitHub issues and pull requests.
+This document defines the product requirements.
 
 ---
 
@@ -274,7 +273,7 @@ field. It does **not** enumerate the formats, and **no edge in the diagram
 connects any writer to any other writer or to that box**. `Extends` in the
 diagram is a legend label on a free-standing line beside the piece row, not a
 relationship. Deriving one class per format from a base class is therefore a
-deviation in its own right — see `object_model.md` section 7.
+deviation that must be documented explicitly in the implementation specification.
 
 | ID | Requirement |
 |---|---|
@@ -310,7 +309,8 @@ deviation in its own right — see `object_model.md` section 7.
 
 Every class and member the diagram defines is listed here with the requirement
 that delivers it. Nothing in the diagram is left without coverage, and anything
-this project adds beyond the diagram is registered in `object_model.md`.
+this project adds beyond the diagram must be covered by the product specification.
+The generated repository AST documents the actual source tree in the documentation's Architecture / AST section.
 
 | Diagram member | Delivered by |
 |---|---|
