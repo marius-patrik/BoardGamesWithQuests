@@ -107,7 +107,6 @@ flowchart LR
 .
 ├── .agents/
 │   ├── AGENTS.md                 # generic engineering governance only
-│   ├── PLAN.md                   # OPTIONAL location only after explicit relocation; do not create a competing copy
 │   ├── SCRATCHPAD.md             # ephemeral execution notes, not architectural authority
 │   └── notes/
 │       ├── PLAN.md               # THIS canonical contract (single copy)
@@ -167,14 +166,14 @@ flowchart LR
 │   └── desktop/
 ├── pyproject.toml                 # native required packaging metadata
 ├── mkdocs.yml                     # native required docs tool metadata
-├── vercel.json                     # compatible API/web deployment routing, if necessary
+├── vercel.json                    # compatible API/web deployment routing, if necessary
 ├── repo.dfconfig                  # sole editable DarkFactory consumer configuration
 ├── README.md
 ├── CONTRIBUTING.md
 └── LICENSE
 ```
 
-The tree is **semantic**: package subdirectory names may be refined without changing responsibilities, but the exact interfaces below may not silently change. **Exactly one** plan lives at `.agents/notes/PLAN.md`; the alternate path shown above MUST NOT be materialized. Python package initialization files are permitted only where a runtime side effect truly requires them; prefer verified namespace-package discovery, including built-wheel resource loading. The obligatory Vercel root adapter may exist **only** if validated packaging/deployment requires it; it must import and expose the real `server.app`, not duplicate endpoints. No `src/` game container, old `checkers/` catch-all, separate Python editor, standalone `scripts/` testing home, or empty placeholder packages.
+The tree is **semantic**: package subdirectory names may be refined without changing responsibilities, but the exact interfaces below may not silently change. **Exactly one** plan lives at `.agents/notes/PLAN.md`; do not materialize an alternate path. Python package initialization files are permitted only where a runtime side effect truly requires them; prefer verified namespace-package discovery, including built-wheel resource loading. The obligatory Vercel root adapter may exist **only** if validated packaging/deployment requires it; it must import and expose the real `server.app`, not duplicate endpoints. No `src/` game container, old `checkers/` catch-all, separate Python editor, standalone `scripts/` testing home, or empty placeholder packages.
 
 ## 4. Supabase ownership and exact logical database model — DECISION GATE
 
@@ -209,7 +208,7 @@ erDiagram
 - No executable code, embedded credential, shared ownership or variant runtime override.
 
 **`bgwq.games`**
-- `id uuid PK`; `creator_id uuid NOT NULL FK auth.users RESTRICT`; `joiner_id uuid NULL FK auth.users RESTRICT`; `created_action_id text NOT NULL`; `join_action_id text NULL`; `source_variant_id uuid NULL` (nullable FK with deletion behavior that retains the immutable pin; **DECISION**: use `ON DELETE SET NULL`); `definition_key text NOT NULL`; `config_snapshot jsonb NOT NULL`; `config_digest bytea NOT NULL`; `lifecycle text NOT NULL` IN `pending, active, finished, expired`; `snapshot jsonb NULL`; `snapshot_digest bytea NULL`; `revision bigint NOT NULL DEFAULT 0`; `created_at, updated_at, started_at, finished_at, pending_expires_at` timestamptz with lifecycle-dependent nullability; `result jsonb NULL`.
+- `id uuid PK`; `creator_id uuid NOT NULL FK auth.users RESTRICT`; `joiner_id uuid NULL FK auth.users RESTRICT`; `created_action_id text NOT NULL`; `join_action_id text NULL`; `source_variant_id uuid NULL` (nullable FK with deletion behavior that retains the immutable pin; **DECISION**: use `ON DELETE SET NULL`); `definition_key text NOT NULL`; `config_snapshot jsonb NOT NULL`; `config_digest bytea NOT NULL`; `lifecycle text NOT NULL` IN `pending, active, finished, expired`; `snapshot jsonb NULL`; `snapshot_digest bytea NULL`; `revision bigint NOT NULL DEFAULT 0`; `created_at, updated_at, started_at, finished_at, pending_expires_at, rating_settled_at` timestamptz with lifecycle-dependent nullability; `result jsonb NULL`.
 - Unique `(creator_id, created_action_id)`; `creator_id != joiner_id` when joined. Pending = `joiner_id IS NULL`, `snapshot IS NULL`, `revision=0`, no game clock. Active = both participants distinct, valid snapshot/clock, null result. Finished = both participants, result matches snapshot and final event, no new gameplay actions. Expired = never-activated pending match, no invented terminal score.
 - Immutable `creator_id, definition_key, config_snapshot, config_digest, created_action_id`; `joiner_id` can change exactly once, from NULL to verified distinct user at activation. Client cannot supply `snapshot` or `result`.
 - A game with a configured terminal starting position is either correctly terminal at activation via engine evaluation or refused; it cannot be presented as active and unplayable.
@@ -217,7 +216,7 @@ erDiagram
 **`bgwq.game_events`**
 - `game_id uuid NOT NULL REFERENCES games(id) RESTRICT`, `revision bigint NOT NULL` (activation event = 0, domain actions = 1..N), `actor_id uuid NOT NULL REFERENCES auth.users(id) RESTRICT`, `scope text NOT NULL` IN `activation, domain`, `action_id text NOT NULL` (1–128), `request_digest bytea NOT NULL`, `payload jsonb NOT NULL`, `previous_state_digest bytea NULL`, `state_digest bytea NOT NULL`, `committed_at timestamptz NOT NULL`.
 - PK `(game_id, revision)`, unique `(game_id, scope, action_id)`; actor/request digests MUST match on idempotent retries and fail on conflicting reuse. The activation envelope at revision 0 is mandatory for every playable match. `created_action_id` has its separate creator-scoped uniqueness in `games`.
-- Append-only: revoke UPDATE/DELETE from application roles, prevent mutation in privileged transaction paths; never truncate accepted transcripts. State digests bind every committed event and snapshot. Deterministic canonicalization must be specified by code and test vectors before release.
+- Append-only: revoke UPDATE/DELETE from application roles, prevent mutation in privileged transaction paths; never truncate accepted transcripts. State digests bind every committed event and snapshot. Canonical serialized bytes MUST use **RFC 8785 JSON Canonicalization Scheme (JCS)** over validated, finite JSON, with no undefined or non-JSON values; digests are binary SHA-256 of those bytes. The event payload's own `state_digest` is excluded from the hashed snapshot to prevent recursion. Maintain public deterministic digest test vectors shared by Python, SQL checks and TypeScript.
 
 **`bgwq.achievement_awards`**
 - `id uuid PK`; `source_game_id uuid FK games RESTRICT`; `user_id uuid FK auth.users RESTRICT`; `quest_id text NOT NULL`; `points integer NOT NULL CHECK (points >= 0)`; `earned_at` timestamptz; unique `(source_game_id, user_id, quest_id)`.
@@ -225,7 +224,7 @@ erDiagram
 
 **`bgwq.game_ratings`**
 - `user_id uuid FK auth.users RESTRICT`; `ruleset_id text NOT NULL`; `rating integer NOT NULL`; `played integer`, `wins integer`, `draws integer`, `losses integer` (all nonnegative); `last_game_id` nullable FK games; timestamps; PK `(user_id, ruleset_id)`.
-- Ruleset identity is a stable built-in definition key **and** versioned rules digest; custom variants use their canonical ruleset digest, so altered rules cannot manipulate an unrelated rating. Initial rating **1200**, two-player Elo **K=32**, deterministic numeric rounding and zero-sum update after one accepted terminal result **(DECISION)**. Update **both** participants in one serializable/locked transaction, once per finished game, and never via client inputs. No leaderboard endpoint/table. Match terminal processing must store an idempotent rating-applied marker/immutable rating event; see §5.5.
+- Ruleset identity is a stable built-in definition key **and** versioned rules digest; custom variants use their canonical ruleset digest, so altered rules cannot manipulate an unrelated rating. Initial rating **1200**, two-player Elo **K=32**: compute `expected_A = 1/(1 + 10**((rating_B - rating_A)/400))` from both **pre-game** ratings, `delta_A = round_half_away_from_zero(32 × (score_A - expected_A))` for score `1` (win), `0.5` (draw), `0` (loss); set `delta_B = -delta_A` for zero-sum updates. Apply once per accepted terminal result **(DECISION)**. Update **both** participants in one serializable/locked transaction, once per finished game, and never via client inputs. No leaderboard endpoint/table. Match terminal processing MUST set `games.rating_settled_at` in the **same** commit as the terminal event and both rating updates; it is NULL until rated settlement, and prevents a second application.
 
 ### 4.2 Database constraints and privileges
 - All project tables in private `bgwq`; enable RLS as defense in depth, no `USAGE` / `SELECT` / `INSERT` / `UPDATE` / `DELETE` / function `EXECUTE` to browser `anon`/`authenticated` roles. No publicly executable privileged stored procedure. DB access only from the trusted API through least-privileged server credentials using the provider-supported pooler.
@@ -272,7 +271,7 @@ No separate “write event then fix snapshot,” “award later,” “update cl
 - Moves require active participant and complete legal route. Resignation can be initiated by either participant. Draw claims require configured rules and are evaluated against authoritative state (optionally a legal, **uncommitted** intended move); claims never mutate the projected position.
 - A draw offer is a durable action/event containing only actor, timestamp and a pending offer owner. **Proposed rule (DECISION):** either participant may offer while active; only the other can accept; at most one outstanding offer; next accepted move expires it; duplicate offer is idempotent; both offer and acceptance receive ordered revisions; neither awards a move increment. Acceptance ends game atomically.
 - A result contains `kind` (win/draw), `winner` (verified participant UUID or null), `cause` (configured rule identifier) and `priority` (bounded integer). Highest valid priority wins; contradictory same-priority proposals fail closed. Result and terminal event must agree exactly.
-- Prevent actions after terminal state except exact retries. Terminal processing evaluates `at_game_end` quests and awards before commit, and applies one rating result (including draws) using an immutable terminal settlement marker/idempotent ledger boundary.
+- Prevent actions after terminal state except exact retries. Terminal processing evaluates `at_game_end` quests and awards before commit, and applies one rating result (including draws) while setting `games.rating_settled_at` atomically; already-settled games cannot be rated again.
 
 ## 6. Supabase authentication, HTTP sessions and authorization — DECISION
 
