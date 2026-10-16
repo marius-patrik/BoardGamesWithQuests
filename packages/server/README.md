@@ -1,6 +1,11 @@
 # Server
 
-`engine/` holds the moved Python engine. `api/index.py` is the ASGI entrypoint
+`engine/` holds the moved Python engine, including its existing `controller/`.
+`GameController` coordinates selections and moves; the retained
+`WindowController` manages legacy window state and is not used by FastAPI.
+Neither controller currently implements durable, authenticated multiplayer
+commands, so those operations must not assume persistent in-memory instances.
+ `api/index.py` is the ASGI entrypoint
 for the separately deployed Vercel API project. It exposes only a real HTTP
 health request; no game, authentication, or Supabase-backed route is implemented.
 

@@ -7,15 +7,16 @@ playable chess, checkers, quests, multiplayer sessions, or a game database.
 ```text
 packages/
   server/
-    engine/             Existing Python engine, moved from packages/engine
+    engine/             Existing Python engine, including controller/
     api/index.py        FastAPI ASGI bootstrap
     supabase/           Supabase CLI configuration and private schema bootstrap
   web/                  Bun + React + TypeScript + Rsbuild + shadcn/ui + Motion
   native/               Bun + Tauri 2 wrapper of the deployed Vercel website
 ```
 
-The `chess` and `checkers` packages, Python GUI view/controller and launcher
-have been removed at the maintainer's direction. The retained engine is not a
+The `chess` and `checkers` packages, Python GUI view and obsolete launcher
+have been removed. The engine's `controller/` package is retained in full;
+its window-specific code is legacy and is not wired to the React interface. The retained engine is not a
 certified game-neutral implementation: game logic, API integration, persistence,
 and acceptance remain future work.
 
