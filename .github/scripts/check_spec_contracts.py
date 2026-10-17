@@ -287,7 +287,14 @@ def validate_mermaid() -> tuple[int, int]:
         assert m.group(1) not in nodes, "duplicate Mermaid declaration"
         nodes[m.group(1)] = m.group(2).split("<br/>", 1)[0]
     assert len(nodes) >= 140, f"Mermaid declarations missing: {len(nodes)}"
-    declarations = re.findall(r'(?m)^\s*D\d+\["([^"\n]*)"\]\s*
+    declarations = re.findall(r'(?m)^\s*D\d+\["([^"\n]*)"\]\s*$', ast)
+    assert len(declarations) >= 100, "source interface contracts are missing"
+    for declaration in declarations:
+        owner = declaration.split("<br/>", 1)[0]
+        assert owner in nodes.values(), f"unowned interface in AST: {owner}"
+        assert "<br/>Algorithm: " in declaration, f"missing algorithm for {owner}"
+        assert "Validate typed inputs; compute" not in declaration, f"generic contract for {owner}"
+    names = set(nodes.values())
     assert len(names) == len(nodes), "source file declared twice"
     arch = (REQ / "ARCHITECTURE.md").read_text()
     block = re.search(r"```text\n([\s\S]*?)\n```", arch)
