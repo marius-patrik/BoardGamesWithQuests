@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   run:
+<<<<<<< HEAD
     name: run
     runs-on: ubuntu-latest
     env:
@@ -69,3 +70,16 @@ jobs:
           else
             echo "Default branch; direct push skipped to comply with protection."
           fi
+||||||| 582631b2
+    uses: marius-patrik/DarkFactory/.github/workflows/auto-format.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+    with:
+      pipeline-repo: marius-patrik/DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    secrets: inherit
+=======
+    uses: marius-patrik/agent-DarkFactory/.github/workflows/auto-format.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+    with:
+      pipeline-repo: marius-patrik/agent-DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    secrets: inherit
+>>>>>>> fix/repin-agent-darkfactory

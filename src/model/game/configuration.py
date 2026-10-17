@@ -188,6 +188,7 @@ class Configuration:
         )
 
 
+<<<<<<< HEAD:src/model/game/configuration.py
 def _within(candidate: str, directory: str) -> bool:
     """Report whether a path lies inside a directory.
 
@@ -316,6 +317,144 @@ def delete_configuration(name: str, root: Optional[str] = None) -> None:
     shutil.rmtree(target)
 
 
+||||||| 582631b2:model/game/configuration.py
+=======
+def _within(candidate: str, directory: str) -> bool:
+    """Report whether a path lies inside a directory.
+
+    Args:
+        candidate: The path to test. Must already be absolute.
+        directory: The containing directory. Must already be absolute.
+
+    Returns:
+        bool: True when `candidate` is inside `directory` or is `directory` itself.
+    """
+    try:
+        return os.path.commonpath([candidate, directory]) == directory
+    except ValueError:  # pragma: no cover - different drives on Windows
+        return False
+
+
+def _validate_name(name: str) -> str:
+    """Check that a name may be used for a configuration directory.
+
+    A name becomes both a directory and the module name a loaded configuration is registered
+    under, so it has to be one path segment and an identifier. Anything else is either a
+    traversal or a name Python will not accept.
+
+    Args:
+        name: The proposed directory name.
+
+    Returns:
+        str: The name, unchanged.
+
+    Raises:
+        ValueError: If the name is empty, holds a path separator, or is a relative marker.
+    """
+    if not name or os.path.sep in name or name in (".", "..") or not name.isidentifier():
+        raise ValueError(f"{name!r} is not a configuration name")
+    return name
+
+
+def copy_configuration(source: str, name: str, root: Optional[str] = None) -> Configuration:
+    """Duplicate a configuration directory into a new variant, and load the copy.
+
+    Duplication is the extension mechanism: `SCRATCHPAD.md` section 2 makes copying a
+    directory how a variant comes into existence, so this is that move with the loading
+    done and the copy refused where it would be wrong.
+
+    Args:
+        source: The configuration directory name to copy from.
+        name: The variant's directory name.
+        root: The directory configurations must live under. Defaults to the shipped `games/`.
+
+    Returns:
+        Configuration: The loaded copy, which is a variant in its own right.
+
+    Raises:
+        ValueError: If `name` is not a usable configuration name.
+        FileNotFoundError: If there is no configuration named `source`.
+        FileExistsError: If `name` already exists, so nothing is overwritten.
+    """
+    _validate_name(name)
+    if name == DEFAULT_GAME:
+        raise ValueError(f"{DEFAULT_GAME} is the default configuration and already exists")
+    allowed = os.path.abspath(root or games_root())
+    origin = os.path.join(allowed, source)
+    if not os.path.isdir(origin):
+        raise FileNotFoundError(f"no configuration directory named {source!r} in {allowed}")
+    target = os.path.join(allowed, name)
+    if os.path.exists(target):
+        raise FileExistsError(f"{target} already exists")
+    shutil.copytree(origin, target, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    return load_configuration_at(target, root=allowed)
+
+
+def rename_configuration(name: str, new_name: str, root: Optional[str] = None) -> Configuration:
+    """Rename a configuration directory, and load it under its new name.
+
+    Args:
+        name: The configuration directory's current name.
+        new_name: The name to give it.
+        root: The directory configurations must live under. Defaults to the shipped `games/`.
+
+    Returns:
+        Configuration: The loaded configuration under its new name.
+
+    Raises:
+        ValueError: If `new_name` is not usable, or names the configuration being renamed.
+        FileNotFoundError: If there is no configuration named `name`.
+        FileExistsError: If `new_name` is already taken.
+    """
+    # Both names become path segments. Validating only the new one left `name` free to be "..",
+    # which renamed the directory *containing* `games/` out from under the caller.
+    _validate_name(name)
+    _validate_name(new_name)
+    if new_name == DEFAULT_GAME:
+        raise ValueError(f"{DEFAULT_GAME} is the default configuration and cannot take a name")
+    allowed = os.path.abspath(root or games_root())
+    origin = os.path.join(allowed, name)
+    if not os.path.isdir(origin):
+        raise FileNotFoundError(f"no configuration directory named {name!r} in {allowed}")
+    if name == DEFAULT_GAME:
+        raise PermissionError(f"{DEFAULT_GAME} is the default configuration and cannot be renamed")
+    if new_name == name:
+        return load_configuration(name, root=allowed)
+    target = os.path.join(allowed, new_name)
+    if os.path.exists(target):
+        raise FileExistsError(f"{target} already exists")
+    os.rename(origin, target)
+    return load_configuration_at(target, root=allowed)
+
+
+def delete_configuration(name: str, root: Optional[str] = None) -> None:
+    """Delete a configuration directory.
+
+    Args:
+        name: The configuration directory to remove.
+        root: The directory configurations must live under. Defaults to the shipped `games/`.
+
+    Returns:
+        None
+
+    Raises:
+        PermissionError: If asked to delete the default configuration.
+        FileNotFoundError: If there is no configuration named `name`.
+    """
+    allowed = os.path.abspath(root or games_root())
+    # Without this, `name=".."` resolved to the directory *containing* `games/` and
+    # `shutil.rmtree` removed everything above it: the function was handed a name and used
+    # it as a path without ever asking whether it was one path segment.
+    _validate_name(name)
+    if name == DEFAULT_GAME:
+        raise PermissionError(f"{DEFAULT_GAME} is the default configuration and cannot be deleted")
+    target = os.path.join(allowed, name)
+    if not os.path.isdir(target):
+        raise FileNotFoundError(f"no configuration directory named {name!r} in {allowed}")
+    shutil.rmtree(target)
+
+
+>>>>>>> fix/repin-agent-darkfactory:model/game/configuration.py
 def load_configuration_at(path: str, root: Optional[str] = None) -> Configuration:
     """Load a configuration from a directory path.
 
@@ -356,6 +495,20 @@ def load_configuration_at(path: str, root: Optional[str] = None) -> Configuratio
     return configuration
 
 
+def _purge_module(module_name: str) -> None:
+    """Forget a module and everything loaded beneath it.
+
+    Args:
+        module_name: The module to remove from `sys.modules`.
+
+    Returns:
+        None
+    """
+    prefix = module_name + "."
+    for cached in [name for name in sys.modules if name == module_name or name.startswith(prefix)]:
+        sys.modules.pop(cached, None)
+
+
 def _import_from_path(entry_point: str, directory: str) -> Any:
     """Import a configuration's `__init__.py` as a package rooted where it lives.
 
@@ -387,12 +540,20 @@ def _import_from_path(entry_point: str, directory: str) -> Any:
     if spec is None or spec.loader is None:  # pragma: no cover - defensive
         raise ImportError(f"cannot load a configuration from {entry_point}")
     module = importlib.util.module_from_spec(spec)
+    # Purge the previous load of this configuration, submodules included. Registering the
+    # package again is not enough: a stale submodule from an earlier load stays in
+    # sys.modules, so `from .rules.capture import CaptureRule` returns the cached module and
+    # the same class object. The code editor then saved a rule, reported "No problems found",
+    # and every reload in that process — including the running game — kept the old rule. Only a
+    # fresh interpreter ever saw the edit.
+    _purge_module(module_name)
     sys.modules[module_name] = module
     try:
         spec.loader.exec_module(module)
     except Exception:
-        sys.modules.pop(module_name, None)
+        _purge_module(module_name)
         raise
+    importlib.invalidate_caches()
     return module
 
 

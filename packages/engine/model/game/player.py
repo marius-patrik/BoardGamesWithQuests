@@ -55,6 +55,7 @@ class Player:
                 return int(get_rating())
         return 1200
 <<<<<<< HEAD:packages/engine/model/game/player.py
+<<<<<<< HEAD:packages/engine/model/game/player.py
 ||||||| b45d2e0f:src/model/game/player.py
 
 <<<<<<< HEAD:packages/engine/model/game/player.py
@@ -78,3 +79,10 @@ Hrac = Player
 #: Czech alias for `Player`, as `PRD.md` section 5 and `Hrac` in the diagram require.
 Hrac = Player
 >>>>>>> tmp155:src/model/game/player.py
+||||||| 582631b2:model/game/player.py
+=======
+
+
+#: Czech alias for `Player`, as `PRD.md` section 5 and `Hrac` in the diagram require.
+Hrac = Player
+>>>>>>> fix/repin-agent-darkfactory:model/game/player.py

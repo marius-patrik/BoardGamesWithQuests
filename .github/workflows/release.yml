@@ -47,10 +47,24 @@ jobs:
           PY
 
   release:
+<<<<<<< HEAD
     needs: resolve
     uses: marius-patrik/DarkFactory/.github/workflows/release.yml@368eb9d75d5d828e7ac17fe590d4dc17b028cebc
+||||||| 582631b2
+    uses: marius-patrik/DarkFactory/.github/workflows/release.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+=======
+    uses: marius-patrik/agent-DarkFactory/.github/workflows/release.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+>>>>>>> fix/repin-agent-darkfactory
     with:
+<<<<<<< HEAD
       pipeline-repo: marius-patrik/DarkFactory
       pipeline-ref: "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
       bump: ${{ inputs.bump || needs.resolve.outputs.fallback_bump }}
+||||||| 582631b2
+      pipeline-repo: marius-patrik/DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+=======
+      pipeline-repo: marius-patrik/agent-DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+>>>>>>> fix/repin-agent-darkfactory
     secrets: inherit

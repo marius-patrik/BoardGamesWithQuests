@@ -2,8 +2,13 @@ import ast
 import importlib.util
 import json
 import os
+<<<<<<< HEAD
 import re
 import subprocess
+||||||| 582631b2
+import subprocess
+=======
+>>>>>>> fix/repin-agent-darkfactory
 import sys
 
 import properdocs.config
@@ -249,6 +254,7 @@ def test_absent_notes_directory_publishes_no_notes_section(tmp_path):
 
     assert not any(isinstance(item, dict) and "Notes" in item for item in nav)
     assert not any(doc_path.startswith("notes/") for doc_path, _, _ in pages)
+<<<<<<< HEAD
 
 
 def test_empty_notes_directory_publishes_no_notes_section(tmp_path):
@@ -351,3 +357,34 @@ def test_agents_rule_mandates_google_docstrings_and_a_strict_docs_build():
     assert "Google-style" in content or "Google-Style" in content
     assert "build --strict" in content, "the rule must mandate a zero-warning documentation build"
     assert "GitHub Pages" in content
+||||||| 582631b2
+
+
+def test_docs_config_and_strict_build():
+    """The site must build with zero warnings, which is what `--strict` enforces."""
+    config_path = os.path.join(repo_root, "properdocs.yml")
+    assert os.path.isfile(config_path), "properdocs.yml must exist at repository root"
+
+    result = subprocess.run(
+        [sys.executable, "-m", "properdocs", "build", "--strict"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, (
+        f"properdocs build --strict failed with code {result.returncode}:\n"
+        f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+    )
+
+
+def test_generated_docs_directory_is_not_tracked():
+    """`docs_dir` is a generated placeholder; nothing it produces may reach the index."""
+    result = subprocess.run(
+        ["git", "check-ignore", "--quiet", ".docs/index.md"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, "generated documentation pages must be git-ignored"
+=======
+>>>>>>> fix/repin-agent-darkfactory

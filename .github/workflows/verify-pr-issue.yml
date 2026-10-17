@@ -9,6 +9,7 @@ permissions:
   contents: read
 
 jobs:
+<<<<<<< HEAD
   verify-bound-issue:
     name: verify / verify-bound-issue
     runs-on: ubuntu-latest
@@ -50,3 +51,18 @@ jobs:
             ROOT="$GITHUB_WORKSPACE/.darkfactory-runtime"
           fi
           bun "$ROOT/packages/harness/src/ci/bound-issue.ts"
+||||||| 582631b2
+  verify:
+    uses: marius-patrik/DarkFactory/.github/workflows/verify-pr-issue.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+    with:
+      pipeline-repo: marius-patrik/DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    secrets: inherit
+=======
+  verify:
+    uses: marius-patrik/agent-DarkFactory/.github/workflows/verify-pr-issue.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+    with:
+      pipeline-repo: marius-patrik/agent-DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    secrets: inherit
+>>>>>>> fix/repin-agent-darkfactory

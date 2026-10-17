@@ -7,6 +7,7 @@ on:
   merge_group:
   workflow_dispatch:
 
+<<<<<<< HEAD
 permissions:
   contents: read
 
@@ -14,7 +15,27 @@ concurrency:
   group: darkfactory-quality-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
+||||||| 582631b2
+# The pipeline itself lives in marius-patrik/DarkFactory and is pinned in
+# `.github/darkfactory.json`. This file is a caller, not a copy: every job body, every script and
+# every version matrix comes from the pinned commit, so adopting a pipeline update is a one-line
+# change here and the diff shows exactly what moved.
+#
+# A caller has to exist on this branch because GitHub only runs workflow files that are present on
+# the branch an event fires on - there is no way to drive the pipeline purely from a side branch.
+# Secrets are not passed: CI needs none beyond the automatic GITHUB_TOKEN.
+=======
+# The pipeline itself lives in marius-patrik/agent-DarkFactory and is pinned in
+# `.github/darkfactory.json`. This file is a caller, not a copy: every job body, every script and
+# every version matrix comes from the pinned commit, so adopting a pipeline update is a one-line
+# change here and the diff shows exactly what moved.
+#
+# A caller has to exist on this branch because GitHub only runs workflow files that are present on
+# the branch an event fires on - there is no way to drive the pipeline purely from a side branch.
+# Secrets are not passed: CI needs none beyond the automatic GITHUB_TOKEN.
+>>>>>>> fix/repin-agent-darkfactory
 jobs:
+<<<<<<< HEAD
   detect:
     name: detect
     runs-on: ubuntu-latest
@@ -320,3 +341,18 @@ jobs:
         env:
           QUALITY_RESULT: ${{ needs.quality.result }}
         run: test "$QUALITY_RESULT" = "success"
+||||||| 582631b2
+  pipeline:
+    uses: marius-patrik/DarkFactory/.github/workflows/ci.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+    with:
+      pipeline-repo: marius-patrik/DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    secrets: inherit
+=======
+  pipeline:
+    uses: marius-patrik/agent-DarkFactory/.github/workflows/ci.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+    with:
+      pipeline-repo: marius-patrik/agent-DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    secrets: inherit
+>>>>>>> fix/repin-agent-darkfactory

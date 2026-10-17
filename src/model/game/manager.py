@@ -146,6 +146,12 @@ class GameManager:
         self.game_logger = GameLogger()
         self.quest_manager.reset()
         if self.configuration is not None:
+            # `reset`, not re-attaching: `attach` is a rule's own chance to seed its state, and
+            # a rule that seeds nothing keeps the last game's. Only `reset` clears the dict
+            # first, so a new game cannot inherit a castling right already spent, an en passant
+            # offer still standing, or a move list nobody asked it to forget. Every shipped rule
+            # happens to reseed in `attach`, so nothing tested this until a rule did not.
+            self.configuration.reset()
             self.move_validator.set_rules(
                 self.configuration.enabled_rules(),
                 clock=self.timer,
@@ -249,6 +255,7 @@ class GameManager:
         self.start_turn_clock()
         return True
 
+<<<<<<< HEAD:src/model/game/manager.py
     def _configuration_clock(self):
         """Return the clock this configuration offers, if it offers one.
 
@@ -308,6 +315,77 @@ class GameManager:
         if self.increment_seconds:
             self.timer.add_time(color, self.increment_seconds)
 
+||||||| 582631b2:model/game/manager.py
+=======
+    def _configuration_clock(self):
+        """Return the clock this configuration offers, if it offers one.
+
+        Returns:
+            Any: The configuration's first clock, or None when it declares none. The engine
+            must not invent one: what a game's clocks are is the configuration's decision.
+        """
+        if self.configuration is None:
+            return None
+        clocks = list(getattr(self.configuration, "clocks", None) or [])
+        return clocks[0] if clocks else None
+
+    def start_turn_clock(self, monotonic: Optional[float] = None) -> None:
+        """Begin charging the player to move for the time they spend.
+
+        Args:
+            monotonic: A monotonic clock reading, in seconds. Defaults to `time.monotonic`.
+
+        Returns:
+            None
+        """
+        import time
+
+        self.turn_started = monotonic if monotonic is not None else time.monotonic()
+
+    def charge_turn(self, color: Optional[int] = None, monotonic: Optional[float] = None) -> int:
+        """Charge the active player for the time their turn has lasted, and end that turn.
+
+        Args:
+            color: The player to charge. Defaults to the player whose turn it is.
+            monotonic: A monotonic clock reading, in seconds. Defaults to `time.monotonic`.
+
+        Returns:
+            int: The whole seconds charged, which is zero for a turn shorter than a second or
+            a game that has not begun.
+        """
+        import time
+
+        if self.turn_started is None:
+            return 0
+        now = monotonic if monotonic is not None else time.monotonic()
+        elapsed = now - self.turn_started
+        # Carry the remainder rather than discarding it. Rounding each call to whole seconds
+        # loses up to a second per call, so a clock asked four times a second fell roughly four
+        # times slower than real time. The turn is still *ended* — a move charges it once and
+        # hands the turn on — but asking mid-turn must not throw away what has accrued.
+        whole = int(elapsed)
+        # Keep the fraction that has not been charged yet, by moving the start forward by only
+        # what was charged. Rounding each call to whole seconds and restarting from now lost up
+        # to a second per call, so a clock asked four times a second fell about four times
+        # slower than real time.
+        self.turn_started = now - (elapsed - whole)
+        if whole > 0:
+            self.timer.tick(color if color is not None else self.active_player, whole)
+        return whole
+
+    def credit_increment(self, color: int) -> None:
+        """Add the increment a player earns by completing a move.
+
+        Args:
+            color: The player who moved.
+
+        Returns:
+            None
+        """
+        if self.increment_seconds:
+            self.timer.add_time(color, self.increment_seconds)
+
+>>>>>>> fix/repin-agent-darkfactory:model/game/manager.py
     def _describe(self, move: Move, mover: int) -> MoveEvent:
         """Build the event the quests judge a move by.
 

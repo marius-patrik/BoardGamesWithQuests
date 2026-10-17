@@ -407,16 +407,16 @@ class SurvivePlies(_AfterMoveQuest):
 
 
 class SurviveWithoutCapture(_AfterMoveQuest):
-    """Make at least `count` of your own moves without losing a piece."""
+    """Make at least `count` of your own moves without capturing anything."""
 
     default_name = "Untouchable"
-    default_description = "Play the required number of moves without losing a piece."
+    default_description = "Play the required number of your moves without capturing anything."
 
     def __init__(self, count: int = 1, **kwargs: Any):
-        """Create a no-loss quest.
+        """Create a quiet-move quest.
 
         Args:
-            count: How many of the quest's own moves must be made without a loss.
+            count: How many of the quest's own moves must be made without a capture.
             kwargs: Passed to `_AfterMoveQuest`.
 
         Raises:
@@ -441,7 +441,7 @@ class SurviveWithoutCapture(_AfterMoveQuest):
         ]
 
     def observe_move(self, event: MoveEvent) -> None:
-        """Record the move when nothing was lost on it.
+        """Record the move when nothing was taken on it.
 
         Args:
             event: The move that was played.
@@ -1003,7 +1003,9 @@ class MaterialAhead(_AtGameEndQuest):
         """
         taken = event.captures_by(self.color)
         lost = event.captures_against(self.color)
-        self._advance(amount=abs(taken - lost), target=self.margin)
+        # Ahead, not merely unequal. `abs(taken - lost)` completed this quest for a player
+        # three pieces *down*, which is the opposite of what it asks for.
+        self._advance(amount=taken - lost, target=self.margin)
 
 
 class Pacifist(_AtGameEndQuest):
@@ -1108,10 +1110,13 @@ class CompositeQuest(_AtGameEndQuest):
         Returns:
             None
         """
-        for item in event.history:
-            self.observe_move(item)
+        # A member that watches moves a move at a time was already given every move as it was
+        # played, by `observe_move` above. Replaying the history here counted each of them a
+        # second time, so three captures reached a member's target of three and doubled every
+        # count besides. Only the end-of-game members are told now.
         for quest in self.quests:
-            quest.observe_result(event)
+            if getattr(quest, "when", None) != WHEN_AFTER_MOVE:
+                quest.observe_result(event)
 
         satisfied = [quest.validate() for quest in self.quests]
         self._current = sum(1 for value in satisfied if value)

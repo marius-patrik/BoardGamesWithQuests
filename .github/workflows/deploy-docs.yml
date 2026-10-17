@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   deploy:
+<<<<<<< HEAD
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -57,3 +58,16 @@ jobs:
       - name: Deploy Pages from Actions
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
+||||||| 582631b2
+    uses: marius-patrik/DarkFactory/.github/workflows/deploy-docs.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+    with:
+      pipeline-repo: marius-patrik/DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    secrets: inherit
+=======
+    uses: marius-patrik/agent-DarkFactory/.github/workflows/deploy-docs.yml@7ecba1617f553e6a34ceb31177e1ac84d08c350f
+    with:
+      pipeline-repo: marius-patrik/agent-DarkFactory
+      pipeline-ref: "7ecba1617f553e6a34ceb31177e1ac84d08c350f"
+    secrets: inherit
+>>>>>>> fix/repin-agent-darkfactory
