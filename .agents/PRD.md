@@ -91,7 +91,7 @@ Before implementing gameplay against this design, review the **API, schema and i
 
 The HTTP API, operation ownership and supplementary PostgreSQL design are maintained as **reference appendices in this PRD**, not as deployed OpenAPI or SQL source files. The executable database structure is authored in [Prisma schema](../packages/server/supabase/schema.prisma); constraints not expressible in Prisma require real migrations during implementation. Portable [sample game configurations](reference/data/configuration.schema.json) are input references, not authoritative game state.
 
-The [engine UML](requirements/diagrams/engine_uml.mmd) defines the target state, transaction and interpreter boundaries; the [client UML](requirements/diagrams/client_uml.mmd) defines externally observable routing, identity, concurrency and recovery flows. These are deliberately **not** a speculative complete source AST. The [repository AST](architecture/diagrams/ast.mmd) and [actual implementation UML](architecture/diagrams/uml.mmd) are generated from source. Original assignment references and the retained [GUI mockup](reference/images/GUI_mockup.svg) belong exclusively under `.agents/reference/`.
+The [engine UML](requirements/diagrams/engine_uml.mmd) defines the target state, transaction and interpreter boundaries; the [client UML](requirements/diagrams/client_uml.mmd) defines externally observable routing, identity, concurrency and recovery flows. These are deliberately **not** a speculative complete source AST. The [repository AST](architecture/diagrams/ast.mmd) and [actual implementation UML](architecture/diagrams/uml.mmd) are generated from source. Original assignment references, including the untouched [assignment GUI sketch](reference/images/GUI_mockup.svg), belong exclusively under `.agents/reference/`. The reviewed-target [product UI mockup](requirements/images/product-ui.svg) illustrates the desktop gameplay, configurable lobby, and game-neutral editor as requirements (not implementation evidence).
 
 ## Source architecture
 
@@ -135,7 +135,7 @@ Prisma is **schema authoring tooling**, not a production Node.js database runtim
       engine_uml.mmd  # Target engine classes, transaction ownership and typed execution relations.
       client_uml.mmd  # End-to-end authenticated routing, actions, Realtime and recovery sequence.
     images/  # Final approved UX assets; never treat original assignment artwork as the final design.
-      .gitkeep  # Track directory until a reviewed finalized product mockup is authored.
+      product-ui.svg  # Target product UI mockup: game view, lobby and definition editor; vector source, not a screenshot.
   PRD.md  # Product invariants, annotated source inventory, package ownership and requirements.
 .github/  # DarkFactory governance, one documentation implementation, verification and release workflows.
   docs-ui/  # Existing ProperDocs template; no second architecture renderer.
