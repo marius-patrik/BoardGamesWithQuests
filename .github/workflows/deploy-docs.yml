@@ -5,15 +5,17 @@ on:
     branches: [main]
   workflow_dispatch:
   workflow_run:
-    workflows: ["Preview Documentation"]
+    workflows: ["Preview Documentation", "Build Main Documentation"]
     types: [completed]
 
-# Preview workflow stages pr-*/ into gh-pages for compatibility; this workflow
-# publishes the combined site only through GitHub Pages' Actions deployment API.
+# GitHub Pages Actions publishes one complete site per repository. Branch
+# previews are built on their own heads and combined from staged artifacts;
+# they must not be gated on the main documentation build.
 permissions:
   contents: read
   pull-requests: read
   pages: write
+  deployments: write
   id-token: write
 
 concurrency:
@@ -21,72 +23,71 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  publish:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Check out main (never checkout code from preview events)
-        uses: actions/checkout@v4
+      - name: Checkout trusted publisher from main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
-          fetch-depth: 1
+          persist-credentials: false
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install documentation dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-
-      - name: Build current documentation
-        run: python .github/scripts/build_docs.py
-
-      - name: Collect live preview builds from staging
+      - name: Assemble all staged snapshots without building branch or main
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # gh-pages is staging for the existing reusable PR preview workflow,
-          # NOT the GitHub Pages publication source.
-          if git fetch origin gh-pages --depth=1; then
-            mkdir -p .published
-            git archive FETCH_HEAD | tar -x -C .published
-            for number in $(gh pr list --state open --limit 200 --json number --jq '.[].number'); do
-              if [ -f ".published/pr-$number/index.html" ]; then
-                cp -a ".published/pr-$number" "site/pr-$number"
-              fi
-            done
-            if [ -d .published/branch ]; then
-              mkdir -p site/branch
-              for candidate in .published/branch/*; do
-                if [ -f "$candidate/index.html" ]; then
-                  cp -a "$candidate" site/branch/
-                fi
-              done
-            fi
-          else
-            echo "No legacy preview staging exists; deploying main only."
-          fi
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/published-staging"
+          git fetch origin gh-pages --depth=1
+          git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/published-staging"
+          open_list=$(gh api --paginate \
+            "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" \
+            --jq '.[].number')
+          mapfile -t open_prs < <(printf '%s\n' "$open_list" | sed '/^$/d')
+          python .github/scripts/assemble_docs.py \
+            --staging "$RUNNER_TEMP/published-staging" \
+            --site site --open-prs "${open_prs[@]}"
 
-      - name: Write manifest from builds actually deployed
-        run: python .github/scripts/build_docs.py --manifest --site site
-
-      - name: Disable Jekyll
-        run: touch site/.nojekyll
+      - name: Generate selector manifest from actual published versions
+        run: python .github/scripts/docs_manifest.py --site site
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload Pages artifact
+      - name: Upload complete Pages site
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
-      - name: Deploy Pages from Actions
+      - name: Deploy complete site through GitHub Pages Actions
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Mark PR deployments successful only after Pages publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          for candidate in site/pr-*; do
+            [ -f "$candidate/index.html" ] || continue
+            pr="$(basename "$candidate" | cut -c4-)"
+            [[ "$pr" =~ ^[0-9]+$ ]] || continue
+            [ -f "$candidate/.preview-head" ] || continue
+            recorded=$(cat "$candidate/.preview-head")
+            actual=$(gh pr view "$pr" --json headRefOid --jq '.headRefOid' 2>/dev/null || true)
+            [ -n "$actual" ] && [ "$recorded" = "$actual" ] || continue
+            deployment=$(gh api \
+              "repos/$GITHUB_REPOSITORY/deployments?environment=pr-$pr&per_page=100" \
+              --jq ".[] | select(.sha == \"$recorded\") | .id" | head -n 1)
+            [ -n "$deployment" ] || continue
+            gh api --method POST \
+              "repos/$GITHUB_REPOSITORY/deployments/$deployment/statuses" \
+              -f state=success \
+              -f environment_url="${PAGE_URL%/}/pr-$pr/" \
+              -f description="Published through GitHub Pages"
+          done
