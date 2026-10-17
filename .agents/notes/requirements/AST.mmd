@@ -132,6 +132,7 @@ flowchart TB
     F119["tests/browser/rendering.spec.ts<br/>exports: test/assertions<br/>TSDoc: SVG, accessibility and layout"]
     F120["tests/configuration/test_assets.py<br/>exports: test/assertions<br/>Python docstring: Binary import/export digest parity"]
     F121["tests/configuration/test_roundtrip.py<br/>exports: test/assertions<br/>Python docstring: Structural and semantic JSON roundtrip"]
+    F167["tests/documentation/test_manifest_cli.py<br/>exports: test_manifest_advertises_only_available_html_roots(); test_manifest_reflects_removed_preview_after_regeneration(); test_manifest_is_deterministic_and_projects_are_from_configuration()<br/>Python docstring: Run the real documentation-manifest CLI against temporary published-site trees."]
     F122["tests/database/test_integrity.py<br/>exports: test/assertions<br/>Python docstring: Published immutability, trigger and RLS checks"]
     F123["tests/database/test_schema.py<br/>exports: test/assertions<br/>Python docstring: Migrations/FKs/constraints in real PostgreSQL"]
     F124["tests/database/test_transactions.py<br/>exports: test/assertions<br/>Python docstring: Concurrent actions and exact idempotency"]
@@ -171,6 +172,7 @@ flowchart TB
     F163[".github/docs-ui/main.html<br/>exports: First-party documentation HTML page template.<br/>Documentation: Canonical, cross-validated source contract."]
     F164[".github/scripts/check_spec_contracts.py<br/>exports: Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory.<br/>Documentation: Canonical, cross-validated source contract."]
     F165[".github/scripts/docs_hooks.py<br/>exports: Generate documentation pages from tracked files, including interactive Mermaid source.<br/>Documentation: Canonical, cross-validated source contract."]
+    F166[".github/scripts/docs_manifest.py<br/>exports: manifest(site, repository); main()<br/>Python docstring: Advertise only deployed HTML roots and derive project navigation from DarkFactory configuration."]
   end
   F001 -->|defines architecture| F149
   F001 -->|defines components| F151
@@ -393,6 +395,8 @@ flowchart TB
   F031 -->|defines HTTP contract| F034
   F139 -->|defines generic semantics| F053
   F039 -->|defines transfer models| F040
+  F166 -->|adds deployed versions manifest to generated documentation| F130
+  F167 -->|executes CLI on published-site fixtures| F166
   F165 -->|renders interactive Mermaid source| F149
   F162 -->|pans/zooms Mermaid visualization| F149
   F163 -->|loads architecture viewer| F162
@@ -570,6 +574,10 @@ flowchart TB
     D166["tools/check_prd.py<br/>verify()-&gt;None<br/>Algorithm: Validate PRD links, architecture paths and normative contract uniqueness; reject stale references."]
     D167[".github/scripts/check_spec_contracts.py<br/>Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory.<br/>Algorithm: Parse and cross-validate canonical Prisma, SQL, OpenAPI, portable JSON, operator registry and Mermaid source paths; exit nonzero on drift."]
     D168[".github/scripts/docs_hooks.py<br/>Generate documentation pages from tracked files, including interactive Mermaid source.<br/>Algorithm: Enumerate tracked canonical docs, securely embed Mermaid in an interactive viewer, publish API/schema source pages and preserve navigation."]
+    D169[".github/scripts/docs_manifest.py<br/>manifest(site, repository); main()<br/>Algorithm: Inspect only existing HTML index roots for main, branch and numbered PR previews; sort branch names ascending and numeric PRs descending; read configured sibling projects; write deterministic versions.json."]
+    D170["tests/documentation/test_manifest_cli.py<br/>test_manifest_advertises_only_available_html_roots()<br/>Algorithm: Create actual temporary HTML roots for valid and invalid preview names, invoke CLI in a subprocess, and assert exactly available ordered version entries."]
+    D171["tests/documentation/test_manifest_cli.py<br/>test_manifest_reflects_removed_preview_after_regeneration()<br/>Algorithm: Generate a preview manifest, remove its index.html, regenerate, and assert the preview disappears instead of lingering in navigation."]
+    D172["tests/documentation/test_manifest_cli.py<br/>test_manifest_is_deterministic_and_projects_are_from_configuration()<br/>Algorithm: Invoke the CLI twice with identical site roots and compare manifest bytes; compare project links to configured DarkFactory documentation projects."]
   end
   F027 -->|exports concrete interface| D001
   F028 -->|exports concrete interface| D002
@@ -739,6 +747,10 @@ flowchart TB
   F148 -->|exports concrete interface| D166
   F164 -->|exports concrete interface| D167
   F165 -->|exports concrete interface| D168
+  F166 -->|exports concrete interface| D169
+  F167 -->|exports concrete interface| D170
+  F167 -->|exports concrete interface| D171
+  F167 -->|exports concrete interface| D172
   D015 -->|invokes checked interface| D017
   D022 -->|invokes checked interface| D051
   D022 -->|invokes checked interface| D050
@@ -791,4 +803,4 @@ flowchart TB
   F094 -->|submits command via API| C01
   C09 -->|transaction commits before notification| C10
   %% Engine purity: the DB service never calls engine from inside a mutable effect, and the browser never mutates authoritative state.
-  %% Source files: 152; one identity per physical file; configuration data is not executable gameplay logic.
+  %% Source files: 154; one identity per physical file; configuration data is not executable gameplay logic.

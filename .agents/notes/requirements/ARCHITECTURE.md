@@ -35,6 +35,7 @@ Prisma is **schema authoring tooling**, not a production Node.js database runtim
   scripts/  # GitHub-specific source/doc verification helpers.
     check_spec_contracts.py  # Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory
     docs_hooks.py  # Generate documentation pages from tracked files, including interactive Mermaid source
+    docs_manifest.py  # manifest(site, repository); main(); Scan published HTML roots and emit the branch/PR version selector without advertising missing deployments
   workflows/  # CI and release configurations, not gameplay code.
     deploy-api.yml  # deploy-api workflow; Deploy FastAPI Vercel project
     deploy-web.yml  # deploy-web workflow; Deploy web Vercel project
@@ -173,6 +174,8 @@ tests/  # Observable API, engine, database and browser behavior.
   configuration/  # Portable JSON import/export and definition validation.
     test_assets.py  # test/assertions; Binary import/export digest parity
     test_roundtrip.py  # test/assertions; Structural and semantic JSON roundtrip
+  documentation/  # Observable tests of generated documentation and preview navigation.
+    test_manifest_cli.py  # Launch the shipped docs manifest CLI on temporary published-site trees; verify available versions, ordering, removal and deterministic outputs.
   database/  # Actual PostgreSQL constraints, events and transactions.
     test_integrity.py  # test/assertions; Published immutability, trigger and RLS checks
     test_schema.py  # test/assertions; Migrations/FKs/constraints in real PostgreSQL
