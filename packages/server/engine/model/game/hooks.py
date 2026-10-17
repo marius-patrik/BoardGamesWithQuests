@@ -8,7 +8,13 @@ from dataclasses import dataclass
 from typing import Any
 
 from server.engine.model.game.conditions import ConditionEvaluator, Query
-from server.engine.model.game.schema import HOOKS, freeze_json, thaw_json, validate_effect, validate_hooks
+from server.engine.model.game.schema import (
+    HOOKS,
+    freeze_json,
+    thaw_json,
+    validate_effect,
+    validate_hooks,
+)
 
 
 @dataclass(frozen=True)
