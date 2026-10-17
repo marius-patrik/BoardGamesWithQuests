@@ -6,15 +6,15 @@ description: Validate current review, integration and GitHub release evidence wi
 
 ## When to use
 
-When promoting development into main, publishing tags or auditing release state.
+When verifying an approved PR, reviewing the native dependency stack, proposing a release or auditing the installed DarkFactory version authority.
 
 ## Procedure
 
 1. Confirm the candidate code, approved scope and current integration branch.
-2. In `tags` mode, ensure no VERSION file is tracked; in `file` mode, verify VERSION was bumped by the PR policy. Require document checks and relevant tests green.
-3. For a main PR, verify the head is this repository's `development` branch.
+2. Read `repo.dfconfig` and the actual workflow. The installed `pridever` release controller remains authoritative; never run an independent template tag/file publisher until #350 approves a verified migration. Require generated-doc, real behavior and affected package checks.
+3. Validate the PR's actual issue binding, reviewer eligibility, dependency branch and required checks. The optional `development`-only main-source policy is pending in #350 and must not be represented as live.
 4. Require actual native branch protection/reviewer approval before merge; do not call workflow policy equivalent to protection.
-5. After main merge, confirm immutable tag, release URL, source commit and retained integration branch.
+5. After an explicitly approved main promotion, confirm the exact source commit, immutable tag and real release artifacts; reconcile any integration branch only as its verified policy requires.
 6. If protection is missing, invoke the admin bootstrap procedure using an authorized account, or report that gate as blocked.
 
 ## Evidence of completion

@@ -10,7 +10,7 @@ When scope, acceptance criteria, non-goals or user intent changes.
 
 ## Procedure
 
-1. Record the request with enough original context to preserve intent in `.agents/requests/<sequence>-<topic>.md`.
+1. Check master product issue #348 and capture approved requirements in the existing canonical `.agents/requests/` record; create a second approved record only for a distinct, nonconflicting owner requirement.
 2. Give each record a `status:` in front matter; only approved requests enter the PRD.
 3. Specify observable outcomes, exclusions, affected actors and dependencies.
 4. Identify conflicts with existing approved records; reconcile rather than keeping two contradictory active requirements.
