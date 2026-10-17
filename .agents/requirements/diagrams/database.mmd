@@ -394,76 +394,76 @@ erDiagram
     versions ||--o{ roles : versionId
     versions ||--o{ phases : versionId
     versions ||--o{ entity_types : versionId
-    entity_types ||--o{ entity_seeds : versionId,_entityTypeId
-    entity_seeds ||--o{ entity_seeds : versionId,_parentId
-    entity_seeds ||--o{ entity_seeds : versionId,_locationId
-    entity_seeds ||--o{ seed_links : versionId,_sourceId
-    entity_seeds ||--o{ seed_links : versionId,_targetId
-    entity_types ||--o{ fields : versionId,_entityTypeId
-    entity_seeds ||--o{ seed_values : versionId,_seedId
-    fields ||--o{ seed_values : versionId,_fieldId
-    entity_seeds ||--o{ seed_values : versionId,_refSeedId
+    entity_types ||--o{ entity_seeds : versionId__entityTypeId
+    entity_seeds ||--o{ entity_seeds : versionId__parentId
+    entity_seeds ||--o{ entity_seeds : versionId__locationId
+    entity_seeds ||--o{ seed_links : versionId__sourceId
+    entity_seeds ||--o{ seed_links : versionId__targetId
+    entity_types ||--o{ fields : versionId__entityTypeId
+    entity_seeds ||--o{ seed_values : versionId__seedId
+    fields ||--o{ seed_values : versionId__fieldId
+    entity_seeds ||--o{ seed_values : versionId__refSeedId
     operators ||--o{ operator_parameters : operatorKey
     versions ||--o{ expressions : versionId
-    fields ||--o{ expressions : versionId,_fieldId
+    fields ||--o{ expressions : versionId__fieldId
     operators ||--o{ expressions : operatorKey
-    expressions ||--o{ expression_arguments : versionId,_parentId
-    expressions ||--o{ expression_arguments : versionId,_childId
-    entity_types ||--o{ actions : versionId,_entityTypeId
-    expressions ||--o{ actions : versionId,_iteratorExpressionId
-    expressions ||--o{ actions : versionId,_conditionExpressionId
+    expressions ||--o{ expression_arguments : versionId__parentId
+    expressions ||--o{ expression_arguments : versionId__childId
+    entity_types ||--o{ actions : versionId__entityTypeId
+    expressions ||--o{ actions : versionId__iteratorExpressionId
+    expressions ||--o{ actions : versionId__conditionExpressionId
     hooks ||--o{ actions : hookKey
-    actions ||--o{ action_parameters : versionId,_actionId
-    phases ||--o{ phase_actions : versionId,_phaseId
-    actions ||--o{ phase_actions : versionId,_actionId
-    actions ||--o{ effects : versionId,_actionId
-    expressions ||--o{ effects : versionId,_conditionExpressionId
+    actions ||--o{ action_parameters : versionId__actionId
+    phases ||--o{ phase_actions : versionId__phaseId
+    actions ||--o{ phase_actions : versionId__actionId
+    actions ||--o{ effects : versionId__actionId
+    expressions ||--o{ effects : versionId__conditionExpressionId
     operators ||--o{ effects : operatorKey
-    effects ||--o{ effect_arguments : versionId,_effectId
-    expressions ||--o{ effect_arguments : versionId,_expressionId
+    effects ||--o{ effect_arguments : versionId__effectId
+    expressions ||--o{ effect_arguments : versionId__expressionId
     versions ||--o{ assets : versionId
-    entity_types ||--o{ visual_templates : versionId,_entityTypeId
-    visual_templates ||--o{ visual_primitives : versionId,_templateId
-    assets ||--o{ visual_primitives : versionId,_assetId
+    entity_types ||--o{ visual_templates : versionId__entityTypeId
+    visual_templates ||--o{ visual_primitives : versionId__templateId
+    assets ||--o{ visual_primitives : versionId__assetId
     versions ||--o{ games : versionId
-    phases ||--o{ games : versionId,_phaseId
-    games ||--o{ participants : gameId,_versionId
-    roles ||--o{ participants : versionId,_roleId
-    participants ||--o{ active_participants : gameId,_participantId
-    games ||--o{ game_entities : gameId,_versionId
-    entity_types ||--o{ game_entities : versionId,_entityTypeId
-    entity_seeds ||--o{ game_entities : versionId,_seedId
-    participants ||--o{ game_entities : gameId,_ownerId
-    game_entities ||--o{ game_entities : gameId,_parentId
-    game_entities ||--o{ game_entities : gameId,_locationId
-    game_entities ||--o{ game_links : gameId,_sourceId
-    game_entities ||--o{ game_links : gameId,_targetId
-    games ||--o{ game_values : gameId,_versionId
-    game_entities ||--o{ game_values : gameId,_entityId
-    fields ||--o{ game_values : versionId,_fieldId
-    game_entities ||--o{ game_values : gameId,_refEntityId
-    participants ||--o{ game_values : gameId,_refParticipantId
-    games ||--o{ game_composites : gameId,_versionId
-    game_entities ||--o{ game_composites : gameId,_ownerEntityId
-    fields ||--o{ game_composites : versionId,_fieldId
-    game_composites ||--o{ game_composite_entries : gameId,_compositeId
-    game_composites ||--o{ game_composite_entries : gameId,_childCompositeId
-    game_entities ||--o{ game_composite_entries : gameId,_refEntityId
-    participants ||--o{ game_composite_entries : gameId,_refParticipantId
-    participants ||--o{ clocks : gameId,_participantId
+    phases ||--o{ games : versionId__phaseId
+    games ||--o{ participants : gameId__versionId
+    roles ||--o{ participants : versionId__roleId
+    participants ||--o{ active_participants : gameId__participantId
+    games ||--o{ game_entities : gameId__versionId
+    entity_types ||--o{ game_entities : versionId__entityTypeId
+    entity_seeds ||--o{ game_entities : versionId__seedId
+    participants ||--o{ game_entities : gameId__ownerId
+    game_entities ||--o{ game_entities : gameId__parentId
+    game_entities ||--o{ game_entities : gameId__locationId
+    game_entities ||--o{ game_links : gameId__sourceId
+    game_entities ||--o{ game_links : gameId__targetId
+    games ||--o{ game_values : gameId__versionId
+    game_entities ||--o{ game_values : gameId__entityId
+    fields ||--o{ game_values : versionId__fieldId
+    game_entities ||--o{ game_values : gameId__refEntityId
+    participants ||--o{ game_values : gameId__refParticipantId
+    games ||--o{ game_composites : gameId__versionId
+    game_entities ||--o{ game_composites : gameId__ownerEntityId
+    fields ||--o{ game_composites : versionId__fieldId
+    game_composites ||--o{ game_composite_entries : gameId__compositeId
+    game_composites ||--o{ game_composite_entries : gameId__childCompositeId
+    game_entities ||--o{ game_composite_entries : gameId__refEntityId
+    participants ||--o{ game_composite_entries : gameId__refParticipantId
+    participants ||--o{ clocks : gameId__participantId
     games ||--o{ events : gameId
-    participants ||--o{ events : gameId,_actorId
-    events ||--o{ event_values : gameId,_eventId
-    game_entities ||--o{ event_values : gameId,_entityId
-    participants ||--o{ event_values : gameId,_participantId
-    events ||--o{ event_mutations : gameId,_eventId
-    participants ||--o{ awards : gameId,_participantId
-    game_entities ||--o{ awards : gameId,_objectiveEntityId
-    events ||--o{ awards : gameId,_eventId
+    participants ||--o{ events : gameId__actorId
+    events ||--o{ event_values : gameId__eventId
+    game_entities ||--o{ event_values : gameId__entityId
+    participants ||--o{ event_values : gameId__participantId
+    events ||--o{ event_mutations : gameId__eventId
+    participants ||--o{ awards : gameId__participantId
+    game_entities ||--o{ awards : gameId__objectiveEntityId
+    events ||--o{ awards : gameId__eventId
     definitions ||--o{ ratings : definitionId
     games ||--o{ game_outcomes : gameId
-    participants ||--o{ game_outcomes : gameId,_participantId
-    events ||--o{ game_outcomes : gameId,_eventId
+    participants ||--o{ game_outcomes : gameId__participantId
+    events ||--o{ game_outcomes : gameId__eventId
 %% EntityKind: game | space | item | objective
 %% GameStatus: pending | active | finished | expired
 %% ValueKind: bool | int | decimal | text | instant | entity | participant | none
