@@ -1,0 +1,64 @@
+flowchart LR
+%% international-draughts: authored design topology converted from reference JSON. Not deployed JSON or a runtime claim.
+classDef def fill:#214050,color:#f4ffff,stroke:#87ddce,stroke-width:2px
+classDef role fill:#263947,color:#e4eeff,stroke:#84aec7
+classDef phase fill:#303854,color:#e4eeff,stroke:#b7a4e6
+classDef entity fill:#243d3a,color:#e4fef3,stroke:#82bcae
+classDef action fill:#424035,color:#ffefde,stroke:#e4ba7d
+def["International Draughts<br/>key: international-draughts<br/>players: 2–2<br/>semantics v1"]:::def
+subgraph ROLES["Participant roles"]
+r0["seat_0<br/>Player 1<br/>capacity 1..1<br/>forward row 1"]:::role
+r1["seat_1<br/>Player 2<br/>capacity 1..1<br/>forward row -1"]:::role
+end
+subgraph PHASES["Ordered phases"]
+p0["turn<br/>order 0<br/>initial"]:::phase
+end
+subgraph ENTITY_TYPES["Game-neutral entity types and fields"]
+e0["game / game<br/>seed instances: 1<br/>SVG primitives: 0<br/>active_seat: int (default)<br/>draw_counter: int (default)"]:::entity
+e1["board / space<br/>seed instances: 1<br/>SVG primitives: 0"]:::entity
+e2["square / space<br/>seed instances: 50<br/>SVG primitives: 1"]:::entity
+e3["man / item<br/>seed instances: 40<br/>SVG primitives: 1<br/>moved: bool (default)"]:::entity
+e4["king / item<br/>seed instances: 0<br/>SVG primitives: 1<br/>moved: bool (default)"]:::entity
+e5["victory / objective<br/>seed instances: 1<br/>SVG primitives: 0<br/>completed: bool (default)<br/>progress: int (default)"]:::entity
+e6["draw / objective<br/>seed instances: 1<br/>SVG primitives: 0<br/>completed: bool (default)<br/>progress: int (default)"]:::entity
+e7["capture_quest / objective<br/>seed instances: 1<br/>SVG primitives: 0<br/>completed: bool (default)<br/>progress: int (default)"]:::entity
+end
+subgraph ACTIONS["Typed conditions and ordered effects"]
+a0["#1 step (command)<br/>priority 0<br/>params: to:entity<br/>predicate ops: and, any_match, contains, context, count, gt, is_active, jump_landing_steps, list, literal, not, owner_orientation, participant_entities, reachable_grid_nodes, traverse_paths, vector<br/>effects: move_entity → change_entity_type → advance_turn"]:::action
+a1["#2 capture (command)<br/>priority 0<br/>params: path:path<br/>predicate ops: and, contains, context, count, eq, is_active, jump_landing_steps, list, literal, map, maximum, owner_orientation, path_captured_entities, traverse_paths, vector<br/>effects: apply_path → change_entity_type → emit_event → advance_turn"]:::action
+a2["#3 candidates (hook)<br/>priority 0<br/>params: none<br/>predicate ops: literal<br/>effects: emit_candidate"]:::action
+a3["#4 step (command)<br/>priority 0<br/>params: to:entity<br/>predicate ops: and, any_match, contains, context, count, gt, is_active, jump_landing_steps, list, literal, not, owner_orientation, participant_entities, reachable_grid_nodes, traverse_paths, vector<br/>effects: move_entity → advance_turn"]:::action
+a4["#5 capture (command)<br/>priority 0<br/>params: path:path<br/>predicate ops: and, contains, context, count, eq, is_active, jump_landing_steps, list, literal, map, maximum, owner_orientation, path_captured_entities, traverse_paths, vector<br/>effects: apply_path → emit_event → advance_turn"]:::action
+a5["#6 candidates (hook)<br/>priority 0<br/>params: none<br/>predicate ops: literal<br/>effects: emit_candidate"]:::action
+a6["#7 evaluate (hook)<br/>priority 0<br/>params: none<br/>predicate ops: available_action_count, context, eq, literal, next_participant<br/>effects: complete_objective → finish_game"]:::action
+a7["#8 evaluate (hook)<br/>priority 0<br/>params: none<br/>predicate ops: context, field, gte, literal<br/>effects: complete_objective → finish_game"]:::action
+a8["#9 count (hook)<br/>priority 0<br/>params: none<br/>predicate ops: context, eq, event_attribute, literal<br/>effects: increment_field"]:::action
+end
+def -.-> r0
+def -.-> r1
+def --> p0
+def -.-> e0
+def -.-> e1
+def -.-> e2
+def -.-> e3
+def -.-> e4
+def -.-> e5
+def -.-> e6
+def -.-> e7
+e3 --> a0
+p0 -.-> a0
+e3 --> a1
+p0 -.-> a1
+e3 --> a2
+p0 -.-> a2
+e4 --> a3
+p0 -.-> a3
+e4 --> a4
+p0 -.-> a4
+e4 --> a5
+p0 -.-> a5
+e5 --> a6
+e6 --> a7
+e7 --> a8
+info["Graph/link seeds: 0 · entity seeds: 95 · action definitions: 9 · roles: 2"]:::def
+def -.-> info
