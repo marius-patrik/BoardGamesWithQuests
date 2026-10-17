@@ -23,7 +23,7 @@ classifiers = [
     "Topic :: Games/Entertainment :: Board Games",
 ]
 # API runtime dependencies are declared for build reproducibility.
-dependencies = ["fastapi==0.143.0"]
+dependencies = ["fastapi==0.143.0", "httpx==0.28.1"]
 
 [project.urls]
 Homepage = "https://github.com/marius-patrik/BoardGamesWithQuests"
