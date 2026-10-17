@@ -46,7 +46,7 @@ def test_source_generated_diagrams_work_in_documentation():
         from urllib.parse import urlsplit
         import re
 
-        rendered = re.search(r'<img src="([^"]+\\.svg)"', html)
+        rendered = re.search(r'<img src="([^"]+\.svg)"', html)
         assert rendered, f"Mermaid was not pre-rendered into an SVG: {stem}"
         relative = urlsplit(unescape(rendered.group(1))).path
         asset = (page.parent / relative).resolve()

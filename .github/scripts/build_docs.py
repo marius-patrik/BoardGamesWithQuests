@@ -413,7 +413,7 @@ def render_published_mermaid(site: Path) -> None:
     assets = site / "assets" / "diagrams"
     assets.mkdir(parents=True, exist_ok=True)
     compiled: dict[str, Path] = {}
-    pattern = re.compile(r'<pre class="mermaid">([\\s\\S]*?)</pre>')
+    pattern = re.compile(r'<pre class="mermaid">([\s\S]*?)</pre>')
     with tempfile.TemporaryDirectory(prefix="render-mermaid-") as temporary:
         work = Path(temporary)
         config = work / "mermaid.json"
@@ -431,7 +431,7 @@ def render_published_mermaid(site: Path) -> None:
         for page, document in pages:
 
             def replace_diagram(match: Any) -> str:
-                source = html.unescape(match.group(1)).strip() + "\\n"
+                source = html.unescape(match.group(1)).strip() + "\n"
                 digest = hashlib.sha256(source.encode("utf-8")).hexdigest()[:20]
                 if digest not in compiled:
                     input_file = work / (digest + ".mmd")
