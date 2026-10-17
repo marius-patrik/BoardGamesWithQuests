@@ -1,93 +1,158 @@
 name: Deploy Documentation
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
   workflow_run:
     workflows: ["Preview Documentation", "Build Main Documentation"]
     types: [completed]
 
-# GitHub Pages Actions publishes one complete site per repository. Branch
-# previews are built on their own heads and combined from staged artifacts;
-# they must not be gated on the main documentation build.
+# Always run the publisher from the trusted default branch. A failed PR build
+# also triggers reconciliation, withdrawing artifacts from superseded heads.
 permissions:
   contents: read
-  pull-requests: read
-  pages: write
-  deployments: write
-  id-token: write
 
 concurrency:
   group: docs-pages-actions
   cancel-in-progress: false
 
 jobs:
-  publish:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  assemble:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      pages: write
+    outputs:
+      previews: ${{ steps.preview-index.outputs.json }}
     steps:
-      - name: Checkout trusted publisher from main
+      - name: Check out trusted publisher from main
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
           persist-credentials: false
 
-      - name: Assemble all staged snapshots without building branch or main
+      - name: Collect latest passing, source-verified Actions artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python .github/scripts/collect_docs_artifacts.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --staging "$RUNNER_TEMP/docs-staging"
+
+      - name: Assemble open PR previews without rebuilding
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/published-staging"
-          git fetch origin gh-pages --depth=1
-          git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/published-staging"
-          open_list=$(gh api --paginate \
+          mapfile -t open_prs < <(gh api --paginate \
             "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" \
             --jq '.[].number')
-          mapfile -t open_prs < <(printf '%s\n' "$open_list" | sed '/^$/d')
           python .github/scripts/assemble_docs.py \
-            --staging "$RUNNER_TEMP/published-staging" \
+            --staging "$RUNNER_TEMP/docs-staging" \
             --site site --open-prs "${open_prs[@]}"
+          python .github/scripts/build_docs.py --manifest --site site
+          test -f site/index.html
 
-      - name: Generate selector manifest from actual published versions
-        run: python .github/scripts/build_docs.py --manifest --site site
+      - name: Record the exact included preview heads
+        id: preview-index
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          previews = {
+              file.parent.name.removeprefix("pr-"): file.read_text().strip()
+              for file in Path("site").glob("pr-*/.preview-head")
+          }
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("json=" + json.dumps(previews, separators=(",", ":")) + "\n")
+          PY
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload complete Pages site
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload one complete Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
           path: site
 
-      - name: Deploy complete site through GitHub Pages Actions
+  deploy:
+    needs: assemble
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      deployments: write
+      pull-requests: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy directly through GitHub Pages Actions
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Mark PR deployments successful only after Pages publication
+      - name: Mark only successfully published preview heads as deployed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          PREVIEWS: ${{ needs.assemble.outputs.previews }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$PREVIEWS" | jq -e 'type == "object"' >/dev/null
+          while IFS=$'\t' read -r pr sha; do
+            [[ "$pr" =~ ^[0-9]+$ && "$sha" =~ ^[0-9a-f]{40}$ ]] || exit 1
+            actual=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq '.head.sha')
+            [ "$actual" = "$sha" ] || continue
+            deployment=$(gh api "repos/$GITHUB_REPOSITORY/deployments?environment=pr-$pr&per_page=100" \
+              --jq ".[] | select(.sha == \"$sha\") | .id" | head -n 1)
+            if [ -z "$deployment" ]; then
+              payload=$(jq -n --arg sha "$sha" --arg env "pr-$pr" \
+                '{ref:$sha,environment:$env,auto_merge:false,transient_environment:true,required_contexts:[],description:"Documentation preview"}')
+              deployment=$(gh api --method POST "repos/$GITHUB_REPOSITORY/deployments" \
+                --input <(printf '%s' "$payload") --jq '.id')
+            fi
+            gh api --method POST "repos/$GITHUB_REPOSITORY/deployments/$deployment/statuses" \
+              -f state=success \
+              -f environment_url="${PAGE_URL%/}/pr-$pr/" \
+              -f description="Published via GitHub Pages Actions" >/dev/null
+          done < <(printf '%s' "$PREVIEWS" | jq -r 'to_entries[] | [.key,.value] | @tsv')
+
+          # Retire preview deployments whose PR was closed or whose head failed.
+          while IFS=$'\t' read -r deployment env sha; do
+            [[ "$env" =~ ^pr-([0-9]+)$ ]] || continue
+            pr="${BASH_REMATCH[1]}"
+            current=$(printf '%s' "$PREVIEWS" | jq -r --arg pr "$pr" '.[$pr] // empty')
+            [ "$sha" = "$current" ] && continue
+            state=$(gh api "repos/$GITHUB_REPOSITORY/deployments/$deployment/statuses?per_page=1" --jq '.[0].state // empty')
+            [ "$state" = inactive ] && continue
+            gh api --method POST "repos/$GITHUB_REPOSITORY/deployments/$deployment/statuses" \
+              -f state=inactive -f description="Preview not in published Pages site" >/dev/null
+          done < <(gh api --paginate "repos/$GITHUB_REPOSITORY/deployments?per_page=100" \
+            --jq '.[] | [.id,.environment,.sha] | @tsv')
+
+      - name: Retire gh-pages branch only after verified Actions publication
         env:
           GH_TOKEN: ${{ github.token }}
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -euo pipefail
-          for candidate in site/pr-*; do
-            [ -f "$candidate/index.html" ] || continue
-            pr="$(basename "$candidate" | cut -c4-)"
-            [[ "$pr" =~ ^[0-9]+$ ]] || continue
-            [ -f "$candidate/.preview-head" ] || continue
-            recorded=$(cat "$candidate/.preview-head")
-            actual=$(gh pr view "$pr" --json headRefOid --jq '.headRefOid' 2>/dev/null || true)
-            [ -n "$actual" ] && [ "$recorded" = "$actual" ] || continue
-            deployment=$(gh api \
-              "repos/$GITHUB_REPOSITORY/deployments?environment=pr-$pr&per_page=100" \
-              --jq ".[] | select(.sha == \"$recorded\") | .id" | head -n 1)
-            [ -n "$deployment" ] || continue
-            gh api --method POST \
-              "repos/$GITHUB_REPOSITORY/deployments/$deployment/statuses" \
-              -f state=success \
-              -f environment_url="${PAGE_URL%/}/pr-$pr/" \
-              -f description="Published through GitHub Pages"
-          done
+          mode=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.build_type')
+          if [ "$mode" != workflow ]; then
+            echo "::warning::Pages source is not GitHub Actions; preserving gh-pages."
+            exit 0
+          fi
+          if ! curl --fail --location --silent --show-error --retry 5 \
+            --retry-all-errors --retry-delay 2 --max-time 15 \
+            "${PAGE_URL%/}/" --output /dev/null; then
+            echo "::warning::The published site is not yet reachable; preserving gh-pages."
+            exit 0
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/gh-pages" --silent \
+            >/dev/null 2>&1; then
+            gh api --method DELETE \
+              "repos/$GITHUB_REPOSITORY/git/refs/heads/gh-pages" --silent
+            echo "Actions publication verified; gh-pages branch retired."
+          fi

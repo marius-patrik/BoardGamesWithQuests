@@ -8,20 +8,18 @@ permissions:
   contents: read
 
 concurrency:
-  group: docs-staging
-  cancel-in-progress: false
+  group: docs-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   preview:
     if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      deployments: write
     steps:
-      - name: Check out requested source revision
+      - name: Check out the exact PR head
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Set up documentation Python
@@ -32,16 +30,20 @@ jobs:
       - name: Install documentation dependencies
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Cross-validate normative product specifications
+      - name: Validate normative API and database contracts
         run: python .github/scripts/check_spec_contracts.py
 
-      - name: Validate relational schema with pinned Prisma 7 CLI
+      - name: Validate Prisma schema with pinned Prisma 7 CLI
         run: |
           npm install --global --no-fund --no-audit prisma@7.10.0
           prisma validate --schema=packages/server/supabase/schema.prisma
 
-      - name: Verify independently published snapshot behavior
-        run: python -m pytest -q .github/tests/test_docs_publication.py
+      - name: Verify documentation publication behavior
+        run: |
+          python -m pytest -q .github/tests/test_docs_publication.py
+          if [ -f .github/tests/test_docs_artifacts.py ]; then
+            python -m pytest -q .github/tests/test_docs_artifacts.py
+          fi
 
       - name: Install pinned Mermaid compiler
         run: npm install --global --no-fund --no-audit @mermaid-js/mermaid-cli@11.16.0
@@ -56,71 +58,23 @@ jobs:
       - name: Exercise reader and image viewer in Chromium
         run: node .github/tests/test_docs_browser.mjs
 
-      - name: Stage PR documentation and register deployment
+      - name: Record exact PR head for publisher validation
         env:
-          GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-          gh auth setup-git
-          mkdir "$RUNNER_TEMP/docs-staging"
-          cd "$RUNNER_TEMP/docs-staging"
-          git init
-          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
-          if git ls-remote --exit-code origin refs/heads/gh-pages >/dev/null 2>&1; then
-            git fetch --depth 1 origin gh-pages
-            git checkout -b gh-pages FETCH_HEAD
-          else
-            git checkout --orphan gh-pages
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          rm -rf "pr-$PR"
-          cp -a "$GITHUB_WORKSPACE/site" "pr-$PR"
-          printf '%s\n' "$HEAD_SHA" > "pr-$PR/.preview-head"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "docs(preview): publish PR $PR"
-            git push origin HEAD:gh-pages
-          fi
-          payload=$(jq -n --arg sha "$HEAD_SHA" --arg env "pr-$PR" \
-            '{ref:$sha,environment:$env,auto_merge:false,transient_environment:true,required_contexts:[],description:"Documentation preview"}')
-          deployment_id=$(gh api "repos/$GITHUB_REPOSITORY/deployments" \
-            --method POST --input <(printf '%s' "$payload") --jq .id)
-          page_url="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/pr-$PR/"
-          gh api "repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses" \
-            -f state=in_progress -f environment_url="$page_url" \
-            -f description="Built and staged; awaiting GitHub Pages publication"
+        run: printf '%s\n' "$HEAD_SHA" > site/.preview-head
 
-  teardown:
+      - name: Upload passing PR site
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: docs-preview-${{ github.event.pull_request.number }}
+          path: site/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
+
+  closed:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      deployments: write
     steps:
-      - name: Remove staged PR documentation and deactivate deployment
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.pull_request.number }}
-        run: |
-          set -euo pipefail
-          gh auth setup-git
-          if gh api "repos/$GITHUB_REPOSITORY/branches/gh-pages" >/dev/null 2>&1; then
-            git clone --quiet --depth 1 --branch gh-pages \
-              "https://github.com/$GITHUB_REPOSITORY.git" "$RUNNER_TEMP/docs-staging"
-            cd "$RUNNER_TEMP/docs-staging"
-            if [ -d "pr-$PR" ]; then
-              git config user.name "github-actions[bot]"
-              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-              git rm -rq "pr-$PR"
-              git commit -m "docs(preview): remove PR $PR"
-              git push origin HEAD:gh-pages
-            fi
-          fi
-          gh api "repos/$GITHUB_REPOSITORY/deployments?environment=pr-$PR" \
-            --jq '.[].id' | while read -r deployment_id; do
-              gh api "repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses" \
-                -f state=inactive -f description="PR preview removed"
-            done
+      - name: Trigger trusted publisher to remove closed preview
+        run: echo "The publisher retains only open PRs."
