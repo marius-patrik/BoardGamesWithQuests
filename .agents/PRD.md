@@ -3,9 +3,8 @@
 **Status:** Target requirements — not a statement of implemented features
 **Version:** 1.0
 
-Planning material — current state, work streams, risks, acceptance criteria and
-the decision log — lives in `../SCRATCHPAD.md`. This document states only what the
-product is and requires.
+Implementation work and acceptance progress are tracked in GitHub issues and pull requests.
+This document defines the product requirements.
 
 ---
 
@@ -56,7 +55,7 @@ chess library.**
   Kivy, pygame or webview shell.
 - `tkinter` is standard library and adds no dependency, but it is absent from
   some Linux Python distributions unless `python3-tk` is installed separately.
-- Development tooling (`pytest`, `black`, `properdocs`, `mkdocstrings`) is exempt
+- Development tooling (`pytest`, `black`, `properdocs`) is exempt
   and never ships.
 
 ### 3.2 Tests
@@ -274,7 +273,7 @@ field. It does **not** enumerate the formats, and **no edge in the diagram
 connects any writer to any other writer or to that box**. `Extends` in the
 diagram is a legend label on a free-standing line beside the piece row, not a
 relationship. Deriving one class per format from a base class is therefore a
-deviation in its own right — see `object_model.md` section 7.
+deviation that must be documented explicitly in the implementation specification.
 
 | ID | Requirement |
 |---|---|
@@ -310,7 +309,8 @@ deviation in its own right — see `object_model.md` section 7.
 
 Every class and member the diagram defines is listed here with the requirement
 that delivers it. Nothing in the diagram is left without coverage, and anything
-this project adds beyond the diagram is registered in `object_model.md`.
+this project adds beyond the diagram must be covered by the product specification.
+Generated repository AST and implementation UML diagrams are maintained under `.agents/notes/diagrams/implementation/` (`ast.mmd` and `uml.mmd`). Reference UML and MVC diagrams are maintained under `.agents/notes/diagrams/reference/` (`uml.mmd` and `mvc.mmd`). Navigation follows these repository folders without synthetic sections. Compiled diagram SVGs are publication-only artifacts. The original GUI mockup is a separate image preserved at `.agents/notes/images/GUI_mockup.svg`.
 
 | Diagram member | Delivered by |
 |---|---|

@@ -13,7 +13,7 @@ theme:
   custom_dir: .github/docs-ui
 
 hooks:
-  - .github/scripts/docs_hooks.py
+  - .github/scripts/build_docs.py
 
 markdown_extensions:
   - admonition
@@ -31,12 +31,3 @@ markdown_extensions:
 
 plugins:
   - search
-  - mkdocstrings:
-      handlers:
-        python:
-          paths: []
-          options:
-            docstring_style: google
-            show_root_heading: true
-            show_source: true
-            heading_level: 3
