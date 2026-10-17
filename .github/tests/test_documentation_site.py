@@ -64,8 +64,14 @@ def test_source_generated_diagrams_work_in_documentation():
     for category, stem in (("implementation", "ast"), ("implementation", "uml")):
         raw = SITE / "agents" / "notes" / "diagrams" / category / (stem + ".mmd")
         page = (
-            SITE / "repository-files" / "agents" / "notes" / "diagrams"
-            / category / (stem + ".mmd") / "index.html"
+            SITE
+            / "repository-files"
+            / "agents"
+            / "notes"
+            / "diagrams"
+            / category
+            / (stem + ".mmd")
+            / "index.html"
         )
         assert raw.is_file(), f"Generated diagram source is missing: {category}/{stem}"
         assert raw.read_text(encoding="utf-8").startswith(("classDiagram", "flowchart"))
@@ -109,8 +115,14 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         source = ROOT / ".agents" / "notes" / "diagrams" / category / (name + ".mmd")
         assert source.is_file() and len(source.read_text(encoding="utf-8").splitlines()) > 12
         page = (
-            SITE / "repository-files" / "agents" / "notes" / "diagrams"
-            / category / (name + ".mmd") / "index.html"
+            SITE
+            / "repository-files"
+            / "agents"
+            / "notes"
+            / "diagrams"
+            / category
+            / (name + ".mmd")
+            / "index.html"
         )
         assert page.is_file(), f"Missing interactive diagram page: {category}/{name}"
         html = page.read_text(encoding="utf-8")
@@ -138,10 +150,7 @@ def test_diagram_sources_are_grouped_by_source_ownership():
     import re
 
     diagrams = ROOT / ".agents" / "notes" / "diagrams"
-    assert {
-        path.relative_to(diagrams).as_posix()
-        for path in diagrams.rglob("*.mmd")
-    } == {
+    assert {path.relative_to(diagrams).as_posix() for path in diagrams.rglob("*.mmd")} == {
         "implementation/ast.mmd",
         "implementation/uml.mmd",
         "reference/mvc.mmd",
