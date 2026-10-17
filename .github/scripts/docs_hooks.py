@@ -31,7 +31,9 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
     files = [root / Path(p.decode("utf-8")) for p in result.stdout.split(b"\0") if p]
     return sorted(
         (
-            p for p in files if p.is_file()
+            p
+            for p in files
+            if p.is_file()
             and (
                 p.suffix.lower() in {".md", ".py"}
                 or (
@@ -112,7 +114,6 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str]]:
                 pages[dest] = path.read_text(encoding="utf-8")
             continue
 
-
         # Render pure Mermaid source interactively without committing generated SVG.
         if relative.suffix.lower() == ".mmd":
             dest = public_path(relative.with_suffix(".md"))
@@ -127,12 +128,12 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str]]:
                 '    <button type="button" data-mermaid-zoom-out disabled>Zoom out</button>\n'
                 '    <button type="button" data-mermaid-reset disabled>Reset</button>\n'
                 '    <span role="status" aria-live="polite" data-mermaid-status>Ready</span>\n'
-                '  </div>\n'
+                "  </div>\n"
                 '  <div class="architecture-viewport" data-mermaid-viewport></div>\n'
                 '  <details class="architecture-source"><summary>Mermaid source</summary>\n'
-                f'    <pre data-mermaid-source>{source}</pre>\n'
-                '  </details>\n'
-                '</div>\n'
+                f"    <pre data-mermaid-source>{source}</pre>\n"
+                "  </details>\n"
+                "</div>\n"
             )
             continue
 
