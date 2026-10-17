@@ -45,6 +45,9 @@ jobs:
           test -f site/index.html
           touch site/.nojekyll
 
+      - name: Exercise reader and image viewer in Chromium
+        run: node .github/tests/test_docs_browser.mjs
+
       - name: Stage PR documentation and register deployment
         env:
           GH_TOKEN: ${{ github.token }}
