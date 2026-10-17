@@ -25,6 +25,10 @@ def definition(effects: list[dict] | None = None, capture: bool = False):
     package = "english_draughts" if capture else "chess"
     data = json.loads((ROOT / "packages" / package / "config.json").read_text("utf-8"))
     data.update(name="test-game", title="Authority contract", playable=False)
+    for option in ("starting_side", "halfmove_reset", "position_identity", "initial_state"):
+        data.pop(option, None)
+    for piece in data["pieces"].values():
+        piece.pop("promotion", None)
     if capture:
         data["board"]["starting_pieces"] = [
             {"piece": "man", "color": "white", "squares": [[5, 2]]},
