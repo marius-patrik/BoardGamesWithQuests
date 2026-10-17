@@ -231,7 +231,7 @@ def validate_prisma_sql() -> tuple[int, int]:
                 attr = re.search(r'@map\("([^\"]+)"\)', line)
                 columns[p[0]] = (attr.group(1) if attr else p[0], p[1], line)
         models[key] = (db.group(1), columns, body)
-    assert len(models) >= 37, "missing normalized models"
+    assert len(models) == 38, f"Prisma model count drifted: {len(models)} (expected 38)"
     tablemap = {t: fields for _, (t, fields, _) in models.items()}
     for name, (_, fields, body) in models.items():
         assert len(fields) == len(set(fields)), f"duplicate Prisma field in {name}"
@@ -343,6 +343,23 @@ def main() -> None:
     for obsolete in (REQ / "data", REQ / "SCHEMA.prisma", REQ / "INTEGRITY.sql",
                      REQ / "API.yaml", REQ / "diagrams/reference_AST.svg"):
         assert not obsolete.exists(), f"Superseded or generated contract was retained: {obsolete}"
+    # Links in the canonical product and source-tree docs must resolve in the
+    # checked-out repository; a folder move must not leave dead references.
+    for md in (ROOT / ".agents/PRD.md", REQ / "ARCHITECTURE.md"):
+        body = md.read_text()
+        for href in re.findall(r"\\[[^\\]]+\\]\\(([^)]+)\\)", body):
+            if href.startswith(("http:", "https:", "#", "mailto:")):
+                continue
+            target = href.split("#", 1)[0]
+            assert (md.parent / target).exists(), f"{md.relative_to(ROOT)}: broken link {href}"
+    assert "37-model relational declaration" not in (REQ / "ARCHITECTURE.md").read_text(), "obsolete Prisma model count"
+    diagram = (REQ / "AST.mmd").read_text()
+    assert "Validate typed inputs; compute" not in diagram, "vague method contracts"
+    assert "implementation defined by owning source" not in diagram, "missing behavior contracts"
+    assert not (REQ / "data").exists(), "duplicate portable data"
+    assert not (REQ / "SCHEMA.prisma").exists(), "duplicate schema"
+    assert not (REQ / "API.yaml").exists(), "duplicate API contract"
+    assert not (REQ / "diagrams" / "reference_AST.svg").exists(), "tracked SVG not permitted"
     games = validate_data()
     http = validate_openapi()
     models, checks = validate_prisma_sql()
