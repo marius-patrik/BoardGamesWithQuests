@@ -9,7 +9,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 CLI = ROOT / ".github" / "scripts" / "docs_manifest.py"
 
