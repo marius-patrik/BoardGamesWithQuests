@@ -7,14 +7,12 @@ try:
     from server.engine.model.game.move import Move
     from server.engine.model.game.player import Player
     from server.engine.model.game.timer import Timer
-    from server.engine.model.game.logger import GameLogger
     from server.engine.model.game.validator import MoveValidator
 except ImportError:
     from .board import Board
     from .move import Move
     from .player import Player
     from .timer import Timer
-    from .logger import GameLogger
     from .validator import MoveValidator
 
 
@@ -32,7 +30,6 @@ class GameManager:
         board: Optional[Board] = None,
         players: Optional[List[Player]] = None,
         timer: Optional[Timer] = None,
-        logger: Optional[GameLogger] = None,
         validator: Optional[MoveValidator] = None,
     ):
         """Initialize a GameManager instance.
@@ -41,7 +38,6 @@ class GameManager:
             board: Optional Board instance (defaults to standard 8x8 Board).
             players: Optional list of Player instances (defaults to White and Black players).
             timer: Optional Timer instance (defaults to standard 600s timer).
-            logger: Optional GameLogger instance.
             validator: Optional MoveValidator instance.
         """
         self.board: Board = board or Board()
@@ -49,7 +45,6 @@ class GameManager:
         self.active_player: int = 1
         self.current_move: Optional[Move] = None
         self.timer: Timer = timer or Timer()
-        self.game_logger: GameLogger = logger or GameLogger()
         self.move_validator: MoveValidator = validator or MoveValidator(self.board)
 
     def start_turn(self) -> Optional[Move]:
@@ -75,10 +70,6 @@ class GameManager:
         """Cancel or reset the currently selected move."""
         self.current_move = None
 
-    def save_log(self) -> None:
-        """Save the game log (stub implementation)."""
-        pass
-
     def get_state(self) -> int:
         """Evaluate and return the current state of the game.
 
@@ -97,7 +88,7 @@ class GameManager:
         return self.STATE_IN_PROGRESS
 
     def make_move(self, move: Move) -> bool:
-        """Validate and execute a move, log it, and switch the active player.
+        """Validate and execute a proposed in-memory move and switch the active player.
 
         Args:
             move: Move instance to execute.
@@ -116,6 +107,5 @@ class GameManager:
             return False
 
         self.current_move = move
-        self.game_logger.log_move(move)
         self.active_player = -1 if self.active_player == 1 else 1
         return True
