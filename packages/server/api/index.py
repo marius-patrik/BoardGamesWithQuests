@@ -15,7 +15,7 @@ app = FastAPI(title="BoardGamesWithQuests")
 def _catalog() -> dict[str, dict]:
     """Read the owned configuration set without accepting client filesystem paths."""
     root = Path(__file__).resolve().parents[3]
-    candidates = (root / "config", root / "packages" / "server" / "config")
+    candidates = (root / "config", Path(__file__).resolve().parents[1] / "config", Path.cwd() / "config")
     source = next((path for path in candidates if path.is_dir()), None)
     if source is None:
         raise RuntimeError("Published game definitions are unavailable")
