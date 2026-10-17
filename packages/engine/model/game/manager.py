@@ -148,6 +148,8 @@ class GameManager:
             or definition.halfmove_reset is not None
         ):
             config["halfmove_reset"] = thaw_json(definition.halfmove_reset)
+        if "starting_side" in definition.declared_optional_fields or definition.starting_side != 1:
+            config["starting_side"] = definition.starting_side
         initial = definition.clock["initial_seconds"] * 1000
         state: dict[str, Any] = {
             "version": 1,
@@ -155,7 +157,7 @@ class GameManager:
             "config": config,
             "participants": {"1": participant_ids[0], "-1": participant_ids[1]},
             "started_at_ms": started_at_ms,
-            "active_side": 1,
+            "active_side": definition.starting_side,
             "board": self._placement(board_from_definition(definition)),
             "captured": [],
             "rule_state": thaw_json(definition.initial_state["rule_state"]),

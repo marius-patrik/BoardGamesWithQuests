@@ -47,6 +47,7 @@ class GameDefinition:
         initial_state: Immutable initial rule values, rights and temporary targets.
         halfmove_reset: Optional additional reset condition evaluated on original state.
         declared_optional_fields: Frozen parser metadata preserving optional JSON field presence.
+        starting_side: Configured initial side, 1 or -1; defaults to 1.
     """
 
     name: str
@@ -70,6 +71,7 @@ class GameDefinition:
     )
     halfmove_reset: Mapping[str, Any] | None = None
     declared_optional_fields: frozenset[str] = frozenset()
+    starting_side: int = 1
 
     def __post_init__(self) -> None:
         """Detach and recursively freeze every configuration-owned JSON value.
@@ -77,8 +79,10 @@ class GameDefinition:
         Raises:
             ValueError: Nested values are not finite bounded JSON.
         """
-        if not self.declared_optional_fields <= {"initial_state", "halfmove_reset"}:
+        if not self.declared_optional_fields <= {"initial_state", "halfmove_reset", "starting_side"}:
             raise ValueError("unknown declared optional configuration fields")
+        if type(self.starting_side) is not int or self.starting_side not in (-1, 1):
+            raise ValueError("starting side must be explicit integer 1 or -1")
         object.__setattr__(
             self, "declared_optional_fields", frozenset(self.declared_optional_fields)
         )
@@ -183,7 +187,7 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
     if (
         not isinstance(data, dict)
         or not TOP_LEVEL_FIELDS <= set(data)
-        or not set(data) <= TOP_LEVEL_FIELDS | {"initial_state", "halfmove_reset"}
+        or not set(data) <= TOP_LEVEL_FIELDS | {"initial_state", "halfmove_reset", "starting_side"}
     ):
         raise ConfigurationError(f"{package}: missing or unknown top-level fields")
     try:
@@ -400,6 +404,9 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
             condition(halfmove_reset)
     except ValueError as error:
         raise ConfigurationError(f"{package}: invalid initial lifecycle policy: {error}") from error
+    starting_side = data.get("starting_side", 1)
+    if type(starting_side) is not int or starting_side not in (-1, 1):
+        raise ConfigurationError("starting side must be explicit integer 1 or -1")
     return GameDefinition(
         name,
         package,
@@ -415,7 +422,8 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         freeze_json(data["quests"]),
         freeze_json(initial_state),
         freeze_json(halfmove_reset),
-        frozenset(set(data) & {"initial_state", "halfmove_reset"}),
+        frozenset(set(data) & {"initial_state", "halfmove_reset", "starting_side"}),
+        starting_side,
     )
 
 
