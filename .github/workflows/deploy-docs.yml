@@ -74,7 +74,7 @@ jobs:
           fi
 
       - name: Write manifest from builds actually deployed
-        run: python .github/scripts/docs_manifest.py --site site
+        run: python .github/scripts/build_docs.py --manifest --site site
 
       - name: Disable Jekyll
         run: touch site/.nojekyll

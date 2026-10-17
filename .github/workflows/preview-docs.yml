@@ -35,6 +35,7 @@ jobs:
       - name: Build documentation from PR source
         run: |
           python .github/scripts/build_docs.py
+          python -m pytest -q .github/tests/test_documentation_site.py
           test -f site/index.html
           touch site/.nojekyll
 
