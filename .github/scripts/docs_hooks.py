@@ -42,13 +42,15 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
         if not path.is_file():
             continue
         suffix = path.suffix.lower()
-        architecture_source = (
-            relative.as_posix().startswith(".agents/notes/requirements/")
-            and suffix in {".mmd", ".yaml", ".json", ".prisma", ".sql"}
-        )
+        architecture_source = relative.as_posix().startswith(
+            ".agents/notes/requirements/"
+        ) and suffix in {".mmd", ".yaml", ".json", ".prisma", ".sql"}
         portable_data = relative.parts[0] == "data" and suffix in {".json", ".sql"}
-        if suffix in {".md", ".py"} or architecture_source or portable_data or (
-            relative.as_posix() in canonical
+        if (
+            suffix in {".md", ".py"}
+            or architecture_source
+            or portable_data
+            or (relative.as_posix() in canonical)
         ):
             documents.append(path)
     return sorted(documents, key=lambda path: path.relative_to(root).as_posix())

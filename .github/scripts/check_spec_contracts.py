@@ -344,11 +344,23 @@ def validate_mermaid() -> tuple[int, int]:
 
 def main() -> None:
     """Run all independent contract checks as a CI gate."""
-    for expected in (API, PRISMA, INTEGRITY, DATA / "configuration.schema.json",
-                     DATA / "operators.json", REQ / "AST.mmd", REQ / "ARCHITECTURE.md"):
+    for expected in (
+        API,
+        PRISMA,
+        INTEGRITY,
+        DATA / "configuration.schema.json",
+        DATA / "operators.json",
+        REQ / "AST.mmd",
+        REQ / "ARCHITECTURE.md",
+    ):
         assert expected.is_file(), f"Missing authoritative contract {expected}"
-    for obsolete in (REQ / "data", REQ / "SCHEMA.prisma", REQ / "INTEGRITY.sql",
-                     REQ / "API.yaml", REQ / "diagrams/reference_AST.svg"):
+    for obsolete in (
+        REQ / "data",
+        REQ / "SCHEMA.prisma",
+        REQ / "INTEGRITY.sql",
+        REQ / "API.yaml",
+        REQ / "diagrams/reference_AST.svg",
+    ):
         assert not obsolete.exists(), f"Superseded or generated contract was retained: {obsolete}"
     # Links in the canonical product and source-tree docs must resolve in the
     # checked-out repository; a folder move must not leave dead references.
@@ -359,7 +371,9 @@ def main() -> None:
                 continue
             target = href.split("#", 1)[0]
             assert (md.parent / target).exists(), f"{md.relative_to(ROOT)}: broken link {href}"
-    assert "37-model relational declaration" not in (REQ / "ARCHITECTURE.md").read_text(), "obsolete Prisma model count"
+    assert (
+        "37-model relational declaration" not in (REQ / "ARCHITECTURE.md").read_text()
+    ), "obsolete Prisma model count"
     diagram = (REQ / "AST.mmd").read_text()
     assert "Validate typed inputs; compute" not in diagram, "vague method contracts"
     assert "implementation defined by owning source" not in diagram, "missing behavior contracts"
