@@ -428,6 +428,16 @@ def render_published_mermaid(site: Path) -> None:
             encoding="utf-8",
         )
 
+        browser_options: list[str] = []
+        # GitHub's isolated Linux runners do not permit Chromium's sandbox.
+        if os.environ.get("GITHUB_ACTIONS") == "true" and sys.platform == "linux":
+            browser = work / "puppeteer.json"
+            browser.write_text(
+                json.dumps({"args": ["--no-sandbox", "--disable-setuid-sandbox"]}),
+                encoding="utf-8",
+            )
+            browser_options = ["--puppeteerConfigFile", str(browser)]
+
         for page, document in pages:
 
             def replace_diagram(match: Any) -> str:
@@ -448,6 +458,7 @@ def render_published_mermaid(site: Path) -> None:
                             str(config),
                             "--backgroundColor",
                             "transparent",
+                            *browser_options,
                         ],
                         check=True,
                         timeout=240,
