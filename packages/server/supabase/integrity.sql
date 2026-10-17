@@ -408,6 +408,55 @@ CREATE TRIGGER game_requires_publication
 BEFORE INSERT OR UPDATE OF version_id ON bgwq.games
 FOR EACH ROW EXECUTE FUNCTION bgwq.assert_game_definition_published();
 
+
+-- Enforce variable participant bounds and per-role capacities at the database
+-- boundary, independently of FastAPI checks. Locking the parent game row
+-- serializes competing joins even under the default READ COMMITTED isolation.
+CREATE OR REPLACE FUNCTION bgwq.enforce_participant_capacity()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path = '' AS $$
+DECLARE
+  g_version uuid;
+  g_status bgwq.game_status;
+  max_seats integer;
+  max_role integer;
+  used_seats integer;
+  used_role integer;
+BEGIN
+  SELECT g.version_id, g.status, v.maximum_participants
+    INTO g_version, g_status, max_seats
+    FROM bgwq.games AS g
+    JOIN bgwq.versions AS v ON v.id = g.version_id
+    WHERE g.id = NEW.game_id FOR UPDATE OF g;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'participant game is not available' USING ERRCODE = '23503';
+  END IF;
+  IF g_status <> 'pending' THEN
+    RAISE EXCEPTION 'participants may join only pending games' USING ERRCODE = '23514';
+  END IF;
+  IF NEW.version_id <> g_version OR NEW.seat < 0 OR NEW.seat >= max_seats THEN
+    RAISE EXCEPTION 'seat is outside the pinned definition capacity' USING ERRCODE = '23514';
+  END IF;
+  SELECT r.maximum_count INTO max_role
+    FROM bgwq.roles AS r WHERE r.version_id = g_version AND r.id = NEW.role_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'participant role is not part of the pinned version' USING ERRCODE = '23503';
+  END IF;
+  SELECT count(*) INTO used_seats FROM bgwq.participants p
+    WHERE p.game_id = NEW.game_id AND p.id IS DISTINCT FROM NEW.id;
+  SELECT count(*) INTO used_role FROM bgwq.participants p
+    WHERE p.game_id = NEW.game_id AND p.role_id = NEW.role_id
+      AND p.id IS DISTINCT FROM NEW.id;
+  IF used_seats >= max_seats OR used_role >= max_role THEN
+    RAISE EXCEPTION 'configured game or role capacity exceeded' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS participant_capacity_guard ON bgwq.participants;
+CREATE TRIGGER participant_capacity_guard
+BEFORE INSERT OR UPDATE OF game_id, version_id, role_id, seat ON bgwq.participants
+FOR EACH ROW EXECUTE FUNCTION bgwq.enforce_participant_capacity();
+
 -- Outcome rows are immutable settlement records; account ratings/awards may be
 -- updated by authorized settlement services but never by author-defined effects.
 DROP TRIGGER IF EXISTS immutable_game_outcomes ON bgwq.game_outcomes;

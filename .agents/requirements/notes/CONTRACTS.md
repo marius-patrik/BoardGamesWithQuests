@@ -20,7 +20,7 @@ Every `operationId` in [API.md](API.md) has exactly one service transaction or q
 
 | Operation ID | Owning service and collaborators | Authoritative data boundary | Externally observed contract |
 | --- | --- | --- | --- |
-| `getSession` | api/security.py → routes.py | Supabase Auth session; no private game query | 401 expired; no misleading anonymous game projection |
+| `getSession` | api/security.py → routes.py | Supabase Auth session; no private game query | 200 unauthenticated with valid pre-auth CSRF cookie; 401 only on malformed/hostile requests |
 | `createGuest` | api/security.py → routes.py | Supabase anonymous Auth UUID, profile | 201 identity; rate-limited; no invalid cookie trust |
 | `register` | api/security.py → routes.py | Supabase Auth registration; profile | 201 or typed validation; no duplicate profile |
 | `login` | api/security.py → routes.py | Supabase Auth credentials/session | 200 session or typed 401 |

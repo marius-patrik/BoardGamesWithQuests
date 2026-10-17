@@ -1,6 +1,6 @@
 # API — Authoritative OpenAPI contract
 
-This is the **only** normative HTTP interface definition. The fenced YAML is OpenAPI 3.1 and is extracted without rewriting or hand-maintained duplicates by `.github/scripts/export_api_contract.py`; generated `openapi.yaml` is a build artifact, not tracked source. Implementation handlers and generated browser types must be checked against the extracted contract. All requests that mutate state are authenticated and require the declared CSRF/revision/idempotency semantics; this document does not certify that runtime handlers exist.
+This is the **only** normative HTTP interface definition. A fresh unauthenticated browser MUST receive HTTP 200 from `GET /session`, with `authenticated: false`, `profile: null` and a CSRF token bound to its pre-auth cookie; otherwise protected guest and login POST requests have no legal way to obtain a CSRF token. The fenced YAML is OpenAPI 3.1 and is extracted without rewriting or hand-maintained duplicates by `.github/scripts/export_api_contract.py`; generated `openapi.yaml` is a build artifact, not tracked source. Implementation handlers and generated browser types must be checked against the extracted contract. All requests that mutate state are authenticated and require the declared CSRF/revision/idempotency semantics; this document does not certify that runtime handlers exist.
 
 ```yaml
 openapi: 3.1.0
@@ -18,7 +18,7 @@ paths:
       tags:
       - Identity
       operationId: getSession
-      summary: Read session
+      summary: Read authenticated session or bootstrap anonymous CSRF cookie
       responses:
         '200':
           description: Read session

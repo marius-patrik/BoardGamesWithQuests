@@ -29,7 +29,7 @@ No matchmaking, bots, spectator mode, social feed, leaderboard, or tournaments a
 
 For a submitted command, FastAPI authenticates the principal, checks Origin and CSRF, locks the game, resolves idempotency, and checks the expected revision. The repository loads the immutable pinned version and authoritative relational state into typed immutable projections. The engine generates candidates using entity actions, validates the selected command, creates an isolated proposed state, executes ordered effects and automatic hooks, evaluates objectives and completion, and returns a fully typed transition. The API validates the transition and commits all state changes, immutable event/mutation rows, revision increment and authorized progression in one PostgreSQL transaction. A failed check rolls everything back. Realtime publishes the committed revision as a hint; the client reloads the API projection.
 
-The actor cannot submit trusted time, randomness, game state, the results of conditions, or effect arguments the definition does not permit. Exact same idempotency key+request digest returns the accepted result. Different payload reusing a key is a conflict. Accepted events are append-only; replay uses stored complete before/after mutations and recorded trusted inputs.
+The browser first calls the read-only `GET /session` to establish a CSRF-bound pre-authentication cookie even without an identity; it receives `authenticated: false` and a token. Guest/login/register are CSRF-checked against that cookie and issue new authenticated session credentials. The actor cannot submit trusted time, randomness, game state, the results of conditions, or effect arguments the definition does not permit. Exact same idempotency key+request digest returns the accepted result. Different payload reusing a key is a conflict. Accepted events are append-only; replay uses stored complete before/after mutations and recorded trusted inputs.
 
 At activation, configuration seeds are instantiated in parent-before-child order. A seed with
 an `owner` seat is instantiated **only when that seat is occupied**; this permits a
@@ -53,7 +53,7 @@ or legality evaluation before the random effect executes. Phase-changing effects
 schedule subsequent `phase.enter` hooks through a bounded queue, never recursive
 uncontrolled dispatch. Wildcard-phase actions apply to every configured phase.
 
-A game is `pending`, `active`, `finished`, or `expired`. The final accepted event settles one immutable outcome per participant and may authorize progression awards; nonterminal games have no outcome records. The configured minimum participant count activates pending games once seats/roles are valid. Pending invitations expire after 24 hours. Games always pin one published version; published versions are immutable. A terminal game does not accept gameplay actions other than exact retries.
+A game is `pending`, `active`, `finished`, or `expired`. The final accepted event settles one immutable outcome per participant and may authorize progression awards; nonterminal games have no outcome records. The configured minimum participant count activates pending games once seats/roles are valid. Joins serialize on the parent game and are rejected by PostgreSQL when the seat index or per-role capacity exceeds the pinned version, even if the service has a bug. Pending invitations expire after 24 hours. Games always pin one published version; published versions are immutable. A terminal game does not accept gameplay actions other than exact retries.
 
 ## 1.4 Security and privacy
 
