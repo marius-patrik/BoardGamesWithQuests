@@ -385,6 +385,87 @@ def manifest(site: Path, repository: Path) -> dict[str, list[dict[str, str]]]:
     return {"versions": versions, "projects": project_registry(repository)}
 
 
+
+def render_published_mermaid(site: Path) -> None:
+    """Pre-render every published Mermaid source to SVG and verify real output.
+
+    Mermaid remains the canonical diagram source. The generated SVGs exist only
+    inside the deployment artifact, where our existing SVG pan/zoom viewer can
+    display them without relying on a third-party browser CDN or a live parser.
+    """
+    import hashlib
+    import html
+    import os
+    import re
+    from urllib.parse import quote
+
+    pages = []
+    for page in site.rglob("index.html"):
+        text = page.read_text(encoding="utf-8")
+        if '<pre class="mermaid">' in text:
+            pages.append((page, text))
+    if not pages:
+        return
+
+    executable = shutil.which("mmdc")
+    if executable is None:
+        raise RuntimeError("Documentation build requires the pinned Mermaid CLI (mmdc)")
+
+    assets = site / "assets" / "diagrams"
+    assets.mkdir(parents=True, exist_ok=True)
+    compiled: dict[str, Path] = {}
+    pattern = re.compile(r'<pre class="mermaid">([\\s\\S]*?)</pre>')
+    with tempfile.TemporaryDirectory(prefix="render-mermaid-") as temporary:
+        work = Path(temporary)
+        config = work / "mermaid.json"
+        config.write_text(
+            json.dumps(
+                {
+                    "securityLevel": "strict",
+                    "maxTextSize": 1000000,
+                    "flowchart": {"htmlLabels": False, "useMaxWidth": False},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        for page, document in pages:
+            def replace_diagram(match: Any) -> str:
+                source = html.unescape(match.group(1)).strip() + "\\n"
+                digest = hashlib.sha256(source.encode("utf-8")).hexdigest()[:20]
+                if digest not in compiled:
+                    input_file = work / (digest + ".mmd")
+                    target = assets / (digest + ".svg")
+                    input_file.write_text(source, encoding="utf-8")
+                    subprocess.run(
+                        [
+                            executable,
+                            "--input", str(input_file),
+                            "--output", str(target),
+                            "--configFile", str(config),
+                            "--backgroundColor", "transparent",
+                        ],
+                        check=True,
+                        timeout=240,
+                        cwd=ROOT,
+                    )
+                    data = target.read_text(encoding="utf-8")
+                    if "<svg" not in data or "</svg>" not in data:
+                        raise RuntimeError(f"Mermaid did not produce an SVG: {target}")
+                    compiled[digest] = target
+                relative = os.path.relpath(compiled[digest], page.parent).replace(os.sep, "/")
+                return (
+                    '<img src="'
+                    + quote(relative, safe="/.-_")
+                    + '" alt="Rendered Mermaid architecture diagram" '
+                    'loading="lazy" draggable="false">'
+                )
+
+            rendered, count = pattern.subn(replace_diagram, document)
+            if count < 1:
+                raise RuntimeError(f"Expected Mermaid diagram is missing from {page}")
+            page.write_text(rendered, encoding="utf-8")
+
 def build() -> None:
     """Build the strict documentation site and validate dynamically generated assets."""
     import yaml
@@ -412,6 +493,7 @@ def build() -> None:
         for asset in (*diagram_paths, *graphviz_assets(ROOT)):
             if not (ROOT / "site" / asset).is_file():
                 raise RuntimeError(f"Missing generated site asset: {asset}")
+    render_published_mermaid(ROOT / "site")
     write_manifest(ROOT / "site")
 
 

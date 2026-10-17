@@ -40,16 +40,27 @@ def test_source_generated_diagrams_work_in_documentation():
         assert source.startswith(("classDiagram", "flowchart")), stem
         assert page.is_file(), f"Interactive page is missing: {stem}"
         html = page.read_text(encoding="utf-8")
-        assert 'class="mermaid"' in html and "assets/diagrams.js" in html
-        runtime = SITE / "assets" / "diagrams.js"
-        assert runtime.is_file() and "mermaid.esm.min.mjs" in runtime.read_text(encoding="utf-8")
-        assert ("classDiagram" if stem == "implementation-uml" else "flowchart") in html
+        assert 'class="diagram-viewer"' in html
+        assert "assets/diagrams.js" in html
+        from html import unescape
+        from urllib.parse import urlsplit
+        import re
+
+        rendered = re.search(r'<img src="([^"]+\\.svg)"', html)
+        assert rendered, f"Mermaid was not pre-rendered into an SVG: {stem}"
+        relative = urlsplit(unescape(rendered.group(1))).path
+        asset = (page.parent / relative).resolve()
+        assert asset.is_relative_to(SITE.resolve()), "Diagram cannot escape published site"
+        assert asset.is_file(), f"Generated diagram is missing: {asset}"
+        drawing = asset.read_text(encoding="utf-8")
+        assert "<svg" in drawing and "</svg>" in drawing
+        assert 'class="mermaid"' not in html, "Unrendered Mermaid code leaked into published site"
 
 
 def test_tracked_mermaid_and_svg_pages_render_graphics_instead_of_source_text():
     """A real generated source-tree entry must open a rendered graphic, not XML/flowchart code."""
     cases = (
-        ("repository-ast.mmd", 'class="mermaid"'),
+        ("repository-ast.mmd", "<img "),
         ("reference-page1.svg", "<img "),
     )
     for name, marker in cases:
@@ -59,6 +70,7 @@ def test_tracked_mermaid_and_svg_pages_render_graphics_instead_of_source_text():
         assert 'class="diagram-viewer"' in html
         assert marker in html, f"Diagram rendered as source text: {name}"
         assert "assets/diagrams.js" in html, f"Interactive diagram script absent: {name}"
+        assert 'class="mermaid"' not in html, f"Client-side Mermaid source remains unrendered: {name}"
 
     source_page = (
         SITE

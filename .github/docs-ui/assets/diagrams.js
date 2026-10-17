@@ -1,38 +1,7 @@
 // First-party diagram viewer: rendering, accessible controls and pan/zoom.
 const containers = [...document.querySelectorAll("[data-diagram-viewer]")];
-const mermaids = [...document.querySelectorAll("[data-diagram-viewer] .mermaid")];
-
-if (mermaids.length) {
-  try {
-    const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.esm.min.mjs");
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: "strict",
-      theme: document.documentElement.dataset.theme === "light" ? "default" : "dark",
-      flowchart: { useMaxWidth: false, htmlLabels: false },
-    });
-    await mermaid.run({ nodes: mermaids });
-    for (const svg of document.querySelectorAll("[data-diagram-viewer] .mermaid svg")) {
-      const width = svg.viewBox?.baseVal?.width;
-      const height = svg.viewBox?.baseVal?.height;
-      if (width > 0 && height > 0) {
-        svg.style.width = Math.ceil(width) + "px";
-        svg.style.height = Math.ceil(height) + "px";
-      }
-      svg.setAttribute("role", "img");
-      svg.setAttribute("aria-label", "Rendered architecture diagram");
-    }
-  } catch (error) {
-    console.error("Unable to render architecture diagram", error);
-    for (const source of mermaids) {
-      const message = document.createElement("p");
-      message.className = "diagram-viewer__error";
-      message.setAttribute("role", "alert");
-      message.textContent = "The diagram could not be rendered. Open the Mermaid source using the repository link.";
-      source.replaceWith(message);
-    }
-  }
-}
+// All Mermaid definitions are compiled to verified SVG assets during the
+// documentation build. The browser has no dependency on third-party CDNs.
 
 function attachViewer(root) {
   const viewport = root.querySelector(".diagram-viewer__viewport");

@@ -35,6 +35,9 @@ jobs:
       - name: Verify independently published snapshot behavior
         run: python -m pytest -q .github/tests/test_docs_publication.py
 
+      - name: Install pinned Mermaid compiler
+        run: npm install --global --no-fund --no-audit @mermaid-js/mermaid-cli@11.16.0
+
       - name: Build documentation from PR source
         run: |
           python .github/scripts/build_docs.py
