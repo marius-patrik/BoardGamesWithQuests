@@ -52,6 +52,7 @@ class Timer:
         self.player_times[idx] = max(0, self.player_times[idx] - elapsed_seconds)
 
 <<<<<<< HEAD:packages/engine/model/game/timer.py
+<<<<<<< HEAD:packages/engine/model/game/timer.py
     def add_time(self, player: int, increment_seconds: int) -> None:
 ||||||| b45d2e0f:src/model/game/timer.py
     countdown = tick
@@ -60,6 +61,13 @@ class Timer:
 =======
     def add_time(self, player: Union[int, str], increment_seconds: int) -> None:
 >>>>>>> fix/independent-review-findings:src/model/game/timer.py
+||||||| 07086322:src/model/game/timer.py
+    countdown = tick
+
+    def add_time(self, player: int, increment_seconds: int) -> None:
+=======
+    def add_time(self, player: Union[int, str], increment_seconds: int) -> None:
+>>>>>>> tmp155:src/model/game/timer.py
         """Add increment time to a player's clock.
 
         Args:
