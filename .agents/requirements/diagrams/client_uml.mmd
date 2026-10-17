@@ -29,22 +29,22 @@ else Create pending game
   DB-->>API: game_id and revision
   API-->>Page: GameView for creator
 else Join invitation
-  Page->>API: POST /games/{id}/join (seat and expected revision)
+  Page->>API: POST /games/{gameId}/join (seat and expected revision)
   API->>DB: Lock game, assign unique occupied seat
   DB-->>API: Pending or activated game
   API-->>Page: Viewer-scoped GameView
 end
-Page->>API: GET /games/{id}
+Page->>API: GET /games/{gameId}
 API->>DB: Check membership, load pinned version
 API-->>Page: Authorized state and revision
-Page->>API: GET /games/{id}/available-actions
+Page->>API: GET /games/{gameId}/available-actions
 API-->>Page: Typed, legal, viewer-scoped actions
-Page->>API: POST /games/{id}/realtime-grant
+Page->>API: POST /games/{gameId}/realtime-grant
 API-->>Page: Membership-scoped channel grant
 Page->>Feed: Subscribe to private revision topic
 loop One or more authorized participant commands
   Player->>Page: Choose action and typed parameters
-  Page->>API: POST /games/{id}/actions (revision, idempotency key, CSRF)
+  Page->>API: POST /games/{gameId}/actions (revision, idempotency key, CSRF)
   API->>DB: Lock, authenticate, validate, execute and commit
   alt Accepted
     DB-->>API: New revision and immutable event
@@ -62,7 +62,7 @@ loop One or more authorized participant commands
   end
 end
 opt Page resumes after disconnection
-  Page->>API: GET /games/{id} with renewed session
+  Page->>API: GET /games/{gameId} with renewed session
   API-->>Page: Durable latest game revision
   Page->>Feed: Resubscribe to private topic
 end

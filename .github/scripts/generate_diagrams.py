@@ -173,8 +173,8 @@ def implementation_uml(root: Path) -> str:
 def generated_assets(root: Path) -> dict[str, str]:
     """Return solely Mermaid assets, under the repository diagrams folder."""
     return {
-        "agents/notes/diagrams/implementation/ast.mmd": repository_ast(root),
-        "agents/notes/diagrams/implementation/uml.mmd": implementation_uml(root),
+        "agents/architecture/diagrams/ast.mmd": repository_ast(root),
+        "agents/architecture/diagrams/uml.mmd": implementation_uml(root),
     }
 
 
