@@ -422,6 +422,7 @@ def render_published_mermaid(site: Path) -> None:
                 {
                     "securityLevel": "strict",
                     "maxTextSize": 1000000,
+                    "maxEdges": 10000,
                     "flowchart": {"htmlLabels": False, "useMaxWidth": False},
                 }
             ),
