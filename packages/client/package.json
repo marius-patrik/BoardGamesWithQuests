@@ -9,7 +9,7 @@
     "build": "bun run assets && rsbuild build",
     "preview": "rsbuild preview",
     "typecheck": "tsc --noEmit",
-    "assets": "bun scripts/prepare-assets.ts"
+    "assets": "bun scripts/stage-icon.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
