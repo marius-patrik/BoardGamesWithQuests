@@ -15,10 +15,10 @@ SOURCE = ROOT / ".agents/requirements/notes/API.md"
 def extract() -> str:
     """Return exactly the YAML contents of the one fenced contract."""
     text = SOURCE.read_text(encoding="utf-8")
-    matches = re.findall(r"(?ms)^\x60{3}yaml\\n(.*?)\\n\x60{3}\\s*$", text)
+    matches = re.findall(r"(?ms)^\x60{3}yaml\n(.*?)\n\x60{3}\s*$", text)
     if len(matches) != 1:
         raise ValueError("API.md must have exactly one normative YAML code block")
-    content = matches[0] + "\\n"
+    content = matches[0] + chr(10)
     document = yaml.safe_load(content)
     if not isinstance(document, dict) or not str(document.get("openapi", "")).startswith("3.1."):
         raise ValueError("API.md does not contain OpenAPI 3.1")

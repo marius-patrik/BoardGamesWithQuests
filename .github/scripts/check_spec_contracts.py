@@ -172,7 +172,7 @@ def validate_data() -> dict[str, object]:
 def embedded_openapi() -> dict:
     """Parse the unique normative OpenAPI YAML block inside requirements/notes/API.md."""
     text = API.read_text(encoding="utf-8")
-    blocks = re.findall(r"(?ms)^\x60{3}yaml\\n(.*?)\\n\x60{3}\\s*$", text)
+    blocks = re.findall(r"(?ms)^\x60{3}yaml\n(.*?)\n\x60{3}\s*$", text)
     assert len(blocks) == 1, "API.md must contain exactly one extractable YAML contract"
     doc = yaml.safe_load(blocks[0])
     assert isinstance(doc, dict), "invalid canonical OpenAPI contract"
@@ -183,7 +183,7 @@ def embedded_openapi() -> dict:
 def op_owners() -> dict[str, str]:
     """Read the complete one-owner-per-operation matrix, not a loose route count."""
     source = (REQ / "notes/CONTRACTS.md").read_text(encoding="utf-8")
-    owned = re.findall(r"(?m)^\\| \\x60([a-zA-Z][a-zA-Z0-9]+)\\x60 \\| ([^|]+) \\|", source)
+    owned = re.findall(r"(?m)^\| \x60([a-zA-Z][a-zA-Z0-9]+)\x60 \| ([^|]+) \|", source)
     registry: dict[str, str] = {}
     for operation, owner in owned:
         assert operation not in registry, f"duplicate HTTP owner: {operation}"
@@ -315,11 +315,11 @@ def validate_diagrams() -> tuple[int, int]:
     """Validate actual Mermaid syntax and target interface connectivity, not a synthetic full source AST."""
     engine = (REQ / "diagrams/engine_uml.mmd").read_text(encoding="utf-8")
     client = (REQ / "diagrams/client_uml.mmd").read_text(encoding="utf-8")
-    assert engine.startswith("classDiagram\\n"), "engine UML must be a Mermaid class diagram"
-    assert client.startswith("sequenceDiagram\\n"), "client UML must be a Mermaid sequence diagram"
-    classes = set(re.findall(r"(?m)^class (\\w+) \\{", engine))
+    assert engine.startswith("classDiagram\n"), "engine UML must be a Mermaid class diagram"
+    assert client.startswith("sequenceDiagram\n"), "client UML must be a Mermaid sequence diagram"
+    classes = set(re.findall(r"(?m)^class (\w+) \{", engine))
     assert len(classes) >= 15, "target engine omits principal interfaces"
-    edges = re.findall(r'(?m)^(\\w+)(?: "[^"]+")?\\s+(?:-->|o--|<\\|--)(?: "[^"]+")?\\s+(\\w+)\\s*:', engine)
+    edges = re.findall(r'(?m)^(\w+)(?: "[^"]+")?\s+(?:-->|o--|<\|--)(?: "[^"]+")?\s+(\w+)\s*:', engine)
     assert len(edges) >= len(classes) - 1, "target engine lacks typed relationships"
     graph = {name: set() for name in classes}
     for src, dst in edges:
@@ -337,8 +337,8 @@ def validate_diagrams() -> tuple[int, int]:
     for semantic in ("expected_revision", "idempotency_key", "request_digest", "min_participants", "max_participants"):
         assert semantic in engine, f"engine UML lacks {semantic} contract"
     api = embedded_openapi()
-    for path in re.findall(r"(?:GET|POST|PUT|PATCH|DELETE) (/[^\\s()]+)", client):
-        canonical = re.sub(r"\\{id\\}", "{gameId}", path)
+    for path in re.findall(r"(?:GET|POST|PUT|PATCH|DELETE) (/[^\s()]+)", client):
+        canonical = re.sub(r"\{id\}", "{gameId}", path)
         assert canonical in api["paths"], f"client flow references uncontracted HTTP endpoint {path}"
     assert "reconnect" in client.lower() and "Stale revision" in client, "recovery and concurrency path missing"
     # Original references are authored, and implementation diagrams are generated;
@@ -353,7 +353,7 @@ def validate_diagrams() -> tuple[int, int]:
     # The merged target source tree remains inline in the PRD, with all files
     # annotated, but it is not enforced as fabricated matching source-AST nodes.
     prd = (ROOT / ".agents/PRD.md").read_text(encoding="utf-8")
-    target = re.search(r"`{3}text\\n([\\s\\S]*?)\\n`{3}", prd)
+    target = re.search(r"`{3}text\n([\s\S]*?)\n`{3}", prd)
     assert target, "PRD must own the annotated target source tree"
     for line in target.group(1).splitlines():
         if line.strip() and not line.strip().endswith("/"):

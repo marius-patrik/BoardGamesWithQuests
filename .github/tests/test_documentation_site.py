@@ -63,16 +63,7 @@ def test_source_generated_diagrams_work_in_documentation():
 
     for category, stem in (("architecture", "ast"), ("architecture", "uml")):
         raw = SITE / "agents" / "architecture" / "diagrams" / (stem + ".mmd")
-        page = (
-            SITE
-            / "repository-files"
-            / "agents"
-            / "notes"
-            / "diagrams"
-            / category
-            / (stem + ".mmd")
-            / "index.html"
-        )
+        page = SITE / "repository-files" / "agents" / "architecture" / "diagrams" / (stem + ".mmd") / "index.html"
         assert raw.is_file(), f"Generated diagram source is missing: {category}/{stem}"
         assert raw.read_text(encoding="utf-8").startswith(("classDiagram", "flowchart"))
         assert page.is_file(), f"Rendered diagram page is missing: {category}/{stem}"
@@ -102,7 +93,7 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
     incompatible = [
         name
         for name in names
-        if name.startswith(.agents/architecture/diagrams/) and name.endswith((".svg", ".dot", ".gv"))
+        if name.startswith(".agents/") and "/diagrams/" in name and name.endswith((".svg", ".dot", ".gv"))
     ]
     assert not incompatible, f"Committed diagram sources must be Mermaid: {incompatible}"
 
@@ -114,18 +105,9 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         ("requirements", "engine_uml"),
         ("requirements", "client_uml"),
     ):
-        source = ROOT / ".agents" / "architecture" / "diagrams" / (name + ".mmd")
+        source = ROOT / ".agents" / category / "diagrams" / (name + ".mmd")
         assert source.is_file() and len(source.read_text(encoding="utf-8").splitlines()) > 12
-        page = (
-            SITE
-            / "repository-files"
-            / "agents"
-            / "notes"
-            / "diagrams"
-            / category
-            / (name + ".mmd")
-            / "index.html"
-        )
+        page = SITE / "repository-files" / "agents" / category / "diagrams" / (name + ".mmd") / "index.html"
         assert page.is_file(), f"Missing interactive diagram page: {category}/{name}"
         html = page.read_text(encoding="utf-8")
         assert 'class="diagram-viewer"' in html
