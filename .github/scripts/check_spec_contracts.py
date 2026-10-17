@@ -21,9 +21,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 REQ = ROOT / ".agents/requirements"
 DATA = ROOT / ".agents/reference/data"
-API = REQ / "notes/API.md"
+API = ROOT / ".agents/PRD.md"
 PRISMA = ROOT / "packages/server/supabase/schema.prisma"
-INTEGRITY = ROOT / ".agents/reference/notes/integrity.sql"
+INTEGRITY = ROOT / ".agents/PRD.md"
 GAME_KEYS = ("chess", "english-draughts", "international-draughts", "moneyproperty")
 
 
@@ -183,9 +183,17 @@ def embedded_openapi() -> dict:
     return doc
 
 
+def reference_sql() -> str:
+    """Read exactly the supplementary SQL code block from the PRD."""
+    source = INTEGRITY.read_text(encoding="utf-8")
+    blocks = re.findall(r"(?ms)^`{3}sql\n(.*?)\n`{3}\s*$", source)
+    assert len(blocks) == 1, "PRD must contain exactly one supplementary SQL reference"
+    return blocks[0]
+
+
 def op_owners() -> dict[str, str]:
     """Read the complete one-owner-per-operation matrix, not a loose route count."""
-    source = (REQ / "notes/CONTRACTS.md").read_text(encoding="utf-8")
+    source = API.read_text(encoding="utf-8")
     owned = re.findall(r"(?m)^\| \x60([a-zA-Z][a-zA-Z0-9]+)\x60 \| ([^|]+) \|", source)
     registry: dict[str, str] = {}
     for operation, owner in owned:
@@ -303,7 +311,7 @@ def validate_prisma_sql() -> tuple[int, int]:
             for fld in match.group(1).split(","):
                 f = fld.strip().split("(")[0]
                 assert f in fields, f"Prisma {name}: index on unknown {f}"
-    sql = INTEGRITY.read_text()
+    sql = reference_sql()
     for tbl in re.findall(r'ALTER TABLE bgwq\."(\w+)"', sql):
         assert tbl in tablemap, f"INTEGRITY.sql: unknown table {tbl}"
     # A CHECK constraint is authored against a single table; every quoted column must exist.
@@ -417,13 +425,15 @@ def main() -> None:
         DATA / "operators.json",
         REQ / "diagrams/engine_uml.mmd",
         REQ / "diagrams/client_uml.mmd",
-        REQ / "notes/CONTRACTS.md",
     ):
         assert required.is_file(), f"missing authoritative source {required}"
     for stale in (
         "packages/server/api/openapi.yaml",
         ".agents/notes/requirements/AST.mmd",
         ".agents/notes/requirements/ARCHITECTURE.md",
+        ".agents/requirements/notes/API.md",
+        ".agents/requirements/notes/CONTRACTS.md",
+        ".agents/reference/notes/integrity.sql",
     ):
         assert not (ROOT / stale).exists(), f"obsolete overlapping contract still tracked: {stale}"
     games = validate_data()
@@ -446,8 +456,8 @@ def main() -> None:
         "model Rating",
     ):
         assert declaration in prisma, f"missing persisted domain requirement {declaration}"
-    assert "CREATE CONSTRAINT TRIGGER check_game_revision_history" in INTEGRITY.read_text()
-    assert "auth.uid()" in INTEGRITY.read_text(), "Realtime policy lacks identity-based membership"
+    assert "CREATE CONSTRAINT TRIGGER check_game_revision_history" in reference_sql()
+    assert "auth.uid()" in reference_sql(), "Realtime reference policy lacks identity-based membership"
     print(f'PASS: {games["games"]} game definitions, {games["actions"]} configured actions')
     print(f"PASS: {operations} planned HTTP operations and local reference links")
     print(f"PASS: {models} Prisma models, {checks} supplementary reference SQL constraints")
