@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: docs-preview-staging
+  group: docs-staging
   cancel-in-progress: false
 
 jobs:
@@ -31,6 +31,9 @@ jobs:
 
       - name: Install documentation dependencies
         run: python -m pip install -r requirements-dev.txt
+
+      - name: Verify independently published snapshot behavior
+        run: python -m pytest -q .github/tests/test_docs_publication.py
 
       - name: Build documentation from PR source
         run: |
@@ -61,6 +64,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           rm -rf "pr-$PR"
           cp -a "$GITHUB_WORKSPACE/site" "pr-$PR"
+          printf '%s\n' "$HEAD_SHA" > "pr-$PR/.preview-head"
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "docs(preview): publish PR $PR"
@@ -72,8 +76,8 @@ jobs:
             --method POST --input <(printf '%s' "$payload") --jq .id)
           page_url="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/pr-$PR/"
           gh api "repos/$GITHUB_REPOSITORY/deployments/$deployment_id/statuses" \
-            -f state=success -f environment_url="$page_url" \
-            -f description="PR documentation staged for Pages publishing"
+            -f state=in_progress -f environment_url="$page_url" \
+            -f description="Built and staged; awaiting GitHub Pages publication"
 
   teardown:
     if: github.event.action == 'closed'
