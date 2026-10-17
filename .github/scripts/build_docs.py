@@ -44,7 +44,9 @@ def diagram_generator() -> Any:
 
 def tracked_files(root: Path = ROOT) -> list[Path]:
     """Discover every tracked file and symlink through the Git index."""
-    return diagram_generator().tracked_paths(root)
+    # A Git submodule is a gitlink in the index but a directory in a working tree.
+    # Document its pinned source through .gitmodules; never attempt read_bytes() on it.
+    return [path for path in diagram_generator().tracked_paths(root) if not path.is_dir()]
 
 
 def public_path(path: Path) -> str:
