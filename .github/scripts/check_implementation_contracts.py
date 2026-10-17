@@ -4,6 +4,7 @@
 Static conformance only: no claims about deployed migrations, real identity,
 transactional gameplay, private RLS, revision conflicts or verified user paths.
 """
+
 from __future__ import annotations
 import json
 import re
@@ -13,6 +14,7 @@ import jsonschema
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 GAME_KEYS = ("chess", "english-draughts", "international-draughts", "moneyproperty")
+
 
 def walk(value):
     """Traverse nested JSON and OpenAPI AST values, including array members."""
@@ -164,9 +166,12 @@ def main() -> None:
     assert len(models) == 38 and len(set(models)) == 38, "expected 38 Prisma models"
     assert "CREATE TRIGGER participant_capacity_guard" in sql, "seat capacity unguarded"
     assert "CREATE TRIGGER game_target_size_guard" in sql, "lobby target unguarded"
-    print(f"PASS: {counts['games']} data definitions, {counts['actions']} actions, "
-          f"{len(counts['operators'])} referenced operator kinds, {len(models)} models")
+    print(
+        f"PASS: {counts['games']} data definitions, {counts['actions']} actions, "
+        f"{len(counts['operators'])} referenced operator kinds, {len(models)} models"
+    )
     print("NOT VERIFIED: SQL migrations, API behavior, real identities or gameplay.")
+
 
 if __name__ == "__main__":
     main()
