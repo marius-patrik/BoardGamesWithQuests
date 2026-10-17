@@ -31,7 +31,10 @@ class WorkspaceLayoutTests(unittest.TestCase):
     def test_darkfactory_is_git_submodule(self) -> None:
         result = subprocess.run(
             ["git", "ls-files", "--stage", "--", ".darkfactory"],
-            cwd=ROOT, capture_output=True, text=True, check=True,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
         )
         self.assertRegex(result.stdout, r"^160000 [0-9a-f]{40} 0\t\.darkfactory\n$")
         self.assertIn("path = .darkfactory", (ROOT / ".gitmodules").read_text(encoding="utf-8"))
@@ -58,17 +61,31 @@ class WorkspaceLayoutTests(unittest.TestCase):
     def test_generator_exits_successfully(self) -> None:
         r = subprocess.run(
             [sys.executable, str(ROOT / ".github/scripts/generate_documents.py"), "--check"],
-            cwd=ROOT, text=True, capture_output=True, check=False,
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
         )
         self.assertEqual(r.returncode, 0, r.stderr)
 
     def test_rejects_external_test_and_fixture_paths(self) -> None:
         fake = subprocess.CompletedProcess(
-            args=["git", "ls-files", "-z"], returncode=0,
-            stdout="package/tests/test_bad.py\0other/fixtures/data.json\0", stderr="",
+            args=["git", "ls-files", "-z"],
+            returncode=0,
+            stdout="package/tests/test_bad.py\0other/fixtures/data.json\0",
+            stderr="",
         )
-        with patch.object(generator.subprocess, "run", side_effect=lambda command, **kwargs:
-                          fake if "-z" in command else subprocess.CompletedProcess(command, 0, stdout="160000 " + "a"*40 + " 0\t.darkfactory\n", stderr="")):
+        with patch.object(
+            generator.subprocess,
+            "run",
+            side_effect=lambda command, **kwargs: (
+                fake
+                if "-z" in command
+                else subprocess.CompletedProcess(
+                    command, 0, stdout="160000 " + "a" * 40 + " 0\t.darkfactory\n", stderr=""
+                )
+            ),
+        ):
             errors = generator.validate_layout()
         self.assertTrue(any("package/tests/test_bad.py" in e for e in errors), errors)
         self.assertTrue(any("other/fixtures/data.json" in e for e in errors), errors)

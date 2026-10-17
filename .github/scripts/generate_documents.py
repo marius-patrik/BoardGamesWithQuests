@@ -33,7 +33,7 @@ def parse_source(file: Path, allow_plain_notes: bool) -> tuple[str | None, str]:
     status = re.search(r"(?m)^status:\s*([a-z_-]+)\s*$", front.group(1))
     if status is None:
         raise ValueError(f"Missing status field: {file.relative_to(ROOT)}")
-    return status.group(1), contents[front.end():].strip()
+    return status.group(1), contents[front.end() :].strip()
 
 
 def content_for(directory: str, required_status: str, heading: str) -> str:
@@ -48,7 +48,9 @@ def content_for(directory: str, required_status: str, heading: str) -> str:
         if status != required_status:
             continue
         if not body.startswith("# "):
-            raise ValueError(f"Source must begin with a level-one heading: {file.relative_to(ROOT)}")
+            raise ValueError(
+                f"Source must begin with a level-one heading: {file.relative_to(ROOT)}"
+            )
         # Convert source H1s to section headings in the generated document.
         body = re.sub(r"(?m)^(#{1,5})(?= )", lambda match: "#" + match.group(1), body)
         parts.append(f"\n{body}\n\n_Source: [{file.name}]({directory}/{file.name})_\n")
@@ -74,8 +76,13 @@ def validate_layout() -> list[str]:
             errors.append(f"{name} must be a Git symlink to {target}")
 
     for old in (
-        "notes/GOAL.md", "notes/PRD.md", "notes/ARCHITECTURE.md", "notes/TODO.md",
-        "notes/requests", "notes/decisions", "notes/rules",
+        "notes/GOAL.md",
+        "notes/PRD.md",
+        "notes/ARCHITECTURE.md",
+        "notes/TODO.md",
+        "notes/requests",
+        "notes/decisions",
+        "notes/rules",
     ):
         if (WORKSPACE / old).exists():
             errors.append(f"Obsolete workspace path: .agents/{old}")
@@ -97,8 +104,11 @@ def validate_layout() -> list[str]:
     if not tests.is_dir() or not list(tests.glob("test_*.py")):
         errors.append("Missing central tests under .github/tests/")
     tracked = subprocess.run(
-        ["git", "ls-files", "-z"], cwd=ROOT, text=True,
-        capture_output=True, check=False,
+        ["git", "ls-files", "-z"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
     )
     if tracked.returncode != 0:
         errors.append("Cannot audit test ownership: " + tracked.stderr.strip())
@@ -109,9 +119,19 @@ def validate_layout() -> list[str]:
             segments = path.split("/")
             leaf = segments[-1]
             is_test_directory = any(
-                p.lower() in {
-                    "test", "tests", "__tests__", "spec", "specs", "fixtures",
-                    "__fixtures__", "snapshots", "__snapshots__", "mocks", "__mocks__",
+                p.lower()
+                in {
+                    "test",
+                    "tests",
+                    "__tests__",
+                    "spec",
+                    "specs",
+                    "fixtures",
+                    "__fixtures__",
+                    "snapshots",
+                    "__snapshots__",
+                    "mocks",
+                    "__mocks__",
                 }
                 for p in segments[:-1]
             )
@@ -123,7 +143,10 @@ def validate_layout() -> list[str]:
 
     submodule = subprocess.run(
         ["git", "ls-files", "--stage", "--", ".darkfactory"],
-        cwd=ROOT, capture_output=True, text=True, check=False,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if submodule.returncode != 0 or not re.fullmatch(
         r"160000 [0-9a-f]{40} 0\t\.darkfactory\n", submodule.stdout
@@ -133,12 +156,16 @@ def validate_layout() -> list[str]:
         errors.append("Missing .gitmodules entry for .darkfactory")
     else:
         submodules_text = (ROOT / ".gitmodules").read_text(encoding="utf-8")
-        if "path = .darkfactory" not in submodules_text or "https://github.com/marius-patrik/DarkFactory.git" not in submodules_text:
+        if (
+            "path = .darkfactory" not in submodules_text
+            or "https://github.com/marius-patrik/DarkFactory.git" not in submodules_text
+        ):
             errors.append(".gitmodules must declare the DarkFactory root submodule")
 
     version = ROOT / "VERSION"
     try:
         import json
+
         config = json.loads((ROOT / "repo.dfconfig").read_text(encoding="utf-8"))
         mode = config["repo"].get("versioning", {}).get("mode", "tags")
         if mode not in {"tags", "file", "pridever"}:
@@ -146,7 +173,8 @@ def validate_layout() -> list[str]:
         elif mode in {"tags", "pridever"} and version.exists():
             errors.append("Tag-only mode must not track VERSION; use file mode to opt in")
         elif mode == "file" and (
-            not version.is_file() or not re.fullmatch(
+            not version.is_file()
+            or not re.fullmatch(
                 r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\n",
                 version.read_text(encoding="utf-8") if version.is_file() else "",
             )
@@ -176,7 +204,9 @@ def main() -> int:
     for error in errors:
         print(f"error: {error}", file=sys.stderr)
     if args.check and not errors:
-        print("Generated documents, native directories, submodule, tests and versioning are consistent.")
+        print(
+            "Generated documents, native directories, submodule, tests and versioning are consistent."
+        )
     return int(bool(errors))
 
 
