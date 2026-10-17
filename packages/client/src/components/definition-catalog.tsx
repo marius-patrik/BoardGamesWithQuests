@@ -64,7 +64,7 @@ export function DefinitionCatalog() {
 			</div>
 			{selected && (
 				<p role="status" className="mt-6 text-sm text-muted-foreground">
-					Selected: {definitions.find((game) => game.id === selected)?.title}.
+					Selected: {definitions.find((game) => game.id === selected)?.name}.
 					Gameplay is provided by the authoritative game service, not the public
 					catalog.
 				</p>
