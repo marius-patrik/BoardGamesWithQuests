@@ -258,24 +258,71 @@ geometric pseudo-moves when rules are absent.
 
 ## Supabase persistence boundary
 
-The deployed `bgwq` schema is private and not intended for direct browser
-access. Its `games` table owns the immutable configuration snapshot, two
-distinct participants, game JSON state and optimistic revision; `events`
-records one immutable event for each committed revision. Both enable RLS,
-and neither anonymous nor authenticated client roles have direct schema, table
-or function access. The private `commit_revision` function accepts a verified
-actor, expected revision and already validated new state, atomically updates
-the revision and appends one event. It rejects an outsider and stale retries.
+The `bgwq` schema is private. Browser `anon` and `authenticated` roles have no
+schema, table or function privileges; both game tables enable RLS. The trusted
+server verifies the Supabase identity and runs the engine before invoking
+`SECURITY INVOKER` functions with server-only database credentials. Foreign keys
+from participant and event-actor columns reference `auth.users(id)` with
+restrictive deletion. They require no service-role Auth table read grant and
+never modify Auth identities or protected unrelated records.
 
-**The function does not validate chess or draughts moves.** The authoritative
-server must verify the Supabase JWT identity, game participation and full
-configuration legality before invoking it; only trusted server-side credentials
-may call it. This boundary is not a direct client RPC.
+`create_game(game_uuid, actor_uuid, action_id, config_json)` returns the game UUID.
+The creator occupies side `1`; `player_two` is null, lifecycle is `pending`,
+revision is `0` and state is `{}`. Configuration and creation metadata are
+immutable. The creator/action key identifies one creation request across games;
+an exact retry requires the same UUID and configuration. A server adapter must
+recover that UUID from the creator's persisted request before assigning another
+UUID on a retry.
 
-The canonical migration is
-`supabase/migrations/20261013145509_private_game_persistence.sql`.
-The reproducible SQL transaction/security probe is
-`scripts/fixtures/g1_supabase_atomicity.sql`.
+`activate_game(game_uuid, actor_uuid, action_id, state_json)` locks the pending
+game and fills side `-1` once with a distinct existing Auth identity. Its state
+must be a complete canonical version-1 engine snapshot with revision `0`, empty
+domain events, the pinned `starting_side` (default `1` when omitted), no result
+and clocks matching the declared controls.
+The database appends an activation event at revision `0`; the engine's move
+history remains empty. Activation retries require the stored genesis state
+and key, including its recorded timestamp. Additional joiners cannot change an
+activated game's participants, configuration or lifecycle.
+
+`commit_revision(game_uuid, actor_uuid, expected_revision, state_json,
+event_json)` retains its five-argument signature and returns the committed
+revision. It locks the row, requires the acting participant and turn, checks
+expected revision, immutable identity/configuration, canonical metadata,
+clock timestamp, one appended domain event and the closed move DTO. Updating the
+snapshot and inserting the event occur in one transaction. A rejected call or
+failed event insertion leaves both unchanged. The database does not evaluate
+movement vectors, game rules or rewards; the server must supply an engine-
+validated transition.
+
+Creation, activation and domain actions have separate idempotency scopes.
+`events.action_scope` is `activation` or `domain`, with unique
+`(game_id, action_scope, action_id)`. The domain scope is reserved for moves and terminal commands; terminal-command
+transitions require implementation and behavioral verification. Reusing a textual
+creation or activation key as a move key is valid. Reusing a key for different data within its scope is rejected.
+Each keyed event stores a SHA-256 fingerprint of its resulting canonical JSONB
+snapshot. A low-level exact commit retry supplies the accepted event and
+resulting snapshot and returns its accepted revision, including after later
+moves. Records without a keyed genesis fail closed.
+
+A reconstructed engine's exact retry returns its accepted event at the requested revision while
+`get_state()` returns the loaded authoritative snapshot. If that validated
+event's revision is at most the loaded revision, the durable adapter returns the
+accepted event and authoritative state without another commit. Passing the
+latest snapshot with a accepted event at the requested revision is a conflicting low-level request.
+This adapter flow requires genuine authenticated HTTP/database integration;
+the SQL consumer scenario alone does not certify the public adapter.
+
+The forward lifecycle migration is
+`supabase/migrations/20261013202238_private_session_lifecycle.sql`.
+`tests/test_private_transactions.py` executes real isolated PostgreSQL
+transactions, concurrent connections and faults through the private functions.
+Docker/PostgreSQL unavailability fails the gate without a skip. Its local Auth
+fixture supplies referential identities, not provider authentication evidence.
+The hosted provider transaction/privilege probe is
+`scripts/fixtures/provider_session_atomicity.sql`; it references three existing
+Auth identities and rolls back its private test rows and fault objects.
+Provider execution, verified JWT/gameplay HTTP access, Realtime and classroom
+capacity remain distinct acceptance gates.
 
 ## Deployment and capacity boundaries
 
