@@ -80,6 +80,7 @@ def import_name(path: Path, roots: list[Path]) -> str | None:
             relative = path.relative_to(base)
         except ValueError:
             continue
+<<<<<<< HEAD
         if len(relative.parts) < 2:
             continue
         packages = relative.parts[:-1]
@@ -91,6 +92,47 @@ def import_name(path: Path, roots: list[Path]) -> str | None:
         tail = () if path.name == "__init__.py" else (path.stem,)
         return ".".join((*packages, *tail))
     return None
+||||||| b45d2e0f
+        title = os.path.splitext(name)[0].replace("_", " ").title()
+        pages.append((f"notes/{name}", title, content))
+
+    index_path = os.path.join(notes_dir, "index.md")
+    if os.path.isfile(index_path):
+        try:
+            with open(index_path, "r", encoding="utf-8") as handle:
+                pages.append(("notes/index.md", "Overview", handle.read()))
+        except (OSError, UnicodeDecodeError) as error:
+            print(f"Warning: Failed to read notes index {index_path}: {error}")
+    if pages:
+        hub_content = ["# Architecture & Design Notes", ""]
+        for doc_path, label, _ in pages:
+            if doc_path == "notes/index.md":
+                continue
+            hub_content.append(f"- [{label}]({os.path.basename(doc_path)})")
+        if not any(doc_path == "notes/index.md" for doc_path, _, _ in pages):
+            pages.append(("notes/index.md", "Overview", "\n".join(hub_content) + "\n"))
+    return pages
+=======
+        title = os.path.splitext(name)[0].replace("_", " ").title()
+        pages.append((f"notes/{name}", title, content))
+
+    index_path = os.path.join(notes_dir, "index.md")
+    if os.path.isfile(index_path):
+        try:
+            with open(index_path, "r", encoding="utf-8") as handle:
+                pages.append(("notes/index.md", "Overview", handle.read() + "\n"))
+        except (OSError, UnicodeDecodeError) as error:
+            print(f"Warning: Failed to read notes index {index_path}: {error}")
+    if pages:
+        hub_content = ["# Architecture & Design Notes", ""]
+        for doc_path, label, _ in pages:
+            if doc_path == "notes/index.md":
+                continue
+            hub_content.append(f"- [{label}]({os.path.basename(doc_path)})")
+        if not any(doc_path == "notes/index.md" for doc_path, _, _ in pages):
+            pages.append(("notes/index.md", "Overview", "\n".join(hub_content) + "\n"))
+    return pages
+>>>>>>> fix/independent-review-findings
 
 
 def display_name(stem: str) -> str:

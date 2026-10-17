@@ -114,7 +114,13 @@ smoothing them over would make the deviations unverifiable.
 
 | Drawn | Note |
 |---|---|
+<<<<<<< HEAD:.agents/notes/reference_diagram.md
 | `GameVeiw` | `e` and `i` are transposed relative to `GameView`. This is a spelling error in the reference; `GameView` is the intended canonical translation |
+||||||| b45d2e0f:notes/reference_diagram.md
+| `GameVeiw` | missing `r`. The class is `GameView`; the drawn spelling is not reproduced |
+=======
+| `GameVeiw` | missing `r`. No class carries this name in the code; the drawn spelling is not reproduced, and `notes/object_model.md` section 15 records what stands in its place |
+>>>>>>> fix/independent-review-findings:notes/reference_diagram.md
 | `check_Pat` | Czech *patová* — stalemate. Retained as the drawn operation name's meaning, spelled correctly in code |
 | `intger` | misspelling of `integer` on `get_stav()` |
 | `akutalizuj_hrace` | `u` and `t` are transposed relative to `aktualizuj_hrace` |
@@ -180,7 +186,7 @@ listed here are already English in the diagram.
 | `Kwest` | `Quest` | appears only inside `splnene_kwesty` |
 | `Timer` | `Timer` | the configurable parent is `Clock` — [object_model.md](object_model.md) |
 | `GameManagerController` | `GameManagerController` | already English; the diagram has no `GameController` or `WindowController` box |
-| `GameVeiw` | `GameView` | diagram typo |
-| `HracGameView` | `PlayerGameView` | the `Hrac` part is Czech |
+| `GameVeiw` | no class of that name | diagram typo. The board is `BoardView` in `view/game_view.py` and the window is `PlayerGameView` in `view/player_game_view.py` — `notes/object_model.md` section 15 |
+| `HracGameView` | `PlayerGameView` | the `Hrac` part is Czech. `HracView` is `PlayerView` |
 
 The normative alias table for the delivered product is in [PRD §5](PRD.md#5-naming-and-source-uml).

@@ -47,8 +47,23 @@ class Player:
             Integer Elo rating, defaulting to 1200 if unrated.
         """
         if self.user is not None:
-            if hasattr(self.user, "elo"):
-                return int(self.user.elo)
-            if hasattr(self.user, "getEloRating"):
-                return int(self.user.getEloRating())
+            rating = getattr(self.user, "elo", None)
+            if rating is not None:
+                return int(rating)
+            get_rating = getattr(self.user, "getEloRating", None)
+            if callable(get_rating):
+                return int(get_rating())
         return 1200
+<<<<<<< HEAD:packages/engine/model/game/player.py
+||||||| b45d2e0f:src/model/game/player.py
+
+    # Aliases
+    get_elo_rating = getEloRating
+    get_color = getColor
+    get_user = getUser
+=======
+
+
+#: Czech alias for `Player`, as `PRD.md` section 5 and `Hrac` in the diagram require.
+Hrac = Player
+>>>>>>> fix/independent-review-findings:src/model/game/player.py
