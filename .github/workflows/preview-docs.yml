@@ -35,6 +35,11 @@ jobs:
       - name: Cross-validate normative product specifications
         run: python .github/scripts/check_spec_contracts.py
 
+      - name: Validate relational schema with pinned Prisma 7 CLI
+        run: |
+          npm install --global --no-fund --no-audit prisma@7.10.0
+          prisma validate --schema=packages/server/supabase/schema.prisma
+
       - name: Verify independently published snapshot behavior
         run: python -m pytest -q .github/tests/test_docs_publication.py
 
