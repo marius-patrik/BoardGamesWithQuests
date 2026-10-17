@@ -140,30 +140,18 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                 body = header + f"{fence}{lang}\n{decoded}\n{fence}\n"
         # A source-diagram page is a diagram viewer, never a fenced source dump.
         # The original file remains separately available at its published URL.
-        if decoded is not None and rel.suffix.lower() in {".svg", ".mmd"}:
+        if decoded is not None and rel.suffix.lower() == ".mmd":
             from html import escape
             import posixpath
 
             title = escape(name, quote=False)
-            if rel.suffix.lower() == ".mmd":
-                body = (
-                    f"# {title}\n\n"
-                    + diagram_viewer_markup(
-                        '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
-                    )
-                    + "\n"
+            body = (
+                f"# {title}\n\n"
+                + diagram_viewer_markup(
+                    '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
                 )
-            else:
-                raw_url = posixpath.relpath(public_path(rel), start=dest.removesuffix(".md"))
-                safe_url = escape(raw_url, quote=True)
-                body = (
-                    f"# {title}\n\n"
-                    + diagram_viewer_markup(
-                        f'<img src="{safe_url}" alt="{escape(rel.stem, quote=True)}"'
-                        ' loading="lazy" draggable="false">'
-                    )
-                    + f'\n<a href="{safe_url}">View original SVG</a>\n'
-                )
+                + "\n"
+            )
         pages.append((name, dest, body))
     from html import escape
 
@@ -257,55 +245,7 @@ def on_files(files: Any, config: Any) -> Any:
         if current is not None:
             files.remove(current)
         files.append(File.generated(config, dest, content=path.read_text(encoding="utf-8")))
-    # Discover Graphviz inputs from Git rather than hardcoding diagram paths.
-    # Rendered sources override their tracked SVG snapshots when both exist.
-    for dest, svg in graphviz_assets(ROOT).items():
-        current = files.get_file_from_path(dest)
-        if current is not None:
-            files.remove(current)
-        files.append(File.generated(config, dest, content=svg))
     return files
-
-
-def ensure_dot() -> str:
-    """Install Graphviz only when source-based diagrams need it."""
-    binary = shutil.which("dot")
-    if binary is None and os.environ.get("CI", "").lower() == "true" and sys.platform == "linux":
-        apt = [] if os.geteuid() == 0 else ["sudo"]
-        subprocess.run([*apt, "apt-get", "update", "-qq"], check=True)
-        subprocess.run([*apt, "apt-get", "install", "-y", "-qq", "graphviz"], check=True)
-        binary = shutil.which("dot")
-    if binary is None:
-        raise RuntimeError("Generated diagrams require the system 'dot' binary")
-    return binary
-
-
-def graphviz_assets(root: Path) -> dict[str, str]:
-    """Compile only diagrams found in Git; no hardcoded diagram filenames.
-
-    Graphviz is required when a tracked .dot/.gv input exists, otherwise it
-    is not installed or invoked. A present source must render or fail the build.
-    """
-    sources = [p for p in tracked_files(root) if p.suffix.lower() in {".dot", ".gv"}]
-    if not sources:
-        return {}
-    binary = ensure_dot()
-    rendered: dict[str, str] = {}
-    for path in sources:
-        target = public_path(path.relative_to(root).with_suffix(".svg"))
-        if target in rendered:
-            raise ValueError(f"Multiple Graphviz sources render to {target}")
-        run = subprocess.run(
-            [binary, "-Tsvg"],
-            input=path.read_text(encoding="utf-8"),
-            text=True,
-            capture_output=True,
-            check=True,
-        )
-        if "<svg " not in run.stdout:
-            raise RuntimeError(f"Graphviz produced no SVG for {path}")
-        rendered[target] = run.stdout
-    return rendered
 
 
 def project_registry(repository: Path) -> list[dict[str, str]]:
@@ -468,6 +408,27 @@ def render_published_mermaid(site: Path) -> None:
                     data = target.read_text(encoding="utf-8")
                     if "<svg" not in data or "</svg>" not in data:
                         raise RuntimeError(f"Mermaid did not produce an SVG: {target}")
+                    # Mermaid emits width="100%" without an intrinsic height.
+                    # That produces an incorrectly sized image in the viewer.
+                    # Use the actual rendered bounds to give both axes real units.
+                    opening = re.search(r"<svg\\b[^>]*>", data)
+                    viewbox = re.search(
+                        r'viewBox="([^"]+)"', opening.group(0) if opening else ""
+                    )
+                    if opening is None or viewbox is None:
+                        raise RuntimeError(f"Mermaid SVG has no intrinsic bounds: {target}")
+                    bounds = viewbox.group(1).split()
+                    if len(bounds) != 4 or float(bounds[2]) <= 0 or float(bounds[3]) <= 0:
+                        raise RuntimeError(f"Mermaid SVG has invalid bounds: {target}")
+                    from math import ceil
+                    svg_tag = re.sub(r'\\s(?:width|height)="[^"]*"', "", opening.group(0))
+                    svg_tag = svg_tag.replace(
+                        "<svg",
+                        f'<svg width="{ceil(float(bounds[2]))}" height="{ceil(float(bounds[3]))}"',
+                        1,
+                    )
+                    data = data.replace(opening.group(0), svg_tag, 1)
+                    target.write_text(data, encoding="utf-8")
                     compiled[digest] = target
                 relative = os.path.relpath(compiled[digest], page.parent).replace(os.sep, "/")
                 return (
@@ -507,7 +468,7 @@ def build() -> None:
         )
         # Validate generated source outputs without rerunning the diagram parser.
         diagram_paths = diagram_generator().generated_assets(ROOT)
-        for asset in (*diagram_paths, *graphviz_assets(ROOT)):
+        for asset in diagram_paths:
             if not (ROOT / "site" / asset).is_file():
                 raise RuntimeError(f"Missing generated site asset: {asset}")
     render_published_mermaid(ROOT / "site")

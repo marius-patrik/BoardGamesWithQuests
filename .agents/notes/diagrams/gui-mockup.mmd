@@ -1,0 +1,28 @@
+flowchart LR
+%% Functional wireframe distilled from the submitted game-view mockup.
+%% Live frontend and interaction contracts are owned by the PRD.
+subgraph GAME["Game view"]
+  direction TB
+  STATUS["Current player and status"]
+  PLAYERS["Player 1 and Player 2"]
+  BOARD["Board and pieces"]
+  ACTIONS["Menu and game actions"]
+  QUESTS["Quest progress and XP"]
+  STATUS --> BOARD
+  PLAYERS --> BOARD
+  BOARD --> QUESTS
+  ACTIONS --> BOARD
+end
+subgraph SETTINGS["Game configuration"]
+  direction TB
+  SIZE["Board size - rows and columns"]
+  POSITION["Initial position editor"]
+  PIECES["Piece definitions"]
+  VECTORS["Movement and attack vectors"]
+  JUMP["Jump permissions"]
+  SIZE --> POSITION
+  PIECES --> VECTORS
+  PIECES --> JUMP
+end
+ACTIONS -->|"Open configuration"| SETTINGS
+SETTINGS -->|"Apply configuration"| GAME

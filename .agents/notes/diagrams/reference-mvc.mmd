@@ -1,0 +1,35 @@
+classDiagram
+direction LR
+%% Reference MVC sketch transcribed from the supplied diagram. Not implemented source.
+class GameManagerController {
+  +game_manager : GameManager
+  +herni_plocha : HerniPlocha
+  +game_view : GameView
+  +hrac_view : HracGameView
+  +vyber_pole(souradnice)
+}
+class GameManager {
+  +herni_plocha : HerniPlocha
+  +aktivni_hrac : int
+  +hraci : List
+  +revizor_tahu : RevizorTahu
+  +je_vlastni_figurka(souradnice) bool
+}
+class HerniPlocha {
+  +hraci_plocha : List
+  +rozmery : Tuple
+  +vrat_obsah(souradnice) Figurka
+}
+class GameView {
+  +controller : GameManagerController
+  +aktualizuj_plochu()
+}
+class HracGameView {
+  +controller : GameManagerController
+  +aktualizuj_hrace(hrac)
+}
+GameManagerController --> GameManager : manages
+GameManagerController --> HerniPlocha : uses
+GameManagerController --> GameView : updates
+GameManagerController --> HracGameView : updates
+GameManager --> HerniPlocha : owns

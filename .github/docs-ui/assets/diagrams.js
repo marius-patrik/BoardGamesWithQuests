@@ -28,9 +28,10 @@ function attachViewer(root) {
   function fit() {
     const [width, height] = dimensions();
     if (!width || !height || !viewport.clientWidth) return;
-    scale = clamp(Math.min((viewport.clientWidth - 32) / width, (viewport.clientHeight - 32) / height, 1), .01, 1);
+    scale = clamp(Math.min((viewport.clientWidth - 32) / width, 1), .05, 2);
     offsetX = (viewport.clientWidth - width * scale) / 2;
-    offsetY = (viewport.clientHeight - height * scale) / 2;
+    // Tall UML diagrams must be legible at opening, not squeezed vertically.
+    offsetY = height * scale > viewport.clientHeight ? 16 : (viewport.clientHeight - height * scale) / 2;
     paint();
   }
   function zoom(factor, x = viewport.clientWidth / 2, y = viewport.clientHeight / 2) {
@@ -44,7 +45,7 @@ function attachViewer(root) {
   for (const [text, action, caption] of [
     ["+", () => zoom(1.3), "Zoom in"],
     ["−", () => zoom(1 / 1.3), "Zoom out"],
-    ["Fit", fit, "Fit diagram to viewport"],
+    ["Fit width", fit, "Fit diagram to width"],
     ["100%", () => { scale = 1; offsetX = 16; offsetY = 16; paint(); }, "Original size"],
   ]) {
     const button = document.createElement("button");
