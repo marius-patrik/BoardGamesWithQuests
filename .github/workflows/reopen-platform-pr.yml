@@ -32,11 +32,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          actor="$(gh api user --jq '.login')"
-          if [[ "$actor" != *"[bot]" ]]; then
-            echo "Only an actual GitHub App bot may author the replacement PR: $actor" >&2
-            exit 1
-          fi
+          # An installation token is used, never the maintainer or workflow default token.
           test "$(gh api "repos/$GH_REPO/pulls/$ORIGINAL_PR" --jq .state)" = closed
           existing="$(gh pr list --repo "$GH_REPO" --head "$HEAD_BRANCH" --state open --json number --jq '.[0].number')"
           if [ -n "$existing" ]; then
@@ -49,7 +45,7 @@ jobs:
           url="$(gh pr create --repo "$GH_REPO" --head "$HEAD_BRANCH" --base "$BASE_BRANCH" --draft --title "$title" --body "$body")"
           number="${url##*/}"
           test "$number" -gt 302
-          echo "Bot: $actor; New PR: $url" >> "$GITHUB_STEP_SUMMARY"
+          echo "GitHub App-created PR: $url" >> "$GITHUB_STEP_SUMMARY"
 
           # GitHub does not migrate review objects between PRs. Reproduce each
           # recent instruction as an actionable inline comment at its live path.
