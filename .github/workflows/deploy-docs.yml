@@ -53,7 +53,7 @@ jobs:
             --site site --open-prs "${open_prs[@]}"
 
       - name: Generate selector manifest from actual published versions
-        run: python .github/scripts/docs_manifest.py --site site
+        run: python .github/scripts/build_docs.py --manifest --site site
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
