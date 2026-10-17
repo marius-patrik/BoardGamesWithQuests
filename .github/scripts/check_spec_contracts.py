@@ -226,7 +226,9 @@ def validate_openapi() -> int:
         k: v for k, v in schema.items() if k not in ("$schema", "$id")
     }, "OpenAPI ConfigDocument drifted from JSON Schema"
     session = api["paths"]["/session"]["get"]
-    assert session["responses"]["200"]["content"]["application/json"]["schema"]["$ref"].endswith("/Session")
+    assert session["responses"]["200"]["content"]["application/json"]["schema"]["$ref"].endswith(
+        "/Session"
+    )
     assert "anonymous CSRF cookie" in API.read_text(), "anonymous login bootstrap is unspecified"
     operations = [
         (path, method, obj.get("operationId"))
@@ -313,7 +315,9 @@ def validate_prisma_sql() -> tuple[int, int]:
         "CREATE CONSTRAINT TRIGGER check_game_revision_history" in sql
     ), "committed revision parity absent"
     assert "REFERENCES auth.users(id)" in sql, "Supabase Auth FK constraints absent"
-    assert "CREATE TRIGGER participant_capacity_guard" in sql and "FOR UPDATE OF g" in sql, "concurrent joins lack enforced variable seat capacity"
+    assert (
+        "CREATE TRIGGER participant_capacity_guard" in sql and "FOR UPDATE OF g" in sql
+    ), "concurrent joins lack enforced variable seat capacity"
     return len(models), len(re.findall(r'ADD CONSTRAINT "\w+" CHECK', sql))
 
 
