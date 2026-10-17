@@ -412,15 +412,14 @@ def render_published_mermaid(site: Path) -> None:
                     # That produces an incorrectly sized image in the viewer.
                     # Use the actual rendered bounds to give both axes real units.
                     opening = re.search(r"<svg\\b[^>]*>", data)
-                    viewbox = re.search(
-                        r'viewBox="([^"]+)"', opening.group(0) if opening else ""
-                    )
+                    viewbox = re.search(r'viewBox="([^"]+)"', opening.group(0) if opening else "")
                     if opening is None or viewbox is None:
                         raise RuntimeError(f"Mermaid SVG has no intrinsic bounds: {target}")
                     bounds = viewbox.group(1).split()
                     if len(bounds) != 4 or float(bounds[2]) <= 0 or float(bounds[3]) <= 0:
                         raise RuntimeError(f"Mermaid SVG has invalid bounds: {target}")
                     from math import ceil
+
                     svg_tag = re.sub(r'\\s(?:width|height)="[^"]*"', "", opening.group(0))
                     svg_tag = svg_tag.replace(
                         "<svg",

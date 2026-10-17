@@ -166,7 +166,7 @@ def implementation_uml(root: Path) -> str:
                 if len(matches) == 1 and matches[0] != key:
                     associations.add((key, matches[0], target.attr))
     for source, target, attribute in sorted(associations):
-        lines.append(f'  {keys[source]} --> {keys[target]} : {attribute}')
+        lines.append(f"  {keys[source]} --> {keys[target]} : {attribute}")
     return "\\n".join(lines) + "\\n"
 
 
