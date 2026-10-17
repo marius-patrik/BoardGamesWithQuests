@@ -382,8 +382,8 @@ def validate_diagrams() -> tuple[int, int]:
     for line in target.group(1).splitlines():
         if line.strip() and not line.strip().endswith("/"):
             assert "  # " in line, f"unannotated target declaration: {line}"
-    assert "packages/client/" in target.group(1), "client ownership missing"
-    assert "packages/web/" not in target.group(1), "obsolete frontend ownership"
+    assert "  client/  #" in target.group(1), "client ownership missing"
+    assert "  web/  #" not in target.group(1), "obsolete frontend ownership"
     return len(classes), len(edges)
 
 
