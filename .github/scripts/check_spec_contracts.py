@@ -49,7 +49,9 @@ def main() -> None:
     tables = re.findall(r"^\s+([a-z][a-z0-9_]*)\s+\{$", er, flags=re.MULTILINE)
     assert len(tables) == 39 and len(set(tables)) == 39, "38 tables + external auth projection"
     relations = re.findall(r"^\s+\w+\s+\|\|--o[\{\|]\s+\w+\s+:", er, flags=re.MULTILINE)
-    assert len(relations) == 75, f"expected 74 in-schema references plus Auth projection, found {len(relations)}"
+    assert (
+        len(relations) == 75
+    ), f"expected 74 in-schema references plus Auth projection, found {len(relations)}"
     for name, count in (
         ("chess", 24),
         ("english-draughts", 9),
