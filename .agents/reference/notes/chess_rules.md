@@ -10,11 +10,7 @@ This is the **target rules baseline for the chess configuration**, summarized fr
    knight-forward file and the castling rook files are derived from the configured
    board. Every statement below that names rank 1, rank 8 or a specific file is
    true of the *default* configuration and is parameterised everywhere else.
-2. **It is not the specification for the object model.** The reference
-   architecture diagram is. Where this document and
-   `reference_diagram.md` disagree about structure, the diagram governs.
-
-The rule names used by the code are listed in `PRD.md` FR-16.
+2. **It is not the specification for the object model.** The current [PRD](../../PRD.md) defines product behavior and the engine-neutral model; [chess.json](../data/chess.json) is a portable *reference definition*, not evidence of supported gameplay. If this rules summary contradicts FIDE Laws of Chess, authoritative FIDE rules prevail. The implementation must demonstrate actual observable legal moves, invalid-move rejection and persistence through the supported player interfaces.
 
 ---
 

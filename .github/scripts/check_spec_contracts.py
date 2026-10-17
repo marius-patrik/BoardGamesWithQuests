@@ -20,10 +20,10 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 REQ = ROOT / ".agents/requirements"
-DATA = ROOT / "data"
-API = REQ / "notes/API.md"
+DATA = ROOT / ".agents/reference/data"
+API = ROOT / ".agents/PRD.md"
 PRISMA = ROOT / "packages/server/supabase/schema.prisma"
-INTEGRITY = ROOT / "packages/server/supabase/integrity.sql"
+INTEGRITY = ROOT / ".agents/PRD.md"
 GAME_KEYS = ("chess", "english-draughts", "international-draughts", "moneyproperty")
 
 
@@ -48,7 +48,12 @@ def validate_data() -> dict[str, object]:
     schema = json.loads((DATA / "configuration.schema.json").read_text())
     jsonschema.Draft202012Validator.check_schema(schema)
     operator_registry = json.loads((DATA / "operators.json").read_text())["operators"]
-    hooks = set(re.findall(r"\('([a-z_]+(?:\.[a-z_]+)+)',\s*\d+", (DATA / "seed.sql").read_text()))
+    hooks = set(
+        re.findall(
+            r"\('([a-z_]+(?:\.[a-z_]+)+)',\s*\d+",
+            (ROOT / "packages/server/supabase/migrations/seed.sql").read_text(),
+        )
+    )
     counts = {"games": 0, "seeds": 0, "actions": 0, "operators": set()}
     for name in GAME_KEYS:
         doc = json.loads((DATA / f"{name}.json").read_text())
@@ -169,18 +174,26 @@ def validate_data() -> dict[str, object]:
 
 
 def embedded_openapi() -> dict:
-    """Parse the unique normative OpenAPI YAML block inside requirements/notes/API.md."""
+    """Parse the single planned OpenAPI 3.1 example, not runtime FastAPI output."""
     text = API.read_text(encoding="utf-8")
     blocks = re.findall(r"(?ms)^\x60{3}yaml\n(.*?)\n\x60{3}\s*$", text)
-    assert len(blocks) == 1, "API.md must contain exactly one extractable YAML contract"
+    assert len(blocks) == 1, "API.md must contain one unambiguous reference YAML example"
     doc = yaml.safe_load(blocks[0])
-    assert isinstance(doc, dict), "invalid canonical OpenAPI contract"
+    assert isinstance(doc, dict), "invalid design-reference OpenAPI example"
     return doc
+
+
+def reference_sql() -> str:
+    """Read exactly the supplementary SQL code block from the PRD."""
+    source = INTEGRITY.read_text(encoding="utf-8")
+    blocks = re.findall(r"(?ms)^`{3}sql\n(.*?)\n`{3}\s*$", source)
+    assert len(blocks) == 1, "PRD must contain exactly one supplementary SQL reference"
+    return blocks[0]
 
 
 def op_owners() -> dict[str, str]:
     """Read the complete one-owner-per-operation matrix, not a loose route count."""
-    source = (REQ / "notes/CONTRACTS.md").read_text(encoding="utf-8")
+    source = API.read_text(encoding="utf-8")
     owned = re.findall(r"(?m)^\| \x60([a-zA-Z][a-zA-Z0-9]+)\x60 \| ([^|]+) \|", source)
     registry: dict[str, str] = {}
     for operation, owner in owned:
@@ -298,7 +311,7 @@ def validate_prisma_sql() -> tuple[int, int]:
             for fld in match.group(1).split(","):
                 f = fld.strip().split("(")[0]
                 assert f in fields, f"Prisma {name}: index on unknown {f}"
-    sql = INTEGRITY.read_text()
+    sql = reference_sql()
     for tbl in re.findall(r'ALTER TABLE bgwq\."(\w+)"', sql):
         assert tbl in tablemap, f"INTEGRITY.sql: unknown table {tbl}"
     # A CHECK constraint is authored against a single table; every quoted column must exist.
@@ -319,7 +332,9 @@ def validate_prisma_sql() -> tuple[int, int]:
         "CREATE CONSTRAINT TRIGGER check_game_revision_history" in sql
     ), "committed revision parity absent"
     assert "REFERENCES auth.users(id)" in sql, "Supabase Auth FK constraints absent"
-    assert "CREATE TRIGGER game_target_size_guard" in sql, "database lobby target not bounded"
+    assert (
+        "CREATE TRIGGER game_target_size_guard" in sql
+    ), "reference SQL omits bounded lobby target"
     assert (
         "CREATE TRIGGER participant_capacity_guard" in sql and "FOR UPDATE OF g" in sql
     ), "concurrent joins lack enforced variable seat capacity"
@@ -401,7 +416,7 @@ def validate_diagrams() -> tuple[int, int]:
 
 
 def main() -> None:
-    """Check exactly one normative API, canonical persisted identities, and UML dependencies."""
+    """Check design references against intended identities and UML dependencies."""
     for required in (
         API,
         PRISMA,
@@ -410,20 +425,22 @@ def main() -> None:
         DATA / "operators.json",
         REQ / "diagrams/engine_uml.mmd",
         REQ / "diagrams/client_uml.mmd",
-        REQ / "notes/CONTRACTS.md",
     ):
         assert required.is_file(), f"missing authoritative source {required}"
     for stale in (
         "packages/server/api/openapi.yaml",
         ".agents/notes/requirements/AST.mmd",
         ".agents/notes/requirements/ARCHITECTURE.md",
+        ".agents/requirements/notes/API.md",
+        ".agents/requirements/notes/CONTRACTS.md",
+        ".agents/reference/notes/integrity.sql",
     ):
         assert not (ROOT / stale).exists(), f"obsolete overlapping contract still tracked: {stale}"
     games = validate_data()
     operations = validate_openapi()
     models, checks = validate_prisma_sql()
     classes, relations = validate_diagrams()
-    # Stable participant capacity and revision/event ownership must exist across
+    # Intended participant capacity and revision/event ownership must exist across
     # API, relational fields, and runtime contract: one failure blocks the gate.
     prisma = PRISMA.read_text()
     for declaration in (
@@ -439,14 +456,16 @@ def main() -> None:
         "model Rating",
     ):
         assert declaration in prisma, f"missing persisted domain requirement {declaration}"
-    assert "CREATE CONSTRAINT TRIGGER check_game_revision_history" in INTEGRITY.read_text()
-    assert "auth.uid()" in INTEGRITY.read_text(), "Realtime policy lacks identity-based membership"
+    assert "CREATE CONSTRAINT TRIGGER check_game_revision_history" in reference_sql()
+    assert (
+        "auth.uid()" in reference_sql()
+    ), "Realtime reference policy lacks identity-based membership"
     print(f'PASS: {games["games"]} game definitions, {games["actions"]} configured actions')
-    print(f"PASS: {operations} owned HTTP operations with local OpenAPI references")
-    print(f"PASS: {models} Prisma models, {checks} SQL constraints")
+    print(f"PASS: {operations} planned HTTP operations and local reference links")
+    print(f"PASS: {models} Prisma models, {checks} supplementary reference SQL constraints")
     print(f"PASS: {classes} engine interfaces and {relations} declared UML relationships")
     print(
-        "NOT VERIFIED: migration execution, formal engine semantics, real API/DB/browser integration or runtime replay"
+        "NOT VERIFIED: FastAPI-generated OpenAPI parity, migrations or supplemental SQL execution, real providers or runtime game behavior"
     )
 
 
