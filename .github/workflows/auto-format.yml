@@ -48,14 +48,14 @@ jobs:
         run: cargo fmt --manifest-path packages/native/src-tauri/Cargo.toml --all
 
       - name: Set up Bun for owned UI packages
-        if: hashFiles('packages/web/package.json', 'packages/native/package.json') != ''
+        if: hashFiles('packages/client/package.json', 'packages/native/package.json') != ''
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
 
       - name: Format Bun app sources and generate reproducible locks
-        if: hashFiles('packages/web/package.json', 'packages/native/package.json') != ''
+        if: hashFiles('packages/client/package.json', 'packages/native/package.json') != ''
         run: |
           set -euo pipefail
-          for pkg in packages/web packages/native; do
+          for pkg in packages/client packages/native; do
             if [ -f "$pkg/package.json" ]; then
               (
                 cd "$pkg"
@@ -72,7 +72,7 @@ jobs:
       - name: Commit tracked formatting changes
         run: |
           git add -u -- . ':(exclude,attr:submodule)'
-          for lockfile in packages/web/bun.lock packages/native/bun.lock; do
+          for lockfile in packages/client/bun.lock packages/native/bun.lock; do
             if [ -f "$lockfile" ]; then git add -- "$lockfile"; fi
           done
           if git diff --cached --quiet; then

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@bgwq/web",
+      "name": "@bgwq/client",
       "dependencies": {
         "@radix-ui/react-slot": "^1.2.3",
         "@supabase/supabase-js": "^2.76.1",

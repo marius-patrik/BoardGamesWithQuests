@@ -56,5 +56,5 @@ packages/server/.temp/
 packages/server/supabase/.temp/
 
 # Web icon copied from canonical root asset during builds.
-packages/web/public/icon.svg
-packages/web/public/config/
+packages/client/public/icon.svg
+packages/client/public/config/

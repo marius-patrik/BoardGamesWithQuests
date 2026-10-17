@@ -49,7 +49,7 @@ packages/
     engine/    Python board, moves, generic declarative rules/quests and domain lifecycle
     api/       FastAPI, Vercel entrypoint and authoritative HTTP boundaries
     supabase/  Supabase CLI config, migrations, schema and transaction ownership
-  web/         Bun/React/TypeScript/Rsbuild/Tailwind/shadcn/ui/Motion web app
+  client/      Bun/React/TypeScript/Rsbuild/Tailwind/shadcn/ui/Motion web app
   native/      Bun/Tauri 2 client of the same deployed web origin
 \`\`\`
 

@@ -4,12 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/web/**"
+      - "packages/client/**"
       - ".github/workflows/deploy-web.yml"
   pull_request:
     branches: [main]
     paths:
-      - "packages/web/**"
+      - "packages/client/**"
       - ".github/workflows/deploy-web.yml"
   workflow_dispatch:
 
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: packages/web
+        working-directory: packages/client
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -44,7 +44,7 @@ jobs:
     environment: web-production
     defaults:
       run:
-        working-directory: packages/web
+        working-directory: packages/client
     env:
       VERCEL_ORG_ID: team_Uq6MeWzqk2HnlAbXDi5fuLBV
       VERCEL_PROJECT_ID: prj_iWSGkCmiCeh1uliqVN06b5QWPAAx

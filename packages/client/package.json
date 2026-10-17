@@ -1,5 +1,5 @@
 {
-  "name": "@bgwq/web",
+  "name": "@bgwq/client",
   "version": "0.8.0",
   "private": true,
   "type": "module",
