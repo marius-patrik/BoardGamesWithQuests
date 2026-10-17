@@ -13,6 +13,7 @@ from engine.model.game.board import Board
 from engine.model.game.capture_geometry import CapturePolicy
 from engine.model.pieces.piece import Piece
 from engine.model.game.schema import (
+    MAX_JSON_TEXT_BYTES,
     _bounded_json,
     condition,
     freeze_json,
@@ -46,6 +47,8 @@ class GameDefinition:
         quests: Declarative quest definitions.
         initial_state: Immutable initial rule values, rights and temporary targets.
         halfmove_reset: Optional additional reset condition evaluated on original state.
+        starting_side: Opening participant side, integer 1 or -1.
+        position_identity: Optional selected state and legal-target repetition policy.
         declared_optional_fields: Frozen parser metadata preserving optional JSON field presence.
     """
 
@@ -70,6 +73,8 @@ class GameDefinition:
     )
     halfmove_reset: Mapping[str, Any] | None = None
     declared_optional_fields: frozenset[str] = frozenset()
+    starting_side: int = 1
+    position_identity: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         """Detach and recursively freeze every configuration-owned JSON value.
@@ -77,8 +82,15 @@ class GameDefinition:
         Raises:
             ValueError: Nested values are not finite bounded JSON.
         """
-        if not self.declared_optional_fields <= {"initial_state", "halfmove_reset"}:
+        if not self.declared_optional_fields <= {
+            "initial_state",
+            "halfmove_reset",
+            "position_identity",
+            "starting_side",
+        }:
             raise ValueError("unknown declared optional configuration fields")
+        if type(self.starting_side) is not int or self.starting_side not in (-1, 1):
+            raise ValueError("starting side must be explicit integer 1 or -1")
         object.__setattr__(
             self, "declared_optional_fields", frozenset(self.declared_optional_fields)
         )
@@ -92,11 +104,12 @@ class GameDefinition:
             "exports",
             "initial_state",
             "halfmove_reset",
+            "position_identity",
         ):
             object.__setattr__(self, field, freeze_json(getattr(self, field)))
 
 
-MAX_GAME_JSON_BYTES = 262144
+MAX_GAME_JSON_BYTES = MAX_JSON_TEXT_BYTES
 TOP_LEVEL_FIELDS = frozenset(
     {
         "schema_version",
@@ -183,7 +196,9 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
     if (
         not isinstance(data, dict)
         or not TOP_LEVEL_FIELDS <= set(data)
-        or not set(data) <= TOP_LEVEL_FIELDS | {"initial_state", "halfmove_reset"}
+        or not set(data)
+        <= TOP_LEVEL_FIELDS
+        | {"initial_state", "halfmove_reset", "position_identity", "starting_side"}
     ):
         raise ConfigurationError(f"{package}: missing or unknown top-level fields")
     try:
@@ -400,6 +415,55 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
             condition(halfmove_reset)
     except ValueError as error:
         raise ConfigurationError(f"{package}: invalid initial lifecycle policy: {error}") from error
+    starting_side = data.get("starting_side", 1)
+    if type(starting_side) is not int or starting_side not in (-1, 1):
+        raise ConfigurationError("starting side must be explicit integer 1 or -1")
+    position_identity = data.get("position_identity")
+    if position_identity is not None:
+        try:
+            _bounded_json(position_identity)
+            if not isinstance(position_identity, dict) or set(position_identity) != {
+                "moved_kinds",
+                "rule_state",
+                "rights",
+                "targets",
+            }:
+                raise ValueError(
+                    "position identity requires exact piece, state, rights and target selections"
+                )
+            selections = {
+                "moved_kinds": pieces,
+                "rule_state": initial_state["rule_state"],
+                "rights": initial_state["special_rights"],
+            }
+            for field, known in selections.items():
+                values = position_identity[field]
+                if (
+                    not isinstance(values, list)
+                    or len(values) > 64
+                    or any(not isinstance(value, str) or value not in known for value in values)
+                    or len(set(values)) != len(values)
+                ):
+                    raise ValueError("position identity selects an unknown or duplicate field")
+            targets = position_identity["targets"]
+            if not isinstance(targets, list) or len(targets) > 32:
+                raise ValueError("position targets must be a bounded list")
+            names: set[str] = set()
+            for target in targets:
+                if (
+                    not isinstance(target, dict)
+                    or set(target) != {"name", "legal_capture"}
+                    or not isinstance(target["name"], str)
+                    or target["name"] not in initial_state["temporary_targets"]
+                    or target["name"] in names
+                    or type(target["legal_capture"]) is not bool
+                ):
+                    raise ValueError(
+                        "position target must select one initialized target and eligibility policy"
+                    )
+                names.add(target["name"])
+        except ValueError as error:
+            raise ConfigurationError(f"{package}: invalid position identity: {error}") from error
     return GameDefinition(
         name,
         package,
@@ -415,7 +479,11 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         freeze_json(data["quests"]),
         freeze_json(initial_state),
         freeze_json(halfmove_reset),
-        frozenset(set(data) & {"initial_state", "halfmove_reset"}),
+        frozenset(
+            set(data) & {"initial_state", "halfmove_reset", "position_identity", "starting_side"}
+        ),
+        starting_side,
+        freeze_json(position_identity),
     )
 
 
