@@ -1,6 +1,8 @@
-# API — Authoritative OpenAPI contract
+# API reference — intended FastAPI HTTP behavior
 
-This is the **only** normative HTTP interface definition. A fresh unauthenticated browser MUST receive HTTP 200 from `GET /session`, with `authenticated: false`, `profile: null` and a CSRF token bound to its pre-auth cookie; otherwise protected guest and login POST requests have no legal way to obtain a CSRF token. The fenced YAML is OpenAPI 3.1 and is extracted without rewriting or hand-maintained duplicates by `.github/scripts/export_api_contract.py`; generated `openapi.yaml` is a build artifact, not tracked source. Implementation handlers and generated browser types must be checked against the extracted contract. State-changing requests must enforce the documented CSRF and route-specific authentication/authorization, revision and idempotency semantics (guest/login/register establish identity only after valid pre-auth CSRF); this document does not certify that runtime handlers exist.
+This file is a **design reference**, not the deployed API specification or a source for generated clients. The Python FastAPI routes and their typed Pydantic models will generate the **actual** OpenAPI contract when implemented; production clients derive types from that generated output, not by extracting a document from this folder.
+
+The following OpenAPI 3.1 example records the intended endpoints, responses, authentication, CSRF, revision, idempotency and participant boundaries before implementation. Review/contract checks may parse it to detect contradictions with the database/engine model, but passing that check **does not** establish that corresponding routes or types exist. The example requires that a new browser can get anonymous CSRF via `GET /session`, then submit guest/login/register operations using that token; final behavior must be exercised against the running service.
 
 ```yaml
 openapi: 3.1.0

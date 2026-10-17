@@ -174,12 +174,12 @@ def validate_data() -> dict[str, object]:
 
 
 def embedded_openapi() -> dict:
-    """Parse the unique normative OpenAPI YAML block inside requirements/notes/API.md."""
+    """Parse the single planned OpenAPI 3.1 example, not runtime FastAPI output."""
     text = API.read_text(encoding="utf-8")
     blocks = re.findall(r"(?ms)^\x60{3}yaml\n(.*?)\n\x60{3}\s*$", text)
-    assert len(blocks) == 1, "API.md must contain exactly one extractable YAML contract"
+    assert len(blocks) == 1, "API.md must contain one unambiguous reference YAML example"
     doc = yaml.safe_load(blocks[0])
-    assert isinstance(doc, dict), "invalid canonical OpenAPI contract"
+    assert isinstance(doc, dict), "invalid design-reference OpenAPI example"
     return doc
 
 
@@ -408,7 +408,7 @@ def validate_diagrams() -> tuple[int, int]:
 
 
 def main() -> None:
-    """Check exactly one normative API, canonical persisted identities, and UML dependencies."""
+    """Check design references against intended identities and UML dependencies."""
     for required in (
         API,
         PRISMA,
@@ -449,11 +449,11 @@ def main() -> None:
     assert "CREATE CONSTRAINT TRIGGER check_game_revision_history" in INTEGRITY.read_text()
     assert "auth.uid()" in INTEGRITY.read_text(), "Realtime policy lacks identity-based membership"
     print(f'PASS: {games["games"]} game definitions, {games["actions"]} configured actions')
-    print(f"PASS: {operations} owned HTTP operations with local OpenAPI references")
+    print(f"PASS: {operations} planned HTTP operations and local reference links")
     print(f"PASS: {models} Prisma models, {checks} supplementary reference SQL constraints")
     print(f"PASS: {classes} engine interfaces and {relations} declared UML relationships")
     print(
-        "NOT VERIFIED: migration execution, formal engine semantics, real API/DB/browser integration or runtime replay"
+        "NOT VERIFIED: FastAPI-generated OpenAPI parity, migrations or supplemental SQL execution, real providers or runtime game behavior"
     )
 
 

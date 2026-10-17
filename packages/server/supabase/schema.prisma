@@ -1,6 +1,7 @@
 // BoardGamesWithQuests — normative relational model.
 // Auth identities are supplied by Supabase-managed auth.users; their external FKs and
-// database-only security/constraints are declared in integrity.sql.
+// supplemental PostgreSQL constraints are reviewed in .agents/reference/notes/integrity.sql
+// and must be incorporated into executable versioned migrations before deployment.
 // Python/psycopg uses the database at runtime. Prisma is a schema/migration tool only.
 
 // No generated TypeScript database client: Python/psycopg is the only runtime
