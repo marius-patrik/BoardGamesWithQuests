@@ -40,7 +40,9 @@ def test_source_generated_diagrams_work_in_documentation():
         assert source.startswith(("classDiagram", "flowchart")), stem
         assert page.is_file(), f"Interactive page is missing: {stem}"
         html = page.read_text(encoding="utf-8")
-        assert 'class="mermaid"' in html and "mermaid.esm.min.mjs" in html
+        assert 'class="mermaid"' in html and "assets/diagrams.js" in html
+        runtime = SITE / "assets" / "diagrams.js"
+        assert runtime.is_file() and "mermaid.esm.min.mjs" in runtime.read_text(encoding="utf-8")
         assert ("classDiagram" if stem == "implementation-uml" else "flowchart") in html
 
 
