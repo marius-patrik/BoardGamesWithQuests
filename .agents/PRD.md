@@ -120,16 +120,24 @@ Prisma is **schema authoring tooling**, not a production Node.js database runtim
     diagrams/  # Real cross-language repository AST and Python implementation UML.
       ast.mmd  # Generated cross-language file/declaration graph.
       uml.mmd  # Generated implementation classes and verified inheritance edges.
+    images/  # Actual implementation screenshots only, never reference art.
+      .gitkeep  # Keep optional image folder in Git when no verified screenshot exists.
+    notes/  # Provenance, generation and interpretation of implementation evidence.
+      README.md  # Explain what source-generated diagrams actually prove and how to reproduce them.
   reference/  # Original assignment references, explicitly not normative implementation design.
     diagrams/  # Original reference models in editable Mermaid form.
       mvc.mmd  # Assignment MVC reference.
       uml.mmd  # Assignment UML reference.
     images/  # Original authored assignment artwork; do not synthesize a replacement silently.
       GUI_mockup.svg  # Preserved original Excalidraw drawing.
+    notes/  # Provenance and correct interpretation of assignment references.
+      README.md  # Keep the original reference diagrams and artwork distinct from product specifications.
   requirements/  # Normative target behavior and design, not generated code evidence.
     diagrams/  # Independently reviewable engine model and client interaction flow.
       engine_uml.mmd  # Target engine classes, transaction ownership and typed execution relations.
       client_uml.mmd  # End-to-end authenticated routing, actions, Realtime and recovery sequence.
+    images/  # Final approved UX assets; never treat original assignment artwork as the final design.
+      .gitkeep  # Track directory until a reviewed finalized product mockup is authored.
     notes/  # Definitive human-readable contracts and interface ownership.
       API.md  # Only normative OpenAPI 3.1 document, fenced YAML extractable for code generation.
       CONTRACTS.md  # Cross-contract HTTP/persistence/authority traceability and failure semantics.
