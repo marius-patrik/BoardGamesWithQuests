@@ -18,8 +18,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
-import yaml
-from properdocs.structure.files import File, Files
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -109,6 +107,8 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                 # Link to its exact Git revision for full-byte inspection.
                 from urllib.parse import quote
 
+                import yaml
+
                 config = yaml.safe_load((root / "properdocs.yml").read_text(encoding="utf-8"))
                 repository_url = (config.get("repo_url") or "").rstrip("/")
                 revision = subprocess.run(
@@ -188,8 +188,9 @@ def on_config(config: Any) -> Any:
     return config
 
 
-def on_files(files: Files, config: Any) -> Files:
+def on_files(files: Any, config: Any) -> Any:
     """Materialize virtual pages without writing documentation sources to disk."""
+    from properdocs.structure.files import File
     plugins = getattr(config, "plugins", None)
     if plugins is not None and not hasattr(plugins, "_current_plugin"):
         plugins._current_plugin = None
@@ -350,6 +351,7 @@ def manifest(site: Path, repository: Path) -> dict[str, list[dict[str, str]]]:
 
 def build() -> None:
     """Build the strict documentation site and validate dynamically generated assets."""
+    import yaml
     with tempfile.TemporaryDirectory(prefix="repo-docs-") as temporary:
         work = Path(temporary)
         source = work / "source"
