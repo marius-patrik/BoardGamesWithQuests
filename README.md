@@ -62,6 +62,20 @@ multiplayer HTTP requests, two-browser gameplay, Realtime recovery, Tauri and
 classroom shared-IP capacity each require their own integration gate. A passing
 local suite does not certify those external requirements or a complete game.
 
+The private SQL commit boundary accepts exact nine-field move events and exact
+ten-field terminal events (`resign`, `claim_draw`, `timeout`) in version-1
+snapshots. Terminal commits preserve position and rule/quest state, charge only
+the running clock without increment, and atomically append one configured
+result. Rule legality and outcome arbitration remain engine responsibilities.
+Run the mandatory PostgreSQL suites with the integrated terminal engine:
+
+```sh
+PYTHONPATH=packages python -m pytest -q tests/test_private_transactions.py tests/test_private_transactions_adversarial.py tests/test_terminal_transactions.py
+```
+
+These tests require Docker access and fail explicitly when PostgreSQL cannot
+start. They verify local private transactions, not hosted multiplayer acceptance.
+
 ## Source documentation
 
 Install Graphviz and the Python package with its development requirements:
