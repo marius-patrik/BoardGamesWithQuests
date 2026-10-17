@@ -424,8 +424,10 @@ BEGIN
   IF NEW.target_participants < minimum_size OR NEW.target_participants > maximum_size THEN
     RAISE EXCEPTION 'game target is outside published participant bounds' USING ERRCODE = '23514';
   END IF;
-  IF TG_OP = 'UPDATE' AND NEW.target_participants IS DISTINCT FROM OLD.target_participants THEN
-    RAISE EXCEPTION 'game target participants are immutable' USING ERRCODE = '23514';
+  IF TG_OP = 'UPDATE' THEN
+    IF NEW.target_participants IS DISTINCT FROM OLD.target_participants THEN
+      RAISE EXCEPTION 'game target participants are immutable' USING ERRCODE = '23514';
+    END IF;
   END IF;
   RETURN NEW;
 END;
