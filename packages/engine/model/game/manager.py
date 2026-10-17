@@ -139,6 +139,15 @@ class GameManager:
             "rules": thaw_json(definition.rules),
             "quests": thaw_json(definition.quests),
         }
+        if "initial_state" in definition.declared_optional_fields or any(
+            definition.initial_state.values()
+        ):
+            config["initial_state"] = thaw_json(definition.initial_state)
+        if (
+            "halfmove_reset" in definition.declared_optional_fields
+            or definition.halfmove_reset is not None
+        ):
+            config["halfmove_reset"] = thaw_json(definition.halfmove_reset)
         initial = definition.clock["initial_seconds"] * 1000
         state: dict[str, Any] = {
             "version": 1,
@@ -149,9 +158,9 @@ class GameManager:
             "active_side": 1,
             "board": self._placement(board_from_definition(definition)),
             "captured": [],
-            "rule_state": {},
-            "special_rights": {},
-            "temporary_targets": {},
+            "rule_state": thaw_json(definition.initial_state["rule_state"]),
+            "special_rights": thaw_json(definition.initial_state["special_rights"]),
+            "temporary_targets": thaw_json(definition.initial_state["temporary_targets"]),
             "clocks": {
                 "remaining_ms": {"1": initial, "-1": initial},
                 "anchor_ms": started_at_ms,
@@ -391,6 +400,11 @@ class GameManager:
                     enumerator.enumerate(
                         tuple(record["square"]),
                         CapturePolicy.from_json(spec["capture_policy"]),
+                        (
+                            (0 if side == 1 else board.rows - 1)
+                            if spec.get("promotion", {}).get("stop_capture")
+                            else None
+                        ),
                     )
                 )
             if len(routes) > 128:
@@ -411,6 +425,8 @@ class GameManager:
         captures: list[list[int]],
         now_ms: int,
         counts: dict[str, int] | None = None,
+        before_board: Board | None = None,
+        projected_board: Board | None = None,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Bind read-only queries and references to one explicit evaluation state.
 
@@ -422,6 +438,8 @@ class GameManager:
             captures: Server-derived captured coordinates.
             now_ms: Trusted timestamp for derived remaining time.
             counts: Computed legal counts, or None when unavailable.
+            before_board: Original board for explicit before-phase queries.
+            projected_board: Fully isolated projection for after-phase safety queries.
 
         Returns:
             Trusted query registry and detached reference bindings.
@@ -439,7 +457,19 @@ class GameManager:
                 "promotion": move.promotion if move else None,
             },
             "capture_paths": {name: self._paths(board, color) for name, color in selectors.items()},
-            "promotion_options": {"active": [], "opponent": []},
+            "promotion_options": {
+                name: sorted(
+                    {
+                        option
+                        for record in self._placement(before_board or board)
+                        if record["side"] == color
+                        for option in self.definition.pieces[record["kind"]]
+                        .get("promotion", {})
+                        .get("options", ())
+                    }
+                )
+                for name, color in selectors.items()
+            },
             "clocks": {
                 name: max(
                     0,
@@ -489,11 +519,51 @@ class GameManager:
                 }
             )
         self._charge(_json_work(query_state))
+        budget = self._evaluation.budget if self._evaluation is not None else None
         queries = {
-            **BoardQueries(board, side).bindings(),
+            **BoardQueries(board, side, budget).bindings(),
             **SnapshotQueries(query_state).bindings(),
-            "turn": BoardQueries(board, state["active_side"]).turn,
+            "turn": BoardQueries(board, state["active_side"], budget).turn,
         }
+
+        for name in BoardQueries(board, side, budget).bindings():
+            if name == "turn":
+                continue
+            ordinary = queries[name]
+
+            def phased(
+                params: Mapping[str, Any], name: str = name, ordinary: Any = ordinary
+            ) -> Any:
+                """Read an explicit board phase without speculative recursive evaluation.
+
+                Args:
+                    params: Validated query parameters with optional phase.
+                    name: Bound board-query operation.
+                    ordinary: Default lifecycle query implementation.
+
+                Returns:
+                    Isolated JSON board facts.
+
+                Raises:
+                    QueryResolutionError: Phase is unknown or projection is unavailable.
+                """
+                values = dict(params)
+                phase = values.pop("phase", None)
+                if phase is None:
+                    if name == "pieces_safe":
+                        raise QueryResolutionError("piece safety requires an explicit board phase")
+                    return ordinary(values)
+                if phase == "before":
+                    selected = before_board or board
+                elif phase == "after" and projected_board is not None:
+                    selected = projected_board
+                else:
+                    raise QueryResolutionError(
+                        "board phase is unknown or projection is unavailable"
+                    )
+                return BoardQueries(selected, side, budget).bindings()[name](values)
+
+            queries[name] = phased
 
         def bounded_query(operation: Any) -> Any:
             """Wrap a trusted query with its traversal reservation.
@@ -521,9 +591,108 @@ class GameManager:
 
         return {name: bounded_query(operation) for name, operation in queries.items()}, references
 
+    def _offers(
+        self, state: dict[str, Any], board: Board, side: int, now_ms: int
+    ) -> dict[Move, tuple[PlannedEffect, ...]]:
+        """Resolve bounded game-authored special intents before candidate authorization.
+
+        Args:
+            state: Observed authoritative snapshot.
+            board: Corresponding board.
+            side: Evaluating participant.
+            now_ms: Trusted timestamp.
+
+        Returns:
+            Unique immutable intents mapped to their trusted auxiliary effect plans.
+
+        Raises:
+            QueryResolutionError: Offers are malformed, ambiguous or require recursive facts.
+        """
+        if not any(rule["hook"] == "available_moves" for rule in self.definition.rules):
+            return {}
+        effects = self._evaluate("available_moves", state, board, side, None, [], now_ms)
+        offers: dict[Move, tuple[PlannedEffect, ...]] = {}
+        for effect in effects:
+            if effect.op != "offer_move":
+                raise QueryResolutionError("available_moves may only emit bounded move offers")
+            params = thaw_json(effect.params)
+            move = Move(
+                tuple(params["start"]),
+                tuple(params["end"]),
+                tuple(tuple(square) for square in params.get("hops", [params["end"]])),
+                params.get("promotion"),
+            )
+            if any(not board.is_within_bounds(*square) for square in (move.start_pos, *move.hops)):
+                raise QueryResolutionError("offered coordinates are outside the board")
+            piece = board.get_piece_at(move.start_pos)
+            if piece is None or piece.getColor() != side:
+                raise QueryResolutionError(
+                    "offered source must belong to the evaluating participant"
+                )
+            if move in offers:
+                raise QueryResolutionError("ambiguous duplicate move offers")
+            self._charge(_json_work(params))
+            offers[move] = tuple(
+                PlannedEffect(item["op"], item["params"]) for item in params.get("effects", [])
+            )
+        return offers
+
+    def _promotion(self, piece: Piece, move: Move, rows: int) -> str | None:
+        """Derive promotion exclusively from configured rank and choice policy.
+
+        Args:
+            piece: Moving piece before transition.
+            move: Intent carrying an optional selected kind.
+            rows: Explicit configured board rows.
+
+        Returns:
+            Replacement kind or None when no promotion is due.
+
+        Raises:
+            TransitionError: Choice or capture-chain crowning boundary is invalid.
+        """
+        policy = self.definition.pieces[piece.getType()].get("promotion")
+        far = 0 if piece.getColor() == 1 else rows - 1
+        if policy and policy["stop_capture"] and any(square[0] == far for square in move.hops[:-1]):
+            raise TransitionError("capture chain must stop on its configured crowning rank")
+        if not policy or move.end_pos[0] != far:
+            if move.promotion is not None:
+                raise TransitionError("promotion is not available on this destination")
+            return None
+        if policy["mode"] == "automatic":
+            if move.promotion is not None:
+                raise TransitionError("automatic promotion does not accept a client choice")
+            return policy["options"][0]
+        if move.promotion not in policy["options"]:
+            raise TransitionError("move requires one configured promotion choice")
+        return move.promotion
+
+    def _intents(
+        self, start: tuple[int, int], hops: tuple[tuple[int, int], ...], piece: Piece, rows: int
+    ) -> list[Move]:
+        """Expand configured explicit choices without inventing piece identities.
+
+        Args:
+            start: Source coordinates.
+            hops: Complete landing sequence.
+            piece: Configured moving piece.
+            rows: Board rows.
+
+        Returns:
+            One ordinary intent or each configured promotion-choice intent.
+        """
+        policy = self.definition.pieces[piece.getType()].get("promotion")
+        far = 0 if piece.getColor() == 1 else rows - 1
+        choices = (
+            policy["options"]
+            if policy and policy["mode"] == "choice" and hops[-1][0] == far
+            else (None,)
+        )
+        return [Move(start, hops[-1], hops, choice) for choice in choices]
+
     def _candidate(
-        self, state: dict[str, Any], board: Board, move: Move, side: int
-    ) -> list[list[int]]:
+        self, state: dict[str, Any], board: Board, move: Move, side: int, now_ms: int
+    ) -> tuple[list[list[int]], tuple[PlannedEffect, ...]]:
         """Require exact geometry or a complete server-enumerated capture chain.
 
         Args:
@@ -531,9 +700,10 @@ class GameManager:
             board: Isolated position.
             move: Immutable intent.
             side: Active side being authorized.
+            now_ms: Trusted evaluation timestamp.
 
         Returns:
-            Captured coordinates derived solely from board state.
+            Server-derived capture coordinates and offered auxiliary effects.
 
         Raises:
             TransitionError: Intent is incomplete, illegal or belongs to another side.
@@ -543,8 +713,13 @@ class GameManager:
         piece = board.get_piece_at(move.start_pos)
         if piece is None or piece.getColor() != side:
             raise TransitionError("source does not belong to the active participant")
-        if move.promotion is not None:
-            raise TransitionError("promotion requires configured move offers")
+        self._promotion(piece, move, board.rows)
+        offers = self._offers(state, board, side, now_ms)
+        if move in offers:
+            target = board.get_piece_at(move.end_pos)
+            if target is not None and target.getColor() == side:
+                raise TransitionError("offered destination cannot overwrite a friendly piece")
+            return ([list(move.end_pos)] if target is not None else []), offers[move]
         spec = self.definition.pieces[piece.getType()]
         if "capture_policy" in spec:
             for route in self._paths(board, side):
@@ -552,7 +727,7 @@ class GameManager:
                     tuple(route["start"]) == move.start_pos
                     and tuple(tuple(step["landing"]) for step in route["steps"]) == move.hops
                 ):
-                    return [step["captured"] for step in route["steps"]]
+                    return [step["captured"] for step in route["steps"]], ()
             if len(move.hops) != 1 or board.get_piece_at(move.end_pos) is not None:
                 raise TransitionError("capture intent must contain one complete legal chain")
         elif len(move.hops) != 1:
@@ -562,7 +737,7 @@ class GameManager:
         )
         if move.end_pos not in MoveValidator(board).get_geometric_moves(move.start_pos):
             raise TransitionError("move is not a configured geometric candidate")
-        return [list(move.end_pos)] if board.get_piece_at(move.end_pos) is not None else []
+        return ([list(move.end_pos)] if board.get_piece_at(move.end_pos) is not None else []), ()
 
     def _evaluate(
         self,
@@ -574,6 +749,8 @@ class GameManager:
         captures: list[list[int]],
         now_ms: int,
         counts: dict[str, int] | None = None,
+        before_board: Board | None = None,
+        projected_board: Board | None = None,
     ) -> tuple[PlannedEffect, ...]:
         """Evaluate configured rules without mutating their inputs.
 
@@ -586,12 +763,16 @@ class GameManager:
             captures: Derived capture coordinates.
             now_ms: Trusted timestamp.
             counts: Optional computed legal counts.
+            before_board: Original board for explicit before-phase queries.
+            projected_board: Isolated board after derived movement and effects.
 
         Returns:
             Immutable effects in declared order.
         """
         self._charge(self._rule_work)
-        queries, references = self._context(state, board, side, move, captures, now_ms, counts)
+        queries, references = self._context(
+            state, board, side, move, captures, now_ms, counts, before_board, projected_board
+        )
         return (
             HookInterpreter(thaw_json(self.definition.rules), queries, references)
             .evaluate(hook)
@@ -659,6 +840,11 @@ class GameManager:
             if op in {"set_state", "set_rights"}:
                 field = "rule_state" if op == "set_state" else "special_rights"
                 state[field][params["name"]] = params["value"]
+            elif op == "set_target":
+                value = params["value"]
+                if value is not None and not board.is_within_bounds(*value):
+                    raise TransitionError("temporary target is outside the board")
+                state["temporary_targets"][params["name"]] = value
             elif op == "increment_state":
                 value = state["rule_state"].get(params["name"], 0)
                 if type(value) is not int:
@@ -744,12 +930,14 @@ class GameManager:
         elapsed = now_ms - state["clocks"]["anchor_ms"] if side == state["active_side"] else 0
         if elapsed < 0 or elapsed >= state["clocks"]["remaining_ms"][str(side)]:
             raise TransitionError("participant clock does not permit an action")
+        self._charge(_json_work(state))
+        observed = thaw_json(freeze_json(state))
+        before_board = self._board(state)
         board = self._board(state)
-        captures = self._candidate(state, board, move, side)
-        authorization = self._evaluate("permits_move", state, board, side, move, captures, now_ms)
-        if not self._allowed(authorization):
-            raise TransitionError("configured rules deny this intent")
+        captures, offered_effects = self._candidate(state, board, move, side, now_ms)
         moving_piece = board.get_piece_at(move.start_pos)
+        promotion = self._promotion(moving_piece, move, board.rows)
+        reset = bool(captures)
         for square in captures:
             captured = board.get_piece_at(tuple(square))
             state["captured"].append({"kind": captured.getType(), "side": captured.getColor()})
@@ -762,7 +950,7 @@ class GameManager:
         state["clocks"]["remaining_ms"][str(side)] += state["clocks"]["increment_ms"]
         state["clocks"]["anchor_ms"] = now_ms
         state["active_side"] = -side
-        state["halfmove_count"] = 0 if captures else state["halfmove_count"] + 1
+        state["halfmove_count"] = 0 if reset else state["halfmove_count"] + 1
         state["revision"] += 1
         event = {
             "revision": state["revision"],
@@ -775,17 +963,74 @@ class GameManager:
             "effects": [],
         }
         state["events"].append(event)
-        effects = self._evaluate("on_move_made", state, board, side, move, captures, now_ms)
-        emitted = self._effects(
-            tuple(effect for effect in authorization if effect.op == "record_event"),
+        state["temporary_targets"] = {name: None for name in state["temporary_targets"]}
+        emitted = self._effects(offered_effects, state, board)
+        if self.definition.halfmove_reset is not None:
+            queries, references = self._context(
+                observed,
+                before_board,
+                side,
+                move,
+                captures,
+                now_ms,
+                before_board=before_board,
+                projected_board=board,
+            )
+            extra_reset = ConditionEvaluator(queries, references).evaluate(
+                thaw_json(self.definition.halfmove_reset)
+            )
+            state["halfmove_count"] = (
+                0 if captures or extra_reset else observed["halfmove_count"] + 1
+            )
+        if promotion is not None:
+            board.set_piece_at(move.end_pos, self._piece(promotion, side, True))
+        state["board"] = self._placement(board)
+        effects = self._evaluate(
+            "on_move_made",
             state,
             board,
+            side,
+            move,
+            captures,
+            now_ms,
+            before_board=before_board,
+            projected_board=board,
         )
         emitted.extend(self._effects(effects, state, board))
+        authorization = self._evaluate(
+            "permits_move",
+            observed,
+            before_board,
+            side,
+            move,
+            captures,
+            now_ms,
+            before_board=before_board,
+            projected_board=board,
+        )
+        if not self._allowed(authorization):
+            raise TransitionError("configured rules deny this intent")
+        emitted = (
+            self._effects(
+                tuple(effect for effect in authorization if effect.op == "record_event"),
+                state,
+                board,
+            )
+            + emitted
+        )
         event["effects"] = emitted
         state["board"] = self._placement(board)
         state["position_history"].append(self._position_key(state))
-        queries, references = self._context(state, board, side, move, captures, now_ms)
+        queries, references = self._context(
+            state,
+            board,
+            side,
+            move,
+            captures,
+            now_ms,
+            before_board=before_board,
+            projected_board=board,
+        )
         evaluator = ConditionEvaluator(queries, references)
         for quest in self.definition.quests:
             self._charge(_json_work(quest))
@@ -828,13 +1073,32 @@ class GameManager:
                     raise QueryResolutionError(
                         "candidate move enumeration exceeds bounded resources"
                     )
-                candidates.append(Move(start, end))
+                for intent in self._intents(start, (end,), piece, board.rows):
+                    if len(candidates) >= 4096:
+                        raise QueryResolutionError(
+                            "candidate move enumeration exceeds bounded resources"
+                        )
+                    candidates.append(intent)
         for route in self._paths(board, side):
             hops = tuple(tuple(step["landing"]) for step in route["steps"])
             self._charge(len(hops))
             if len(candidates) >= 4096:
                 raise QueryResolutionError("candidate move enumeration exceeds bounded resources")
-            candidates.append(Move(tuple(route["start"]), hops[-1], hops))
+            for intent in self._intents(
+                tuple(route["start"]), hops, board.get_piece_at(tuple(route["start"])), board.rows
+            ):
+                if len(candidates) >= 4096:
+                    raise QueryResolutionError(
+                        "candidate move enumeration exceeds bounded resources"
+                    )
+                candidates.append(intent)
+        for move in self._offers(state, board, side, now_ms):
+            if move not in candidates:
+                if len(candidates) >= 4096:
+                    raise QueryResolutionError(
+                        "candidate move enumeration exceeds bounded resources"
+                    )
+                candidates.append(move)
         legal: list[Move] = []
         for move in candidates:
             try:
@@ -944,7 +1208,15 @@ class GameManager:
                     "opponent": len(self._legal_moves(state, side, now_ms)),
                 }
             terminal = self._evaluate(
-                "outcome", state, board, -side, move, captures, now_ms, counts
+                "outcome",
+                state,
+                board,
+                -side,
+                move,
+                captures,
+                now_ms,
+                counts,
+                projected_board=board,
             )
             if any(effect.op != "propose_outcome" for effect in terminal):
                 raise TransitionError("outcome hook must only propose terminal results")

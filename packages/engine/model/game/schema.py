@@ -18,6 +18,10 @@ MAX_QUESTS = 128
 HOOKS = frozenset({"permits_move", "available_moves", "outcome", "on_move_made", "status"})
 QUERIES = frozenset(
     {
+        "integer",
+        "json_value",
+        "square_offset",
+        "pieces_safe",
         "piece_at",
         "pieces_matching",
         "path_clear",
@@ -57,6 +61,7 @@ EFFECTS = frozenset(
         "complete_quest",
         "set_clock",
         "set_rights",
+        "set_target",
     }
 )
 RELATIONS = frozenset({"eq", "ne", "lt", "lte", "gt", "gte", "in"})
@@ -129,7 +134,7 @@ def validate_effect(op: str, params: Any, allow_references: bool = True) -> None
     contracts = {
         "permit": (set(), {"reason", "target"}),
         "deny": (set(), {"reason", "target"}),
-        "offer_move": ({"start", "end"}, set()),
+        "offer_move": ({"start", "end"}, {"hops", "promotion", "effects"}),
         "move_piece": ({"start", "end"}, set()),
         "capture_piece": ({"square"}, set()),
         "replace_piece": ({"square", "kind"}, set()),
@@ -140,13 +145,25 @@ def validate_effect(op: str, params: Any, allow_references: bool = True) -> None
         "complete_quest": ({"quest", "player"}, set()),
         "set_clock": ({"player", "seconds"}, set()),
         "set_rights": ({"name", "value"}, set()),
+        "set_target": ({"name", "value"}, set()),
     }
     if op not in contracts:
         raise ValueError("unknown effect operation")
     required, optional = contracts[op]
     if not required <= set(params) or not set(params) <= required | optional:
         raise ValueError(f"{op} has missing or unknown parameters")
+
+    def expression(value: Any) -> bool:
+        """Recognize bounded typed expressions without treating text as code."""
+        if isinstance(value, dict):
+            return set(value) in ({"ref"}, {"query", "params"}) or any(
+                expression(child) for child in value.values()
+            )
+        return isinstance(value, list) and any(expression(child) for child in value)
+
     for name, value in params.items():
+        if allow_references and expression(value):
+            continue
         if isinstance(value, dict) and set(value) == {"ref"}:
             if not allow_references:
                 raise ValueError("resolved effects cannot contain references")
@@ -181,14 +198,58 @@ def validate_effect(op: str, params: Any, allow_references: bool = True) -> None
                 raise ValueError("clock seconds must be a nonnegative bounded integer")
         elif name == "value" and op == "set_rights" and type(value) is not bool:
             raise ValueError("special right must be boolean")
+        elif name == "value" and op == "set_target":
+            if value is not None and (
+                not isinstance(value, list)
+                or len(value) != 2
+                or any(type(axis) is not int or not 0 <= axis <= 255 for axis in value)
+            ):
+                raise ValueError("temporary target must be a bounded square or null")
+        elif name == "promotion":
+            if value is not None and (not isinstance(value, str) or not value or len(value) > 128):
+                raise ValueError("offered promotion must name a configured kind")
+        elif name == "hops":
+            if not isinstance(value, list) or not 1 <= len(value) <= 128:
+                raise ValueError("offered hops must be a bounded nonempty array")
+            for square in value:
+                if (
+                    not isinstance(square, list)
+                    or len(square) != 2
+                    or any(type(axis) is not int or not 0 <= axis <= 255 for axis in square)
+                ):
+                    raise ValueError("offered landing must be a bounded square")
+            if value[-1] != params["end"]:
+                raise ValueError("offered final landing must match end")
+        elif name == "effects":
+            if not isinstance(value, list) or len(value) > 32:
+                raise ValueError("offered effects must be a bounded array")
+            for effect in value:
+                if (
+                    not isinstance(effect, dict)
+                    or set(effect) != {"op", "params"}
+                    or not isinstance(effect["op"], str)
+                    or effect["op"]
+                    not in {
+                        "move_piece",
+                        "capture_piece",
+                        "replace_piece",
+                        "set_state",
+                        "increment_state",
+                        "set_rights",
+                        "set_target",
+                        "record_event",
+                    }
+                ):
+                    raise ValueError("offer contains an unsupported transition effect")
+                validate_effect(effect["op"], effect["params"], allow_references)
         elif name == "payload" and not isinstance(value, dict):
             raise ValueError("event payload must be a JSON object")
     if not allow_references:
 
         def reject_reference(value: Any) -> None:
             if isinstance(value, dict):
-                if "ref" in value:
-                    raise ValueError("resolved effects cannot contain references")
+                if "ref" in value or "query" in value:
+                    raise ValueError("resolved effects cannot contain expressions")
                 for child in value.values():
                     reject_reference(child)
             elif isinstance(value, list):
@@ -210,12 +271,27 @@ def validate_reference(value: Any) -> None:
 
 
 def validate_embedded_references(value: Any) -> None:
-    """Validate reference nodes inside query or effect parameters."""
+    """Validate bounded reference and nested query nodes in data parameters.
+
+    Args:
+        value: Bounded JSON literal or typed expression tree.
+
+    Raises:
+        ValueError: A reference, nested query name or expression shape is invalid.
+    """
     if isinstance(value, dict):
         if "ref" in value:
             if set(value) != {"ref"}:
                 raise ValueError("a reference node may contain only ref")
             validate_reference(value["ref"])
+        elif "query" in value:
+            if (
+                set(value) != {"query", "params"}
+                or not isinstance(value["query"], str)
+                or value["query"] not in QUERIES
+            ):
+                raise ValueError("unknown or malformed nested query")
+            _check_params(value["params"])
         else:
             for child in value.values():
                 validate_embedded_references(child)

@@ -51,7 +51,7 @@ class Move:
         if hops[-1] != end or any(a == b for a, b in zip((start, *hops), hops)):
             raise ValueError("move landings must end at destination without empty hops")
         if self.promotion is not None and (
-            not isinstance(self.promotion, str) or not 1 <= len(self.promotion) <= 100
+            not isinstance(self.promotion, str) or not 1 <= len(self.promotion) <= 128
         ):
             raise ValueError("promotion must name a configured piece kind")
         object.__setattr__(self, "start_pos", start)

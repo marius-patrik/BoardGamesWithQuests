@@ -31,17 +31,18 @@ instructions or manually duplicated CI statuses.
   event capacity. Test lengthy orthodox and draughts sessions against service
   execution limits without replacing denied hostile work with a larger action budget.
 
-- Add bounded configured `available_moves` offers and prospective-state safety
-  evaluation so castling, en passant and royal safety pass the same transition
-  boundary as ordinary moves. Bind optional promotion choices to legal offers;
-  reject unoffered kinds and implement complete crowning policies.
-- Provide declarative temporary-target initialization, updates and expiry,
-  configured starting rights and recoverable per-rule state. Align JSON schema,
-  interpreter, session snapshot and shipped definitions in each chunk.
-- Define configurable halfmove-reset and position-identity policies. Exact
+- Compose declarative shipped special-movement offers and role-safety conditions;
+  verify full castling rights, attacked transit squares, en-passant eligibility,
+  choice promotion and both capture-chain crowning policies against rule references.
+- Derive rights/target lifecycle and quiet initial movements from configured
+  pieces, previous actions and board dimensions. Verify relocated layouts and
+  apply configuration edits through the identical interpreter and commit boundary.
+- Complete rule-specific halfmove-reset and position-identity policies. Exact
   chess repetition must depend on available rights and legally meaningful
   en-passant eligibility; irrelevant movement flags must not split equivalent
   positions. Test repetition through actual accepted sequences and replay.
+- Expose configured status hooks through read-only session/API views without
+  permitting mutations or recursive legal enumeration.
 - Adjudicate expired clocks with configured material/outcome conditions using
   a trusted timestamp and durable transition; rejected moves alone must not
   stand in for timeout completion. Cover restart, retries and clock boundaries.
