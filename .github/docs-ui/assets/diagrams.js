@@ -18,6 +18,49 @@ function attachViewer(root) {
     canvas.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
     label.textContent = Math.round(scale * 100) + "%";
   };
+  let expanded = null;
+
+  function openModal() {
+    if (expanded) { expanded.close(); return; }
+    if (!("showModal" in HTMLDialogElement.prototype)) return;
+
+    const marker = document.createComment("image viewer position");
+    root.before(marker);
+    const dialog = document.createElement("dialog");
+    dialog.className = "diagram-modal";
+    dialog.setAttribute("aria-label", "Expanded image viewer");
+    marker.after(dialog);
+    dialog.append(root);
+    root.classList.add("diagram-viewer--expanded");
+    expanded = dialog;
+    const expandButton = toolbar.querySelector('[aria-label="Expand image in modal"]');
+    expandButton.textContent = "⤡";
+    expandButton.setAttribute("aria-label", "Close expanded image");
+    expandButton.title = "Close expanded image";
+
+    dialog.addEventListener("close", () => {
+      marker.replaceWith(root);
+      root.classList.remove("diagram-viewer--expanded");
+      dialog.remove();
+      expanded = null;
+      expandButton.textContent = "⛶";
+      expandButton.setAttribute("aria-label", "Expand image in modal");
+      expandButton.title = "Expand image in modal";
+      requestAnimationFrame(fit);
+      expandButton.focus();
+    }, { once: true });
+    dialog.addEventListener("click", event => {
+      if (event.target !== dialog) return;
+      const bounds = dialog.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right ||
+          event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
+    });
+
+    dialog.showModal();
+    expandButton.focus();
+    requestAnimationFrame(fit);
+  }
+
   const dimensions = () => {
     if (graphic instanceof SVGElement) {
       const box = graphic.viewBox?.baseVal;
@@ -47,6 +90,7 @@ function attachViewer(root) {
     ["−", () => zoom(1 / 1.3), "Zoom out"],
     ["Fit width", fit, "Fit diagram to width"],
     ["100%", () => { scale = 1; offsetX = 16; offsetY = 16; paint(); }, "Original size"],
+    ["⛶", openModal, "Expand image in modal"],
   ]) {
     const button = document.createElement("button");
     button.type = "button";

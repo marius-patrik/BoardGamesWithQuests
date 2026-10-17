@@ -81,7 +81,56 @@
     syncNavigation();
   }
 
-  /* ── Browser fullscreen (same full-bleed layout) ─────────────────────── */
+  /* ── Persistent centered / full-width reader layout ────────────────── */
+
+  var layoutToggle = document.querySelector("[data-layout-toggle]");
+  if (layoutToggle) {
+    function syncLayout() {
+      var wide = root.getAttribute("data-layout") === "wide";
+      layoutToggle.setAttribute("aria-pressed", String(wide));
+      layoutToggle.setAttribute("aria-label", wide ? "Use centered layout" : "Use full-width layout");
+      layoutToggle.title = wide ? "Use centered layout" : "Use full-width layout";
+    }
+
+    layoutToggle.addEventListener("click", function () {
+      var wide = root.getAttribute("data-layout") !== "wide";
+      root.setAttribute("data-layout", wide ? "wide" : "centered");
+      try {
+        localStorage.setItem("docs-layout", wide ? "wide" : "centered");
+      } catch (e) {
+        /* Layout switching is available without persistent storage. */
+      }
+      syncLayout();
+    });
+    syncLayout();
+  }
+
+  /* ── Independently collapsible navigation groups ────────────────────── */
+
+  var groups = Array.prototype.slice.call(document.querySelectorAll("details[data-nav-section]"));
+  var groupStorage = "docs-sidebar-sections";
+  var groupStates = {};
+  try {
+    var saved = JSON.parse(localStorage.getItem(groupStorage) || "{}");
+    if (saved && typeof saved === "object" && !Array.isArray(saved)) groupStates = saved;
+  } catch (e) {
+    /* A corrupt or unavailable preference never prevents navigation. */
+  }
+  groups.forEach(function (group) {
+    var key = group.getAttribute("data-nav-section");
+    if (Object.prototype.hasOwnProperty.call(groupStates, key)) {
+      group.open = Boolean(groupStates[key]);
+    }
+    // Never hide the selected file within a collapsed ancestor on navigation.
+    if (group.querySelector('[aria-current="page"]')) group.open = true;
+    group.addEventListener("toggle", function () {
+      groupStates[key] = group.open;
+      try { localStorage.setItem(groupStorage, JSON.stringify(groupStates)); }
+      catch (e) { /* Navigation still works without storage. */ }
+    });
+  });
+
+  /* ── Browser fullscreen, independent of layout width ─────────────────── */
 
   var fullscreenToggle = document.querySelector("[data-fullscreen-toggle]");
   if (fullscreenToggle) {

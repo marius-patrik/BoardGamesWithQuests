@@ -175,3 +175,53 @@ def test_published_docs_use_full_viewport_layout_with_operable_navigation_and_fu
     assert 'sidebar.classList.toggle("is-open")' in js
     assert 'navToggle.setAttribute("aria-expanded"' in js
     assert 'event.key === "Escape"' in js
+
+
+def test_reading_width_and_independent_fullscreen_buttons():
+    """The published browser app must offer distinct layout and fullscreen actions."""
+    page = (SITE / "index.html").read_text(encoding="utf-8")
+    stylesheet = (SITE / "assets/theme.css").read_text(encoding="utf-8")
+    script = (SITE / "assets/theme.js").read_text(encoding="utf-8")
+    assert page.count("data-layout-toggle") == 1
+    assert page.count("data-fullscreen-toggle") == 1
+    assert 'data-layout="centered"' in page
+    assert 'aria-label="Use full-width layout"' in page
+    assert 'docs-layout' in page
+    assert 'html[data-layout="centered"] .layout' in stylesheet
+    assert 'html[data-layout="wide"] .icon-layout-centered' in stylesheet
+    assert "requestFullscreen()" in script and "exitFullscreen()" in script
+    assert 'localStorage.setItem("docs-layout"' in script
+    assert 'root.setAttribute("data-layout"' in script
+
+
+def test_navigation_sections_are_natively_collapsible_and_preserve_active_page():
+    """Published navigation must expose working disclosure controls at every depth."""
+    page = (SITE / "index.html").read_text(encoding="utf-8")
+    css = (SITE / "assets/theme.css").read_text(encoding="utf-8")
+    script = (SITE / "assets/theme.js").read_text(encoding="utf-8")
+    assert 'class="nav__group"' in page
+    assert "data-nav-section=" in page
+    assert '<summary class="nav__label">' in page
+    assert 'nav__group[open]' in css
+    assert "docs-sidebar-sections" in script
+    assert "group.querySelector" in script
+    assert "group.addEventListener(\"toggle\"" in script
+    assert 'aria-current="page"' in page
+
+
+def test_image_and_diagram_viewers_offer_an_accessible_modal():
+    """Every graphic uses the same zoomable viewer with modal expansion."""
+    css = (SITE / "assets/theme.css").read_text(encoding="utf-8")
+    script = (SITE / "assets/diagrams.js").read_text(encoding="utf-8")
+    index = (SITE / "repository-files" / "agents" / "notes" / "images" / "GUI_mockup.svg" / "index.html")
+    assert index.is_file()
+    html = index.read_text(encoding="utf-8")
+    assert 'class="diagram-viewer"' in html
+    assert 'assets/diagrams.js' in html
+    assert '"Expand image in modal"' in script
+    assert "dialog.showModal()" in script
+    assert 'dialog.addEventListener("close"' in script
+    assert 'dialog.setAttribute("aria-label", "Expanded image viewer")' in script
+    assert 'marker.replaceWith(root)' in script
+    assert '.diagram-modal::backdrop' in css
+    assert '.diagram-modal .diagram-viewer__viewport' in css

@@ -576,3 +576,109 @@ html[data-nav-collapsed="true"] .layout:has(.toc--empty) {
   height: auto;
 }
 .prose .diagram-viewer__error { padding: 1.25rem; font-size: 0.875rem; }
+
+
+/* ── Reader width modes ──────────────────────────────────────────────────
+   Centered is the normal reading layout; wide uses every pixel between the
+   independent edge-aligned navigation and table of contents panels. */
+.icon-layout-centered,
+html[data-layout="wide"] .icon-layout-wide { display: none; }
+html[data-layout="wide"] .icon-layout-centered { display: block; }
+
+@media (min-width: 901px) {
+  html[data-layout="centered"] .header__inner {
+    max-width: 100rem;
+    margin-inline: auto;
+  }
+  html[data-layout="centered"] .layout {
+    max-width: 100rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+    column-gap: 2rem;
+  }
+  html[data-layout="centered"] .content {
+    max-width: 46rem;
+    margin-inline: auto;
+    padding-inline: 0;
+  }
+  html[data-layout="centered"] .sidebar,
+  html[data-layout="centered"] .toc {
+    border: 0;
+    padding-inline: 0;
+  }
+}
+@media (max-width: 900px) {
+  html[data-layout="centered"] .content {
+    max-width: 46rem;
+    margin-inline: auto;
+  }
+}
+
+/* ── Collapsible nested navigation sections ───────────────────────────── */
+.nav__section > .nav__group { display: block; min-width: 0; }
+.nav__section .nav__group > .nav__label {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  cursor: pointer;
+  list-style: none;
+  padding: .35rem .4rem;
+  border-radius: var(--radius);
+  margin: .65rem 0 .15rem;
+  user-select: none;
+}
+.nav__section .nav__group > .nav__label::-webkit-details-marker { display: none; }
+.nav__section .nav__group > .nav__label::before {
+  content: "";
+  flex: 0 0 auto;
+  border: solid hsl(var(--muted-foreground));
+  border-width: 0 1.5px 1.5px 0;
+  padding: 3px;
+  transform: rotate(-45deg);
+  transition: transform 120ms ease;
+}
+.nav__section .nav__group[open] > .nav__label::before { transform: rotate(45deg); }
+.nav__section .nav__group > .nav__label:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+.nav__section .nav__group > .nav__label:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+.nav__section--active > .nav__group > .nav__label { color: hsl(var(--foreground)); }
+
+
+/* ── Image / Mermaid graphic modal ────────────────────────────────────────
+   Native dialog supplies focus management, Escape, and modal isolation. */
+.prose .diagram-modal {
+  box-sizing: border-box;
+  width: calc(100vw - 1.25rem);
+  max-width: calc(100vw - 1.25rem);
+  height: calc(100dvh - 1.25rem);
+  max-height: calc(100dvh - 1.25rem);
+  padding: .5rem;
+  margin: auto;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+.prose .diagram-modal::backdrop {
+  background: hsl(var(--shadow) / .75);
+  backdrop-filter: blur(6px);
+}
+.prose .diagram-modal .diagram-viewer--expanded {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  height: 100%;
+  max-height: 100%;
+}
+.prose .diagram-modal .diagram-viewer__toolbar { flex: 0 0 auto; }
+.prose .diagram-modal .diagram-viewer__viewport {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
