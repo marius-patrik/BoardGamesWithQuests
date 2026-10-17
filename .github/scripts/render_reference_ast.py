@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Render the supported Mermaid AST flowchart grammar into a deterministic reference SVG.
 
-Every node and every edge in AST.mmd is included. The source file is authoritative;
-Graphviz is used only as a layout engine because the graph has thousands of nodes.
-The renderer fails closed on unrecognized Mermaid statements instead of silently
-omitting architecture declarations or action-expression edges.
+Each planned tracked source file appears once, with its exported declarations
+and documentation contract. Typed edges express architectural dependencies.
+Game-instance action/condition trees belong in portable DATA, not this diagram.
+Reject disconnected files, accidental game-instance nodes and unsupported syntax.
 """
 
 from __future__ import annotations
@@ -66,7 +66,35 @@ def parse_mermaid(source: str) -> tuple[dict[str, str], list[tuple[str, str, str
     for start, end, _ in edges:
         if start not in nodes or end not in nodes:
             raise ValueError(f"edge references undeclared node: {start} -> {end}")
+    verify_architecture(nodes, edges)
     return nodes, edges
+
+
+def verify_architecture(nodes: dict[str, str], edges: list[tuple[str, str, str]]) -> None:
+    """Require connected, typed source-file relations; never inline game data actions."""
+    unexpected = sorted(node for node in nodes if re.fullmatch(r"F[0-9]{3}", node) is None)
+    if unexpected:
+        raise ValueError(f"Non-source nodes (game-specific actions belong in DATA): {unexpected[:12]}")
+    graph: dict[str, set[str]] = {node: set() for node in nodes}
+    for start, end, label in edges:
+        if not label.strip():
+            raise ValueError(f"Untyped architecture relationship: {start} -> {end}")
+        graph[start].add(end)
+        graph[end].add(start)
+    isolated = sorted(name for name, adjacent in graph.items() if not adjacent)
+    if isolated:
+        raise ValueError(f"Isolated source files: {isolated}")
+    if not nodes:
+        raise ValueError("Empty source architecture")
+    pending = [next(iter(nodes))]
+    reached = set(pending)
+    while pending:
+        for child in graph[pending.pop()]:
+            if child not in reached:
+                reached.add(child)
+                pending.append(child)
+    if len(reached) != len(nodes):
+        raise ValueError(f"Disconnected source components: {sorted(set(nodes) - reached)}")
 
 
 def make_dot(nodes: dict[str, str], edges: list[tuple[str, str, str]]) -> str:

@@ -2722,7 +2722,7 @@ The authoritative, inline-documented Prisma PostgreSQL relational model is **[SC
 
 # 5. AST
 
-The canonical source-file, declaration, dependency, and game-configuration diagram is pure Mermaid source in **[AST.mmd](notes/requirements/AST.mmd)**. Its generated visual reference is **[reference_AST.svg](notes/requirements/diagrams/reference_AST.svg)**. [COMPONENTS.md](notes/requirements/COMPONENTS.md) defines the corresponding intended source-file inventory. The renderer and CI automation regenerate the SVG from AST.mmd.
+The canonical **source-code declaration and integration architecture** is pure Mermaid source in **[AST.mmd](notes/requirements/AST.mmd)**. Its generated visual reference is **[reference_AST.svg](notes/requirements/diagrams/reference_AST.svg)**. [COMPONENTS.md](notes/requirements/COMPONENTS.md) defines the corresponding intended source-file inventory. Every source-file node declares its interface and documentation responsibilities and participates in a typed architectural relationship; disconnected nodes fail verification. The four games and their individual actions, conditions, and effects belong in **DATA**, not as extra code AST nodes. The renderer and CI regenerate the SVG from AST.mmd.
 
 # 6. DATA
 

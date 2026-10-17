@@ -23,7 +23,7 @@ The API and web deployments are separate Vercel projects; the web origin forward
 
 ## 2. Exact intended tracked source tree
 
-Every intended source path listed here has exactly one file node in the [AST](AST.mmd). Generated build output, package caches, timestamped migration artifacts and generated native platform projects are not authored files.
+Every intended source path listed here has exactly one file/declaration node in the [AST](AST.mmd), with an explicit typed architectural relationship; disconnected files fail validation. The AST describes **source architecture only**. Individual chess, draughts and MoneyProperty actions, conditions and effects belong in portable **DATA**, not as additional source-code nodes. Generated build output, package caches, timestamped migration artifacts and generated native platform projects are not authored files.
 
 ```text
 .
