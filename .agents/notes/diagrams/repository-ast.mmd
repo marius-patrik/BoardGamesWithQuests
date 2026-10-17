@@ -12,8 +12,14 @@ flowchart TD
   n5ded58ca3ec08d498 --> naefabf0f5bba19e93
   n66fe4004fa2807dc6["diagrams/"]
   n5ded58ca3ec08d498 --> n66fe4004fa2807dc6
+  n83347b1e464ee2b18["gui-mockup.mmd"]
+  n66fe4004fa2807dc6 --> n83347b1e464ee2b18
   n7ba02b3d7df3f47e6["implementation-uml.mmd"]
   n66fe4004fa2807dc6 --> n7ba02b3d7df3f47e6
+  n1e06f7a793f5647a4["reference-mvc.mmd"]
+  n66fe4004fa2807dc6 --> n1e06f7a793f5647a4
+  nf38230d3891c63fe4["reference-page1.mmd"]
+  n66fe4004fa2807dc6 --> nf38230d3891c63fe4
   nc8444f0fe8fb2d0bb["repository-ast.mmd"]
   n66fe4004fa2807dc6 --> nc8444f0fe8fb2d0bb
   n13fa1c3ddbfcc027c[".darkfactory/"]
@@ -34,6 +40,46 @@ flowchart TD
   nfad65243633b77700 --> n6d0842500b0a11032
   n0a78d11ace79474b3["assets/"]
   n6d0842500b0a11032 --> n0a78d11ace79474b3
+  n06612ffac08cb47cc["diagrams.js"]
+  n0a78d11ace79474b3 --> n06612ffac08cb47cc
+  n6681a26f49cee7ce1["lexical_declaration"]
+  n06612ffac08cb47cc --> n6681a26f49cee7ce1
+  nfeb5ca5027af38c22["function_declaration attachViewer"]
+  n06612ffac08cb47cc --> nfeb5ca5027af38c22
+  n7a8bd8f69871db66a["lexical_declaration"]
+  n06612ffac08cb47cc --> n7a8bd8f69871db66a
+  n23b60c81dbd92ff21["lexical_declaration"]
+  n06612ffac08cb47cc --> n23b60c81dbd92ff21
+  n533506f8f8f2c3a2b["lexical_declaration"]
+  n06612ffac08cb47cc --> n533506f8f8f2c3a2b
+  n739daf74f2465fd18["lexical_declaration"]
+  n06612ffac08cb47cc --> n739daf74f2465fd18
+  nd7ba50e1e9311b70f["lexical_declaration"]
+  n06612ffac08cb47cc --> nd7ba50e1e9311b70f
+  n51c1b972a70fc8693["lexical_declaration"]
+  n06612ffac08cb47cc --> n51c1b972a70fc8693
+  n27163ec963b9e19c8["lexical_declaration"]
+  n06612ffac08cb47cc --> n27163ec963b9e19c8
+  nbfcdc026f9cb03dbe["lexical_declaration"]
+  n06612ffac08cb47cc --> nbfcdc026f9cb03dbe
+  n35b1452a921484545["lexical_declaration"]
+  n06612ffac08cb47cc --> n35b1452a921484545
+  na3d9da575f8a89c0e["function_declaration fit"]
+  n06612ffac08cb47cc --> na3d9da575f8a89c0e
+  n097bb4e790977b761["lexical_declaration"]
+  n06612ffac08cb47cc --> n097bb4e790977b761
+  n115a3d8eea69ff3d5["function_declaration zoom"]
+  n06612ffac08cb47cc --> n115a3d8eea69ff3d5
+  n25ec293776b1d75d7["lexical_declaration"]
+  n06612ffac08cb47cc --> n25ec293776b1d75d7
+  n4c5610cc30d6522dd["lexical_declaration"]
+  n06612ffac08cb47cc --> n4c5610cc30d6522dd
+  na52878711f269dbdf["lexical_declaration"]
+  n06612ffac08cb47cc --> na52878711f269dbdf
+  n449be59eeee9f1dae["lexical_declaration"]
+  n06612ffac08cb47cc --> n449be59eeee9f1dae
+  n8df3ae24fe5b7cad8["lexical_declaration"]
+  n06612ffac08cb47cc --> n8df3ae24fe5b7cad8
   n8d4ecad21e87ba737["theme.css"]
   n0a78d11ace79474b3 --> n8d4ecad21e87ba737
   n9ae536518d1d66168["declaration"]
@@ -412,6 +458,12 @@ flowchart TD
   nb914c06ad22602465 --> n56d8aa4f97d913c40
   n2092df3a19d2f7b13["scripts/"]
   nfad65243633b77700 --> n2092df3a19d2f7b13
+  n3b9f839fbbebb1fb8["assemble_docs.py"]
+  n2092df3a19d2f7b13 --> n3b9f839fbbebb1fb8
+  ne3b7b0f2b0484d496["function_definition assemble"]
+  n3b9f839fbbebb1fb8 --> ne3b7b0f2b0484d496
+  n55b6e90b7f6300fa3["function_definition main"]
+  n3b9f839fbbebb1fb8 --> n55b6e90b7f6300fa3
   n3cdac3a1a6fcf734d["build_docs.py"]
   n2092df3a19d2f7b13 --> n3cdac3a1a6fcf734d
   n5d41d45a54c16919a["function_definition load_builder_module"]
@@ -422,25 +474,25 @@ flowchart TD
   n3cdac3a1a6fcf734d --> nc3a94bc57a4fac858
   nf75f482d1d4284017["function_definition public_path"]
   n3cdac3a1a6fcf734d --> nf75f482d1d4284017
-  n82369efdee82dc0c3["function_definition pages_for"]
+  n82369efdee82dc0c3["function_definition diagram_viewer_markup"]
   n3cdac3a1a6fcf734d --> n82369efdee82dc0c3
-  n7ab5b55a4bed0fcd5["function_definition navigation"]
+  n7ab5b55a4bed0fcd5["function_definition pages_for"]
   n3cdac3a1a6fcf734d --> n7ab5b55a4bed0fcd5
-  nd880139dccb6aeb89["function_definition entries"]
+  nd880139dccb6aeb89["function_definition navigation"]
   n3cdac3a1a6fcf734d --> nd880139dccb6aeb89
-  n6c092a209edc48a92["function_definition build_nav"]
+  n6c092a209edc48a92["function_definition entries"]
   n3cdac3a1a6fcf734d --> n6c092a209edc48a92
-  nbc8480ff99cf85ac2["function_definition on_config"]
+  nbc8480ff99cf85ac2["function_definition build_nav"]
   n3cdac3a1a6fcf734d --> nbc8480ff99cf85ac2
-  n85c4737184c93fb0d["function_definition on_files"]
+  n85c4737184c93fb0d["function_definition on_config"]
   n3cdac3a1a6fcf734d --> n85c4737184c93fb0d
-  nfef7addb5ed138ed8["function_definition ensure_dot"]
+  nfef7addb5ed138ed8["function_definition on_files"]
   n3cdac3a1a6fcf734d --> nfef7addb5ed138ed8
-  n92cb9eca4b8209811["function_definition graphviz_assets"]
+  n92cb9eca4b8209811["function_definition project_registry"]
   n3cdac3a1a6fcf734d --> n92cb9eca4b8209811
-  nf67fd356d6feb96f1["function_definition project_registry"]
+  nf67fd356d6feb96f1["function_definition manifest"]
   n3cdac3a1a6fcf734d --> nf67fd356d6feb96f1
-  n573f563d4a8faaa64["function_definition manifest"]
+  n573f563d4a8faaa64["function_definition render_published_mermaid"]
   n3cdac3a1a6fcf734d --> n573f563d4a8faaa64
   n840ddd95ef956fd3f["function_definition build"]
   n3cdac3a1a6fcf734d --> n840ddd95ef956fd3f
@@ -466,18 +518,36 @@ flowchart TD
   n91d3c07ae3b6e8c4b --> n3d172c7deeb7aa1eb
   nc9f5868186eb03f66["tests/"]
   nfad65243633b77700 --> nc9f5868186eb03f66
+  n08502483f6d83fd34["test_docs_publication.py"]
+  nc9f5868186eb03f66 --> n08502483f6d83fd34
+  n6bb9383ded1ecec78["function_definition invoke"]
+  n08502483f6d83fd34 --> n6bb9383ded1ecec78
+  n62a959cd152a4adcd["function_definition test_publishes_pr_even_without_main_site"]
+  n08502483f6d83fd34 --> n62a959cd152a4adcd
+  n3dbacfacf98d78bef["function_definition test_preserves_last_passing_main_and_filters_closed_previews"]
+  n08502483f6d83fd34 --> n3dbacfacf98d78bef
+  n13127710bb8a370c0["function_definition test_missing_staging_fails_instead_of_reporting_success"]
+  n08502483f6d83fd34 --> n13127710bb8a370c0
+  n390e462822152c5bb["function_definition test_rejects_symlink_payload_in_untrusted_artifact"]
+  n08502483f6d83fd34 --> n390e462822152c5bb
+  nbe59e9b775f50b83c["function_definition test_replaces_stale_deployed_preview_on_update"]
+  n08502483f6d83fd34 --> nbe59e9b775f50b83c
   n599e008723231e657["test_documentation_site.py"]
   nc9f5868186eb03f66 --> n599e008723231e657
   n66a694bc11ab0ac8d["function_definition test_repository_navigation_and_every_file_page"]
   n599e008723231e657 --> n66a694bc11ab0ac8d
   nfe2bdd55f23a82ab7["function_definition test_source_generated_diagrams_work_in_documentation"]
   n599e008723231e657 --> nfe2bdd55f23a82ab7
+  n3512379172c37c99c["function_definition test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images"]
+  n599e008723231e657 --> n3512379172c37c99c
   nbf32064a6a26ab2df["workflows/"]
   nfad65243633b77700 --> nbf32064a6a26ab2df
   n936162c3846c6b099["agent.yml"]
   nbf32064a6a26ab2df --> n936162c3846c6b099
   nf062b443567dc1fe8["auto-format.yml"]
   nbf32064a6a26ab2df --> nf062b443567dc1fe8
+  ne7cad7434d574f09c["build-main-docs.yml"]
+  nbf32064a6a26ab2df --> ne7cad7434d574f09c
   n3feee3a065a9480cc["darkfactory-control.yml"]
   nbf32064a6a26ab2df --> n3feee3a065a9480cc
   n287ff0a0ecf3283a1["darkfactory.yml"]
@@ -916,9 +986,13 @@ flowchart TD
   root --> n424f31ee2b48e507d
   n0c069dda5b5d2988a["requirements-dev.txt"]
   root --> n0c069dda5b5d2988a
-  nmermaid_reference_0["gui-mockup.mmd"]
-  n66fe4004fa2807dc6 --> nmermaid_reference_0
-  nmermaid_reference_1["reference-mvc.mmd"]
-  n66fe4004fa2807dc6 --> nmermaid_reference_1
-  nmermaid_reference_2["reference-page1.mmd"]
-  n66fe4004fa2807dc6 --> nmermaid_reference_2
+  n470d3f6fe1322a4eb["tests/"]
+  root --> n470d3f6fe1322a4eb
+  n6190fd8ed6a1d7c45["test_docs_manifest.py"]
+  n470d3f6fe1322a4eb --> n6190fd8ed6a1d7c45
+  nb1f56723a01eea7b4["function_definition publish"]
+  n6190fd8ed6a1d7c45 --> nb1f56723a01eea7b4
+  n5da71e745e853c21a["function_definition test_published_manifest_lists_only_real_deployable_builds"]
+  n6190fd8ed6a1d7c45 --> n5da71e745e853c21a
+  nbce877760f6e91a53["function_definition test_missing_documentation_root_fails_without_publishing"]
+  n6190fd8ed6a1d7c45 --> nbce877760f6e91a53
