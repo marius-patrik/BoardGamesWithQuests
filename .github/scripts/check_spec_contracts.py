@@ -19,9 +19,9 @@ import jsonschema
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-REQ = ROOT / ".agents/notes/requirements"
+REQ = ROOT / ".agents/requirements"
 DATA = ROOT / "data"
-API = ROOT / "packages/server/api/openapi.yaml"
+API = REQ / "notes/API.md"
 PRISMA = ROOT / "packages/server/supabase/schema.prisma"
 INTEGRITY = ROOT / "packages/server/supabase/integrity.sql"
 GAME_KEYS = ("chess", "english-draughts", "international-draughts", "moneyproperty")
@@ -168,9 +168,32 @@ def validate_data() -> dict[str, object]:
     return counts
 
 
+def embedded_openapi() -> dict:
+    """Parse the unique normative OpenAPI YAML block inside requirements/notes/API.md."""
+    text = API.read_text(encoding="utf-8")
+    blocks = re.findall(r"(?ms)^\x60{3}yaml\n(.*?)\n\x60{3}\s*$", text)
+    assert len(blocks) == 1, "API.md must contain exactly one extractable YAML contract"
+    doc = yaml.safe_load(blocks[0])
+    assert isinstance(doc, dict), "invalid canonical OpenAPI contract"
+    return doc
+
+
+def op_owners() -> dict[str, str]:
+    """Read the complete one-owner-per-operation matrix, not a loose route count."""
+    source = (REQ / "notes/CONTRACTS.md").read_text(encoding="utf-8")
+    owned = re.findall(r"(?m)^\| \x60([a-zA-Z][a-zA-Z0-9]+)\x60 \| ([^|]+) \|", source)
+    registry: dict[str, str] = {}
+    for operation, owner in owned:
+        assert operation not in registry, f"duplicate HTTP owner: {operation}"
+        assert owner.strip(), f"owner not declared for {operation}"
+        registry[operation] = owner.strip()
+    assert registry, "no API operation ownership matrix"
+    return registry
+
+
 def validate_openapi() -> int:
     """Verify OpenAPI references and exact portable schema equivalence."""
-    api = yaml.safe_load(API.read_text())
+    api = embedded_openapi()
     assert str(api["openapi"]).startswith("3.1."), "OpenAPI version"
     assert api["servers"][0]["url"] == "/api/v1", "API base route"
     for node in walk(api):
@@ -202,6 +225,11 @@ def validate_openapi() -> int:
     assert portable_ref(embedded) == {
         k: v for k, v in schema.items() if k not in ("$schema", "$id")
     }, "OpenAPI ConfigDocument drifted from JSON Schema"
+    session = api["paths"]["/session"]["get"]
+    assert session["responses"]["200"]["content"]["application/json"]["schema"]["$ref"].endswith(
+        "/Session"
+    )
+    assert "anonymous CSRF cookie" in API.read_text(), "anonymous login bootstrap is unspecified"
     operations = [
         (path, method, obj.get("operationId"))
         for path, verbs in api["paths"].items()
@@ -210,6 +238,19 @@ def validate_openapi() -> int:
     ]
     ids = [op for _, _, op in operations]
     assert len(ids) == len(set(ids)) and all(ids), "duplicate or missing OpenAPI operationId"
+    for route, method, operation in operations:
+        assert (
+            operation in op_owners()
+        ), f"HTTP operation lacks an owned persistence/service boundary: {operation}"
+        if method != "get":
+            params = api["paths"][route][method].get("parameters", [])
+            assert any(
+                x.get("$ref", "").endswith("/csrf") for x in params
+            ), f"{operation}: mutation must declare CSRF parameter"
+        assert api["paths"][route][method].get(
+            "responses"
+        ), f"{operation}: missing response contract"
+    assert set(ids) == set(op_owners()), "HTTP operation ownership matrix disagrees with API paths"
     return len(ids)
 
 
@@ -274,133 +315,132 @@ def validate_prisma_sql() -> tuple[int, int]:
         "CREATE CONSTRAINT TRIGGER check_game_revision_history" in sql
     ), "committed revision parity absent"
     assert "REFERENCES auth.users(id)" in sql, "Supabase Auth FK constraints absent"
+    assert (
+        "CREATE TRIGGER participant_capacity_guard" in sql and "FOR UPDATE OF g" in sql
+    ), "concurrent joins lack enforced variable seat capacity"
     return len(models), len(re.findall(r'ADD CONSTRAINT "\w+" CHECK', sql))
 
 
-def validate_mermaid() -> tuple[int, int]:
-    """Verify exact tree alignment, typed connections, and no hidden game-action AST nodes."""
-    ast = (REQ / "AST.mmd").read_text()
-    assert ast.startswith("flowchart TB\n"), "expected plain Mermaid, not Markdown"
-    assert "reference_AST.svg" not in ast, "tracked SVG still referenced"
-    assert (
-        "docs_hooks.py" not in ast and "docs_manifest.py" not in ast
-    ), "obsolete documentation entrypoints in target graph"
-    nodes = {}
-    for m in re.finditer(r'(?m)^\s*(F\d+)\["([^"\n]*)"\]\s*$', ast):
-        assert m.group(1) not in nodes, "duplicate Mermaid declaration"
-        nodes[m.group(1)] = m.group(2).split("<br/>", 1)[0]
-    assert len(nodes) >= 140, f"Mermaid declarations missing: {len(nodes)}"
-    assert not any(
-        path.startswith("tools/") for path in nodes.values()
-    ), "duplicate root tooling declared"
-    assert not any(p.startswith("packages/web/") for p in nodes.values()), "obsolete package path"
-    assert any(p.startswith("packages/client/") for p in nodes.values()), "missing client package"
-    declarations = re.findall(r'(?m)^\s*D\d+\["([^"\n]*)"\]\s*$', ast)
-    assert len(declarations) >= 100, "source interface contracts are missing"
-    for declaration in declarations:
-        owner = declaration.split("<br/>", 1)[0]
-        assert owner in nodes.values(), f"unowned interface in AST: {owner}"
-        assert "<br/>Algorithm: " in declaration, f"missing algorithm for {owner}"
-        assert "Validate typed inputs; compute" not in declaration, f"generic contract for {owner}"
-    names = set(nodes.values())
-    assert len(names) == len(nodes), "source file declared twice"
-    arch = (REQ / "ARCHITECTURE.md").read_text()
-    block = re.search(r"```text\n([\s\S]*?)\n```", arch)
-    assert block, "ARCHITECTURE missing source tree"
-    paths = set()
-    stack = []
-    for line in block.group(1).splitlines():
-        if not line.strip():
-            continue
-        text = line.split("  # ", 1)[0].rstrip()
-        indent = len(text) - len(text.lstrip(" "))
-        depth = indent // 2
-        stack = stack[:depth]
-        name = text.strip()
-        if name.endswith("/"):
-            stack.append(name.rstrip("/"))
-        else:
-            assert "  # " in line, f"inline source doc missing for {name}"
-            paths.add("/".join(stack + [name]))
-    assert (
-        paths == names
-    ), f"inventory drift: missing AST {sorted(paths-names)[:6]}, missing tree {sorted(names-paths)[:6]}"
-    pattern = re.compile(r"(?m)^\s*(F\d+)\s+-->\|([^|]+)\|\s*(F\d+)\s*$")
-    edges = pattern.findall(ast)
-    assert len(edges) >= len(nodes) - 1, "Mermaid lacks source relationships"
-    neighbors = {n: set() for n in nodes}
-    for a, label, b in edges:
-        assert a in nodes and b in nodes, "edge to undefined source file"
-        assert label.strip() and not label.strip().lower().startswith(
-            "connect"
-        ), "untyped or synthetic dependency edge"
-        neighbors[a].add(b)
-        neighbors[b].add(a)
-    isolated = [n for n, v in neighbors.items() if not v]
-    assert not isolated, f"isolated source modules {isolated}"
-    todo = [next(iter(nodes))]
-    seen = set(todo)
+def validate_diagrams() -> tuple[int, int]:
+    """Validate actual Mermaid syntax and target interface connectivity, not a synthetic full source AST."""
+    engine = (REQ / "diagrams/engine_uml.mmd").read_text(encoding="utf-8")
+    client = (REQ / "diagrams/client_uml.mmd").read_text(encoding="utf-8")
+    assert engine.startswith("classDiagram\n"), "engine UML must be a Mermaid class diagram"
+    assert client.startswith("sequenceDiagram\n"), "client UML must be a Mermaid sequence diagram"
+    classes = set(re.findall(r"(?m)^class (\w+) \{", engine))
+    assert len(classes) >= 15, "target engine omits principal interfaces"
+    edges = re.findall(
+        r'(?m)^(\w+)(?: "[^"]+")?\s+(?:-->|o--|<\|--)(?: "[^"]+")?\s+(\w+)\s*:', engine
+    )
+    assert len(edges) >= len(classes) - 1, "target engine lacks typed relationships"
+    graph = {name: set() for name in classes}
+    for src, dst in edges:
+        assert src in classes and dst in classes, f"undefined engine UML endpoint: {src} -> {dst}"
+        graph[src].add(dst)
+        graph[dst].add(src)
+    visited = {"GameService"}
+    todo = ["GameService"]
     while todo:
-        for n in neighbors[todo.pop()] - seen:
-            seen.add(n)
-            todo.append(n)
-    assert len(seen) == len(nodes), f"disconnected source graph: {sorted(set(nodes)-seen)}"
-    # The AST encodes implementation-level declarations only; portable rules are in JSON.
-    assert not re.search(r"(?m)^\s*[A-Z]\d+_\w+\[", ast), "non-source game action AST"
-    return len(nodes), len(edges)
+        for target in graph[todo.pop()] - visited:
+            visited.add(target)
+            todo.append(target)
+    assert visited == classes, f"disconnected engine interfaces: {sorted(classes - visited)}"
+    assert "Chess" not in " ".join(classes) and "MoneyProperty" not in " ".join(
+        classes
+    ), "game-specific interpreter class"
+    for semantic in (
+        "expected_revision",
+        "idempotency_key",
+        "request_digest",
+        "min_participants",
+        "max_participants",
+    ):
+        assert semantic in engine, f"engine UML lacks {semantic} contract"
+    api = embedded_openapi()
+    for path in re.findall(r"(?:GET|POST|PUT|PATCH|DELETE) (/[^\s()]+)", client):
+        canonical = re.sub(r"\{id\}", "{gameId}", path)
+        assert (
+            canonical in api["paths"]
+        ), f"client flow references uncontracted HTTP endpoint {path}"
+    assert (
+        "reconnect" in client.lower() and "Stale revision" in client
+    ), "recovery and concurrency path missing"
+    # Original references are authored, and implementation diagrams are generated;
+    # none of them is allowed to masquerade as an immutable normative source graph.
+    for relative in (
+        "reference/diagrams/mvc.mmd",
+        "reference/diagrams/uml.mmd",
+        "architecture/diagrams/ast.mmd",
+        "architecture/diagrams/uml.mmd",
+    ):
+        actual = ROOT / ".agents" / relative
+        assert actual.is_file() and actual.suffix == ".mmd", f"missing diagram {relative}"
+    assert (
+        ROOT / ".agents/reference/images/GUI_mockup.svg"
+    ).is_file(), "original GUI reference missing"
+    assert not (ROOT / ".agents/notes/diagrams").exists(), "obsolete diagram structure retained"
+    assert not (
+        ROOT / ".agents/notes/images"
+    ).exists(), "obsolete top-level image directory retained"
+    # The merged target source tree remains inline in the PRD, with all files
+    # annotated, but it is not enforced as fabricated matching source-AST nodes.
+    prd = (ROOT / ".agents/PRD.md").read_text(encoding="utf-8")
+    target = re.search(r"`{3}text\n([\s\S]*?)\n`{3}", prd)
+    assert target, "PRD must own the annotated target source tree"
+    for line in target.group(1).splitlines():
+        if line.strip() and not line.strip().endswith("/"):
+            assert "  # " in line, f"unannotated target declaration: {line}"
+    assert "  client/  #" in target.group(1), "client ownership missing"
+    assert "  web/  #" not in target.group(1), "obsolete frontend ownership"
+    return len(classes), len(edges)
 
 
 def main() -> None:
-    """Run all independent contract checks as a CI gate."""
-    for expected in (
+    """Check exactly one normative API, canonical persisted identities, and UML dependencies."""
+    for required in (
         API,
         PRISMA,
         INTEGRITY,
         DATA / "configuration.schema.json",
         DATA / "operators.json",
-        REQ / "AST.mmd",
-        REQ / "ARCHITECTURE.md",
+        REQ / "diagrams/engine_uml.mmd",
+        REQ / "diagrams/client_uml.mmd",
+        REQ / "notes/CONTRACTS.md",
     ):
-        assert expected.is_file(), f"Missing authoritative contract {expected}"
-    for obsolete in (
-        REQ / "data",
-        REQ / "SCHEMA.prisma",
-        REQ / "INTEGRITY.sql",
-        REQ / "API.yaml",
-        REQ / "diagrams/reference_AST.svg",
+        assert required.is_file(), f"missing authoritative source {required}"
+    for stale in (
+        "packages/server/api/openapi.yaml",
+        ".agents/notes/requirements/AST.mmd",
+        ".agents/notes/requirements/ARCHITECTURE.md",
     ):
-        assert not obsolete.exists(), f"Superseded or generated contract was retained: {obsolete}"
-    # Links in the canonical product and source-tree docs must resolve in the
-    # checked-out repository; a folder move must not leave dead references.
-    for md in (ROOT / ".agents/PRD.md", REQ / "ARCHITECTURE.md"):
-        body = md.read_text()
-        for href in re.findall(r"\\[[^\\]]+\\]\\(([^)]+)\\)", body):
-            if href.startswith(("http:", "https:", "#", "mailto:")):
-                continue
-            target = href.split("#", 1)[0]
-            assert (md.parent / target).exists(), f"{md.relative_to(ROOT)}: broken link {href}"
-    assert (
-        "37-model relational declaration" not in (REQ / "ARCHITECTURE.md").read_text()
-    ), "obsolete Prisma model count"
-    diagram = (REQ / "AST.mmd").read_text()
-    assert "Validate typed inputs; compute" not in diagram, "vague method contracts"
-    assert "implementation defined by owning source" not in diagram, "missing behavior contracts"
-    assert not (REQ / "data").exists(), "duplicate portable data"
-    assert not (REQ / "SCHEMA.prisma").exists(), "duplicate schema"
-    assert not (REQ / "API.yaml").exists(), "duplicate API contract"
-    assert not (REQ / "diagrams" / "reference_AST.svg").exists(), "tracked SVG not permitted"
+        assert not (ROOT / stale).exists(), f"obsolete overlapping contract still tracked: {stale}"
     games = validate_data()
-    http = validate_openapi()
+    operations = validate_openapi()
     models, checks = validate_prisma_sql()
-    files, edges = validate_mermaid()
+    classes, relations = validate_diagrams()
+    # Stable participant capacity and revision/event ownership must exist across
+    # API, relational fields, and runtime contract: one failure blocks the gate.
+    prisma = PRISMA.read_text()
+    for declaration in (
+        "minimumParticipants",
+        "maximumParticipants",
+        "model Participant",
+        "model ActiveParticipant",
+        "model EventMutation",
+        "model GameOutcome",
+        "model EventValue",
+        "model GameEntity",
+        "model Rating",
+    ):
+        assert declaration in prisma, f"missing persisted domain requirement {declaration}"
+    assert "CREATE CONSTRAINT TRIGGER check_game_revision_history" in INTEGRITY.read_text()
+    assert "auth.uid()" in INTEGRITY.read_text(), "Realtime policy lacks identity-based membership"
+    print(f'PASS: {games["games"]} game definitions, {games["actions"]} configured actions')
+    print(f"PASS: {operations} owned HTTP operations with local OpenAPI references")
+    print(f"PASS: {models} Prisma models, {checks} SQL constraints")
+    print(f"PASS: {classes} engine interfaces and {relations} declared UML relationships")
     print(
-        f'PASS: {games["games"]} games, {games["seeds"]} seeds, {games["actions"]} actions, {len(games["operators"])} declared operators'
-    )
-    print(f"PASS: {http} OpenAPI operations and exact portable schema projection")
-    print(f"PASS: {models} Prisma models, {checks} SQL CHECK constraints and cross-references")
-    print(f"PASS: {files} source declarations / {edges} typed Mermaid relationships; all connected")
-    print(
-        "NOT VERIFIED: actual Prisma validation/migrations, execution of games, browser/native deployment or runtime code generation"
+        "NOT VERIFIED: migration execution, formal engine semantics, real API/DB/browser integration or runtime replay"
     )
 
 

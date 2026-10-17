@@ -61,15 +61,14 @@ def test_source_generated_diagrams_work_in_documentation():
     from html import unescape
     from urllib.parse import urlsplit
 
-    for category, stem in (("implementation", "ast"), ("implementation", "uml")):
-        raw = SITE / "agents" / "notes" / "diagrams" / category / (stem + ".mmd")
+    for category, stem in (("architecture", "ast"), ("architecture", "uml")):
+        raw = SITE / "agents" / "architecture" / "diagrams" / (stem + ".mmd")
         page = (
             SITE
             / "repository-files"
             / "agents"
-            / "notes"
+            / "architecture"
             / "diagrams"
-            / category
             / (stem + ".mmd")
             / "index.html"
         )
@@ -102,25 +101,28 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
     incompatible = [
         name
         for name in names
-        if name.startswith(".agents/notes/diagrams/") and name.endswith((".svg", ".dot", ".gv"))
+        if name.startswith(".agents/")
+        and "/diagrams/" in name
+        and name.endswith((".svg", ".dot", ".gv"))
     ]
     assert not incompatible, f"Committed diagram sources must be Mermaid: {incompatible}"
 
     for category, name in (
-        ("implementation", "ast"),
-        ("implementation", "uml"),
+        ("architecture", "ast"),
+        ("architecture", "uml"),
         ("reference", "mvc"),
         ("reference", "uml"),
+        ("requirements", "engine_uml"),
+        ("requirements", "client_uml"),
     ):
-        source = ROOT / ".agents" / "notes" / "diagrams" / category / (name + ".mmd")
+        source = ROOT / ".agents" / category / "diagrams" / (name + ".mmd")
         assert source.is_file() and len(source.read_text(encoding="utf-8").splitlines()) > 12
         page = (
             SITE
             / "repository-files"
             / "agents"
-            / "notes"
-            / "diagrams"
             / category
+            / "diagrams"
             / (name + ".mmd")
             / "index.html"
         )
@@ -138,31 +140,32 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         opening = re.search(r"<svg[^>]*>", svg)
         assert opening and re.search(r'width="[1-9][0-9]*"', opening.group(0))
         assert re.search(r'height="[1-9][0-9]*"', opening.group(0))
-        if (category, name) == ("implementation", "uml"):
+        if (category, name) == ("architecture", "uml"):
             assert (
                 "GameController" in svg and "GameManager" in svg
             ), "Rendered UML must have real classes"
 
 
-def test_diagram_sources_are_grouped_by_source_ownership():
-    """The true directory tree, not aliases, owns every Mermaid diagram."""
+def test_diagrams_are_owned_by_reference_requirements_and_implementation():
+    """Diagrams must be in exactly the three requested source-owner areas."""
     from html import unescape
     import re
 
-    diagrams = ROOT / ".agents" / "notes" / "diagrams"
-    assert {path.relative_to(diagrams).as_posix() for path in diagrams.rglob("*.mmd")} == {
-        "implementation/ast.mmd",
-        "implementation/uml.mmd",
-        "reference/mvc.mmd",
-        "reference/uml.mmd",
+    expected = {
+        ".agents/architecture/diagrams/ast.mmd",
+        ".agents/architecture/diagrams/uml.mmd",
+        ".agents/reference/diagrams/mvc.mmd",
+        ".agents/reference/diagrams/uml.mmd",
+        ".agents/requirements/diagrams/engine_uml.mmd",
+        ".agents/requirements/diagrams/client_uml.mmd",
     }
+    actual = {p.relative_to(ROOT).as_posix() for p in (ROOT / ".agents").rglob("*.mmd")}
+    assert actual == expected, f"Mermaid owner drift: {actual ^ expected}"
     document = (SITE / "index.html").read_text(encoding="utf-8")
     sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
-    sections = {unescape(s) for s in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
-    assert "/.agents/notes/diagrams/implementation" in sections
-    assert "/.agents/notes/diagrams/reference" in sections
-    for old_name in ("reference-page1", "reference-mvc", "repository-ast", "implementation-uml"):
-        assert not (diagrams / (old_name + ".mmd")).exists()
+    sections = {unescape(x) for x in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
+    for name in ("architecture/diagrams", "reference/diagrams", "requirements/diagrams"):
+        assert "/.agents/" + name in sections
 
 
 def test_original_gui_mockup_is_an_image_and_ships_unchanged():
@@ -171,7 +174,7 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     from html import unescape
     from urllib.parse import urlsplit
 
-    relative = Path(".agents/notes/images/GUI_mockup.svg")
+    relative = Path(".agents/reference/images/GUI_mockup.svg")
     source = ROOT / relative
     assert source.is_file(), "The original SVG artwork must exist under images/"
     assert b"svg-source:excalidraw" in source.read_bytes()
@@ -183,7 +186,13 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     ), "The original GUI mockup image was altered"
 
     page = (
-        SITE / "repository-files" / "agents" / "notes" / "images" / "GUI_mockup.svg" / "index.html"
+        SITE
+        / "repository-files"
+        / "agents"
+        / "reference"
+        / "images"
+        / "GUI_mockup.svg"
+        / "index.html"
     )
     assert page.is_file(), "The original image must have a navigable documentation page"
     html = page.read_text(encoding="utf-8")
@@ -199,7 +208,7 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
         published.read_bytes() == source.read_bytes()
     ), "Published image is not the source artwork"
     assert not (
-        ROOT / ".agents/notes/diagrams/gui-mockup.mmd"
+        ROOT / ".agents/requirements/diagrams/gui-mockup.mmd"
     ).exists(), "Do not replace the GUI image with a conceptual Mermaid diagram"
 
 
@@ -266,7 +275,13 @@ def test_image_and_diagram_viewers_offer_an_accessible_modal():
     css = (SITE / "assets/theme.css").read_text(encoding="utf-8")
     script = (SITE / "assets/diagrams.js").read_text(encoding="utf-8")
     index = (
-        SITE / "repository-files" / "agents" / "notes" / "images" / "GUI_mockup.svg" / "index.html"
+        SITE
+        / "repository-files"
+        / "agents"
+        / "reference"
+        / "images"
+        / "GUI_mockup.svg"
+        / "index.html"
     )
     assert index.is_file()
     html = index.read_text(encoding="utf-8")

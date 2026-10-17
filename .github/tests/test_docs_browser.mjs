@@ -66,7 +66,7 @@ try {
   assert(wide > centered + 70, "Full-width mode did not expand the actual reader");
   assert.equal(await page.$eval("html", el => el.dataset.layout), "wide");
   console.log("Checking layout persistence across page navigation");
-  await page.goto(base + "/repository-files/agents/notes/diagrams/implementation/uml.mmd/", { waitUntil: "load" });
+  await page.goto(base + "/repository-files/agents/architecture/diagrams/uml.mmd/", { waitUntil: "load" });
   assert.equal(await page.$eval("html", el => el.dataset.layout), "wide", "Width mode was not saved");
   await page.click("[data-layout-toggle]");
 
@@ -91,7 +91,7 @@ try {
   // The original image, rather than a fabricated Mermaid substitute, opens
   // as a full-viewport modal. Escape must return the same viewer to the page.
   console.log("Checking original image fullscreen modal");
-  await page.goto(base + "/repository-files/agents/notes/images/GUI_mockup.svg/", {
+  await page.goto(base + "/repository-files/agents/reference/images/GUI_mockup.svg/", {
     waitUntil: "load",
   });
   await page.waitForSelector('[aria-label="Expand image in modal"]');
@@ -106,7 +106,7 @@ try {
 
   // The generated implementation UML shares the same modal behavior.
   console.log("Checking generated implementation UML fullscreen modal");
-  await page.goto(base + "/repository-files/agents/notes/diagrams/implementation/uml.mmd/", {
+  await page.goto(base + "/repository-files/agents/architecture/diagrams/uml.mmd/", {
     waitUntil: "load",
   });
   await page.waitForSelector('[aria-label="Expand image in modal"]');
