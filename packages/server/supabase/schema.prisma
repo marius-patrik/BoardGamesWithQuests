@@ -105,8 +105,8 @@ model Definition {
   versions Version[] @relation("R_versions_definitionId_definitions")
   ratings Rating[] @relation("R_ratings_definitionId_definitions")
 
-  // PostgreSQL partial unique index definition_owner_key (ownerId, key) WHERE ${t.ownerId} IS NOT NULL: integrity.sql
-  // PostgreSQL partial unique index builtin_definition_key (key) WHERE ${t.builtIn}: integrity.sql
+  // PostgreSQL partial unique index definition_owner_key (ownerId, key) WHERE owner_id IS NOT NULL: integrity.sql
+  // PostgreSQL partial unique index builtin_definition_key (key) WHERE built_in: integrity.sql
   // PostgreSQL CHECK constraint definition_builtin_ownership: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("definitions")
   @@schema("bgwq")
@@ -170,7 +170,7 @@ model Phase {
 
   @@unique([versionId, key], map: "phase_version_key")
   @@unique([versionId, id], map: "phase_version_id")
-  // PostgreSQL partial unique index phase_single_initial (versionId) WHERE ${t.initial}: integrity.sql
+  // PostgreSQL partial unique index phase_single_initial (versionId) WHERE initial: integrity.sql
   @@map("phases")
   @@schema("bgwq")
 }
@@ -884,7 +884,6 @@ model Rating {
   @@map("ratings")
   @@schema("bgwq")
 }
-
 
 /// One final, immutable result per participant, written in the same transaction as the final event.
 /// The game and event scoped foreign keys prevent cross-game winners and orphaned results.
