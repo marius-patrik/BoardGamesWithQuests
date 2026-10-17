@@ -9,7 +9,7 @@
     "build": "bun run assets && rsbuild build",
     "preview": "rsbuild preview",
     "typecheck": "tsc --noEmit",
-    "assets": "bun scripts/prepare-assets.ts"
+    "assets": "bun scripts/stage-icon.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
@@ -20,7 +20,8 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.3.0",
-    "@supabase/supabase-js": "^2.76.1"
+    "@supabase/supabase-js": "^2.76.1",
+    "wouter": "^3.7.1"
   },
   "devDependencies": {
     "@rsbuild/core": "^2.1.0",
