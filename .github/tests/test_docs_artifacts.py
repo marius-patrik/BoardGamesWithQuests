@@ -91,9 +91,14 @@ def invoke(tmp: Path, env: dict[str, str]):
 def assemble(tmp: Path, *prs: int):
     return subprocess.run(
         [
-            sys.executable, str(ASSEMBLER),
-            "--staging", str(tmp / "staging"),
-            "--site", str(tmp / "site"), "--open-prs", *(str(p) for p in prs),
+            sys.executable,
+            str(ASSEMBLER),
+            "--staging",
+            str(tmp / "staging"),
+            "--site",
+            str(tmp / "site"),
+            "--open-prs",
+            *(str(p) for p in prs),
         ],
         capture_output=True,
         text=True,
@@ -108,14 +113,16 @@ def test_main_and_matching_pr_publish_without_branch_storage(tmp_path: Path) -> 
                 {
                     "number": 331,
                     "head": {
-                        "sha": GOOD, "ref": "topic",
+                        "sha": GOOD,
+                        "ref": "topic",
                         "repo": {"full_name": REPO},
                     },
                 },
                 {
                     "number": 339,
                     "head": {
-                        "sha": GOOD, "ref": "fork",
+                        "sha": GOOD,
+                        "ref": "fork",
                         "repo": {"full_name": "elsewhere/other"},
                     },
                 },
@@ -153,7 +160,8 @@ def test_failed_main_and_outdated_pr_never_publish_stale_content(tmp_path: Path)
                 {
                     "number": 331,
                     "head": {
-                        "sha": GOOD, "ref": "topic",
+                        "sha": GOOD,
+                        "ref": "topic",
                         "repo": {"full_name": REPO},
                     },
                 },
@@ -163,9 +171,7 @@ def test_failed_main_and_outdated_pr_never_publish_stale_content(tmp_path: Path)
                 "docs-preview-331": [artifact(2, "docs-preview-331", 11)],
             },
             "runs": {
-                "10": run_record(
-                    10, "Build Main Documentation", "main", conclusion="failure"
-                ),
+                "10": run_record(10, "Build Main Documentation", "main", conclusion="failure"),
                 "11": run_record(11, "Preview Documentation", "topic"),
             },
         },
@@ -184,13 +190,16 @@ def test_failed_main_and_outdated_pr_never_publish_stale_content(tmp_path: Path)
 
 
 @pytest.mark.parametrize(
-    "workflow,branch", [
+    "workflow,branch",
+    [
         ("Another Workflow", "topic"),
         ("Preview Documentation", "other-branch"),
     ],
 )
 def test_spoofed_artifact_origin_is_rejected(
-    tmp_path: Path, workflow: str, branch: str,
+    tmp_path: Path,
+    workflow: str,
+    branch: str,
 ) -> None:
     env = prepare_cli(
         tmp_path,
@@ -199,7 +208,8 @@ def test_spoofed_artifact_origin_is_rejected(
                 {
                     "number": 331,
                     "head": {
-                        "sha": GOOD, "ref": "topic",
+                        "sha": GOOD,
+                        "ref": "topic",
                         "repo": {"full_name": REPO},
                     },
                 },
