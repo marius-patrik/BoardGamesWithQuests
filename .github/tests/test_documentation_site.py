@@ -56,37 +56,29 @@ def test_sidebar_sections_exactly_match_git_tracked_directories():
 
 
 def test_source_generated_diagrams_work_in_documentation():
-    for stem in ("repository-ast", "implementation-uml"):
-        raw = SITE / "agents" / "notes" / "diagrams" / (stem + ".mmd")
-        page = (
-            SITE
-            / "repository-files"
-            / "agents"
-            / "notes"
-            / "diagrams"
-            / (stem + ".mmd")
-            / "index.html"
-        )
-        assert raw.is_file(), f"Generated source is missing: {stem}"
-        source = raw.read_text(encoding="utf-8")
-        assert source.startswith(("classDiagram", "flowchart")), stem
-        assert page.is_file(), f"Interactive page is missing: {stem}"
-        html = page.read_text(encoding="utf-8")
-        assert 'class="diagram-viewer"' in html
-        assert "assets/diagrams.js" in html
-        from html import unescape
-        from urllib.parse import urlsplit
-        import re
+    """Generated implementation diagrams must open from their actual repository paths."""
+    import re
+    from html import unescape
+    from urllib.parse import urlsplit
 
-        rendered = re.search(r'<img src="([^"]+\.svg)"', html)
-        assert rendered, f"Mermaid was not pre-rendered into an SVG: {stem}"
+    for category, stem in (("implementation", "ast"), ("implementation", "uml")):
+        raw = SITE / "agents" / "notes" / "diagrams" / category / (stem + ".mmd")
+        page = (
+            SITE / "repository-files" / "agents" / "notes" / "diagrams"
+            / category / (stem + ".mmd") / "index.html"
+        )
+        assert raw.is_file(), f"Generated diagram source is missing: {category}/{stem}"
+        assert raw.read_text(encoding="utf-8").startswith(("classDiagram", "flowchart"))
+        assert page.is_file(), f"Rendered diagram page is missing: {category}/{stem}"
+        html = page.read_text(encoding="utf-8")
+        assert 'class="diagram-viewer"' in html and "assets/diagrams.js" in html
+        rendered = re.search(r'<img src="([^"]+\\.svg)"', html)
+        assert rendered, f"Mermaid was not rendered: {category}/{stem}"
         relative = urlsplit(unescape(rendered.group(1))).path
-        asset = (page.parent / relative).resolve()
-        assert asset.is_relative_to(SITE.resolve()), "Diagram cannot escape published site"
-        assert asset.is_file(), f"Generated diagram is missing: {asset}"
-        drawing = asset.read_text(encoding="utf-8")
-        assert "<svg" in drawing and "</svg>" in drawing
-        assert 'class="mermaid"' not in html, "Unrendered Mermaid code leaked into published site"
+        image = (page.parent / relative).resolve()
+        assert image.is_relative_to(SITE.resolve()) and image.is_file()
+        assert "<svg" in image.read_text(encoding="utf-8")
+        assert 'class="mermaid"' not in html
 
 
 def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
@@ -108,30 +100,25 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
     ]
     assert not incompatible, f"Committed diagram sources must be Mermaid: {incompatible}"
 
-    for name in (
-        "repository-ast",
-        "implementation-uml",
-        "reference-mvc",
-        "reference-page1",
+    for category, name in (
+        ("implementation", "ast"),
+        ("implementation", "uml"),
+        ("reference", "mvc"),
+        ("reference", "uml"),
     ):
-        source = ROOT / ".agents" / "notes" / "diagrams" / (name + ".mmd")
+        source = ROOT / ".agents" / "notes" / "diagrams" / category / (name + ".mmd")
         assert source.is_file() and len(source.read_text(encoding="utf-8").splitlines()) > 12
         page = (
-            SITE
-            / "repository-files"
-            / "agents"
-            / "notes"
-            / "diagrams"
-            / (name + ".mmd")
-            / "index.html"
+            SITE / "repository-files" / "agents" / "notes" / "diagrams"
+            / category / (name + ".mmd") / "index.html"
         )
-        assert page.is_file(), f"Missing interactive diagram page: {name}"
+        assert page.is_file(), f"Missing interactive diagram page: {category}/{name}"
         html = page.read_text(encoding="utf-8")
         assert 'class="diagram-viewer"' in html
         assert 'class="mermaid"' not in html
         assert "assets/diagrams.js" in html
         match = re.search(r'<img src="([^"]+\.svg)"', html)
-        assert match, f"No rendered SVG image for {name}"
+        assert match, f"No rendered SVG image for {category}/{name}"
         path = (page.parent / urlsplit(unescape(match.group(1))).path).resolve()
         assert path.is_relative_to(SITE.resolve()) and path.is_file()
         svg = path.read_text(encoding="utf-8")
@@ -139,10 +126,34 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         opening = re.search(r"<svg[^>]*>", svg)
         assert opening and re.search(r'width="[1-9][0-9]*"', opening.group(0))
         assert re.search(r'height="[1-9][0-9]*"', opening.group(0))
-        if name == "implementation-uml":
+        if (category, name) == ("implementation", "uml"):
             assert (
                 "GameController" in svg and "GameManager" in svg
             ), "Rendered UML must have real classes"
+
+
+def test_diagram_sources_are_grouped_by_source_ownership():
+    """The true directory tree, not aliases, owns every Mermaid diagram."""
+    from html import unescape
+    import re
+
+    diagrams = ROOT / ".agents" / "notes" / "diagrams"
+    assert {
+        path.relative_to(diagrams).as_posix()
+        for path in diagrams.rglob("*.mmd")
+    } == {
+        "implementation/ast.mmd",
+        "implementation/uml.mmd",
+        "reference/mvc.mmd",
+        "reference/uml.mmd",
+    }
+    document = (SITE / "index.html").read_text(encoding="utf-8")
+    sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
+    sections = {unescape(s) for s in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
+    assert "/.agents/notes/diagrams/implementation" in sections
+    assert "/.agents/notes/diagrams/reference" in sections
+    for old_name in ("reference-page1", "reference-mvc", "repository-ast", "implementation-uml"):
+        assert not (diagrams / (old_name + ".mmd")).exists()
 
 
 def test_original_gui_mockup_is_an_image_and_ships_unchanged():
