@@ -1,0 +1,473 @@
+erDiagram
+%% Target PostgreSQL relational schema reference; not an applied migration.
+%% Derived from the reviewed Prisma design. The actual PSL and versioned SQL migrations belong to implementation PR #271.
+    auth_users {
+        uuid id PK
+    }
+    profiles {
+        varchar user_id PK
+        varchar display_name
+        varchar username UK
+        timestamptz created_at
+    }
+    definitions {
+        varchar id PK
+        varchar owner_id
+        varchar key
+        varchar name
+        varchar description
+        boolean built_in
+        timestamptz created_at
+    }
+    versions {
+        varchar id PK
+        varchar definition_id FK
+        bigint number UK
+        bigint minimum_participants
+        bigint maximum_participants
+        bigint semantics_version
+        timestamptz published_at
+        timestamptz created_at
+    }
+    roles {
+        varchar id PK
+        varchar version_id FK
+        varchar key UK
+        varchar label
+        bigint forward_row
+        bigint minimum_count
+        bigint maximum_count
+    }
+    phases {
+        varchar id PK
+        varchar version_id FK
+        varchar key UK
+        varchar label
+        boolean initial
+        bigint ordinal
+    }
+    entity_types {
+        varchar id PK
+        varchar version_id FK
+        varchar key UK
+        varchar name
+        EntityKind kind
+    }
+    entity_seeds {
+        varchar id PK
+        varchar version_id FK
+        varchar key UK
+        varchar entity_type_id FK
+        bigint owner_seat
+        varchar parent_id FK
+        varchar location_id FK
+        bigint ordinal
+        bigint row
+        bigint column
+        numeric x
+        numeric y
+    }
+    seed_links {
+        varchar id PK
+        varchar version_id FK
+        varchar source_id FK
+        varchar target_id FK
+        varchar relation UK
+        bigint ordinal
+    }
+    fields {
+        varchar id PK
+        varchar version_id FK
+        varchar entity_type_id FK
+        varchar key UK
+        varchar type_key
+        boolean nullable
+    }
+    seed_values {
+        varchar seed_id PK
+        varchar version_id FK
+        varchar field_id PK
+        ValueKind kind
+        boolean bool_value
+        Bigbigint int_value
+        numeric decimal_value
+        varchar text_value
+        timestamptz instant_value
+        varchar ref_seed_id FK
+        bigint ref_seat
+    }
+    operators {
+        varchar key PK
+        varchar kind
+        varchar returns
+        varchar summary
+    }
+    operator_parameters {
+        varchar operator_key PK
+        varchar key PK
+        varchar type_key
+        bigint ordinal UK
+        boolean required
+        boolean variadic
+    }
+    hooks {
+        varchar key PK
+        bigint ordinal UK
+        varchar summary
+    }
+    expressions {
+        varchar id PK
+        varchar version_id FK
+        varchar key UK
+        varchar kind
+        varchar result_type
+        ValueKind literal_kind
+        boolean literal_bool
+        Bigbigint literal_int
+        numeric literal_decimal
+        varchar literal_text
+        timestamptz literal_instant
+        varchar reference_key
+        varchar field_id FK
+        varchar operator_key FK
+    }
+    expression_arguments {
+        varchar version_id FK
+        varchar parent_id PK
+        varchar child_id FK
+        varchar parameter PK
+        bigint ordinal PK
+    }
+    actions {
+        varchar id PK
+        varchar version_id FK
+        varchar entity_type_id FK
+        varchar key UK
+        varchar title
+        TriggerKind trigger
+        varchar hook_key FK
+        varchar iterator_expression_id FK
+        varchar iterator_var
+        varchar condition_expression_id FK
+        bigint priority
+        boolean enabled
+    }
+    action_parameters {
+        varchar version_id FK
+        varchar action_id PK
+        varchar key PK
+        varchar type_key
+        boolean required
+        bigint ordinal
+    }
+    phase_actions {
+        varchar version_id FK
+        varchar phase_id PK
+        varchar action_id PK
+    }
+    effects {
+        varchar id PK
+        varchar version_id FK
+        varchar action_id FK
+        bigint ordinal UK
+        varchar operator_key FK
+        varchar condition_expression_id FK
+    }
+    effect_arguments {
+        varchar version_id FK
+        varchar effect_id PK
+        varchar expression_id FK
+        varchar key PK
+        bigint ordinal PK
+    }
+    assets {
+        varchar id PK
+        varchar version_id FK
+        varchar key UK
+        varchar bucket UK
+        varchar path UK
+        varchar mime
+        Bigbigint bytes
+        varchar sha256
+        AssetStatus status
+    }
+    visual_templates {
+        varchar id PK
+        varchar version_id FK
+        varchar entity_type_id FK
+        varchar key UK
+    }
+    visual_primitives {
+        varchar id PK
+        varchar version_id FK
+        varchar template_id FK
+        varchar kind
+        bigint layer UK
+        bigint ordinal UK
+        numeric x
+        numeric y
+        numeric width
+        numeric height
+        varchar path_data
+        varchar text_content
+        varchar fill
+        varchar stroke
+        varchar asset_id FK
+    }
+    games {
+        varchar id PK
+        varchar version_id FK
+        varchar creator_id UK
+        varchar creation_key UK
+        bigint target_participants
+        GameStatus status
+        Bigbigint revision
+        varchar phase_id FK
+        Bigbigint turn
+        timestamptz created_at
+        timestamptz started_at
+        timestamptz finished_at
+        timestamptz expires_at
+    }
+    participants {
+        varchar id PK
+        varchar game_id FK
+        varchar version_id FK
+        varchar user_id UK
+        varchar role_id FK
+        bigint seat UK
+        timestamptz eliminated_at
+        timestamptz created_at
+    }
+    active_participants {
+        varchar game_id PK
+        varchar participant_id PK
+    }
+    game_entities {
+        varchar id PK
+        varchar game_id FK
+        varchar version_id FK
+        varchar entity_type_id FK
+        varchar seed_id FK
+        varchar owner_id FK
+        varchar parent_id FK
+        varchar location_id FK
+        bigint ordinal
+        Bigbigint created_revision
+        Bigbigint removed_revision
+    }
+    game_links {
+        varchar id PK
+        varchar game_id FK
+        varchar source_id FK
+        varchar target_id FK
+        varchar relation UK
+        bigint ordinal
+    }
+    game_values {
+        varchar game_id FK
+        varchar version_id FK
+        varchar entity_id PK
+        varchar field_id PK
+        ValueKind kind
+        boolean bool_value
+        Bigbigint int_value
+        numeric decimal_value
+        varchar text_value
+        timestamptz instant_value
+        varchar ref_entity_id FK
+        varchar ref_participant_id FK
+        Bigbigint updated_revision
+    }
+    game_composites {
+        varchar id PK
+        varchar game_id FK
+        varchar version_id FK
+        varchar owner_entity_id FK
+        varchar field_id FK
+        varchar container_kind
+        varchar type_key
+        Bigbigint created_revision
+    }
+    game_composite_entries {
+        varchar id PK
+        varchar game_id FK
+        varchar composite_id FK
+        bigint ordinal UK
+        varchar member_key UK
+        ValueKind kind
+        boolean bool_value
+        Bigbigint int_value
+        numeric decimal_value
+        varchar text_value
+        timestamptz instant_value
+        varchar ref_entity_id FK
+        varchar ref_participant_id FK
+        varchar child_composite_id FK
+    }
+    clocks {
+        varchar game_id PK
+        varchar participant_id PK
+        Bigbigint remaining_ms
+        Bigbigint increment_ms
+        timestamptz anchor_at
+        boolean paused
+    }
+    events {
+        varchar id PK
+        varchar game_id FK
+        Bigbigint revision UK
+        varchar actor_id FK
+        varchar action_key
+        varchar request_id UK
+        varchar request_digest
+        bigint semantics_version
+        timestamptz occurred_at
+        varchar before_digest
+        varchar after_digest
+    }
+    event_values {
+        varchar id PK
+        varchar game_id FK
+        varchar event_id FK
+        varchar category UK
+        varchar key UK
+        bigint ordinal UK
+        ValueKind kind
+        boolean bool_value
+        Bigbigint int_value
+        numeric decimal_value
+        varchar text_value
+        timestamptz instant_value
+        varchar entity_id FK
+        varchar participant_id FK
+    }
+    event_mutations {
+        varchar id PK
+        varchar game_id FK
+        varchar event_id FK
+        bigint ordinal UK
+        varchar target_kind
+        varchar target_id
+        varchar column_key
+        OperationKind operation
+        ValueKind before_kind
+        boolean before_bool
+        Bigbigint before_int
+        numeric before_decimal
+        varchar before_text
+        timestamptz before_instant
+        varchar before_ref
+        ValueKind after_kind
+        boolean after_bool
+        Bigbigint after_int
+        numeric after_decimal
+        varchar after_text
+        timestamptz after_instant
+        varchar after_ref
+    }
+    awards {
+        varchar game_id PK
+        varchar participant_id PK
+        varchar objective_entity_id PK
+        varchar event_id FK
+        Bigbigint points
+    }
+    ratings {
+        varchar user_id PK
+        varchar definition_id PK
+        bigint rating
+        bigint games
+        bigint wins
+        bigint draws
+        bigint losses
+    }
+    game_outcomes {
+        varchar game_id PK
+        varchar participant_id PK
+        varchar event_id FK
+        OutcomeKind kind
+        Bigbigint score
+    }
+    auth_users ||--o| profiles : verified_identity
+    definitions ||--o{ versions : definitionId
+    versions ||--o{ roles : versionId
+    versions ||--o{ phases : versionId
+    versions ||--o{ entity_types : versionId
+    entity_types ||--o{ entity_seeds : versionId,_entityTypeId
+    entity_seeds ||--o{ entity_seeds : versionId,_parentId
+    entity_seeds ||--o{ entity_seeds : versionId,_locationId
+    entity_seeds ||--o{ seed_links : versionId,_sourceId
+    entity_seeds ||--o{ seed_links : versionId,_targetId
+    entity_types ||--o{ fields : versionId,_entityTypeId
+    entity_seeds ||--o{ seed_values : versionId,_seedId
+    fields ||--o{ seed_values : versionId,_fieldId
+    entity_seeds ||--o{ seed_values : versionId,_refSeedId
+    operators ||--o{ operator_parameters : operatorKey
+    versions ||--o{ expressions : versionId
+    fields ||--o{ expressions : versionId,_fieldId
+    operators ||--o{ expressions : operatorKey
+    expressions ||--o{ expression_arguments : versionId,_parentId
+    expressions ||--o{ expression_arguments : versionId,_childId
+    entity_types ||--o{ actions : versionId,_entityTypeId
+    expressions ||--o{ actions : versionId,_iteratorExpressionId
+    expressions ||--o{ actions : versionId,_conditionExpressionId
+    hooks ||--o{ actions : hookKey
+    actions ||--o{ action_parameters : versionId,_actionId
+    phases ||--o{ phase_actions : versionId,_phaseId
+    actions ||--o{ phase_actions : versionId,_actionId
+    actions ||--o{ effects : versionId,_actionId
+    expressions ||--o{ effects : versionId,_conditionExpressionId
+    operators ||--o{ effects : operatorKey
+    effects ||--o{ effect_arguments : versionId,_effectId
+    expressions ||--o{ effect_arguments : versionId,_expressionId
+    versions ||--o{ assets : versionId
+    entity_types ||--o{ visual_templates : versionId,_entityTypeId
+    visual_templates ||--o{ visual_primitives : versionId,_templateId
+    assets ||--o{ visual_primitives : versionId,_assetId
+    versions ||--o{ games : versionId
+    phases ||--o{ games : versionId,_phaseId
+    games ||--o{ participants : gameId,_versionId
+    roles ||--o{ participants : versionId,_roleId
+    participants ||--o{ active_participants : gameId,_participantId
+    games ||--o{ game_entities : gameId,_versionId
+    entity_types ||--o{ game_entities : versionId,_entityTypeId
+    entity_seeds ||--o{ game_entities : versionId,_seedId
+    participants ||--o{ game_entities : gameId,_ownerId
+    game_entities ||--o{ game_entities : gameId,_parentId
+    game_entities ||--o{ game_entities : gameId,_locationId
+    game_entities ||--o{ game_links : gameId,_sourceId
+    game_entities ||--o{ game_links : gameId,_targetId
+    games ||--o{ game_values : gameId,_versionId
+    game_entities ||--o{ game_values : gameId,_entityId
+    fields ||--o{ game_values : versionId,_fieldId
+    game_entities ||--o{ game_values : gameId,_refEntityId
+    participants ||--o{ game_values : gameId,_refParticipantId
+    games ||--o{ game_composites : gameId,_versionId
+    game_entities ||--o{ game_composites : gameId,_ownerEntityId
+    fields ||--o{ game_composites : versionId,_fieldId
+    game_composites ||--o{ game_composite_entries : gameId,_compositeId
+    game_composites ||--o{ game_composite_entries : gameId,_childCompositeId
+    game_entities ||--o{ game_composite_entries : gameId,_refEntityId
+    participants ||--o{ game_composite_entries : gameId,_refParticipantId
+    participants ||--o{ clocks : gameId,_participantId
+    games ||--o{ events : gameId
+    participants ||--o{ events : gameId,_actorId
+    events ||--o{ event_values : gameId,_eventId
+    game_entities ||--o{ event_values : gameId,_entityId
+    participants ||--o{ event_values : gameId,_participantId
+    events ||--o{ event_mutations : gameId,_eventId
+    participants ||--o{ awards : gameId,_participantId
+    game_entities ||--o{ awards : gameId,_objectiveEntityId
+    events ||--o{ awards : gameId,_eventId
+    definitions ||--o{ ratings : definitionId
+    games ||--o{ game_outcomes : gameId
+    participants ||--o{ game_outcomes : gameId,_participantId
+    events ||--o{ game_outcomes : gameId,_eventId
+%% EntityKind: game | space | item | objective
+%% GameStatus: pending | active | finished | expired
+%% ValueKind: bool | int | decimal | text | instant | entity | participant | none
+%% TriggerKind: command | hook
+%% OperationKind: insert | set | remove
+%% OutcomeKind: win | loss | draw | eliminated
+%% AssetStatus: staged | ready
