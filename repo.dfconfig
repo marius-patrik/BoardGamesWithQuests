@@ -22,7 +22,7 @@
     },
     "upstream": {
       "repo": "marius-patrik/DarkFactory",
-      "ref": "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
+      "ref": "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4"
     },
     "versioning": {
       "mode": "pridever",
@@ -191,10 +191,6 @@
         ]
       }
     },
-    "required_checks": [
-      "quality",
-      "verify-bound-issue"
-    ],
     "board": {
       "global": "Global",
       "boards": [
@@ -225,6 +221,21 @@
       "spdx": "GPL-3.0-only",
       "holder": "marius-patrik",
       "year": "2026"
+    },
+    "protection": {
+      "lanes": [
+        {
+          "branch": "main",
+          "required_checks": [
+            "governed / released-df-quality",
+            "governed / issue-binding / verify-bound-issue"
+          ],
+          "approvals": 1,
+          "strict": true,
+          "enforce_admins": false,
+          "resolve_conversations": true
+        }
+      ]
     }
   },
   "docs": {
