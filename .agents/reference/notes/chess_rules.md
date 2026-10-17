@@ -1,6 +1,6 @@
 # FIDE Chess Rules Reference
 
-This defines the chess rules required by the declarative game configuration, summarized from the FIDE Laws of Chess. The official FIDE rules govern conformance. It describes orthodox chess on an 8×8 board.
+This is the **target rules baseline for the chess configuration**, summarized from FIDE Laws of Chess. It is not a claim of current implementation or a substitute for the official FIDE rules. It describes orthodox chess on an 8×8 board.
 
 **Two things this document is not:**
 
@@ -10,11 +10,7 @@ This defines the chess rules required by the declarative game configuration, sum
    knight-forward file and the castling rook files are derived from the configured
    board. Every statement below that names rank 1, rank 8 or a specific file is
    true of the *default* configuration and is parameterised everywhere else.
-2. **It is not the specification for the object model.** The reference
-   architecture diagram is. Where this document and
-   `reference_diagram.md` disagree about structure, the diagram governs.
-
-The rule names used by the code are listed in `PRD.md` FR-16.
+2. **It is not the specification for the object model.** The current [PRD](../../PRD.md) defines product behavior and the engine-neutral model; [chess.json](../data/chess.json) is a portable *reference definition*, not evidence of supported gameplay. If this rules summary contradicts FIDE Laws of Chess, authoritative FIDE rules prevail. The implementation must demonstrate actual observable legal moves, invalid-move rejection and persistence through the supported player interfaces.
 
 ---
 
@@ -70,7 +66,7 @@ A simultaneous movement of the King and a Rook of the same color along the playe
 - **Mandatory Requirements**:
   1. Neither the King nor the chosen Rook has moved earlier in the game.
   2. All squares between the King and the Rook must be empty.
-  3. The King is **not** in check at the start of castling.
+  3. The King is **not** currently in check.
   4. The square the King passes across is **not** attacked by an enemy piece.
   5. The square the King lands upon is **not** attacked by an enemy piece.
 
@@ -81,7 +77,7 @@ A simultaneous movement of the King and a Rook of the same color along the playe
 
 ### Pawn Promotion
 - When a pawn reaches the eighth rank (Rank 8 for White, Rank 1 for Black), it is immediately converted to a Queen, Rook, Bishop, or Knight of the same color as chosen by the player.
-- Promotion takes effect instantly and is not constrained by whether pieces of that type have been captured (e.g. multiple Queens are permitted).
+- Promotion takes effect instantly and is not constrained by whether pieces of that type were previously captured (e.g. multiple Queens are permitted).
 
 ---
 
