@@ -20,10 +20,10 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 REQ = ROOT / ".agents/requirements"
-DATA = ROOT / "data"
+DATA = ROOT / ".agents/reference/data"
 API = REQ / "notes/API.md"
 PRISMA = ROOT / "packages/server/supabase/schema.prisma"
-INTEGRITY = ROOT / "packages/server/supabase/integrity.sql"
+INTEGRITY = ROOT / ".agents/reference/notes/integrity.sql"
 GAME_KEYS = ("chess", "english-draughts", "international-draughts", "moneyproperty")
 
 
@@ -48,7 +48,7 @@ def validate_data() -> dict[str, object]:
     schema = json.loads((DATA / "configuration.schema.json").read_text())
     jsonschema.Draft202012Validator.check_schema(schema)
     operator_registry = json.loads((DATA / "operators.json").read_text())["operators"]
-    hooks = set(re.findall(r"\('([a-z_]+(?:\.[a-z_]+)+)',\s*\d+", (DATA / "seed.sql").read_text()))
+    hooks = set(re.findall(r"\('([a-z_]+(?:\.[a-z_]+)+)',\s*\d+", (ROOT / "packages/server/supabase/migrations/seed.sql").read_text()))
     counts = {"games": 0, "seeds": 0, "actions": 0, "operators": set()}
     for name in GAME_KEYS:
         doc = json.loads((DATA / f"{name}.json").read_text())
@@ -319,7 +319,7 @@ def validate_prisma_sql() -> tuple[int, int]:
         "CREATE CONSTRAINT TRIGGER check_game_revision_history" in sql
     ), "committed revision parity absent"
     assert "REFERENCES auth.users(id)" in sql, "Supabase Auth FK constraints absent"
-    assert "CREATE TRIGGER game_target_size_guard" in sql, "database lobby target not bounded"
+    assert "CREATE TRIGGER game_target_size_guard" in sql, "reference SQL omits bounded lobby target"
     assert (
         "CREATE TRIGGER participant_capacity_guard" in sql and "FOR UPDATE OF g" in sql
     ), "concurrent joins lack enforced variable seat capacity"
@@ -423,7 +423,7 @@ def main() -> None:
     operations = validate_openapi()
     models, checks = validate_prisma_sql()
     classes, relations = validate_diagrams()
-    # Stable participant capacity and revision/event ownership must exist across
+    # Intended participant capacity and revision/event ownership must exist across
     # API, relational fields, and runtime contract: one failure blocks the gate.
     prisma = PRISMA.read_text()
     for declaration in (
@@ -443,7 +443,7 @@ def main() -> None:
     assert "auth.uid()" in INTEGRITY.read_text(), "Realtime policy lacks identity-based membership"
     print(f'PASS: {games["games"]} game definitions, {games["actions"]} configured actions')
     print(f"PASS: {operations} owned HTTP operations with local OpenAPI references")
-    print(f"PASS: {models} Prisma models, {checks} SQL constraints")
+    print(f"PASS: {models} Prisma models, {checks} supplementary reference SQL constraints")
     print(f"PASS: {classes} engine interfaces and {relations} declared UML relationships")
     print(
         "NOT VERIFIED: migration execution, formal engine semantics, real API/DB/browser integration or runtime replay"
