@@ -12,6 +12,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 import json
 import os
+import re
 import sys
 from typing import Any
 from urllib.parse import urlsplit
@@ -19,7 +20,6 @@ from uuid import UUID
 
 import httpx
 
-PROJECT_HOST = "wdthdcdoqdtywngwvddk.supabase.co"
 MAX_TOKEN_BYTES = 16384
 MAX_RESPONSE_BYTES = 65536
 AUTH_TIMEOUT_SECONDS = 5.0
@@ -121,9 +121,11 @@ class SupabaseAuth:
         """
         try:
             parsed = urlsplit(self.url)
+            project_ref = parsed.netloc.removesuffix(".supabase.co")
             valid_url = (
                 parsed.scheme == "https"
-                and parsed.netloc == PROJECT_HOST
+                and parsed.netloc.endswith(".supabase.co")
+                and re.fullmatch(r"[a-z0-9]{20}", project_ref) is not None
                 and parsed.path in ("", "/")
                 and not parsed.query
                 and not parsed.fragment
