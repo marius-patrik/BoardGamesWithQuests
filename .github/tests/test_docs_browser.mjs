@@ -69,7 +69,6 @@ try {
   const group = await page.$("details[data-nav-section]");
   assert(group, "No collapsible sidebar sections were rendered");
   const initial = await group.evaluate(el => el.open);
-  await group.click({ button: "left" }).catch(() => {}); // details itself is not a click target
   const summary = await page.$("details[data-nav-section] > summary");
   assert(summary, "No disclosure summary was rendered");
   await summary.click();
