@@ -169,24 +169,30 @@ def main() -> None:
     if args.staging.exists():
         raise FileExistsError(f"Refusing nonempty staging directory: {args.staging}")
     args.staging.mkdir(parents=True)
-    restore(
-        args.repo,
-        args.staging,
-        "docs-main",
-        "Build Main Documentation",
-        {"push", "workflow_dispatch"},
-        "main",
-    )
-    for number, head in sorted(open_same_repo_prs(args.repo).items()):
+    restored = int(
         restore(
             args.repo,
             args.staging,
-            f"docs-preview-{number}",
-            "Preview Documentation",
-            {"pull_request"},
-            head["branch"],
-            head["sha"],
+            "docs-main",
+            "Build Main Documentation",
+            {"push", "workflow_dispatch"},
+            "main",
         )
+    )
+    for number, head in sorted(open_same_repo_prs(args.repo).items()):
+        restored += int(
+            restore(
+                args.repo,
+                args.staging,
+                f"docs-preview-{number}",
+                "Preview Documentation",
+                {"pull_request"},
+                head["branch"],
+                head["sha"],
+            )
+        )
+    if not restored:
+        raise RuntimeError("No passing Actions artifacts; preserving the deployed site")
 
 
 if __name__ == "__main__":
