@@ -140,17 +140,23 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                 body = header + f"{fence}{lang}\n{decoded}\n{fence}\n"
         # A source-diagram page is a diagram viewer, never a fenced source dump.
         # The original file remains separately available at its published URL.
-        if decoded is not None and rel.suffix.lower() == ".mmd":
+        if decoded is not None and rel.suffix.lower() in {".mmd", ".svg"}:
             from html import escape
+            from posixpath import relpath
 
             title = escape(name, quote=False)
-            body = (
-                f"# {title}\n\n"
-                + diagram_viewer_markup(
-                    '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
+            if rel.suffix.lower() == ".mmd":
+                graphic = '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
+            else:
+                # A committed SVG in images/ is an image, not editable diagram
+                # source. Render the original bytes with the same pan/zoom UI.
+                original_url = relpath(public_path(rel), start=dest.removesuffix(".md"))
+                graphic = (
+                    f'<img src="{escape(original_url, quote=True)}" '
+                    f'alt="{escape(rel.stem.replace("_", " "), quote=True)}" '
+                    'loading="lazy" draggable="false">'
                 )
-                + "\n"
-            )
+            body = f"# {title}\n\n" + diagram_viewer_markup(graphic) + "\n"
         pages.append((name, dest, body))
     from html import escape
 

@@ -310,7 +310,7 @@ deviation that must be documented explicitly in the implementation specification
 Every class and member the diagram defines is listed here with the requirement
 that delivers it. Nothing in the diagram is left without coverage, and anything
 this project adds beyond the diagram must be covered by the product specification.
-Generated repository diagrams document the actual source tree and classes in the documentation's Architecture / Diagrams section. Reference class structures, controller interactions, and UI states are maintained as Mermaid sources under `.agents/notes/diagrams/`; compiled SVGs are publication-only artifacts.
+Generated repository diagrams document the actual source tree and classes in the documentation's Architecture / Diagrams section. Reference class structures and controller interactions are maintained as Mermaid sources under `.agents/notes/diagrams/`; compiled diagram SVGs are publication-only artifacts. The original GUI mockup is a separate image preserved at `.agents/notes/images/GUI_mockup.svg`.
 
 | Diagram member | Delivered by |
 |---|---|
