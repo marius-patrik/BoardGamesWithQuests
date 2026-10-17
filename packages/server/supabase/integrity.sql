@@ -409,6 +409,32 @@ BEFORE INSERT OR UPDATE OF version_id ON bgwq.games
 FOR EACH ROW EXECUTE FUNCTION bgwq.assert_game_definition_published();
 
 
+-- A lobby starts only when its immutable creator-selected target is full.
+CREATE OR REPLACE FUNCTION bgwq.enforce_game_target_size()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path = '' AS $
+DECLARE
+  minimum_size integer;
+  maximum_size integer;
+BEGIN
+  SELECT v.minimum_participants, v.maximum_participants INTO minimum_size, maximum_size
+    FROM bgwq.versions AS v WHERE v.id = NEW.version_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'game references an unknown definition version' USING ERRCODE = '23503';
+  END IF;
+  IF NEW.target_participants < minimum_size OR NEW.target_participants > maximum_size THEN
+    RAISE EXCEPTION 'game target is outside published participant bounds' USING ERRCODE = '23514';
+  END IF;
+  IF TG_OP = 'UPDATE' AND NEW.target_participants IS DISTINCT FROM OLD.target_participants THEN
+    RAISE EXCEPTION 'game target participants are immutable' USING ERRCODE = '23514';
+  END IF;
+  RETURN NEW;
+END;
+$;
+DROP TRIGGER IF EXISTS game_target_size_guard ON bgwq.games;
+CREATE TRIGGER game_target_size_guard
+BEFORE INSERT OR UPDATE OF target_participants, version_id ON bgwq.games
+FOR EACH ROW EXECUTE FUNCTION bgwq.enforce_game_target_size();
+
 -- Enforce variable participant bounds and per-role capacities at the database
 -- boundary, independently of FastAPI checks. Locking the parent game row
 -- serializes competing joins even under the default READ COMMITTED isolation.
@@ -422,7 +448,7 @@ DECLARE
   used_seats integer;
   used_role integer;
 BEGIN
-  SELECT g.version_id, g.status, v.maximum_participants
+  SELECT g.version_id, g.status, g.target_participants
     INTO g_version, g_status, max_seats
     FROM bgwq.games AS g
     JOIN bgwq.versions AS v ON v.id = g.version_id
