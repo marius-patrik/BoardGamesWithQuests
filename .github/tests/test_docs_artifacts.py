@@ -195,7 +195,8 @@ def test_independent_pr_publishes_when_main_has_no_passing_build(
                 {
                     "number": 331,
                     "head": {
-                        "sha": GOOD, "ref": "topic",
+                        "sha": GOOD,
+                        "ref": "topic",
                         "repo": {"full_name": REPO},
                     },
                 },
@@ -205,9 +206,7 @@ def test_independent_pr_publishes_when_main_has_no_passing_build(
                 "docs-preview-331": [artifact(2, "docs-preview-331", 11)],
             },
             "runs": {
-                "10": run_record(
-                    10, "Build Main Documentation", "main", conclusion="failure"
-                ),
+                "10": run_record(10, "Build Main Documentation", "main", conclusion="failure"),
                 "11": run_record(11, "Preview Documentation", "topic"),
             },
         },
@@ -220,9 +219,9 @@ def test_independent_pr_publishes_when_main_has_no_passing_build(
     assert published.returncode == 0, published.stderr
     site = tmp_path / "site"
     assert (site / "pr-331/index.html").read_text() == "<h1>Independent preview</h1>"
-    assert "production documentation build is unavailable" in (
-        site / "index.html"
-    ).read_text().lower()
+    assert (
+        "production documentation build is unavailable" in (site / "index.html").read_text().lower()
+    )
     assert "Failed main" not in (site / "index.html").read_text()
 
 
