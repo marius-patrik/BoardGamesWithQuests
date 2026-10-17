@@ -164,7 +164,7 @@ def test_published_docs_use_full_viewport_layout_with_operable_navigation_and_fu
     assert "data-fullscreen-toggle" in index
     assert 'aria-pressed="false"' in index
 
-    assert "max-width: 100rem" not in css, "Layout must not be centered in a fixed-width shell"
+    assert 'html[data-layout="centered"] .layout' in css, "Centered mode must be available"
     assert "--content-max" not in css, "Main document must use the remaining viewport width"
     assert "grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--toc-width)" in css
     assert 'html[data-nav-collapsed="true"] .layout' in css
