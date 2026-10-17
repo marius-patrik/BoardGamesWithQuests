@@ -542,6 +542,7 @@ model Game {
   versionId String @db.Uuid @map("version_id")
   creatorId String @db.Uuid @map("creator_id")
   creationKey String @map("creation_key")
+  targetParticipants Int @map("target_participants")
   status GameStatus @default(pending)
   revision BigInt @default(0)
   phaseId String? @db.Uuid @map("phase_id")

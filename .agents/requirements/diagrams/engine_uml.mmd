@@ -1,7 +1,7 @@
 classDiagram
 direction LR
 class GameService {
-  +create_game(actor, version_id, request_key) Game
+  +create_game(actor, version_id, target, request_key) Game
   +join_game(actor, invitation, seat) GameView
   +submit_action(actor, game_id, command) GameView
   +read_view(actor, game_id) GameView
@@ -34,6 +34,7 @@ class DefinitionVersion {
 class GameState {
   +game_id uuid
   +version_id uuid
+  +target_participants int
   +revision int64
   +phase_id uuid
   +active_participants ParticipantRef[]

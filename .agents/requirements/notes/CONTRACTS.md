@@ -45,10 +45,10 @@ Every `operationId` in [API.md](API.md) has exactly one service transaction or q
 | `finalizeUpload` | api/assets.py + repository.py | assets digest/MIME verification and ready status | 409 mismatch; no published reference |
 | `deleteAsset` | api/assets.py + repository.py | unpublished owner version and asset reference graph | reject linked or published resource |
 | `getAsset` | api/assets.py + security.py | version-pinned authorized asset Storage grant | short-lived scoped retrieval |
-| `createGame` | api/services.py + repository.py | games(creator_id,creation_key) pinned versions | 201 pending game; exact retry stable |
+| `createGame` | api/services.py + repository.py | games(creator_id,creation_key,target_participants) pinned versions | 201 pending game with immutable target; mismatching retry rejects |
 | `getGame` | api/services.py + engine projection | games participants and viewer-redacted state | 401/404 unauthorized; latest revision |
 | `getInvitation` | api/services.py + security.py | pending games and opaque invitation token | bounded pending eligibility; no private leak |
-| `joinGame` | api/services.py + repository.py | locked game participant seat and role | join once, 409 occupied/stale; activation once |
+| `joinGame` | api/services.py + repository.py | locked game participant seat and role, target-bound capacity | join once, 409 occupied/stale; activate only at creator-selected target |
 | `availableActions` | api/services.py + engine/runtime.py | pinned state plus authorized candidate enumeration | 200 legal viewer-scoped actions only |
 | `submitAction` | api/services.py + engine/runtime.py | locked games state events mutations outcomes awards | atomic revision, idempotency, rollback |
 | `getEvents` | api/services.py + repository.py | append-only events plus authorized redacted values | cursor/revision stable replay-safe history |
@@ -56,7 +56,7 @@ Every `operationId` in [API.md](API.md) has exactly one service transaction or q
 
 ## Global invariants
 
-- `Version.minimumParticipants` and `maximumParticipants` are definition constraints, **not** a fixed two-seat engine. `Participant.seat` is unique by game, and no unoccupied seat receives entities, wallets, active-turn rights or settlements.
+- `Version.minimumParticipants` and `maximumParticipants` are definition constraints, **not** a fixed two-seat engine. A creator picks `Game.targetParticipants` within the range; activation waits for exactly this size. `Participant.seat` is unique by game, and no unoccupied seat receives entities, wallets, active-turn rights or settlements.
 - Runtime identifiers are always scoped by game; definition identifiers by immutable version. SQL composite foreign keys must reject cross-game and cross-version references.
 - Client action arguments are untrusted. Evaluated conditions do no I/O; typed effects update a proposed state only. A committed event records server time and randomness, ensuring replay does not re-roll or recompute clocks.
 - Read operations must never use a service role to bypass participant filtering without an explicit membership gate. Schema-only checks cannot certify these security obligations.
