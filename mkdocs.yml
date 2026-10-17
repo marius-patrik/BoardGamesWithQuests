@@ -4,13 +4,20 @@ site_author: marius-patrik
 repo_name: marius-patrik/BoardGamesWithQuests
 repo_url: https://github.com/marius-patrik/BoardGamesWithQuests
 
-# The build script reads tracked Markdown and Python from the repository root.
-# Its temporary config and empty source directory are created outside the checkout.
+# Pages and navigation are generated from tracked Python source docstrings.
+# The existing theme asset directory permits the direct strict CLI; the hook
+# replaces collected files with source-generated pages and explicit assets.
+docs_dir: .github/docs-ui
 
 theme:
-  # Site-specific header over the shared first-party design. Kept outside the repository root.
-  name: null
+  name: material
   custom_dir: .github/docs-ui
+
+extra_css:
+  - assets/theme.css
+extra_javascript:
+  - assets/theme.js
+extra: {}
 
 hooks:
   - .github/scripts/docs_hooks.py
@@ -39,4 +46,5 @@ plugins:
             docstring_style: google
             show_root_heading: true
             show_source: true
+            show_signature_annotations: true
             heading_level: 3

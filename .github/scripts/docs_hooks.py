@@ -1,194 +1,216 @@
-"""Build the documentation tree from tracked repository content.
+"""Generate MkDocs pages and navigation exclusively from Python source docstrings.
 
-Markdown is published as written. Python packages are rendered with mkdocstrings;
-other Python files receive source pages. All paths, titles and navigation are
-derived from the checked-out repository, not a curated list of directories.
+Authoritative Markdown specifications remain repository source references. The site
+renders importable package APIs and source-derived diagrams without copying Markdown
+or creating a committed documentation source directory.
 """
+
+from __future__ import annotations
 
 import ast
 import subprocess
-
-try:
-    import tomllib
-except ModuleNotFoundError:  # Python 3.10
-    import tomli as tomllib
 from pathlib import Path
 from typing import Any
 
-from properdocs.structure.files import File, Files
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
+
+from mkdocs.structure.files import File, Files
+from mkdocs.plugins import event_priority
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def tracked_files(root: Path = ROOT) -> list[Path]:
-    """Discover all tracked Python and Markdown files, respecting Git's own index."""
+    """Discover tracked Python files from the repository index.
+
+    Args:
+        root: Repository whose source documents the application.
+
+    Returns:
+        Existing Python files in stable source-path order.
+    """
     result = subprocess.run(
         ["git", "-C", str(root), "ls-files", "-z", "--cached"],
         check=True,
         capture_output=True,
     )
-    files = [root / Path(p.decode("utf-8")) for p in result.stdout.split(b"\0") if p]
-    tracked = [
-        p
-        for p in files
-        if p.is_file() and not p.is_symlink() and p.suffix.lower() in {".md", ".py"}
-    ]
-    return sorted(tracked, key=lambda p: p.relative_to(root).as_posix())
+    files = [root / Path(item.decode("utf-8")) for item in result.stdout.split(b"\0") if item]
+    return sorted(
+        (
+            path
+            for path in files
+            if path.is_file() and not path.is_symlink() and path.suffix == ".py"
+        ),
+        key=lambda path: path.relative_to(root).as_posix(),
+    )
 
 
 def python_roots(root: Path = ROOT) -> list[Path]:
-    """Read the project's Python import roots instead of listing packages by name."""
-    project = root / "pyproject.toml"
-    roots: list[Path] = []
-    if project.exists():
-        config = tomllib.loads(project.read_text(encoding="utf-8"))
-        candidates = (
-            config.get("tool", {}).get("pytest", {}).get("ini_options", {}).get("pythonpath", [])
-        )
-        if isinstance(candidates, str):
-            candidates = candidates.split()
-        roots += [root / entry for entry in candidates]
-        setuptools = config.get("tool", {}).get("setuptools", {})
-        roots += [
-            root / entry
-            for entry in setuptools.get("packages", {}).get("find", {}).get("where", [])
-        ]
+    """Derive import roots from native Python build metadata.
+
+    Args:
+        root: Repository containing pyproject.toml.
+
+    Returns:
+        Distinct existing package directories followed by the repository root.
+    """
+    config = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    setuptools = config.get("tool", {}).get("setuptools", {})
+    sources = setuptools.get("packages", {}).get("find", {}).get("where", [])
+    roots = [root / entry for entry in sources]
     roots.append(root)
-    return [p.resolve() for p in dict.fromkeys(p for p in roots if p.is_dir())]
+    return list(dict.fromkeys(path.resolve() for path in roots if path.is_dir()))
 
 
 def import_name(path: Path, roots: list[Path]) -> str | None:
-    """Return an importable dotted name, or None for standalone Python scripts."""
-    sources = [item for item in roots if item != ROOT]
-    for base in sources or roots:
+    """Identify Python package modules without a manually curated package list.
+
+    Args:
+        path: Tracked Python source file.
+        roots: Package discovery roots.
+
+    Returns:
+        Dotted import identifier, or None for standalone scripts and tests.
+    """
+    for base in roots:
         try:
             relative = path.relative_to(base)
         except ValueError:
             continue
-        if len(relative.parts) == 1:
+        if len(relative.parts) < 2:
             continue
-        package_parts = relative.parts[:-1]
+        packages = relative.parts[:-1]
         if not all(
-            (base.joinpath(*package_parts[:i]) / "__init__.py").exists()
-            for i in range(1, len(package_parts) + 1)
+            (base.joinpath(*packages[:index]) / "__init__.py").is_file()
+            for index in range(1, len(packages) + 1)
         ):
             continue
         tail = () if path.name == "__init__.py" else (path.stem,)
-        return ".".join((*package_parts, *tail))
+        return ".".join((*packages, *tail))
     return None
 
 
 def display_name(stem: str) -> str:
-    """Derive readable labels without a manually maintained title mapping."""
-    return stem.replace("_", " ").replace("-", " ").title()
+    """Derive a navigation label from a source module or package name.
 
+    Args:
+        stem: Python identifier.
 
-def public_path(path: Path) -> str:
-    """Publish hidden tracked directories under ordinary URL-safe names."""
-    return "/".join(part.lstrip(".") if part.startswith(".") else part for part in path.parts)
+    Returns:
+        Readable source-derived label.
+    """
+    return stem.replace("_", " ").title()
 
 
 def pages_for(root: Path = ROOT) -> list[tuple[str, str]]:
-    """Create virtual pages for every tracked Markdown and Python file."""
+    """Create API and homepage content from package source and its docstrings.
+
+    Args:
+        root: Source repository to document.
+
+    Returns:
+        Virtual Markdown paths and generated content with no static page inputs.
+
+    Raises:
+        SyntaxError: A Python module cannot be parsed.
+        ValueError: No importable Python source or colliding page paths are found.
+    """
     pages: dict[str, str] = {}
+    packages: list[tuple[str, str]] = []
     roots = python_roots(root)
     for path in tracked_files(root):
-        relative = path.relative_to(root)
-        if path.suffix.lower() == ".md":
-            dest = (
-                "index.md" if relative.as_posix().lower() == "readme.md" else public_path(relative)
-            )
-            if path.name.lower() == "readme.md" and len(relative.parts) > 1:
-                dest = public_path(relative.parent.joinpath("index.md"))
-            if dest not in pages or path.name.lower() != "readme.md":
-                content = path.read_text(encoding="utf-8")
-                # GitHub resolves .agents/* relative to repository root, while
-                # Pages publishes hidden paths under their public agents/* name.
-                # Normalize virtual homepage only; leave tracked README intact.
-                if relative.as_posix() == "README.md":
-                    content = content.replace("](.agents/", "](agents/")
-                pages[dest] = content
-            continue
-
         dotted = import_name(path, roots)
-        if dotted is not None:
-            dest = dotted.replace(".", "/") + ("/index.md" if path.name == "__init__.py" else ".md")
-            body = f"# {display_name(path.parent.name if path.name == '__init__.py' else path.stem)}\n\n::: {dotted}\n"
-        else:
-            dest = public_path(relative.with_suffix(".md"))
-            source = path.read_text(encoding="utf-8")
-            try:
-                summary = ast.get_docstring(ast.parse(source)) or ""
-            except SyntaxError:
-                summary = ""
-            body = f"# {display_name(path.stem)}\n\n{summary}\n\n````python\n{source}\n````\n"
-        if dest in pages:
-            raise ValueError(f"Documentation page collision at {dest}: {relative}")
-        pages[dest] = body
-
-    if "index.md" not in pages:
-        name = display_name(root.name)
-        pages["index.md"] = f"# {name}\n"
-    # Every directory receives a generated hub unless a real index or package index exists.
-    directories = {Path(name).parent.as_posix() for name in pages}
-    directories.discard(".")
-    for directory in sorted(directories, key=lambda d: d.count("/"), reverse=True):
-        index = f"{directory}/index.md"
-        if index in pages:
+        if dotted is None:
             continue
-        children = sorted(
-            key for key in pages if Path(key).parent.as_posix() == directory and key != index
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        summary = ast.get_docstring(tree) or dotted
+        destination = dotted.replace(".", "/") + (
+            "/index.md" if path.name == "__init__.py" else ".md"
         )
-        if children:
-            items = "\n".join(
-                f"- [{display_name(Path(key).stem)}]({Path(key).name})" for key in children
-            )
-            pages[index] = f"# {display_name(Path(directory).name)}\n\n{items}\n"
+        if destination in pages:
+            raise ValueError(f"Documentation page collision: {destination}")
+        pages[destination] = f"# {summary.splitlines()[0]}\n\n::: {dotted}\n"
+        if "." not in dotted:
+            packages.append((destination, summary))
+    if not pages:
+        raise ValueError("Documentation requires importable Python package source")
+    home = []
+    for destination, summary in sorted(packages):
+        home.append(f"## [{summary.splitlines()[0]}]({destination})\n\n{summary}\n")
+    if not home:
+        destination = min(pages)
+        home.append(f"[{destination}]({destination})")
+    pages["index.md"] = "\n".join(home)
     return sorted(pages.items())
 
 
 def navigation(pages: list[tuple[str, str]]) -> list[dict[str, Any]]:
-    """Derive the exact navigation from the same pages emitted by on_files."""
+    """Generate hierarchical navigation from the emitted module paths.
+
+    Args:
+        pages: Generated page path/content pairs.
+
+    Returns:
+        MkDocs navigation entries resolving to the same generated files.
+    """
     tree: dict[str, Any] = {}
-    for dest, _ in pages:
-        parts = Path(dest).with_suffix("").parts
+    for destination, _ in pages:
+        parts = Path(destination).with_suffix("").parts
         cursor = tree
         for part in parts[:-1]:
             cursor = cursor.setdefault(part, {})
-        cursor[parts[-1]] = dest
+        cursor[parts[-1]] = destination
 
     def render(node: dict[str, Any]) -> list[dict[str, Any]]:
-        result: list[dict[str, Any]] = []
-        for key, value in sorted(node.items(), key=lambda item: (item[0] != "index", item[0])):
-            result.append({display_name(key): render(value) if isinstance(value, dict) else value})
-        return result
+        return [
+            {display_name(key): render(value) if isinstance(value, dict) else value}
+            for key, value in sorted(node.items(), key=lambda item: (item[0] != "index", item[0]))
+        ]
 
     return render(tree)
 
 
-def build_nav(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[tuple[str, str]]]:
-    """Build navigation and content together so their targets cannot diverge."""
-    pages = pages_for(root)
-    return navigation(pages), pages
-
-
+@event_priority(100)
 def on_config(config: Any) -> Any:
-    """Populate navigation from repository content before rendering."""
-    config["nav"] = build_nav()[0]
+    """Bind navigation and repository reference links to the checked-out source.
+
+    Args:
+        config: MkDocs configuration under construction.
+
+    Returns:
+        Configuration with generated navigation and immutable source references.
+    """
+    handlers = config.plugins["mkdocstrings"].config.handlers
+    handlers.setdefault("python", {})["paths"] = [str(path) for path in python_roots()]
+    config["nav"] = navigation(pages_for())
+    revision = subprocess.check_output(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+    ).strip()
+    base = config["repo_url"].rstrip("/") + "/blob/" + revision + "/"
+    config["extra"]["source_references"] = [
+        {"name": display_name(path.stem), "url": base + path.relative_to(ROOT).as_posix()}
+        for path in sorted((ROOT / ".agents" / "notes").glob("*.md"))
+    ]
     return config
 
 
 def on_files(files: Files, config: Any) -> Files:
-    """Materialize virtual pages without writing documentation sources to disk."""
-    plugins = getattr(config, "plugins", None)
-    if plugins is not None and not hasattr(plugins, "_current_plugin"):
-        plugins._current_plugin = None
-    for dest, body in build_nav()[1]:
-        if files.get_file_from_path(dest) is None:
-            files.append(File.generated(config, dest, content=body))
-    # Only implementation UML is live-generated from code. Reference SVGs are
-    # the already-exported static diagrams from the external diagrams.net file.
-    # ProperDocs imports this hook by file path rather than as a package.
+    """Supply virtual source API pages, theme assets and live architecture SVGs.
+
+    Args:
+        files: Files collected by MkDocs.
+        config: Resolved MkDocs configuration.
+
+    Returns:
+        File collection containing only generated documentation pages and assets.
+    """
+    for collected in list(files):
+        files.remove(collected)
+    for destination, body in pages_for():
+        files.append(File.generated(config, destination, content=body))
     import sys
 
     scripts = str(Path(__file__).resolve().parent)
@@ -196,20 +218,27 @@ def on_files(files: Files, config: Any) -> Files:
         sys.path.insert(0, scripts)
     from generate_architecture_diagrams import generated_assets
 
-    for dest, svg in generated_assets(ROOT).items():
-        current = files.get_file_from_path(dest)
-        if current is not None:
-            # Tracked snapshots are useful in GitHub, but must not override
-            # the current implementation's actual diagram on Pages.
-            files.remove(current)
-        files.append(File.generated(config, dest, content=svg))
-    # Reference diagram source stays external per maintainer review. Its
-    # committed SVG exports remain available in the generated documentation.
-    for name in ("reference-page1.svg", "reference-mvc.svg"):
-        dest = f"agents/notes/diagrams/{name}"
-        source = ROOT / ".agents/notes/diagrams" / name
-        current = files.get_file_from_path(dest)
-        if current is not None:
-            files.remove(current)
-        files.append(File.generated(config, dest, content=source.read_text(encoding="utf-8")))
+    diagrams: list[dict[str, str]] = []
+    for destination, svg in generated_assets(ROOT).items():
+        files.append(File.generated(config, destination, content=svg))
+        diagrams.append({"name": display_name(Path(destination).stem), "path": destination})
+    references = ROOT / ".agents" / "notes" / "diagrams"
+    for source in sorted(references.glob("reference-*.svg")):
+        destination = "agents/notes/diagrams/" + source.name
+        files.append(
+            File.generated(
+                config,
+                destination,
+                content=source.read_text(encoding="utf-8"),
+            )
+        )
+        diagrams.append({"name": display_name(source.stem), "path": destination})
+    config["extra"]["diagram_assets"] = diagrams
+    for source in sorted((ROOT / ".github" / "docs-ui" / "assets").iterdir()):
+        if source.is_file():
+            files.append(
+                File.generated(
+                    config, "assets/" + source.name, content=source.read_text(encoding="utf-8")
+                )
+            )
     return files
