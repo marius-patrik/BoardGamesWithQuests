@@ -7,6 +7,7 @@ import pytest
 from engine.model.game.conditions import QueryResolutionError
 from engine.model.game.hooks import HookInterpreter, PlannedEffect
 from engine.model.game.outcomes import resolve_outcome
+from engine.model.game.schema import thaw_json
 
 
 def rule(when: dict, operation: str = "permit") -> dict:
@@ -27,7 +28,7 @@ def test_valid_move_reference_produces_effect_without_mutating_inputs() -> None:
     effects = HookInterpreter([entry], {}, references).evaluate("permits_move")
     assert effects.matched_rule_ids == ("move_rule",)
     assert len(effects.effects) == 1
-    assert effects.effects[0].params == {"target": [5, 4]}
+    assert thaw_json(effects.effects[0].params) == {"target": [5, 4]}
     assert entry == unchanged and references["move.end"] == [5, 4]
 
 

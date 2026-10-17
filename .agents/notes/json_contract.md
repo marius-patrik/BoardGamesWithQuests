@@ -5,6 +5,19 @@
 Version 2 is a validated JSON envelope. The parser accepts at most
 256 KiB and rejects duplicate or unknown top-level fields, invalid clocks,
 unknown pieces, overlapping placements and executable extensions.
+Nested board, placement, piece, symbol, clock and appearance objects reject
+unknown fields. Appearance accepts optional `light_square` and `dark_square`
+hex colors. Pieces accept optional `notation`, single-letter `fen`,
+`color_relative`, `capture_policy` and `initial_moves`; initial quiet offsets
+are available only before the piece moves and mirror by side when configured.
+Malformed encodings and excessive nesting produce a configuration error.
+The same byte limit applies to directly validated decoded documents.
+Validated definitions detach from caller data and recursively freeze objects
+and arrays. `freeze_json` protects the same invariant for resolved effect plans;
+`thaw_json` creates detached dictionaries/lists for serialization or editing.
+A complete document permits 65,536 nodes and 32 levels; expression limits below
+remain smaller independently of board size.
+
 Board dimensions, placements, movement vectors, appearance, captures, rules,
 quests and clocks are data owned by each game configuration.
 
@@ -37,7 +50,28 @@ are resolved into copied JSON values, not Python attributes or executable code.
 
 `HookInterpreter` evaluates rules in declared order, creates a typed
 `HookEvaluation` and returns an ordered immutable effect plan. Evaluation does
-not authorize or mutate a game. Applying effects, deterministic conflict/
+not authorize or mutate a game. Effect parameter keys and types are checked
+before evaluation and again after resolving references. Parameters are:
+
+| Effect | Required parameters | Optional parameters |
+| --- | --- | --- |
+| `permit`, `deny` | none | `reason`, `target` |
+| `offer_move`, `move_piece` | `start`, `end` | none |
+| `capture_piece` | `square` | none |
+| `replace_piece` | `square`, `kind` | none |
+| `set_state` | `name`, `value` | none |
+| `increment_state` | `name`, `amount` | none |
+| `record_event` | `name` | `payload` |
+| `propose_outcome` | `kind`, `cause`, `winner`, `priority` | none |
+| `complete_quest` | `quest`, `player` | none |
+| `set_clock` | `player`, `seconds` | none |
+| `set_rights` | `name`, `value` | none |
+
+Coordinates are integer pairs; participant values are nonempty identities or
+explicit side values; clocks, counters and priorities are bounded integers;
+rights are booleans. State values and event payloads remain bounded JSON.
+Board bounds, membership and transition legality require session validation.
+Applying effects, deterministic conflict/
 outcome priority, event persistence and atomic gameplay commits are separate
 G2 requirements. No missing query is implicitly false, legal or complete.
 

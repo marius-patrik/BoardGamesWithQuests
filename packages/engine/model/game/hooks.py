@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from engine.model.game.conditions import ConditionEvaluator, Query
-from engine.model.game.schema import HOOKS, validate_hooks
+from engine.model.game.schema import HOOKS, freeze_json, thaw_json, validate_effect, validate_hooks
 
 
 @dataclass(frozen=True)
@@ -17,6 +17,16 @@ class PlannedEffect:
 
     op: str
     params: Mapping[str, Any]
+
+    def __post_init__(self) -> None:
+        """Detach and freeze validated resolved effect parameters.
+
+        Raises:
+            ValueError: Resolved parameters violate their operation contract.
+        """
+        detached = thaw_json(self.params)
+        validate_effect(self.op, detached, allow_references=False)
+        object.__setattr__(self, "params", freeze_json(detached))
 
 
 @dataclass(frozen=True)
@@ -36,13 +46,33 @@ class HookInterpreter:
         queries: Mapping[str, Query],
         references: Mapping[str, Any] | None = None,
     ):
-        """Validate rules and copy their JSON data out of the mutable editor."""
+        """Validate rules and detach their JSON data from the mutable editor.
+
+        Args:
+            rules: Declarative hook definitions, including frozen snapshots.
+            queries: Trusted query implementations keyed by whitelisted operation.
+            references: Bound immutable-context reference values.
+
+        Raises:
+            ValueError: Rules, query names or references are invalid.
+        """
+        rules = thaw_json(rules)
         validate_hooks(rules, [])
         self._rules = tuple(deepcopy(rules))
         self._conditions = ConditionEvaluator(queries, references)
 
     def evaluate(self, hook: str) -> HookEvaluation:
-        """Collect matching effects in declared order, without authorizing them."""
+        """Collect validated immutable effects without authorizing or applying them.
+
+        Args:
+            hook: One recognized lifecycle hook.
+
+        Returns:
+            Ordered matched rule identities and immutable resolved effects.
+
+        Raises:
+            ValueError: Hook, query resolution or resolved effect data is invalid.
+        """
         if hook not in HOOKS:
             raise ValueError(f"unknown game hook: {hook!r}")
         matched: list[str] = []
