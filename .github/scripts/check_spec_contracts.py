@@ -290,6 +290,7 @@ def validate_mermaid() -> tuple[int, int]:
         assert m.group(1) not in nodes, "duplicate Mermaid declaration"
         nodes[m.group(1)] = m.group(2).split("<br/>", 1)[0]
     assert len(nodes) >= 140, f"Mermaid declarations missing: {len(nodes)}"
+    assert not any(path.startswith("tools/") for path in nodes.values()), "duplicate root tooling declared"
     declarations = re.findall(r'(?m)^\s*D\d+\["([^"\n]*)"\]\s*$', ast)
     assert len(declarations) >= 100, "source interface contracts are missing"
     for declaration in declarations:

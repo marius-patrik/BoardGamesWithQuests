@@ -210,17 +210,6 @@ tests/  # Observable API, engine, database and browser behavior.
     test_reachability.py  # test_reachable_even_with_cycles(); test_unreachable_only_when_exhausted(); test_budget_does_not_produce_false_proof(); test_terminal_start_and_invalid_budget(); Check proof soundness, cycles and budge
   native/  # Remote-origin Tauri WebView wrapper.
     smoke.spec.ts  # test/assertions; Remote WebView and navigation restrictions
-tools/  # Own the declared files and their documented interfaces; no duplicate implementation.
-  build_docs.py  # render_source_docs(); Generate Python, TSDoc and Rustdoc source/API documentation
-  build_operator_contract.py  # operator_contract.json compiler; Emit normative operator contracts from used typed calls
-  build_prd.py  # build()->str; replace_first(text,language,content)->str; Regenerate linked PRD with canonical API, DATA, and source-tree listings; never embed schema or AST
-  check_prd.py  # verify()->None; Verify linked SCHEMA and AST exist, source-tree and graph align, and inline API and DATA are fresh
-  check_semantics.py  # check() -> list[str]; Validate cross-configuration hooks, fields and AST synchronization
-  check_spec.py  # verify_document(); verify_builtin_shape(); verify_api(); verify_ast(); operator_inventory(); main(); Validate typed seed references, four concrete fixtures, JSON/OpenAPI equivalence, AST and operator
-  generate_ast.py  # compile_mermaid() -> str; main() -> None; Build single Mermaid source and configuration AST
-  migrate_schema.py  # emit() -> list[Path]; Convert reviewed Prisma SQL to Supabase versioned migrations without executing them
-  register_manifest.py  # register_manifest()->None; Synchronize one source-file node per contract and exact tracked source tree
-  sync_api_schema.py  # sync_config_schema(); Embed canonical portable JSON Schema in OpenAPI without drift
 .editorconfig  # indent / whitespace; Consistent editor indentation
 .env.example  # variable names only; Document public and server-only environment names
 .gitignore  # build outputs; Exclude generated caches and binaries

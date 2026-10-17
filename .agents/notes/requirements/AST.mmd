@@ -157,18 +157,6 @@ flowchart TB
     F178[".github/tests/test_documentation_site.py<br/>exports: Published repository page tests<br/>Python: Verify every tracked page, folder navigation and compiled diagrams."]
     F179[".github/tests/test_docs_publication.py<br/>exports: Published preview artifact tests<br/>Python: Verify staging, preview removal and independently built main behavior."]
   end
-  subgraph TOOLS["Tools — source declarations"]
-    F130["tools/build_docs.py<br/>exports: render_source_docs()<br/>Python docstring: Generate Python, TSDoc and Rustdoc source/API documentation."]
-    F131["tools/check_spec.py<br/>exports: verify_document(); verify_builtin_shape(); verify_api(); verify_ast(); operator_inventory(); main()<br/>Python docstring: Validate typed seed references, four concrete fixtures, JSON/OpenAPI equivalence, AST and operator inventory."]
-    F132["tools/migrate_schema.py<br/>exports: emit() -&gt; list[Path]<br/>Python docstring: Convert reviewed Prisma SQL to Supabase versioned migrations without executing them."]
-    F136["tools/generate_ast.py<br/>exports: compile_mermaid() -&gt; str; main() -&gt; None<br/>Python docstring: Build single Mermaid source and configuration AST"]
-    F137["tools/check_semantics.py<br/>exports: check() -&gt; list[str]<br/>Python docstring: Validate cross-configuration hooks, fields and AST synchronization"]
-    F138["tools/build_operator_contract.py<br/>exports: operator_contract.json compiler<br/>Python docstring: Emit normative operator contracts from used typed calls"]
-    F144["tools/sync_api_schema.py<br/>exports: sync_config_schema()<br/>Python docstring: Embed canonical portable JSON Schema in OpenAPI without drift."]
-    F146["tools/build_prd.py<br/>exports: build()-&gt;str; replace_first(text,language,content)-&gt;str<br/>Python docstring: Regenerate linked PRD with canonical API, DATA, and source-tree listings; never embed schema or AST."]
-    F147["tools/register_manifest.py<br/>exports: register_manifest()-&gt;None<br/>Python docstring: Synchronize one source-file node per contract and exact tracked source tree."]
-    F148["tools/check_prd.py<br/>exports: verify()-&gt;None<br/>Python docstring: Verify linked SCHEMA and AST exist, source-tree and graph align, and inline API and DATA are fresh."]
-  end
   subgraph META["Meta — source declarations"]
     F002[".editorconfig<br/>exports: indent / whitespace<br/>File contract: Consistent editor indentation."]
     F003[".env.example<br/>exports: variable names only<br/>File contract: Document public and server-only environment names."]
@@ -204,7 +192,6 @@ flowchart TB
   F006 -->|packages native releases| F025
   F007 -->|runs browser checks| F118
   F007 -->|runs database checks| F122
-  F007 -->|runs verification| F131
   F008 -->|excludes generated build outputs| F012
   F009 -->|distribution terms| F001
   F010 -->|links to| F001
@@ -360,30 +347,8 @@ flowchart TB
   F128 -->|tests observable behavior| F046
   F141 -->|tests observable behavior| F140
   F129 -->|tests observable behavior| F024
-  F130 -->|documents architecture| F001
-  F130 -->|uses TSDoc settings| F135
-  F138 -->|generates operator manifest| F139
-  F146 -->|regenerates specification| F001
-  F146 -->|embeds file inventory| F151
-  F148 -->|checks references| F001
-  F148 -->|checks architecture| F149
-  F148 -->|checks schema link| F150
-  F137 -->|validates operator types| F139
-  F137 -->|checks game semantics| F043
-  F137 -->|checks game semantics| F046
-  F131 -->|validates AST structure| F149
-  F131 -->|validates HTTP contract| F031
-  F131 -->|validates definition grammar| F039
-  F136 -->|generates source AST| F149
-  F132 -->|includes SQL exceptions| F152
-  F132 -->|compiles Prisma declaration| F150
-  F147 -->|synchronizes declarations| F149
-  F147 -->|synchronizes inventory| F151
-  F144 -->|updates config contract| F031
-  F144 -->|uses canonical schema| F039
   F133 -->|extends TypeScript defaults| F111
   F134 -->|defines documentation tags| F135
-  F135 -->|configures documentation| F130
   F001 -->|defines product scope for| F151
   F001 -->|references normative contract| F031
   F001 -->|references normative contract| F150
@@ -412,7 +377,6 @@ flowchart TB
   F031 -->|defines HTTP contract| F034
   F139 -->|defines generic semantics| F053
   F039 -->|defines transfer models| F040
-  F166 -->|adds deployed versions manifest to generated documentation| F130
   F165 -->|renders interactive Mermaid source| F149
   F162 -->|pans/zooms Mermaid visualization| F149
   F163 -->|loads architecture viewer| F162
@@ -438,6 +402,9 @@ flowchart TB
   F182 -->|orchestrates canonical source| F176
   F183 -->|orchestrates canonical source| F007
   F184 -->|orchestrates canonical source| F006
+  F166 -->|generates source diagrams for documentation builder| F165
+  F134 -->|defines structured frontend documentation grammar| F095
+  F135 -->|publishes TypeScript interface documentation| F095
   subgraph DECLARATIONS["Typed source function and class contracts"]
     D001["packages/server/api/app.py<br/>create_app()-&gt;FastAPI<br/>Algorithm: Construct FastAPI, install session, Origin, CSRF, error middleware, mount exactly the OpenAPI routes, and fail startup on missing backend settings."]
     D002["packages/server/api/assets.py<br/>begin_upload()<br/>Algorithm: Verify authenticated owner and unpublished version, check declared MIME/size/digest, issue short-lived scoped Storage upload ticket; no direct client permission to publish."]
@@ -588,23 +555,6 @@ flowchart TB
     D147["tests/engine/test_game_contracts.py<br/>test_game_definition_is_built_from_entities_actions_and_objectives()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
     D148["tests/engine/test_game_contracts.py<br/>test_card_resolution_is_scoped_to_the_single_drawn_card()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
     D149["tests/engine/test_game_contracts.py<br/>test_chess_moves_cannot_capture_the_opposing_king()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
-    D150["tools/build_docs.py<br/>render_source_docs()<br/>Algorithm: Build Python docstrings, TypeDoc/TSDoc and Rustdoc pages, validate references and generate no alternate runtime module."]
-    D151["tools/check_spec.py<br/>verify_document()<br/>Algorithm: Compare implementation modules, schema, API, graph, operator signatures and portable data; fail on any mismatched public contract."]
-    D152["tools/check_spec.py<br/>verify_builtin_shape()<br/>Algorithm: Compare implementation modules, schema, API, graph, operator signatures and portable data; fail on any mismatched public contract."]
-    D153["tools/check_spec.py<br/>verify_api()<br/>Algorithm: Compare implementation modules, schema, API, graph, operator signatures and portable data; fail on any mismatched public contract."]
-    D154["tools/check_spec.py<br/>verify_ast()<br/>Algorithm: Compare implementation modules, schema, API, graph, operator signatures and portable data; fail on any mismatched public contract."]
-    D155["tools/check_spec.py<br/>operator_inventory()<br/>Algorithm: Compare implementation modules, schema, API, graph, operator signatures and portable data; fail on any mismatched public contract."]
-    D156["tools/check_spec.py<br/>main()<br/>Algorithm: Compare implementation modules, schema, API, graph, operator signatures and portable data; fail on any mismatched public contract."]
-    D157["tools/migrate_schema.py<br/>emit() -&gt; list[Path]<br/>Algorithm: Derive versioned Prisma migration and apply supplemental SQL after relational tables; verify scope/ordering without executing gameplay."]
-    D158["tools/generate_ast.py<br/>compile_mermaid() -&gt; str<br/>Algorithm: Enumerate files and public typed declarations, construct dependency/call graph with deterministic IDs and fail on unowned edges."]
-    D159["tools/generate_ast.py<br/>main() -&gt; None<br/>Algorithm: Enumerate files and public typed declarations, construct dependency/call graph with deterministic IDs and fail on unowned edges."]
-    D160["tools/check_semantics.py<br/>check() -&gt; list[str]<br/>Algorithm: Resolve action hooks, fields, references and operator signatures in each game configuration; reject game-named engine shortcuts."]
-    D161["tools/build_operator_contract.py<br/>operator_contract.json compiler<br/>Algorithm: Collect each called operator, validate type/arity against registry and emit canonical machine-readable semantics inventory."]
-    D162["tools/sync_api_schema.py<br/>sync_config_schema()<br/>Algorithm: Replace ConfigDocument subtree with canonical JSON Schema and revalidate all OpenAPI references."]
-    D163["tools/build_prd.py<br/>build()-&gt;str<br/>Algorithm: Render product requirements and canonical links without duplicating AST, schema or portable game documents."]
-    D164["tools/build_prd.py<br/>replace_first(text,language,content)-&gt;str<br/>Algorithm: Render product requirements and canonical links without duplicating AST, schema or portable game documents."]
-    D165["tools/register_manifest.py<br/>register_manifest()-&gt;None<br/>Algorithm: Compare implementation inventory with one ARCHITECTURE path and one AST node per file and reject missing declarations."]
-    D166["tools/check_prd.py<br/>verify()-&gt;None<br/>Algorithm: Validate PRD links, architecture paths and normative contract uniqueness; reject stale references."]
     D167[".github/scripts/check_spec_contracts.py<br/>Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory.<br/>Algorithm: Parse and cross-validate canonical Prisma, SQL, OpenAPI, portable JSON, operator registry and Mermaid source paths; exit nonzero on drift."]
     D168[".github/scripts/build_docs.py<br/>pages_for(); build(); manifest()<br/>Algorithm: Traverse tracked files once, produce one page per source, compile Mermaid into publication-only SVG assets, and enumerate only deployed HTML roots."]
     D169[".github/scripts/generate_diagrams.py<br/>repository_ast(); implementation_uml(); generated_assets()<br/>Algorithm: Parse actual tracked cross-language declarations and typed Python class relations; generate deterministic connected Mermaid sources."]
@@ -759,23 +709,6 @@ flowchart TB
   F145 -->|exports concrete interface| D147
   F145 -->|exports concrete interface| D148
   F145 -->|exports concrete interface| D149
-  F130 -->|exports concrete interface| D150
-  F131 -->|exports concrete interface| D151
-  F131 -->|exports concrete interface| D152
-  F131 -->|exports concrete interface| D153
-  F131 -->|exports concrete interface| D154
-  F131 -->|exports concrete interface| D155
-  F131 -->|exports concrete interface| D156
-  F132 -->|exports concrete interface| D157
-  F136 -->|exports concrete interface| D158
-  F136 -->|exports concrete interface| D159
-  F137 -->|exports concrete interface| D160
-  F138 -->|exports concrete interface| D161
-  F144 -->|exports concrete interface| D162
-  F146 -->|exports concrete interface| D163
-  F146 -->|exports concrete interface| D164
-  F147 -->|exports concrete interface| D165
-  F148 -->|exports concrete interface| D166
   F164 -->|exports concrete interface| D167
   F165 -->|exports concrete interface| D168
   F166 -->|exports concrete interface| D169
