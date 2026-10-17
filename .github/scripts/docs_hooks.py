@@ -39,6 +39,21 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
                 or (
                     ".agents/notes/requirements/" in p.as_posix()
                     and p.suffix.lower() in {".mmd", ".yaml", ".json", ".prisma", ".sql"}
+                or (
+                    p.relative_to(root).as_posix()
+                    in {
+                        "packages/server/api/openapi.yaml",
+                        "packages/server/supabase/schema.prisma",
+                        "packages/server/supabase/integrity.sql",
+                        "data/chess.json",
+                        "data/english-draughts.json",
+                        "data/international-draughts.json",
+                        "data/moneyproperty.json",
+                        "data/configuration.schema.json",
+                        "data/operators.json",
+                        "data/seed.sql",
+                    }
+                )
                 )
                 or (
                     p.relative_to(root).parts[0] == "data"
