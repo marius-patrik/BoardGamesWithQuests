@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
-
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -191,6 +190,7 @@ def on_config(config: Any) -> Any:
 def on_files(files: Any, config: Any) -> Any:
     """Materialize virtual pages without writing documentation sources to disk."""
     from properdocs.structure.files import File
+
     plugins = getattr(config, "plugins", None)
     if plugins is not None and not hasattr(plugins, "_current_plugin"):
         plugins._current_plugin = None
@@ -352,6 +352,7 @@ def manifest(site: Path, repository: Path) -> dict[str, list[dict[str, str]]]:
 def build() -> None:
     """Build the strict documentation site and validate dynamically generated assets."""
     import yaml
+
     with tempfile.TemporaryDirectory(prefix="repo-docs-") as temporary:
         work = Path(temporary)
         source = work / "source"

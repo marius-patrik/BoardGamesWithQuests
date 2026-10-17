@@ -29,7 +29,9 @@ def publish(site: Path) -> subprocess.CompletedProcess[str]:
 def test_published_manifest_lists_only_real_deployable_builds(tmp_path: Path) -> None:
     (tmp_path / "index.html").write_text("<!doctype html><title>Main</title>", encoding="utf-8")
     (tmp_path / "pr-328").mkdir()
-    (tmp_path / "pr-328/index.html").write_text("<!doctype html><title>PR</title>", encoding="utf-8")
+    (tmp_path / "pr-328/index.html").write_text(
+        "<!doctype html><title>PR</title>", encoding="utf-8"
+    )
     (tmp_path / "pr-999").mkdir()
     (tmp_path / "pr-999/README.txt").write_text("not deployed", encoding="utf-8")
     (tmp_path / "branch/review").mkdir(parents=True)
@@ -52,7 +54,10 @@ def test_published_manifest_lists_only_real_deployable_builds(tmp_path: Path) ->
         {"name": item["name"].strip(), "url": item["url"].rstrip("/") + "/"}
         for item in config["repo"].get("documentation", {}).get("projects", [])
     ]
-    assert all(entry["path"] == "" or (tmp_path / entry["path"] / "index.html").is_file() for entry in versions)
+    assert all(
+        entry["path"] == "" or (tmp_path / entry["path"] / "index.html").is_file()
+        for entry in versions
+    )
 
 
 def test_missing_documentation_root_fails_without_publishing(tmp_path: Path) -> None:
