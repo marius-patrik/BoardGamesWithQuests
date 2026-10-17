@@ -258,7 +258,8 @@ def test_spoofed_artifact_origin_is_rejected(
     )
     snapshot(tmp_path, "docs-preview-331", "<h1>Forged</h1>", GOOD)
     result = invoke(tmp_path, env)
-    assert result.returncode == 0, result.stderr
+    assert result.returncode != 0
+    assert "No passing Actions artifacts" in result.stderr
     assert not (tmp_path / "staging/pr-331").exists()
 
 
