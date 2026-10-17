@@ -74,7 +74,9 @@ def verify_architecture(nodes: dict[str, str], edges: list[tuple[str, str, str]]
     """Require connected, typed source-file relations; never inline game data actions."""
     unexpected = sorted(node for node in nodes if re.fullmatch(r"F[0-9]{3}", node) is None)
     if unexpected:
-        raise ValueError(f"Non-source nodes (game-specific actions belong in DATA): {unexpected[:12]}")
+        raise ValueError(
+            f"Non-source nodes (game-specific actions belong in DATA): {unexpected[:12]}"
+        )
     graph: dict[str, set[str]] = {node: set() for node in nodes}
     for start, end, label in edges:
         if not label.strip():
