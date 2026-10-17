@@ -82,7 +82,7 @@ def _declarations(path: Path) -> list[tuple[str, str]]:
 
 def repository_ast(root: Path) -> str:
     """Mermaid tree of every tracked file and its discovered syntax declarations."""
-    lines = ["flowchart TD", '  root["Tracked repository"]']
+    lines = ["flowchart LR", '  root["Tracked repository"]']
     directories: set[str] = set()
     for file in tracked_paths(root):
         path = file.relative_to(root).as_posix()
@@ -132,7 +132,7 @@ def implementation_uml(root: Path) -> str:
     for key, cls in sorted(classes.items()):
         ident = _node("class:" + key)
         keys[key] = ident
-        lines.append(f'  class {ident}["{_label(key)}"]')
+        lines.append(f'  class {ident}["{_label(cls.name)}"]')
         for item in cls.body:
             if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 lines.append(f"  {ident} : +{item.name}()")
@@ -148,14 +148,33 @@ def implementation_uml(root: Path) -> str:
                 parent = matches[0] if len(matches) == 1 else None
             if parent and parent != key:
                 lines.append(f"  {keys[parent]} <|-- {keys[key]}")
+    # Associations come exclusively from explicit source-level type hints.
+    # Do not infer links from matching spellings or ad-hoc method calls.
+    associations: set[tuple[str, str, str]] = set()
+    for key, cls in sorted(classes.items()):
+        for node in ast.walk(cls):
+            if not isinstance(node, ast.AnnAssign) or not isinstance(node.target, ast.Attribute):
+                continue
+            target = node.target
+            if not isinstance(target.value, ast.Name) or target.value.id != "self":
+                continue
+            annotation_types = {
+                item.id for item in ast.walk(node.annotation) if isinstance(item, ast.Name)
+            }
+            for type_name in sorted(annotation_types):
+                matches = simple.get(type_name, [])
+                if len(matches) == 1 and matches[0] != key:
+                    associations.add((key, matches[0], target.attr))
+    for source, target, attribute in sorted(associations):
+        lines.append(f"  {keys[source]} --> {keys[target]} : {attribute}")
     return "\n".join(lines) + "\n"
 
 
 def generated_assets(root: Path) -> dict[str, str]:
     """Return solely Mermaid assets, under the repository diagrams folder."""
     return {
-        "agents/notes/diagrams/repository-ast.mmd": repository_ast(root),
-        "agents/notes/diagrams/implementation-uml.mmd": implementation_uml(root),
+        "agents/notes/diagrams/implementation/ast.mmd": repository_ast(root),
+        "agents/notes/diagrams/implementation/uml.mmd": implementation_uml(root),
     }
 
 

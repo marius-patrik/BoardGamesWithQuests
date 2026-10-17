@@ -18,9 +18,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
-import yaml
-from properdocs.structure.files import File, Files
-
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -53,6 +50,16 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
 def public_path(path: Path) -> str:
     """Publish hidden tracked directories under ordinary URL-safe names."""
     return "/".join(part.lstrip(".") if part.startswith(".") else part for part in path.parts)
+
+
+def diagram_viewer_markup(content: str) -> str:
+    """Render a readable, pan-and-zoom-capable diagram without duplicating source views."""
+    return (
+        '<div class="diagram-viewer" data-diagram-viewer>'
+        '<div class="diagram-viewer__viewport" tabindex="0" role="region"'
+        ' aria-label="Diagram: drag to pan, scroll to zoom">'
+        '<div class="diagram-viewer__canvas">' + content + "</div></div></div>"
+    )
 
 
 def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
@@ -109,6 +116,8 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                 # Link to its exact Git revision for full-byte inspection.
                 from urllib.parse import quote
 
+                import yaml
+
                 config = yaml.safe_load((root / "properdocs.yml").read_text(encoding="utf-8"))
                 repository_url = (config.get("repo_url") or "").rstrip("/")
                 revision = subprocess.run(
@@ -129,28 +138,26 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                 fence = "`" * max(4, 1 + max((len(t) for t in blocks), default=0))
                 lang = rel.suffix.lstrip(".")
                 body = header + f"{fence}{lang}\n{decoded}\n{fence}\n"
-        pages.append((name, dest, body))
-    from html import escape
+        # A source-diagram page is a diagram viewer, never a fenced source dump.
+        # The original file remains separately available at its published URL.
+        if decoded is not None and rel.suffix.lower() in {".mmd", ".svg"}:
+            from html import escape
+            from posixpath import relpath
 
-    diagrams = diagram_generator().generated_assets(root)
-    overview = "architecture/diagrams/index.md"
-    pages.append(
-        (
-            "architecture/diagrams/index",
-            overview,
-            "# Generated architecture diagrams\n\n"
-            "The diagrams are derived directly from the tracked repository. "
-            "Mermaid rendering supports interactive diagram inspection.\n\n"
-            + "\n".join(f"- [{Path(path).stem}]({Path(path).stem}/)" for path in diagrams)
-            + "\n",
-        )
-    )
-    for diagram_path, diagram in diagrams.items():
-        stem = Path(diagram_path).stem
-        dest = "architecture/diagrams/" + stem + ".md"
-        page = "# " + stem.replace("-", " ").title() + "\n\n"
-        page += '<pre class="mermaid">\n' + escape(diagram) + "</pre>\n"
-        pages.append(("architecture/diagrams/" + stem, dest, page))
+            title = escape(name, quote=False)
+            if rel.suffix.lower() == ".mmd":
+                graphic = '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
+            else:
+                # A committed SVG in images/ is an image, not editable diagram
+                # source. Render the original bytes with the same pan/zoom UI.
+                original_url = relpath(public_path(rel), start=dest.removesuffix(".md"))
+                graphic = (
+                    f'<img src="{escape(original_url, quote=True)}" '
+                    f'alt="{escape(rel.stem.replace("_", " "), quote=True)}" '
+                    'loading="lazy" draggable="false">'
+                )
+            body = f"# {title}\n\n" + diagram_viewer_markup(graphic) + "\n"
+        pages.append((name, dest, body))
     return pages
 
 
@@ -188,8 +195,10 @@ def on_config(config: Any) -> Any:
     return config
 
 
-def on_files(files: Files, config: Any) -> Files:
+def on_files(files: Any, config: Any) -> Any:
     """Materialize virtual pages without writing documentation sources to disk."""
+    from properdocs.structure.files import File
+
     plugins = getattr(config, "plugins", None)
     if plugins is not None and not hasattr(plugins, "_current_plugin"):
         plugins._current_plugin = None
@@ -220,55 +229,7 @@ def on_files(files: Files, config: Any) -> Files:
         if current is not None:
             files.remove(current)
         files.append(File.generated(config, dest, content=path.read_text(encoding="utf-8")))
-    # Discover Graphviz inputs from Git rather than hardcoding diagram paths.
-    # Rendered sources override their tracked SVG snapshots when both exist.
-    for dest, svg in graphviz_assets(ROOT).items():
-        current = files.get_file_from_path(dest)
-        if current is not None:
-            files.remove(current)
-        files.append(File.generated(config, dest, content=svg))
     return files
-
-
-def ensure_dot() -> str:
-    """Install Graphviz only when source-based diagrams need it."""
-    binary = shutil.which("dot")
-    if binary is None and os.environ.get("CI", "").lower() == "true" and sys.platform == "linux":
-        apt = [] if os.geteuid() == 0 else ["sudo"]
-        subprocess.run([*apt, "apt-get", "update", "-qq"], check=True)
-        subprocess.run([*apt, "apt-get", "install", "-y", "-qq", "graphviz"], check=True)
-        binary = shutil.which("dot")
-    if binary is None:
-        raise RuntimeError("Generated diagrams require the system 'dot' binary")
-    return binary
-
-
-def graphviz_assets(root: Path) -> dict[str, str]:
-    """Compile only diagrams found in Git; no hardcoded diagram filenames.
-
-    Graphviz is required when a tracked .dot/.gv input exists, otherwise it
-    is not installed or invoked. A present source must render or fail the build.
-    """
-    sources = [p for p in tracked_files(root) if p.suffix.lower() in {".dot", ".gv"}]
-    if not sources:
-        return {}
-    binary = ensure_dot()
-    rendered: dict[str, str] = {}
-    for path in sources:
-        target = public_path(path.relative_to(root).with_suffix(".svg"))
-        if target in rendered:
-            raise ValueError(f"Multiple Graphviz sources render to {target}")
-        run = subprocess.run(
-            [binary, "-Tsvg"],
-            input=path.read_text(encoding="utf-8"),
-            text=True,
-            capture_output=True,
-            check=True,
-        )
-        if "<svg " not in run.stdout:
-            raise RuntimeError(f"Graphviz produced no SVG for {path}")
-        rendered[target] = run.stdout
-    return rendered
 
 
 def project_registry(repository: Path) -> list[dict[str, str]]:
@@ -348,8 +309,128 @@ def manifest(site: Path, repository: Path) -> dict[str, list[dict[str, str]]]:
     return {"versions": versions, "projects": project_registry(repository)}
 
 
+def render_published_mermaid(site: Path) -> None:
+    """Pre-render every published Mermaid source to SVG and verify real output.
+
+    Mermaid remains the canonical diagram source. The generated SVGs exist only
+    inside the deployment artifact, where our existing SVG pan/zoom viewer can
+    display them without relying on a third-party browser CDN or a live parser.
+    """
+    import hashlib
+    import html
+    import os
+    import re
+    from urllib.parse import quote
+
+    pages = []
+    for page in site.rglob("index.html"):
+        text = page.read_text(encoding="utf-8")
+        if '<pre class="mermaid">' in text:
+            pages.append((page, text))
+    if not pages:
+        return
+
+    executable = shutil.which("mmdc")
+    if executable is None:
+        raise RuntimeError("Documentation build requires the pinned Mermaid CLI (mmdc)")
+
+    assets = site / "assets" / "diagrams"
+    assets.mkdir(parents=True, exist_ok=True)
+    compiled: dict[str, Path] = {}
+    pattern = re.compile(r'<pre class="mermaid">([\s\S]*?)</pre>')
+    with tempfile.TemporaryDirectory(prefix="render-mermaid-") as temporary:
+        work = Path(temporary)
+        config = work / "mermaid.json"
+        config.write_text(
+            json.dumps(
+                {
+                    "securityLevel": "strict",
+                    "maxTextSize": 1000000,
+                    "maxEdges": 10000,
+                    "flowchart": {"htmlLabels": False, "useMaxWidth": False},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        browser_options: list[str] = []
+        # GitHub's isolated Linux runners do not permit Chromium's sandbox.
+        if os.environ.get("GITHUB_ACTIONS") == "true" and sys.platform == "linux":
+            browser = work / "puppeteer.json"
+            browser.write_text(
+                json.dumps({"args": ["--no-sandbox", "--disable-setuid-sandbox"]}),
+                encoding="utf-8",
+            )
+            browser_options = ["--puppeteerConfigFile", str(browser)]
+
+        for page, document in pages:
+
+            def replace_diagram(match: Any) -> str:
+                source = html.unescape(match.group(1)).strip() + "\n"
+                digest = hashlib.sha256(source.encode("utf-8")).hexdigest()[:20]
+                if digest not in compiled:
+                    input_file = work / (digest + ".mmd")
+                    target = assets / (digest + ".svg")
+                    input_file.write_text(source, encoding="utf-8")
+                    subprocess.run(
+                        [
+                            executable,
+                            "--input",
+                            str(input_file),
+                            "--output",
+                            str(target),
+                            "--configFile",
+                            str(config),
+                            "--backgroundColor",
+                            "transparent",
+                            *browser_options,
+                        ],
+                        check=True,
+                        timeout=240,
+                        cwd=ROOT,
+                    )
+                    data = target.read_text(encoding="utf-8")
+                    if "<svg" not in data or "</svg>" not in data:
+                        raise RuntimeError(f"Mermaid did not produce an SVG: {target}")
+                    # Mermaid emits width="100%" without an intrinsic height.
+                    # That produces an incorrectly sized image in the viewer.
+                    # Use the actual rendered bounds to give both axes real units.
+                    opening = re.search(r"<svg\b[^>]*>", data)
+                    viewbox = re.search(r'viewBox="([^"]+)"', opening.group(0) if opening else "")
+                    if opening is None or viewbox is None:
+                        raise RuntimeError(f"Mermaid SVG has no intrinsic bounds: {target}")
+                    bounds = viewbox.group(1).split()
+                    if len(bounds) != 4 or float(bounds[2]) <= 0 or float(bounds[3]) <= 0:
+                        raise RuntimeError(f"Mermaid SVG has invalid bounds: {target}")
+                    from math import ceil
+
+                    svg_tag = re.sub(r'\s(?:width|height)="[^"]*"', "", opening.group(0))
+                    svg_tag = svg_tag.replace(
+                        "<svg",
+                        f'<svg width="{ceil(float(bounds[2]))}" height="{ceil(float(bounds[3]))}"',
+                        1,
+                    )
+                    data = data.replace(opening.group(0), svg_tag, 1)
+                    target.write_text(data, encoding="utf-8")
+                    compiled[digest] = target
+                relative = os.path.relpath(compiled[digest], page.parent).replace(os.sep, "/")
+                return (
+                    '<img src="'
+                    + quote(relative, safe="/.-_")
+                    + '" alt="Rendered Mermaid architecture diagram" '
+                    'loading="lazy" draggable="false">'
+                )
+
+            rendered, count = pattern.subn(replace_diagram, document)
+            if count < 1:
+                raise RuntimeError(f"Expected Mermaid diagram is missing from {page}")
+            page.write_text(rendered, encoding="utf-8")
+
+
 def build() -> None:
     """Build the strict documentation site and validate dynamically generated assets."""
+    import yaml
+
     with tempfile.TemporaryDirectory(prefix="repo-docs-") as temporary:
         work = Path(temporary)
         source = work / "source"
@@ -370,9 +451,10 @@ def build() -> None:
         )
         # Validate generated source outputs without rerunning the diagram parser.
         diagram_paths = diagram_generator().generated_assets(ROOT)
-        for asset in (*diagram_paths, *graphviz_assets(ROOT)):
+        for asset in diagram_paths:
             if not (ROOT / "site" / asset).is_file():
                 raise RuntimeError(f"Missing generated site asset: {asset}")
+    render_published_mermaid(ROOT / "site")
     write_manifest(ROOT / "site")
 
 
