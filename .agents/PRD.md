@@ -1,6 +1,6 @@
 # BoardGamesWithQuests — Product Requirements Document
 
-**Product scope:** This is the target behavior; implementation progress is established by verified tests, not by the presence of source files. Reference UML: [reference diagram](notes/reference_diagram.md). Package ownership: the canonical product contract.
+**Product scope:** This is the target behavior; implementation progress is established by verified tests, not by the presence of source files. Reference UML: [reference diagram](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/diagrams/reference/uml.mmd). Package ownership: the canonical product contract.
 
 ## 1. Product
 
@@ -39,7 +39,7 @@ Forms for Board, Pieces, Rules, Quests and Clocks derive their allowed fields an
 
 ## 5. Naming and source UML
 
-English canonical names are used for shared domain types; the source-reference Czech naming and reference mapping remain in [reference diagram](notes/reference_diagram.md). Where the engine Python implementation needs Czech aliases, they bind to the same canonical domain class, not a parallel runtime. Canonical chess knight is `Knight`, not `Horse` or `Tower`. `GameView`/`PlayerView` are **React component responsibilities**, not classes to keep inside `engine/view`. See the canonical product contract for rationale and traceability.
+English canonical names are used for shared domain types; the source-reference Czech naming and reference mapping remain in [reference diagram](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/diagrams/reference/uml.mmd). Where the engine Python implementation needs Czech aliases, they bind to the same canonical domain class, not a parallel runtime. Canonical chess knight is `Knight`, not `Horse` or `Tower`. `GameView`/`PlayerView` are **React component responsibilities**, not classes to keep inside `engine/view`. See the canonical product contract for rationale and traceability.
 
 ## 6. Package boundaries
 
