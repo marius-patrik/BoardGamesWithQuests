@@ -157,11 +157,11 @@ def test_published_docs_use_full_viewport_layout_with_operable_navigation_and_fu
     css = (SITE / "assets" / "theme.css").read_text(encoding="utf-8")
     js = (SITE / "assets" / "theme.js").read_text(encoding="utf-8")
 
-    assert 'data-docs-layout' in index
+    assert "data-docs-layout" in index
     assert 'id="docs-navigation"' in index
-    assert 'data-nav-toggle' in index
+    assert "data-nav-toggle" in index
     assert 'aria-controls="docs-navigation"' in index
-    assert 'data-fullscreen-toggle' in index
+    assert "data-fullscreen-toggle" in index
     assert 'aria-pressed="false"' in index
 
     assert "max-width: 100rem" not in css, "Layout must not be centered in a fixed-width shell"
@@ -171,7 +171,7 @@ def test_published_docs_use_full_viewport_layout_with_operable_navigation_and_fu
     assert "max-width: none" in css
     assert "requestFullscreen()" in js and "exitFullscreen()" in js
     assert "fullscreenchange" in js
-    assert 'data-nav-collapsed' in js
+    assert "data-nav-collapsed" in js
     assert 'sidebar.classList.toggle("is-open")' in js
     assert 'navToggle.setAttribute("aria-expanded"' in js
     assert 'event.key === "Escape"' in js
