@@ -1,0 +1,42 @@
+name: Open Documentation Migration PR
+
+on:
+  push:
+    branches: [ci/docs-actions-artifacts]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-pr:
+    runs-on: ubuntu-latest
+    env:
+      HAS_APP_KEY: ${{ secrets.DARKFACTORY_APP_PRIVATE_KEY != '' }}
+    steps:
+      - name: Mint bot installation token
+        id: app
+        if: env.HAS_APP_KEY == 'true'
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
+        with:
+          app-id: ${{ vars.DARKFACTORY_APP_ID || '4861004' }}
+          private-key: ${{ secrets.DARKFACTORY_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Open draft review via the bot
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          existing=$(gh pr list --repo "$GH_REPO" --head ci/docs-actions-artifacts \
+            --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            echo "PR #$existing already exists"
+            exit 0
+          fi
+          gh pr create --repo "$GH_REPO" --head ci/docs-actions-artifacts \
+            --base main --draft \
+            --title "ci(docs): deploy Pages from Actions artifacts without gh-pages" \
+            --body "Closes #345. Replace gh-pages snapshot storage with passing GitHub Actions artifacts for main and individual PR heads. A trusted Actions publisher reconstructs the live site, preserves independent previews and only retires gh-pages after successful Actions deployment with a reachable site. No merge before maintainer review and end-to-end publication verification."
