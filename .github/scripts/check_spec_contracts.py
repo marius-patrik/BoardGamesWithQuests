@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check Mermaid design completeness, not runtime or deployed database behavior."""
+
 from __future__ import annotations
 import re
 from pathlib import Path
@@ -8,10 +9,20 @@ ROOT = Path(__file__).resolve().parents[2]
 PRD = ROOT / ".agents/PRD.md"
 DIAGRAMS = ROOT / ".agents/requirements/diagrams"
 NAMES = (
-    "engine_uml", "client_uml", "api", "api_dtos", "database", "integrity",
-    "configuration_schema", "operators", "chess", "english-draughts",
-    "international-draughts", "moneyproperty",
+    "engine_uml",
+    "client_uml",
+    "api",
+    "api_dtos",
+    "database",
+    "integrity",
+    "configuration_schema",
+    "operators",
+    "chess",
+    "english-draughts",
+    "international-draughts",
+    "moneyproperty",
 )
+
 
 def get(name: str) -> str:
     path = DIAGRAMS / (name + ".mmd")
@@ -21,8 +32,10 @@ def get(name: str) -> str:
     assert len(text.splitlines()) > 10, f"incomplete graph: {name}"
     return text
 
+
 def nodes(body: str, prefix: str) -> int:
     return len(re.findall(r"^\s*" + prefix + r"\d+\[", body, flags=re.MULTILINE))
+
 
 def main() -> None:
     prd = PRD.read_text(encoding="utf-8")
@@ -38,8 +51,10 @@ def main() -> None:
     relations = re.findall(r"^\s+\w+\s+\|\|--o[\{\|]\s+\w+\s+:", er, flags=re.MULTILINE)
     assert len(relations) == 74, f"expected 74 relationships, found {len(relations)}"
     for name, count in (
-        ("chess", 24), ("english-draughts", 9),
-        ("international-draughts", 9), ("moneyproperty", 30),
+        ("chess", 24),
+        ("english-draughts", 9),
+        ("international-draughts", 9),
+        ("moneyproperty", 30),
     ):
         assert nodes(graph[name], "a") == count, f"{name} action topology truncated"
         assert "def[" in graph[name], f"{name} lacks a game root"
@@ -55,6 +70,7 @@ def main() -> None:
     assert "Lossless conformance gate" in prd, "semantic limitations must be declared"
     print("PASS: 12 Mermaid design diagrams, 33 operations, 28 DTOs, 38 models, 101 operators")
     print("NOT VERIFIED: deployed APIs, game JSON, runtime operators, migrations, RLS or gameplay")
+
 
 if __name__ == "__main__":
     main()
