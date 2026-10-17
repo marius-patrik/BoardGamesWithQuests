@@ -6,10 +6,10 @@ import math
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from engine.model.game.board import Board
-from engine.model.game.conditions import QueryResolutionError
-from engine.model.game.capture_geometry import EvaluationBudget, MAX_EVALUATION_WORK
-from engine.model.game.validator import MoveValidator
+from server.engine.model.game.board import Board
+from server.engine.model.game.conditions import QueryResolutionError
+from server.engine.model.game.capture_geometry import EvaluationBudget, MAX_EVALUATION_WORK
+from server.engine.model.game.validator import MoveValidator
 
 
 class BoardQueries:

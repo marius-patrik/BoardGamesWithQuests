@@ -11,8 +11,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from engine.model.game.board import Board
-from engine.model.game.conditions import QueryResolutionError
+from server.engine.model.game.board import Board
+from server.engine.model.game.conditions import QueryResolutionError
 
 MAX_EVALUATION_WORK = 250000
 
