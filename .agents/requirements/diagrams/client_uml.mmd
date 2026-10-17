@@ -61,7 +61,7 @@ loop One or more authorized participant commands
     Page-->>Router: Return to authentication or access error
   end
 end
-opt Page resumes after disconnection
+opt Page reconnects after disconnection or mobile suspension
   Page->>API: GET /games/{gameId} with renewed session
   API-->>Page: Durable latest game revision
   Page->>Feed: Resubscribe to private topic
