@@ -28,46 +28,30 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
         check=True,
         capture_output=True,
     )
-    files = [root / Path(p.decode("utf-8")) for p in result.stdout.split(b"\0") if p]
-    return sorted(
-        (
-            p
-            for p in files
-            if p.is_file()
-            and (
-                p.suffix.lower() in {".md", ".py"}
-                or (
-                    ".agents/notes/requirements/" in p.as_posix()
-                    and p.suffix.lower() in {".mmd", ".yaml", ".json", ".prisma", ".sql"}
-                or (
-                    p.relative_to(root).as_posix()
-                    in {
-                        "packages/server/api/openapi.yaml",
-                        "packages/server/supabase/schema.prisma",
-                        "packages/server/supabase/integrity.sql",
-                        "data/chess.json",
-                        "data/english-draughts.json",
-                        "data/international-draughts.json",
-                        "data/moneyproperty.json",
-                        "data/configuration.schema.json",
-                        "data/operators.json",
-                        "data/seed.sql",
-                    }
-                )
-                )
-                or (
-                    p.relative_to(root).parts[0] == "data"
-                    and p.suffix.lower() in {".json", ".sql"}
-                )
-                or p.relative_to(root).as_posix() in {
-                    "packages/server/api/openapi.yaml",
-                    "packages/server/supabase/schema.prisma",
-                    "packages/server/supabase/integrity.sql",
-                }
-            )
-        ),
-        key=lambda p: p.relative_to(root).as_posix(),
-    )
+    canonical = {
+        "packages/server/api/openapi.yaml",
+        "packages/server/supabase/schema.prisma",
+        "packages/server/supabase/integrity.sql",
+    }
+    documents: list[Path] = []
+    for filename in result.stdout.split(b"\0"):
+        if not filename:
+            continue
+        relative = Path(filename.decode("utf-8"))
+        path = root / relative
+        if not path.is_file():
+            continue
+        suffix = path.suffix.lower()
+        architecture_source = (
+            relative.as_posix().startswith(".agents/notes/requirements/")
+            and suffix in {".mmd", ".yaml", ".json", ".prisma", ".sql"}
+        )
+        portable_data = relative.parts[0] == "data" and suffix in {".json", ".sql"}
+        if suffix in {".md", ".py"} or architecture_source or portable_data or (
+            relative.as_posix() in canonical
+        ):
+            documents.append(path)
+    return sorted(documents, key=lambda path: path.relative_to(root).as_posix())
 
 
 def python_roots(root: Path = ROOT) -> list[Path]:
