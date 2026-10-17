@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from copy import deepcopy
+from collections.abc import Mapping, Callable
 from dataclasses import dataclass
 from typing import Any
 
-from engine.model.game.conditions import ConditionEvaluator, Query
+from engine.model.game.conditions import ConditionEvaluator, Query, QueryResolutionError
 from engine.model.game.schema import HOOKS, freeze_json, thaw_json, validate_effect, validate_hooks
 
 
@@ -37,6 +36,83 @@ class HookEvaluation:
     effects: tuple[PlannedEffect, ...]
 
 
+class RuleProgram:
+    """Own validated immutable rules indexed by lifecycle hook.
+
+    This representation carries only static game data. Query implementations and
+    references are bound separately for each evaluation and never retained.
+    """
+
+    def __init__(self, rules: Any) -> None:
+        """Validate and freeze detached rules once.
+
+        Args:
+            rules: Bounded declarative rule sequence.
+
+        Raises:
+            ValueError: The rule sequence violates the closed schema.
+        """
+        detached = thaw_json(rules)
+        validate_hooks(detached, [])
+        frozen = freeze_json(detached)
+        self._hooks = {
+            hook: tuple(rule for rule in frozen if rule["hook"] == hook) for hook in HOOKS
+        }
+
+    def rules(self, hook: str) -> tuple[Mapping[str, Any], ...]:
+        """Return immutable rules for one recognized hook.
+
+        Args:
+            hook: Recognized lifecycle name.
+
+        Returns:
+            Program-owned immutable rule nodes in declared order.
+
+        Raises:
+            ValueError: The hook is unknown.
+        """
+        if hook not in self._hooks:
+            raise ValueError(f"unknown game hook: {hook!r}")
+        return self._hooks[hook]
+
+    def evaluate(
+        self,
+        hook: str,
+        queries: Mapping[str, Query],
+        references: Mapping[str, Any] | None = None,
+        work: Callable[[int], None] | None = None,
+    ) -> HookEvaluation:
+        """Evaluate immutable rules with operation-local facts.
+
+        Args:
+            hook: Recognized lifecycle name.
+            queries: Trusted query bindings for the explicit position.
+            references: Explicit immutable-context values.
+            work: Aggregate reservation callback for actual visited rule nodes.
+
+        Returns:
+            Ordered matches and resolved immutable effect plans.
+
+        Raises:
+            ValueError: Hook or query bindings are invalid.
+            QueryResolutionError: A required fact or work reservation fails.
+        """
+        evaluator = ConditionEvaluator(queries, references)
+        if work is not None:
+            evaluator._work = work
+        matched = []
+        effects = []
+        for rule in self.rules(hook):
+            evaluator._work(1)
+            if evaluator._evaluate_validated(rule["when"]):
+                matched.append(rule["id"])
+                effects.extend(
+                    PlannedEffect(effect["op"], evaluator.resolve(effect["params"]))
+                    for effect in rule["effects"]
+                )
+        return HookEvaluation(tuple(matched), tuple(effects))
+
+
 class HookInterpreter:
     """Compile and evaluate bounded game JSON without applying effects."""
 
@@ -45,7 +121,7 @@ class HookInterpreter:
         rules: list[dict[str, Any]],
         queries: Mapping[str, Query],
         references: Mapping[str, Any] | None = None,
-    ):
+    ) -> None:
         """Validate rules and detach their JSON data from the mutable editor.
 
         Args:
@@ -56,9 +132,7 @@ class HookInterpreter:
         Raises:
             ValueError: Rules, query names or references are invalid.
         """
-        rules = thaw_json(rules)
-        validate_hooks(rules, [])
-        self._rules = tuple(deepcopy(rules))
+        self._program = RuleProgram(rules)
         self._conditions = ConditionEvaluator(queries, references)
 
     def evaluate(self, hook: str) -> HookEvaluation:
@@ -73,17 +147,4 @@ class HookInterpreter:
         Raises:
             ValueError: Hook, query resolution or resolved effect data is invalid.
         """
-        if hook not in HOOKS:
-            raise ValueError(f"unknown game hook: {hook!r}")
-        matched: list[str] = []
-        effects: list[PlannedEffect] = []
-        for rule in self._rules:
-            if rule["hook"] != hook:
-                continue
-            if self._conditions.evaluate(rule["when"]):
-                matched.append(rule["id"])
-                effects.extend(
-                    PlannedEffect(effect["op"], self._conditions.resolve(effect["params"]))
-                    for effect in rule["effects"]
-                )
-        return HookEvaluation(tuple(matched), tuple(effects))
+        return self._program.evaluate(hook, self._conditions._queries, self._conditions._references)

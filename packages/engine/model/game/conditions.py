@@ -16,6 +16,8 @@ from engine.model.game.schema import (
     _bounded_json,
     condition,
     validate_reference,
+    thaw_json,
+    _json_work,
 )
 
 Query = Callable[[Mapping[str, Any]], Any]
@@ -28,12 +30,15 @@ class QueryResolutionError(ValueError):
 class ConditionEvaluator:
     """Evaluate validated JSON conditions against registered read-only queries."""
 
-    def __init__(self, queries: Mapping[str, Query], references: Mapping[str, Any] | None = None):
+    def __init__(
+        self, queries: Mapping[str, Query], references: Mapping[str, Any] | None = None
+    ) -> None:
         """Register only recognized, trusted query primitives."""
         invalid = set(queries).difference(QUERIES)
         if invalid:
             raise QueryResolutionError(f"unknown query registrations: {sorted(invalid)}")
         self._queries = dict(queries)
+        self._work: Callable[[int], None] = lambda units: None
         for name, value in (references or {}).items():
             validate_reference(name)
             if name == "event.claim" and isinstance(value, str):
@@ -58,7 +63,8 @@ class ConditionEvaluator:
         Raises:
             QueryResolutionError: A reference or required query is unavailable or invalid.
         """
-        if isinstance(value, dict):
+        self._work(1 + (len(value) // 64 if isinstance(value, str) else 0))
+        if isinstance(value, Mapping):
             if set(value) == {"ref"}:
                 name = value["ref"]
                 validate_reference(name)
@@ -68,7 +74,7 @@ class ConditionEvaluator:
             if set(value) == {"query", "params"}:
                 return deepcopy(self._query(value["query"], value["params"]))
             return {key: self.resolve(child) for key, child in value.items()}
-        if isinstance(value, list):
+        if isinstance(value, (list, tuple)):
             return [self.resolve(child) for child in value]
         return value
 
@@ -79,18 +85,18 @@ class ConditionEvaluator:
             raise QueryResolutionError(f"query is not implemented: {name}")
         value = primitive(self.resolve(dict(params)))
         _bounded_json(value)
+        self._work(3 * _json_work(value))
         return value
 
     def _value(self, expression: Any) -> Any:
         """Resolve an immutable literal or a declared query reference."""
-        if isinstance(expression, dict):
+        if isinstance(expression, Mapping):
             if set(expression) == {"ref"}:
                 return self.resolve(expression)
             return self._query(expression["query"], expression["params"])
-        return expression
+        return self.resolve(expression)
 
-    @staticmethod
-    def _equal(left: Any, right: Any) -> bool:
+    def _equal(self, left: Any, right: Any) -> bool:
         """Compare JSON values recursively without boolean or numeric coercion.
 
         Args:
@@ -100,15 +106,22 @@ class ConditionEvaluator:
         Returns:
             Whether every corresponding value has the same type and value.
         """
+        self._work(
+            1
+            + (
+                max(len(left), len(right)) // 64
+                if isinstance(left, str) and isinstance(right, str)
+                else 0
+            )
+        )
         if type(left) is not type(right):
             return False
         if isinstance(left, list):
-            return len(left) == len(right) and all(
-                ConditionEvaluator._equal(a, b) for a, b in zip(left, right)
-            )
+            return len(left) == len(right) and all(self._equal(a, b) for a, b in zip(left, right))
         if isinstance(left, dict):
+            self._work(len(left))
             return left.keys() == right.keys() and all(
-                ConditionEvaluator._equal(value, right[key]) for key, value in left.items()
+                self._equal(value, right[key]) for key, value in left.items()
             )
         return left == right
 
@@ -153,8 +166,20 @@ class ConditionEvaluator:
     def evaluate(self, expression: Mapping[str, Any]) -> bool:
         """Validate and interpret a bounded expression from a game JSON file."""
         condition(expression)
+        return self._evaluate_validated(expression)
+
+    def _evaluate_validated(self, expression: Mapping[str, Any]) -> bool:
+        """Interpret a program-owned expression validated before freezing.
+
+        Args:
+            expression: Immutable node from a validated rule program.
+
+        Returns:
+            The condition result without repeating static schema traversal.
+        """
 
         def walk(node: Mapping[str, Any]) -> bool:
+            self._work(1)
             op = node["op"]
             if op == "true":
                 return True

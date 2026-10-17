@@ -378,12 +378,15 @@ def test_available_move_discovery_cannot_recurse_into_uncomputed_legal_counts() 
 def test_aggregate_budget_covers_query_work_inside_special_offer_discovery() -> None:
     """FR-69/80: valid bounded rule syntax cannot amplify unbounded discovery."""
     data = config()
+    data["board"]["rows"] = 64
+    data["board"]["columns"] = 64
     repeated_query = {
-        "op": "test",
-        "query": "path_clear",
-        "params": {"source": [5, 2], "target": [5, 4]},
+        "op": "compare",
+        "relation": "ne",
+        "left": {"query": "pieces_matching", "params": {}},
+        "right": [],
     }
-    condition = {"op": "all", "args": [deepcopy(repeated_query) for _ in range(16)]}
+    condition = {"op": "all", "args": [deepcopy(repeated_query) for _ in range(8)]}
     data["rules"].extend(
         rule(f"work-{index}", "available_moves", [offer([5, 2], [5, 4])], condition)
         for index in range(127)
