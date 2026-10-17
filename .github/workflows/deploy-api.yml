@@ -4,16 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/server/api/**"
-      - "packages/server/engine/**"
-      - "packages/server/requirements.txt"
+      - "packages/server/**"
       - ".github/workflows/deploy-api.yml"
   pull_request:
     branches: [main]
     paths:
-      - "packages/server/api/**"
-      - "packages/server/engine/**"
-      - "packages/server/requirements.txt"
+      - "packages/server/**"
       - ".github/workflows/deploy-api.yml"
   workflow_dispatch:
 
