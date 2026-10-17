@@ -23,6 +23,12 @@ Closes #
 - [ ] Unavailable mandatory external gates declared **BLOCKED**, never replaced by mocked passes
 - [ ] Typecheck, build, format, documentation and package validation pass where applicable
 
+## Governance source verification
+
+- [ ] Updated any affected `.agents/{notes,requests,decisions,rules}/` source record and regenerated README, PRD, ARCHITECTURE and AGENTS in one diff
+- [ ] `python3 .github/scripts/generate_documents.py --check` passes, including symlinks, submodule and `.github/tests/` ownership
+- [ ] Template policy differences (development integration or release mode) are not silently enforced without #350 ratification
+
 ## Artifact alignment
 
 - [ ] APIs, implementations, configuration, schemas, migrations, game JSON, tests, documentation and diagrams agree

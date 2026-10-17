@@ -54,7 +54,7 @@ checkers = ["config.json"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests"]
+testpaths = [".github/tests"]
 pythonpath = ["packages", "."]
 
 [tool.black]
