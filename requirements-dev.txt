@@ -1,12 +1,11 @@
 pytest>=8.0.0
 black>=24.0.0
 properdocs>=1.6.7
-# Required by configured pymdownx Markdown extensions; keep the verified compatibility cap.
+# Required by configured pymdownx Markdown extensions.
 pymdown-extensions>=10.0,<12.0
 Pygments>=2.17
-# Python 3.10 lacks tomllib; later Python versions use the standard library.
 tomli>=2.0; python_version < '3.11'
-mkdocstrings[python]>=0.25.0
-# Canonical portable-schema/OpenAPI/AST contract validator.
+tree-sitter-language-pack>=1.22.1,<1.23
+# Portable game JSON Schema, OpenAPI and Mermaid contract validation.
 jsonschema>=4.22,<5
 PyYAML>=6.0,<7
