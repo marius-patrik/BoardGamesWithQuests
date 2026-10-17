@@ -92,9 +92,9 @@ Before implementing gameplay against this design, review the **API, schema and i
 
 ## Normative design and source ownership
 
-The API, database, operator set, configuration type graph, and four game-definition topologies are specified through editable [Mermaid API graph](requirements/diagrams/api.mmd). They are **design constraints**, not generated production artifacts. The executable Prisma schema, PostgreSQL migrations and importable JSON configurations belong to the implementation PR and MUST be validated against these graphs, including the semantics that a graph overview cannot express.
+The API, database, operator set, configuration type graph, and four game-definition topologies are specified through editable [Mermaid API graph](../requirements/diagrams/api.mmd). They are **design constraints**, not generated production artifacts. The executable Prisma schema, PostgreSQL migrations and importable JSON configurations belong to the implementation PR and MUST be validated against these graphs, including the semantics that a graph overview cannot express.
 
-The [engine UML](requirements/diagrams/engine_uml.mmd) defines the target state, transaction and interpreter boundaries; the [client UML](requirements/diagrams/client_uml.mmd) defines externally observable routing, identity, concurrency and recovery flows. These are deliberately **not** a speculative complete source AST. The [repository AST](architecture/diagrams/ast.mmd) and [actual implementation UML](architecture/diagrams/uml.mmd) are generated from source. Original assignment references, including the untouched [assignment GUI sketch](reference/images/GUI_mockup.svg), belong exclusively under `.agents/reference/`. The reviewed-target [product UI mockup](requirements/images/product-ui.svg) illustrates the desktop gameplay, configurable lobby, and game-neutral editor as requirements (not implementation evidence).
+The [engine UML](../requirements/diagrams/engine_uml.mmd) defines the target state, transaction and interpreter boundaries; the [client UML](../requirements/diagrams/client_uml.mmd) defines externally observable routing, identity, concurrency and recovery flows. These are deliberately **not** a speculative complete source AST. The [repository AST](../architecture/diagrams/ast.mmd) and [actual implementation UML](../architecture/diagrams/uml.mmd) are generated from source. Original assignment references, including the untouched [assignment GUI sketch](../reference/images/GUI_mockup.svg), belong exclusively under `.agents/reference/`. The reviewed-target [product UI mockup](../requirements/images/product-ui.svg) illustrates the desktop gameplay, configurable lobby, and game-neutral editor as requirements (not implementation evidence).
 
 ## Source architecture
 
@@ -113,7 +113,7 @@ The following is a **target source inventory** with ownership and file responsib
 | Documentation | TSDoc, Python docstrings, Rustdoc, OpenAPI and interactive Mermaid source diagrams |
 | Verification | pytest, Playwright, native smoke tests, real database migrations and cross-contract validation |
 
-Prisma is **implementation-only schema tooling**, never a production Node.js database client. [Database ER](requirements/diagrams/database.mmd) and [integrity graph](requirements/diagrams/integrity.mmd) specify the planned relational owners and SQL-only guarantees. The implementation must author, deploy and provider-test actual versioned PostgreSQL migrations and RLS policies; a diagram does not enforce a database constraint.
+Prisma is **implementation-only schema tooling**, never a production Node.js database client. [Database ER](../requirements/diagrams/database.mmd) and [integrity graph](../requirements/diagrams/integrity.mmd) specify the planned relational owners and SQL-only guarantees. The implementation must author, deploy and provider-test actual versioned PostgreSQL migrations and RLS policies; a diagram does not enforce a database constraint.
 
 ## Target file tree
 
@@ -346,10 +346,10 @@ The API imports engine interfaces but the engine cannot import API or I/O module
 
 The following diagrams specify the target structure before implementation. Their links are intentionally **not** paths to deployable schemas, game configurations or API server files. No file in this PR is an actual PostgreSQL migration or an executable definition. The implementation must satisfy all stated invariants and establish completeness by generation/diff against its real provider contracts.
 
-- **API**: [33-operation endpoint graph](requirements/diagrams/api.mmd), [28-DTO fields and references](requirements/diagrams/api_dtos.mmd), [identity / retry / Realtime behavior](requirements/diagrams/client_uml.mmd).
-- **Database**: [38-table, 74-relationship ER](requirements/diagrams/database.mmd), [supplemental SQL-only integrity](requirements/diagrams/integrity.mmd).
-- **Generic interpretation**: [engine class and transition graph](requirements/diagrams/engine_uml.mmd), [portable configuration type graph](requirements/diagrams/configuration_schema.mmd), [typed operator catalogue](requirements/diagrams/operators.mmd).
-- **Four game target topologies**: [Chess](requirements/diagrams/chess.mmd), [English draughts](requirements/diagrams/english-draughts.mmd), [International draughts](requirements/diagrams/international-draughts.mmd), [MoneyProperty](requirements/diagrams/moneyproperty.mmd). MoneyProperty's economic acceptance occurs last, but its general types must be supported from the start.
+- **API**: [33-operation endpoint graph](../requirements/diagrams/api.mmd), [28-DTO fields and references](../requirements/diagrams/api_dtos.mmd), [identity / retry / Realtime behavior](../requirements/diagrams/client_uml.mmd).
+- **Database**: [38-table, 74-relationship ER](../requirements/diagrams/database.mmd), [supplemental SQL-only integrity](../requirements/diagrams/integrity.mmd).
+- **Generic interpretation**: [engine class and transition graph](../requirements/diagrams/engine_uml.mmd), [portable configuration type graph](../requirements/diagrams/configuration_schema.mmd), [typed operator catalogue](../requirements/diagrams/operators.mmd).
+- **Four game target topologies**: [Chess](../requirements/diagrams/chess.mmd), [English draughts](../requirements/diagrams/english-draughts.mmd), [International draughts](../requirements/diagrams/international-draughts.mmd), [MoneyProperty](../requirements/diagrams/moneyproperty.mmd). MoneyProperty's economic acceptance occurs last, but its general types must be supported from the start.
 
 **Lossless conformance gate:** These visual graphs display declared entities, operators, operations and their major dependencies, but do not encode every value, literal, expression node, HTTP constraint or SQL predicate. They are **not sufficient for deterministic code generation by themselves**. Consequently, this PR may be approved as architecture direction only; do not claim final schema/API completeness until implementation PR proves structural and semantic parity through generated schemas, migration tests and provider-observed acceptance. A published structural diagram cannot replace that evidence.
 
@@ -357,7 +357,7 @@ A fresh unauthenticated browser obtains a CSRF cookie from `GET /session` before
 
 ## API ownership and persistence boundaries
 
-This document fixes ownership and response behavior where a type schema alone cannot specify a transaction. The [API/DTO graphs](requirements/diagrams/api.mmd), [database/integrity graphs](requirements/diagrams/database.mmd), [engine UML](requirements/diagrams/engine_uml.mmd) and [client UML](requirements/diagrams/client_uml.mmd) must be reviewed together. No game-specific code paths are allowed in the interpreter.
+This document fixes ownership and response behavior where a type schema alone cannot specify a transaction. The [API/DTO graphs](../requirements/diagrams/api.mmd), [database/integrity graphs](../requirements/diagrams/database.mmd), [engine UML](../requirements/diagrams/engine_uml.mmd) and [client UML](../requirements/diagrams/client_uml.mmd) must be reviewed together. No game-specific code paths are allowed in the interpreter.
 
 | External actor operation | Authorization and persistent boundary | Commit/retry/failure observable contract |
 | --- | --- | --- |

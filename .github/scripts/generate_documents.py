@@ -53,6 +53,9 @@ def content_for(directory: str, required_status: str, heading: str) -> str:
             )
         # Convert source H1s to section headings in the generated document.
         body = re.sub(r"(?m)^(#{1,5})(?= )", lambda match: "#" + match.group(1), body)
+        # Source records are one directory below their generated artifact.
+        # Preserve links in both the authored record and generated reader view.
+        body = re.sub(r"\]\(\.\./([^)]+)\)", r"](\1)", body)
         parts.append(f"\n{body}\n\n_Source: [{file.name}]({directory}/{file.name})_\n")
         included += 1
     if included == 0:
