@@ -385,7 +385,6 @@ def manifest(site: Path, repository: Path) -> dict[str, list[dict[str, str]]]:
     return {"versions": versions, "projects": project_registry(repository)}
 
 
-
 def render_published_mermaid(site: Path) -> None:
     """Pre-render every published Mermaid source to SVG and verify real output.
 
@@ -430,6 +429,7 @@ def render_published_mermaid(site: Path) -> None:
         )
 
         for page, document in pages:
+
             def replace_diagram(match: Any) -> str:
                 source = html.unescape(match.group(1)).strip() + "\\n"
                 digest = hashlib.sha256(source.encode("utf-8")).hexdigest()[:20]
@@ -440,10 +440,14 @@ def render_published_mermaid(site: Path) -> None:
                     subprocess.run(
                         [
                             executable,
-                            "--input", str(input_file),
-                            "--output", str(target),
-                            "--configFile", str(config),
-                            "--backgroundColor", "transparent",
+                            "--input",
+                            str(input_file),
+                            "--output",
+                            str(target),
+                            "--configFile",
+                            str(config),
+                            "--backgroundColor",
+                            "transparent",
                         ],
                         check=True,
                         timeout=240,
@@ -465,6 +469,7 @@ def render_published_mermaid(site: Path) -> None:
             if count < 1:
                 raise RuntimeError(f"Expected Mermaid diagram is missing from {page}")
             page.write_text(rendered, encoding="utf-8")
+
 
 def build() -> None:
     """Build the strict documentation site and validate dynamically generated assets."""

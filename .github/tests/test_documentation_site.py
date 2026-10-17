@@ -70,7 +70,9 @@ def test_tracked_mermaid_and_svg_pages_render_graphics_instead_of_source_text():
         assert 'class="diagram-viewer"' in html
         assert marker in html, f"Diagram rendered as source text: {name}"
         assert "assets/diagrams.js" in html, f"Interactive diagram script absent: {name}"
-        assert 'class="mermaid"' not in html, f"Client-side Mermaid source remains unrendered: {name}"
+        assert (
+            'class="mermaid"' not in html
+        ), f"Client-side Mermaid source remains unrendered: {name}"
 
     source_page = (
         SITE
