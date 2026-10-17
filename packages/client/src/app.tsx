@@ -68,7 +68,10 @@ export function App() {
 	useEffect(() => {
 		if (!session) return;
 		const controller = new AbortController();
-		void fetch(`${(import.meta.env.PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "")}/api/definitions`, { signal: controller.signal })
+		void fetch(
+			`${(import.meta.env.PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "")}/api/definitions`,
+			{ signal: controller.signal },
+		)
 			.then((response) => {
 				if (!response.ok) throw new Error("Cannot load the game catalog.");
 				return response.json() as Promise<{ definitions: Definition[] }>;
