@@ -4,46 +4,72 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Head branch name (e.g. feature/my-feature)'
+        description: "Head branch"
         required: true
         type: string
       title:
-        description: 'Pull Request title'
+        description: "PR title"
         required: true
         type: string
       body:
-        description: 'Pull Request description'
+        description: "PR body, including linked issue"
         required: true
         type: string
       base:
-        description: 'Target base branch'
+        description: "Target branch"
         required: false
-        default: 'main'
+        default: main
         type: string
       draft:
-        description: 'Create as draft PR'
+        description: "Open as Draft"
         required: false
         default: true
         type: boolean
-
-# A caller, not a copy. Each dispatch input is forwarded by name because a called workflow receives
-# nothing from this file's `inputs` context automatically.
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
-  actions: write
 
 jobs:
-  run:
-    uses: marius-patrik/DarkFactory/.github/workflows/open-pr.yml@368eb9d75d5d828e7ac17fe590d4dc17b028cebc
-    with:
-      branch: ${{ inputs.branch }}
-      title: ${{ inputs.title }}
-      body: ${{ inputs.body }}
-      base: ${{ inputs.base }}
-      draft: ${{ inputs.draft }}
-      pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
-    secrets:
-      DARKFACTORY_APP_PRIVATE_KEY: ${{ secrets.DARKFACTORY_APP_PRIVATE_KEY }}
-      GH_PROJECT_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
+  open-pr:
+    runs-on: ubuntu-latest
+    env:
+      HAS_APP_KEY: ${{ secrets.DARKFACTORY_APP_PRIVATE_KEY != '' }}
+    steps:
+      - name: Mint DarkFactory installation token
+        id: app
+        if: env.HAS_APP_KEY == 'true'
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
+        with:
+          app-id: ${{ vars.DARKFACTORY_APP_ID || '4861004' }}
+          private-key: ${{ secrets.DARKFACTORY_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Create or update PR through authenticated GitHub API
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ inputs.branch || github.event.pull_request.head.ref }}
+          BASE: ${{ inputs.base || github.event.pull_request.base.ref || 'main' }}
+          TITLE: ${{ inputs.title || github.event.pull_request.title }}
+          BODY: ${{ inputs.body || github.event.pull_request.body }}
+          DRAFT: ${{ inputs.draft == true || github.event_name == 'pull_request' }}
+        run: |
+          set -euo pipefail
+          test -n "$BRANCH"
+          test -n "$BASE"
+          test -n "$TITLE"
+          test -n "$BODY"
+          gh api "repos/$GH_REPO/branches/$BRANCH" --silent
+          gh api "repos/$GH_REPO/branches/$BASE" --silent
+          existing=$(gh pr list --repo "$GH_REPO" --head "$BRANCH" --base "$BASE" \
+            --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --repo "$GH_REPO" --title "$TITLE" --body "$BODY"
+            echo "Updated PR #$existing" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          draft_flags=()
+          if [ "$DRAFT" = true ]; then draft_flags=(--draft); fi
+          gh pr create --repo "$GH_REPO" --head "$BRANCH" --base "$BASE" \
+            --title "$TITLE" --body "$BODY" "${draft_flags[@]}"

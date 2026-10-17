@@ -22,7 +22,7 @@
     },
     "upstream": {
       "repo": "marius-patrik/DarkFactory",
-      "ref": "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
+      "ref": "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4"
     },
     "versioning": {
       "mode": "pridever",
@@ -45,20 +45,12 @@
       "documentation": {
         "python": {
           "command": "python .github/scripts/build_docs.py",
-          "source": "Python source docstrings with generated API pages and navigation"
+          "source": "repository Markdown and Python docstrings"
         }
       },
       "release": {
         "python": {
           "enabled": false
-        }
-      },
-      "setup": {
-        "python": {
-          "command": "python -m pip install -e . -r requirements-dev.txt && if [ \"$(uname -s)\" = Linux ]; then sudo apt-get update && sudo apt-get install -y --no-install-recommends graphviz; fi"
-        },
-        "rust": {
-          "command": "if [ \"$(uname -s)\" = Linux ]; then sudo apt-get update && sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev patchelf; fi"
         }
       }
     },
@@ -195,18 +187,6 @@
         ]
       }
     },
-    "required_checks": [
-      "quality",
-      "pipeline / pipeline (3.10)",
-      "pipeline / pipeline (3.11)",
-      "pipeline / pipeline (3.12)",
-      "pipeline / pipeline (3.13)",
-      "pipeline / rust",
-      "pipeline / web",
-      "pipeline / docs",
-      "verify-docs",
-      "verify / verify-bound-issue"
-    ],
     "board": {
       "global": "Global",
       "boards": [
@@ -237,7 +217,30 @@
       "spdx": "GPL-3.0-only",
       "holder": "marius-patrik",
       "year": "2026"
+    },
+    "protection": {
+      "lanes": [
+        {
+          "branch": "main",
+          "required_checks": [
+            "governed / released-df-quality",
+            "governed / issue-binding / verify-bound-issue"
+          ],
+          "approvals": 1,
+          "strict": true,
+          "enforce_admins": false,
+          "resolve_conversations": true
+        }
+      ]
     }
+  },
+  "docs": {
+    "version": 1,
+    "site": {
+      "name": "BoardGamesWithQuests",
+      "description": "JSON-driven chess and checkers Python engine and React application"
+    },
+    "home": "README.md"
   },
   "providers": {}
 }

@@ -1,0 +1,168 @@
+classDiagram
+direction LR
+  class nd371e629bfa293ffb["GameController"]
+  nd371e629bfa293ffb : +__init__()
+  nd371e629bfa293ffb : +select_square()
+  nd371e629bfa293ffb : +handle_square_click()
+  nd371e629bfa293ffb : +reset_selection()
+  nd371e629bfa293ffb : +new_game()
+  class nc606331a1c2b21775["WindowController"]
+  nc606331a1c2b21775 : +__init__()
+  nc606331a1c2b21775 : +start()
+  nc606331a1c2b21775 : +stop()
+  nc606331a1c2b21775 : +set_status()
+  nc606331a1c2b21775 : +show_dialog()
+  nc606331a1c2b21775 : +close_dialog()
+  nc606331a1c2b21775 : +on_square_clicked()
+  nc606331a1c2b21775 : +tick_timer()
+  class nc1313c0736e59013c["Board"]
+  nc1313c0736e59013c : +__init__()
+  nc1313c0736e59013c : +is_within_bounds()
+  nc1313c0736e59013c : +get_piece_at()
+  nc1313c0736e59013c : +set_piece_at()
+  nc1313c0736e59013c : +move_piece()
+  nc1313c0736e59013c : +replace_piece()
+  nc1313c0736e59013c : +setup_default_board()
+  class n258a904e29b6a7487["ConfigurationError"]
+  class n02a89850b82a89385["GameDefinition"]
+  n02a89850b82a89385 : +name
+  n02a89850b82a89385 : +package
+  n02a89850b82a89385 : +title
+  n02a89850b82a89385 : +default
+  n02a89850b82a89385 : +playable
+  n02a89850b82a89385 : +board
+  n02a89850b82a89385 : +pieces
+  n02a89850b82a89385 : +clock
+  n02a89850b82a89385 : +exports
+  n02a89850b82a89385 : +appearance
+  class nb94b380f065f4a0fd["GameLogger"]
+  nb94b380f065f4a0fd : +__init__()
+  nb94b380f065f4a0fd : +create_file()
+  nb94b380f065f4a0fd : +log_move()
+  nb94b380f065f4a0fd : +get_moves()
+  nb94b380f065f4a0fd : +file_path()
+  class nda10dab1b63b6cb39["GameManager"]
+  nda10dab1b63b6cb39 : +__init__()
+  nda10dab1b63b6cb39 : +start_turn()
+  nda10dab1b63b6cb39 : +get_valid_moves()
+  nda10dab1b63b6cb39 : +cancel_move()
+  nda10dab1b63b6cb39 : +save_log()
+  nda10dab1b63b6cb39 : +get_state()
+  nda10dab1b63b6cb39 : +make_move()
+  class n45d74fe3962d7d530["Move"]
+  n45d74fe3962d7d530 : +__init__()
+  n45d74fe3962d7d530 : +validate()
+  n45d74fe3962d7d530 : +execute()
+  class n359d08f9e022bd6de["Player"]
+  n359d08f9e022bd6de : +__init__()
+  n359d08f9e022bd6de : +getColor()
+  n359d08f9e022bd6de : +getUser()
+  n359d08f9e022bd6de : +setUser()
+  n359d08f9e022bd6de : +getEloRating()
+  class nb9282aa7602bb6314["Quest"]
+  nb9282aa7602bb6314 : +__init__()
+  nb9282aa7602bb6314 : +validate()
+  nb9282aa7602bb6314 : +complete()
+  class nf8d6c7b85394e7406["Timer"]
+  nf8d6c7b85394e7406 : +__init__()
+  nf8d6c7b85394e7406 : +_get_player_index()
+  nf8d6c7b85394e7406 : +reset_time()
+  nf8d6c7b85394e7406 : +tick()
+  nf8d6c7b85394e7406 : +add_time()
+  nf8d6c7b85394e7406 : +get_time()
+  nf8d6c7b85394e7406 : +is_expired()
+  class ncd6b7a600f01cb085["MoveValidator"]
+  ncd6b7a600f01cb085 : +__init__()
+  ncd6b7a600f01cb085 : +set_board()
+  ncd6b7a600f01cb085 : +set_move()
+  ncd6b7a600f01cb085 : +find_king()
+  ncd6b7a600f01cb085 : +is_square_attacked()
+  ncd6b7a600f01cb085 : +is_check()
+  ncd6b7a600f01cb085 : +get_pseudo_legal_moves()
+  ncd6b7a600f01cb085 : +get_valid_moves()
+  ncd6b7a600f01cb085 : +get_all_valid_moves()
+  ncd6b7a600f01cb085 : +is_valid_move()
+  ncd6b7a600f01cb085 : +is_checkmate()
+  ncd6b7a600f01cb085 : +is_stalemate()
+  ncd6b7a600f01cb085 : +simulate_move()
+  class n1d8b1fb69d5af6b8e["ChessNotationWriter"]
+  n1d8b1fb69d5af6b8e : +__init__()
+  n1d8b1fb69d5af6b8e : +to_stenographic()
+  n1d8b1fb69d5af6b8e : +to_fen()
+  n1d8b1fb69d5af6b8e : +to_pgn()
+  n1d8b1fb69d5af6b8e : +export()
+  class n2db65a0476b9b2af7["ExportWriter"]
+  n2db65a0476b9b2af7 : +__init__()
+  n2db65a0476b9b2af7 : +export()
+  class n1a88b16330183a588["MetadataWriter"]
+  n1a88b16330183a588 : +__init__()
+  n1a88b16330183a588 : +set_header()
+  n1a88b16330183a588 : +get_header()
+  n1a88b16330183a588 : +format_pgn_headers()
+  n1a88b16330183a588 : +export()
+  class nfa5464b8b8014cbb7["QuestManager"]
+  nfa5464b8b8014cbb7 : +__init__()
+  nfa5464b8b8014cbb7 : +register_quest()
+  nfa5464b8b8014cbb7 : +get_quests()
+  nfa5464b8b8014cbb7 : +check_quests()
+  nfa5464b8b8014cbb7 : +get_completed_quests()
+  class n0b9b84d911ee178ba["Bishop"]
+  n0b9b84d911ee178ba : +__init__()
+  class n5221046c4a5d28faf["Horse"]
+  n5221046c4a5d28faf : +__init__()
+  class n3c66775beb86d6814["King"]
+  n3c66775beb86d6814 : +__init__()
+  n3c66775beb86d6814 : +hasMoved()
+  n3c66775beb86d6814 : +setMoved()
+  class ndcf73d29c336a959a["Pawn"]
+  ndcf73d29c336a959a : +__init__()
+  ndcf73d29c336a959a : +hasMoved()
+  ndcf73d29c336a959a : +setMoved()
+  ndcf73d29c336a959a : +getInitialVectors()
+  class nda3e38f4b5ff5b785["Piece"]
+  nda3e38f4b5ff5b785 : +__init__()
+  nda3e38f4b5ff5b785 : +getDirections()
+  nda3e38f4b5ff5b785 : +getAttackDirections()
+  nda3e38f4b5ff5b785 : +canJump()
+  nda3e38f4b5ff5b785 : +getColor()
+  nda3e38f4b5ff5b785 : +getType()
+  nda3e38f4b5ff5b785 : +getName()
+  class n55160175fbafc3dea["Queen"]
+  n55160175fbafc3dea : +__init__()
+  class nc7d8b41bdca19e527["Rook"]
+  nc7d8b41bdca19e527 : +__init__()
+  nc7d8b41bdca19e527 : +hasMoved()
+  nc7d8b41bdca19e527 : +setMoved()
+  class na242b6280b793a394["UserManager"]
+  na242b6280b793a394 : +__init__()
+  na242b6280b793a394 : +register_user()
+  na242b6280b793a394 : +get_user()
+  na242b6280b793a394 : +link_player()
+  na242b6280b793a394 : +log_action()
+  na242b6280b793a394 : +record_history()
+  na242b6280b793a394 : +execute_move()
+  class n50c5f4d1af2eb534f["User"]
+  n50c5f4d1af2eb534f : +__init__()
+  n50c5f4d1af2eb534f : +add_quest()
+  n50c5f4d1af2eb534f : +get_completed_quests()
+  n50c5f4d1af2eb534f : +getEloRating()
+  n2db65a0476b9b2af7 <|-- n1d8b1fb69d5af6b8e
+  nda3e38f4b5ff5b785 <|-- n0b9b84d911ee178ba
+  nda3e38f4b5ff5b785 <|-- n5221046c4a5d28faf
+  nda3e38f4b5ff5b785 <|-- n3c66775beb86d6814
+  nda3e38f4b5ff5b785 <|-- ndcf73d29c336a959a
+  nda3e38f4b5ff5b785 <|-- n55160175fbafc3dea
+  nda3e38f4b5ff5b785 <|-- nc7d8b41bdca19e527
+  nd371e629bfa293ffb --> nda10dab1b63b6cb39 : game_manager
+  nc606331a1c2b21775 --> nd371e629bfa293ffb : game_controller
+  nc1313c0736e59013c --> nda3e38f4b5ff5b785 : board
+  nc1313c0736e59013c --> nda3e38f4b5ff5b785 : captured_black
+  nc1313c0736e59013c --> nda3e38f4b5ff5b785 : captured_white
+  nda10dab1b63b6cb39 --> nc1313c0736e59013c : board
+  nda10dab1b63b6cb39 --> nb94b380f065f4a0fd : game_logger
+  nda10dab1b63b6cb39 --> n45d74fe3962d7d530 : current_move
+  nda10dab1b63b6cb39 --> n359d08f9e022bd6de : players
+  nda10dab1b63b6cb39 --> nf8d6c7b85394e7406 : timer
+  nda10dab1b63b6cb39 --> ncd6b7a600f01cb085 : move_validator
+  nfa5464b8b8014cbb7 --> nb9282aa7602bb6314 : quests
+  na242b6280b793a394 --> n50c5f4d1af2eb534f : users

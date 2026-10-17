@@ -3,54 +3,86 @@ name: Release
 on:
   push:
     branches: [main]
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - repo.dfconfig
   workflow_dispatch:
     inputs:
       bump:
-        description: "Optional explicit PrideVer bump: patch, minor, major, proud or version"
+        description: "Optional PrideVer bump or exact version"
         required: false
         type: string
 
 permissions:
   contents: write
 
+concurrency:
+  group: repository-release
+  cancel-in-progress: false
+
 jobs:
-  resolve:
+  release:
     runs-on: ubuntu-latest
-    outputs:
-      fallback_bump: ${{ steps.resolve.outputs.bump }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Checkout repository with tags
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+          persist-credentials: false
+
+      - name: Checkout pinned DarkFactory release authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: marius-patrik/DarkFactory
           ref: 368eb9d75d5d828e7ac17fe590d4dc17b028cebc
-          path: .darkfactory
-      - id: resolve
-        name: Ensure every untagged main change creates a development release
+          path: .darkfactory-pipeline
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Install DarkFactory release runtime
+        run: bun install --frozen-lockfile --cwd .darkfactory-pipeline
+
+      - name: Resolve version, assets and release notes
+        id: resolve
+        env:
+          REQUESTED_BUMP: ${{ inputs.bump }}
         run: |
-          PYTHONPATH=.darkfactory/.github/scripts python - <<'PY' >> "$GITHUB_OUTPUT"
-          import subprocess
-          import versioning
+          set -euo pipefail
+          args=()
+          if [ -n "$REQUESTED_BUMP" ]; then args=(--bump "$REQUESTED_BUMP"); fi
+          bun .darkfactory-pipeline/packages/harness/src/release/cli.ts \
+            --repo-root "$GITHUB_WORKSPACE" --notes-out "$RUNNER_TEMP/release-notes.md" \
+            "${args[@]}" > "$RUNNER_TEMP/release.json"
+          if [ "$(jq -r '.tag // empty' "$RUNNER_TEMP/release.json")" = "" ] && \
+             [ -z "$REQUESTED_BUMP" ] && [ -z "$(git tag --points-at HEAD)" ]; then
+            bun .darkfactory-pipeline/packages/harness/src/release/cli.ts \
+              --repo-root "$GITHUB_WORKSPACE" --bump patch \
+              --notes-out "$RUNNER_TEMP/release-notes.md" > "$RUNNER_TEMP/release.json"
+          fi
+          if [ "$(jq '.metadata_problems | length' "$RUNNER_TEMP/release.json")" -ne 0 ]; then
+            jq -r '.metadata_problems[]' "$RUNNER_TEMP/release.json" >&2
+            exit 1
+          fi
+          echo "tag=$(jq -r '.tag // empty' "$RUNNER_TEMP/release.json")" >> "$GITHUB_OUTPUT"
+          jq '{version,tag,mode,metadata_problems,steps}' "$RUNNER_TEMP/release.json" >> "$GITHUB_STEP_SUMMARY"
 
-          decision = versioning.resolve(".")
-          tag = versioning.latest_tag(versioning.git_tags("."))
-          untagged = subprocess.check_output(
-              ["git", "rev-list", "--count", f"{tag}..HEAD" if tag else "HEAD"],
-              text=True,
-          ).strip()
-          # Preserve normal Conventional Commit classification (feat -> minor,
-          # fix -> patch). Docs/chore commits otherwise silently create no release.
-          # No untagged commits means rerunning the workflow remains idempotent.
-          print("bump=patch" if int(untagged) and not decision["next"] else "bump=")
-          PY
-
-  release:
-    needs: resolve
-    uses: marius-patrik/DarkFactory/.github/workflows/release.yml@368eb9d75d5d828e7ac17fe590d4dc17b028cebc
-    with:
-      pipeline-repo: marius-patrik/DarkFactory
-      pipeline-ref: "368eb9d75d5d828e7ac17fe590d4dc17b028cebc"
-      bump: ${{ inputs.bump || needs.resolve.outputs.fallback_bump }}
-    secrets: inherit
+      - name: Publish development snapshot
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.resolve.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.resolve.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; no changes." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Development $TAG" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            --prerelease

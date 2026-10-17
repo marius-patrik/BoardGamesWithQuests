@@ -1,6 +1,357 @@
+/*
+ * Documentation header, navigation, search and theme behaviour.
+ *
+ * No framework dependencies: the colour-scheme toggle, mobile navigation, search over
+ * the existing index and repository/build selectors. Search uses a scored substring match.
+ */
+
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+
+  /* ── Colour scheme ──────────────────────────────────────────────────── */
+
+  var toggle = document.querySelector("[data-theme-toggle]");
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try {
+        localStorage.setItem("docs-theme", next);
+      } catch (e) {
+        /* Private browsing: the choice simply does not persist. */
+      }
+    });
+  }
+
+  /* ── Collapsible sidebar: desktop grid / mobile drawer ────────────── */
+
+  var navToggle = document.querySelector("[data-nav-toggle]");
+  var sidebar = document.querySelector("[data-nav]");
+  var mobileQuery = window.matchMedia("(max-width: 900px)");
+  if (navToggle && sidebar) {
+    function syncNavigation() {
+      var expanded = mobileQuery.matches
+        ? sidebar.classList.contains("is-open")
+        : root.getAttribute("data-nav-collapsed") !== "true";
+      navToggle.setAttribute("aria-expanded", String(expanded));
+      navToggle.setAttribute("aria-label", expanded ? "Collapse navigation" : "Expand navigation");
+      navToggle.title = expanded ? "Collapse navigation" : "Expand navigation";
+    }
+
+    function closeMobileNavigation() {
+      if (!sidebar.classList.contains("is-open")) return;
+      sidebar.classList.remove("is-open");
+      syncNavigation();
+    }
+
+    navToggle.addEventListener("click", function () {
+      if (mobileQuery.matches) {
+        sidebar.classList.toggle("is-open");
+      } else {
+        var collapsed = root.getAttribute("data-nav-collapsed") !== "true";
+        if (collapsed) root.setAttribute("data-nav-collapsed", "true");
+        else root.removeAttribute("data-nav-collapsed");
+        try {
+          localStorage.setItem("docs-navigation-collapsed", String(collapsed));
+        } catch (e) {
+          /* Navigation still works if storage is unavailable. */
+        }
+      }
+      syncNavigation();
+    });
+    sidebar.addEventListener("click", function (event) {
+      if (event.target.closest("a")) closeMobileNavigation();
+    });
+    document.addEventListener("pointerdown", function (event) {
+      if (mobileQuery.matches && !sidebar.contains(event.target) && !navToggle.contains(event.target))
+        closeMobileNavigation();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && mobileQuery.matches && sidebar.classList.contains("is-open")) {
+        closeMobileNavigation();
+        navToggle.focus();
+      }
+    });
+    if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", function () {
+      sidebar.classList.remove("is-open");
+      syncNavigation();
+    });
+    syncNavigation();
+  }
+
+  /* ── Persistent centered / full-width reader layout ────────────────── */
+
+  var layoutToggle = document.querySelector("[data-layout-toggle]");
+  if (layoutToggle) {
+    function syncLayout() {
+      var wide = root.getAttribute("data-layout") === "wide";
+      layoutToggle.setAttribute("aria-pressed", String(wide));
+      layoutToggle.setAttribute("aria-label", wide ? "Use centered layout" : "Use full-width layout");
+      layoutToggle.title = wide ? "Use centered layout" : "Use full-width layout";
+    }
+
+    layoutToggle.addEventListener("click", function () {
+      var wide = root.getAttribute("data-layout") !== "wide";
+      root.setAttribute("data-layout", wide ? "wide" : "centered");
+      try {
+        localStorage.setItem("docs-layout", wide ? "wide" : "centered");
+      } catch (e) {
+        /* Layout switching is available without persistent storage. */
+      }
+      syncLayout();
+    });
+    syncLayout();
+  }
+
+  /* ── Independently collapsible navigation groups ────────────────────── */
+
+  var groups = Array.prototype.slice.call(document.querySelectorAll("details[data-nav-section]"));
+  var groupStorage = "docs-sidebar-sections";
+  var groupStates = {};
+  try {
+    var saved = JSON.parse(localStorage.getItem(groupStorage) || "{}");
+    if (saved && typeof saved === "object" && !Array.isArray(saved)) groupStates = saved;
+  } catch (e) {
+    /* A corrupt or unavailable preference never prevents navigation. */
+  }
+  groups.forEach(function (group) {
+    var key = group.getAttribute("data-nav-section");
+    if (Object.prototype.hasOwnProperty.call(groupStates, key)) {
+      group.open = Boolean(groupStates[key]);
+    }
+    // Never hide the selected file within a collapsed ancestor on navigation.
+    if (group.querySelector('[aria-current="page"]')) group.open = true;
+    group.addEventListener("toggle", function () {
+      groupStates[key] = group.open;
+      try { localStorage.setItem(groupStorage, JSON.stringify(groupStates)); }
+      catch (e) { /* Navigation still works without storage. */ }
+    });
+  });
+
+  /* ── Browser fullscreen, independent of layout width ─────────────────── */
+
+  var fullscreenToggle = document.querySelector("[data-fullscreen-toggle]");
+  if (fullscreenToggle) {
+    var fullscreenAvailable =
+      typeof root.requestFullscreen === "function" &&
+      typeof document.exitFullscreen === "function";
+
+    function syncFullscreen() {
+      var active = Boolean(document.fullscreenElement);
+      root.toggleAttribute("data-fullscreen-active", active);
+      fullscreenToggle.setAttribute("aria-pressed", String(active));
+      fullscreenToggle.setAttribute("aria-label", active ? "Exit fullscreen" : "Enter fullscreen");
+      fullscreenToggle.title = active ? "Exit fullscreen" : "Enter fullscreen";
+    }
+
+    if (!fullscreenAvailable) {
+      fullscreenToggle.disabled = true;
+      fullscreenToggle.title = "Fullscreen unavailable in this browser";
+    } else {
+      fullscreenToggle.addEventListener("click", function () {
+        var operation = document.fullscreenElement
+          ? document.exitFullscreen()
+          : root.requestFullscreen();
+        Promise.resolve(operation).catch(function () {
+          syncFullscreen();
+        });
+      });
+      document.addEventListener("fullscreenchange", syncFullscreen);
+      document.addEventListener("fullscreenerror", syncFullscreen);
+    }
+    syncFullscreen();
+  }
+
+  /* ── Table of contents highlighting ─────────────────────────────────── */
+
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll(".toc__list a"));
+  if (tocLinks.length && "IntersectionObserver" in window) {
+    var byId = {};
+    tocLinks.forEach(function (link) {
+      var id = decodeURIComponent(link.getAttribute("href") || "").replace(/^#/, "");
+      if (id) byId[id] = link;
+    });
+
+    var visible = new Set();
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
+        });
+        var first = tocLinks.find(function (link) {
+          var id = decodeURIComponent(link.getAttribute("href") || "").replace(/^#/, "");
+          return visible.has(id);
+        });
+        tocLinks.forEach(function (link) {
+          link.classList.toggle("is-active", link === first);
+        });
+      },
+      { rootMargin: "-80px 0px -70% 0px" }
+    );
+
+    Object.keys(byId).forEach(function (id) {
+      var heading = document.getElementById(id);
+      if (heading) observer.observe(heading);
+    });
+  }
+
+  /* ── Search ─────────────────────────────────────────────────────────── */
+
+  var input = document.getElementById("search-input");
+  var panel = document.getElementById("search-results");
+  if (!input || !panel) return;
+
+  var baseEl = document.getElementById("search-base");
+  var base = "";
+  try {
+    base = JSON.parse(baseEl.textContent) || "";
+  } catch (e) {
+    base = "";
+  }
+  if (base && base.slice(-1) !== "/") base += "/";
+
+  var docs = null;
+  var loading = false;
+  var activeIndex = -1;
+
+  function load() {
+    if (docs || loading) return Promise.resolve();
+    loading = true;
+    return fetch(base + "search/search_index.json")
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        docs = (data && data.docs) || [];
+      })
+      .catch(function () {
+        docs = [];
+      })
+      .finally(function () {
+        loading = false;
+      });
+  }
+
+  function score(doc, needle) {
+    var title = (doc.title || "").toLowerCase();
+    var text = (doc.text || "").toLowerCase();
+    if (title === needle) return 100;
+    if (title.indexOf(needle) === 0) return 80;
+    if (title.indexOf(needle) !== -1) return 60;
+    var at = text.indexOf(needle);
+    if (at !== -1) return 30 - Math.min(20, Math.floor(at / 200));
+    return 0;
+  }
+
+  function excerpt(doc, needle) {
+    var text = doc.text || "";
+    var at = text.toLowerCase().indexOf(needle);
+    if (at === -1) return text.slice(0, 140);
+    var from = Math.max(0, at - 50);
+    return (from > 0 ? "…" : "") + text.slice(from, from + 150);
+  }
+
+  function render(results) {
+    activeIndex = -1;
+    if (!results.length) {
+      panel.innerHTML = '<div class="search-results__empty">No matches</div>';
+      panel.hidden = false;
+      return;
+    }
+    panel.innerHTML = results
+      .map(function (doc) {
+        return (
+          '<a href="' +
+          base +
+          doc.location +
+          '"><span class="search-results__title"></span>' +
+          '<span class="search-results__text"></span></a>'
+        );
+      })
+      .join("");
+    // Assign text via textContent so document content can never inject markup.
+    Array.prototype.forEach.call(panel.children, function (anchor, i) {
+      anchor.children[0].textContent = results[i].title || results[i].location;
+      anchor.children[1].textContent = results[i].excerpt;
+    });
+    panel.hidden = false;
+  }
+
+  function search() {
+    var needle = input.value.trim().toLowerCase();
+    if (needle.length < 2) {
+      panel.hidden = true;
+      return;
+    }
+    load().then(function () {
+      var results = (docs || [])
+        .map(function (doc) {
+          return { doc: doc, rank: score(doc, needle) };
+        })
+        .filter(function (entry) {
+          return entry.rank > 0;
+        })
+        .sort(function (a, b) {
+          return b.rank - a.rank;
+        })
+        .slice(0, 8)
+        .map(function (entry) {
+          return {
+            title: entry.doc.title,
+            location: entry.doc.location,
+            excerpt: excerpt(entry.doc, needle),
+          };
+        });
+      render(results);
+    });
+  }
+
+  input.addEventListener("input", search);
+  input.addEventListener("focus", load);
+
+  input.addEventListener("keydown", function (event) {
+    var items = panel.querySelectorAll("a");
+    if (event.key === "Escape") {
+      panel.hidden = true;
+      input.blur();
+    } else if (event.key === "ArrowDown" && items.length) {
+      event.preventDefault();
+      activeIndex = (activeIndex + 1) % items.length;
+    } else if (event.key === "ArrowUp" && items.length) {
+      event.preventDefault();
+      activeIndex = (activeIndex - 1 + items.length) % items.length;
+    } else if (event.key === "Enter" && activeIndex >= 0 && items[activeIndex]) {
+      event.preventDefault();
+      window.location.href = items[activeIndex].href;
+      return;
+    } else {
+      return;
+    }
+    Array.prototype.forEach.call(items, function (item, i) {
+      item.classList.toggle("is-active", i === activeIndex);
+    });
+  });
+
+  document.addEventListener("click", function (event) {
+    if (!event.target.closest(".header__search")) panel.hidden = true;
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "/" && document.activeElement !== input) {
+      var tag = (document.activeElement && document.activeElement.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      event.preventDefault();
+      input.focus();
+    }
+  });
+})();
+
 /**
  * Repository and branch selectors. The selected value comes from the current URL, not
- * the manifest publisher metadata.
+ * manifest.current (which describes the publisher, not the page a visitor is reading).
  * Compute the shared site root from the absolute CSS URL; it works on nested pages
  * and in PR/branch previews alike. Every navigation target is a published site URL.
  */
@@ -46,7 +397,7 @@
     });
   }
 
-  // Both controls are functional even if a site has no manifest.
+  // Both controls are functional even if a legacy site has no manifest.
   populate(projectSelect, [
     { name: controls.dataset.siteName, url: siteRoot, id: "this" }
   ], "this");
