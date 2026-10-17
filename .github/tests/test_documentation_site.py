@@ -78,7 +78,7 @@ def test_source_generated_diagrams_work_in_documentation():
         assert page.is_file(), f"Rendered diagram page is missing: {category}/{stem}"
         html = page.read_text(encoding="utf-8")
         assert 'class="diagram-viewer"' in html and "assets/diagrams.js" in html
-        rendered = re.search(r'<img src="([^"]+\\.svg)"', html)
+        rendered = re.search(r'<img src="([^"]+\.svg)"', html)
         assert rendered, f"Mermaid was not rendered: {category}/{stem}"
         relative = urlsplit(unescape(rendered.group(1))).path
         image = (page.parent / relative).resolve()
