@@ -12,7 +12,7 @@ from server.auth import (
     bearer_token,
 )
 
-from engine.model.game.configuration import installed_definitions
+from server.engine.model.game.configuration import installed_definitions
 
 app = FastAPI(
     title="BoardGamesWithQuests API",
