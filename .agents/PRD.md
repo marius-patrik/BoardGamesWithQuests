@@ -1,200 +1,103 @@
-# BoardGamesWithQuests — Product Requirements Document
+# BoardGamesWithQuests
 
-**Product scope:** This is the target behavior; implementation progress is established by verified tests, not by the presence of source files. Reference UML: [reference diagram](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/diagrams/reference/uml.mmd). Package ownership: the canonical product contract.
+BoardGamesWithQuests is a configuration-driven multiplayer board-game platform. One React application runs on Vercel and in Tauri WebViews; a separate Vercel-hosted Python/FastAPI application executes a generic deterministic engine. Supabase PostgreSQL owns all authoritative state and declarative configurations; Supabase Storage holds raster presentation assets. Configuration JSON is portable interchange and is not authoritative database state.
 
-## 1. Product
+# 1. INVARIANTS
 
-A configurable online **two-player** board-game app, with Python engine shared by orthodox chess, WCDF English draughts and international draughts. Players select or create validated JSON variants: board, starting position, piece movements and glyphs, active rules and quests, and clocks. Chess is the preselected shipped game, not an implicit engine constructor default. Both draughts variants demonstrate engine neutrality: neither uses a game-identity branch.
+## 1.1 User-visible product
 
-The complete user interface is a **React/Rsbuild** website, publicly hosted on **Vercel**. **Tauri** is a thin desktop wrapper loading that same website. **FastAPI Python Functions on Vercel** run all authoritative game logic. **Supabase** provides persistent game data, Auth (registered and guest identities), and Realtime event updates. Each game has precisely two participant slots; creating/joining a match needs no separate room concept. No leaderboard, tournament or other unrequested features.
+The application provides guest and registered accounts; creation and joining of games by opaque URL; published built-in definitions; an owned visual editor; configuration import/export; private real-time revision hints; game history; optional objectives/quests; ratings for eligible built-ins; and responsive, accessible browser/native UX. Users interact through a single frontend and API.
 
-## 2. User needs
+The initial playable games are **chess**, **English draughts**, and **international draughts**. **MoneyProperty** remains a fully specified, original and unbranded property-trading game definition and a required generic-engine compatibility target; complete playable economic behavior and its end-to-end acceptance are the **final game milestone**, after the generic engine, multiplayer system, editor, deployments and first three games are verified. No protected third-party names, boards, cards, or artwork may be bundled. Chess is the selection default. Game history export is not provided; configuration JSON export is provided.
 
-| Actor | Required outcome |
-|---|---|
-| Player | Create/join matches, configure variants through forms, see board, legal moves, players, clocks, captures, progress, history and correct result. |
-| Guest | Play immediately with an anonymous authenticated identity and nickname, without needing an email account. |
-| Registered user | Register/sign in, manage identity and persisted game history, quests and ratings. |
-| Teacher/grader | See supplied reference UML preserved and supported by a recorded, explicit set of modern architecture deviations; demo running public game. |
-| Maintainer | Behavior verified against requirements, with one documented architecture, reviewable implementation PRs, and honest CI/release statuses. |
+No matchmaking, bots, spectator mode, social feed, leaderboard, or tournaments are specified.
 
-## 3. Fixed constraints
+## 1.2 Domain and ownership
 
-- **JSON only for game configuration, including rules/quests/hooks.** No user-authored executable code, custom Python modules, JS snippets, unsafe expressions or code editors.
-- Python can implement **trusted generic predicates/effects/operations**, never untrusted user code; the JSON vocabulary and its limits must be validated for all shipped-game requirements.
-- No hard-coded game identity, royal king logic, pawn names or default board dimensions in shared engine. Domain-significant values are supplied explicitly.
-- No external chess rules library replacing the hand-implemented engine, unless separately approved. Modern approved runtime libraries for web/API/Supabase are allowed.
-- All public multiplayer state changes are authenticated, authorized, atomic and durable.
-- Existing source/reference UML is preserved as reference evidence; intentional divergence is registered in the product requirements.
-- Permanent tests must assert real gameplay, API, UI and persistence behavior. Behavioral tests accompany every implementation chunk and are integrated into the permanent acceptance suite.
-- MkDocs, Material and mkdocstrings generate all documentation pages and navigation from Python source/docstrings. Strict builds have zero warnings or errors; repository specifications remain source references rather than static documentation pages or manual indices.
+- **Entity type**: `game | space | item | objective`. Types are domain metadata, not distinct interpreters. All seeded and dynamically created instances share one entity model.
+- **Action**: a configured command or an automatically triggered hook action, attached to one entity type. It may enumerate typed locals, evaluate a pure Boolean condition, and execute an ordered list of effects. There are no separate movement, rule, or quest pipelines.
+- **Objective**: a normal entity whose fields and actions encode progress, terminal game outcomes or optional quests. Permanent account XP/ratings are privileged settlement operations independent of author-defined effects.
+- **Space**: an entity graph with directed or undirected links, optional grid coordinates, cyclic tracks, zones or ordered containment. Nothing in the engine requires a rectangular board.
+- **Participants**: each immutable published definition declares a validated `min_participants`/`max_participants` range, with seats allocated only to joined users; no engine, API, schema, or renderer assumes exactly two. Chess and both draughts require precisely two; MoneyProperty supports two through eight, while the core model supports other bounded counts and multi-party decisions.
+- **Phase**: a named action-eligibility state; turns may contain multiple phases, simultaneous eligibility, and decisions. No hardcoded two-player alternation.
+- **Condition**: a typed, pure expression returning Boolean. Expressions can read observed/proposed state but cannot mutate it or perform I/O.
+- **Effect**: a typed mutation proposal that acts only on a transition workspace. The engine never writes directly to PostgreSQL.
+- **Hook**: an engine lifecycle event with deterministic ordering, context and bounded dispatch.
+- **Presentation**: a read-only typed SVG scene projection assembled from entity topology, visuals and authoritative state. Never used to decide gameplay legality.
 
-## 4. Configuration and extension model
+## 1.3 Action evaluation algorithm
 
-The built-in chess, English draughts and international draughts definitions will be trusted immutable JSON data served by the server, not separate Python packages. All definitions use the **same versioned declarative schema**, with board placements, piece declarations, rule/quest hooks/conditions, game outcomes, symbols, clock controls, metadata and applicable export formats. Copying/creating a variant means copying validated **data**, not creating/importing a new Python module. User variants persist in Supabase.
+For a submitted command, FastAPI authenticates the principal, checks Origin and CSRF, locks the game, resolves idempotency, and checks the expected revision. The repository loads the immutable pinned version and authoritative relational state into typed immutable projections. The engine generates candidates using entity actions, validates the selected command, creates an isolated proposed state, executes ordered effects and automatic hooks, evaluates objectives and completion, and returns a fully typed transition. The API validates the transition and commits all state changes, immutable event/mutation rows, revision increment and authorized progression in one PostgreSQL transaction. A failed check rolls everything back. Realtime publishes the committed revision as a hint; the client reloads the API projection.
 
-The engine's five conceptual rule hooks are `permits_move`, `available_moves`, `outcome`, `on_move_made`, `status`. The engine implements generic interpreters for typed conditions, logical composition, comparisons, counts, board queries, movement vectors, per-session state and authorized effects. A rule does not commit a move; the game manager owns the final transition. Quests are similarly declarative, report progress and rewards, and are scoped per player. No user-authored rule/quest subclass or executable configuration path.
+The actor cannot submit trusted time, randomness, game state, the results of conditions, or effect arguments the definition does not permit. Exact same idempotency key+request digest returns the accepted result. Different payload reusing a key is a conflict. Accepted events are append-only; replay uses stored complete before/after mutations and recorded trusted inputs.
 
-Forms for Board, Pieces, Rules, Quests and Clocks derive their allowed fields and operations from the shared schema. Config validation must fail closed, without corrupting valid saved state or exposing arbitrary evaluation.
+At activation, configuration seeds are instantiated in parent-before-child order. A seed with
+an `owner` seat is instantiated **only when that seat is occupied**; this permits a
+single 2–8-player MoneyProperty definition without instantiating tokens or wallets for
+absent players. Global seeds must not depend on omitted optional-seat seeds. Every
+instance's stable identity and initial order are recorded by the activation event.
 
-## 5. Naming and source UML
+Hook actions execute for live instances of their owning entity type in deterministic
+creation/seed order. Within a hook, priority and action identity determine order.
+Entity-scoped hooks evaluate against instances in deterministic order. Hooks for
+an individual event subject (such as a drawn card) MUST explicitly match the
+subject instance; a shared entity type or operation name is not sufficient.
+Configured automatic movement MUST verify that the instance belongs to the
+active participant, preventing actions on other participants' pieces or tokens.
+Chess promotion is an effect within the same accepted pawn-movement command
+before the turn advances; no separate post-turn promotion command is permitted.
 
-English canonical names are used for shared domain types; the source-reference Czech naming and reference mapping remain in [reference diagram](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/diagrams/reference/uml.mmd). Where the engine Python implementation needs Czech aliases, they bind to the same canonical domain class, not a parallel runtime. Canonical chess knight is `Knight`, not `Horse` or `Tower`. `GameView`/`PlayerView` are **React component responsibilities**, not classes to keep inside `engine/view`. See the canonical product contract for rationale and traceability.
+A successful effect may expose a typed result to later effects in the same proposed
+transition (for example, a trusted die result); it is never available to candidate
+or legality evaluation before the random effect executes. Phase-changing effects
+schedule subsequent `phase.enter` hooks through a bounded queue, never recursive
+uncontrolled dispatch. Wildcard-phase actions apply to every configured phase.
 
-## 6. Package boundaries
+A game is `pending`, `active`, `finished`, or `expired`. The final accepted event settles one immutable outcome per participant and may authorize progression awards; nonterminal games have no outcome records. The configured minimum participant count activates pending games once seats/roles are valid. Pending invitations expire after 24 hours. Games always pin one published version; published versions are immutable. A terminal game does not accept gameplay actions other than exact retries.
 
-\`\`\`text
-packages/
-  server/
-    engine/    Python board, moves, generic declarative rules/quests and domain lifecycle
-    api/       FastAPI, Vercel entrypoint and authoritative HTTP boundaries
-    supabase/  Supabase CLI config, migrations, schema and transaction ownership
-  client/      Bun/React/TypeScript/Rsbuild/Tailwind/shadcn/ui/Motion web app
-  native/      Bun/Tauri 2 client of the same deployed web origin
-\`\`\`
+## 1.4 Security and privacy
 
+All client-visible game state and available actions must be projected for the authenticated viewer; hidden cards, inventories and other secret data must not leak to competitors. Runtime entity references must remain inside their game; configuration references inside their pinned version. All execution is bounded. Public Supabase roles cannot query private `bgwq` tables. Database Realtime topics are private and membership-restricted. Assets use bounded signed uploads, MIME+hash verification, and version-pinned Storage paths. No user-authored Python, JavaScript, SQL, or unrestricted SVG/HTML execution is accepted.
 
-Python domain orchestration stays in `server/engine`, including the preserved `server/engine/controller/` package. Its existing `GameController` coordinates selections and moves; the legacy `WindowController` is retained as source but is not a deployed UI runtime. There is no Tkinter view or launcher. Supabase Auth owns account credentials; server owns participant authorization; engine owns rule and turn legality. Future serverless execution must not rely on controller instances surviving between requests.
+## 1.5 Numeric and temporal semantics
 
-## 7. Functional requirements
+Authoritative values support Boolean, signed 64-bit integer, exact decimal, Unicode text, UTC instant, typed entity/participant reference, and absence. Lists, sets and paths are bounded typed execution values and relationally stored as ordered entities/links. Monetary values are integer minor units. No floating-point authoritativeness. Integer overflow and invalid casts cause a typed evaluation error. All execution ordering, collection iteration, state digests, random draws and server-time reads have deterministic semantics. Path enumeration cannot silently truncate candidate lists.
 
-### 7.1 Game data
+## 1.6 Rendering, interaction and accessibility
 
-| ID | Requirement |
-|---|---|
-| FR-1 | Board dimensions are configurable in rows and columns. |
-| FR-2 | The starting position is either the shipped one or edited square by square. |
-| FR-3 | A piece declares a name, a white symbol, a black symbol, movement vectors, attack vectors, a jump flag and a `kind` label. A piece may be added to the palette and placed on the board. |
-| FR-4 | Symbols are **unicode chess glyphs declared as data**. The board renderer and the notation writer have no knowledge of piece types; both read what the piece declares. |
-| FR-5 | A piece may additionally declare an optional FEN character. Without one it has no FEN representation. |
-| FR-6 | Clocks declare an initial time and an increment. |
-| FR-7 | A game runs under exactly one configuration and exactly one board. |
+The web app uses **Wouter** for routing, SVG primitives for space/entity visuals, shadcn/ui for accessible controls, Motion for visual transitions, and an API-supplied typed action catalog for input forms. All boards, tokens, cards, pieces and tracks are dynamically generated. Generic controls support selection, drag/pointer, touch, keyboard, lists, paths, choices, auctions, trades, dice, cards, objectives and clocks. The client animates but does not determine legal moves or mutate authoritative state. Private Storage assets are resolved through authorized asset grants.
 
-### 7.2 Declarative rules
+## 1.7 Required observable outcomes
 
-| ID | Requirement |
-|---|---|
-| FR-8 | The engine interprets JSON-defined rule instances through five generic hooks: `permits_move`, `available_moves`, `outcome`, `on_move_made`, and `status`. A rule contains declarative configured parameters and isolated per-game state. The hooks are implemented by trusted generic engine operations; users do not write subclasses. |
-| FR-9 | `permits_move` and `available_moves` restrict/describe allowed actions, `outcome` proposes a result, `on_move_made` updates configured per-session state, and `status` supplies display information. Side effects are bounded, schema-validated declarative effects, never arbitrary executable code. |
-| FR-10 | Rules propose permitted actions, status and outcomes; a single engine coordinator authorizes closed move/resign/claim_draw/timeout actions, commits transitions and resolves configured outcomes. Agreed draw requires a separate offer/acceptance handshake. No rule implementation may bypass the central commit boundary. |
-| FR-11 | `Result` records kind, winner, reason and precedence. Conflict resolution is deterministic, with appropriate decisive/draw policy and tie order. |
-| FR-12 | Configured rule parameters are stored in immutable JSON game-definition snapshots; mutable rule state is isolated by game and must be serialized for serverless restart recovery. A newly created game resets runtime state. |
-| FR-13 | A move may consist of **several hops**. A capture chain in checkers is one move the player makes, not several. |
-| FR-14 | No piece type is special to the engine. Whether a position has a king is a rule, not a lookup by type name. |
-| FR-15 | Board size is not restricted to 8×8. Rank-relative rules are **generalised, not disabled**: the home rank and the castling and knight-forward files are derived from the configured board. |
-| FR-16 | The JSON hook vocabulary can express all applicable chess rules from `chess_rules.md`, including castling, en passant, promotion, check, mate, stalemate, draw/repetition, claims and timeout material conditions. |
-| FR-17 | Generic predicates, comparisons, counts, state queries, logical composition and bounded effects support all approved customization without game-name-specific engine branches. The system does not promise arbitrary user-written algorithms or executable scripts. |
+- Chess must implement all orthodox moves and compound transitions, checks, mate, stalemate, castling, en passant, promotions, clocks, repetition, draw claims and automatic draws.
+- English and international draughts must implement their distinct capture, promotion, king movement, victory and draw semantics.
+- MoneyProperty must provide original 40-location board data, full purchasable economy, deterministic dice/deck replay, extra rolls, detention, taxes, rent, upgrades, mortgages, auctions, trades, bankruptcy, elimination and victory.
+- Chess and both draughts games first pass complete browser and provider-backed replay/recovery scenarios on the same generic engine and renderer. MoneyProperty is implemented and accepted as the final game, without adding game-name branches or a second interpreter.
+- MoneyProperty's definition, generic operators, schema and API requirements remain normative from the outset. Deferring playable acceptance cannot defer variable participants, hidden-state, multi-phase decisions, or economic data-model support.
+- At least 30 simultaneous players across 15 games from one classroom IP must function with revision and authorization correctness.
+- Only Tauri wraps the hosted frontend; it never duplicates or locally runs the engine.
 
-### 7.3 Declarative quests
+## Contract-finalization gate
 
-| ID | Requirement |
-|---|---|
-| FR-18 | `Quest` is a data-defined game objective evaluated by the engine through configured hooks and conditions, not a user-authored Python subclass; quest evaluation has the conceptual `validate` result required by the reference. |
-| FR-19 | Quest logic is JSON configuration interpreted by trusted generic engine primitives. No separate user-authored condition class, source code module, or Python plugin is required. |
-| FR-20 | Quests declare identity, name, description, parameters, timing, progress measurement, completion criteria and reward as schema-validated JSON. |
-| FR-21 | A quest declares evaluation timing (`after_move` or `at_game_end`), or another explicitly supported lifecycle trigger defined in the schema. |
-| FR-22 | A quest exposes progress as active and target, not only a completion boolean. |
-| FR-23 | Configured quests are held per game; their progress and completion are isolated per player; completed achievements are persisted against the user's account. |
-| FR-24 | Total experience is **derived** from the quests a user has completed, so the user type gains no new field. |
+Before implementing gameplay against this design, review the **API, schema and interface/dependency graph as one system**. Approval requires:
 
-### 7.4 Game definitions and persistence
+- **HTTP/API**: Every public operation declares its typed request/response, authentication and CSRF, per-participant authorization, revision/idempotency behavior, error cases, and viewer-scoped projection/redaction; each operation maps to a concrete service and transactional owner.
+- **Database**: Every API projection and engine mutation maps to immutable version-pinned definitions, game-scoped state, append-only events, outcomes and rewards, with sound composite keys, indexes, constraints, RLS/grants, real upgrade paths and atomic settlement.
+- **Source graph**: Every file and exported interface has one owner, typed inputs/outputs, dependencies, ordering, invariants, failure modes and side-effect boundaries. The specification graph cannot silently be confused with the actual generated implementation diagrams.
+- **Cross-contract validation**: All JSON fixtures, operators, OpenAPI, Prisma and PostgreSQL integrity SQL agree on participant ranges, stable identifiers, reference scopes, secrecy, revisions and replay. Passing structural checks is not a substitute for running migrations and provider-facing acceptance.
+- **Dependency**: Architecture is approved before treating platform bootstrap or integration as complete. The full MoneyProperty browser/product acceptance is last, while its architectural requirements apply throughout.
 
-| ID | Requirement |
-|---|---|
-| FR-25 | Shipped game definitions are immutable validated JSON documents, not executable Python packages. The server loads trusted built-ins, and the generic engine consumes them with no game-name branches. |
-| FR-26 | The immutable shipped chess definition provides orthodox 8×8 pieces, setup, rules and clocks as JSON. The UI may preselect this definition; constructing a playable engine session always receives its selected configuration explicitly. |
-| FR-27 | Shipped default definitions cannot be edited/deleted; a variant begins as a validated copy. |
-| FR-28 | Users can create, rename, duplicate, edit and delete user-owned game variants through JSON-backed settings. |
-| FR-29 | User variants persist as versioned, validated JSON in Supabase; a running game uses an immutable snapshot and survives serverless restarts. Runtime configuration does not depend on writable package directories. |
+## Normative architecture and contracts
 
-### 7.5 Schema-driven settings
+The product requirements above are defined by the following **single-source contracts**, which must agree with one another:
 
-| ID | Requirement |
-|---|---|
-| FR-30 | The Settings interface contains an explicit selector identifying which configuration is being edited. |
-| FR-31 | Settings exposes Board, Pieces, Rules, Quests and Clocks as declarative configuration sections. |
-| FR-32 | All configurable game data, including rule and quest logic composition, is exposed through schema-driven forms; no source-code editor is required. |
-| FR-33 | Rule and Quest sections provide a declarative form/builder for composing supported JSON conditions, hooks, parameters and effects; no Python/JS authoring or execution. |
-| FR-34 | The settings editor validates JSON schema, operation references, nesting limits and semantic constraints before saving; invalid configurations never replace valid definitions. |
-| FR-35 | Settings supports save, reset, cancel and appropriate variant duplication/edit/delete actions, with persistence affecting subsequent games. |
+- [ARCHITECTURE.md](notes/requirements/ARCHITECTURE.md) — source tree with inline responsibilities, package boundaries, frameworks, tooling, and deployment.
+- [openapi.yaml](../packages/server/api/openapi.yaml) — complete OpenAPI 3.1 HTTP contract and payload schemas.
+- [schema.prisma](../packages/server/supabase/schema.prisma) — relational PostgreSQL entities, fields, relations and indexes.
+- [integrity.sql](../packages/server/supabase/integrity.sql) — PostgreSQL-only integrity and Supabase Auth/Realtime security (not expressible in Prisma Schema Language).
+- [AST.mmd](notes/requirements/AST.mmd) — pure Mermaid source-declaration and dependency graph; rendered interactively by the documentation site, **without committing an SVG**.
+- [data/](../data/) — portable configuration JSON Schema, four self-contained game configurations, operator semantics and provisioning DML.
 
-### 7.6 Browser gameplay
+**Authority:** the API YAML, Prisma schema, Mermaid graph, and portable JSON files are normative inputs, not illustrations. The PRD defines product behavior and invariants; it does not duplicate their contents. A diagram specifies source architecture and exported interfaces, but is not an executable substitute for function bodies. Complete behavior is verified against a running generic engine and database, not inferred from document shape.
 
-| ID | Requirement |
-|---|---|
-| FR-36 | The web game-start experience offers a game/configuration selector, Settings action and Start/create/join flow for exactly two players. |
-| FR-37 | The React board renders coordinates, declared glyphs, active squares and legal-move highlights; gameplay comes from the authoritative engine. |
-| FR-38 | Both player panels show authenticated/guest identity, clock and captured/lost pieces. |
-| FR-39 | The active turn is indicated from authoritative game state. |
-| FR-40 | Durable game move history is visible in the React UI. |
-| FR-41 | Game status and alerts display the actual terminal reason in a footer/status surface. |
-| FR-42 | Per-player quests appear as cards showing progress and reward; both players' quest logs are visible. |
-
-### 7.7 Notation and export
-
-| ID | Requirement |
-|---|---|
-| FR-43 | Each supported game export is a trusted, independent format writer selected through a typed definition capability. No user-authored format code, generic-engine game-name switch or dynamically imported game module. |
-| FR-44 | *Letter* — the move is rendered in algebraic notation with piece letters, capture markers, promotion and castling notation. |
-| FR-45 | *PGN* — real PGN: a seven-tag roster **derived from the game** (event, site, date, round, both players, result), and movetext in Standard Algebraic Notation, including piece disambiguation, castling notation, promotion, and check and mate suffixes. |
-| FR-46 | *FEN* — all six fields are **computed from the game state**: placement, side to move, castling rights, en passant square, halfmove clock and fullmove number. No field is hard-coded. |
-| FR-48 | Game transcript metadata derives from actual event/site/date/players/result state; never hardcode placeholders. |
-| FR-49 | Stenographic game transcript export uses a standard or explicitly configured standard-library codec; no user-authored executable compression. |
-| FR-50 | An authoritative durable transcript records every move and relevant event separately from export formats. |
-| FR-51 | FEN and PGN are chess-only formats. A game without a supported representation does not offer that export; game-format applicability derives from validated definition metadata. |
-
-### 7.8 Shipped games
-
-| ID | Requirement |
-|---|---|
-| FR-53 | The built-in chess JSON definition will implement complete orthodox chess including valid castling, en passant, promotion, check/mate, draws, clocks and exports. |
-| FR-54 | The built-in English draughts JSON definition will implement complete 8×8 rules: 12 pieces per side, mandatory chained captures, crowning, and wins by capture or immobilization. |
-| FR-55 | Adding/checking the checkers JSON definition requires no conditional branch in generic engine behavior; game-specific implementations never leak into the engine. |
-
-| FR-83 | The built-in international draughts JSON definition will implement complete 10×10 play: 20 men per side, backward captures, flying kings, mandatory maximum-capture routes and correct crowning/outcomes. |
-
-### 7.9 Application and runtime
-
-| ID | Requirement |
-|---|---|
-| FR-56 | Authoritative game logs and history are stored durably in Supabase and exposed through authenticated APIs. A local development log file is optional, not a source of truth. |
-| FR-57 | The Python server package containing the engine is installable and declare FastAPI/Supabase and any real runtime dependencies. Frontend dependencies are managed by Bun; release versions derive from Git tags. |
-| FR-58 | A documented public Vercel URL loads the web application and two players can complete a game to a valid outcome against the Python engine. |
-| FR-59 | The deployed application has an explicit FastAPI ASGI entry point and a built Rsbuild frontend; Tauri wraps that same hosted frontend. No Python/Tkinter GUI entry point exists. |
-
-### 7.10 Domain model and UI responsibilities
-
-| ID | Requirement |
-|---|---|
-| FR-60 | Supabase Auth registers, authenticates and identifies persistent and anonymous guests. Profiles have username/display name where applicable and rating and quest records; player assignments reference stable identities; duplicate IDs and unauthorized links are rejected. |
-| FR-61 | The generic validator exposes candidate/legal moves and state/outcome queries through JSON-configured rules; royal/check semantics are game configuration data, never piece-name tests in engine. |
-| FR-62 | One GameManager owns the active board, active player, two positions, move, configured clocks, history, rule/quest state and validator, and serializes a consistent session snapshot for durable storage. The selected definition pins starting_side and optional position_identity policies. |
-| FR-63 | Game clocks use explicit time controls and participant IDs, trusted timestamps, invalid-input rejection and recoverable state independent of continuously running functions. |
-| FR-64 | A durable append-only game transcript records moves, action types, events and results without accidental truncation; move events retain their version-1 envelope and terminal events additionally carry the canonical action with a null move; authenticated clients can retrieve it. |
-| FR-65 | React UI interaction chooses squares and sends a move intent to FastAPI; the Python engine controller authorizes and commits through its single public domain operation. |
-| FR-66 | The React board view subscribes/refetches persisted authoritative state after committed changes, reconnection and missed Realtime messages. |
-| FR-67 | The React player panels similarly refresh from authoritative player identity, clock, captures and quest progress. |
-
-### 7.11 Online application, security and delivery
-
-| ID | Requirement |
-|---|---|
-| FR-68 | Game configuration is only validated JSON. User-provided Python, JavaScript, arbitrary code expressions, dynamic executable imports and runtime eval/exec are prohibited. |
-| FR-69 | JSON rule/quest hooks use a typed, bounded, versioned AST with schema-checked operations, nesting, references, effects and complexity limits. |
-| FR-70 | The public game API runs Python engine/domain logic in FastAPI hosted as Vercel Python Functions; functions have no required persistent in-memory state. |
-| FR-71 | Supabase Postgres stores authoritative game snapshots, revisions, history, users, settings, quest progress and results. Every game is reconstructible after a serverless restart. |
-| FR-72 | Move submission verifies Supabase-authenticated identity and game membership, enforces correct turn and rules, and atomically commits a single revision or rejects conflicts/duplicates. |
-| FR-73 | Supabase Auth supports registered accounts and anonymous guests with nicknames; RLS and server authorization isolate participants' data. |
-| FR-74 | Supabase Realtime notifies authorized participants of committed updates; clients handle reconnect, gaps, duplicate/out-of-order events by fetching authoritative snapshots. |
-| FR-75 | The sole GUI is React + TypeScript + Rsbuild + Bun + Tailwind + shadcn/ui + Motion + Lucide/lucide-animated; the server supplies generated typed OpenAPI contracts. |
-| FR-76 | The Tauri native package loads the **same deployed web UI**, does not maintain another frontend or bundle a Python server, and uses minimal native capabilities. |
-| FR-77 | Two Vercel projects deploy the frontend and Python API from compatible reviewed Git revisions; Supabase is the only persistent hosted service. Hosting aims to stay within free tiers, verified before public release. |
-| FR-78 | The public application supports exactly two participants per individual game, create/join invitation, separate concurrent games and correct resilience; it has no additional classroom room or leaderboard. |
-| FR-79 | The public deployment must be usable for the class presentation: guests on a shared IP, real browsers, conactive games, match completion, clock correctness and reconnection tested against quotas. |
-| FR-80 | Each behavior change delivers automated user-observable and adversarial tests. The permanent suite (#239) extends these through real network/browser/database end-to-end verification; a green build or diagram cannot certify gameplay. |
-| FR-81 | Shipped configurations are immutable; authenticated users can save editable JSON variants, and each game pins an immutable validated config snapshot. |
-| FR-82 | Repository and release artifacts have one active plan, correct GPL-3.0 metadata, one `repo.dfconfig`, updated DarkFactory pin, aligned code and accurate diagrams, with explicit approval before merge. |
-
-## 8. Acceptance evidence
-
-Deliver a complete public two-player game from guest sign-in through game creation/joining, alternating legal moves, correct result, persisted history, reconnection and serverless function restart. Exercise real rule/quest JSON customization, saved variants, orthodox chess and WCDF checkers, correct PGN/SAN and FEN export, GUI behavior, account isolation, access policies, atomic double-submit handling, clocks, Tauri wrapper, classrooms on shared network, and verified Vercel/Supabase free-tier quotas. Behavioral verification is required throughout delivery and for final acceptance in #239. **No documentation check or code compilation substitutes for this evidence.** The web/API Vercel workflows and Supabase migration verification must gate deployment appropriately; native release assets target Windows, Linux, macOS, Android and iOS with device signing required for distributable mobile artifacts.
+The specification graph in [AST.mmd](notes/requirements/AST.mmd) describes intended interfaces and dependencies. Source-derived [implementation AST](notes/diagrams/implementation/ast.mmd) and [implementation UML](notes/diagrams/implementation/uml.mmd) describe only code actually committed. Both are shown through the one Git-backed documentation viewer. Neither kind of diagram is proof of executable game behavior or a complete code generator.
