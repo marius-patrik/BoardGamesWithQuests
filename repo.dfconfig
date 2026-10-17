@@ -8,7 +8,7 @@
       "project_title": "BoardGamesWithQuests",
       "agent_slug": "boardgameswithquests-agent",
       "default_branch": "main",
-      "description": "Configurable chess/checkers app with declarative JSON game rules, React frontend, and Python backend on Vercel.",
+      "description": "BoardGamesWithQuests Python API/engine, Bun React web app and Tauri native client.",
       "topics": [
         "chess",
         "checkers",
@@ -131,7 +131,7 @@
         ]
       },
       "core": {
-        "description": "Controller, model wiring, application lifecycle, configuration",
+        "description": "Reusable Python game engine under the server package",
         "keywords": [
           "controller",
           "model",
@@ -177,13 +177,17 @@
           "frontend"
         ]
       },
-      "desktop": {
-        "description": "Tauri native wrapper for the hosted web UI",
+      "native": {
+        "description": "Tauri 2 hosted-web client and desktop/mobile release assets",
         "keywords": [
           "tauri",
-          "desktop",
-          "webview",
-          "native"
+          "native",
+          "android",
+          "ios",
+          "macos",
+          "linux",
+          "windows",
+          "bundle"
         ]
       }
     },
@@ -238,7 +242,7 @@
     "version": 1,
     "site": {
       "name": "BoardGamesWithQuests",
-      "description": "JSON-driven chess and checkers Python engine and React application"
+      "description": "FastAPI server, reusable board-game engine, React web, Tauri native shell"
     },
     "home": "README.md"
   },
