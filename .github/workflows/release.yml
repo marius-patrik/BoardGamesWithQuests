@@ -3,10 +3,6 @@ name: Release
 on:
   push:
     branches: [main]
-  pull_request:
-    paths:
-      - .github/workflows/release.yml
-      - repo.dfconfig
   workflow_dispatch:
     inputs:
       bump:
