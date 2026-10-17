@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from engine.model.game.conditions import QueryResolutionError
-from engine.model.game.hooks import PlannedEffect
+from server.engine.model.game.conditions import QueryResolutionError
+from server.engine.model.game.hooks import PlannedEffect
 
 
 @dataclass(frozen=True)

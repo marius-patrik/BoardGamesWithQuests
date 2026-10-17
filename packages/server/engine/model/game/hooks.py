@@ -7,8 +7,8 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
-from engine.model.game.conditions import ConditionEvaluator, Query
-from engine.model.game.schema import HOOKS, freeze_json, thaw_json, validate_effect, validate_hooks
+from server.engine.model.game.conditions import ConditionEvaluator, Query
+from server.engine.model.game.schema import HOOKS, freeze_json, thaw_json, validate_effect, validate_hooks
 
 
 @dataclass(frozen=True)
