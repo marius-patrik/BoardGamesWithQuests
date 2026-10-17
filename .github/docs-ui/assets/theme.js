@@ -72,6 +72,80 @@
     });
   }
 
+
+  /* ── Interactive Mermaid architecture viewer ───────────────────────── */
+
+  var viewer = document.querySelector("[data-mermaid-viewer]");
+  if (viewer) {
+    var draw = viewer.querySelector("[data-mermaid-render]");
+    var source = viewer.querySelector("[data-mermaid-source]");
+    var stage = viewer.querySelector("[data-mermaid-viewport]");
+    var status = viewer.querySelector("[data-mermaid-status]");
+    var zoomIn = viewer.querySelector("[data-mermaid-zoom-in]");
+    var zoomOut = viewer.querySelector("[data-mermaid-zoom-out]");
+    var reset = viewer.querySelector("[data-mermaid-reset]");
+    var diagram = null;
+    var width = 0;
+    var scale = 1;
+
+    function setScale(next) {
+      if (!diagram) return;
+      scale = Math.max(0.25, Math.min(4, next));
+      diagram.style.width = Math.round(width * scale) + "px";
+      diagram.style.maxWidth = "none";
+      status.textContent = "Zoom: " + Math.round(scale * 100) + "%";
+    }
+
+    zoomIn.addEventListener("click", function () { setScale(scale * 1.2); });
+    zoomOut.addEventListener("click", function () { setScale(scale / 1.2); });
+    reset.addEventListener("click", function () {
+      setScale(1);
+      stage.scrollTop = 0;
+      stage.scrollLeft = 0;
+    });
+    stage.addEventListener("wheel", function (event) {
+      if (!diagram || !event.ctrlKey) return;
+      event.preventDefault();
+      setScale(scale * (event.deltaY < 0 ? 1.1 : 1 / 1.1));
+    }, { passive: false });
+
+    draw.addEventListener("click", function () {
+      if (!source || !stage || !draw) return;
+      draw.disabled = true;
+      status.textContent = "Rendering Mermaid source…";
+      // Version pinned. No server-side SVG build or committed generated diagram.
+      import("https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.esm.min.mjs")
+        .then(function (module) {
+          var mermaid = module.default;
+          mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: "strict",
+            maxTextSize: 200000,
+            maxEdges: 10000,
+            flowchart: { htmlLabels: false, useMaxWidth: false }
+          });
+          return mermaid.render("bgwq-architecture", source.textContent);
+        })
+        .then(function (result) {
+          stage.innerHTML = result.svg;
+          diagram = stage.querySelector("svg");
+          if (!diagram) throw new Error("Mermaid returned no SVG");
+          width = Math.min(2200, Math.max(1100, diagram.viewBox.baseVal.width || 1600));
+          diagram.removeAttribute("height");
+          zoomIn.disabled = false;
+          zoomOut.disabled = false;
+          reset.disabled = false;
+          setScale(1);
+          draw.textContent = "Rendered";
+        })
+        .catch(function (error) {
+          status.textContent = "Could not render the diagram; Mermaid source remains available.";
+          draw.disabled = false;
+          console.error("Architecture Mermaid rendering failed", error);
+        });
+    });
+  }
+
   /* ── Search ─────────────────────────────────────────────────────────── */
 
   var input = document.getElementById("search-input");

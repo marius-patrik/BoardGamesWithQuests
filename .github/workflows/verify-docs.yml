@@ -29,6 +29,19 @@ jobs:
       - name: Syntax validation while test suite is being rebuilt (issue 239)
         run: python -m compileall -q packages
 
+      - name: Verify normative API, schema, data and source architecture
+        run: |
+          python .github/scripts/check_spec_contracts.py
+          python - <<'PY'
+          from pathlib import Path
+          import ast
+          source=Path('.github/scripts/docs_hooks.py').read_text(encoding='utf-8')
+          ast.parse(source)
+          assert 'data-mermaid-viewer' in source
+          assert Path('.agents/notes/requirements/AST.mmd').exists()
+          assert not Path('.agents/notes/requirements/diagrams/reference_AST.svg').exists()
+          PY
+
       - name: Verify repository-wide virtual documentation
         run: |
           python .github/scripts/build_docs.py

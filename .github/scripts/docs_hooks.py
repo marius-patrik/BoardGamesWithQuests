@@ -6,6 +6,7 @@ derived from the checked-out repository, not a curated list of directories.
 """
 
 import ast
+import html
 import subprocess
 
 try:
@@ -21,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def tracked_files(root: Path = ROOT) -> list[Path]:
-    """Discover all tracked Python and Markdown files, respecting Git's own index."""
+    """Discover tracked implementation docs and canonical architecture contracts."""
     result = subprocess.run(
         ["git", "-C", str(root), "ls-files", "-z", "--cached"],
         check=True,
@@ -29,7 +30,16 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
     )
     files = [root / Path(p.decode("utf-8")) for p in result.stdout.split(b"\0") if p]
     return sorted(
-        (p for p in files if p.is_file() and p.suffix.lower() in {".md", ".py"}),
+        (
+            p for p in files if p.is_file()
+            and (
+                p.suffix.lower() in {".md", ".py"}
+                or (
+                    ".agents/notes/requirements/" in p.as_posix()
+                    and p.suffix.lower() in {".mmd", ".yaml", ".json", ".prisma", ".sql"}
+                )
+            )
+        ),
         key=lambda p: p.relative_to(root).as_posix(),
     )
 
@@ -100,6 +110,39 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str]]:
                 dest = public_path(relative.parent.joinpath("index.md"))
             if dest not in pages or path.name.lower() != "readme.md":
                 pages[dest] = path.read_text(encoding="utf-8")
+            continue
+
+
+        # Render pure Mermaid source interactively without committing generated SVG.
+        if relative.suffix.lower() == ".mmd":
+            dest = public_path(relative.with_suffix(".md"))
+            source = html.escape(path.read_text(encoding="utf-8"))
+            pages[dest] = (
+                f"# {display_name(relative.stem)} — interactive architecture\n\n"
+                "Render the live Mermaid diagram to pan and zoom, or inspect its source.\n\n"
+                '<div class="architecture-viewer" data-mermaid-viewer>\n'
+                '  <div class="architecture-controls">\n'
+                '    <button type="button" data-mermaid-render>Render diagram</button>\n'
+                '    <button type="button" data-mermaid-zoom-in disabled>Zoom in</button>\n'
+                '    <button type="button" data-mermaid-zoom-out disabled>Zoom out</button>\n'
+                '    <button type="button" data-mermaid-reset disabled>Reset</button>\n'
+                '    <span role="status" aria-live="polite" data-mermaid-status>Ready</span>\n'
+                '  </div>\n'
+                '  <div class="architecture-viewport" data-mermaid-viewport></div>\n'
+                '  <details class="architecture-source"><summary>Mermaid source</summary>\n'
+                f'    <pre data-mermaid-source>{source}</pre>\n'
+                '  </details>\n'
+                '</div>\n'
+            )
+            continue
+
+        # Expose the canonical schema and data as virtual source pages only.
+        if relative.suffix.lower() in {".yaml", ".json", ".prisma", ".sql"}:
+            dest = public_path(relative.with_suffix(".md"))
+            language = relative.suffix.lower()[1:]
+            content = path.read_text(encoding="utf-8")
+            fence = chr(96) * 3
+            pages[dest] = f"# {relative.name}\n\n{fence}{language}\n{content}\n{fence}\n"
             continue
 
         dotted = import_name(path, roots)

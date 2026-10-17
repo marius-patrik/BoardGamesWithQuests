@@ -259,7 +259,7 @@ DO $bgwq_auth$ BEGIN
   END IF;
 END $bgwq_auth$;
 
--- Database security and runtime integrity from the original database contract.
+-- Database security and runtime integrity beyond Prisma Schema Language.
 -- PostgreSQL-only invariants not representable by Prisma Schema Language.
 -- Apply AFTER the Prisma-generated schema migration; review before production deployment.
 -- This file is part of the declarative contract, not gameplay scripting.
@@ -280,9 +280,11 @@ BEGIN
   IF EXISTS (SELECT 1 FROM bgwq.versions WHERE id = v_id AND published_at IS NOT NULL) THEN
     RAISE EXCEPTION 'published configuration is immutable: %', v_id USING ERRCODE = '23514';
   END IF;
-  IF TG_OP = 'UPDATE' AND NEW.version_id IS DISTINCT FROM OLD.version_id
-     AND EXISTS (SELECT 1 FROM bgwq.versions WHERE id = NEW.version_id AND published_at IS NOT NULL) THEN
-    RAISE EXCEPTION 'published configuration is immutable: %', v_id USING ERRCODE = '23514';
+  IF TG_OP = 'UPDATE' THEN
+    IF NEW.version_id IS DISTINCT FROM OLD.version_id
+       AND EXISTS (SELECT 1 FROM bgwq.versions WHERE id = NEW.version_id AND published_at IS NOT NULL) THEN
+      RAISE EXCEPTION 'destination published configuration is immutable: %', NEW.version_id USING ERRCODE = '23514';
+    END IF;
   END IF;
   IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
   RETURN NEW;
