@@ -66,16 +66,17 @@ def artifacts(repo: str, name: str) -> list[dict[str, Any]]:
 
     return [
         item
-        for item in pages(
-            f"repos/{repo}/actions/artifacts?name={quote(name, safe='')}"
-        )
+        for item in pages(f"repos/{repo}/actions/artifacts?name={quote(name, safe='')}")
         if item["name"] == name and not item.get("expired", False)
     ]
 
 
 def approved_run(
-    repo: str, artifact: dict[str, Any], expected_workflow: str,
-    expected_events: set[str], expected_branch: str,
+    repo: str,
+    artifact: dict[str, Any],
+    expected_workflow: str,
+    expected_events: set[str],
+    expected_branch: str,
 ) -> int | None:
     """Reject artifacts not produced by the intended successful workflow."""
     run_id = (artifact.get("workflow_run") or {}).get("id")
@@ -87,8 +88,7 @@ def approved_run(
         or run.get("event") not in expected_events
         or run.get("conclusion") != "success"
         or run.get("head_branch") != expected_branch
-        or run.get("repository", {}).get("full_name", "").casefold()
-        != repo.casefold()
+        or run.get("repository", {}).get("full_name", "").casefold() != repo.casefold()
     ):
         return None
     return run_id
@@ -98,14 +98,26 @@ def download(repo: str, run_id: int, name: str, destination: Path) -> None:
     """Download a named artifact from an authenticated, selected run."""
     destination.mkdir(parents=True)
     gh(
-        "run", "download", str(run_id),
-        "--repo", repo, "--name", name, "--dir", str(destination),
+        "run",
+        "download",
+        str(run_id),
+        "--repo",
+        repo,
+        "--name",
+        name,
+        "--dir",
+        str(destination),
     )
 
 
 def restore(
-    repo: str, staging: Path, name: str, workflow: str,
-    events: set[str], branch: str, expected_sha: str | None = None,
+    repo: str,
+    staging: Path,
+    name: str,
+    workflow: str,
+    events: set[str],
+    branch: str,
+    expected_sha: str | None = None,
 ) -> bool:
     """Restore the newest valid snapshot matching the live PR head, if any."""
     for item in artifacts(repo, name):
@@ -158,13 +170,22 @@ def main() -> None:
         raise FileExistsError(f"Refusing nonempty staging directory: {args.staging}")
     args.staging.mkdir(parents=True)
     restore(
-        args.repo, args.staging, "docs-main",
-        "Build Main Documentation", {"push", "workflow_dispatch"}, "main",
+        args.repo,
+        args.staging,
+        "docs-main",
+        "Build Main Documentation",
+        {"push", "workflow_dispatch"},
+        "main",
     )
     for number, head in sorted(open_same_repo_prs(args.repo).items()):
         restore(
-            args.repo, args.staging, f"docs-preview-{number}",
-            "Preview Documentation", {"pull_request"}, head["branch"], head["sha"],
+            args.repo,
+            args.staging,
+            f"docs-preview-{number}",
+            "Preview Documentation",
+            {"pull_request"},
+            head["branch"],
+            head["sha"],
         )
 
 
