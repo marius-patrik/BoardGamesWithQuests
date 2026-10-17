@@ -97,3 +97,64 @@ probe rolls back all private test rows and never changes Auth identities or
 protected unrelated records. A provider-backed authenticated gameplay adapter,
 real HTTP concurrency/restart behavior and authorized Realtime recovery require
 separate implementation and acceptance evidence.
+
+## Internal durable adapter
+
+`server.persistence.GameStore` provides async `create`, `join`, `read` and
+`submit` operations over the private lifecycle functions. Callers supply a
+provider-verified canonical UUID, a stable bounded action ID, validated
+`GameDefinition`, canonical game UUID, expected revision, `Move`, and explicit
+trusted epoch milliseconds as applicable. It does not verify JWTs. Reads are
+participant-scoped. Creation retries recover the persisted UUID; joining retries
+recover the persisted genesis snapshot, even after moves. Accepted move retries
+return the accepted event with authoritative state without committing again. Concurrent
+new transitions use one compare-and-swap and surface `Conflict`; callers must
+refetch before making another decision.
+
+Configure server-only `BGWQ_DATABASE_DSN` with `sslmode=verify-full` and one explicit
+network hostname or IP address. Socket, omitted, multiple and hostaddr endpoints
+are rejected, as are service/options overrides and ambient PGHOSTADDR/PGSERVICE
+configuration. Connections
+are operation-local with GSS encryption disabled to require TLS, and prepared
+statements disabled for transaction pooling,
+3-second connect and statement/lock bounds and a 10-second active-operation
+deadline including pure work. Cancellation drains psycopg cancellation (up to
+five seconds each for sending cancellation and waiting for query termination),
+then allows three seconds for rollback before forcibly closing the connection.
+This cleanup tail can extend response time beyond ten seconds. An I/O failure or
+lost commit acknowledgement can leave the result indeterminate: refetch or retry
+the exact same key and request; never allocate a new key or blindly replay.
+All engine construction, replay, JSON decoding and serialization run in two fixed
+pure worker slots with no waiting queue. Capacity exhaustion fails explicitly.
+The active-operation deadline includes creation canonicalization. Timed-out or cancelled
+workers cannot access SQL or publish a result; their slots remain reserved until
+their computation finishes. Active reads and activation recovery validate canonical
+replay plus row identity, configuration and revision before returning state.
+Only explicit loopback test DSNs may use `local_test=True, sslmode=disable`.
+Public exceptions redact database diagnostics. No cache holds authoritative state.
+Catalog and gameplay readiness remain false; no playable route exposes the store.
+
+Run genuine adapter acceptance (Docker and OpenSSL required, no skips or mock DB):
+
+```sh
+python -m pip install -e . -r requirements-dev.txt
+python -m pytest -q tests/test_persistence_adapter.py
+```
+
+The fixture binds an ephemeral host port to `127.0.0.1` and connects as a real
+`service_role` login. Its Auth rows are isolated FK fixtures, not verified tokens.
+Root must independently run these tests before integration. Dependency or Docker
+failure blocks this gate; compilation alone provides no behavioral evidence.
+
+A read-only hosted probe needs `BGWQ_DATABASE_DSN`, `SUPABASE_URL`,
+`SUPABASE_PUBLISHABLE_KEY`, `BGWQ_REGISTERED_ACCESS_TOKEN`,
+`BGWQ_REGISTERED_USER_ID`, and `BGWQ_PROVIDER_GAME_ID` for an existing game in
+which that verified identity participates:
+
+```sh
+PYTHONPATH=packages python -m server.persistence --verify-provider
+```
+
+Missing inputs fail explicitly. The probe makes no provider writes and certifies
+only identity verification plus a participant-scoped real database read. Hosted
+mutation, authenticated HTTP, Realtime and complete gameplay gates remain open.

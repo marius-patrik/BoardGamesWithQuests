@@ -72,8 +72,8 @@ instructions or manually duplicated CI statuses.
 
 ## Delivery dependencies
 
-- Implement the authenticated durable game adapter over the private pending,
-  activation and domain transaction functions. Bind every actor to verified
+- Integrate the internal server.persistence.GameStore into verified HTTP
+  routes over the private pending, activation and domain transaction functions. Bind every actor to verified
   Supabase identity, recover creation/genesis data for retries and detect a
   reconstructed already-accepted event before attempting another commit.
   Return its accepted event and latest authoritative snapshot. Verify real
@@ -107,3 +107,7 @@ instructions or manually duplicated CI statuses.
   Missing provider access or unavailable integration binaries leave the specific
   external gate blocked; continue independent work and retain reproducible
   verification commands without substituting mocks.
+
+- Preserve the bounded worker, TLS, corruption and cancellation invariants when
+  exposing durable operations through authenticated HTTP; verify actual provider
+  TLS and trusted server time before public gameplay acceptance.

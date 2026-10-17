@@ -513,3 +513,39 @@ The documented shared-IP anonymous signup allowance is a classroom capacity
 risk (normally 30/hour/IP). Validate the actual project's settings and a
 classroom-size signup rehearsal before claiming free-tier capacity in G7.
 Unauthenticated/public game APIs and sign-in are not provided until G4.
+
+## Internal durable game store
+
+`server.persistence.GameStore` is the internal async lifecycle adapter. Its
+trusted inputs are verified canonical UUID identities, bounded action IDs,
+validated definitions, expected revisions, immutable moves and server timestamps.
+It uses operation-local psycopg connections, parameterized private SQL functions,
+verified TLS with GSS encryption disabled, disabled prepared statements and
+bounded connection and statement execution plus an active-operation deadline. It never reads Auth tables or retains authoritative state in memory.
+Creation recovers its UUID before allocation; activation recovers the stored
+genesis snapshot and persisted start time; accepted moves return their event
+with authoritative state without recommitting. New moves reconstruct GameManager and
+commit exactly one loaded revision by CAS, returning typed conflicts on races.
+Exactly two pure engine worker slots bound execution without a waiting queue.
+All engine construction, replay and JSON serialization are off the event loop.
+The ten-second active-operation deadline includes creation canonicalization.
+Cancellation drains the pinned driver cancellation bounds (five seconds to send
+and five seconds for query termination), then permits three seconds for rollback
+before forcing connection closure. This cleanup can extend response time.
+An unknown commit acknowledgement requires authoritative refetch or the exact
+same key and request; a new key or blind replay is unsafe. Cancelled or timed-out
+workers cannot use SQL or publish their output; occupied slots remain reserved
+until computation finishes. Active reads and activation recovery check canonical
+replay against row identity, pinned configuration, revision and genesis start time.
+DSNs require one explicit network host and verify-full TLS; sockets, hostaddr,
+multihost and service/options overrides are rejected. Disabled TLS is confined to
+explicit loopback-only test DSNs.
+Participant isolation occurs before engine reconstruction or private reads are
+returned. Database diagnostics and credentials never enter public exceptions.
+
+`tests/test_persistence_adapter.py` is the genuine Docker/PostgreSQL gate with
+actual service-role connections on a loopback ephemeral port. Dependency or
+Docker failure blocks acceptance. The read-only `python -m server.persistence
+--verify-provider` probe requires explicit credentials and an existing participant
+game; missing credentials fail explicitly. Neither probe certifies playable HTTP,
+Realtime or complete game rules. Catalog/gameplay readiness remains false.

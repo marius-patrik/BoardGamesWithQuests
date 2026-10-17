@@ -90,3 +90,18 @@ must reference the same Python type rather than create a second system.
 
 Every architectural change updates this table, relevant requirement rows,
 the JSON contract, tests, deploy scripts and source-derived diagrams together.
+
+## Internal durable game store
+
+`server.persistence.GameStore` coordinates participant-scoped private SQL
+transactions after the host verifies Supabase identity. It reconstructs
+canonical state and commits exactly one loaded revision; accepted retries
+return authoritative state without another commit. No authoritative cache or
+persistent process connection is used.
+
+Two bounded pure engine workers perform replay and JSON work without SQL
+capability. Cancellation discards their output. Operation-local connections
+use verified network TLS, bounded execution and rollback cleanup; ambiguous
+commit acknowledgements require the same request key and authoritative recovery.
+The exact interface, limits and integration gates are defined in the
+[durable store contract](json_contract.md#internal-durable-game-store).
