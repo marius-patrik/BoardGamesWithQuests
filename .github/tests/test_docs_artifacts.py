@@ -179,14 +179,51 @@ def test_failed_main_and_outdated_pr_never_publish_stale_content(tmp_path: Path)
     snapshot(tmp_path, "docs-main", "<h1>Failed main</h1>")
     snapshot(tmp_path, "docs-preview-331", "<h1>Old PR</h1>", STALE)
     collected = invoke(tmp_path, env)
+    assert collected.returncode != 0
+    assert "No passing Actions artifacts" in collected.stderr
+    assert not (tmp_path / "staging/pr-331").exists()
+    assert not (tmp_path / "staging/index.html").exists()
+
+
+def test_independent_pr_publishes_when_main_has_no_passing_build(
+    tmp_path: Path,
+) -> None:
+    env = prepare_cli(
+        tmp_path,
+        {
+            "prs": [
+                {
+                    "number": 331,
+                    "head": {
+                        "sha": GOOD, "ref": "topic",
+                        "repo": {"full_name": REPO},
+                    },
+                },
+            ],
+            "artifacts": {
+                "docs-main": [artifact(1, "docs-main", 10)],
+                "docs-preview-331": [artifact(2, "docs-preview-331", 11)],
+            },
+            "runs": {
+                "10": run_record(
+                    10, "Build Main Documentation", "main", conclusion="failure"
+                ),
+                "11": run_record(11, "Preview Documentation", "topic"),
+            },
+        },
+    )
+    snapshot(tmp_path, "docs-main", "<h1>Failed main</h1>")
+    snapshot(tmp_path, "docs-preview-331", "<h1>Independent preview</h1>", GOOD)
+    collected = invoke(tmp_path, env)
     assert collected.returncode == 0, collected.stderr
-    result = assemble(tmp_path, 331)
-    assert result.returncode == 0, result.stderr
-    content = (tmp_path / "site/index.html").read_text()
-    assert "production documentation build is unavailable" in content.lower()
-    assert not (tmp_path / "site/pr-331").exists()
-    assert "Old PR" not in content
-    assert "Failed main" not in content
+    published = assemble(tmp_path, 331)
+    assert published.returncode == 0, published.stderr
+    site = tmp_path / "site"
+    assert (site / "pr-331/index.html").read_text() == "<h1>Independent preview</h1>"
+    assert "production documentation build is unavailable" in (
+        site / "index.html"
+    ).read_text().lower()
+    assert "Failed main" not in (site / "index.html").read_text()
 
 
 @pytest.mark.parametrize(
