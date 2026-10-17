@@ -167,7 +167,7 @@ def implementation_uml(root: Path) -> str:
                     associations.add((key, matches[0], target.attr))
     for source, target, attribute in sorted(associations):
         lines.append(f"  {keys[source]} --> {keys[target]} : {attribute}")
-    return "\\n".join(lines) + "\\n"
+    return "\n".join(lines) + "\n"
 
 
 def generated_assets(root: Path) -> dict[str, str]:

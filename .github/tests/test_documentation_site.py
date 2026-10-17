@@ -57,40 +57,40 @@ def test_source_generated_diagrams_work_in_documentation():
         assert 'class="mermaid"' not in html, "Unrendered Mermaid code leaked into published site"
 
 
-def test_tracked_mermaid_and_svg_pages_render_graphics_instead_of_source_text():
-    """A real generated source-tree entry must open a rendered graphic, not XML/flowchart code."""
-    cases = (
-        ("repository-ast.mmd", "<img "),
-        ("reference-page1.svg", "<img "),
-    )
-    for name, marker in cases:
-        page = SITE / "repository-files" / "agents" / "notes" / "diagrams" / name / "index.html"
-        assert page.is_file(), f"No diagram viewer for {name}"
-        html = page.read_text(encoding="utf-8")
-        assert 'class="diagram-viewer"' in html
-        assert marker in html, f"Diagram rendered as source text: {name}"
-        assert "assets/diagrams.js" in html, f"Interactive diagram script absent: {name}"
-        assert (
-            'class="mermaid"' not in html
-        ), f"Client-side Mermaid source remains unrendered: {name}"
-
-    source_page = (
-        SITE
-        / "repository-files"
-        / "agents"
-        / "notes"
-        / "diagrams"
-        / "reference-page1.svg"
-        / "index.html"
-    )
-    html = source_page.read_text(encoding="utf-8")
+def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
+    """Assert the actual deployment pages contain visible graphics, not source dumps."""
     import re
     from html import unescape
     from urllib.parse import urlsplit
 
-    match = re.search(r'<img src="([^"]+)"', html)
-    assert match, "Reference SVG must be embedded as a real image"
-    relative = urlsplit(unescape(match.group(1))).path
-    assert (
-        (source_page.parent / relative).resolve().is_file()
-    ), "Referenced SVG asset must actually ship"
+    tracked = subprocess.run(
+        ["git", "-C", str(ROOT), "ls-files", "-z", "--cached"],
+        capture_output=True, check=True,
+    ).stdout
+    names = [part.decode("utf-8", "surrogateescape") for part in tracked.split(b"\0") if part]
+    incompatible = [
+        name for name in names
+        if name.startswith(".agents/notes/") and name.endswith((".svg", ".dot", ".gv"))
+    ]
+    assert not incompatible, f"Committed diagrams must use Mermaid sources: {incompatible}"
+
+    for name in ("repository-ast", "implementation-uml", "reference-mvc", "reference-page1", "gui-mockup"):
+        source = ROOT / ".agents" / "notes" / "diagrams" / (name + ".mmd")
+        assert source.is_file() and len(source.read_text(encoding="utf-8").splitlines()) > 12
+        page = SITE / "repository-files" / "agents" / "notes" / "diagrams" / (name + ".mmd") / "index.html"
+        assert page.is_file(), f"Missing interactive diagram page: {name}"
+        html = page.read_text(encoding="utf-8")
+        assert 'class="diagram-viewer"' in html
+        assert 'class="mermaid"' not in html
+        assert "assets/diagrams.js" in html
+        match = re.search(r'<img src="([^"]+\.svg)"', html)
+        assert match, f"No rendered SVG image for {name}"
+        path = (page.parent / urlsplit(unescape(match.group(1))).path).resolve()
+        assert path.is_relative_to(SITE.resolve()) and path.is_file()
+        svg = path.read_text(encoding="utf-8")
+        assert "<svg " in svg and "</svg>" in svg
+        opening = re.search(r"<svg[^>]*>", svg)
+        assert opening and re.search(r'width="[1-9][0-9]*"', opening.group(0))
+        assert re.search(r'height="[1-9][0-9]*"', opening.group(0))
+        if name == "implementation-uml":
+            assert "GameController" in svg and "GameManager" in svg, "Rendered UML must have real classes"

@@ -142,7 +142,6 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
         # The original file remains separately available at its published URL.
         if decoded is not None and rel.suffix.lower() == ".mmd":
             from html import escape
-            import posixpath
 
             title = escape(name, quote=False)
             body = (
