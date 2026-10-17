@@ -1,6 +1,6 @@
 # ARCHITECTURE — source tree, tooling and components
 
-This is the **intended tracked source layout**, not a claim that the implementation files already exist. Every leaf carries a source-level responsibility or documentation contract inline. The [Mermaid AST](AST.mmd) declares the same leaf paths, public interfaces and actual typed dependencies; game-specific JSON action instances do not become source files or AST execution modules.
+This is the **intended tracked source layout**, not a claim that the implementation files already exist. Every leaf carries a source-level responsibility or documentation contract inline. The [Mermaid AST](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/requirements/AST.mmd) declares the same leaf paths, public interfaces and actual typed dependencies; game-specific JSON action instances do not become source files or AST execution modules.
 
 ## Stack and authority
 
@@ -216,4 +216,4 @@ The API imports engine interfaces but the engine cannot import API or I/O module
 
 ## Single-source contract dependencies
 
-The requirements start at [PRD](../../PRD.md). HTTP payloads are specified by [openapi.yaml](../../../packages/server/api/openapi.yaml), database tables and constraints by [schema.prisma](../../../packages/server/supabase/schema.prisma) and [integrity.sql](../../../packages/server/supabase/integrity.sql), source file interfaces by [AST.mmd](AST.mmd), and built-in game data by the files under [data/](../../../data/). These files refer to one another rather than embedding duplicate authoritative copies. A CI verifier checks their identities, type references, documented responsibilities, and graph connectivity.
+The requirements start at [PRD](../../PRD.md). HTTP payloads are specified by [openapi.yaml](../../../packages/server/api/openapi.yaml), database tables and constraints by [schema.prisma](../../../packages/server/supabase/schema.prisma) and [integrity.sql](../../../packages/server/supabase/integrity.sql), source file interfaces by [AST.mmd](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/requirements/AST.mmd), and built-in game data by the files under [data/](../../../data/). These files refer to one another rather than embedding duplicate authoritative copies. A CI verifier checks their identities, type references, documented responsibilities, and graph connectivity.
