@@ -81,7 +81,7 @@ jobs:
     needs: assemble
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
       deployments: write
@@ -132,3 +132,27 @@ jobs:
               -f state=inactive -f description="Preview not in published Pages site" >/dev/null
           done < <(gh api --paginate "repos/$GITHUB_REPOSITORY/deployments?per_page=100" \
             --jq '.[] | [.id,.environment,.sha] | @tsv')
+
+      - name: Retire gh-pages branch only after verified Actions publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          mode=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.build_type')
+          if [ "$mode" != workflow ]; then
+            echo "::warning::Pages source is not GitHub Actions; preserving gh-pages."
+            exit 0
+          fi
+          if ! curl --fail --location --silent --show-error --retry 5 \
+            --retry-all-errors --retry-delay 2 --max-time 15 \
+            "${PAGE_URL%/}/" --output /dev/null; then
+            echo "::warning::The published site is not yet reachable; preserving gh-pages."
+            exit 0
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/gh-pages" --silent \
+            >/dev/null 2>&1; then
+            gh api --method DELETE \
+              "repos/$GITHUB_REPOSITORY/git/refs/heads/gh-pages" --silent
+            echo "Actions publication verified; gh-pages branch retired."
+          fi
