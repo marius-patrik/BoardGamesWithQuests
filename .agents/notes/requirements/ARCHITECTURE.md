@@ -99,7 +99,7 @@ packages/  # Package grouping: packages; paths are physical tracked sources, not
     supabase/  # Package grouping: supabase; paths are physical tracked sources, not generated output.
       config.toml  # Supabase local/auth/storage config; Local Supabase services and migrations
       integrity.sql  # Database-only constraints, cross-version guards, Supabase Auth FKs, immutable publication and event parity, private Realtime; companion to Prisma migrations.
-      schema.prisma  # Authoritative Prisma PostgreSQL 37-model relational declaration; migration-only tooling, no Node runtime.
+      schema.prisma  # Authoritative Prisma PostgreSQL 38-model relational declaration; migration-only tooling, no Node runtime.
     pyproject.toml  # Python dependencies and pytest; FastAPI psycopg Pydantic and validation dependencies
     vercel.json  # ASGI route and limits; Deploy Python entrypoint in separate Vercel project
   web/  # Package grouping: web; paths are physical tracked sources, not generated output.
@@ -216,4 +216,4 @@ The API imports engine interfaces but the engine cannot import API or I/O module
 
 ## Single-source contract dependencies
 
-The requirements start at [PRD](../../../PRD.md). HTTP payloads are specified by [openapi.yaml](../../../packages/server/api/openapi.yaml), database tables and constraints by [schema.prisma](../../../packages/server/supabase/schema.prisma) and [integrity.sql](../../../packages/server/supabase/integrity.sql), source file interfaces by [AST.mmd](AST.mmd), and built-in game data by the files under [data/](../../../data/). These files refer to one another rather than embedding duplicate authoritative copies. A CI verifier checks their identities, type references, documented responsibilities, and graph connectivity.
+The requirements start at [PRD](../../PRD.md). HTTP payloads are specified by [openapi.yaml](../../../packages/server/api/openapi.yaml), database tables and constraints by [schema.prisma](../../../packages/server/supabase/schema.prisma) and [integrity.sql](../../../packages/server/supabase/integrity.sql), source file interfaces by [AST.mmd](AST.mmd), and built-in game data by the files under [data/](../../../data/). These files refer to one another rather than embedding duplicate authoritative copies. A CI verifier checks their identities, type references, documented responsibilities, and graph connectivity.
