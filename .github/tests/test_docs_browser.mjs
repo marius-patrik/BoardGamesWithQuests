@@ -66,7 +66,7 @@ try {
   assert(wide > centered + 70, "Full-width mode did not expand the actual reader");
   assert.equal(await page.$eval("html", el => el.dataset.layout), "wide");
   console.log("Checking layout persistence across page navigation");
-  await page.goto(base + "/architecture/diagrams/implementation-uml/", { waitUntil: "load" });
+  await page.goto(base + "/repository-files/agents/notes/diagrams/implementation-uml.mmd/", { waitUntil: "load" });
   assert.equal(await page.$eval("html", el => el.dataset.layout), "wide", "Width mode was not saved");
   await page.click("[data-layout-toggle]");
 
@@ -106,7 +106,7 @@ try {
 
   // The generated implementation UML shares the same modal behavior.
   console.log("Checking generated implementation UML fullscreen modal");
-  await page.goto(base + "/architecture/diagrams/implementation-uml/", {
+  await page.goto(base + "/repository-files/agents/notes/diagrams/implementation-uml.mmd/", {
     waitUntil: "load",
   });
   await page.waitForSelector('[aria-label="Expand image in modal"]');

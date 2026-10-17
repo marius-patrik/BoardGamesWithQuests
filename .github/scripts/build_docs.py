@@ -158,27 +158,6 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                 )
             body = f"# {title}\n\n" + diagram_viewer_markup(graphic) + "\n"
         pages.append((name, dest, body))
-    from html import escape
-
-    diagrams = diagram_generator().generated_assets(root)
-    overview = "architecture/diagrams/index.md"
-    pages.append(
-        (
-            "architecture/diagrams/index",
-            overview,
-            "# Generated architecture diagrams\n\n"
-            "The diagrams are derived directly from the tracked repository. "
-            "Mermaid rendering supports interactive diagram inspection.\n\n"
-            + "\n".join(f"- [{Path(path).stem}]({Path(path).stem}.md)" for path in diagrams)
-            + "\n",
-        )
-    )
-    for diagram_path, diagram in diagrams.items():
-        stem = Path(diagram_path).stem
-        dest = "architecture/diagrams/" + stem + ".md"
-        page = "# " + stem.replace("-", " ").title() + "\n\n"
-        page += diagram_viewer_markup('<pre class="mermaid">\n' + escape(diagram) + "</pre>") + "\n"
-        pages.append(("architecture/diagrams/" + stem, dest, page))
     return pages
 
 

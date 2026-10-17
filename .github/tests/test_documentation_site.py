@@ -31,10 +31,51 @@ def test_repository_navigation_and_every_file_page():
         assert target.is_file(), f"Missing published navigation page for {name}: {target}"
 
 
+def test_sidebar_sections_exactly_match_git_tracked_directories():
+    """Reject invented navigation categories, including virtual architecture roots."""
+    import re
+    from html import unescape
+
+    tracked = subprocess.run(
+        ["git", "-C", str(ROOT), "ls-files", "-z", "--cached"],
+        check=True,
+        capture_output=True,
+    ).stdout
+    paths = [
+        Path(name.decode("utf-8", "surrogateescape"))
+        for name in tracked.split(b"\0")
+        if name
+    ]
+    # Git does not track empty folders, so only file ancestors may be sections.
+    expected = {
+        "/" + "/".join(path.parts[:depth])
+        for path in paths
+        for depth in range(1, len(path.parts))
+    }
+    document = (SITE / "index.html").read_text(encoding="utf-8")
+    sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
+    actual = {
+        unescape(name)
+        for name in re.findall(r'data-nav-section="([^"]+)"', sidebar)
+    }
+    assert actual == expected, (
+        "Sidebar entries must correspond exactly to Git-tracked folders: "
+        f"unexpected={sorted(actual - expected)}; missing={sorted(expected - actual)}"
+    )
+
+
 def test_source_generated_diagrams_work_in_documentation():
     for stem in ("repository-ast", "implementation-uml"):
         raw = SITE / "agents" / "notes" / "diagrams" / (stem + ".mmd")
-        page = SITE / "architecture" / "diagrams" / stem / "index.html"
+        page = (
+            SITE
+            / "repository-files"
+            / "agents"
+            / "notes"
+            / "diagrams"
+            / (stem + ".mmd")
+            / "index.html"
+        )
         assert raw.is_file(), f"Generated source is missing: {stem}"
         source = raw.read_text(encoding="utf-8")
         assert source.startswith(("classDiagram", "flowchart")), stem
