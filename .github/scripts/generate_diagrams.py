@@ -82,7 +82,7 @@ def _declarations(path: Path) -> list[tuple[str, str]]:
 
 def repository_ast(root: Path) -> str:
     """Mermaid tree of every tracked file and its discovered syntax declarations."""
-    lines = ["flowchart TD", '  root["Tracked repository"]']
+    lines = ["flowchart LR", '  root["Tracked repository"]']
     directories: set[str] = set()
     for file in tracked_paths(root):
         path = file.relative_to(root).as_posix()

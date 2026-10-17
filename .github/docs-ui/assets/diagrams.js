@@ -28,14 +28,14 @@ function attachViewer(root) {
   function fit() {
     const [width, height] = dimensions();
     if (!width || !height || !viewport.clientWidth) return;
-    scale = clamp(Math.min((viewport.clientWidth - 32) / width, 1), .05, 2);
+    scale = clamp(Math.min((viewport.clientWidth - 32) / width, 1), .0005, 2);
     offsetX = (viewport.clientWidth - width * scale) / 2;
     // Tall UML diagrams must be legible at opening, not squeezed vertically.
     offsetY = height * scale > viewport.clientHeight ? 16 : (viewport.clientHeight - height * scale) / 2;
     paint();
   }
   function zoom(factor, x = viewport.clientWidth / 2, y = viewport.clientHeight / 2) {
-    const next = clamp(scale * factor, .01, 8);
+    const next = clamp(scale * factor, .0005, 8);
     const ratio = next / scale;
     offsetX = x - (x - offsetX) * ratio;
     offsetY = y - (y - offsetY) * ratio;
