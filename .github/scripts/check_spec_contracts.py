@@ -168,7 +168,6 @@ def validate_data() -> dict[str, object]:
     return counts
 
 
-
 def embedded_openapi() -> dict:
     """Parse the unique normative OpenAPI YAML block inside requirements/notes/API.md."""
     text = API.read_text(encoding="utf-8")
@@ -177,7 +176,6 @@ def embedded_openapi() -> dict:
     doc = yaml.safe_load(blocks[0])
     assert isinstance(doc, dict), "invalid canonical OpenAPI contract"
     return doc
-
 
 
 def op_owners() -> dict[str, str]:
@@ -236,13 +234,17 @@ def validate_openapi() -> int:
     ids = [op for _, _, op in operations]
     assert len(ids) == len(set(ids)) and all(ids), "duplicate or missing OpenAPI operationId"
     for route, method, operation in operations:
-        assert operation in op_owners(), f"HTTP operation lacks an owned persistence/service boundary: {operation}"
+        assert (
+            operation in op_owners()
+        ), f"HTTP operation lacks an owned persistence/service boundary: {operation}"
         if method != "get":
             params = api["paths"][route][method].get("parameters", [])
-            assert any(x.get("$ref", "").endswith("/csrf") for x in params), (
-                f"{operation}: mutation must declare CSRF parameter"
-            )
-        assert api["paths"][route][method].get("responses"), f"{operation}: missing response contract"
+            assert any(
+                x.get("$ref", "").endswith("/csrf") for x in params
+            ), f"{operation}: mutation must declare CSRF parameter"
+        assert api["paths"][route][method].get(
+            "responses"
+        ), f"{operation}: missing response contract"
     assert set(ids) == set(op_owners()), "HTTP operation ownership matrix disagrees with API paths"
     return len(ids)
 
@@ -319,7 +321,9 @@ def validate_diagrams() -> tuple[int, int]:
     assert client.startswith("sequenceDiagram\n"), "client UML must be a Mermaid sequence diagram"
     classes = set(re.findall(r"(?m)^class (\w+) \{", engine))
     assert len(classes) >= 15, "target engine omits principal interfaces"
-    edges = re.findall(r'(?m)^(\w+)(?: "[^"]+")?\s+(?:-->|o--|<\|--)(?: "[^"]+")?\s+(\w+)\s*:', engine)
+    edges = re.findall(
+        r'(?m)^(\w+)(?: "[^"]+")?\s+(?:-->|o--|<\|--)(?: "[^"]+")?\s+(\w+)\s*:', engine
+    )
     assert len(edges) >= len(classes) - 1, "target engine lacks typed relationships"
     graph = {name: set() for name in classes}
     for src, dst in edges:
@@ -333,23 +337,43 @@ def validate_diagrams() -> tuple[int, int]:
             visited.add(target)
             todo.append(target)
     assert visited == classes, f"disconnected engine interfaces: {sorted(classes - visited)}"
-    assert "Chess" not in " ".join(classes) and "MoneyProperty" not in " ".join(classes), "game-specific interpreter class"
-    for semantic in ("expected_revision", "idempotency_key", "request_digest", "min_participants", "max_participants"):
+    assert "Chess" not in " ".join(classes) and "MoneyProperty" not in " ".join(
+        classes
+    ), "game-specific interpreter class"
+    for semantic in (
+        "expected_revision",
+        "idempotency_key",
+        "request_digest",
+        "min_participants",
+        "max_participants",
+    ):
         assert semantic in engine, f"engine UML lacks {semantic} contract"
     api = embedded_openapi()
     for path in re.findall(r"(?:GET|POST|PUT|PATCH|DELETE) (/[^\s()]+)", client):
         canonical = re.sub(r"\{id\}", "{gameId}", path)
-        assert canonical in api["paths"], f"client flow references uncontracted HTTP endpoint {path}"
-    assert "reconnect" in client.lower() and "Stale revision" in client, "recovery and concurrency path missing"
+        assert (
+            canonical in api["paths"]
+        ), f"client flow references uncontracted HTTP endpoint {path}"
+    assert (
+        "reconnect" in client.lower() and "Stale revision" in client
+    ), "recovery and concurrency path missing"
     # Original references are authored, and implementation diagrams are generated;
     # none of them is allowed to masquerade as an immutable normative source graph.
-    for relative in ("reference/diagrams/mvc.mmd", "reference/diagrams/uml.mmd",
-                     "architecture/diagrams/ast.mmd", "architecture/diagrams/uml.mmd"):
+    for relative in (
+        "reference/diagrams/mvc.mmd",
+        "reference/diagrams/uml.mmd",
+        "architecture/diagrams/ast.mmd",
+        "architecture/diagrams/uml.mmd",
+    ):
         actual = ROOT / ".agents" / relative
         assert actual.is_file() and actual.suffix == ".mmd", f"missing diagram {relative}"
-    assert (ROOT / ".agents/reference/images/GUI_mockup.svg").is_file(), "original GUI reference missing"
+    assert (
+        ROOT / ".agents/reference/images/GUI_mockup.svg"
+    ).is_file(), "original GUI reference missing"
     assert not (ROOT / ".agents/notes/diagrams").exists(), "obsolete diagram structure retained"
-    assert not (ROOT / ".agents/notes/images").exists(), "obsolete top-level image directory retained"
+    assert not (
+        ROOT / ".agents/notes/images"
+    ).exists(), "obsolete top-level image directory retained"
     # The merged target source tree remains inline in the PRD, with all files
     # annotated, but it is not enforced as fabricated matching source-AST nodes.
     prd = (ROOT / ".agents/PRD.md").read_text(encoding="utf-8")
@@ -365,13 +389,22 @@ def validate_diagrams() -> tuple[int, int]:
 
 def main() -> None:
     """Check exactly one normative API, canonical persisted identities, and UML dependencies."""
-    for required in (API, PRISMA, INTEGRITY, DATA / "configuration.schema.json",
-                     DATA / "operators.json", REQ / "diagrams/engine_uml.mmd",
-                     REQ / "diagrams/client_uml.mmd", REQ / "notes/CONTRACTS.md"):
+    for required in (
+        API,
+        PRISMA,
+        INTEGRITY,
+        DATA / "configuration.schema.json",
+        DATA / "operators.json",
+        REQ / "diagrams/engine_uml.mmd",
+        REQ / "diagrams/client_uml.mmd",
+        REQ / "notes/CONTRACTS.md",
+    ):
         assert required.is_file(), f"missing authoritative source {required}"
-    for stale in ("packages/server/api/openapi.yaml",
-                  ".agents/notes/requirements/AST.mmd",
-                  ".agents/notes/requirements/ARCHITECTURE.md"):
+    for stale in (
+        "packages/server/api/openapi.yaml",
+        ".agents/notes/requirements/AST.mmd",
+        ".agents/notes/requirements/ARCHITECTURE.md",
+    ):
         assert not (ROOT / stale).exists(), f"obsolete overlapping contract still tracked: {stale}"
     games = validate_data()
     operations = validate_openapi()
@@ -380,9 +413,17 @@ def main() -> None:
     # Stable participant capacity and revision/event ownership must exist across
     # API, relational fields, and runtime contract: one failure blocks the gate.
     prisma = PRISMA.read_text()
-    for declaration in ("minimumParticipants", "maximumParticipants", "model Participant",
-                        "model ActiveParticipant", "model EventMutation", "model GameOutcome",
-                        "model EventValue", "model GameEntity", "model Rating"):
+    for declaration in (
+        "minimumParticipants",
+        "maximumParticipants",
+        "model Participant",
+        "model ActiveParticipant",
+        "model EventMutation",
+        "model GameOutcome",
+        "model EventValue",
+        "model GameEntity",
+        "model Rating",
+    ):
         assert declaration in prisma, f"missing persisted domain requirement {declaration}"
     assert "CREATE CONSTRAINT TRIGGER check_game_revision_history" in INTEGRITY.read_text()
     assert "auth.uid()" in INTEGRITY.read_text(), "Realtime policy lacks identity-based membership"
@@ -390,7 +431,9 @@ def main() -> None:
     print(f"PASS: {operations} owned HTTP operations with local OpenAPI references")
     print(f"PASS: {models} Prisma models, {checks} SQL constraints")
     print(f"PASS: {classes} engine interfaces and {relations} declared UML relationships")
-    print("NOT VERIFIED: migration execution, formal engine semantics, real API/DB/browser integration or runtime replay")
+    print(
+        "NOT VERIFIED: migration execution, formal engine semantics, real API/DB/browser integration or runtime replay"
+    )
 
 
 if __name__ == "__main__":

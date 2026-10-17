@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Extract the single normative OpenAPI 3.1 YAML from API.md for tooling."""
+
 from __future__ import annotations
 
 import argparse
