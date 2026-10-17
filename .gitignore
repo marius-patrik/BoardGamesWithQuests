@@ -1,15 +1,7 @@
-# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
-
-# C extensions
 *.so
-
-#agents
 .opencode/
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -28,38 +20,41 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
-# Virtual Environments
 .venv/
 venv/
 ENV/
 env/
-
-# Pytest / coverage
 .pytest_cache/
 .coverage
 .coverage.*
 htmlcov/
 .tox/
 .nox/
-
-# IDE / Editor
 .vscode/
 .idea/
 *.swp
 *.swo
-# Documentation build
 site/
-
 .DS_Store
-
-# Temporary CI artifacts
 event.json
-
 .pipeline/
 .darkfactory/
-
+.docs/*
+!.docs/.gitkeep
 logs/
+**/node_modules/
+**/.rsbuild/
+**/dist/
+**/target/
+**/src-tauri/gen/
+**/.vercel/
+**/.env
+**/.env.*
+!**/.env.example
+packages/server/.branches/
+packages/server/.temp/
+packages/server/supabase/.temp/
 
-# Installed JavaScript dependencies
-node_modules/
+# Web icon copied from canonical root asset during builds.
+packages/client/public/icon.svg
+packages/client/public/config/

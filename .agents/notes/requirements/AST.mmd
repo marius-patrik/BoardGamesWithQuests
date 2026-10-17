@@ -1,0 +1,767 @@
+flowchart TB
+  %% Source-and-execution contract graph: each file declares public interfaces and TSDoc/docstring/Rustdoc responsibility.
+  %% Typed edges model actual build, import, contract, runtime, documentation, or test interactions.
+  %% Game-specific action instances belong to data/*.json, never source implementation nodes.
+  subgraph REQUIREMENTS["Requirements — source declarations"]
+    F001[".agents/PRD.md<br/>exports: Product invariants and acceptance criteria<br/>Documentation: Links normative architecture/API/schema/AST/data; no duplicated contracts."]
+    F149[".agents/notes/requirements/AST.mmd<br/>exports: Mermaid source for the single file/declaration/action graph<br/>Mermaid comments: Normative source-declaration and typed dependency graph."]
+    F150["packages/server/supabase/schema.prisma<br/>exports: Prisma models, indexes, relationships<br/>Prisma /// comments: Normative relational model; companion SQL in INTEGRITY.sql."]
+    F151[".agents/notes/requirements/ARCHITECTURE.md<br/>exports: Exact intended source tree and technology boundaries<br/>Markdown: Normative annotated tree synchronized with source declarations."]
+    F152["packages/server/supabase/integrity.sql<br/>exports: PostgreSQL-only constraints, Supabase Auth references and triggers<br/>SQL comments: Reviewed extension to Prisma schema."]
+    F168[".agents/notes/diagrams/implementation/ast.mmd<br/>exports: Source-derived cross-language file and declaration graph<br/>Mermaid: Derived from real Git-tracked source, not the proposed source contract."]
+    F169[".agents/notes/diagrams/implementation/uml.mmd<br/>exports: Source-derived class UML<br/>Mermaid: Actual class signatures, typed associations and inheritance."]
+    F170[".agents/notes/diagrams/reference/mvc.mmd<br/>exports: Reference MVC architecture<br/>Mermaid: Authored reference distinct from implementation verification."]
+    F171[".agents/notes/diagrams/reference/uml.mmd<br/>exports: Reference UML architecture<br/>Mermaid: Authored reference distinct from implementation verification."]
+    F172[".agents/notes/images/GUI_mockup.svg<br/>exports: Original immutable GUI mockup<br/>SVG: The real Excalidraw image, not an invented Mermaid drawing."]
+  end
+  subgraph SERVER["Server — source declarations"]
+    F026["packages/server/api/__init__.py<br/>exports: module<br/>Python docstring: Python package marker."]
+    F027["packages/server/api/app.py<br/>exports: create_app()-&gt;FastAPI<br/>Python docstring: Construct middleware, session, routes, error handlers."]
+    F028["packages/server/api/assets.py<br/>exports: begin_upload(); finish_upload(); signed_url(); cleanup()<br/>Python docstring: Supabase Storage signed upload, digest validation, publication immutability."]
+    F029["packages/server/api/contracts.py<br/>exports: Pydantic Models: Session, Game, Definition, Command, Event<br/>Python docstring: HTTP DTOs conform exactly to OpenAPI."]
+    F030["packages/server/api/index.py<br/>exports: app: FastAPI<br/>Python docstring: Serverless ASGI entrypoint."]
+    F031["packages/server/api/openapi.yaml<br/>exports: OpenAPI 3.1 contract<br/>Workflow comments: Normative HTTP operations and request/response schemas."]
+    F032["packages/server/api/realtime.py<br/>exports: private_channel_grant(); authorize_subscription()<br/>Python docstring: Supabase private Broadcast access for game members."]
+    F033["packages/server/api/repository.py<br/>exports: Repository.load/save/project + UOW<br/>Python docstring: Psycopg relational hydration and atomic writes."]
+    F034["packages/server/api/routes.py<br/>exports: mount_routes(app); 33 operation IDs<br/>Python docstring: Register all documented identity, definition, asset, and game endpoints."]
+    F035["packages/server/api/security.py<br/>exports: principal(); verify_csrf(); require_membership()<br/>Python docstring: Supabase Auth session, Origin/CSRF, role and hidden-state authorization."]
+    F036["packages/server/api/services.py<br/>exports: create_game(); join_game(); submit_action(); publish_definition()<br/>Python docstring: Transaction-aware API orchestration; no game rules."]
+    F037["packages/server/configuration/__init__.py<br/>exports: module<br/>Python docstring: Portable configuration package."]
+    F038["packages/server/configuration/bootstrap.py<br/>exports: import_builtins(repository)<br/>Python docstring: Load four portable game definitions into published versions."]
+    F039["data/configuration.schema.json<br/>exports: JSON Schema draft2020-12<br/>Schema/document metadata: Complete typed portable configuration grammar."]
+    F040["packages/server/configuration/models.py<br/>exports: PortableConfig Pydantic + local references<br/>Python docstring: Validate portable fields and structurally defined record types."]
+    F041["packages/server/configuration/transfer.py<br/>exports: import_json(); export_json(); canonicalize()<br/>Python docstring: Deterministic relational import/export and asset bundling."]
+    F042["packages/server/configuration/validation.py<br/>exports: validate_references(); validate_types(); publish()<br/>Python docstring: Validate cycles, budgets, signed assets, hook/effect signatures."]
+    F043["data/chess.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
+    F044["data/english-draughts.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
+    F045["data/international-draughts.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
+    F046["data/moneyproperty.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
+    F047["packages/server/engine/__init__.py<br/>exports: module<br/>Python docstring: Generic engine package."]
+    F048["packages/server/engine/effects.py<br/>exports: propose(effect,state,ctx)-&gt;Mutation[]<br/>Python docstring: Controlled generic effect executor; never writes database."]
+    F049["packages/server/engine/events.py<br/>exports: encode_mutations(); replay(); digest()<br/>Python docstring: Reconstruct complete entity/link/value/turn changes from typed event rows."]
+    F050["packages/server/engine/expressions.py<br/>exports: evaluate(expr,ctx); validate_dag(expr)<br/>Python docstring: Pure typed expression evaluator; no IO, deterministic budget."]
+    F051["packages/server/engine/hooks.py<br/>exports: dispatch(hook,ctx)-&gt;ActionResult[]<br/>Python docstring: Stratified hook scheduler, ordering, event queue and budgets."]
+    F052["packages/server/engine/model.py<br/>exports: EntityType,Entity,ActionDef,GameState,Transition,Mutation<br/>Python docstring: Frozen typed pure engine data models."]
+    F053["packages/server/engine/operators.py<br/>exports: registry(); evaluate_op(); signature()<br/>Python docstring: Finite generic pure operator catalog; no game-name branches."]
+    F054["packages/server/engine/randomness.py<br/>exports: consume(trusted_stream,range)-&gt;RandomSample<br/>Python docstring: Deterministic consumption of injected entropy; replay uses recorded values."]
+    F055["packages/server/engine/runtime.py<br/>exports: initialize(); available_actions(); evaluate(); status()<br/>Python docstring: The single authority for action semantics; immutable state transitions."]
+    F056["packages/server/engine/topology.py<br/>exports: neighbors(); ray(); paths(); track_advance()<br/>Python docstring: General topology and bounded traversal primitives."]
+    F057["packages/server/engine/types.py<br/>exports: parse_type(); check_type(); TypedValue<br/>Python docstring: Generic scalar, reference, optional, list, set, path, record typing."]
+    F058["packages/server/pyproject.toml<br/>exports: Python dependencies and pytest<br/>File contract: FastAPI psycopg Pydantic and validation dependencies."]
+    F059["packages/server/supabase/config.toml<br/>exports: Supabase local/auth/storage config<br/>File contract: Local Supabase services and migrations."]
+    F061["data/seed.sql<br/>exports: Operator registry, hooks, buckets DML<br/>SQL documentation: Reference data is data, not schema; deployed after migration."]
+    F062["packages/server/vercel.json<br/>exports: ASGI route and limits<br/>Schema/document metadata: Deploy Python entrypoint in separate Vercel project."]
+    F139["data/operators.json<br/>exports: 101 generic operator names with observed argument signatures and deterministic semantic descriptions<br/>Machine contract: Required pure/effect signatures and semantics; implementations must conform and be behaviorally tested."]
+    F140["packages/server/engine/reachability.py<br/>exports: exists_reachable(start,successors,target,canonical_key,max_states)-&gt;bool; no_reachable_terminal(...)-&gt;bool; ReachabilityLimit<br/>Python docstring: Exact generic finite-state model checking; resource exhaustion never establishes a draw."]
+  end
+  subgraph WEB["Web — source declarations"]
+    F063["packages/client/components.json<br/>exports: shadcn registry configuration<br/>Schema/document metadata: UI composition and token aliases."]
+    F064["packages/client/index.html<br/>exports: root viewport<br/>File contract: Application HTML shell."]
+    F065["packages/client/package.json<br/>exports: React + Wouter + Motion + shadcn + OpenAPI client<br/>Schema/document metadata: Locked frontend and tooling dependencies."]
+    F066["packages/client/rsbuild.config.ts<br/>exports: defineConfig()<br/>TSDoc: Rsbuild bundling, alias, compile options."]
+    F067["packages/client/src/App.tsx<br/>exports: App():ReactElement<br/>TSDoc: Auth/Query providers and Wouter Router."]
+    F068["packages/client/src/api/assets.ts<br/>exports: assetUrl(); uploadAsset()<br/>TSDoc: Bounded signed asset requests and downloads."]
+    F069["packages/client/src/api/client.ts<br/>exports: request&lt;T&gt;(); API error normalization<br/>TSDoc: Same-origin cookie/CSRF-aware fetch."]
+    F070["packages/client/src/api/realtime.ts<br/>exports: subscribeGame(gameId, callback)<br/>TSDoc: Private Broadcast + reconnect revision invalidation."]
+    F071["packages/client/src/api/types.ts<br/>exports: generated OpenAPI types<br/>TSDoc: Generated from normative OpenAPI YAML; not manually edited."]
+    F072["packages/client/src/app/pages.tsx<br/>exports: HomePage,AuthPage,AccountPage,DefinitionsPage,GamePage<br/>TSDoc: All routed screens (not game-specific boards)."]
+    F073["packages/client/src/app/query.ts<br/>exports: QueryClient;invalidateOnRevision()<br/>TSDoc: HTTP cache, retry and version synchronization."]
+    F074["packages/client/src/app/router.tsx<br/>exports: AppRoutes():ReactElement<br/>TSDoc: Wouter Switch/Route navigation and guard."]
+    F075["packages/client/src/app/session.tsx<br/>exports: SessionProvider();useSession()<br/>TSDoc: Cookie session and CSRF state."]
+    F076["packages/client/src/editor/ActionEditor.tsx<br/>exports: ActionEditor()<br/>TSDoc: Manual/hook actions, conditions, parameter and effect lists."]
+    F077["packages/client/src/editor/AssetEditor.tsx<br/>exports: AssetEditor()<br/>TSDoc: Private binary upload and presentation assets."]
+    F078["packages/client/src/editor/DefinitionEditor.tsx<br/>exports: DefinitionEditor()<br/>TSDoc: Top-level unified configuration editor."]
+    F079["packages/client/src/editor/EntityEditor.tsx<br/>exports: EntityEditor()<br/>TSDoc: Types, seeds, field values and relationships."]
+    F080["packages/client/src/editor/ExpressionEditor.tsx<br/>exports: ExpressionEditor()<br/>TSDoc: Typed operator DAG builder with validation."]
+    F081["packages/client/src/editor/RolePhaseEditor.tsx<br/>exports: RolePhaseEditor()<br/>TSDoc: Participant roles, phases and eligible command forms."]
+    F082["packages/client/src/editor/SpaceEditor.tsx<br/>exports: SpaceEditor()<br/>TSDoc: Visual grid/graph/track and entity placement editor."]
+    F083["packages/client/src/editor/TransferEditor.tsx<br/>exports: TransferEditor()<br/>TSDoc: Canonical portable JSON import/export."]
+    F084["packages/client/src/editor/VisualEditor.tsx<br/>exports: VisualEditor()<br/>TSDoc: SVG template construction and asset binding."]
+    F085["packages/client/src/editor/useDraft.ts<br/>exports: useDraft(); publish(); validate()<br/>TSDoc: Autosave/publish conflict handling and draft revisions."]
+    F086["packages/client/src/games/ActionPanel.tsx<br/>exports: ActionPanel();ParameterInput()<br/>TSDoc: Typed, dynamically generated action controls."]
+    F087["packages/client/src/games/Clocks.tsx<br/>exports: Clocks()<br/>TSDoc: Nonauthoritative clock projection."]
+    F088["packages/client/src/games/Decisions.tsx<br/>exports: DecisionControls()<br/>TSDoc: Generic multi-party decision/auction/trade controls."]
+    F089["packages/client/src/games/GameView.tsx<br/>exports: GameView({gameId}):ReactElement<br/>TSDoc: Compose generic scene, actions, history, status and participants."]
+    F090["packages/client/src/games/History.tsx<br/>exports: History({events})<br/>TSDoc: Generic revision and accepted-event timeline."]
+    F091["packages/client/src/games/Invite.tsx<br/>exports: Invite()<br/>TSDoc: Invite URL, join state, pending expiration."]
+    F092["packages/client/src/games/ObjectivePanel.tsx<br/>exports: ObjectivePanel()<br/>TSDoc: Generic objective state/progress including optional quests."]
+    F093["packages/client/src/games/Participants.tsx<br/>exports: ParticipantPanel()<br/>TSDoc: Arbitrary participant counts, roles and eliminated state."]
+    F094["packages/client/src/games/useGame.ts<br/>exports: useGame(); useAvailableActions(); useSubmitAction()<br/>TSDoc: Authoritative game queries, revisions, idempotent command sends."]
+    F095["packages/client/src/main.tsx<br/>exports: createRoot().render(&lt;App/&gt;)<br/>TSDoc: Browser root mounting."]
+    F096["packages/client/src/rendering/Accessibility.ts<br/>exports: getEntityAria(); focusNavigation()<br/>TSDoc: Keyboard and screenreader metadata derived from scene."]
+    F097["packages/client/src/rendering/Animation.tsx<br/>exports: AnimatedEntity(); useMotionProjection()<br/>TSDoc: Motion projections on authoritative state changes."]
+    F098["packages/client/src/rendering/Interactions.tsx<br/>exports: InteractionLayer(); usePointerActions()<br/>TSDoc: Pointer/touch/keyboard access and action-source selection."]
+    F099["packages/client/src/rendering/Layout.ts<br/>exports: resolveLayouts(); projectLocations()<br/>TSDoc: Grid, node graph, track and free placement transforms."]
+    F100["packages/client/src/rendering/Primitive.tsx<br/>exports: Primitive({definition}):ReactElement<br/>TSDoc: Allowlisted safe SVG primitives; no arbitrary markup."]
+    F101["packages/client/src/rendering/Scene.tsx<br/>exports: Scene({entities,scene}):ReactElement<br/>TSDoc: One generic SVG scene for board, graph, track and other layouts."]
+    F102["packages/client/src/styles.css<br/>exports: Tailwind base + design tokens<br/>File contract: Themes, typography and focus styles."]
+    F103["packages/client/src/ui/button.tsx<br/>exports: Button(props)<br/>TSDoc: Clickable semantic button"]
+    F104["packages/client/src/ui/card.tsx<br/>exports: Card(props)<br/>TSDoc: Visual panel"]
+    F105["packages/client/src/ui/dialog.tsx<br/>exports: Dialog(props)<br/>TSDoc: Accessible modal"]
+    F106["packages/client/src/ui/input.tsx<br/>exports: Input(props)<br/>TSDoc: Accessible text input"]
+    F107["packages/client/src/ui/select.tsx<br/>exports: Select(props)<br/>TSDoc: Typed selection control"]
+    F108["packages/client/src/ui/tabs.tsx<br/>exports: Tabs(props)<br/>TSDoc: Accessible tab list"]
+    F109["packages/client/src/ui/toast.tsx<br/>exports: Toast(props)<br/>TSDoc: Status and error announcement"]
+    F110["packages/client/src/ui/tooltip.tsx<br/>exports: Tooltip(props)<br/>TSDoc: Contextual help"]
+    F111["packages/client/tsconfig.json<br/>exports: compilerOptions strict<br/>Schema/document metadata: Web TS project constraints."]
+    F112["packages/client/vercel.json<br/>exports: SPA rewrites + API proxy<br/>Schema/document metadata: Forward /api/* to separate Vercel deployment."]
+  end
+  subgraph DATABASE["Database — source declarations"]
+    F015["prisma.config.ts<br/>exports: defineConfig({ schema: packages/server/supabase/schema.prisma, migrations: packages/server/supabase/migrations })<br/>TSDoc: Prisma tooling config; no generated runtime client."]
+  end
+  subgraph NATIVE["Native — source declarations"]
+    F016["packages/native/package.json<br/>exports: Tauri build scripts<br/>Schema/document metadata: Platform build toolchain."]
+    F017["packages/native/src-tauri/Cargo.lock<br/>exports: Cargo dependency lock<br/>File contract: Reproducible native build."]
+    F018["packages/native/src-tauri/Cargo.toml<br/>exports: crate manifest<br/>File contract: Restricted host dependencies."]
+    F019["packages/native/src-tauri/build.rs<br/>exports: tauri_build::build()<br/>Rustdoc: Tauri native resource setup."]
+    F020["packages/native/src-tauri/capabilities/default.json<br/>exports: least-privilege capabilities<br/>Schema/document metadata: Navigation capabilities restricted to production origin."]
+    F021["packages/native/src-tauri/icons/icon.icns<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
+    F022["packages/native/src-tauri/icons/icon.ico<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
+    F023["packages/native/src-tauri/icons/icon.png<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
+    F024["packages/native/src-tauri/src/main.rs<br/>exports: main() -&gt; run()<br/>Rustdoc: Minimal native WebView lifecycle."]
+    F025["packages/native/src-tauri/tauri.conf.json<br/>exports: production remote URL, ids, permissions<br/>Schema/document metadata: One remotely loaded frontend across targets."]
+  end
+  subgraph WORKFLOWS["Workflows — source declarations"]
+    F004[".github/workflows/deploy-api.yml<br/>exports: deploy-api workflow<br/>Workflow comments: Deploy FastAPI Vercel project"]
+    F005[".github/workflows/deploy-web.yml<br/>exports: deploy-web workflow<br/>Workflow comments: Deploy web Vercel project"]
+    F006[".github/workflows/native-release.yml<br/>exports: native release workflow<br/>GitHub Actions: Produce platform-specific artifacts from one Tauri wrapper."]
+    F007[".github/workflows/darkfactory.yml<br/>exports: DarkFactory Runtime workflow<br/>GitHub Actions: Invoke canonical repository quality and governance."]
+    F180[".github/workflows/preview-docs.yml<br/>exports: PR documentation preview workflow<br/>GitHub Actions: Build and browser-test actual PR head independently."]
+    F181[".github/workflows/build-main-docs.yml<br/>exports: Main documentation builder workflow<br/>GitHub Actions: Stage passing main independently of PR builds."]
+    F182[".github/workflows/deploy-docs.yml<br/>exports: GitHub Pages publisher workflow<br/>GitHub Actions: Publish assembled snapshots with verified selectors."]
+    F183[".github/workflows/darkfactory-control.yml<br/>exports: DarkFactory managed quality control workflow<br/>GitHub Actions: Real shared quality orchestration for product changes."]
+    F184[".github/workflows/native-ios-signed.yml<br/>exports: Signed iOS native workflow<br/>GitHub Actions: Require proper Apple signing for distributable assets."]
+  end
+  subgraph TESTS["Tests — source declarations"]
+    F113["tests/api/test_contract.py<br/>exports: test/assertions<br/>Python docstring: OpenAPI and security errors"]
+    F114["tests/api/test_realtime.py<br/>exports: test/assertions<br/>Python docstring: Private revision authorization"]
+    F115["tests/browser/editor.spec.ts<br/>exports: test/assertions<br/>TSDoc: Structured authoring and import/export"]
+    F116["tests/browser/games.spec.ts<br/>exports: test/assertions<br/>TSDoc: Four full game scenarios"]
+    F117["tests/browser/package.json<br/>exports: configuration<br/>Schema/document metadata: Browser test runner dependencies"]
+    F118["tests/browser/playwright.config.ts<br/>exports: configuration<br/>TSDoc: Cross-browser test configuration"]
+    F119["tests/browser/rendering.spec.ts<br/>exports: test/assertions<br/>TSDoc: SVG, accessibility and layout"]
+    F120["tests/configuration/test_assets.py<br/>exports: test/assertions<br/>Python docstring: Binary import/export digest parity"]
+    F121["tests/configuration/test_roundtrip.py<br/>exports: test/assertions<br/>Python docstring: Structural and semantic JSON roundtrip"]
+
+    F122["tests/database/test_integrity.py<br/>exports: test/assertions<br/>Python docstring: Published immutability, trigger and RLS checks"]
+    F123["tests/database/test_schema.py<br/>exports: test/assertions<br/>Python docstring: Migrations/FKs/constraints in real PostgreSQL"]
+    F124["tests/database/test_transactions.py<br/>exports: test/assertions<br/>Python docstring: Concurrent actions and exact idempotency"]
+    F125["tests/engine/test_chess.py<br/>exports: test/assertions<br/>Python docstring: FIDE legal and forbidden actions"]
+    F126["tests/engine/test_draughts.py<br/>exports: test/assertions<br/>Python docstring: Capture/path and promotion edge cases"]
+    F127["tests/engine/test_execution.py<br/>exports: test/assertions<br/>Python docstring: Pure operator semantics"]
+    F128["tests/engine/test_moneyproperty.py<br/>exports: test/assertions<br/>Python docstring: Economic decision and multi-party transactions"]
+    F129["tests/native/smoke.spec.ts<br/>exports: test/assertions<br/>TSDoc: Remote WebView and navigation restrictions"]
+    F141["tests/engine/test_reachability.py<br/>exports: test_reachable_even_with_cycles(); test_unreachable_only_when_exhausted(); test_budget_does_not_produce_false_proof(); test_terminal_start_and_invalid_budget()<br/>Python docstring: Check proof soundness, cycles and budget exceptions against observable graph behavior."]
+    F145["tests/engine/test_game_contracts.py<br/>exports: test_dice_moves_only_the_active_players_token(); test_pawn_promotion_occurs_before_advancing_turn(); test_economic_actions_do_not_embed_a_game_named_operator(); test_chess_dead_position_uses_sound_generic_reachability(); test_moneyproperty_doubles_detention_and_release_use_actions(); test_game_definition_is_built_from_entities_actions_and_objectives(); test_card_resolution_is_scoped_to_the_single_drawn_card(); test_chess_moves_cannot_capture_the_opposing_king()<br/>Python docstring: Exercise observed per-player action eligibility and atomic promotion ordering."]
+    F177[".github/tests/test_docs_browser.mjs<br/>exports: Browser reader interaction tests<br/>JavaScript: Verify real user controls against compiled pages in Chromium."]
+    F178[".github/tests/test_documentation_site.py<br/>exports: Published repository page tests<br/>Python: Verify every tracked page, folder navigation and compiled diagrams."]
+    F179[".github/tests/test_docs_publication.py<br/>exports: Published preview artifact tests<br/>Python: Verify staging, preview removal and independently built main behavior."]
+  end
+  subgraph META["Meta — source declarations"]
+    F002[".editorconfig<br/>exports: indent / whitespace<br/>File contract: Consistent editor indentation."]
+    F003[".env.example<br/>exports: variable names only<br/>File contract: Document public and server-only environment names."]
+    F008[".gitignore<br/>exports: build outputs<br/>File contract: Exclude generated caches and binaries."]
+    F009["LICENSE<br/>exports: license text<br/>File contract: Product distribution terms."]
+    F010["README.md<br/>exports: symlink -&gt; .agents/PRD.md<br/>Markdown: Entry to source of truth."]
+    F011["bun.lock<br/>exports: Bun lockfile<br/>File contract: Locked dependency graph."]
+    F012["package.json<br/>exports: bun workspaces<br/>Schema/document metadata: Root workspace and verify tasks."]
+    F133["tsconfig.json<br/>exports: TS project base<br/>Schema/document metadata: Strict TS and module-resolution defaults."]
+    F134["tsdoc.json<br/>exports: TSDoc grammar<br/>Schema/document metadata: Single standard for structured TSDoc tags."]
+    F135["typedoc.json<br/>exports: TypeDoc configuration<br/>Schema/document metadata: Generate docs from structured TSDoc declarations."]
+    F161[".github/docs-ui/assets/theme.css<br/>exports: Documentation site theme and interactive diagram controls.<br/>Documentation: Canonical, cross-validated source contract."]
+    F162[".github/docs-ui/assets/theme.js<br/>exports: navigation, width, fullscreen and project selector logic<br/>JavaScript: Diagram pan/zoom is implemented only in diagrams.js."]
+    F163[".github/docs-ui/main.html<br/>exports: First-party documentation HTML page template.<br/>Documentation: Canonical, cross-validated source contract."]
+    F164[".github/scripts/check_spec_contracts.py<br/>exports: Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory.<br/>Documentation: Canonical, cross-validated source contract."]
+    F165[".github/scripts/build_docs.py<br/>exports: pages_for(); navigation(); manifest(); render_published_mermaid(); build(); main()<br/>Python: One Git-backed documentation renderer and published version manifest."]
+    F166[".github/scripts/generate_diagrams.py<br/>exports: tracked_paths(); repository_ast(); implementation_uml(); generated_assets()<br/>Python: Build source-derived Mermaid without committing generated SVG."]
+    F173[".github/docs-ui/assets/diagrams.js<br/>exports: Image pan, zoom and modal controls<br/>JavaScript: Use the one actual diagram viewer for SVG and Mermaid assets."]
+    F174[".github/docs-ui/partials/nav.html<br/>exports: Git-tracked recursive sidebar<br/>Jinja: Reflect folder hierarchy without synthetic sections."]
+    F175[".github/docs-ui/partials/switcher.html<br/>exports: Deployed version and project selector<br/>Jinja: Show only verified published site roots."]
+    F176[".github/scripts/assemble_docs.py<br/>exports: Independent HTML snapshot assembler<br/>Python: Combine staged and verified PR/main builds without rebuilding them."]
+  end
+  F001 -->|defines architecture| F149
+  F001 -->|defines components| F151
+  F001 -->|defines schema| F150
+  F151 -->|enumerates source declarations| F149
+  F150 -->|requires SQL integrity| F152
+  F002 -->|governs repository editing| F012
+  F003 -->|defines server environment| F035
+  F003 -->|defines public environment| F069
+  F004 -->|deploys API| F062
+  F005 -->|deploys web| F112
+  F006 -->|packages native releases| F025
+  F007 -->|runs browser checks| F118
+  F007 -->|runs database checks| F122
+  F008 -->|excludes generated build outputs| F012
+  F009 -->|distribution terms| F001
+  F010 -->|links to| F001
+  F011 -->|locks dependencies| F012
+  F012 -->|workspace| F016
+  F012 -->|workspace| F065
+  F012 -->|provides Prisma CLI| F015
+  F015 -->|loads schema| F150
+  F016 -->|builds Tauri wrapper| F018
+  F017 -->|locks Rust crates| F018
+  F019 -->|builds crate resources| F018
+  F020 -->|grants minimum capabilities| F025
+  F021 -->|supplies platform icon| F025
+  F022 -->|supplies platform icon| F025
+  F023 -->|supplies platform icon| F025
+  F024 -->|loads WebView config| F025
+  F025 -->|loads deployed HTTPS frontend| F112
+  F026 -->|exposes API package| F027
+  F027 -->|registers routes| F034
+  F027 -->|installs authentication| F035
+  F028 -->|stores asset metadata| F150
+  F028 -->|authorizes assets| F035
+  F029 -->|conforms to OpenAPI| F031
+  F030 -->|creates ASGI app| F027
+  F032 -->|authorizes game membership| F035
+  F032 -->|authorizes Broadcast| F152
+  F033 -->|persists normalized records| F150
+  F034 -->|routes asset operations| F028
+  F034 -->|serializes request DTOs| F029
+  F034 -->|routes private subscriptions| F032
+  F034 -->|dispatches service requests| F036
+  F036 -->|coordinates transactions| F033
+  F036 -->|imports definitions| F041
+  F036 -->|evaluates gameplay| F055
+  F037 -->|exposes config types| F040
+  F038 -->|imports built-ins| F041
+  F038 -->|imports built-in data| F043
+  F038 -->|imports built-in data| F044
+  F038 -->|imports built-in data| F045
+  F038 -->|imports built-in data| F046
+  F040 -->|models JSON contract| F039
+  F139 -->|validates portable operators| F042
+  F139 -->|defines generic operators| F053
+  F041 -->|writes relational rows| F033
+  F041 -->|deserializes configuration| F040
+  F042 -->|validates operators| F053
+  F042 -->|validates type references| F057
+  F043 -->|conforms to portable data grammar| F039
+  F044 -->|conforms to portable data grammar| F039
+  F045 -->|conforms to portable data grammar| F039
+  F046 -->|conforms to portable data grammar| F039
+  F047 -->|exposes generic engine| F055
+  F048 -->|updates proposed state| F052
+  F049 -->|encodes structural mutations| F052
+  F050 -->|evaluates pure operators| F053
+  F050 -->|typechecks expressions| F057
+  F051 -->|evaluates conditions| F050
+  F053 -->|uses generic reachability| F140
+  F053 -->|uses bounded topology| F056
+  F054 -->|supplies trusted outcomes| F048
+  F140 -->|traverses finite graph| F056
+  F055 -->|applies proposed effects| F048
+  F055 -->|records transitions| F049
+  F055 -->|checks conditions| F050
+  F055 -->|dispatches entity actions| F051
+  F055 -->|constructs immutable state| F052
+  F056 -->|reads configured topology| F052
+  F057 -->|validates typed values| F052
+  F058 -->|declares Python environment| F030
+  F059 -->|provisions database| F150
+  F061 -->|seeds operator registry| F139
+  F062 -->|deploys ASGI entrypoint| F030
+  F063 -->|configures UI primitives| F103
+  F064 -->|hosts application root| F095
+  F065 -->|configures bundler| F066
+  F066 -->|bundles entrypoint| F095
+  F067 -->|provides query cache| F073
+  F067 -->|installs Wouter| F074
+  F067 -->|provides session| F075
+  F067 -->|loads theme| F102
+  F068 -->|requests signed assets| F069
+  F069 -->|typechecks HTTP DTOs| F071
+  F070 -->|authorizes subscriptions| F069
+  F071 -->|derives public types| F031
+  F072 -->|renders definition editor| F078
+  F072 -->|renders game page| F089
+  F073 -->|invalidates on revision| F070
+  F074 -->|routes pages| F072
+  F075 -->|establishes session| F069
+  F076 -->|renders operator control| F107
+  F077 -->|uploads asset| F068
+  F078 -->|composes editor| F076
+  F078 -->|composes editor| F077
+  F078 -->|composes editor| F079
+  F078 -->|composes editor| F080
+  F078 -->|composes editor| F081
+  F078 -->|composes editor| F082
+  F078 -->|composes editor| F083
+  F078 -->|composes editor| F084
+  F078 -->|edits draft| F085
+  F080 -->|reads operator signatures| F071
+  F084 -->|previews generic scene| F101
+  F085 -->|saves drafts| F069
+  F086 -->|submits typed action| F094
+  F086 -->|renders action control| F103
+  F088 -->|submits decision| F086
+  F089 -->|composes game widget| F086
+  F089 -->|composes game widget| F087
+  F089 -->|composes game widget| F088
+  F089 -->|composes game widget| F090
+  F089 -->|composes game widget| F091
+  F089 -->|composes game widget| F092
+  F089 -->|composes game widget| F093
+  F089 -->|loads authorized state| F094
+  F089 -->|draws scene| F101
+  F091 -->|renders invitation| F105
+  F094 -->|loads actions and game state| F069
+  F095 -->|mounts UI| F067
+  F097 -->|projects transitions| F099
+  F098 -->|supports keyboard access| F096
+  F100 -->|resolves image assets| F068
+  F101 -->|animates state| F097
+  F101 -->|creates interaction layer| F098
+  F101 -->|positions entities| F099
+  F101 -->|renders SVG primitive| F100
+  F102 -->|styles UI primitives| F103
+  F104 -->|uses shadcn configuration| F063
+  F105 -->|uses shadcn configuration| F063
+  F106 -->|uses shadcn configuration| F063
+  F107 -->|uses shadcn configuration| F063
+  F108 -->|uses shadcn configuration| F063
+  F109 -->|uses shadcn configuration| F063
+  F110 -->|uses shadcn configuration| F063
+  F111 -->|typechecks bundle| F066
+  F112 -->|deploys build| F066
+  F113 -->|tests observable behavior| F031
+  F114 -->|tests observable behavior| F032
+  F115 -->|tests public behavior| F078
+  F116 -->|tests public behavior| F089
+  F117 -->|configures runner| F118
+  F118 -->|tests deployed frontend| F112
+  F119 -->|tests public behavior| F101
+  F120 -->|tests observable behavior| F028
+  F121 -->|tests observable behavior| F041
+  F122 -->|tests observable behavior| F152
+  F123 -->|tests observable behavior| F150
+  F124 -->|tests observable behavior| F036
+  F125 -->|tests observable behavior| F043
+  F126 -->|tests observable behavior| F044
+  F126 -->|tests international rules| F045
+  F127 -->|tests observable behavior| F055
+  F145 -->|tests observable behavior| F055
+  F128 -->|tests observable behavior| F046
+  F141 -->|tests observable behavior| F140
+  F129 -->|tests observable behavior| F024
+  F133 -->|extends TypeScript defaults| F111
+  F134 -->|defines documentation tags| F135
+  F001 -->|defines product scope for| F151
+  F001 -->|references normative contract| F031
+  F001 -->|references normative contract| F150
+  F001 -->|references normative contract| F152
+  F001 -->|references normative contract| F149
+  F151 -->|declares exact source inventory| F149
+  F150 -->|requires PostgreSQL-only constraints| F152
+  F164 -->|validates contract| F031
+  F164 -->|validates contract| F149
+  F164 -->|validates contract| F150
+  F164 -->|validates contract| F151
+  F164 -->|validates normative data| F039
+  F038 -->|imports portable reference| F039
+  F164 -->|validates normative data| F043
+  F038 -->|imports portable reference| F043
+  F164 -->|validates normative data| F044
+  F038 -->|imports portable reference| F044
+  F164 -->|validates normative data| F045
+  F038 -->|imports portable reference| F045
+  F164 -->|validates normative data| F046
+  F038 -->|imports portable reference| F046
+  F164 -->|validates normative data| F139
+  F038 -->|imports portable reference| F139
+  F164 -->|validates normative data| F061
+  F042 -->|validates grammar| F061
+  F031 -->|defines HTTP contract| F034
+  F139 -->|defines generic semantics| F053
+  F039 -->|defines transfer models| F040
+  F165 -->|renders interactive Mermaid source| F149
+  F162 -->|pans/zooms Mermaid visualization| F149
+  F163 -->|loads architecture viewer| F162
+  F163 -->|styles architecture viewer| F161
+  F164 -->|verifies generated pages| F165
+
+  %% Public declaration graph: source-owned symbols with explicit interface responsibilities.
+  %% Concrete interfaces: symbols from each file exports, with observable input, algorithm, output and error contracts.
+  F168 -->|documents canonical source| F166
+  F169 -->|documents canonical source| F166
+  F170 -->|documents canonical source| F165
+  F171 -->|documents canonical source| F165
+  F172 -->|documents canonical source| F173
+  F173 -->|documents canonical source| F165
+  F174 -->|documents canonical source| F165
+  F175 -->|documents canonical source| F165
+  F176 -->|documents canonical source| F165
+  F177 -->|verifies canonical source| F173
+  F178 -->|verifies canonical source| F165
+  F179 -->|verifies canonical source| F176
+  F180 -->|orchestrates canonical source| F165
+  F181 -->|orchestrates canonical source| F165
+  F182 -->|orchestrates canonical source| F176
+  F183 -->|orchestrates canonical source| F007
+  F184 -->|orchestrates canonical source| F006
+  F166 -->|generates source diagrams for documentation builder| F165
+  F134 -->|defines structured frontend documentation grammar| F095
+  F135 -->|publishes TypeScript interface documentation| F095
+  subgraph DECLARATIONS["Typed source function and class contracts"]
+    D001["packages/server/api/app.py<br/>create_app()-&gt;FastAPI<br/>Algorithm: Construct FastAPI, install session, Origin, CSRF, error middleware, mount exactly the OpenAPI routes, and fail startup on missing backend settings."]
+    D002["packages/server/api/assets.py<br/>begin_upload()<br/>Algorithm: Verify authenticated owner and unpublished version, check declared MIME/size/digest, issue short-lived scoped Storage upload ticket; no direct client permission to publish."]
+    D003["packages/server/api/assets.py<br/>finish_upload()<br/>Algorithm: Read staged object metadata and stream exact bytes to SHA-256; atomically mark asset ready if MIME, length and digest match; reject mismatches."]
+    D004["packages/server/api/assets.py<br/>signed_url()<br/>Algorithm: Require actor access to pinned published version or own editable version, return short-lived read grant; never return service role token."]
+    D005["packages/server/api/assets.py<br/>cleanup()<br/>Algorithm: Remove only storage objects for expired and unreferenced staged assets; preserve every published version asset."]
+    D006["packages/server/api/contracts.py<br/>Session<br/>Algorithm: Validate named Pydantic DTO against its OpenAPI schema, require fields and typed values, reject unknown properties and serialize JSON using the contract's keys."]
+    D007["packages/server/api/contracts.py<br/>Game<br/>Algorithm: Validate named Pydantic DTO against its OpenAPI schema, require fields and typed values, reject unknown properties and serialize JSON using the contract's keys."]
+    D008["packages/server/api/contracts.py<br/>Definition<br/>Algorithm: Validate named Pydantic DTO against its OpenAPI schema, require fields and typed values, reject unknown properties and serialize JSON using the contract's keys."]
+    D009["packages/server/api/contracts.py<br/>Command<br/>Algorithm: Validate named Pydantic DTO against its OpenAPI schema, require fields and typed values, reject unknown properties and serialize JSON using the contract's keys."]
+    D010["packages/server/api/contracts.py<br/>Event<br/>Algorithm: Validate named Pydantic DTO against its OpenAPI schema, require fields and typed values, reject unknown properties and serialize JSON using the contract's keys."]
+    D011["packages/server/api/index.py<br/>app: FastAPI<br/>Algorithm: Initialize once per serverless process from create_app(); fail startup on missing backend credentials; do not persist session/game state in process memory."]
+    D012["packages/server/api/realtime.py<br/>private_channel_grant()<br/>Algorithm: Issue a short-lived private game topic capability only to an authenticated current participant; reject arbitrary topic paths."]
+    D013["packages/server/api/realtime.py<br/>authorize_subscription()<br/>Algorithm: Map topic game UUID to membership under Supabase Auth JWT; expose committed revision hints only, never hidden game state."]
+    D014["packages/server/api/repository.py<br/>Repository.load/save/project + UOW<br/>Algorithm: Load a version-scoped definition and game-scoped typed snapshot in stable order; save all entity/link/field mutations and one event in the caller transaction; redact projection per viewer."]
+    D015["packages/server/api/routes.py<br/>mount_routes(app)<br/>Algorithm: Register each OpenAPI operationId once with typed Pydantic input/output and structured 400/401/403/409/422 errors; no undocumented mutation route."]
+    D016["packages/server/api/routes.py<br/>33 operation IDs<br/>Algorithm: For each documented operationId bind one typed endpoint to auth and service dependencies; return declared schema, status codes and failures."]
+    D017["packages/server/api/security.py<br/>principal()<br/>Algorithm: Verify HttpOnly session signed by backend and Supabase Auth identity, expiration and revocation; return actual user UUID or 401."]
+    D018["packages/server/api/security.py<br/>verify_csrf()<br/>Algorithm: For every mutation enforce allowed Origin and X-CSRF-Token matching session; reject cross-site and invalid tokens before reading requested body."]
+    D019["packages/server/api/security.py<br/>require_membership()<br/>Algorithm: Query game_participants filtered by authenticated principal and game; return game-scoped actor/role or 404/403 without leaking private presence."]
+    D020["packages/server/api/services.py<br/>create_game()<br/>Algorithm: BEGIN; verify published version, creator and creation idempotency; insert pending game and expiry; commit and project game; reject unpublished version."]
+    D021["packages/server/api/services.py<br/>join_game()<br/>Algorithm: BEGIN; lock pending game, verify invite and unique user/seat/role capacities, create participant, initialize exactly once when eligible; commit or rollback."]
+    D022["packages/server/api/services.py<br/>submit_action()<br/>Algorithm: BEGIN; SELECT game FOR UPDATE; resolve same-key+digest retry; reject mismatched key/stale revision; hydrate snapshot; run pure engine; persist ordered mutations/event/outcomes/revision; COMMIT once."]
+    D023["packages/server/api/services.py<br/>publish_definition()<br/>Algorithm: BEGIN; validate references, action conditions, operator types/arity, acyclicity, assets, cardinality and execution limits; mark version immutable; COMMIT."]
+    D024["packages/server/configuration/bootstrap.py<br/>import_builtins(repository)<br/>Algorithm: Read four validated root data/*.json files; canonicalize keys, import relational definition versions and mark built-ins published idempotently."]
+    D025["packages/server/configuration/models.py<br/>PortableConfig Pydantic + local references<br/>Algorithm: Deserialize canonical portable JSON into typed entity/role/phase/action DAG records keyed by stable local references; reject missing or contradictory values."]
+    D026["packages/server/configuration/transfer.py<br/>import_json()<br/>Algorithm: Parse configuration schema, reject unrecognized operators and dangling references, resolve local keys to UUIDs under an unpublished version in one transaction."]
+    D027["packages/server/configuration/transfer.py<br/>export_json()<br/>Algorithm: Read complete normalized version with assets and attachments, normalize stable key ordering, emit canonical portable JSON with SHA-256-validated assets."]
+    D028["packages/server/configuration/transfer.py<br/>canonicalize()<br/>Algorithm: Normalize object key order, Unicode, ordered collections and numeric scalars without DB UUIDs; repeated invocation produces identical bytes."]
+    D029["packages/server/configuration/validation.py<br/>validate_references()<br/>Algorithm: For every local key and relation verify same-version existence/type, valid space locations and acyclic parent and expression references."]
+    D030["packages/server/configuration/validation.py<br/>validate_types()<br/>Algorithm: Infer expression result types and enforce each operator parameter arity and contextual local binding; reject ambiguous optional/collection types."]
+    D031["packages/server/configuration/validation.py<br/>publish()<br/>Algorithm: Verify roles, seeds, phases, actions, effect permissions, operator budgets, presentation and required binary assets before immutable publication."]
+    D032["packages/server/engine/effects.py<br/>propose(effect,state,ctx)-&gt;Mutation[]<br/>Algorithm: Validate effect signature, actor authorization and scoped refs; execute on isolated proposed-state view; produce complete before/after entity/link/field mutations; never I/O."]
+    D033["packages/server/engine/events.py<br/>encode_mutations()<br/>Algorithm: Serialize ordered changes as typed event rows with stable object IDs and replayable before/after payloads; reject unknown event operation."]
+    D034["packages/server/engine/events.py<br/>replay()<br/>Algorithm: Apply accepted ordered event mutations exactly once by revision to canonical initial state, check previous/next digests, and never generate entropy."]
+    D035["packages/server/engine/events.py<br/>digest()<br/>Algorithm: Hash canonical typed state serialization using stable sort, explicit null/type tags and precise arithmetic; exclude hidden viewer-specific rendering."]
+    D036["packages/server/engine/expressions.py<br/>evaluate(expr,ctx)<br/>Algorithm: Topologically evaluate pure typed expressions with short-circuit Boolean operators and immutable locals; enforce budget; reject untrusted external I/O."]
+    D037["packages/server/engine/expressions.py<br/>validate_dag(expr)<br/>Algorithm: Depth-first cycle detection plus operator signature/arity/context typechecking; return validated result type or typed invalid-definition error."]
+    D038["packages/server/engine/hooks.py<br/>dispatch(hook,ctx)-&gt;ActionResult[]<br/>Algorithm: Select instance-scoped action bindings matching hook+phase, order priority then stable seed/instance/action ID, enqueue bounded effects, reject recursive dispatch."]
+    D039["packages/server/engine/model.py<br/>EntityType<br/>Algorithm: Construct frozen typed domain record with stable IDs, scoped references and explicit optional values; reject mismatched game/version ownership."]
+    D040["packages/server/engine/model.py<br/>Entity<br/>Algorithm: Construct frozen typed domain record with stable IDs, scoped references and explicit optional values; reject mismatched game/version ownership."]
+    D041["packages/server/engine/model.py<br/>ActionDef<br/>Algorithm: Construct frozen typed domain record with stable IDs, scoped references and explicit optional values; reject mismatched game/version ownership."]
+    D042["packages/server/engine/model.py<br/>GameState<br/>Algorithm: Construct frozen typed domain record with stable IDs, scoped references and explicit optional values; reject mismatched game/version ownership."]
+    D043["packages/server/engine/model.py<br/>Transition<br/>Algorithm: Construct frozen typed domain record with stable IDs, scoped references and explicit optional values; reject mismatched game/version ownership."]
+    D044["packages/server/engine/model.py<br/>Mutation<br/>Algorithm: Construct frozen typed domain record with stable IDs, scoped references and explicit optional values; reject mismatched game/version ownership."]
+    D045["packages/server/engine/operators.py<br/>registry()<br/>Algorithm: Load root data/operators.json into one immutable operator-signature registry; reject undocumented game-name shortcuts."]
+    D046["packages/server/engine/operators.py<br/>evaluate_op()<br/>Algorithm: Use registered pure generic operator and typed validated argument collection; apply exact integer/decimal arithmetic and bounded traversal."]
+    D047["packages/server/engine/operators.py<br/>signature()<br/>Algorithm: Resolve operator key from immutable registry; return parameter constraints and return type or reject unknown key."]
+    D048["packages/server/engine/randomness.py<br/>consume(trusted_stream,range)-&gt;RandomSample<br/>Algorithm: Consume exactly one trusted entropy sample within configured bounds, store result in accepted event; no randomness during legal-action enumeration."]
+    D049["packages/server/engine/runtime.py<br/>initialize()<br/>Algorithm: Verify participant cardinality and roles, instantiate seeds in parent-before-child order for occupied seats, dispatch game.initialize, return canonical state."]
+    D050["packages/server/engine/runtime.py<br/>available_actions()<br/>Algorithm: Enumerate only actor-permitted manual actions, condition-filter typed candidate parameters, sort in deterministic order, return viewer-safe descriptions."]
+    D051["packages/server/engine/runtime.py<br/>evaluate()<br/>Algorithm: Match client command to available legal action, execute ordered effects/hooks on isolated proposed state, evaluate objectives and outcome, return one typed transition."]
+    D052["packages/server/engine/runtime.py<br/>status()<br/>Algorithm: Derive status and participant outcomes solely from authoritative phase/objective values; disallow nonretry terminal gameplay updates."]
+    D053["packages/server/engine/topology.py<br/>neighbors()<br/>Algorithm: Return deterministic outgoing linked nodes for configured topology; enforce link direction, board scope and occupancy where requested."]
+    D054["packages/server/engine/topology.py<br/>ray()<br/>Algorithm: Advance configured grid vector one valid node at a time until boundary or blocker; return ordered nodes and traversed entities."]
+    D055["packages/server/engine/topology.py<br/>paths()<br/>Algorithm: Enumerate bounded DFS traversal paths with capture/visited sets; reject budget overflow, never silently omit valid paths."]
+    D056["packages/server/engine/topology.py<br/>track_advance()<br/>Algorithm: Take exactly N configured successor links in track, supporting wraparound and ordered pass-start crossings, return full path metadata."]
+    D057["packages/server/engine/types.py<br/>parse_type()<br/>Algorithm: Parse scalar/ref/optional/list/set/path type grammar; normalize aliases and reject unknown nested type constructors."]
+    D058["packages/server/engine/types.py<br/>check_type()<br/>Algorithm: Verify inferred and configured types agree including scoped reference identity and optionality; no implicit numeric/ref casts."]
+    D059["packages/server/engine/types.py<br/>TypedValue<br/>Algorithm: Represent typed values with explicit discriminant, exact numeric semantics, collection bounds and scoped references; reject lossy or implicit casts."]
+    D060["packages/server/engine/reachability.py<br/>exists_reachable(start,successors,target,canonical_key,max_states)-&gt;bool<br/>Algorithm: Perform BFS over canonical keys with visited set; true on target, false only when exhausted; raise ReachabilityLimit at configured budget."]
+    D061["packages/server/engine/reachability.py<br/>no_reachable_terminal(...)-&gt;bool<br/>Algorithm: Return logical inverse of exact exhaustive reachability, propagating ReachabilityLimit; never mistake resource failure for proof."]
+    D062["packages/server/engine/reachability.py<br/>ReachabilityLimit<br/>Algorithm: Raise typed ReachabilityLimit when exhaustive finite-state traversal cannot prove a result before max_states; never return false from budget exhaustion."]
+    D063["packages/client/rsbuild.config.ts<br/>defineConfig()<br/>Algorithm: Return migration-only Prisma schema and migrations directory, no runtime client generator; CLI applies versioned database changes."]
+    D064["packages/client/src/App.tsx<br/>App():ReactElement<br/>Algorithm: Mount session/query providers, Wouter router and guarded app shell; display authentication/network failures rather than fabricated game state."]
+    D065["packages/client/src/api/assets.ts<br/>assetUrl()<br/>Algorithm: Validate input types and scope, compute Bounded signed asset requests and downloads deterministically, return typed result or structured error; no implicit global state."]
+    D066["packages/client/src/api/assets.ts<br/>uploadAsset()<br/>Algorithm: Validate input types and scope, compute Bounded signed asset requests and downloads deterministically, return typed result or structured error; no implicit global state."]
+    D067["packages/client/src/api/client.ts<br/>request&lt;T&gt;()<br/>Algorithm: Attach session cookies and CSRF token to same-origin requests, enforce JSON OpenAPI schema, parse structured errors and throw typed exception."]
+    D068["packages/client/src/api/client.ts<br/>API error normalization<br/>Algorithm: Validate input types and scope, compute Same-origin cookie/CSRF-aware fetch deterministically, return typed result or structured error; no implicit global state."]
+    D069["packages/client/src/api/realtime.ts<br/>subscribeGame(gameId, callback)<br/>Algorithm: Connect to authorized private revision channel, dedupe monotonically increasing revisions, invalidate cached state, refetch on reconnect."]
+    D070["packages/client/src/api/types.ts<br/>generated OpenAPI types<br/>Algorithm: Validate input types and scope, compute Generated from normative OpenAPI YAML; not manually edited deterministically, return typed result or structured error; no implicit global state."]
+    D071["packages/client/src/app/pages.tsx<br/>HomePage,AuthPage,AccountPage,DefinitionsPage,GamePage<br/>Algorithm: Route home, identity, account, game, and definition screens using Wouter and typed API queries; never duplicate game-specific board rendering."]
+    D072["packages/client/src/app/query.ts<br/>QueryClient<br/>Algorithm: Validate input types and scope, compute HTTP cache, retry and version synchronization deterministically, return typed result or structured error; no implicit global state."]
+    D073["packages/client/src/app/query.ts<br/>invalidateOnRevision()<br/>Algorithm: Validate input types and scope, compute HTTP cache, retry and version synchronization deterministically, return typed result or structured error; no implicit global state."]
+    D074["packages/client/src/app/router.tsx<br/>AppRoutes():ReactElement<br/>Algorithm: Match Wouter routes by typed path params, gate authenticated paths on session, return not-found for unmatched routes."]
+    D075["packages/client/src/app/session.tsx<br/>SessionProvider()<br/>Algorithm: Fetch /session using credentials, store CSRF token in memory, invalidate cached viewer projections after auth changes and explicitly handle expiry."]
+    D076["packages/client/src/app/session.tsx<br/>useSession()<br/>Algorithm: Fetch /session using credentials, store CSRF token in memory, invalidate cached viewer projections after auth changes and explicitly handle expiry."]
+    D077["packages/client/src/editor/ActionEditor.tsx<br/>ActionEditor()<br/>Algorithm: Edit configured manual/hook action parameters, conditions and ordered effects; validate operator signatures against registry before saving draft."]
+    D078["packages/client/src/editor/AssetEditor.tsx<br/>AssetEditor()<br/>Algorithm: Request signed upload, put binary within size/MIME limits, finalize server-side SHA-256 digest and bind only authorized asset IDs."]
+    D079["packages/client/src/editor/DefinitionEditor.tsx<br/>DefinitionEditor()<br/>Algorithm: Load owned unpublished version, compose entity/space/action/visual editors, save optimistic draft and publish only after server validates."]
+    D080["packages/client/src/editor/EntityEditor.tsx<br/>EntityEditor()<br/>Algorithm: Edit types, seed instances, ownership, containment and declared typed fields; disallow unknown type and cyclic entity dependencies."]
+    D081["packages/client/src/editor/ExpressionEditor.tsx<br/>ExpressionEditor()<br/>Algorithm: Build acyclic expression DAG from registered pure operators with typed argument positions and local variables; surface exact validation errors."]
+    D082["packages/client/src/editor/RolePhaseEditor.tsx<br/>RolePhaseEditor()<br/>Algorithm: Edit role occupancy bounds, seats and phase transitions; require one opening phase, valid role capacity and scoped actions."]
+    D083["packages/client/src/editor/SpaceEditor.tsx<br/>SpaceEditor()<br/>Algorithm: Edit space entities, ordered graph/grid/track links and coordinates; validate locations, directed successors and topology bounds."]
+    D084["packages/client/src/editor/TransferEditor.tsx<br/>TransferEditor()<br/>Algorithm: Import portable JSON through the API, display validation errors, and export canonical definition and asset bytes without database UUIDs."]
+    D085["packages/client/src/editor/VisualEditor.tsx<br/>VisualEditor()<br/>Algorithm: Edit allowlisted safe SVG primitives and bindings with normalized geometry; prevent script attributes or untrusted URL execution."]
+    D086["packages/client/src/editor/useDraft.ts<br/>useDraft()<br/>Algorithm: Validate input types and scope, compute Autosave/publish conflict handling and draft revisions deterministically, return typed result or structured error; no implicit global state."]
+    D087["packages/client/src/editor/useDraft.ts<br/>publish()<br/>Algorithm: Verify roles, seeds, phases, actions, effect permissions, operator budgets, presentation and required binary assets before immutable publication."]
+    D088["packages/client/src/editor/useDraft.ts<br/>validate()<br/>Algorithm: Validate input types and scope, compute Autosave/publish conflict handling and draft revisions deterministically, return typed result or structured error; no implicit global state."]
+    D089["packages/client/src/games/ActionPanel.tsx<br/>ActionPanel()<br/>Algorithm: Render server-supplied available actions by source entity, enforce parameter types, submit command with expected revision and idempotency ID."]
+    D090["packages/client/src/games/ActionPanel.tsx<br/>ParameterInput()<br/>Algorithm: Render server-supplied available actions by source entity, enforce parameter types, submit command with expected revision and idempotency ID."]
+    D091["packages/client/src/games/Clocks.tsx<br/>Clocks()<br/>Algorithm: Show server-authoritative remaining time with local display-only interpolation, re-synchronize after revision and never decide timeout."]
+    D092["packages/client/src/games/Decisions.tsx<br/>DecisionControls()<br/>Algorithm: Render authorized pending decisions, auctions and trades; serialize choices to declared action parameters and post once through API."]
+    D093["packages/client/src/games/GameView.tsx<br/>GameView({gameId}):ReactElement<br/>Algorithm: Fetch viewer-scoped game and available actions; subscribe private revision channel; compose scene, commands, objectives and event history."]
+    D094["packages/client/src/games/History.tsx<br/>History({events})<br/>Algorithm: Fetch cursor-paginated events, stable sort by revision and display only authorized event detail to current viewer."]
+    D095["packages/client/src/games/Invite.tsx<br/>Invite()<br/>Algorithm: Render opaque invitation details, show expiry/seat availability and submit authenticated join without exposing private participant state."]
+    D096["packages/client/src/games/ObjectivePanel.tsx<br/>ObjectivePanel()<br/>Algorithm: Display allowed objective entities and progress counters; redact secret objectives and never authorize platform rewards locally."]
+    D097["packages/client/src/games/Participants.tsx<br/>ParticipantPanel()<br/>Algorithm: Sort participants by configured seat, show role, status and elimination, and support arbitrary configured counts."]
+    D098["packages/client/src/games/useGame.ts<br/>useGame()<br/>Algorithm: Validate input types and scope, compute Authoritative game queries, revisions, idempotent command sends deterministically, return typed result or structured error; no implicit global state."]
+    D099["packages/client/src/games/useGame.ts<br/>useAvailableActions()<br/>Algorithm: Validate input types and scope, compute Authoritative game queries, revisions, idempotent command sends deterministically, return typed result or structured error; no implicit global state."]
+    D100["packages/client/src/games/useGame.ts<br/>useSubmitAction()<br/>Algorithm: Validate input types and scope, compute Authoritative game queries, revisions, idempotent command sends deterministically, return typed result or structured error; no implicit global state."]
+    D101["packages/client/src/main.tsx<br/>createRoot().render(&lt;App/&gt;)<br/>Algorithm: Locate required DOM host, create React root and mount App; handle missing element with visible error."]
+    D102["packages/client/src/rendering/Accessibility.ts<br/>getEntityAria()<br/>Algorithm: Validate input types and scope, compute Keyboard and screenreader metadata derived from scene deterministically, return typed result or structured error; no implicit global state."]
+    D103["packages/client/src/rendering/Accessibility.ts<br/>focusNavigation()<br/>Algorithm: Validate input types and scope, compute Keyboard and screenreader metadata derived from scene deterministically, return typed result or structured error; no implicit global state."]
+    D104["packages/client/src/rendering/Animation.tsx<br/>AnimatedEntity()<br/>Algorithm: Compare authoritative before/after entity positions by stable ID, animate Motion transforms, honor reduced-motion preference."]
+    D105["packages/client/src/rendering/Animation.tsx<br/>useMotionProjection()<br/>Algorithm: Compare authoritative before/after entity positions by stable ID, animate Motion transforms, honor reduced-motion preference."]
+    D106["packages/client/src/rendering/Interactions.tsx<br/>InteractionLayer()<br/>Algorithm: Map pointer, touch and keyboard events to source/entity and typed action arguments; submit choices without computing legality."]
+    D107["packages/client/src/rendering/Interactions.tsx<br/>usePointerActions()<br/>Algorithm: Map pointer, touch and keyboard events to source/entity and typed action arguments; submit choices without computing legality."]
+    D108["packages/client/src/rendering/Layout.ts<br/>resolveLayouts()<br/>Algorithm: Validate input types and scope, compute Grid, node graph, track and free placement transforms deterministically, return typed result or structured error; no implicit global state."]
+    D109["packages/client/src/rendering/Layout.ts<br/>projectLocations()<br/>Algorithm: Validate input types and scope, compute Grid, node graph, track and free placement transforms deterministically, return typed result or structured error; no implicit global state."]
+    D110["packages/client/src/rendering/Primitive.tsx<br/>Primitive({definition}):ReactElement<br/>Algorithm: Render allowlisted safe SVG shape/attributes; reject raw HTML/script and unsafe image URL; no game-specific board markup."]
+    D111["packages/client/src/rendering/Scene.tsx<br/>Scene({entities,scene}):ReactElement<br/>Algorithm: Render viewer-filtered space/entity projections into stable SVG layers, keyed by entity ID, preserving accessible labels and keyboard actions."]
+    D112["packages/client/src/ui/button.tsx<br/>Button(props)<br/>Algorithm: Render named controlled UI primitive, preserve HTML/ARIA/keyboard semantics and emit only documented callback events; no gameplay logic."]
+    D113["packages/client/src/ui/card.tsx<br/>Card(props)<br/>Algorithm: Render named controlled UI primitive, preserve HTML/ARIA/keyboard semantics and emit only documented callback events; no gameplay logic."]
+    D114["packages/client/src/ui/dialog.tsx<br/>Dialog(props)<br/>Algorithm: Render named controlled UI primitive, preserve HTML/ARIA/keyboard semantics and emit only documented callback events; no gameplay logic."]
+    D115["packages/client/src/ui/input.tsx<br/>Input(props)<br/>Algorithm: Render named controlled UI primitive, preserve HTML/ARIA/keyboard semantics and emit only documented callback events; no gameplay logic."]
+    D116["packages/client/src/ui/select.tsx<br/>Select(props)<br/>Algorithm: Render named controlled UI primitive, preserve HTML/ARIA/keyboard semantics and emit only documented callback events; no gameplay logic."]
+    D117["packages/client/src/ui/tabs.tsx<br/>Tabs(props)<br/>Algorithm: Render named controlled UI primitive, preserve HTML/ARIA/keyboard semantics and emit only documented callback events; no gameplay logic."]
+    D118["packages/client/src/ui/toast.tsx<br/>Toast(props)<br/>Algorithm: Render named controlled UI primitive, preserve HTML/ARIA/keyboard semantics and emit only documented callback events; no gameplay logic."]
+    D119["packages/client/src/ui/tooltip.tsx<br/>Tooltip(props)<br/>Algorithm: Render named controlled UI primitive, preserve HTML/ARIA/keyboard semantics and emit only documented callback events; no gameplay logic."]
+    D120["prisma.config.ts<br/>defineConfig({ schema: packages/server/supabase/schema.prisma, migrations: packages/server/supabase/migrations })<br/>Algorithm: Validate input types and scope, compute Prisma tooling config; no generated runtime client deterministically, return typed result or structured error; no implicit global state."]
+    D121["packages/native/src-tauri/build.rs<br/>tauri_build::build()<br/>Algorithm: Call tauri_build with verified capability manifest, icons and native resources; fail build if required platform inputs absent."]
+    D122["packages/native/src-tauri/src/main.rs<br/>main() -&gt; run()<br/>Algorithm: Initialize constrained WebView at configured production HTTPS origin, enforce allowlisted navigation and expose no local engine."]
+    D123["tests/api/test_contract.py<br/>test/assertions<br/>Algorithm: Drive api behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D124["tests/api/test_realtime.py<br/>test/assertions<br/>Algorithm: Drive api behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D125["tests/browser/editor.spec.ts<br/>test/assertions<br/>Algorithm: Validate input types and scope, compute Structured authoring and import/export deterministically, return typed result or structured error; no implicit global state."]
+    D126["tests/browser/games.spec.ts<br/>test/assertions<br/>Algorithm: Validate input types and scope, compute Four full game scenarios deterministically, return typed result or structured error; no implicit global state."]
+    D127["tests/browser/rendering.spec.ts<br/>test/assertions<br/>Algorithm: Validate input types and scope, compute SVG, accessibility and layout deterministically, return typed result or structured error; no implicit global state."]
+    D128["tests/configuration/test_assets.py<br/>test/assertions<br/>Algorithm: Drive configuration behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D129["tests/configuration/test_roundtrip.py<br/>test/assertions<br/>Algorithm: Drive configuration behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D130["tests/database/test_integrity.py<br/>test/assertions<br/>Algorithm: Drive database behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D131["tests/database/test_schema.py<br/>test/assertions<br/>Algorithm: Drive database behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D132["tests/database/test_transactions.py<br/>test/assertions<br/>Algorithm: Drive database behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D133["tests/engine/test_chess.py<br/>test/assertions<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D134["tests/engine/test_draughts.py<br/>test/assertions<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D135["tests/engine/test_execution.py<br/>test/assertions<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D136["tests/engine/test_moneyproperty.py<br/>test/assertions<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D137["tests/native/smoke.spec.ts<br/>test/assertions<br/>Algorithm: Validate input types and scope, compute Remote WebView and navigation restrictions deterministically, return typed result or structured error; no implicit global state."]
+    D138["tests/engine/test_reachability.py<br/>test_reachable_even_with_cycles()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D139["tests/engine/test_reachability.py<br/>test_unreachable_only_when_exhausted()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D140["tests/engine/test_reachability.py<br/>test_budget_does_not_produce_false_proof()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D141["tests/engine/test_reachability.py<br/>test_terminal_start_and_invalid_budget()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D142["tests/engine/test_game_contracts.py<br/>test_dice_moves_only_the_active_players_token()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D143["tests/engine/test_game_contracts.py<br/>test_pawn_promotion_occurs_before_advancing_turn()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D144["tests/engine/test_game_contracts.py<br/>test_economic_actions_do_not_embed_a_game_named_operator()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D145["tests/engine/test_game_contracts.py<br/>test_chess_dead_position_uses_sound_generic_reachability()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D146["tests/engine/test_game_contracts.py<br/>test_moneyproperty_doubles_detention_and_release_use_actions()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D147["tests/engine/test_game_contracts.py<br/>test_game_definition_is_built_from_entities_actions_and_objectives()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D148["tests/engine/test_game_contracts.py<br/>test_card_resolution_is_scoped_to_the_single_drawn_card()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D149["tests/engine/test_game_contracts.py<br/>test_chess_moves_cannot_capture_the_opposing_king()<br/>Algorithm: Drive engine behavior through supported external interface, exercise boundary and adversarial inputs, and assert visible state, error, replay or security outcome; reject mock-only success."]
+    D167[".github/scripts/check_spec_contracts.py<br/>Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory.<br/>Algorithm: Parse and cross-validate canonical Prisma, SQL, OpenAPI, portable JSON, operator registry and Mermaid source paths; exit nonzero on drift."]
+    D168[".github/scripts/build_docs.py<br/>pages_for(); build(); manifest()<br/>Algorithm: Traverse tracked files once, produce one page per source, compile Mermaid into publication-only SVG assets, and enumerate only deployed HTML roots."]
+    D169[".github/scripts/generate_diagrams.py<br/>repository_ast(); implementation_uml(); generated_assets()<br/>Algorithm: Parse actual tracked cross-language declarations and typed Python class relations; generate deterministic connected Mermaid sources."]
+
+  end
+  F027 -->|exports concrete interface| D001
+  F028 -->|exports concrete interface| D002
+  F028 -->|exports concrete interface| D003
+  F028 -->|exports concrete interface| D004
+  F028 -->|exports concrete interface| D005
+  F029 -->|exports concrete interface| D006
+  F029 -->|exports concrete interface| D007
+  F029 -->|exports concrete interface| D008
+  F029 -->|exports concrete interface| D009
+  F029 -->|exports concrete interface| D010
+  F030 -->|exports concrete interface| D011
+  F032 -->|exports concrete interface| D012
+  F032 -->|exports concrete interface| D013
+  F033 -->|exports concrete interface| D014
+  F034 -->|exports concrete interface| D015
+  F034 -->|exports concrete interface| D016
+  F035 -->|exports concrete interface| D017
+  F035 -->|exports concrete interface| D018
+  F035 -->|exports concrete interface| D019
+  F036 -->|exports concrete interface| D020
+  F036 -->|exports concrete interface| D021
+  F036 -->|exports concrete interface| D022
+  F036 -->|exports concrete interface| D023
+  F038 -->|exports concrete interface| D024
+  F040 -->|exports concrete interface| D025
+  F041 -->|exports concrete interface| D026
+  F041 -->|exports concrete interface| D027
+  F041 -->|exports concrete interface| D028
+  F042 -->|exports concrete interface| D029
+  F042 -->|exports concrete interface| D030
+  F042 -->|exports concrete interface| D031
+  F048 -->|exports concrete interface| D032
+  F049 -->|exports concrete interface| D033
+  F049 -->|exports concrete interface| D034
+  F049 -->|exports concrete interface| D035
+  F050 -->|exports concrete interface| D036
+  F050 -->|exports concrete interface| D037
+  F051 -->|exports concrete interface| D038
+  F052 -->|exports concrete interface| D039
+  F052 -->|exports concrete interface| D040
+  F052 -->|exports concrete interface| D041
+  F052 -->|exports concrete interface| D042
+  F052 -->|exports concrete interface| D043
+  F052 -->|exports concrete interface| D044
+  F053 -->|exports concrete interface| D045
+  F053 -->|exports concrete interface| D046
+  F053 -->|exports concrete interface| D047
+  F054 -->|exports concrete interface| D048
+  F055 -->|exports concrete interface| D049
+  F055 -->|exports concrete interface| D050
+  F055 -->|exports concrete interface| D051
+  F055 -->|exports concrete interface| D052
+  F056 -->|exports concrete interface| D053
+  F056 -->|exports concrete interface| D054
+  F056 -->|exports concrete interface| D055
+  F056 -->|exports concrete interface| D056
+  F057 -->|exports concrete interface| D057
+  F057 -->|exports concrete interface| D058
+  F057 -->|exports concrete interface| D059
+  F140 -->|exports concrete interface| D060
+  F140 -->|exports concrete interface| D061
+  F140 -->|exports concrete interface| D062
+  F066 -->|exports concrete interface| D063
+  F067 -->|exports concrete interface| D064
+  F068 -->|exports concrete interface| D065
+  F068 -->|exports concrete interface| D066
+  F069 -->|exports concrete interface| D067
+  F069 -->|exports concrete interface| D068
+  F070 -->|exports concrete interface| D069
+  F071 -->|exports concrete interface| D070
+  F072 -->|exports concrete interface| D071
+  F073 -->|exports concrete interface| D072
+  F073 -->|exports concrete interface| D073
+  F074 -->|exports concrete interface| D074
+  F075 -->|exports concrete interface| D075
+  F075 -->|exports concrete interface| D076
+  F076 -->|exports concrete interface| D077
+  F077 -->|exports concrete interface| D078
+  F078 -->|exports concrete interface| D079
+  F079 -->|exports concrete interface| D080
+  F080 -->|exports concrete interface| D081
+  F081 -->|exports concrete interface| D082
+  F082 -->|exports concrete interface| D083
+  F083 -->|exports concrete interface| D084
+  F084 -->|exports concrete interface| D085
+  F085 -->|exports concrete interface| D086
+  F085 -->|exports concrete interface| D087
+  F085 -->|exports concrete interface| D088
+  F086 -->|exports concrete interface| D089
+  F086 -->|exports concrete interface| D090
+  F087 -->|exports concrete interface| D091
+  F088 -->|exports concrete interface| D092
+  F089 -->|exports concrete interface| D093
+  F090 -->|exports concrete interface| D094
+  F091 -->|exports concrete interface| D095
+  F092 -->|exports concrete interface| D096
+  F093 -->|exports concrete interface| D097
+  F094 -->|exports concrete interface| D098
+  F094 -->|exports concrete interface| D099
+  F094 -->|exports concrete interface| D100
+  F095 -->|exports concrete interface| D101
+  F096 -->|exports concrete interface| D102
+  F096 -->|exports concrete interface| D103
+  F097 -->|exports concrete interface| D104
+  F097 -->|exports concrete interface| D105
+  F098 -->|exports concrete interface| D106
+  F098 -->|exports concrete interface| D107
+  F099 -->|exports concrete interface| D108
+  F099 -->|exports concrete interface| D109
+  F100 -->|exports concrete interface| D110
+  F101 -->|exports concrete interface| D111
+  F103 -->|exports concrete interface| D112
+  F104 -->|exports concrete interface| D113
+  F105 -->|exports concrete interface| D114
+  F106 -->|exports concrete interface| D115
+  F107 -->|exports concrete interface| D116
+  F108 -->|exports concrete interface| D117
+  F109 -->|exports concrete interface| D118
+  F110 -->|exports concrete interface| D119
+  F015 -->|exports concrete interface| D120
+  F019 -->|exports concrete interface| D121
+  F024 -->|exports concrete interface| D122
+  F113 -->|exports concrete interface| D123
+  F114 -->|exports concrete interface| D124
+  F115 -->|exports concrete interface| D125
+  F116 -->|exports concrete interface| D126
+  F119 -->|exports concrete interface| D127
+  F120 -->|exports concrete interface| D128
+  F121 -->|exports concrete interface| D129
+  F122 -->|exports concrete interface| D130
+  F123 -->|exports concrete interface| D131
+  F124 -->|exports concrete interface| D132
+  F125 -->|exports concrete interface| D133
+  F126 -->|exports concrete interface| D134
+  F127 -->|exports concrete interface| D135
+  F128 -->|exports concrete interface| D136
+  F129 -->|exports concrete interface| D137
+  F141 -->|exports concrete interface| D138
+  F141 -->|exports concrete interface| D139
+  F141 -->|exports concrete interface| D140
+  F141 -->|exports concrete interface| D141
+  F145 -->|exports concrete interface| D142
+  F145 -->|exports concrete interface| D143
+  F145 -->|exports concrete interface| D144
+  F145 -->|exports concrete interface| D145
+  F145 -->|exports concrete interface| D146
+  F145 -->|exports concrete interface| D147
+  F145 -->|exports concrete interface| D148
+  F145 -->|exports concrete interface| D149
+  F164 -->|exports concrete interface| D167
+  F165 -->|exports concrete interface| D168
+  F166 -->|exports concrete interface| D169
+  D015 -->|invokes checked interface| D017
+  D022 -->|invokes checked interface| D051
+  D022 -->|invokes checked interface| D050
+  D051 -->|invokes checked interface| D036
+  D051 -->|invokes checked interface| D038
+  D038 -->|invokes checked interface| D032
+  D032 -->|invokes checked interface| D046
+  D034 -->|invokes checked interface| D035
+  D031 -->|invokes checked interface| D029
+  D031 -->|invokes checked interface| D030
+  D026 -->|invokes checked interface| D029
+  D098 -->|invokes checked interface| D069
+  subgraph COMMAND["Authoritative command control-flow contract"]
+    C01["1. Authenticate & authorize<br/>owner: packages/server/api/security.py"]
+    C02["2. Lock game and resolve idempotency<br/>owner: packages/server/api/services.py"]
+    C03["3. Load pinned definition and authoritative snapshot<br/>owner: packages/server/api/repository.py"]
+    C04["4. Validate action type and typed arguments<br/>owner: packages/server/engine/types.py"]
+    C05["5. Generate legal candidates and evaluate conditions<br/>owner: packages/server/engine/runtime.py"]
+    C06["6. Dispatch queued hooks deterministically<br/>owner: packages/server/engine/hooks.py"]
+    C07["7. Execute proposed effects and validate state<br/>owner: packages/server/engine/effects.py"]
+    C08["8. Record complete ordered event mutations<br/>owner: packages/server/engine/events.py"]
+    C09["9. Commit state, game results and one revision<br/>owner: packages/server/api/services.py"]
+    C10["10. Broadcast committed revision hint<br/>owner: packages/server/api/realtime.py"]
+    C11["11. Invalidate and reload authorized projection<br/>owner: packages/client/src/api/realtime.ts"]
+    C12["12. Render generic SVG scene<br/>owner: packages/client/src/rendering/Scene.tsx"]
+  end
+  F035 -->|implements authoritative stage| C01
+  F036 -->|implements authoritative stage| C02
+  C01 -->|next validated stage| C02
+  F033 -->|implements authoritative stage| C03
+  C02 -->|next validated stage| C03
+  F057 -->|implements authoritative stage| C04
+  C03 -->|next validated stage| C04
+  F055 -->|implements authoritative stage| C05
+  C04 -->|next validated stage| C05
+  F051 -->|implements authoritative stage| C06
+  C05 -->|next validated stage| C06
+  F048 -->|implements authoritative stage| C07
+  C06 -->|next validated stage| C07
+  F049 -->|implements authoritative stage| C08
+  C07 -->|next validated stage| C08
+  F036 -->|implements authoritative stage| C09
+  C08 -->|next validated stage| C09
+  F032 -->|implements authoritative stage| C10
+  C09 -->|next validated stage| C10
+  F070 -->|implements authoritative stage| C11
+  C10 -->|next validated stage| C11
+  F101 -->|implements authoritative stage| C12
+  C11 -->|next validated stage| C12
+  F094 -->|submits command via API| C01
+  C09 -->|transaction commits before notification| C10
+  %% Engine purity: the DB service never calls engine from inside a mutable effect, and the browser never mutates authoritative state.
+  %% Source files: 154; one identity per physical file; configuration data is not executable gameplay logic.

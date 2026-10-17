@@ -1,0 +1,36 @@
+{
+  "name": "@bgwq/client",
+  "version": "0.8.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.0",
+  "scripts": {
+    "dev": "bun run assets && rsbuild dev",
+    "build": "bun run assets && rsbuild build",
+    "preview": "rsbuild preview",
+    "typecheck": "tsc --noEmit",
+    "assets": "bun scripts/prepare-assets.ts"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "motion": "^12.23.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.3.0",
+    "@supabase/supabase-js": "^2.76.1"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^2.1.0",
+    "@rsbuild/plugin-react": "^2.1.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.9.0",
+    "@types/node": "^24.0.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@biomejs/biome": "^2.5.0"
+  }
+}

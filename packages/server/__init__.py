@@ -1,1 +1,1 @@
-"""Network transport for the headless board-game engine."""
+"""Python server boundary and game-engine namespace."""

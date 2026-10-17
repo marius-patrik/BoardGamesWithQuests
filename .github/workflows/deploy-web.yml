@@ -1,0 +1,72 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/client/**"
+      - ".github/workflows/deploy-web.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/client/**"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-web-production
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/client
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - name: Install and typecheck
+        run: |
+          bun install --frozen-lockfile
+          bun run typecheck
+      - name: Build web bundle
+        run: bun run build
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: web-production
+    defaults:
+      run:
+        working-directory: packages/client
+    env:
+      VERCEL_ORG_ID: team_Uq6MeWzqk2HnlAbXDi5fuLBV
+      VERCEL_PROJECT_ID: prj_iWSGkCmiCeh1uliqVN06b5QWPAAx
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Install Vercel CLI
+        run: npm install --global vercel@50.4.0
+      - name: Pull production project environment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production
+      - name: Build web assets from canonical root icon and configs
+        run: |
+          bun install --frozen-lockfile
+          bun run assets
+      - name: Build Vercel output
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod
+      - name: Deploy reviewed web build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --prod

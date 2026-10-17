@@ -1,55 +1,32 @@
 [build-system]
-requires = ["setuptools>=77", "setuptools-scm>=8"]
+requires = ["setuptools>=69", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "boardgameswithquests"
 dynamic = ["version"]
-# The Git release tag is the version source of truth, including for Python builds.
-description = "Game-neutral Python engine for JSON-configurable chess and checkers, powering an online React application."
+description = "BoardGamesWithQuests Python server and reusable game engine"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "GPL-3.0-only"
+license = { text = "GPL-3.0-only" }
 authors = [{ name = "marius-patrik" }]
-keywords = ["chess", "checkers", "board game", "engine", "json rules", "quests", "web"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Games/Entertainment :: Board Games",
-]
-# API runtime dependencies are declared for build reproducibility.
-dependencies = ["fastapi==0.143.0", "httpx==0.28.1", "psycopg[binary]==3.3.6"]
+keywords = ["board games", "fastapi", "engine", "quests"]
+dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1"]
 
 [project.urls]
 Homepage = "https://github.com/marius-patrik/BoardGamesWithQuests"
 Documentation = "https://marius-patrik.github.io/BoardGamesWithQuests/"
-"Architecture diagram" = "https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D"
-
-
-[project.entry-points."boardgameswithquests.games"]
-chess = "chess"
-english_draughts = "english_draughts"
-international_checkers = "international_checkers"
 
 [tool.setuptools_scm]
-# setuptools-scm reads Git tags directly; no manually maintained package version.
+# Tags are the package version source.
 
 [tool.setuptools]
 package-dir = {"" = "packages"}
 
 [tool.setuptools.packages.find]
 where = ["packages"]
-include = ["engine*", "server*", "chess*", "english_draughts*", "international_checkers*"]
-
-[tool.setuptools.package-data]
-chess = ["config.json"]
-english_draughts = ["config.json"]
-international_checkers = ["config.json"]
+include = ["server*"]
+namespaces = true
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -59,14 +36,3 @@ pythonpath = ["packages", "."]
 [tool.black]
 line-length = 100
 target-version = ["py310", "py311", "py312", "py313"]
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.venv
-  | \.pytest_cache
-  | build
-  | dist
-)/
-'''
