@@ -225,6 +225,10 @@ def validate_openapi() -> int:
     assert portable_ref(embedded) == {
         k: v for k, v in schema.items() if k not in ("$schema", "$id")
     }, "OpenAPI ConfigDocument drifted from JSON Schema"
+    for component in ("GameCreate", "Game", "GameSummary", "Invitation"):
+        shape = api["components"]["schemas"][component]
+        assert "target_participants" in shape["required"], f"{component} missing fixed capacity"
+        assert shape["properties"]["target_participants"]["minimum"] >= 2
     session = api["paths"]["/session"]["get"]
     assert session["responses"]["200"]["content"]["application/json"]["schema"]["$ref"].endswith(
         "/Session"
@@ -315,6 +319,7 @@ def validate_prisma_sql() -> tuple[int, int]:
         "CREATE CONSTRAINT TRIGGER check_game_revision_history" in sql
     ), "committed revision parity absent"
     assert "REFERENCES auth.users(id)" in sql, "Supabase Auth FK constraints absent"
+    assert "CREATE TRIGGER game_target_size_guard" in sql, "database lobby target not bounded"
     assert (
         "CREATE TRIGGER participant_capacity_guard" in sql and "FOR UPDATE OF g" in sql
     ), "concurrent joins lack enforced variable seat capacity"
@@ -425,6 +430,7 @@ def main() -> None:
         "minimumParticipants",
         "maximumParticipants",
         "model Participant",
+        "targetParticipants",
         "model ActiveParticipant",
         "model EventMutation",
         "model GameOutcome",

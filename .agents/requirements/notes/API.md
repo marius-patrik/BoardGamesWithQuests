@@ -2011,10 +2011,15 @@ components:
       - definition_id
       - version
       - idempotency_key
+      - target_participants
       properties:
         definition_id: *id001
         version: *id003
         idempotency_key: *id002
+        target_participants:
+          type: integer
+          minimum: 2
+          maximum: 64
     GameSummary:
       type: object
       additionalProperties: false
@@ -2023,6 +2028,7 @@ components:
       - status
       - revision
       - definition
+      - target_participants
       properties:
         id: *id001
         status:
@@ -2032,6 +2038,10 @@ components:
           - finished
           - expired
         revision: *id003
+        target_participants:
+          type: integer
+          minimum: 2
+          maximum: 64
         definition:
           $ref: '#/components/schemas/Definition'
     Game:
@@ -2042,6 +2052,7 @@ components:
       - status
       - revision
       - definition
+      - target_participants
       - participants
       - entities
       - available_actions
@@ -2056,6 +2067,10 @@ components:
           - finished
           - expired
         revision: *id003
+        target_participants:
+          type: integer
+          minimum: 2
+          maximum: 64
         definition:
           $ref: '#/components/schemas/Definition'
         participants:
@@ -2086,6 +2101,7 @@ components:
       - status
       - expires_at
       - definition
+      - target_participants
       properties:
         game_id: *id001
         status:
@@ -2094,6 +2110,10 @@ components:
           - active
           - expired
         expires_at: *id004
+        target_participants:
+          type: integer
+          minimum: 2
+          maximum: 64
         definition:
           $ref: '#/components/schemas/Definition'
     JoinRequest:
