@@ -72,8 +72,7 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
     incompatible = [
         name
         for name in names
-        if name.startswith(".agents/notes/diagrams/")
-        and name.endswith((".svg", ".dot", ".gv"))
+        if name.startswith(".agents/notes/diagrams/") and name.endswith((".svg", ".dot", ".gv"))
     ]
     assert not incompatible, f"Committed diagram sources must be Mermaid: {incompatible}"
 
@@ -127,23 +126,26 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     original_blob = subprocess.run(
         ["git", "hash-object", str(source)], cwd=ROOT, check=True, capture_output=True, text=True
     ).stdout.strip()
-    assert original_blob == "b693531ab78f3e07c1f6ff1452f59aa45d773a7d", "The original GUI mockup image was altered"
+    assert (
+        original_blob == "b693531ab78f3e07c1f6ff1452f59aa45d773a7d"
+    ), "The original GUI mockup image was altered"
 
     page = (
-        SITE / "repository-files" / "agents" / "notes" / "images"
-        / "GUI_mockup.svg" / "index.html"
+        SITE / "repository-files" / "agents" / "notes" / "images" / "GUI_mockup.svg" / "index.html"
     )
     assert page.is_file(), "The original image must have a navigable documentation page"
     html = page.read_text(encoding="utf-8")
     assert 'class="diagram-viewer"' in html
-    assert 'assets/diagrams.js' in html
+    assert "assets/diagrams.js" in html
     match = re.search(r'<img src="([^"]+)"', html)
     assert match, "The image must render visually rather than as SVG source text"
     url = urlsplit(unescape(match.group(1))).path
     published = (page.parent / url).resolve()
     assert published.is_relative_to(SITE.resolve())
     assert published.is_file(), "Published original image cannot be loaded"
-    assert published.read_bytes() == source.read_bytes(), "Published image is not the source artwork"
-    assert not (ROOT / ".agents/notes/diagrams/gui-mockup.mmd").exists(), (
-        "Do not replace the GUI image with a conceptual Mermaid diagram"
-    )
+    assert (
+        published.read_bytes() == source.read_bytes()
+    ), "Published image is not the source artwork"
+    assert not (
+        ROOT / ".agents/notes/diagrams/gui-mockup.mmd"
+    ).exists(), "Do not replace the GUI image with a conceptual Mermaid diagram"
