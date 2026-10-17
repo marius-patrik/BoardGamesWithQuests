@@ -1,6 +1,6 @@
 # ARCHITECTURE — source tree, tooling and components
 
-This is the **intended tracked source layout**, not a claim that the implementation files already exist. Every leaf carries a source-level responsibility or documentation contract inline. The [Mermaid AST](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/requirements/AST.mmd) declares the same leaf paths, public interfaces and actual typed dependencies; game-specific JSON action instances do not become source files or AST execution modules.
+This is the **intended tracked source layout**, not a claim that the implementation files already exist. The merged Git-backed documentation pipeline is authoritative; the target-source graph below is a specification, distinct from source-derived diagrams of code actually present. Every leaf carries a source-level responsibility or documentation contract inline. The [Mermaid AST](AST.mmd) declares the same leaf paths, public interfaces and actual typed dependencies; game-specific JSON action instances do not become source files or AST execution modules.
 
 ## Stack and authority
 
@@ -15,32 +15,55 @@ This is the **intended tracked source layout**, not a claim that the implementat
 | Documentation | TSDoc, Python docstrings, Rustdoc, OpenAPI and a live interactive Mermaid AST |
 | Verification | pytest, Playwright, native smoke tests, real database migrations and cross-contract validation |
 
-Prisma is **schema authoring tooling**, not a production Node.js database runtime. PostgreSQL-specific SQL in [integrity.sql](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/packages/server/supabase/integrity.sql) is mandatory only for guarantees PSL cannot represent: CHECK constraints, partial indexes, Supabase Auth references, trigger-based immutability, event parity, and private Broadcast authorization. The SQL must be applied after Prisma's schema-generated migration and verified against real PostgreSQL; it never implements gameplay rules.
+Prisma is **schema authoring tooling**, not a production Node.js database runtime. PostgreSQL-specific SQL in [integrity.sql](../../../packages/server/supabase/integrity.sql) is mandatory only for guarantees PSL cannot represent: CHECK constraints, partial indexes, Supabase Auth references, trigger-based immutability, event parity, and private Broadcast authorization. The SQL must be applied after Prisma's schema-generated migration and verified against real PostgreSQL; it never implements gameplay rules.
 
 ## Intended source tree
 
 ```text
 .agents/  # Product and architectural requirements; implementation lives in packages, not here.
   notes/  # Source-authored product requirements and referenced design material.
+    diagrams/  # Source-backed Mermaid diagrams; rendered SVGs are deployment artifacts, not committed diagram sources.
+      implementation/  # Generated from actual tracked source declarations.
+        ast.mmd  # Repository-wide cross-language file/declaration graph.
+        uml.mmd  # Actual Python class signatures, inheritance and typed associations.
+      reference/  # Authored design references, not verified runtime architecture.
+        mvc.mmd  # Reference MVC diagram.
+        uml.mmd  # Reference UML diagram.
+    images/  # Immutable original visual references.
+      GUI_mockup.svg  # Excalidraw image retained as original SVG, not converted to Mermaid.
     requirements/  # Normative interfaces, annotated architecture and the source-only Mermaid diagram.
       ARCHITECTURE.md  # Annotated source inventory and exact package ownership; every file has inline input/output/invariant documentation and graph counterpart.
       AST.mmd  # Single Mermaid declaration/dependency/control-flow graph; each implementation declaration has typed contract and deterministic operation semantics.
   PRD.md  # Product invariants, user journeys and behavior acceptance only; links to canonical architecture, API, Prisma schema, AST and portable data.
-.github/  # Repository CI, documentation and release automation.
-  docs-ui/  # First-party documentation page template and interactive Mermaid view.
-    assets/  # Documentation theme assets and UI logic only.
-      theme.css  # Documentation site theme and interactive diagram controls
-      theme.js  # Documentation interaction and virtual Mermaid renderer controls
-    main.html  # First-party documentation HTML page template
-  scripts/  # GitHub-specific source/doc verification helpers.
-    check_spec_contracts.py  # Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory
-    docs_hooks.py  # Generate documentation pages from tracked files, including interactive Mermaid source
-    docs_manifest.py  # manifest(site, repository); main(); Scan published HTML roots and emit the branch/PR version selector without advertising missing deployments
-  workflows/  # CI and release configurations, not gameplay code.
-    deploy-api.yml  # deploy-api workflow; Deploy FastAPI Vercel project
-    deploy-web.yml  # deploy-web workflow; Deploy web Vercel project
-    release-native.yml  # release-native workflow; Build and sign native artifacts
-    verify.yml  # verify workflow; Check AST/schema/API/data/tests and code docs
+.github/  # DarkFactory governance, one documentation implementation, verification and release workflows.
+  docs-ui/  # Existing ProperDocs template; no second architecture renderer.
+    assets/  # Reader styles and controls.
+      diagrams.js  # Shared SVG/Mermaid zoom, pan and modal viewer controls.
+      theme.css  # Reader layout, theme and sidebar styles.
+      theme.js  # Layout, navigation, fullscreen and version selection.
+    partials/  # File-system-derived UI templates.
+      nav.html  # Exact Git folder hierarchy, collapsible sections.
+      switcher.html  # Published main/PR versions only.
+    main.html  # ProperDocs template that consumes generated navigation.
+  scripts/  # One Git-backed docs pipeline plus explicit contract verification.
+    assemble_docs.py  # Assemble only independently staged successful HTML snapshots.
+    build_docs.py  # Single source-page, navigation, compilation and deployed-manifest builder.
+    check_spec_contracts.py  # Validate canonical JSON, OpenAPI, relational schema, SQL and Mermaid architecture.
+    generate_diagrams.py  # Generate repository AST and implementation UML from actual tracked source.
+  tests/  # User-visible documentation and publication tests.
+    test_docs_browser.mjs  # Browser-level reader, image zoom/modal and collapsible-navigation checks.
+    test_docs_publication.py  # Staging, missing-main behavior and preview filtering checks.
+    test_documentation_site.py  # Verify all Git-tracked pages and compiled Mermaid diagrams.
+  workflows/  # Existing DarkFactory and GitHub Pages pipelines; no duplicate check workflow.
+    build-main-docs.yml  # Independently stage passing main documentation.
+    darkfactory-control.yml  # Execute delegated quality and governance.
+    darkfactory.yml  # Invoke the canonical DarkFactory workflow.
+    deploy-api.yml  # Deploy reviewed FastAPI service to its Vercel project.
+    deploy-docs.yml  # Assemble published GitHub Pages snapshots without rebuilding PRs.
+    deploy-web.yml  # Deploy reviewed React bundle to its Vercel project.
+    native-ios-signed.yml  # Signed iOS release build gate.
+    native-release.yml  # Native platform release automation.
+    preview-docs.yml  # Build and browser-test each PR's own docs source.
 data/  # Portable game configurations, typed operator registry and seed data.
   chess.json  # Complete portable orthodox chess definition interpreted by the generic engine
   configuration.schema.json  # JSON Schema 2020-12 for portable game configuration import and export
@@ -174,8 +197,6 @@ tests/  # Observable API, engine, database and browser behavior.
   configuration/  # Portable JSON import/export and definition validation.
     test_assets.py  # test/assertions; Binary import/export digest parity
     test_roundtrip.py  # test/assertions; Structural and semantic JSON roundtrip
-  documentation/  # Observable tests of generated documentation and preview navigation.
-    test_manifest_cli.py  # Launch the shipped docs manifest CLI on temporary published-site trees; verify available versions, ordering, removal and deterministic outputs.
   database/  # Actual PostgreSQL constraints, events and transactions.
     test_integrity.py  # test/assertions; Published immutability, trigger and RLS checks
     test_schema.py  # test/assertions; Migrations/FKs/constraints in real PostgreSQL
@@ -219,4 +240,4 @@ The API imports engine interfaces but the engine cannot import API or I/O module
 
 ## Single-source contract dependencies
 
-The requirements start at [PRD](../../PRD.md). HTTP payloads are specified by [openapi.yaml](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/packages/server/api/openapi.yaml), database tables and constraints by [schema.prisma](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/packages/server/supabase/schema.prisma) and [integrity.sql](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/packages/server/supabase/integrity.sql), source file interfaces by [AST.mmd](https://github.com/marius-patrik/BoardGamesWithQuests/blob/main/.agents/notes/requirements/AST.mmd), and built-in game data by the files under `data/`. These files refer to one another rather than embedding duplicate authoritative copies. A CI verifier checks their identities, type references, documented responsibilities, and graph connectivity.
+The requirements start at [PRD](../../PRD.md). HTTP payloads are specified by [openapi.yaml](../../../packages/server/api/openapi.yaml), database tables and constraints by [schema.prisma](../../../packages/server/supabase/schema.prisma) and [integrity.sql](../../../packages/server/supabase/integrity.sql), source file interfaces by [AST.mmd](AST.mmd), and built-in game data by the files under `data/`. These files refer to one another rather than embedding duplicate authoritative copies. A CI verifier checks their identities, type references, documented responsibilities, and graph connectivity.

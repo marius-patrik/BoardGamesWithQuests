@@ -282,6 +282,7 @@ def validate_mermaid() -> tuple[int, int]:
     ast = (REQ / "AST.mmd").read_text()
     assert ast.startswith("flowchart TB\n"), "expected plain Mermaid, not Markdown"
     assert "reference_AST.svg" not in ast, "tracked SVG still referenced"
+    assert "docs_hooks.py" not in ast and "docs_manifest.py" not in ast, "obsolete documentation entrypoints in target graph"
     nodes = {}
     for m in re.finditer(r'(?m)^\s*(F\d+)\["([^"\n]*)"\]\s*$', ast):
         assert m.group(1) not in nodes, "duplicate Mermaid declaration"

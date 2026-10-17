@@ -8,6 +8,11 @@ flowchart TB
     F150["packages/server/supabase/schema.prisma<br/>exports: Prisma models, indexes, relationships<br/>Prisma /// comments: Normative relational model; companion SQL in INTEGRITY.sql."]
     F151[".agents/notes/requirements/ARCHITECTURE.md<br/>exports: Exact intended source tree and technology boundaries<br/>Markdown: Normative annotated tree synchronized with source declarations."]
     F152["packages/server/supabase/integrity.sql<br/>exports: PostgreSQL-only constraints, Supabase Auth references and triggers<br/>SQL comments: Reviewed extension to Prisma schema."]
+    F168[".agents/notes/diagrams/implementation/ast.mmd<br/>exports: Source-derived cross-language file and declaration graph<br/>Mermaid: Derived from real Git-tracked source, not the proposed source contract."]
+    F169[".agents/notes/diagrams/implementation/uml.mmd<br/>exports: Source-derived class UML<br/>Mermaid: Actual class signatures, typed associations and inheritance."]
+    F170[".agents/notes/diagrams/reference/mvc.mmd<br/>exports: Reference MVC architecture<br/>Mermaid: Authored reference distinct from implementation verification."]
+    F171[".agents/notes/diagrams/reference/uml.mmd<br/>exports: Reference UML architecture<br/>Mermaid: Authored reference distinct from implementation verification."]
+    F172[".agents/notes/images/GUI_mockup.svg<br/>exports: Original immutable GUI mockup<br/>SVG: The real Excalidraw image, not an invented Mermaid drawing."]
   end
   subgraph SERVER["Server — source declarations"]
     F026["packages/server/api/__init__.py<br/>exports: module<br/>Python docstring: Python package marker."]
@@ -119,8 +124,13 @@ flowchart TB
   subgraph WORKFLOWS["Workflows — source declarations"]
     F004[".github/workflows/deploy-api.yml<br/>exports: deploy-api workflow<br/>Workflow comments: Deploy FastAPI Vercel project"]
     F005[".github/workflows/deploy-web.yml<br/>exports: deploy-web workflow<br/>Workflow comments: Deploy web Vercel project"]
-    F006[".github/workflows/release-native.yml<br/>exports: release-native workflow<br/>Workflow comments: Build and sign native artifacts"]
-    F007[".github/workflows/verify.yml<br/>exports: verify workflow<br/>Workflow comments: Check AST/schema/API/data/tests and code docs"]
+    F006[".github/workflows/native-release.yml<br/>exports: native release workflow<br/>GitHub Actions: Produce platform-specific artifacts from one Tauri wrapper."]
+    F007[".github/workflows/darkfactory.yml<br/>exports: DarkFactory Runtime workflow<br/>GitHub Actions: Invoke canonical repository quality and governance."]
+    F180[".github/workflows/preview-docs.yml<br/>exports: PR documentation preview workflow<br/>GitHub Actions: Build and browser-test actual PR head independently."]
+    F181[".github/workflows/build-main-docs.yml<br/>exports: Main documentation builder workflow<br/>GitHub Actions: Stage passing main independently of PR builds."]
+    F182[".github/workflows/deploy-docs.yml<br/>exports: GitHub Pages publisher workflow<br/>GitHub Actions: Publish assembled snapshots with verified selectors."]
+    F183[".github/workflows/darkfactory-control.yml<br/>exports: DarkFactory managed quality control workflow<br/>GitHub Actions: Real shared quality orchestration for product changes."]
+    F184[".github/workflows/native-ios-signed.yml<br/>exports: Signed iOS native workflow<br/>GitHub Actions: Require proper Apple signing for distributable assets."]
   end
   subgraph TESTS["Tests — source declarations"]
     F113["tests/api/test_contract.py<br/>exports: test/assertions<br/>Python docstring: OpenAPI and security errors"]
@@ -132,7 +142,7 @@ flowchart TB
     F119["tests/browser/rendering.spec.ts<br/>exports: test/assertions<br/>TSDoc: SVG, accessibility and layout"]
     F120["tests/configuration/test_assets.py<br/>exports: test/assertions<br/>Python docstring: Binary import/export digest parity"]
     F121["tests/configuration/test_roundtrip.py<br/>exports: test/assertions<br/>Python docstring: Structural and semantic JSON roundtrip"]
-    F167["tests/documentation/test_manifest_cli.py<br/>exports: test_manifest_advertises_only_available_html_roots(); test_manifest_reflects_removed_preview_after_regeneration(); test_manifest_is_deterministic_and_projects_are_from_configuration()<br/>Python docstring: Run the real documentation-manifest CLI against temporary published-site trees."]
+
     F122["tests/database/test_integrity.py<br/>exports: test/assertions<br/>Python docstring: Published immutability, trigger and RLS checks"]
     F123["tests/database/test_schema.py<br/>exports: test/assertions<br/>Python docstring: Migrations/FKs/constraints in real PostgreSQL"]
     F124["tests/database/test_transactions.py<br/>exports: test/assertions<br/>Python docstring: Concurrent actions and exact idempotency"]
@@ -143,6 +153,9 @@ flowchart TB
     F129["tests/native/smoke.spec.ts<br/>exports: test/assertions<br/>TSDoc: Remote WebView and navigation restrictions"]
     F141["tests/engine/test_reachability.py<br/>exports: test_reachable_even_with_cycles(); test_unreachable_only_when_exhausted(); test_budget_does_not_produce_false_proof(); test_terminal_start_and_invalid_budget()<br/>Python docstring: Check proof soundness, cycles and budget exceptions against observable graph behavior."]
     F145["tests/engine/test_game_contracts.py<br/>exports: test_dice_moves_only_the_active_players_token(); test_pawn_promotion_occurs_before_advancing_turn(); test_economic_actions_do_not_embed_a_game_named_operator(); test_chess_dead_position_uses_sound_generic_reachability(); test_moneyproperty_doubles_detention_and_release_use_actions(); test_game_definition_is_built_from_entities_actions_and_objectives(); test_card_resolution_is_scoped_to_the_single_drawn_card(); test_chess_moves_cannot_capture_the_opposing_king()<br/>Python docstring: Exercise observed per-player action eligibility and atomic promotion ordering."]
+    F177[".github/tests/test_docs_browser.mjs<br/>exports: Browser reader interaction tests<br/>JavaScript: Verify real user controls against compiled pages in Chromium."]
+    F178[".github/tests/test_documentation_site.py<br/>exports: Published repository page tests<br/>Python: Verify every tracked page, folder navigation and compiled diagrams."]
+    F179[".github/tests/test_docs_publication.py<br/>exports: Published preview artifact tests<br/>Python: Verify staging, preview removal and independently built main behavior."]
   end
   subgraph TOOLS["Tools — source declarations"]
     F130["tools/build_docs.py<br/>exports: render_source_docs()<br/>Python docstring: Generate Python, TSDoc and Rustdoc source/API documentation."]
@@ -168,11 +181,15 @@ flowchart TB
     F134["tsdoc.json<br/>exports: TSDoc grammar<br/>Schema/document metadata: Single standard for structured TSDoc tags."]
     F135["typedoc.json<br/>exports: TypeDoc configuration<br/>Schema/document metadata: Generate docs from structured TSDoc declarations."]
     F161[".github/docs-ui/assets/theme.css<br/>exports: Documentation site theme and interactive diagram controls.<br/>Documentation: Canonical, cross-validated source contract."]
-    F162[".github/docs-ui/assets/theme.js<br/>exports: Documentation interaction and virtual Mermaid renderer controls.<br/>Documentation: Canonical, cross-validated source contract."]
+    F162[".github/docs-ui/assets/theme.js<br/>exports: navigation, width, fullscreen and project selector logic<br/>JavaScript: Diagram pan/zoom is implemented only in diagrams.js."]
     F163[".github/docs-ui/main.html<br/>exports: First-party documentation HTML page template.<br/>Documentation: Canonical, cross-validated source contract."]
     F164[".github/scripts/check_spec_contracts.py<br/>exports: Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory.<br/>Documentation: Canonical, cross-validated source contract."]
-    F165[".github/scripts/docs_hooks.py<br/>exports: Generate documentation pages from tracked files, including interactive Mermaid source.<br/>Documentation: Canonical, cross-validated source contract."]
-    F166[".github/scripts/docs_manifest.py<br/>exports: manifest(site, repository); main()<br/>Python docstring: Advertise only deployed HTML roots and derive project navigation from DarkFactory configuration."]
+    F165[".github/scripts/build_docs.py<br/>exports: pages_for(); navigation(); manifest(); render_published_mermaid(); build(); main()<br/>Python: One Git-backed documentation renderer and published version manifest."]
+    F166[".github/scripts/generate_diagrams.py<br/>exports: tracked_paths(); repository_ast(); implementation_uml(); generated_assets()<br/>Python: Build source-derived Mermaid without committing generated SVG."]
+    F173[".github/docs-ui/assets/diagrams.js<br/>exports: Image pan, zoom and modal controls<br/>JavaScript: Use the one actual diagram viewer for SVG and Mermaid assets."]
+    F174[".github/docs-ui/partials/nav.html<br/>exports: Git-tracked recursive sidebar<br/>Jinja: Reflect folder hierarchy without synthetic sections."]
+    F175[".github/docs-ui/partials/switcher.html<br/>exports: Deployed version and project selector<br/>Jinja: Show only verified published site roots."]
+    F176[".github/scripts/assemble_docs.py<br/>exports: Independent HTML snapshot assembler<br/>Python: Combine staged and verified PR/main builds without rebuilding them."]
   end
   F001 -->|defines architecture| F149
   F001 -->|defines components| F151
@@ -396,7 +413,6 @@ flowchart TB
   F139 -->|defines generic semantics| F053
   F039 -->|defines transfer models| F040
   F166 -->|adds deployed versions manifest to generated documentation| F130
-  F167 -->|executes CLI on published-site fixtures| F166
   F165 -->|renders interactive Mermaid source| F149
   F162 -->|pans/zooms Mermaid visualization| F149
   F163 -->|loads architecture viewer| F162
@@ -405,6 +421,23 @@ flowchart TB
 
   %% Public declaration graph: source-owned symbols with explicit interface responsibilities.
   %% Concrete interfaces: symbols from each file exports, with observable input, algorithm, output and error contracts.
+  F168 -->|documents canonical source| F166
+  F169 -->|documents canonical source| F166
+  F170 -->|documents canonical source| F165
+  F171 -->|documents canonical source| F165
+  F172 -->|documents canonical source| F173
+  F173 -->|documents canonical source| F165
+  F174 -->|documents canonical source| F165
+  F175 -->|documents canonical source| F165
+  F176 -->|documents canonical source| F165
+  F177 -->|verifies canonical source| F173
+  F178 -->|verifies canonical source| F165
+  F179 -->|verifies canonical source| F176
+  F180 -->|orchestrates canonical source| F165
+  F181 -->|orchestrates canonical source| F165
+  F182 -->|orchestrates canonical source| F176
+  F183 -->|orchestrates canonical source| F007
+  F184 -->|orchestrates canonical source| F006
   subgraph DECLARATIONS["Typed source function and class contracts"]
     D001["packages/server/api/app.py<br/>create_app()-&gt;FastAPI<br/>Algorithm: Construct FastAPI, install session, Origin, CSRF, error middleware, mount exactly the OpenAPI routes, and fail startup on missing backend settings."]
     D002["packages/server/api/assets.py<br/>begin_upload()<br/>Algorithm: Verify authenticated owner and unpublished version, check declared MIME/size/digest, issue short-lived scoped Storage upload ticket; no direct client permission to publish."]
@@ -573,11 +606,9 @@ flowchart TB
     D165["tools/register_manifest.py<br/>register_manifest()-&gt;None<br/>Algorithm: Compare implementation inventory with one ARCHITECTURE path and one AST node per file and reject missing declarations."]
     D166["tools/check_prd.py<br/>verify()-&gt;None<br/>Algorithm: Validate PRD links, architecture paths and normative contract uniqueness; reject stale references."]
     D167[".github/scripts/check_spec_contracts.py<br/>Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory.<br/>Algorithm: Parse and cross-validate canonical Prisma, SQL, OpenAPI, portable JSON, operator registry and Mermaid source paths; exit nonzero on drift."]
-    D168[".github/scripts/docs_hooks.py<br/>Generate documentation pages from tracked files, including interactive Mermaid source.<br/>Algorithm: Enumerate tracked canonical docs, securely embed Mermaid in an interactive viewer, publish API/schema source pages and preserve navigation."]
-    D169[".github/scripts/docs_manifest.py<br/>manifest(site, repository); main()<br/>Algorithm: Inspect only existing HTML index roots for main, branch and numbered PR previews; sort branch names ascending and numeric PRs descending; read configured sibling projects; write deterministic versions.json."]
-    D170["tests/documentation/test_manifest_cli.py<br/>test_manifest_advertises_only_available_html_roots()<br/>Algorithm: Create actual temporary HTML roots for valid and invalid preview names, invoke CLI in a subprocess, and assert exactly available ordered version entries."]
-    D171["tests/documentation/test_manifest_cli.py<br/>test_manifest_reflects_removed_preview_after_regeneration()<br/>Algorithm: Generate a preview manifest, remove its index.html, regenerate, and assert the preview disappears instead of lingering in navigation."]
-    D172["tests/documentation/test_manifest_cli.py<br/>test_manifest_is_deterministic_and_projects_are_from_configuration()<br/>Algorithm: Invoke the CLI twice with identical site roots and compare manifest bytes; compare project links to configured DarkFactory documentation projects."]
+    D168[".github/scripts/build_docs.py<br/>pages_for(); build(); manifest()<br/>Algorithm: Traverse tracked files once, produce one page per source, compile Mermaid into publication-only SVG assets, and enumerate only deployed HTML roots."]
+    D169[".github/scripts/generate_diagrams.py<br/>repository_ast(); implementation_uml(); generated_assets()<br/>Algorithm: Parse actual tracked cross-language declarations and typed Python class relations; generate deterministic connected Mermaid sources."]
+
   end
   F027 -->|exports concrete interface| D001
   F028 -->|exports concrete interface| D002
@@ -748,9 +779,6 @@ flowchart TB
   F164 -->|exports concrete interface| D167
   F165 -->|exports concrete interface| D168
   F166 -->|exports concrete interface| D169
-  F167 -->|exports concrete interface| D170
-  F167 -->|exports concrete interface| D171
-  F167 -->|exports concrete interface| D172
   D015 -->|invokes checked interface| D017
   D022 -->|invokes checked interface| D051
   D022 -->|invokes checked interface| D050
