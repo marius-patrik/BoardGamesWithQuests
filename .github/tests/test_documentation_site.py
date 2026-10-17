@@ -65,19 +65,35 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
 
     tracked = subprocess.run(
         ["git", "-C", str(ROOT), "ls-files", "-z", "--cached"],
-        capture_output=True, check=True,
+        capture_output=True,
+        check=True,
     ).stdout
     names = [part.decode("utf-8", "surrogateescape") for part in tracked.split(b"\0") if part]
     incompatible = [
-        name for name in names
+        name
+        for name in names
         if name.startswith(".agents/notes/") and name.endswith((".svg", ".dot", ".gv"))
     ]
     assert not incompatible, f"Committed diagrams must use Mermaid sources: {incompatible}"
 
-    for name in ("repository-ast", "implementation-uml", "reference-mvc", "reference-page1", "gui-mockup"):
+    for name in (
+        "repository-ast",
+        "implementation-uml",
+        "reference-mvc",
+        "reference-page1",
+        "gui-mockup",
+    ):
         source = ROOT / ".agents" / "notes" / "diagrams" / (name + ".mmd")
         assert source.is_file() and len(source.read_text(encoding="utf-8").splitlines()) > 12
-        page = SITE / "repository-files" / "agents" / "notes" / "diagrams" / (name + ".mmd") / "index.html"
+        page = (
+            SITE
+            / "repository-files"
+            / "agents"
+            / "notes"
+            / "diagrams"
+            / (name + ".mmd")
+            / "index.html"
+        )
         assert page.is_file(), f"Missing interactive diagram page: {name}"
         html = page.read_text(encoding="utf-8")
         assert 'class="diagram-viewer"' in html
@@ -93,4 +109,6 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         assert opening and re.search(r'width="[1-9][0-9]*"', opening.group(0))
         assert re.search(r'height="[1-9][0-9]*"', opening.group(0))
         if name == "implementation-uml":
-            assert "GameController" in svg and "GameManager" in svg, "Rendered UML must have real classes"
+            assert (
+                "GameController" in svg and "GameManager" in svg
+            ), "Rendered UML must have real classes"
