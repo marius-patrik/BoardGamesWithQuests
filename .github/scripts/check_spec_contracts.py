@@ -457,7 +457,9 @@ def main() -> None:
     ):
         assert declaration in prisma, f"missing persisted domain requirement {declaration}"
     assert "CREATE CONSTRAINT TRIGGER check_game_revision_history" in reference_sql()
-    assert "auth.uid()" in reference_sql(), "Realtime reference policy lacks identity-based membership"
+    assert (
+        "auth.uid()" in reference_sql()
+    ), "Realtime reference policy lacks identity-based membership"
     print(f'PASS: {games["games"]} game definitions, {games["actions"]} configured actions')
     print(f"PASS: {operations} planned HTTP operations and local reference links")
     print(f"PASS: {models} Prisma models, {checks} supplementary reference SQL constraints")
