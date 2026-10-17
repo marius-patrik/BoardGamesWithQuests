@@ -147,22 +147,22 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
             title = escape(name, quote=False)
             if rel.suffix.lower() == ".mmd":
                 body = (
-                    f"# {title}\\n\\n"
+                    f"# {title}\n\n"
                     + diagram_viewer_markup(
                         '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
                     )
-                    + "\\n"
+                    + "\n"
                 )
             else:
                 raw_url = posixpath.relpath(public_path(rel), start=dest.removesuffix(".md"))
                 safe_url = escape(raw_url, quote=True)
                 body = (
-                    f"# {title}\\n\\n"
+                    f"# {title}\n\n"
                     + diagram_viewer_markup(
                         f'<img src="{safe_url}" alt="{escape(rel.stem, quote=True)}"'
                         ' loading="lazy" draggable="false">'
                     )
-                    + f"\\n[View original SVG]({raw_url})\\n"
+                    + f"\n[View original SVG]({raw_url})\n"
                 )
         pages.append((name, dest, body))
     from html import escape
