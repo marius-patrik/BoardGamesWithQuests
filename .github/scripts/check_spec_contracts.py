@@ -293,6 +293,8 @@ def validate_mermaid() -> tuple[int, int]:
     assert not any(
         path.startswith("tools/") for path in nodes.values()
     ), "duplicate root tooling declared"
+    assert not any(p.startswith("packages/web/") for p in nodes.values()), "obsolete package path"
+    assert any(p.startswith("packages/client/") for p in nodes.values()), "missing client package"
     declarations = re.findall(r'(?m)^\s*D\d+\["([^"\n]*)"\]\s*$', ast)
     assert len(declarations) >= 100, "source interface contracts are missing"
     for declaration in declarations:

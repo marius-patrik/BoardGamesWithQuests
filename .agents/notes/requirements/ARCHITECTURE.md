@@ -6,7 +6,7 @@ This is the **intended tracked source layout**, not a claim that the implementat
 
 | Concern | Normative choice |
 | --- | --- |
-| Frontend | Bun, React, TypeScript, Wouter, Rsbuild, Tailwind, shadcn/ui and Motion; SVG scene renderer |
+| Frontend | `packages/client`: Bun, React, TypeScript, Wouter, Rsbuild, Tailwind, shadcn/ui and Motion; SVG scene renderer |
 | Native | Tauri 2 WebView of the same HTTPS frontend (not a second UI or engine) |
 | API | Python FastAPI and Pydantic on a separate Vercel project |
 | Engine | Pure deterministic Python interpreter over entities, actions, conditions, effects and hooks |
@@ -126,7 +126,7 @@ packages/  # Deployable web, API/engine, native packages and schema.
       schema.prisma  # Authoritative Prisma PostgreSQL 38-model relational declaration; migration-only tooling, no Node runtime.
     pyproject.toml  # Python dependencies and pytest; FastAPI psycopg Pydantic and validation dependencies
     vercel.json  # ASGI route and limits; Deploy Python entrypoint in separate Vercel project
-  web/  # One React frontend on Vercel and in native WebView.
+  client/  # One React frontend on Vercel and in native WebView.
     src/  # Implementation source files within its owning package.
       api/  # FastAPI public HTTP DTOs, authorization and services.
         assets.ts  # assetUrl(); uploadAsset(); Bounded signed asset requests and downloads
@@ -222,6 +222,10 @@ tsconfig.json  # TS project base; Strict TS and module-resolution defaults
 tsdoc.json  # TSDoc grammar; Single standard for structured TSDoc tags
 typedoc.json  # TypeDoc configuration; Generate docs from structured TSDoc declarations
 ```
+
+## Implementation order
+
+Approve the complete, mutually consistent API/schema/interface graph before building the authoritative gameplay behavior. Implement the game-neutral client, API, state interpreter and database transactions first; deliver chess and both draughts as real two-account provider-backed games; validate variable participants and all general abstractions throughout; finish MoneyProperty's distinct economic behavior as the last game milestone. No two-player-only production shortcut or game-name-specific engine paths are permitted.
 
 ## Package boundaries
 

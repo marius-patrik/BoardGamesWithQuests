@@ -8,7 +8,7 @@ BoardGamesWithQuests is a configuration-driven multiplayer board-game platform. 
 
 The application provides guest and registered accounts; creation and joining of games by opaque URL; published built-in definitions; an owned visual editor; configuration import/export; private real-time revision hints; game history; optional objectives/quests; ratings for eligible built-ins; and responsive, accessible browser/native UX. Users interact through a single frontend and API.
 
-Playable built-ins are **chess**, **English draughts**, **international draughts**, and **MoneyProperty**, an original, unbranded Monopoly-style property-trading game. No protected third-party names, boards, cards, or other artwork may be bundled. Chess is the selection default. Game history export is not provided; configuration JSON export is provided.
+The initial playable games are **chess**, **English draughts**, and **international draughts**. **MoneyProperty** remains a fully specified, original and unbranded property-trading game definition and a required generic-engine compatibility target; complete playable economic behavior and its end-to-end acceptance are the **final game milestone**, after the generic engine, multiplayer system, editor, deployments and first three games are verified. No protected third-party names, boards, cards, or artwork may be bundled. Chess is the selection default. Game history export is not provided; configuration JSON export is provided.
 
 No matchmaking, bots, spectator mode, social feed, leaderboard, or tournaments are specified.
 
@@ -18,7 +18,8 @@ No matchmaking, bots, spectator mode, social feed, leaderboard, or tournaments a
 - **Action**: a configured command or an automatically triggered hook action, attached to one entity type. It may enumerate typed locals, evaluate a pure Boolean condition, and execute an ordered list of effects. There are no separate movement, rule, or quest pipelines.
 - **Objective**: a normal entity whose fields and actions encode progress, terminal game outcomes or optional quests. Permanent account XP/ratings are privileged settlement operations independent of author-defined effects.
 - **Space**: an entity graph with directed or undirected links, optional grid coordinates, cyclic tracks, zones or ordered containment. Nothing in the engine requires a rectangular board.
-- **Phase**: a named action-eligibility state; turns may contain multiple phases, simultaneous eligibility, and decisions. No hardcoded 2-player alternation.
+- **Participants**: each immutable published definition declares a validated `min_participants`/`max_participants` range, with seats allocated only to joined users; no engine, API, schema, or renderer assumes exactly two. Chess and both draughts require precisely two; MoneyProperty supports two through eight, while the core model supports other bounded counts and multi-party decisions.
+- **Phase**: a named action-eligibility state; turns may contain multiple phases, simultaneous eligibility, and decisions. No hardcoded two-player alternation.
 - **Condition**: a typed, pure expression returning Boolean. Expressions can read observed/proposed state but cannot mutate it or perform I/O.
 - **Effect**: a typed mutation proposal that acts only on a transition workspace. The engine never writes directly to PostgreSQL.
 - **Hook**: an engine lifecycle event with deterministic ordering, context and bounded dispatch.
@@ -71,9 +72,20 @@ The web app uses **Wouter** for routing, SVG primitives for space/entity visuals
 - Chess must implement all orthodox moves and compound transitions, checks, mate, stalemate, castling, en passant, promotions, clocks, repetition, draw claims and automatic draws.
 - English and international draughts must implement their distinct capture, promotion, king movement, victory and draw semantics.
 - MoneyProperty must provide original 40-location board data, full purchasable economy, deterministic dice/deck replay, extra rolls, detention, taxes, rent, upgrades, mortgages, auctions, trades, bankruptcy, elimination and victory.
-- All four games use the same engine and renderer without game-name branches; all have playable complete browser scenarios and full replay after process interruption.
+- Chess and both draughts games first pass complete browser and provider-backed replay/recovery scenarios on the same generic engine and renderer. MoneyProperty is implemented and accepted as the final game, without adding game-name branches or a second interpreter.
+- MoneyProperty's definition, generic operators, schema and API requirements remain normative from the outset. Deferring playable acceptance cannot defer variable participants, hidden-state, multi-phase decisions, or economic data-model support.
 - At least 30 simultaneous players across 15 games from one classroom IP must function with revision and authorization correctness.
 - Only Tauri wraps the hosted frontend; it never duplicates or locally runs the engine.
+
+## Contract-finalization gate
+
+Before implementing gameplay against this design, review the **API, schema and interface/dependency graph as one system**. Approval requires:
+
+- **HTTP/API**: Every public operation declares its typed request/response, authentication and CSRF, per-participant authorization, revision/idempotency behavior, error cases, and viewer-scoped projection/redaction; each operation maps to a concrete service and transactional owner.
+- **Database**: Every API projection and engine mutation maps to immutable version-pinned definitions, game-scoped state, append-only events, outcomes and rewards, with sound composite keys, indexes, constraints, RLS/grants, real upgrade paths and atomic settlement.
+- **Source graph**: Every file and exported interface has one owner, typed inputs/outputs, dependencies, ordering, invariants, failure modes and side-effect boundaries. The specification graph cannot silently be confused with the actual generated implementation diagrams.
+- **Cross-contract validation**: All JSON fixtures, operators, OpenAPI, Prisma and PostgreSQL integrity SQL agree on participant ranges, stable identifiers, reference scopes, secrecy, revisions and replay. Passing structural checks is not a substitute for running migrations and provider-facing acceptance.
+- **Dependency**: Architecture is approved before treating platform bootstrap or integration as complete. The full MoneyProperty browser/product acceptance is last, while its architectural requirements apply throughout.
 
 ## Normative architecture and contracts
 
