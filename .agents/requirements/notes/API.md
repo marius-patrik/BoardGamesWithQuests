@@ -1,3 +1,8 @@
+# API — Authoritative OpenAPI contract
+
+This is the **only** normative HTTP interface definition. The fenced YAML is OpenAPI 3.1 and is extracted without rewriting or hand-maintained duplicates by `.github/scripts/export_api_contract.py`; generated `openapi.yaml` is a build artifact, not tracked source. Implementation handlers and generated browser types must be checked against the extracted contract. All requests that mutate state are authenticated and require the declared CSRF/revision/idempotency semantics; this document does not certify that runtime handlers exist.
+
+```yaml
 openapi: 3.1.0
 info:
   title: BoardGamesWithQuests API
@@ -2656,3 +2661,4 @@ components:
         score:
           type: integer
           format: int64
+```
