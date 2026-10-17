@@ -30,13 +30,8 @@ jobs:
       - name: Install documentation dependencies
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Validate normative API and database contracts
+      - name: Validate Mermaid design contracts
         run: python .github/scripts/check_spec_contracts.py
-
-      - name: Validate Prisma schema with pinned Prisma 7 CLI
-        run: |
-          npm install --global --no-fund --no-audit prisma@7.10.0
-          prisma validate --schema=packages/server/supabase/schema.prisma
 
       - name: Verify documentation publication behavior
         run: |

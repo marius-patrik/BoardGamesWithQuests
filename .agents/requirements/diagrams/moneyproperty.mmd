@@ -1,0 +1,168 @@
+flowchart LR
+%% moneyproperty: authored design topology converted from reference JSON. Not deployed JSON or a runtime claim.
+classDef def fill:#214050,color:#f4ffff,stroke:#87ddce,stroke-width:2px
+classDef role fill:#263947,color:#e4eeff,stroke:#84aec7
+classDef phase fill:#303854,color:#e4eeff,stroke:#b7a4e6
+classDef entity fill:#243d3a,color:#e4fef3,stroke:#82bcae
+classDef action fill:#424035,color:#ffefde,stroke:#e4ba7d
+def["MoneyProperty: Original Property Trading<br/>key: moneyproperty<br/>players: 2–8<br/>semantics v1"]:::def
+subgraph ROLES["Participant roles"]
+r0["seat_0<br/>Player 1<br/>capacity 0..1"]:::role
+r1["seat_1<br/>Player 2<br/>capacity 0..1"]:::role
+r2["seat_2<br/>Player 3<br/>capacity 0..1"]:::role
+r3["seat_3<br/>Player 4<br/>capacity 0..1"]:::role
+r4["seat_4<br/>Player 5<br/>capacity 0..1"]:::role
+r5["seat_5<br/>Player 6<br/>capacity 0..1"]:::role
+r6["seat_6<br/>Player 7<br/>capacity 0..1"]:::role
+r7["seat_7<br/>Player 8<br/>capacity 0..1"]:::role
+end
+subgraph PHASES["Ordered phases"]
+p0["turn_start<br/>order 0<br/>initial"]:::phase
+p1["roll<br/>order 1"]:::phase
+p0 --> p1
+p2["move<br/>order 2"]:::phase
+p1 --> p2
+p3["resolve<br/>order 3"]:::phase
+p2 --> p3
+p4["decision<br/>order 4"]:::phase
+p3 --> p4
+p5["management<br/>order 5"]:::phase
+p4 --> p5
+p6["turn_end<br/>order 6"]:::phase
+p5 --> p6
+end
+subgraph ENTITY_TYPES["Game-neutral entity types and fields"]
+e0["game / game<br/>seed instances: 1<br/>SVG primitives: 0<br/>current_roll: int (default)<br/>pending_auction: bool (default)<br/>round: int (default)<br/>outcome: text (default)"]:::entity
+e1["track / space<br/>seed instances: 1<br/>SVG primitives: 0"]:::entity
+e2["lot / space<br/>seed instances: 40<br/>SVG primitives: 2<br/>name: text (default)<br/>location_kind: text (default)<br/>group: text (default)<br/>price: int (default)<br/>base_rent: int (default)<br/>build_cost: int (default)<br/>mortgage_value: int (default)<br/>houses: int (default)<br/>mortgaged: bool (default)<br/>fee: int (default)"]:::entity
+e3["deck / space<br/>seed instances: 2<br/>SVG primitives: 0"]:::entity
+e4["inventory / space<br/>seed instances: 9<br/>SVG primitives: 0<br/>balance: int (default)"]:::entity
+e5["token / item<br/>seed instances: 8<br/>SVG primitives: 1<br/>detained: bool (default)<br/>doubles: int (default)<br/>detention_attempts: int (default)"]:::entity
+e6["property / item<br/>seed instances: 22<br/>SVG primitives: 1<br/>price: int (default)<br/>base_rent: int (default)<br/>houses: int (default)<br/>mortgaged: bool (default)<br/>build_cost: int (default)<br/>mortgage_value: int (default)<br/>group: text (default)"]:::entity
+e7["transit / item<br/>seed instances: 4<br/>SVG primitives: 0<br/>price: int (default)<br/>base_rent: int (default)<br/>houses: int (default)<br/>mortgaged: bool (default)<br/>build_cost: int (default)<br/>mortgage_value: int (default)<br/>group: text (default)"]:::entity
+e8["utility / item<br/>seed instances: 2<br/>SVG primitives: 0<br/>price: int (default)<br/>base_rent: int (default)<br/>houses: int (default)<br/>mortgaged: bool (default)<br/>build_cost: int (default)<br/>mortgage_value: int (default)<br/>group: text (default)"]:::entity
+e9["building / item<br/>seed instances: 0<br/>SVG primitives: 0"]:::entity
+e10["card / item<br/>seed instances: 24<br/>SVG primitives: 1<br/>text: text (default)<br/>operation: text (default)<br/>amount: int (default)"]:::entity
+e11["trade_offer / item<br/>seed instances: 0<br/>SVG primitives: 0"]:::entity
+e12["auction / item<br/>seed instances: 0<br/>SVG primitives: 0"]:::entity
+e13["bankruptcy / objective<br/>seed instances: 1<br/>SVG primitives: 0<br/>completed: bool (default)<br/>progress: int (default)"]:::entity
+e14["last_solvent / objective<br/>seed instances: 1<br/>SVG primitives: 0<br/>completed: bool (default)<br/>progress: int (default)"]:::entity
+e15["wealth_quest / objective<br/>seed instances: 1<br/>SVG primitives: 0<br/>completed: bool (default)<br/>progress: int (default)"]:::entity
+end
+subgraph ACTIONS["Typed conditions and ordered effects"]
+a0["#1 begin_turn (hook)<br/>priority 0<br/>params: none<br/>predicate ops: literal<br/>effects: set_phase"]:::action
+a1["#2 roll (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_owned_by, field, is_active, literal, not, phase_is<br/>effects: trusted_random_int → trusted_random_int → set_field → set_field → set_phase → move_entity → set_field → set_field → set_field"]:::action
+a2["#3 move (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, eq, literal, owner, phase_is<br/>effects: move_entity → emit_traversal_events → set_phase"]:::action
+a3["#4 resolve_location (hook)<br/>priority 0<br/>params: none<br/>predicate ops: context, entity_at<br/>effects: emit_event → set_phase"]:::action
+a4["#5 buy (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_location, entity_owned_by, eq, field, gte, literal, owner, phase_is<br/>effects: transfer_resource → set_owner → set_phase"]:::action
+a5["#6 decline_purchase (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_location, entity_owned_by, eq, literal, owner<br/>effects: open_decision → set_phase"]:::action
+a6["#7 bid (command)<br/>priority 0<br/>params: amount:int<br/>predicate ops: and, contains, context, decision_eligible, decision_is_open, decision_responses, entity_owned_by, field, gt, gte, literal, map, maximum_or, record_field<br/>effects: record_decision"]:::action
+a7["#8 resolve_auction (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, count, decision_eligible, decision_is_open, decision_responses, eq<br/>effects: resolve_decision → transfer_resource → set_owner → set_phase"]:::action
+a8["#9 charge_rent (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_location, entity_owned_by, eq, literal, not, owner<br/>effects: transfer_resource"]:::action
+a9["#10 mortgage (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, eq, field, literal, not, owner<br/>effects: set_field → credit_resource"]:::action
+a10["#11 unmortgage (command)<br/>priority 0<br/>params: none<br/>predicate ops: add, and, context, entity_owned_by, eq, field, floor_divide, gte, literal, multiply, owner<br/>effects: debit_resource → set_field"]:::action
+a11["#12 build (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_owned_by, eq, field, gte, literal, lt, not, owner<br/>effects: debit_resource → increment_field"]:::action
+a12["#13 sell_building (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, eq, field, gt, literal, owner<br/>effects: increment_field → credit_resource"]:::action
+a13["#14 draw (hook)<br/>priority 0<br/>params: none<br/>predicate ops: context, has_relation, literal<br/>effects: draw_collection_item → emit_event"]:::action
+a14["#15 propose_trade (command)<br/>priority 0<br/>params: offer:record<br/>predicate ops: context, transfer_plan_valid<br/>effects: create_entity → open_decision"]:::action
+a15["#16 accept_trade (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, contains, context, decision_eligible, decision_is_open, decision_payload, transfer_plan_valid<br/>effects: execute_transfer_plan → resolve_decision"]:::action
+a16["#17 reject_trade (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, contains, context, decision_eligible, decision_is_open<br/>effects: resolve_decision"]:::action
+a17["#18 end_turn (command)<br/>priority 0<br/>params: none<br/>predicate ops: context, count, entities_matching, eq, field, literal<br/>effects: advance_turn → set_phase"]:::action
+a18["#19 bankruptcy (hook)<br/>priority 0<br/>params: none<br/>predicate ops: context, entity_owned_by, field, literal, lt<br/>effects: execute_transfer_plan → eliminate_participant"]:::action
+a19["#20 win (hook)<br/>priority 0<br/>params: none<br/>predicate ops: context, count, entity_owned_by, eq, field, filter, gte, literal, participants<br/>effects: complete_objective → finish_game"]:::action
+a20["#21 wealth (hook)<br/>priority 0<br/>params: none<br/>predicate ops: context, entity_owned_by, field, gte, literal<br/>effects: complete_objective"]:::action
+a21["#22 fee_on_landing (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_at, eq, field, literal<br/>effects: debit_resource"]:::action
+a22["#23 send_to_detention (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_at, eq, field, literal<br/>effects: move_entity → set_field → set_field → set_field"]:::action
+a23["#24 start_reward (hook)<br/>priority 0<br/>params: none<br/>predicate ops: context, entity_by_seed, eq, literal<br/>effects: credit_resource"]:::action
+a24["#25 card_credit (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, eq, field, literal<br/>effects: credit_resource"]:::action
+a25["#26 card_debit (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, eq, field, literal<br/>effects: debit_resource"]:::action
+a26["#27 card_advance (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, eq, field, literal<br/>effects: move_entity"]:::action
+a27["#28 card_relative (hook)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, eq, field, literal<br/>effects: move_entity"]:::action
+a28["#29 roll_detained (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_owned_by, field, is_active, literal, phase_is<br/>effects: trusted_random_int → trusted_random_int → set_field → set_field → debit_resource → set_field → set_field → set_phase"]:::action
+a29["#30 pay_release (command)<br/>priority 0<br/>params: none<br/>predicate ops: and, context, entity_owned_by, field, gte, is_active, literal, phase_is<br/>effects: debit_resource → set_field → set_field"]:::action
+end
+def -.-> r0
+def -.-> r1
+def -.-> r2
+def -.-> r3
+def -.-> r4
+def -.-> r5
+def -.-> r6
+def -.-> r7
+def --> p0
+def --> p1
+def --> p2
+def --> p3
+def --> p4
+def --> p5
+def --> p6
+def -.-> e0
+def -.-> e1
+def -.-> e2
+def -.-> e3
+def -.-> e4
+def -.-> e5
+def -.-> e6
+def -.-> e7
+def -.-> e8
+def -.-> e9
+def -.-> e10
+def -.-> e11
+def -.-> e12
+def -.-> e13
+def -.-> e14
+def -.-> e15
+e0 --> a0
+p0 -.-> a0
+e0 --> a1
+p1 -.-> a1
+e5 --> a2
+p2 -.-> a2
+e2 --> a3
+p3 -.-> a3
+e6 --> a4
+p4 -.-> a4
+e6 --> a5
+p4 -.-> a5
+e12 --> a6
+p4 -.-> a6
+e12 --> a7
+p4 -.-> a7
+e6 --> a8
+p3 -.-> a8
+e6 --> a9
+p5 -.-> a9
+e6 --> a10
+p5 -.-> a10
+e6 --> a11
+p5 -.-> a11
+e6 --> a12
+p5 -.-> a12
+e3 --> a13
+p3 -.-> a13
+e11 --> a14
+p5 -.-> a14
+e11 --> a15
+p4 -.-> a15
+e11 --> a16
+p4 -.-> a16
+e0 --> a17
+p5 -.-> a17
+e13 --> a18
+e14 --> a19
+e15 --> a20
+e2 --> a21
+p3 -.-> a21
+e2 --> a22
+p3 -.-> a22
+e2 --> a23
+e10 --> a24
+e10 --> a25
+e10 --> a26
+e10 --> a27
+e0 --> a28
+p1 -.-> a28
+e0 --> a29
+p1 -.-> a29
+info["Graph/link seeds: 43 · entity seeds: 116 · action definitions: 30 · roles: 8"]:::def
+def -.-> info
