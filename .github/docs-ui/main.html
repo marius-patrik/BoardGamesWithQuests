@@ -140,23 +140,8 @@
 
     <script id="search-base" type="application/json">{{ base_url|tojson }}</script>
     <script src="{{ 'assets/theme.js'|url }}" defer></script>
-    {%- if page and 'class="mermaid"' in page.content %}
-    <script type="module">
-      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.esm.min.mjs";
-      mermaid.initialize({
-        startOnLoad: false,
-        securityLevel: "strict",
-        theme: document.documentElement.dataset.theme === "light" ? "default" : "dark",
-        flowchart: { useMaxWidth: false, htmlLabels: false },
-      });
-      await mermaid.run({ querySelector: ".mermaid" });
-      for (const svg of document.querySelectorAll(".mermaid svg")) {
-        svg.style.maxWidth = "none";
-        svg.style.height = "auto";
-        svg.setAttribute("role", "img");
-        svg.setAttribute("tabindex", "0");
-      }
-    </script>
+    {%- if page and ('class="mermaid"' in page.content or 'diagram-viewer' in page.content) %}
+    <script type="module" src="{{ 'assets/diagrams.js'|url }}"></script>
     {%- endif %}
 
     {%- for path in config.extra_javascript %}

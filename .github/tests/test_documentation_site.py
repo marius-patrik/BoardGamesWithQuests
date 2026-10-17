@@ -42,3 +42,29 @@ def test_source_generated_diagrams_work_in_documentation():
         html = page.read_text(encoding="utf-8")
         assert 'class="mermaid"' in html and "mermaid.esm.min.mjs" in html
         assert ("classDiagram" if stem == "implementation-uml" else "flowchart") in html
+
+
+def test_tracked_mermaid_and_svg_pages_render_graphics_instead_of_source_text():
+    """A real generated source-tree entry must open a rendered graphic, not XML/flowchart code."""
+    cases = (
+        ("repository-ast.mmd", "class=\"mermaid\""),
+        ("reference-page1.svg", "<img "),
+    )
+    for name, marker in cases:
+        page = SITE / "repository-files" / "agents" / "notes" / "diagrams" / name / "index.html"
+        assert page.is_file(), f"No diagram viewer for {name}"
+        html = page.read_text(encoding="utf-8")
+        assert 'class="diagram-viewer"' in html
+        assert marker in html, f"Diagram rendered as source text: {name}"
+        assert "assets/diagrams.js" in html, f"Interactive diagram script absent: {name}"
+
+    source_page = SITE / "repository-files" / "agents" / "notes" / "diagrams" / "reference-page1.svg" / "index.html"
+    html = source_page.read_text(encoding="utf-8")
+    import re
+    from html import unescape
+    from urllib.parse import urlsplit
+
+    match = re.search(r'<img src="([^"]+)"', html)
+    assert match, "Reference SVG must be embedded as a real image"
+    relative = urlsplit(unescape(match.group(1))).path
+    assert (source_page.parent / relative).resolve().is_file(), "Referenced SVG asset must actually ship"

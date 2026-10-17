@@ -52,6 +52,18 @@ def public_path(path: Path) -> str:
     return "/".join(part.lstrip(".") if part.startswith(".") else part for part in path.parts)
 
 
+def diagram_viewer_markup(content: str) -> str:
+    """Render a readable, pan-and-zoom-capable diagram without duplicating source views."""
+    return (
+        '<div class="diagram-viewer" data-diagram-viewer>'
+        '<div class="diagram-viewer__viewport" tabindex="0" role="region"'
+        ' aria-label="Diagram: drag to pan, scroll to zoom">'
+        '<div class="diagram-viewer__canvas">'
+        + content
+        + "</div></div></div>"
+    )
+
+
 def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
     """Mirror every tracked repository file as one page, irrespective of language.
 
@@ -128,6 +140,34 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                 fence = "`" * max(4, 1 + max((len(t) for t in blocks), default=0))
                 lang = rel.suffix.lstrip(".")
                 body = header + f"{fence}{lang}\n{decoded}\n{fence}\n"
+        # A source-diagram page is a diagram viewer, never a fenced source dump.
+        # The original file remains separately available at its published URL.
+        if decoded is not None and rel.suffix.lower() in {".svg", ".mmd"}:
+            from html import escape
+            import posixpath
+
+            title = escape(name, quote=False)
+            if rel.suffix.lower() == ".mmd":
+                body = (
+                    f"# {title}\\n\\n"
+                    + diagram_viewer_markup(
+                        '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
+                    )
+                    + "\\n"
+                )
+            else:
+                raw_url = posixpath.relpath(
+                    public_path(rel), start=dest.removesuffix(".md")
+                )
+                safe_url = escape(raw_url, quote=True)
+                body = (
+                    f"# {title}\\n\\n"
+                    + diagram_viewer_markup(
+                        f'<img src="{safe_url}" alt="{escape(rel.stem, quote=True)}"'
+                        ' loading="lazy" draggable="false">'
+                    )
+                    + f'\\n[View original SVG]({raw_url})\\n'
+                )
         pages.append((name, dest, body))
     from html import escape
 
@@ -140,7 +180,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
             "# Generated architecture diagrams\n\n"
             "The diagrams are derived directly from the tracked repository. "
             "Mermaid rendering supports interactive diagram inspection.\n\n"
-            + "\n".join(f"- [{Path(path).stem}]({Path(path).stem}/)" for path in diagrams)
+            + "\n".join(f"- [{Path(path).stem}]({Path(path).stem}.md)" for path in diagrams)
             + "\n",
         )
     )
@@ -148,7 +188,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
         stem = Path(diagram_path).stem
         dest = "architecture/diagrams/" + stem + ".md"
         page = "# " + stem.replace("-", " ").title() + "\n\n"
-        page += '<pre class="mermaid">\n' + escape(diagram) + "</pre>\n"
+        page += diagram_viewer_markup('<pre class="mermaid">\n' + escape(diagram) + "</pre>") + "\n"
         pages.append(("architecture/diagrams/" + stem, dest, page))
     return pages
 
