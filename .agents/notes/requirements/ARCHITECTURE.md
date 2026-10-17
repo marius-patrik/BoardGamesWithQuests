@@ -20,27 +20,27 @@ Prisma is **schema authoring tooling**, not a production Node.js database runtim
 ## Intended source tree
 
 ```text
-.agents/  # Package grouping: .agents; paths are physical tracked sources, not generated output.
-  notes/  # Package grouping: notes; paths are physical tracked sources, not generated output.
-    requirements/  # Package grouping: requirements; paths are physical tracked sources, not generated output.
+.agents/  # Product and architectural requirements; implementation lives in packages, not here.
+  notes/  # Source-authored product requirements and referenced design material.
+    requirements/  # Normative interfaces, annotated architecture and the source-only Mermaid diagram.
       ARCHITECTURE.md  # Annotated source inventory and exact package ownership; every file has inline input/output/invariant documentation and graph counterpart.
       AST.mmd  # Single Mermaid declaration/dependency/control-flow graph; each implementation declaration has typed contract and deterministic operation semantics.
   PRD.md  # Product invariants, user journeys and behavior acceptance only; links to canonical architecture, API, Prisma schema, AST and portable data.
-.github/  # Package grouping: .github; paths are physical tracked sources, not generated output.
-  docs-ui/  # Package grouping: docs-ui; paths are physical tracked sources, not generated output.
-    assets/  # Package grouping: assets; paths are physical tracked sources, not generated output.
+.github/  # Repository CI, documentation and release automation.
+  docs-ui/  # First-party documentation page template and interactive Mermaid view.
+    assets/  # Documentation theme assets and UI logic only.
       theme.css  # Documentation site theme and interactive diagram controls
       theme.js  # Documentation interaction and virtual Mermaid renderer controls
     main.html  # First-party documentation HTML page template
-  scripts/  # Package grouping: scripts; paths are physical tracked sources, not generated output.
+  scripts/  # GitHub-specific source/doc verification helpers.
     check_spec_contracts.py  # Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory
     docs_hooks.py  # Generate documentation pages from tracked files, including interactive Mermaid source
-  workflows/  # Package grouping: workflows; paths are physical tracked sources, not generated output.
+  workflows/  # CI and release configurations, not gameplay code.
     deploy-api.yml  # deploy-api workflow; Deploy FastAPI Vercel project
     deploy-web.yml  # deploy-web workflow; Deploy web Vercel project
     release-native.yml  # release-native workflow; Build and sign native artifacts
     verify.yml  # verify workflow; Check AST/schema/API/data/tests and code docs
-data/  # Package grouping: data; paths are physical tracked sources, not generated output.
+data/  # Portable game configurations, typed operator registry and seed data.
   chess.json  # Complete portable orthodox chess definition interpreted by the generic engine
   configuration.schema.json  # JSON Schema 2020-12 for portable game configuration import and export
   english-draughts.json  # Portable English draughts definition using generic action and traversal operators
@@ -48,24 +48,24 @@ data/  # Package grouping: data; paths are physical tracked sources, not generat
   moneyproperty.json  # Original Monopoly-like economic game configuration with forty spaces
   operators.json  # Finite, typed expression/effect operator registry with argument contracts, determinism and errors; imported by generic engine and validated with all games.
   seed.sql  # Supabase Storage bucket and hook/operator registry seed data applied after schema migration; never implements game-specific behavior.
-packages/  # Package grouping: packages; paths are physical tracked sources, not generated output.
-  native/  # Package grouping: native; paths are physical tracked sources, not generated output.
-    src-tauri/  # Package grouping: src-tauri; paths are physical tracked sources, not generated output.
-      capabilities/  # Package grouping: capabilities; paths are physical tracked sources, not generated output.
+packages/  # Deployable web, API/engine, native packages and schema.
+  native/  # Remote-origin Tauri WebView wrapper.
+    src-tauri/  # Rust host, platform manifests and native capabilities.
+      capabilities/  # Tauri permission and origin allowlist.
         default.json  # least-privilege capabilities; Navigation capabilities restricted to production origin
-      icons/  # Package grouping: icons; paths are physical tracked sources, not generated output.
+      icons/  # OS installer and launcher artwork.
         icon.icns  # icon asset; App icon in platform-required format
         icon.ico  # icon asset; App icon in platform-required format
         icon.png  # icon asset; App icon in platform-required format
-      src/  # Package grouping: src; paths are physical tracked sources, not generated output.
+      src/  # Implementation source files within its owning package.
         main.rs  # main() -> run(); Rustdoc: Minimal native WebView lifecycle
       Cargo.lock  # Cargo dependency lock; Reproducible native build
       Cargo.toml  # crate manifest; Restricted host dependencies
       build.rs  # tauri_build::build(); Rustdoc: Tauri native resource setup
       tauri.conf.json  # production remote URL, ids, permissions; One remotely loaded frontend across targets
     package.json  # Tauri build scripts; Platform build toolchain
-  server/  # Package grouping: server; paths are physical tracked sources, not generated output.
-    api/  # Package grouping: api; paths are physical tracked sources, not generated output.
+  server/  # Python API, pure engine and schema/provisioning definitions.
+    api/  # FastAPI public HTTP DTOs, authorization and services.
       __init__.py  # module; Python package marker
       app.py  # create_app()->FastAPI; Construct middleware, session, routes, error handlers
       assets.py  # begin_upload(); finish_upload(); signed_url(); cleanup(); Supabase Storage signed upload, digest validation, publication immutability
@@ -77,13 +77,13 @@ packages/  # Package grouping: packages; paths are physical tracked sources, not
       routes.py  # mount_routes(app); 33 operation IDs; Register all documented identity, definition, asset, and game endpoints
       security.py  # principal(); verify_csrf(); require_membership(); Supabase Auth session, Origin/CSRF, role and hidden-state authorization
       services.py  # create_game(); join_game(); submit_action(); publish_definition(); Transaction-aware API orchestration; no game rules
-    configuration/  # Package grouping: configuration; paths are physical tracked sources, not generated output.
+    configuration/  # Portable JSON import/export and definition validation.
       __init__.py  # module; Portable configuration package
       bootstrap.py  # import_builtins(repository); Load four portable game definitions into published versions
       models.py  # PortableConfig Pydantic + local references; Validate portable fields and structurally defined record types
       transfer.py  # import_json(); export_json(); canonicalize(); Deterministic relational import/export and asset bundling
       validation.py  # validate_references(); validate_types(); publish(); Validate cycles, budgets, signed assets, hook/effect signatures
-    engine/  # Package grouping: engine; paths are physical tracked sources, not generated output.
+    engine/  # Generic pure interpreter of actions, effects, hooks and typed state.
       __init__.py  # module; Generic engine package
       effects.py  # propose(effect,state,ctx)->Mutation[]; Controlled generic effect executor; never writes database
       events.py  # encode_mutations(); replay(); digest(); Reconstruct complete entity/link/value/turn changes from typed event rows
@@ -96,25 +96,25 @@ packages/  # Package grouping: packages; paths are physical tracked sources, not
       runtime.py  # initialize(); available_actions(); evaluate(); status(); The single authority for action semantics; immutable state transitions
       topology.py  # neighbors(); ray(); paths(); track_advance(); General topology and bounded traversal primitives
       types.py  # parse_type(); check_type(); TypedValue; Generic scalar, reference, optional, list, set, path, record typing
-    supabase/  # Package grouping: supabase; paths are physical tracked sources, not generated output.
+    supabase/  # Prisma declaration and database-only SQL integrity.
       config.toml  # Supabase local/auth/storage config; Local Supabase services and migrations
       integrity.sql  # Database-only constraints, cross-version guards, Supabase Auth FKs, immutable publication and event parity, private Realtime; companion to Prisma migrations.
       schema.prisma  # Authoritative Prisma PostgreSQL 38-model relational declaration; migration-only tooling, no Node runtime.
     pyproject.toml  # Python dependencies and pytest; FastAPI psycopg Pydantic and validation dependencies
     vercel.json  # ASGI route and limits; Deploy Python entrypoint in separate Vercel project
-  web/  # Package grouping: web; paths are physical tracked sources, not generated output.
-    src/  # Package grouping: src; paths are physical tracked sources, not generated output.
-      api/  # Package grouping: api; paths are physical tracked sources, not generated output.
+  web/  # One React frontend on Vercel and in native WebView.
+    src/  # Implementation source files within its owning package.
+      api/  # FastAPI public HTTP DTOs, authorization and services.
         assets.ts  # assetUrl(); uploadAsset(); Bounded signed asset requests and downloads
         client.ts  # request<T>(); API error normalization; Same-origin cookie/CSRF-aware fetch
         realtime.ts  # subscribeGame(gameId, callback); Private Broadcast + reconnect revision invalidation
         types.ts  # generated OpenAPI types; Generated from normative OpenAPI YAML; not manually edited
-      app/  # Package grouping: app; paths are physical tracked sources, not generated output.
+      app/  # Own the declared files and their documented interfaces; no duplicate implementation.
         pages.tsx  # HomePage,AuthPage,AccountPage,DefinitionsPage,GamePage; All routed screens (not game-specific boards)
         query.ts  # QueryClient;invalidateOnRevision(); HTTP cache, retry and version synchronization
         router.tsx  # AppRoutes():ReactElement; Wouter Switch/Route navigation and guard
         session.tsx  # SessionProvider();useSession(); Cookie session and CSRF state
-      editor/  # Package grouping: editor; paths are physical tracked sources, not generated output.
+      editor/  # Typed entity/action/visual authoring controls.
         ActionEditor.tsx  # ActionEditor(); Manual/hook actions, conditions, parameter and effect lists
         AssetEditor.tsx  # AssetEditor(); Private binary upload and presentation assets
         DefinitionEditor.tsx  # DefinitionEditor(); Top-level unified configuration editor
@@ -125,7 +125,7 @@ packages/  # Package grouping: packages; paths are physical tracked sources, not
         TransferEditor.tsx  # TransferEditor(); Canonical portable JSON import/export
         VisualEditor.tsx  # VisualEditor(); SVG template construction and asset binding
         useDraft.ts  # useDraft(); publish(); validate(); Autosave/publish conflict handling and draft revisions
-      games/  # Package grouping: games; paths are physical tracked sources, not generated output.
+      games/  # Config-driven multiplayer interaction and session panels.
         ActionPanel.tsx  # ActionPanel();ParameterInput(); Typed, dynamically generated action controls
         Clocks.tsx  # Clocks(); Nonauthoritative clock projection
         Decisions.tsx  # DecisionControls(); Generic multi-party decision/auction/trade controls
@@ -135,14 +135,14 @@ packages/  # Package grouping: packages; paths are physical tracked sources, not
         ObjectivePanel.tsx  # ObjectivePanel(); Generic objective state/progress including optional quests
         Participants.tsx  # ParticipantPanel(); Arbitrary participant counts, roles and eliminated state
         useGame.ts  # useGame(); useAvailableActions(); useSubmitAction(); Authoritative game queries, revisions, idempotent command sends
-      rendering/  # Package grouping: rendering; paths are physical tracked sources, not generated output.
+      rendering/  # Generic SVG/ARIA layout and scene interaction.
         Accessibility.ts  # getEntityAria(); focusNavigation(); Keyboard and screenreader metadata derived from scene
         Animation.tsx  # AnimatedEntity(); useMotionProjection(); Motion projections on authoritative state changes
         Interactions.tsx  # InteractionLayer(); usePointerActions(); Pointer/touch/keyboard access and action-source selection
         Layout.ts  # resolveLayouts(); projectLocations(); Grid, node graph, track and free placement transforms
         Primitive.tsx  # Primitive({definition}):ReactElement; Allowlisted safe SVG primitives; no arbitrary markup
         Scene.tsx  # Scene({entities,scene}):ReactElement; One dynamic SVG scene for all four game types
-      ui/  # Package grouping: ui; paths are physical tracked sources, not generated output.
+      ui/  # Accessible shadcn-derived presentational controls.
         button.tsx  # Button(props); Clickable semantic button
         card.tsx  # Card(props); Visual panel
         dialog.tsx  # Dialog(props); Accessible modal
@@ -160,33 +160,33 @@ packages/  # Package grouping: packages; paths are physical tracked sources, not
     rsbuild.config.ts  # defineConfig(); Rsbuild bundling, alias, compile options
     tsconfig.json  # compilerOptions strict; Web TS project constraints
     vercel.json  # SPA rewrites + API proxy; Forward /api/* to separate Vercel deployment
-tests/  # Package grouping: tests; paths are physical tracked sources, not generated output.
-  api/  # Package grouping: api; paths are physical tracked sources, not generated output.
+tests/  # Observable API, engine, database and browser behavior.
+  api/  # FastAPI public HTTP DTOs, authorization and services.
     test_contract.py  # test/assertions; OpenAPI and security errors
     test_realtime.py  # test/assertions; Private revision authorization
-  browser/  # Package grouping: browser; paths are physical tracked sources, not generated output.
+  browser/  # End-to-end web session and rendering tests.
     editor.spec.ts  # test/assertions; Structured authoring and import/export
     games.spec.ts  # test/assertions; Four full game scenarios
     package.json  # configuration; Browser test runner dependencies
     playwright.config.ts  # configuration; Cross-browser test configuration
     rendering.spec.ts  # test/assertions; SVG, accessibility and layout
-  configuration/  # Package grouping: configuration; paths are physical tracked sources, not generated output.
+  configuration/  # Portable JSON import/export and definition validation.
     test_assets.py  # test/assertions; Binary import/export digest parity
     test_roundtrip.py  # test/assertions; Structural and semantic JSON roundtrip
-  database/  # Package grouping: database; paths are physical tracked sources, not generated output.
+  database/  # Actual PostgreSQL constraints, events and transactions.
     test_integrity.py  # test/assertions; Published immutability, trigger and RLS checks
     test_schema.py  # test/assertions; Migrations/FKs/constraints in real PostgreSQL
     test_transactions.py  # test/assertions; Concurrent actions and exact idempotency
-  engine/  # Package grouping: engine; paths are physical tracked sources, not generated output.
+  engine/  # Generic pure interpreter of actions, effects, hooks and typed state.
     test_chess.py  # test/assertions; FIDE legal and forbidden actions
     test_draughts.py  # test/assertions; Capture/path and promotion edge cases
     test_execution.py  # test/assertions; Pure operator semantics
     test_game_contracts.py  # test_dice_moves_only_the_active_players_token(); test_pawn_promotion_occurs_before_advancing_turn(); test_economic_actions_do_not_embed_a_game_named_operator(); test_chess_dead_position_uses_sound_gen
     test_moneyproperty.py  # test/assertions; Economic decision and multi-party transactions
     test_reachability.py  # test_reachable_even_with_cycles(); test_unreachable_only_when_exhausted(); test_budget_does_not_produce_false_proof(); test_terminal_start_and_invalid_budget(); Check proof soundness, cycles and budge
-  native/  # Package grouping: native; paths are physical tracked sources, not generated output.
+  native/  # Remote-origin Tauri WebView wrapper.
     smoke.spec.ts  # test/assertions; Remote WebView and navigation restrictions
-tools/  # Package grouping: tools; paths are physical tracked sources, not generated output.
+tools/  # Own the declared files and their documented interfaces; no duplicate implementation.
   build_docs.py  # render_source_docs(); Generate Python, TSDoc and Rustdoc source/API documentation
   build_operator_contract.py  # operator_contract.json compiler; Emit normative operator contracts from used typed calls
   build_prd.py  # build()->str; replace_first(text,language,content)->str; Regenerate linked PRD with canonical API, DATA, and source-tree listings; never embed schema or AST
