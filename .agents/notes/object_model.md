@@ -1,6 +1,6 @@
 # Object Model — Approved Design Deviations
 
-**Purpose:** Record deliberate differences between the [external reference diagram](reference_diagram.md) and the **target implementation**, with rationale and approval. This is not an inventory of completed code. The reference document alone owns the literal boxes, members, spelling errors and disagreements between its two pages; the [PRD](PRD.md) owns acceptance requirements; the [execution plan](../SCRATCHPAD.md) owns implementation status.
+**Purpose:** Record deliberate differences between the [external reference diagram](reference_diagram.md) and the **target implementation**, with rationale and approval. This is not an inventory of completed code. The reference document alone owns the literal boxes, members, spelling errors and disagreements between its two pages; the [PRD](../PRD.md) owns acceptance requirements; the implementation issues owns implementation status.
 
 ## Actual implementation
 
@@ -12,7 +12,7 @@ All entries below describe the **agreed target**, not necessarily completed func
 
 | Decision | Target / difference from the reference | Rationale and approval |
 |---|---|---|
-| Naming and translation | English names are canonical; ASCII Czech aliases map to the **same** classes where required by [PRD §5](PRD.md#5-naming-requirements). | Translation is not structural deviation; alias policy approved 2026-10-02. |
+| Naming and translation | English names are canonical; ASCII Czech aliases map to the **same** classes where required by [PRD §5](../PRD.md). | Translation is not structural deviation; alias policy approved 2026-10-02. |
 | Validation (diagram's unresolved question) | Calculate legal destinations on selection; aggregate all legal moves for mate/stalemate evaluation. | Avoid exhaustive UI recalculation while keeping complete game-end evaluation. Approved 2026-09-04. |
 | Configuration and packaging | Shared `packages/engine/`; independent `packages/chess/` and `packages/checkers/`, with game-local `config.json`, behavior extensions and entry-point discovery. No `src/games/`. | Copyable game packages without chess-specific behavior in the engine. Approved 2026-10-02; folder layout updated 2026-10-12 and present on `main`. |
 | Rule model | `Rule` with configured values, per-game state, and `permits_move`, `available_moves`, `outcome`, `on_move_made`, `status` hooks. Active rules are explicitly composed. | The diagram has a fixed validator and no rule extension mechanism. Approved 2026-10-02. |
