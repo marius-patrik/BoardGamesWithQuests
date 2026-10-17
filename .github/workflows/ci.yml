@@ -20,23 +20,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
-      has-actions: ${{ steps.matrix.outputs.has-actions }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
 
       - name: Check out pinned DarkFactory runtime
         if: github.repository != 'marius-patrik/DarkFactory'
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: "marius-patrik/DarkFactory"
           ref: "12a2507ba6499b3236c17d3c977c55a480ed5200"
           path: .darkfactory-runtime
 
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: "1.3.1"
 
       - name: Install DarkFactory runtime
         run: |
@@ -55,20 +56,19 @@ jobs:
           fi
           bun "$ROOT/packages/cli/src/bin.ts" ci matrix             --repo "$GITHUB_WORKSPACE"             --capabilities-root "$ROOT/.darkfactory/plugins" > "$RUNNER_TEMP/darkfactory-quality.json"
           jq -c '.matrix' "$RUNNER_TEMP/darkfactory-quality.json"             | sed 's/^/matrix=/' >> "$GITHUB_OUTPUT"
-          if [ "$(jq '.matrix | length' "$RUNNER_TEMP/darkfactory-quality.json")" -gt 0 ]; then
-            echo "has-actions=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has-actions=false" >> "$GITHUB_OUTPUT"
-          fi
-          if [ "$(jq '.gaps | length' "$RUNNER_TEMP/darkfactory-quality.json")" -gt 0 ]; then
-            echo "::warning::DarkFactory detected unsupported or missing deterministic actions:"
-            jq -r '.gaps[] | "  \(.packageId) \(.kind): \(.reason // .description)"'               "$RUNNER_TEMP/darkfactory-quality.json"
-          fi
+          python3 .github/scripts/verify_quality_gate.py --plan "$RUNNER_TEMP/darkfactory-quality.json"
+          jq -r '.gaps[] | "Additional product verification gap: \(.packageId) \(.kind): \(.reason // .description)"' "$RUNNER_TEMP/darkfactory-quality.json"
+
+      - name: Preserve validated quality discovery
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: quality-plan
+          path: ${{ runner.temp }}/darkfactory-quality.json
+          if-no-files-found: error
 
   quality-run:
     name: ${{ matrix.id }}
     needs: detect
-    if: needs.detect.outputs.has-actions == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -76,18 +76,20 @@ jobs:
         include: ${{ fromJSON(needs.detect.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
 
       - name: Set up Bun
         # Ensure repository script entrypoints can run under Bun.
         if: matrix.packageManager == 'bun' || matrix.ecosystem == 'typst'
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: "1.3.1"
 
       - name: Set up Node
         if: matrix.ecosystem == 'node' && matrix.packageManager != 'bun'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "24"
 
@@ -97,7 +99,7 @@ jobs:
 
       - name: Set up Python
         if: matrix.ecosystem == 'python'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: ${{ matrix.version || '3.13' }}
 
@@ -109,8 +111,9 @@ jobs:
 
       - name: Set up Rust
         if: matrix.ecosystem == 'rust'
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249
         with:
+          toolchain: stable
           components: rustfmt, clippy
 
       - name: Install Tauri Linux native build prerequisites
@@ -123,25 +126,25 @@ jobs:
 
       - name: Set up Go
         if: matrix.ecosystem == 'go'
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
         with:
           go-version: stable
 
       - name: Set up Deno
         if: matrix.ecosystem == 'deno'
         # Pin to a verified immutable action version.
-        uses: denoland/setup-deno@v2.0.5 # 22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
+        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed
         with:
           deno-version: v2.x
 
       - name: Set up Typst
         # Provide Typst to manuscript compilation jobs.
         if: matrix.ecosystem == 'typst' || matrix.cwd == 'paper'
-        uses: typst-community/setup-typst@v5
+        uses: typst-community/setup-typst@fee4b65b091cc546f02ce3be15fad8760f38a108
 
       - name: Set up Lean
         if: matrix.ecosystem == 'lean'
-        uses: leanprover/lean-action@v1
+        uses: leanprover/lean-action@24581d74d674803a25a81b10b059c5c0cdd344c6
         with:
           build: false
           test: false
@@ -186,14 +189,28 @@ jobs:
             fi
           fi
 
+      - name: Record detected action execution
+        if: always()
+        env:
+          QUALITY_ACTION_ID: ${{ matrix.id }}
+          QUALITY_JOB_RESULT: ${{ job.status }}
+        run: python3 .github/scripts/verify_quality_gate.py --record "$RUNNER_TEMP/result.json" --id "$QUALITY_ACTION_ID" --result "$QUALITY_JOB_RESULT"
+      - name: Preserve detected action execution
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: quality-result-${{ strategy.job-index }}
+          path: ${{ runner.temp }}/result.json
+          if-no-files-found: error
+
   web-build:
     name: web-build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: "1.3.1"
       - name: Install frontend dependencies
@@ -227,18 +244,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.12"
       - name: Install project documentation dependencies
         run: python -m pip install -r requirements-dev.txt
-      # Documentation validation uses the repository source layout.
-      # layout and rejects this project's maintainer-approved .agents/notes + properdocs
-      # hierarchy. Preserve that hierarchy; use this repository's actual strict docs contract.
+      # Build documentation generated from source docstrings and preserve reference assets.
       - name: Build and verify project-specific documentation
         run: |
           python .github/scripts/build_docs.py
@@ -250,21 +265,50 @@ jobs:
     needs: [detect, quality-run, docs-check, web-build, hosted-bootstrap]
     runs-on: ubuntu-latest
     steps:
-      - name: Enforce detected quality result
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Download same-run quality evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: quality-*
+          path: quality-evidence
+      - name: Enforce discovered and executed quality actions
         env:
-          DF_DETECT_RESULT: ${{ needs.detect.result }}
-          DF_HAS_ACTIONS: ${{ needs.detect.outputs.has-actions }}
-          DF_QUALITY_RESULT: ${{ needs.quality-run.result }}
-          DF_DOCS_RESULT: ${{ needs.docs-check.result }}
-          DF_WEB_BUILD_RESULT: ${{ needs.web-build.result }}
-          DF_HOSTED_RESULT: ${{ needs.hosted-bootstrap.result }}
+          QUALITY_DETECT: ${{ needs.detect.result }}
+          QUALITY_ACTIONS: ${{ needs.quality-run.result }}
+          QUALITY_DOCS: ${{ needs.docs-check.result }}
+          QUALITY_WEB: ${{ needs.web-build.result }}
+          QUALITY_HOSTED: ${{ needs.hosted-bootstrap.result }}
         run: |
-          test "$DF_DETECT_RESULT" = "success"
-          test "$DF_DOCS_RESULT" = "success"
-          test "$DF_WEB_BUILD_RESULT" = "success"
-          test "$DF_HOSTED_RESULT" = "success"
-          if [ "$DF_HAS_ACTIONS" = "true" ]; then
-            test "$DF_QUALITY_RESULT" = "success"
-          else
-            test "$DF_QUALITY_RESULT" = "skipped"
-          fi
+          for result in "$QUALITY_DETECT" "$QUALITY_ACTIONS" "$QUALITY_DOCS" "$QUALITY_WEB" "$QUALITY_HOSTED"; do
+            test "$result" = "success"
+          done
+          python3 .github/scripts/verify_quality_gate.py --plan quality-evidence/quality-plan/darkfactory-quality.json --results quality-evidence
+
+  python-status:
+    name: pipeline / pipeline (${{ matrix.python }})
+    if: always()
+    needs: quality
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - name: Publish protected Python behavior status
+        env:
+          QUALITY_RESULT: ${{ needs.quality.result }}
+        run: test "$QUALITY_RESULT" = "success"
+
+  subsystem-status:
+    name: pipeline / ${{ matrix.subsystem }}
+    if: always()
+    needs: quality
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        subsystem: [rust, web, docs]
+    steps:
+      - name: Publish protected subsystem quality status
+        env:
+          QUALITY_RESULT: ${{ needs.quality.result }}
+        run: test "$QUALITY_RESULT" = "success"
