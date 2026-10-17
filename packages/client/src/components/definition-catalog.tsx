@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 
 type Definition = {
 	id: string;
-	title: string;
-	board?: { rows: number; columns: number };
+	name: string;
+	minimum_participants: number;
+	maximum_participants: number;
 };
 
 export function DefinitionCatalog() {
@@ -14,12 +15,12 @@ export function DefinitionCatalog() {
 	useEffect(() => {
 		const controller = new AbortController();
 		const base = (import.meta.env.PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
-		void fetch(`${base}/api/definitions`, { signal: controller.signal })
+		void fetch(`${base}/api/v1/definitions`, { signal: controller.signal })
 			.then((response) => {
 				if (!response.ok) throw new Error("Cannot load the game catalog.");
-				return response.json() as Promise<{ definitions: Definition[] }>;
+				return response.json() as Promise<Definition[]>;
 			})
-			.then(({ definitions: items }) => setDefinitions(items))
+			.then((items) => setDefinitions(items))
 			.catch((cause: unknown) => {
 				if (!controller.signal.aborted) {
 					setError(
@@ -51,11 +52,9 @@ export function DefinitionCatalog() {
 						aria-pressed={selected === game.id}
 						className="rounded-2xl border border-border bg-card p-6 text-left transition hover:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					>
-						<h2 className="text-xl font-semibold">{game.title}</h2>
+						<h2 className="text-xl font-semibold">{game.name}</h2>
 						<p className="mt-3 text-sm text-muted-foreground">
-							{game.board
-								? `${game.board.columns} × ${game.board.rows} board`
-								: "Configurable board"}
+							{`${game.minimum_participants}–${game.maximum_participants} participants`}
 						</p>
 						<p className="mt-6 text-sm">
 							Inspect definition <ArrowRight className="inline size-4" />
