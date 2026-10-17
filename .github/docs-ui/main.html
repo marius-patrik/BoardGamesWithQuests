@@ -31,6 +31,8 @@
           if (stored) document.documentElement.setAttribute("data-theme", stored);
           else if (window.matchMedia("(prefers-color-scheme: light)").matches)
             document.documentElement.setAttribute("data-theme", "light");
+          if (localStorage.getItem("docs-navigation-collapsed") === "true")
+            document.documentElement.setAttribute("data-nav-collapsed", "true");
         } catch (e) {}
       })();
     </script>
@@ -41,7 +43,9 @@
 
     <header class="header">
       <div class="header__inner">
-        <button class="icon-button header__menu" aria-label="Toggle navigation" data-nav-toggle>
+        <button type="button" class="icon-button header__menu" data-nav-toggle
+                aria-controls="docs-navigation" aria-expanded="true" aria-label="Collapse navigation"
+                title="Toggle navigation">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
 
@@ -61,6 +65,15 @@
         </div>
 
         <div class="header__actions">
+          <button type="button" class="icon-button" data-fullscreen-toggle
+                  aria-label="Enter fullscreen" aria-pressed="false" title="Enter fullscreen">
+            <svg class="icon-expand" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/>
+            </svg>
+            <svg class="icon-compress" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 8h5V3M21 8h-5V3M16 21v-5h5M8 21v-5H3"/>
+            </svg>
+          </button>
           <button class="icon-button" data-theme-toggle aria-label="Toggle colour scheme">
             <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="4"/>
@@ -81,8 +94,8 @@
       </div>
     </header>
 
-    <div class="layout">
-      <aside class="sidebar" data-nav>
+    <div class="layout" data-docs-layout>
+      <aside class="sidebar" id="docs-navigation" data-nav>
         <nav aria-label="Documentation">
           {%- include "partials/nav.html" -%}
         </nav>

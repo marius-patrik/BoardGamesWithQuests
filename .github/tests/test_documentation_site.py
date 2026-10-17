@@ -149,3 +149,29 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     assert not (
         ROOT / ".agents/notes/diagrams/gui-mockup.mmd"
     ).exists(), "Do not replace the GUI image with a conceptual Mermaid diagram"
+
+
+def test_published_docs_use_full_viewport_layout_with_operable_navigation_and_fullscreen():
+    """Verify the shipped reader's real HTML, CSS and JavaScript contracts."""
+    index = (SITE / "index.html").read_text(encoding="utf-8")
+    css = (SITE / "assets" / "theme.css").read_text(encoding="utf-8")
+    js = (SITE / "assets" / "theme.js").read_text(encoding="utf-8")
+
+    assert 'data-docs-layout' in index
+    assert 'id="docs-navigation"' in index
+    assert 'data-nav-toggle' in index
+    assert 'aria-controls="docs-navigation"' in index
+    assert 'data-fullscreen-toggle' in index
+    assert 'aria-pressed="false"' in index
+
+    assert "max-width: 100rem" not in css, "Layout must not be centered in a fixed-width shell"
+    assert "--content-max" not in css, "Main document must use the remaining viewport width"
+    assert "grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--toc-width)" in css
+    assert 'html[data-nav-collapsed="true"] .layout' in css
+    assert "max-width: none" in css
+    assert "requestFullscreen()" in js and "exitFullscreen()" in js
+    assert "fullscreenchange" in js
+    assert 'data-nav-collapsed' in js
+    assert 'sidebar.classList.toggle("is-open")' in js
+    assert 'navToggle.setAttribute("aria-expanded"' in js
+    assert 'event.key === "Escape"' in js

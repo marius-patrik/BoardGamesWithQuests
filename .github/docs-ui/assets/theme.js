@@ -25,17 +25,94 @@
     });
   }
 
-  /* ── Mobile navigation ──────────────────────────────────────────────── */
+  /* ── Collapsible sidebar: desktop grid / mobile drawer ────────────── */
 
   var navToggle = document.querySelector("[data-nav-toggle]");
   var sidebar = document.querySelector("[data-nav]");
+  var mobileQuery = window.matchMedia("(max-width: 900px)");
   if (navToggle && sidebar) {
+    function syncNavigation() {
+      var expanded = mobileQuery.matches
+        ? sidebar.classList.contains("is-open")
+        : root.getAttribute("data-nav-collapsed") !== "true";
+      navToggle.setAttribute("aria-expanded", String(expanded));
+      navToggle.setAttribute("aria-label", expanded ? "Collapse navigation" : "Expand navigation");
+      navToggle.title = expanded ? "Collapse navigation" : "Expand navigation";
+    }
+
+    function closeMobileNavigation() {
+      if (!sidebar.classList.contains("is-open")) return;
+      sidebar.classList.remove("is-open");
+      syncNavigation();
+    }
+
     navToggle.addEventListener("click", function () {
-      sidebar.classList.toggle("is-open");
+      if (mobileQuery.matches) {
+        sidebar.classList.toggle("is-open");
+      } else {
+        var collapsed = root.getAttribute("data-nav-collapsed") !== "true";
+        if (collapsed) root.setAttribute("data-nav-collapsed", "true");
+        else root.removeAttribute("data-nav-collapsed");
+        try {
+          localStorage.setItem("docs-navigation-collapsed", String(collapsed));
+        } catch (e) {
+          /* Navigation still works if storage is unavailable. */
+        }
+      }
+      syncNavigation();
     });
     sidebar.addEventListener("click", function (event) {
-      if (event.target.closest("a")) sidebar.classList.remove("is-open");
+      if (event.target.closest("a")) closeMobileNavigation();
     });
+    document.addEventListener("pointerdown", function (event) {
+      if (mobileQuery.matches && !sidebar.contains(event.target) && !navToggle.contains(event.target))
+        closeMobileNavigation();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && mobileQuery.matches && sidebar.classList.contains("is-open")) {
+        closeMobileNavigation();
+        navToggle.focus();
+      }
+    });
+    if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", function () {
+      sidebar.classList.remove("is-open");
+      syncNavigation();
+    });
+    syncNavigation();
+  }
+
+  /* ── Browser fullscreen (same full-bleed layout) ─────────────────────── */
+
+  var fullscreenToggle = document.querySelector("[data-fullscreen-toggle]");
+  if (fullscreenToggle) {
+    var fullscreenAvailable =
+      typeof root.requestFullscreen === "function" &&
+      typeof document.exitFullscreen === "function";
+
+    function syncFullscreen() {
+      var active = Boolean(document.fullscreenElement);
+      root.toggleAttribute("data-fullscreen-active", active);
+      fullscreenToggle.setAttribute("aria-pressed", String(active));
+      fullscreenToggle.setAttribute("aria-label", active ? "Exit fullscreen" : "Enter fullscreen");
+      fullscreenToggle.title = active ? "Exit fullscreen" : "Enter fullscreen";
+    }
+
+    if (!fullscreenAvailable) {
+      fullscreenToggle.disabled = true;
+      fullscreenToggle.title = "Fullscreen unavailable in this browser";
+    } else {
+      fullscreenToggle.addEventListener("click", function () {
+        var operation = document.fullscreenElement
+          ? document.exitFullscreen()
+          : root.requestFullscreen();
+        Promise.resolve(operation).catch(function () {
+          syncFullscreen();
+        });
+      });
+      document.addEventListener("fullscreenchange", syncFullscreen);
+      document.addEventListener("fullscreenerror", syncFullscreen);
+    }
+    syncFullscreen();
   }
 
   /* ── Table of contents highlighting ─────────────────────────────────── */
