@@ -5,13 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# A failed production build does not block separately built PR documentation.
+# A passing main build is a reusable Actions artifact, not a Git branch.
+# PR previews are produced independently and never depend on this job.
 permissions:
-  contents: write
-
-concurrency:
-  group: docs-staging
-  cancel-in-progress: false
+  contents: read
 
 jobs:
   build:
@@ -31,8 +28,8 @@ jobs:
       - name: Install documentation dependencies
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Verify staged publication behavior
-        run: python -m pytest -q .github/tests/test_docs_publication.py
+      - name: Verify artifact selection and publication behavior
+        run: python -m pytest -q .github/tests/test_docs_publication.py .github/tests/test_docs_artifacts.py
 
       - name: Install pinned Mermaid compiler
         run: npm install --global --no-fund --no-audit @mermaid-js/mermaid-cli@11.16.0
@@ -40,22 +37,15 @@ jobs:
       - name: Build and validate main
         run: |
           python .github/scripts/build_docs.py
+          python -m pytest -q .github/tests/test_documentation_site.py
           test -f site/index.html
+          touch site/.nojekyll
 
-      - name: Cache successful main build without changing PR snapshots
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          gh auth setup-git
-          git clone --quiet --depth 1 --branch gh-pages \
-            "https://github.com/$GITHUB_REPOSITORY.git" "$RUNNER_TEMP/docs-staging"
-          git -C "$RUNNER_TEMP/docs-staging" config user.name "github-actions[bot]"
-          git -C "$RUNNER_TEMP/docs-staging" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          rsync -a --delete --exclude='.git/' --exclude='pr-*/' \
-            --exclude='branch/' site/ "$RUNNER_TEMP/docs-staging/"
-          git -C "$RUNNER_TEMP/docs-staging" add -A
-          if ! git -C "$RUNNER_TEMP/docs-staging" diff --cached --quiet; then
-            git -C "$RUNNER_TEMP/docs-staging" commit -m "docs(pages): cache passing main site"
-            git -C "$RUNNER_TEMP/docs-staging" push origin HEAD:gh-pages
-          fi
+      - name: Upload passing main site
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: docs-main
+          path: site/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
