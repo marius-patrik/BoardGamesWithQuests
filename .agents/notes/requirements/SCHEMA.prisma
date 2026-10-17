@@ -3,10 +3,8 @@
 // database-only security/constraints are declared in INTEGRITY.sql.
 // Python/psycopg uses the database at runtime. Prisma is a schema/migration tool only.
 
-generator client {
-  provider = "prisma-client"
-  output   = "../../../packages/database/generated/prisma"
-}
+// No generated TypeScript database client: Python/psycopg is the only runtime
+// database client. Prisma CLI is used exclusively for migrations and validation.
 
 datasource db {
   provider = "postgresql"
@@ -64,6 +62,17 @@ enum OperationKind {
   @@schema("bgwq")
 }
 
+/// Distinguishes terminal placement and settlement from optional progression awards.
+enum OutcomeKind {
+  win
+  loss
+  draw
+  eliminated
+
+  @@map("outcome_kind")
+  @@schema("bgwq")
+}
+
 enum AssetStatus {
   staged
   ready
@@ -93,12 +102,12 @@ model Definition {
   description String?
   builtIn Boolean @default(false) @map("built_in")
   createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
-  inverse_versions_definitionId Version[] @relation("R_versions_definitionId_definitions")
-  inverse_ratings_definitionId Rating[] @relation("R_ratings_definitionId_definitions")
+  versions Version[] @relation("R_versions_definitionId_definitions")
+  ratings Rating[] @relation("R_ratings_definitionId_definitions")
 
-  // Partial uniqueIndex definition_owner_key (ownerId, key) WHERE ${t.ownerId} IS NOT NULL: INTEGRITY.sql
-  // Partial uniqueIndex builtin_definition_key (key) WHERE ${t.builtIn}: INTEGRITY.sql
-  // CHECK definition_builtin_ownership: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL partial unique index definition_owner_key (ownerId, key) WHERE ${t.ownerId} IS NOT NULL: INTEGRITY.sql
+  // PostgreSQL partial unique index builtin_definition_key (key) WHERE ${t.builtIn}: INTEGRITY.sql
+  // PostgreSQL CHECK constraint definition_builtin_ownership: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("definitions")
   @@schema("bgwq")
 }
@@ -113,16 +122,16 @@ model Version {
   semanticsVersion Int @default(1) @map("semantics_version")
   publishedAt DateTime? @db.Timestamptz(6) @map("published_at")
   createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
-  rel_definitions_definitionId Definition @relation("R_versions_definitionId_definitions", fields: [definitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_roles_versionId Role[] @relation("R_roles_versionId_versions")
-  inverse_phases_versionId Phase[] @relation("R_phases_versionId_versions")
-  inverse_entityTypes_versionId EntityType[] @relation("R_entityTypes_versionId_versions")
-  inverse_expressions_versionId Expression[] @relation("R_expressions_versionId_versions")
-  inverse_assets_versionId Asset[] @relation("R_assets_versionId_versions")
-  inverse_games_versionId Game[] @relation("R_games_versionId_versions")
+  definition Definition @relation("R_versions_definitionId_definitions", fields: [definitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  roles Role[] @relation("R_roles_versionId_versions")
+  phases Phase[] @relation("R_phases_versionId_versions")
+  entityTypes EntityType[] @relation("R_entityTypes_versionId_versions")
+  expressions Expression[] @relation("R_expressions_versionId_versions")
+  assets Asset[] @relation("R_assets_versionId_versions")
+  games Game[] @relation("R_games_versionId_versions")
 
   @@unique([definitionId, number], map: "version_number_unique")
-  // CHECK version_bounds: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint version_bounds: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("versions")
   @@schema("bgwq")
 }
@@ -136,13 +145,13 @@ model Role {
   forwardRow Int? @map("forward_row")
   minimumCount Int @default(0) @map("minimum_count")
   maximumCount Int @default(1) @map("maximum_count")
-  rel_versions_versionId Version @relation("R_roles_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_participants_versionId_roleId Participant[] @relation("R_participants_versionId_roleId_roles")
+  version Version @relation("R_roles_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  participants Participant[] @relation("R_participants_versionId_roleId_roles")
 
   @@unique([versionId, key], map: "role_version_key")
   @@unique([versionId, id], map: "role_version_id")
-  // CHECK role_count: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK role_forward_row: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint role_count: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint role_forward_row: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("roles")
   @@schema("bgwq")
 }
@@ -155,13 +164,13 @@ model Phase {
   label String
   initial Boolean @default(false)
   ordinal Int @default(0)
-  rel_versions_versionId Version @relation("R_phases_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_phaseActions_versionId_phaseId PhaseAction[] @relation("R_phaseActions_versionId_phaseId_phases")
-  inverse_games_versionId_phaseId Game[] @relation("R_games_versionId_phaseId_phases")
+  version Version @relation("R_phases_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  phasePhaseActions PhaseAction[] @relation("R_phaseActions_versionId_phaseId_phases")
+  phaseGames Game[] @relation("R_games_versionId_phaseId_phases")
 
   @@unique([versionId, key], map: "phase_version_key")
   @@unique([versionId, id], map: "phase_version_id")
-  // Partial uniqueIndex phase_single_initial (versionId) WHERE ${t.initial}: INTEGRITY.sql
+  // PostgreSQL partial unique index phase_single_initial (versionId) WHERE ${t.initial}: INTEGRITY.sql
   @@map("phases")
   @@schema("bgwq")
 }
@@ -173,12 +182,12 @@ model EntityType {
   key String
   name String
   kind EntityKind
-  rel_versions_versionId Version @relation("R_entityTypes_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_entitySeeds_versionId_entityTypeId EntitySeed[] @relation("R_entitySeeds_versionId_entityTypeId_entityTypes")
-  inverse_fields_versionId_entityTypeId Field[] @relation("R_fields_versionId_entityTypeId_entityTypes")
-  inverse_actions_versionId_entityTypeId Action[] @relation("R_actions_versionId_entityTypeId_entityTypes")
-  inverse_visualTemplates_versionId_entityTypeId VisualTemplate[] @relation("R_visualTemplates_versionId_entityTypeId_entityTypes")
-  inverse_gameEntities_versionId_entityTypeId GameEntity[] @relation("R_gameEntities_versionId_entityTypeId_entityTypes")
+  version Version @relation("R_entityTypes_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  entitySeeds EntitySeed[] @relation("R_entitySeeds_versionId_entityTypeId_entityTypes")
+  fields Field[] @relation("R_fields_versionId_entityTypeId_entityTypes")
+  actions Action[] @relation("R_actions_versionId_entityTypeId_entityTypes")
+  visualTemplates VisualTemplate[] @relation("R_visualTemplates_versionId_entityTypeId_entityTypes")
+  gameEntities GameEntity[] @relation("R_gameEntities_versionId_entityTypeId_entityTypes")
 
   @@unique([versionId, key], map: "entity_type_key")
   @@unique([versionId, id], map: "entity_type_version_id")
@@ -200,20 +209,20 @@ model EntitySeed {
   column Int?
   x Decimal? @db.Decimal(65, 30)
   y Decimal? @db.Decimal(65, 30)
-  rel_entityTypes_versionId_entityTypeId EntityType @relation("R_entitySeeds_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_entitySeeds_versionId_parentId EntitySeed? @relation("R_entitySeeds_versionId_parentId_entitySeeds", fields: [versionId, parentId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_entitySeeds_versionId_parentId EntitySeed[] @relation("R_entitySeeds_versionId_parentId_entitySeeds")
-  rel_entitySeeds_versionId_locationId EntitySeed? @relation("R_entitySeeds_versionId_locationId_entitySeeds", fields: [versionId, locationId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_entitySeeds_versionId_locationId EntitySeed[] @relation("R_entitySeeds_versionId_locationId_entitySeeds")
-  inverse_seedLinks_versionId_sourceId SeedLink[] @relation("R_seedLinks_versionId_sourceId_entitySeeds")
-  inverse_seedLinks_versionId_targetId SeedLink[] @relation("R_seedLinks_versionId_targetId_entitySeeds")
-  inverse_seedValues_versionId_seedId SeedValue[] @relation("R_seedValues_versionId_seedId_entitySeeds")
-  inverse_seedValues_versionId_refSeedId SeedValue[] @relation("R_seedValues_versionId_refSeedId_entitySeeds")
-  inverse_gameEntities_versionId_seedId GameEntity[] @relation("R_gameEntities_versionId_seedId_entitySeeds")
+  entityType EntityType @relation("R_entitySeeds_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  parent EntitySeed? @relation("R_entitySeeds_versionId_parentId_entitySeeds", fields: [versionId, parentId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  parentEntitySeeds EntitySeed[] @relation("R_entitySeeds_versionId_parentId_entitySeeds")
+  location EntitySeed? @relation("R_entitySeeds_versionId_locationId_entitySeeds", fields: [versionId, locationId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  locationEntitySeeds EntitySeed[] @relation("R_entitySeeds_versionId_locationId_entitySeeds")
+  sourceSeedLinks SeedLink[] @relation("R_seedLinks_versionId_sourceId_entitySeeds")
+  targetSeedLinks SeedLink[] @relation("R_seedLinks_versionId_targetId_entitySeeds")
+  seedSeedValues SeedValue[] @relation("R_seedValues_versionId_seedId_entitySeeds")
+  seedValues SeedValue[] @relation("R_seedValues_versionId_refSeedId_entitySeeds")
+  seedGameEntities GameEntity[] @relation("R_gameEntities_versionId_seedId_entitySeeds")
 
   @@unique([versionId, key], map: "seed_version_key")
   @@unique([versionId, id], map: "seed_version_id")
-  // CHECK seed_not_self: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint seed_not_self: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("entity_seeds")
   @@schema("bgwq")
 }
@@ -226,8 +235,8 @@ model SeedLink {
   targetId String @db.Uuid @map("target_id")
   relation String
   ordinal Int @default(0)
-  rel_entitySeeds_versionId_sourceId EntitySeed @relation("R_seedLinks_versionId_sourceId_entitySeeds", fields: [versionId, sourceId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_entitySeeds_versionId_targetId EntitySeed @relation("R_seedLinks_versionId_targetId_entitySeeds", fields: [versionId, targetId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  source EntitySeed @relation("R_seedLinks_versionId_sourceId_entitySeeds", fields: [versionId, sourceId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  target EntitySeed @relation("R_seedLinks_versionId_targetId_entitySeeds", fields: [versionId, targetId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([versionId, sourceId, targetId, relation], map: "seed_link_unique")
   @@map("seed_links")
@@ -242,11 +251,11 @@ model Field {
   key String
   typeKey String @map("type_key")
   nullable Boolean @default(false)
-  rel_entityTypes_versionId_entityTypeId EntityType @relation("R_fields_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_seedValues_versionId_fieldId SeedValue[] @relation("R_seedValues_versionId_fieldId_fields")
-  inverse_expressions_versionId_fieldId Expression[] @relation("R_expressions_versionId_fieldId_fields")
-  inverse_gameValues_versionId_fieldId GameValue[] @relation("R_gameValues_versionId_fieldId_fields")
-  inverse_gameComposites_versionId_fieldId GameComposite[] @relation("R_gameComposites_versionId_fieldId_fields")
+  entityType EntityType @relation("R_fields_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  fieldSeedValues SeedValue[] @relation("R_seedValues_versionId_fieldId_fields")
+  fieldExpressions Expression[] @relation("R_expressions_versionId_fieldId_fields")
+  fieldGameValues GameValue[] @relation("R_gameValues_versionId_fieldId_fields")
+  fieldGameComposites GameComposite[] @relation("R_gameComposites_versionId_fieldId_fields")
 
   @@unique([entityTypeId, key], map: "field_entity_key")
   @@unique([versionId, id], map: "field_version_id")
@@ -267,12 +276,12 @@ model SeedValue {
   instant DateTime? @db.Timestamptz(6) @map("instant_value")
   refSeedId String? @db.Uuid @map("ref_seed_id")
   refSeat Int? @map("ref_seat")
-  rel_entitySeeds_versionId_seedId EntitySeed @relation("R_seedValues_versionId_seedId_entitySeeds", fields: [versionId, seedId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_fields_versionId_fieldId Field @relation("R_seedValues_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_entitySeeds_versionId_refSeedId EntitySeed? @relation("R_seedValues_versionId_refSeedId_entitySeeds", fields: [versionId, refSeedId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  seed EntitySeed @relation("R_seedValues_versionId_seedId_entitySeeds", fields: [versionId, seedId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  field Field @relation("R_seedValues_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  referenceSeed EntitySeed? @relation("R_seedValues_versionId_refSeedId_entitySeeds", fields: [versionId, refSeedId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([seedId, fieldId])
-  // CHECK seed_value_one_payload: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint seed_value_one_payload: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("seed_values")
   @@schema("bgwq")
 }
@@ -283,11 +292,11 @@ model Operator {
   kind String
   returns String?
   summary String
-  inverse_operatorParameters_operatorKey OperatorParameter[] @relation("R_operatorParameters_operatorKey_operators")
-  inverse_expressions_operatorKey Expression[] @relation("R_expressions_operatorKey_operators")
-  inverse_effects_operatorKey Effect[] @relation("R_effects_operatorKey_operators")
+  operatorParameters OperatorParameter[] @relation("R_operatorParameters_operatorKey_operators")
+  expressions Expression[] @relation("R_expressions_operatorKey_operators")
+  effects Effect[] @relation("R_effects_operatorKey_operators")
 
-  // CHECK operator_kind: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint operator_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("operators")
   @@schema("bgwq")
 }
@@ -300,7 +309,7 @@ model OperatorParameter {
   ordinal Int
   required Boolean @default(true)
   variadic Boolean @default(false)
-  rel_operators_operatorKey Operator @relation("R_operatorParameters_operatorKey_operators", fields: [operatorKey], references: [key], onDelete: NoAction, onUpdate: NoAction)
+  operator Operator @relation("R_operatorParameters_operatorKey_operators", fields: [operatorKey], references: [key], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([operatorKey, key])
   @@unique([operatorKey, ordinal], map: "operator_param_order")
@@ -313,7 +322,7 @@ model Hook {
   key String @id
   ordinal Int @unique
   summary String
-  inverse_actions_hookKey Action[] @relation("R_actions_hookKey_hooks")
+  actions Action[] @relation("R_actions_hookKey_hooks")
 
   @@map("hooks")
   @@schema("bgwq")
@@ -335,19 +344,19 @@ model Expression {
   referenceKey String? @map("reference_key")
   fieldId String? @db.Uuid @map("field_id")
   operatorKey String? @map("operator_key")
-  rel_versions_versionId Version @relation("R_expressions_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rel_fields_versionId_fieldId Field? @relation("R_expressions_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_operators_operatorKey Operator? @relation("R_expressions_operatorKey_operators", fields: [operatorKey], references: [key], onDelete: NoAction, onUpdate: NoAction)
-  inverse_expressionArguments_versionId_parentId ExpressionArgument[] @relation("R_expressionArguments_versionId_parentId_expressions")
-  inverse_expressionArguments_versionId_childId ExpressionArgument[] @relation("R_expressionArguments_versionId_childId_expressions")
-  inverse_actions_versionId_iteratorExpressionId Action[] @relation("R_actions_versionId_iteratorExpressionId_expressions")
-  inverse_actions_versionId_conditionExpressionId Action[] @relation("R_actions_versionId_conditionExpressionId_expressions")
-  inverse_effects_versionId_conditionExpressionId Effect[] @relation("R_effects_versionId_conditionExpressionId_expressions")
-  inverse_effectArguments_versionId_expressionId EffectArgument[] @relation("R_effectArguments_versionId_expressionId_expressions")
+  version Version @relation("R_expressions_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  field Field? @relation("R_expressions_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  operator Operator? @relation("R_expressions_operatorKey_operators", fields: [operatorKey], references: [key], onDelete: NoAction, onUpdate: NoAction)
+  parentExpressionArguments ExpressionArgument[] @relation("R_expressionArguments_versionId_parentId_expressions")
+  expressionArguments ExpressionArgument[] @relation("R_expressionArguments_versionId_childId_expressions")
+  actions Action[] @relation("R_actions_versionId_iteratorExpressionId_expressions")
+  actions2 Action[] @relation("R_actions_versionId_conditionExpressionId_expressions")
+  effects Effect[] @relation("R_effects_versionId_conditionExpressionId_expressions")
+  effectArguments EffectArgument[] @relation("R_effectArguments_versionId_expressionId_expressions")
 
   @@unique([versionId, id], map: "expr_version_id")
   @@unique([versionId, key], map: "expr_version_key")
-  // CHECK expression_kind: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint expression_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("expressions")
   @@schema("bgwq")
 }
@@ -359,11 +368,11 @@ model ExpressionArgument {
   childId String @db.Uuid @map("child_id")
   parameter String
   ordinal Int @default(0)
-  rel_expressions_versionId_parentId Expression @relation("R_expressionArguments_versionId_parentId_expressions", fields: [versionId, parentId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_expressions_versionId_childId Expression @relation("R_expressionArguments_versionId_childId_expressions", fields: [versionId, childId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  parent Expression @relation("R_expressionArguments_versionId_parentId_expressions", fields: [versionId, parentId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  child Expression @relation("R_expressionArguments_versionId_childId_expressions", fields: [versionId, childId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([parentId, parameter, ordinal])
-  // CHECK expression_not_self: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint expression_not_self: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("expression_arguments")
   @@schema("bgwq")
 }
@@ -382,19 +391,19 @@ model Action {
   conditionExpressionId String? @db.Uuid @map("condition_expression_id")
   priority Int @default(0)
   enabled Boolean @default(true)
-  rel_entityTypes_versionId_entityTypeId EntityType @relation("R_actions_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_expressions_versionId_iteratorExpressionId Expression? @relation("R_actions_versionId_iteratorExpressionId_expressions", fields: [versionId, iteratorExpressionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_expressions_versionId_conditionExpressionId Expression? @relation("R_actions_versionId_conditionExpressionId_expressions", fields: [versionId, conditionExpressionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_hooks_hookKey Hook? @relation("R_actions_hookKey_hooks", fields: [hookKey], references: [key], onDelete: NoAction, onUpdate: NoAction)
-  inverse_actionParameters_versionId_actionId ActionParameter[] @relation("R_actionParameters_versionId_actionId_actions")
-  inverse_phaseActions_versionId_actionId PhaseAction[] @relation("R_phaseActions_versionId_actionId_actions")
-  inverse_effects_versionId_actionId Effect[] @relation("R_effects_versionId_actionId_actions")
+  entityType EntityType @relation("R_actions_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  expression Expression? @relation("R_actions_versionId_iteratorExpressionId_expressions", fields: [versionId, iteratorExpressionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  expression2 Expression? @relation("R_actions_versionId_conditionExpressionId_expressions", fields: [versionId, conditionExpressionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  hook Hook? @relation("R_actions_hookKey_hooks", fields: [hookKey], references: [key], onDelete: NoAction, onUpdate: NoAction)
+  actionActionParameters ActionParameter[] @relation("R_actionParameters_versionId_actionId_actions")
+  actionPhaseActions PhaseAction[] @relation("R_phaseActions_versionId_actionId_actions")
+  actionEffects Effect[] @relation("R_effects_versionId_actionId_actions")
 
   @@unique([entityTypeId, key], map: "action_owner_key")
   @@unique([versionId, id], map: "action_version_id")
   @@index([trigger, hookKey, priority], map: "action_hook_order")
-  // CHECK action_trigger_check: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK action_iterator_pair: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint action_trigger_check: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint action_iterator_pair: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("actions")
   @@schema("bgwq")
 }
@@ -407,7 +416,7 @@ model ActionParameter {
   typeKey String @map("type_key")
   required Boolean @default(true)
   ordinal Int @default(0)
-  rel_actions_versionId_actionId Action @relation("R_actionParameters_versionId_actionId_actions", fields: [versionId, actionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  action Action @relation("R_actionParameters_versionId_actionId_actions", fields: [versionId, actionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([actionId, key])
   @@map("action_parameters")
@@ -419,8 +428,8 @@ model PhaseAction {
   versionId String @db.Uuid @map("version_id")
   phaseId String @db.Uuid @map("phase_id")
   actionId String @db.Uuid @map("action_id")
-  rel_phases_versionId_phaseId Phase @relation("R_phaseActions_versionId_phaseId_phases", fields: [versionId, phaseId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_actions_versionId_actionId Action @relation("R_phaseActions_versionId_actionId_actions", fields: [versionId, actionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  phase Phase @relation("R_phaseActions_versionId_phaseId_phases", fields: [versionId, phaseId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  action Action @relation("R_phaseActions_versionId_actionId_actions", fields: [versionId, actionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([phaseId, actionId])
   @@map("phase_actions")
@@ -435,10 +444,10 @@ model Effect {
   ordinal Int
   operatorKey String @map("operator_key")
   conditionExpressionId String? @db.Uuid @map("condition_expression_id")
-  rel_actions_versionId_actionId Action @relation("R_effects_versionId_actionId_actions", fields: [versionId, actionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_expressions_versionId_conditionExpressionId Expression? @relation("R_effects_versionId_conditionExpressionId_expressions", fields: [versionId, conditionExpressionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_operators_operatorKey Operator @relation("R_effects_operatorKey_operators", fields: [operatorKey], references: [key], onDelete: NoAction, onUpdate: NoAction)
-  inverse_effectArguments_versionId_effectId EffectArgument[] @relation("R_effectArguments_versionId_effectId_effects")
+  action Action @relation("R_effects_versionId_actionId_actions", fields: [versionId, actionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  expression Expression? @relation("R_effects_versionId_conditionExpressionId_expressions", fields: [versionId, conditionExpressionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  operator Operator @relation("R_effects_operatorKey_operators", fields: [operatorKey], references: [key], onDelete: NoAction, onUpdate: NoAction)
+  effectArguments EffectArgument[] @relation("R_effectArguments_versionId_effectId_effects")
 
   @@unique([versionId, id], map: "effect_version_id")
   @@unique([actionId, ordinal], map: "effect_action_order")
@@ -453,8 +462,8 @@ model EffectArgument {
   expressionId String @db.Uuid @map("expression_id")
   key String
   ordinal Int @default(0)
-  rel_effects_versionId_effectId Effect @relation("R_effectArguments_versionId_effectId_effects", fields: [versionId, effectId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_expressions_versionId_expressionId Expression @relation("R_effectArguments_versionId_expressionId_expressions", fields: [versionId, expressionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  effect Effect @relation("R_effectArguments_versionId_effectId_effects", fields: [versionId, effectId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  expression Expression @relation("R_effectArguments_versionId_expressionId_expressions", fields: [versionId, expressionId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([effectId, key, ordinal])
   @@map("effect_arguments")
@@ -472,16 +481,16 @@ model Asset {
   bytes BigInt
   sha256 String
   status AssetStatus @default(staged)
-  rel_versions_versionId Version @relation("R_assets_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_visualPrimitives_versionId_assetId VisualPrimitive[] @relation("R_visualPrimitives_versionId_assetId_assets")
+  version Version @relation("R_assets_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  visualPrimitives VisualPrimitive[] @relation("R_visualPrimitives_versionId_assetId_assets")
 
   @@unique([versionId, key], map: "asset_version_key")
   @@unique([versionId, id], map: "asset_version_id")
   @@unique([bucket, path], map: "asset_storage_path")
-  // CHECK asset_size: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK asset_hash_lower_hex: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK asset_supported_mime: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK asset_path_nonempty: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint asset_size: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint asset_hash_lower_hex: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint asset_supported_mime: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint asset_path_nonempty: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("assets")
   @@schema("bgwq")
 }
@@ -492,8 +501,8 @@ model VisualTemplate {
   versionId String @db.Uuid @map("version_id")
   entityTypeId String @db.Uuid @map("entity_type_id")
   key String
-  rel_entityTypes_versionId_entityTypeId EntityType @relation("R_visualTemplates_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_visualPrimitives_versionId_templateId VisualPrimitive[] @relation("R_visualPrimitives_versionId_templateId_visualTemplates")
+  entityType EntityType @relation("R_visualTemplates_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  templateVisualPrimitives VisualPrimitive[] @relation("R_visualPrimitives_versionId_templateId_visualTemplates")
 
   @@unique([entityTypeId, key], map: "visual_type_key")
   @@unique([versionId, id], map: "visual_template_version_id")
@@ -518,11 +527,11 @@ model VisualPrimitive {
   fill String?
   stroke String?
   assetId String? @db.Uuid @map("asset_id")
-  rel_visualTemplates_versionId_templateId VisualTemplate @relation("R_visualPrimitives_versionId_templateId_visualTemplates", fields: [versionId, templateId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_assets_versionId_assetId Asset? @relation("R_visualPrimitives_versionId_assetId_assets", fields: [versionId, assetId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  template VisualTemplate @relation("R_visualPrimitives_versionId_templateId_visualTemplates", fields: [versionId, templateId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  asset Asset? @relation("R_visualPrimitives_versionId_assetId_assets", fields: [versionId, assetId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([templateId, layer, ordinal], map: "visual_primitive_order")
-  // CHECK visual_primitive_kind: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint visual_primitive_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("visual_primitives")
   @@schema("bgwq")
 }
@@ -541,24 +550,25 @@ model Game {
   startedAt DateTime? @db.Timestamptz(6) @map("started_at")
   finishedAt DateTime? @db.Timestamptz(6) @map("finished_at")
   expiresAt DateTime @db.Timestamptz(6) @map("expires_at")
-  rel_versions_versionId Version @relation("R_games_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rel_phases_versionId_phaseId Phase? @relation("R_games_versionId_phaseId_phases", fields: [versionId, phaseId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_participants_gameId_versionId Participant[] @relation("R_participants_gameId_versionId_games")
-  inverse_gameEntities_gameId_versionId GameEntity[] @relation("R_gameEntities_gameId_versionId_games")
-  inverse_gameValues_gameId_versionId GameValue[] @relation("R_gameValues_gameId_versionId_games")
-  inverse_gameComposites_gameId_versionId GameComposite[] @relation("R_gameComposites_gameId_versionId_games")
-  inverse_events_gameId Event[] @relation("R_events_gameId_games")
+  version Version @relation("R_games_versionId_versions", fields: [versionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  phase Phase? @relation("R_games_versionId_phaseId_phases", fields: [versionId, phaseId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  participants Participant[] @relation("R_participants_gameId_versionId_games")
+  gameEntities GameEntity[] @relation("R_gameEntities_gameId_versionId_games")
+  gameValues GameValue[] @relation("R_gameValues_gameId_versionId_games")
+  gameComposites GameComposite[] @relation("R_gameComposites_gameId_versionId_games")
+  events Event[] @relation("R_events_gameId_games")
+  outcomes GameOutcome[] @relation("game_outcomes_game")
 
   @@unique([id, versionId], map: "game_version_id")
   @@unique([creatorId, creationKey], map: "game_creation_key")
   @@index([status, expiresAt], map: "games_expiry")
-  // CHECK game_revision_nonnegative: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK game_lifecycle_timestamps: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint game_revision_nonnegative: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_lifecycle_timestamps: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("games")
   @@schema("bgwq")
 }
 
-/// participants persisted application records.
+/// An authenticated user assigned a game-local seat and role; seats are unique within a game.
 model Participant {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   gameId String @db.Uuid @map("game_id")
@@ -568,31 +578,33 @@ model Participant {
   seat Int
   eliminatedAt DateTime? @db.Timestamptz(6) @map("eliminated_at")
   joinedAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
-  rel_games_gameId_versionId Game @relation("R_participants_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
-  rel_roles_versionId_roleId Role @relation("R_participants_versionId_roleId_roles", fields: [versionId, roleId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_activeParticipants_gameId_participantId ActiveParticipant[] @relation("R_activeParticipants_gameId_participantId_participants")
-  inverse_gameEntities_gameId_ownerId GameEntity[] @relation("R_gameEntities_gameId_ownerId_participants")
-  inverse_gameValues_gameId_refParticipantId GameValue[] @relation("R_gameValues_gameId_refParticipantId_participants")
-  inverse_gameCompositeEntries_gameId_refParticipantId GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_refParticipantId_participants")
-  inverse_clocks_gameId_participantId Clock[] @relation("R_clocks_gameId_participantId_participants")
-  inverse_events_gameId_actorId Event[] @relation("R_events_gameId_actorId_participants")
-  inverse_eventValues_gameId_participantId EventValue[] @relation("R_eventValues_gameId_participantId_participants")
-  inverse_awards_gameId_participantId Award[] @relation("R_awards_gameId_participantId_participants")
+  version Game @relation("R_participants_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
+  role Role @relation("R_participants_versionId_roleId_roles", fields: [versionId, roleId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  participantActiveParticipants ActiveParticipant[] @relation("R_activeParticipants_gameId_participantId_participants")
+  ownerGameEntities GameEntity[] @relation("R_gameEntities_gameId_ownerId_participants")
+  refParticipantGameValues GameValue[] @relation("R_gameValues_gameId_refParticipantId_participants")
+  refParticipantGameCompositeEntries GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_refParticipantId_participants")
+  participantClocks Clock[] @relation("R_clocks_gameId_participantId_participants")
+  events Event[] @relation("R_events_gameId_actorId_participants")
+  participantEventValues EventValue[] @relation("R_eventValues_gameId_participantId_participants")
+  participantAwards Award[] @relation("R_awards_gameId_participantId_participants")
+
+  outcomes GameOutcome[] @relation("game_outcomes_participant")
 
   @@unique([gameId, id], map: "participant_game_id")
   @@unique([gameId, userId], map: "participant_user_game")
   @@unique([gameId, seat], map: "participant_seat")
   @@index([userId, gameId], map: "participant_by_user")
-  // CHECK participant_seat_nonnegative: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint participant_seat_nonnegative: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("participants")
   @@schema("bgwq")
 }
 
-/// active_participants persisted application records.
+/// An action-eligible player; several participants may be active simultaneously.
 model ActiveParticipant {
   gameId String @db.Uuid @map("game_id")
   participantId String @db.Uuid @map("participant_id")
-  rel_participants_gameId_participantId Participant @relation("R_activeParticipants_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  participant Participant @relation("R_activeParticipants_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([gameId, participantId])
   @@map("active_participants")
@@ -612,32 +624,33 @@ model GameEntity {
   ordinal Int?
   createdRevision BigInt @map("created_revision")
   removedRevision BigInt? @map("removed_revision")
-  rel_games_gameId_versionId Game @relation("R_gameEntities_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
-  rel_entityTypes_versionId_entityTypeId EntityType @relation("R_gameEntities_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_entitySeeds_versionId_seedId EntitySeed? @relation("R_gameEntities_versionId_seedId_entitySeeds", fields: [versionId, seedId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_participants_gameId_ownerId Participant? @relation("R_gameEntities_gameId_ownerId_participants", fields: [gameId, ownerId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameEntities_gameId_parentId GameEntity? @relation("R_gameEntities_gameId_parentId_gameEntities", fields: [gameId, parentId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_gameEntities_gameId_parentId GameEntity[] @relation("R_gameEntities_gameId_parentId_gameEntities")
-  rel_gameEntities_gameId_locationId GameEntity? @relation("R_gameEntities_gameId_locationId_gameEntities", fields: [gameId, locationId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_gameEntities_gameId_locationId GameEntity[] @relation("R_gameEntities_gameId_locationId_gameEntities")
-  inverse_gameLinks_gameId_sourceId GameLink[] @relation("R_gameLinks_gameId_sourceId_gameEntities")
-  inverse_gameLinks_gameId_targetId GameLink[] @relation("R_gameLinks_gameId_targetId_gameEntities")
-  inverse_gameValues_gameId_entityId GameValue[] @relation("R_gameValues_gameId_entityId_gameEntities")
-  inverse_gameValues_gameId_refEntityId GameValue[] @relation("R_gameValues_gameId_refEntityId_gameEntities")
-  inverse_gameComposites_gameId_ownerEntityId GameComposite[] @relation("R_gameComposites_gameId_ownerEntityId_gameEntities")
-  inverse_gameCompositeEntries_gameId_refEntityId GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_refEntityId_gameEntities")
-  inverse_eventValues_gameId_entityId EventValue[] @relation("R_eventValues_gameId_entityId_gameEntities")
-  inverse_awards_gameId_objectiveEntityId Award[] @relation("R_awards_gameId_objectiveEntityId_gameEntities")
+  version Game @relation("R_gameEntities_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
+  entityType EntityType @relation("R_gameEntities_versionId_entityTypeId_entityTypes", fields: [versionId, entityTypeId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  seed EntitySeed? @relation("R_gameEntities_versionId_seedId_entitySeeds", fields: [versionId, seedId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  owner Participant? @relation("R_gameEntities_gameId_ownerId_participants", fields: [gameId, ownerId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  parent GameEntity? @relation("R_gameEntities_gameId_parentId_gameEntities", fields: [gameId, parentId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  parentGameEntities GameEntity[] @relation("R_gameEntities_gameId_parentId_gameEntities")
+  location GameEntity? @relation("R_gameEntities_gameId_locationId_gameEntities", fields: [gameId, locationId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  locationGameEntities GameEntity[] @relation("R_gameEntities_gameId_locationId_gameEntities")
+  sourceGameLinks GameLink[] @relation("R_gameLinks_gameId_sourceId_gameEntities")
+  targetGameLinks GameLink[] @relation("R_gameLinks_gameId_targetId_gameEntities")
+  entityGameValues GameValue[] @relation("R_gameValues_gameId_entityId_gameEntities")
+  refEntityGameValues GameValue[] @relation("R_gameValues_gameId_refEntityId_gameEntities")
+  gameComposites GameComposite[] @relation("R_gameComposites_gameId_ownerEntityId_gameEntities")
+  refEntityGameCompositeEntries GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_refEntityId_gameEntities")
+  entityEventValues EventValue[] @relation("R_eventValues_gameId_entityId_gameEntities")
+  awards Award[] @relation("R_awards_gameId_objectiveEntityId_gameEntities")
 
   @@unique([gameId, id], map: "game_entity_game_id")
-  // Partial uniqueIndex game_entity_seed_unique (gameId, seedId) WHERE ${t.seedId} IS NOT NULL: INTEGRITY.sql
+  // PostgreSQL permits multiple NULL seed IDs; instantiated seeds remain unique.
+  @@unique([gameId, seedId], map: "game_entity_seed_unique")
   @@index([gameId, locationId], map: "game_entity_location")
-  // CHECK runtime_entity_self: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint runtime_entity_self: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("game_entities")
   @@schema("bgwq")
 }
 
-/// game_links persisted application records.
+/// A directed, typed relation between two entities in the same game.
 model GameLink {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   gameId String @db.Uuid @map("game_id")
@@ -645,8 +658,8 @@ model GameLink {
   targetId String @db.Uuid @map("target_id")
   relation String
   ordinal Int @default(0)
-  rel_gameEntities_gameId_sourceId GameEntity @relation("R_gameLinks_gameId_sourceId_gameEntities", fields: [gameId, sourceId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameEntities_gameId_targetId GameEntity @relation("R_gameLinks_gameId_targetId_gameEntities", fields: [gameId, targetId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  source GameEntity @relation("R_gameLinks_gameId_sourceId_gameEntities", fields: [gameId, sourceId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  target GameEntity @relation("R_gameLinks_gameId_targetId_gameEntities", fields: [gameId, targetId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([gameId, sourceId, targetId, relation], map: "game_link_pair")
   @@map("game_links")
@@ -668,19 +681,19 @@ model GameValue {
   refEntityId String? @db.Uuid @map("ref_entity_id")
   refParticipantId String? @db.Uuid @map("ref_participant_id")
   updatedRevision BigInt @map("updated_revision")
-  rel_games_gameId_versionId Game @relation("R_gameValues_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameEntities_gameId_entityId GameEntity @relation("R_gameValues_gameId_entityId_gameEntities", fields: [gameId, entityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_fields_versionId_fieldId Field @relation("R_gameValues_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameEntities_gameId_refEntityId GameEntity? @relation("R_gameValues_gameId_refEntityId_gameEntities", fields: [gameId, refEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_participants_gameId_refParticipantId Participant? @relation("R_gameValues_gameId_refParticipantId_participants", fields: [gameId, refParticipantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  version Game @relation("R_gameValues_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
+  gameEntitie GameEntity @relation("R_gameValues_gameId_entityId_gameEntities", fields: [gameId, entityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  field Field @relation("R_gameValues_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  referenceEntity GameEntity? @relation("R_gameValues_gameId_refEntityId_gameEntities", fields: [gameId, refEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  referenceParticipant Participant? @relation("R_gameValues_gameId_refParticipantId_participants", fields: [gameId, refParticipantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([entityId, fieldId])
-  // CHECK game_value_exactly_one: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint game_value_exactly_one: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("game_values")
   @@schema("bgwq")
 }
 
-/// Runtime typed collections/records for trade proposals, bids, and action parameters.  No JSONB document stores authoritative composite state. A composite is an  ordered list or keye
+/// A relational representation of one typed list or record associated with an entity field.
 model GameComposite {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   gameId String @db.Uuid @map("game_id")
@@ -690,20 +703,20 @@ model GameComposite {
   containerKind String @map("container_kind")
   typeKey String @map("type_key")
   createdRevision BigInt @map("created_revision")
-  rel_games_gameId_versionId Game @relation("R_gameComposites_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameEntities_gameId_ownerEntityId GameEntity @relation("R_gameComposites_gameId_ownerEntityId_gameEntities", fields: [gameId, ownerEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_fields_versionId_fieldId Field @relation("R_gameComposites_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_gameCompositeEntries_gameId_compositeId GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_compositeId_gameComposites")
-  inverse_gameCompositeEntries_gameId_childCompositeId GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_childCompositeId_gameComposites")
+  version Game @relation("R_gameComposites_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
+  gameEntitie GameEntity @relation("R_gameComposites_gameId_ownerEntityId_gameEntities", fields: [gameId, ownerEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  field Field @relation("R_gameComposites_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
+  gameCompositeEntries GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_compositeId_gameComposites")
+  gameCompositeEntries2 GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_childCompositeId_gameComposites")
 
   @@unique([gameId, id], map: "game_composite_game_id")
   @@unique([ownerEntityId, fieldId], map: "game_composite_owner_field")
-  // CHECK game_composite_kind: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint game_composite_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("game_composites")
   @@schema("bgwq")
 }
 
-/// A typed member of one normalized runtime list/record.
+/// An ordered collection member or keyed record member; values and nested composites are mutually exclusive.
 model GameCompositeEntry {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   gameId String @db.Uuid @map("game_id")
@@ -719,21 +732,22 @@ model GameCompositeEntry {
   refEntityId String? @db.Uuid @map("ref_entity_id")
   refParticipantId String? @db.Uuid @map("ref_participant_id")
   childCompositeId String? @db.Uuid @map("child_composite_id")
-  rel_gameComposites_gameId_compositeId GameComposite @relation("R_gameCompositeEntries_gameId_compositeId_gameComposites", fields: [gameId, compositeId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameComposites_gameId_childCompositeId GameComposite? @relation("R_gameCompositeEntries_gameId_childCompositeId_gameComposites", fields: [gameId, childCompositeId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameEntities_gameId_refEntityId GameEntity? @relation("R_gameCompositeEntries_gameId_refEntityId_gameEntities", fields: [gameId, refEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_participants_gameId_refParticipantId Participant? @relation("R_gameCompositeEntries_gameId_refParticipantId_participants", fields: [gameId, refParticipantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  composite GameComposite @relation("R_gameCompositeEntries_gameId_compositeId_gameComposites", fields: [gameId, compositeId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  childComposite GameComposite? @relation("R_gameCompositeEntries_gameId_childCompositeId_gameComposites", fields: [gameId, childCompositeId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  referenceEntity GameEntity? @relation("R_gameCompositeEntries_gameId_refEntityId_gameEntities", fields: [gameId, refEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  referenceParticipant Participant? @relation("R_gameCompositeEntries_gameId_refParticipantId_participants", fields: [gameId, refParticipantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([compositeId, ordinal], map: "game_composite_entry_order")
-  // Partial uniqueIndex game_composite_record_key (compositeId, memberKey) WHERE ${t.memberKey} IS NOT NULL: INTEGRITY.sql
-  // CHECK game_composite_entry_index: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK game_composite_entry_value: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK game_composite_no_self: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // Multiple NULL keys represent list members; defined record-member keys are unique.
+  @@unique([compositeId, memberKey], map: "game_composite_record_key")
+  // PostgreSQL CHECK constraint game_composite_entry_index: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_composite_entry_value: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_composite_no_self: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("game_composite_entries")
   @@schema("bgwq")
 }
 
-/// Time controls are optional; trusted time is provided by the server/DB.
+/// Server-authoritative participant clock; the anchor timestamp is trusted, never client-supplied.
 model Clock {
   gameId String @db.Uuid @map("game_id")
   participantId String @db.Uuid @map("participant_id")
@@ -741,15 +755,15 @@ model Clock {
   incrementMs BigInt @default(0) @map("increment_ms")
   anchorAt DateTime? @db.Timestamptz(6) @map("anchor_at")
   paused Boolean @default(false)
-  rel_participants_gameId_participantId Participant @relation("R_clocks_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  participant Participant @relation("R_clocks_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([gameId, participantId])
-  // CHECK clock_nonnegative: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint clock_nonnegative: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("clocks")
   @@schema("bgwq")
 }
 
-/// One accepted command -> one immutable revision event.
+/// An immutable accepted game revision with a stable idempotency identifier and before/after digests.
 model Event {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   gameId String @db.Uuid @map("game_id")
@@ -762,20 +776,23 @@ model Event {
   occurredAt DateTime @db.Timestamptz(6) @map("occurred_at")
   beforeDigest String? @map("before_digest")
   afterDigest String? @map("after_digest")
-  rel_games_gameId Game @relation("R_events_gameId_games", fields: [gameId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rel_participants_gameId_actorId Participant? @relation("R_events_gameId_actorId_participants", fields: [gameId, actorId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  inverse_eventValues_gameId_eventId EventValue[] @relation("R_eventValues_gameId_eventId_events")
-  inverse_eventMutations_gameId_eventId EventMutation[] @relation("R_eventMutations_gameId_eventId_events")
-  inverse_awards_gameId_eventId Award[] @relation("R_awards_gameId_eventId_events")
+  game Game @relation("R_events_gameId_games", fields: [gameId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  actor Participant? @relation("R_events_gameId_actorId_participants", fields: [gameId, actorId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  eventValues EventValue[] @relation("R_eventValues_gameId_eventId_events")
+  eventMutations EventMutation[] @relation("R_eventMutations_gameId_eventId_events")
+  awards Award[] @relation("R_awards_gameId_eventId_events")
+
+  settledOutcomes GameOutcome[] @relation("game_outcomes_event")
 
   @@unique([gameId, revision], map: "event_game_revision")
   @@unique([gameId, id], map: "event_game_id")
-  // Partial uniqueIndex event_idempotency (gameId, requestId) WHERE ${t.requestId} IS NOT NULL: INTEGRITY.sql
+  // Allows events with no client idempotency key while forbidding duplicate provided keys.
+  @@unique([gameId, requestId], map: "event_idempotency")
   @@map("events")
   @@schema("bgwq")
 }
 
-/// Event arguments encode scalars, refs and ordered lists through position; no JSONB.
+/// Typed accepted command argument, trusted input, or random value belonging to an event.
 model EventValue {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   gameId String @db.Uuid @map("game_id")
@@ -791,17 +808,17 @@ model EventValue {
   instant DateTime? @db.Timestamptz(6) @map("instant_value")
   entityId String? @db.Uuid @map("entity_id")
   participantId String? @db.Uuid @map("participant_id")
-  rel_events_gameId_eventId Event @relation("R_eventValues_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameEntities_gameId_entityId GameEntity? @relation("R_eventValues_gameId_entityId_gameEntities", fields: [gameId, entityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_participants_gameId_participantId Participant? @relation("R_eventValues_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  event Event @relation("R_eventValues_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  gameEntitie GameEntity? @relation("R_eventValues_gameId_entityId_gameEntities", fields: [gameId, entityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  participant Participant? @relation("R_eventValues_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([eventId, category, key, ordinal], map: "event_value_ordinal")
-  // CHECK event_value_one_payload: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint event_value_one_payload: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("event_values")
   @@schema("bgwq")
 }
 
-/// Complete before/after mutations replay entity, relationship, value and phase changes.
+/// Ordered before/after change needed for deterministic event-sourced state reconstruction.
 model EventMutation {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   gameId String @db.Uuid @map("game_id")
@@ -825,32 +842,32 @@ model EventMutation {
   afterText String? @map("after_text")
   afterInstant DateTime? @db.Timestamptz(6) @map("after_instant")
   afterRef String? @db.Uuid @map("after_ref")
-  rel_events_gameId_eventId Event @relation("R_eventMutations_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  event Event @relation("R_eventMutations_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([eventId, ordinal], map: "mutation_event_ordinal")
-  // CHECK mutation_target_kind: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint mutation_target_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("event_mutations")
   @@schema("bgwq")
 }
 
-/// Platform-trusted permanent rewards cannot be awarded by arbitrary user definition.
+/// Authorized account reward for an objective instance, unique per game and participant.
 model Award {
   gameId String @db.Uuid @map("game_id")
   participantId String @db.Uuid @map("participant_id")
   objectiveEntityId String @db.Uuid @map("objective_entity_id")
   eventId String @db.Uuid @map("event_id")
   points BigInt
-  rel_participants_gameId_participantId Participant @relation("R_awards_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_gameEntities_gameId_objectiveEntityId GameEntity @relation("R_awards_gameId_objectiveEntityId_gameEntities", fields: [gameId, objectiveEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  rel_events_gameId_eventId Event @relation("R_awards_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  participant Participant @relation("R_awards_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  objectiveEntity GameEntity @relation("R_awards_gameId_objectiveEntityId_gameEntities", fields: [gameId, objectiveEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  event Event @relation("R_awards_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([gameId, participantId, objectiveEntityId])
-  // CHECK award_points: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint award_points: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("awards")
   @@schema("bgwq")
 }
 
-/// ratings persisted application records.
+/// Per-user, per-definition aggregated ratings and outcomes; no public leaderboard.
 model Rating {
   userId String @db.Uuid @map("user_id")
   definitionId String @db.Uuid @map("definition_id")
@@ -859,12 +876,31 @@ model Rating {
   wins Int @default(0)
   draws Int @default(0)
   losses Int @default(0)
-  rel_definitions_definitionId Definition @relation("R_ratings_definitionId_definitions", fields: [definitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  definition Definition @relation("R_ratings_definitionId_definitions", fields: [definitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([userId, definitionId])
-  // CHECK rating_counts: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
-  // CHECK rating_nonnegative: implemented in INTEGRITY.sql; Prisma PSL cannot express CHECK.
+  // PostgreSQL CHECK constraint rating_counts: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint rating_nonnegative: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
   @@map("ratings")
   @@schema("bgwq")
 }
 
+
+/// One final, immutable result per participant, written in the same transaction as the final event.
+/// The game and event scoped foreign keys prevent cross-game winners and orphaned results.
+model GameOutcome {
+  gameId String @db.Uuid @map("game_id")
+  participantId String @db.Uuid @map("participant_id")
+  eventId String @db.Uuid @map("event_id")
+  kind OutcomeKind
+  score BigInt @default(0)
+
+  game Game @relation("game_outcomes_game", fields: [gameId], references: [id], onDelete: NoAction)
+  participant Participant @relation("game_outcomes_participant", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction)
+  event Event @relation("game_outcomes_event", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction)
+
+  @@id([gameId, participantId])
+  @@index([gameId, eventId], map: "outcome_settlement_event")
+  @@map("game_outcomes")
+  @@schema("bgwq")
+}

@@ -132,8 +132,6 @@ DO $bgwq_check$ BEGIN
     ALTER TABLE bgwq."game_entities" ADD CONSTRAINT "runtime_entity_self" CHECK ("id" IS DISTINCT FROM "parent_id" AND "id" IS DISTINCT FROM "location_id");
   END IF;
 END $bgwq_check$;
--- game_entity_seed_unique: filtered index not expressible without Prisma preview features.
-CREATE UNIQUE INDEX IF NOT EXISTS "game_entity_seed_unique" ON bgwq."game_entities" ("game_id", "seed_id") WHERE "seed_id" IS NOT NULL;
 -- game_value_exactly_one: game_values schema-level invariant.
 DO $bgwq_check$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'game_value_exactly_one' AND conrelid = 'bgwq.game_values'::regclass) THEN
@@ -164,16 +162,12 @@ DO $bgwq_check$ BEGIN
     ALTER TABLE bgwq."game_composite_entries" ADD CONSTRAINT "game_composite_no_self" CHECK ("composite_id" IS DISTINCT FROM "child_composite_id");
   END IF;
 END $bgwq_check$;
--- game_composite_record_key: filtered index not expressible without Prisma preview features.
-CREATE UNIQUE INDEX IF NOT EXISTS "game_composite_record_key" ON bgwq."game_composite_entries" ("composite_id", "member_key") WHERE "member_key" IS NOT NULL;
 -- clock_nonnegative: clocks schema-level invariant.
 DO $bgwq_check$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'clock_nonnegative' AND conrelid = 'bgwq.clocks'::regclass) THEN
     ALTER TABLE bgwq."clocks" ADD CONSTRAINT "clock_nonnegative" CHECK ("remaining_ms">=0 AND "increment_ms">=0);
   END IF;
 END $bgwq_check$;
--- event_idempotency: filtered index not expressible without Prisma preview features.
-CREATE UNIQUE INDEX IF NOT EXISTS "event_idempotency" ON bgwq."events" ("game_id", "request_id") WHERE "request_id" IS NOT NULL;
 -- event_value_one_payload: event_values schema-level invariant.
 DO $bgwq_check$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'event_value_one_payload' AND conrelid = 'bgwq.event_values'::regclass) THEN
@@ -202,6 +196,37 @@ END $bgwq_check$;
 DO $bgwq_check$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rating_nonnegative' AND conrelid = 'bgwq.ratings'::regclass) THEN
     ALTER TABLE bgwq."ratings" ADD CONSTRAINT "rating_nonnegative" CHECK ("games">=0 AND "wins">=0 AND "draws">=0 AND "losses">=0 AND "rating">=0);
+  END IF;
+END $bgwq_check$;
+
+-- A mutation's before/after payload is typed. Structural inserts/removals use
+-- absent before/after respectively; scalar references remain UUIDs in the log.
+DO $bgwq_check$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'mutation_typed_before' AND conrelid = 'bgwq.event_mutations'::regclass) THEN
+    ALTER TABLE bgwq.event_mutations ADD CONSTRAINT mutation_typed_before CHECK (
+      (before_kind IS NULL AND num_nonnulls(before_bool,before_int,before_decimal,before_text,before_instant,before_ref)=0)
+      OR (before_kind='none' AND num_nonnulls(before_bool,before_int,before_decimal,before_text,before_instant,before_ref)=0)
+      OR (before_kind='bool' AND before_bool IS NOT NULL AND num_nonnulls(before_bool,before_int,before_decimal,before_text,before_instant,before_ref)=1)
+      OR (before_kind='int' AND before_int IS NOT NULL AND num_nonnulls(before_bool,before_int,before_decimal,before_text,before_instant,before_ref)=1)
+      OR (before_kind='decimal' AND before_decimal IS NOT NULL AND num_nonnulls(before_bool,before_int,before_decimal,before_text,before_instant,before_ref)=1)
+      OR (before_kind='text' AND before_text IS NOT NULL AND num_nonnulls(before_bool,before_int,before_decimal,before_text,before_instant,before_ref)=1)
+      OR (before_kind='instant' AND before_instant IS NOT NULL AND num_nonnulls(before_bool,before_int,before_decimal,before_text,before_instant,before_ref)=1)
+      OR (before_kind IN ('entity','participant') AND before_ref IS NOT NULL AND num_nonnulls(before_bool,before_int,before_decimal,before_text,before_instant,before_ref)=1)
+    );
+  END IF;
+END $bgwq_check$;
+DO $bgwq_check$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'mutation_typed_after' AND conrelid = 'bgwq.event_mutations'::regclass) THEN
+    ALTER TABLE bgwq.event_mutations ADD CONSTRAINT mutation_typed_after CHECK (
+      (after_kind IS NULL AND num_nonnulls(after_bool,after_int,after_decimal,after_text,after_instant,after_ref)=0)
+      OR (after_kind='none' AND num_nonnulls(after_bool,after_int,after_decimal,after_text,after_instant,after_ref)=0)
+      OR (after_kind='bool' AND after_bool IS NOT NULL AND num_nonnulls(after_bool,after_int,after_decimal,after_text,after_instant,after_ref)=1)
+      OR (after_kind='int' AND after_int IS NOT NULL AND num_nonnulls(after_bool,after_int,after_decimal,after_text,after_instant,after_ref)=1)
+      OR (after_kind='decimal' AND after_decimal IS NOT NULL AND num_nonnulls(after_bool,after_int,after_decimal,after_text,after_instant,after_ref)=1)
+      OR (after_kind='text' AND after_text IS NOT NULL AND num_nonnulls(after_bool,after_int,after_decimal,after_text,after_instant,after_ref)=1)
+      OR (after_kind='instant' AND after_instant IS NOT NULL AND num_nonnulls(after_bool,after_int,after_decimal,after_text,after_instant,after_ref)=1)
+      OR (after_kind IN ('entity','participant') AND after_ref IS NOT NULL AND num_nonnulls(after_bool,after_int,after_decimal,after_text,after_instant,after_ref)=1)
+    );
   END IF;
 END $bgwq_check$;
 
@@ -235,8 +260,8 @@ DO $bgwq_auth$ BEGIN
 END $bgwq_auth$;
 
 -- Database security and runtime integrity from the original database contract.
--- PostgreSQL-only invariants not representable by Drizzle table declarations.
--- Apply AFTER the Drizzle-generated schema migration; review before production deployment.
+-- PostgreSQL-only invariants not representable by Prisma Schema Language.
+-- Apply AFTER the Prisma-generated schema migration; review before production deployment.
 -- This file is part of the declarative contract, not gameplay scripting.
 
 REVOKE ALL ON SCHEMA bgwq FROM PUBLIC, anon, authenticated;
@@ -249,8 +274,14 @@ CREATE OR REPLACE FUNCTION bgwq.reject_published_version_mutation()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE v_id uuid;
 BEGIN
-  v_id := CASE WHEN TG_OP = 'DELETE' THEN OLD.version_id ELSE NEW.version_id END;
+  v_id := CASE WHEN TG_OP = 'INSERT' THEN NEW.version_id ELSE OLD.version_id END;
+  -- Check the old owner on UPDATE as well as the new owner. Otherwise a
+  -- published row could be moved into a draft and modified.
   IF EXISTS (SELECT 1 FROM bgwq.versions WHERE id = v_id AND published_at IS NOT NULL) THEN
+    RAISE EXCEPTION 'published configuration is immutable: %', v_id USING ERRCODE = '23514';
+  END IF;
+  IF TG_OP = 'UPDATE' AND NEW.version_id IS DISTINCT FROM OLD.version_id
+     AND EXISTS (SELECT 1 FROM bgwq.versions WHERE id = NEW.version_id AND published_at IS NOT NULL) THEN
     RAISE EXCEPTION 'published configuration is immutable: %', v_id USING ERRCODE = '23514';
   END IF;
   IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
@@ -268,6 +299,7 @@ BEGIN
     'action_parameters','phase_actions','effects','effect_arguments',
     'assets','visual_templates','visual_primitives'
   ] LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS immutable_published ON bgwq.%I', table_name);
     EXECUTE format(
       'CREATE TRIGGER immutable_published BEFORE INSERT OR UPDATE OR DELETE ON bgwq.%I '
       || 'FOR EACH ROW EXECUTE FUNCTION bgwq.reject_published_version_mutation()',
@@ -290,6 +322,7 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+DROP TRIGGER IF EXISTS immutable_version_header ON bgwq.versions;
 CREATE TRIGGER immutable_version_header
 BEFORE UPDATE OR DELETE ON bgwq.versions
 FOR EACH ROW EXECUTE FUNCTION bgwq.protect_version_header();
@@ -301,10 +334,13 @@ BEGIN
   RAISE EXCEPTION 'accepted event log is append-only' USING ERRCODE = '23514';
 END;
 $$;
+DROP TRIGGER IF EXISTS immutable_event ON bgwq.events;
 CREATE TRIGGER immutable_event BEFORE UPDATE OR DELETE ON bgwq.events
 FOR EACH ROW EXECUTE FUNCTION bgwq.reject_history_mutation();
+DROP TRIGGER IF EXISTS immutable_event_values ON bgwq.event_values;
 CREATE TRIGGER immutable_event_values BEFORE UPDATE OR DELETE ON bgwq.event_values
 FOR EACH ROW EXECUTE FUNCTION bgwq.reject_history_mutation();
+DROP TRIGGER IF EXISTS immutable_event_mutations ON bgwq.event_mutations;
 CREATE TRIGGER immutable_event_mutations BEFORE UPDATE OR DELETE ON bgwq.event_mutations
 FOR EACH ROW EXECUTE FUNCTION bgwq.reject_history_mutation();
 
@@ -323,6 +359,7 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+DROP TRIGGER IF EXISTS emit_revision_hint ON bgwq.events;
 CREATE TRIGGER emit_revision_hint AFTER INSERT ON bgwq.events
 FOR EACH ROW EXECUTE FUNCTION bgwq.broadcast_revision();
 
@@ -340,6 +377,7 @@ $$;
 REVOKE ALL ON FUNCTION bgwq.can_listen_to_game(text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION bgwq.can_listen_to_game(text) TO authenticated;
 
+DROP POLICY IF EXISTS bgwq_game_broadcast_read ON realtime.messages;
 CREATE POLICY bgwq_game_broadcast_read ON realtime.messages
 FOR SELECT TO authenticated
 USING (bgwq.can_listen_to_game(realtime.topic()));
@@ -363,9 +401,16 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+DROP TRIGGER IF EXISTS game_requires_publication ON bgwq.games;
 CREATE TRIGGER game_requires_publication
 BEFORE INSERT OR UPDATE OF version_id ON bgwq.games
 FOR EACH ROW EXECUTE FUNCTION bgwq.assert_game_definition_published();
+
+-- Outcome rows are immutable settlement records; account ratings/awards may be
+-- updated by authorized settlement services but never by author-defined effects.
+DROP TRIGGER IF EXISTS immutable_game_outcomes ON bgwq.game_outcomes;
+CREATE TRIGGER immutable_game_outcomes BEFORE UPDATE OR DELETE ON bgwq.game_outcomes
+FOR EACH ROW EXECUTE FUNCTION bgwq.reject_history_mutation();
 
 -- Check event/revision parity at COMMIT, after the service has written both the
 -- materialized state and its immutable event. This detects missing or orphan
@@ -383,6 +428,11 @@ BEGIN
   IF NOT FOUND THEN RETURN NULL; END IF;
   SELECT count(*), max(revision) INTO n, top_revision
     FROM bgwq.events WHERE game_id = the_game;
+  IF g.status = 'finished' AND
+     (SELECT count(*) FROM bgwq.game_outcomes WHERE game_id = the_game)
+         <> (SELECT count(*) FROM bgwq.participants WHERE game_id = the_game) THEN
+    RAISE EXCEPTION 'finished game requires a final result for each participant' USING ERRCODE='23514';
+  END IF;
   IF g.status IN ('pending','expired') THEN
     IF n <> 0 THEN
       RAISE EXCEPTION 'pre-activation game has accepted events' USING ERRCODE='23514';
@@ -394,10 +444,12 @@ BEGIN
   RETURN NULL;
 END;
 $$;
+DROP TRIGGER IF EXISTS check_game_revision_history ON bgwq.games;
 CREATE CONSTRAINT TRIGGER check_game_revision_history
 AFTER INSERT OR UPDATE ON bgwq.games
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION bgwq.assert_game_event_parity();
+DROP TRIGGER IF EXISTS check_event_revision_history ON bgwq.events;
 CREATE CONSTRAINT TRIGGER check_event_revision_history
 AFTER INSERT ON bgwq.events
 DEFERRABLE INITIALLY DEFERRED

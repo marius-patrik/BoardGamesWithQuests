@@ -1,61 +1,23 @@
 flowchart TB
-  %% Source architecture: each node is one planned tracked file; never inline game-instance actions.
-  %% Every typed edge names a runtime, build, config, test, or documentation relationship.
-  subgraph META["META — tracked source"]
-    F151[".agents/notes/requirements/COMPONENTS.md<br/>exports: Exact intended source tree and technology boundaries<br/>Markdown: Normative file inventory synchronized with source declarations."]
-    F152[".agents/notes/requirements/INTEGRITY.sql<br/>exports: PostgreSQL-only constraints, Supabase Auth references and triggers<br/>SQL comments: Reviewed extension to Prisma schema."]
-    F153[".agents/notes/requirements/diagrams/reference_AST.svg<br/>exports: Generated SVG projection of AST.mmd<br/>SVG metadata: Regenerate through tracked automation, never edit by hand."]
-    F154[".github/scripts/render_reference_ast.py<br/>exports: render_reference_ast();verify_file_alignment()<br/>Python docstrings: Deterministically render the Mermaid graph to reference SVG."]
-    F155[".github/workflows/render-reference-ast.yml<br/>exports: AST diagram generation and verification workflow<br/>Workflow comments: Automatically maintain Mermaid-derived reference SVG."]
-    F149[".agents/notes/requirements/AST.mmd<br/>exports: Mermaid source for the single file/declaration/action graph<br/>Mermaid comments: Normative source-declaration dependency and action-expression graph."]
+  %% Source-only AST: each file declares public interfaces and TSDoc/docstring/Rustdoc responsibility.
+  %% Typed edges model actual build, import, contract, runtime, documentation, or test interactions.
+  %% Game-specific action instances belong to data/*.json, never source implementation nodes.
+  subgraph REQUIREMENTS["Requirements — source declarations"]
+    F001[".agents/PRD.md<br/>exports: Product invariants and acceptance criteria<br/>Documentation: Links normative architecture/API/schema/AST/data; no duplicated contracts."]
+    F149[".agents/notes/requirements/AST.mmd<br/>exports: Mermaid source for the single file/declaration/action graph<br/>Mermaid comments: Normative source-declaration and typed dependency graph."]
     F150[".agents/notes/requirements/SCHEMA.prisma<br/>exports: Prisma models, indexes, relationships<br/>Prisma /// comments: Normative relational model; companion SQL in INTEGRITY.sql."]
-    F001[".agents/PRD.md<br/>exports: architecture: INVARIANTS, COMPONENTS, API, DATA; links COMPONENTS, SCHEMA, INTEGRITY and AST<br/>Markdown: Normative product contract linking standalone SCHEMA and AST specifications."]
-    F002[".editorconfig<br/>exports: indent / whitespace<br/>File contract: Consistent editor indentation."]
-    F003[".env.example<br/>exports: variable names only<br/>File contract: Document public and server-only environment names."]
-    F004[".github/workflows/deploy-api.yml<br/>exports: deploy-api workflow<br/>Workflow comments: Deploy FastAPI Vercel project"]
-    F005[".github/workflows/deploy-web.yml<br/>exports: deploy-web workflow<br/>Workflow comments: Deploy web Vercel project"]
-    F006[".github/workflows/release-native.yml<br/>exports: release-native workflow<br/>Workflow comments: Build and sign native artifacts"]
-    F007[".github/workflows/verify.yml<br/>exports: verify workflow<br/>Workflow comments: Check AST/schema/API/data/tests and code docs"]
-    F008[".gitignore<br/>exports: build outputs<br/>File contract: Exclude generated caches and binaries."]
-    F009["LICENSE<br/>exports: license text<br/>File contract: Product distribution terms."]
-    F010["README.md<br/>exports: symlink -&gt; .agents/PRD.md<br/>Markdown: Entry to source of truth."]
-    F011["bun.lock<br/>exports: Bun lockfile<br/>File contract: Locked dependency graph."]
-    F012["package.json<br/>exports: bun workspaces<br/>Schema/document metadata: Root workspace and verify tasks."]
-    F130["tools/build_docs.py<br/>exports: render_source_docs()<br/>Python docstring: Generate Python, TSDoc and Rustdoc source/API documentation."]
-    F131["tools/check_spec.py<br/>exports: verify_document(); verify_builtin_shape(); verify_api(); verify_ast(); operator_inventory(); main()<br/>Python docstring: Validate typed seed references, four concrete fixtures, JSON/OpenAPI equivalence, AST and operator inventory."]
-    F132["tools/migrate_schema.py<br/>exports: emit() -&gt; list[Path]<br/>Python docstring: Convert reviewed Prisma SQL to Supabase versioned migrations without executing them."]
-    F133["tsconfig.json<br/>exports: TS project base<br/>Schema/document metadata: Strict TS and module-resolution defaults."]
-    F134["tsdoc.json<br/>exports: TSDoc grammar<br/>Schema/document metadata: Single standard for structured TSDoc tags."]
-    F135["typedoc.json<br/>exports: TypeDoc configuration<br/>Schema/document metadata: Generate docs from structured TSDoc declarations."]
-    F136["tools/generate_ast.py<br/>exports: compile_mermaid() -&gt; str; main() -&gt; None<br/>Python docstring: Build single Mermaid source and configuration AST"]
-    F137["tools/check_semantics.py<br/>exports: check() -&gt; list[str]<br/>Python docstring: Validate cross-configuration hooks, fields and AST synchronization"]
-    F138["tools/build_operator_contract.py<br/>exports: operator_contract.json compiler<br/>Python docstring: Emit normative operator contracts from used typed calls"]
-    F139["packages/server/configuration/operator_contract.json<br/>exports: 101 generic operator names with observed argument signatures and deterministic semantic descriptions<br/>Machine contract: Required pure/effect signatures and semantics; implementations must conform and be behaviorally tested."]
-    F140["packages/server/engine/reachability.py<br/>exports: exists_reachable(start,successors,target,canonical_key,max_states)-&gt;bool; no_reachable_terminal(...)-&gt;bool; ReachabilityLimit<br/>Python docstring: Exact generic finite-state model checking; resource exhaustion never establishes a draw."]
-    F141["tests/engine/test_reachability.py<br/>exports: test_reachable_even_with_cycles(); test_unreachable_only_when_exhausted(); test_budget_does_not_produce_false_proof(); test_terminal_start_and_invalid_budget()<br/>Python docstring: Check proof soundness, cycles and budget exceptions against observable graph behavior."]
-    F144["tools/sync_api_schema.py<br/>exports: sync_config_schema()<br/>Python docstring: Embed canonical portable JSON Schema in OpenAPI without drift."]
-    F145["tests/engine/test_game_contracts.py<br/>exports: test_dice_moves_only_the_active_players_token(); test_pawn_promotion_occurs_before_advancing_turn(); test_economic_actions_do_not_embed_a_game_named_operator(); test_chess_dead_position_uses_sound_generic_reachability(); test_moneyproperty_doubles_detention_and_release_use_actions(); test_game_definition_is_built_from_entities_actions_and_objectives(); test_card_resolution_is_scoped_to_the_single_drawn_card(); test_chess_moves_cannot_capture_the_opposing_king()<br/>Python docstring: Exercise observed per-player action eligibility and atomic promotion ordering."]
-    F146["tools/build_prd.py<br/>exports: build()-&gt;str; replace_first(text,language,content)-&gt;str<br/>Python docstring: Regenerate linked PRD with canonical API, DATA, and source-tree listings; never embed schema or AST."]
-    F147["tools/register_manifest.py<br/>exports: register_manifest()-&gt;None<br/>Python docstring: Synchronize one source-file node per contract and exact tracked source tree."]
-    F148["tools/check_prd.py<br/>exports: verify()-&gt;None<br/>Python docstring: Verify linked SCHEMA and AST exist, source-tree and graph align, and inline API and DATA are fresh."]
+    F151[".agents/notes/requirements/ARCHITECTURE.md<br/>exports: Exact intended source tree and technology boundaries<br/>Markdown: Normative annotated tree synchronized with source declarations."]
+    F152[".agents/notes/requirements/INTEGRITY.sql<br/>exports: PostgreSQL-only constraints, Supabase Auth references and triggers<br/>SQL comments: Reviewed extension to Prisma schema."]
+    F153[".agents/notes/requirements/API.yaml<br/>exports: OpenAPI 3.1 canonical HTTP operations, authorization, status codes, and typed messages.<br/>Documentation: Canonical, cross-validated source contract."]
+    F154[".agents/notes/requirements/data/chess.json<br/>exports: Complete portable orthodox chess definition interpreted by the generic engine.<br/>Documentation: Canonical, cross-validated source contract."]
+    F155[".agents/notes/requirements/data/configuration.schema.json<br/>exports: JSON Schema 2020-12 for portable game configuration import and export.<br/>Documentation: Canonical, cross-validated source contract."]
+    F156[".agents/notes/requirements/data/english-draughts.json<br/>exports: Portable English draughts definition using generic action and traversal operators.<br/>Documentation: Canonical, cross-validated source contract."]
+    F157[".agents/notes/requirements/data/international-draughts.json<br/>exports: Portable international draughts definition with configured maximal capture.<br/>Documentation: Canonical, cross-validated source contract."]
+    F158[".agents/notes/requirements/data/moneyproperty.json<br/>exports: Original Monopoly-like economic game configuration with forty spaces.<br/>Documentation: Canonical, cross-validated source contract."]
+    F159[".agents/notes/requirements/data/operators.json<br/>exports: Typed generic operator catalog and deterministic semantic contracts.<br/>Documentation: Canonical, cross-validated source contract."]
+    F160[".agents/notes/requirements/data/seed.sql<br/>exports: Hook registry and private binary Storage bucket DML only.<br/>Documentation: Canonical, cross-validated source contract."]
   end
-  subgraph DATABASE["DATABASE — tracked source"]
-    F013["packages/database/package.json<br/>exports: defineConfig({dialect:postgresql,schema})<br/>TSDoc: Generate reviewed migrations; auth schema filtered."]
-    F015["packages/database/prisma.config.ts<br/>exports: pgSchema(bgwq): tables, enum, indexes, FK, checks<br/>TSDoc: Sole authored relational table/type declaration; all runtime authority database-side."]
-  end
-  subgraph NATIVE["NATIVE — tracked source"]
-    F016["packages/native/package.json<br/>exports: Tauri build scripts<br/>Schema/document metadata: Platform build toolchain."]
-    F017["packages/native/src-tauri/Cargo.lock<br/>exports: Cargo dependency lock<br/>File contract: Reproducible native build."]
-    F018["packages/native/src-tauri/Cargo.toml<br/>exports: crate manifest<br/>File contract: Restricted host dependencies."]
-    F019["packages/native/src-tauri/build.rs<br/>exports: tauri_build::build()<br/>Rustdoc: Tauri native resource setup."]
-    F020["packages/native/src-tauri/capabilities/default.json<br/>exports: least-privilege capabilities<br/>Schema/document metadata: Navigation capabilities restricted to production origin."]
-    F021["packages/native/src-tauri/icons/icon.icns<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
-    F022["packages/native/src-tauri/icons/icon.ico<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
-    F023["packages/native/src-tauri/icons/icon.png<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
-    F024["packages/native/src-tauri/src/main.rs<br/>exports: main() -&gt; run()<br/>Rustdoc: Minimal native WebView lifecycle."]
-    F025["packages/native/src-tauri/tauri.conf.json<br/>exports: production remote URL, ids, permissions<br/>Schema/document metadata: One remotely loaded frontend across targets."]
-  end
-  subgraph API["API — tracked source"]
+  subgraph SERVER["Server — source declarations"]
     F026["packages/server/api/__init__.py<br/>exports: module<br/>Python docstring: Python package marker."]
     F027["packages/server/api/app.py<br/>exports: create_app()-&gt;FastAPI<br/>Python docstring: Construct middleware, session, routes, error handlers."]
     F028["packages/server/api/assets.py<br/>exports: begin_upload(); finish_upload(); signed_url(); cleanup()<br/>Python docstring: Supabase Storage signed upload, digest validation, publication immutability."]
@@ -67,27 +29,16 @@ flowchart TB
     F034["packages/server/api/routes.py<br/>exports: mount_routes(app); 33 operation IDs<br/>Python docstring: Register all documented identity, definition, asset, and game endpoints."]
     F035["packages/server/api/security.py<br/>exports: principal(); verify_csrf(); require_membership()<br/>Python docstring: Supabase Auth session, Origin/CSRF, role and hidden-state authorization."]
     F036["packages/server/api/services.py<br/>exports: create_game(); join_game(); submit_action(); publish_definition()<br/>Python docstring: Transaction-aware API orchestration; no game rules."]
-  end
-  subgraph CONFIG["CONFIG — tracked source"]
     F037["packages/server/configuration/__init__.py<br/>exports: module<br/>Python docstring: Portable configuration package."]
     F038["packages/server/configuration/bootstrap.py<br/>exports: import_builtins(repository)<br/>Python docstring: Load four portable game definitions into published versions."]
     F039["packages/server/configuration/configuration.schema.json<br/>exports: JSON Schema draft2020-12<br/>Schema/document metadata: Complete typed portable configuration grammar."]
     F040["packages/server/configuration/models.py<br/>exports: PortableConfig Pydantic + local references<br/>Python docstring: Validate portable fields and structurally defined record types."]
     F041["packages/server/configuration/transfer.py<br/>exports: import_json(); export_json(); canonicalize()<br/>Python docstring: Deterministic relational import/export and asset bundling."]
     F042["packages/server/configuration/validation.py<br/>exports: validate_references(); validate_types(); publish()<br/>Python docstring: Validate cycles, budgets, signed assets, hook/effect signatures."]
-  end
-  subgraph SERVERDATA["SERVERDATA — tracked source"]
     F043["packages/server/data/chess.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
     F044["packages/server/data/english-draughts.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
     F045["packages/server/data/international-draughts.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
     F046["packages/server/data/moneyproperty.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
-    F058["packages/server/pyproject.toml<br/>exports: Python dependencies and pytest<br/>File contract: FastAPI psycopg Pydantic and validation dependencies."]
-    F059["packages/server/supabase/config.toml<br/>exports: Supabase local/auth/storage config<br/>File contract: Local Supabase services and migrations."]
-    F060["packages/server/supabase/security.sql<br/>exports: RLS, grants, functions, triggers, Broadcast<br/>SQL documentation: SQL exception: engine-independent PostgreSQL routines Prisma cannot model."]
-    F061["packages/server/supabase/seed.sql<br/>exports: Operator registry, hooks, buckets DML<br/>SQL documentation: Reference data is data, not schema; deployed after migration."]
-    F062["packages/server/vercel.json<br/>exports: ASGI route and limits<br/>Schema/document metadata: Deploy Python entrypoint in separate Vercel project."]
-  end
-  subgraph ENGINE["ENGINE — tracked source"]
     F047["packages/server/engine/__init__.py<br/>exports: module<br/>Python docstring: Generic engine package."]
     F048["packages/server/engine/effects.py<br/>exports: propose(effect,state,ctx)-&gt;Mutation[]<br/>Python docstring: Controlled generic effect executor; never writes database."]
     F049["packages/server/engine/events.py<br/>exports: encode_mutations(); replay(); digest()<br/>Python docstring: Reconstruct complete entity/link/value/turn changes from typed event rows."]
@@ -99,8 +50,15 @@ flowchart TB
     F055["packages/server/engine/runtime.py<br/>exports: initialize(); available_actions(); evaluate(); status()<br/>Python docstring: The single authority for action semantics; immutable state transitions."]
     F056["packages/server/engine/topology.py<br/>exports: neighbors(); ray(); paths(); track_advance()<br/>Python docstring: General topology and bounded traversal primitives."]
     F057["packages/server/engine/types.py<br/>exports: parse_type(); check_type(); TypedValue<br/>Python docstring: Generic scalar, reference, optional, list, set, path, record typing."]
+    F058["packages/server/pyproject.toml<br/>exports: Python dependencies and pytest<br/>File contract: FastAPI psycopg Pydantic and validation dependencies."]
+    F059["packages/server/supabase/config.toml<br/>exports: Supabase local/auth/storage config<br/>File contract: Local Supabase services and migrations."]
+    F060["packages/server/supabase/security.sql<br/>exports: RLS, grants, functions, triggers, Broadcast<br/>SQL documentation: SQL exception: engine-independent PostgreSQL routines Prisma cannot model."]
+    F061["packages/server/supabase/seed.sql<br/>exports: Operator registry, hooks, buckets DML<br/>SQL documentation: Reference data is data, not schema; deployed after migration."]
+    F062["packages/server/vercel.json<br/>exports: ASGI route and limits<br/>Schema/document metadata: Deploy Python entrypoint in separate Vercel project."]
+    F139["packages/server/configuration/operator_contract.json<br/>exports: 101 generic operator names with observed argument signatures and deterministic semantic descriptions<br/>Machine contract: Required pure/effect signatures and semantics; implementations must conform and be behaviorally tested."]
+    F140["packages/server/engine/reachability.py<br/>exports: exists_reachable(start,successors,target,canonical_key,max_states)-&gt;bool; no_reachable_terminal(...)-&gt;bool; ReachabilityLimit<br/>Python docstring: Exact generic finite-state model checking; resource exhaustion never establishes a draw."]
   end
-  subgraph WEB["WEB — tracked source"]
+  subgraph WEB["Web — source declarations"]
     F063["packages/web/components.json<br/>exports: shadcn registry configuration<br/>Schema/document metadata: UI composition and token aliases."]
     F064["packages/web/index.html<br/>exports: root viewport<br/>File contract: Application HTML shell."]
     F065["packages/web/package.json<br/>exports: React + Wouter + Motion + shadcn + OpenAPI client<br/>Schema/document metadata: Locked frontend and tooling dependencies."]
@@ -152,7 +110,29 @@ flowchart TB
     F111["packages/web/tsconfig.json<br/>exports: compilerOptions strict<br/>Schema/document metadata: Web TS project constraints."]
     F112["packages/web/vercel.json<br/>exports: SPA rewrites + API proxy<br/>Schema/document metadata: Forward /api/* to separate Vercel deployment."]
   end
-  subgraph TESTS["TESTS — tracked source"]
+  subgraph DATABASE["Database — source declarations"]
+    F013["packages/database/package.json<br/>exports: defineConfig({dialect:postgresql,schema})<br/>TSDoc: Generate reviewed migrations; auth schema filtered."]
+    F015["packages/database/prisma.config.ts<br/>exports: pgSchema(bgwq): tables, enum, indexes, FK, checks<br/>TSDoc: Sole authored relational table/type declaration; all runtime authority database-side."]
+  end
+  subgraph NATIVE["Native — source declarations"]
+    F016["packages/native/package.json<br/>exports: Tauri build scripts<br/>Schema/document metadata: Platform build toolchain."]
+    F017["packages/native/src-tauri/Cargo.lock<br/>exports: Cargo dependency lock<br/>File contract: Reproducible native build."]
+    F018["packages/native/src-tauri/Cargo.toml<br/>exports: crate manifest<br/>File contract: Restricted host dependencies."]
+    F019["packages/native/src-tauri/build.rs<br/>exports: tauri_build::build()<br/>Rustdoc: Tauri native resource setup."]
+    F020["packages/native/src-tauri/capabilities/default.json<br/>exports: least-privilege capabilities<br/>Schema/document metadata: Navigation capabilities restricted to production origin."]
+    F021["packages/native/src-tauri/icons/icon.icns<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
+    F022["packages/native/src-tauri/icons/icon.ico<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
+    F023["packages/native/src-tauri/icons/icon.png<br/>exports: icon asset<br/>File contract: App icon in platform-required format."]
+    F024["packages/native/src-tauri/src/main.rs<br/>exports: main() -&gt; run()<br/>Rustdoc: Minimal native WebView lifecycle."]
+    F025["packages/native/src-tauri/tauri.conf.json<br/>exports: production remote URL, ids, permissions<br/>Schema/document metadata: One remotely loaded frontend across targets."]
+  end
+  subgraph WORKFLOWS["Workflows — source declarations"]
+    F004[".github/workflows/deploy-api.yml<br/>exports: deploy-api workflow<br/>Workflow comments: Deploy FastAPI Vercel project"]
+    F005[".github/workflows/deploy-web.yml<br/>exports: deploy-web workflow<br/>Workflow comments: Deploy web Vercel project"]
+    F006[".github/workflows/release-native.yml<br/>exports: release-native workflow<br/>Workflow comments: Build and sign native artifacts"]
+    F007[".github/workflows/verify.yml<br/>exports: verify workflow<br/>Workflow comments: Check AST/schema/API/data/tests and code docs"]
+  end
+  subgraph TESTS["Tests — source declarations"]
     F113["tests/api/test_contract.py<br/>exports: test/assertions<br/>Python docstring: OpenAPI and security errors"]
     F114["tests/api/test_realtime.py<br/>exports: test/assertions<br/>Python docstring: Private revision authorization"]
     F115["tests/browser/editor.spec.ts<br/>exports: test/assertions<br/>TSDoc: Structured authoring and import/export"]
@@ -170,23 +150,49 @@ flowchart TB
     F127["tests/engine/test_execution.py<br/>exports: test/assertions<br/>Python docstring: Pure operator semantics"]
     F128["tests/engine/test_moneyproperty.py<br/>exports: test/assertions<br/>Python docstring: Economic decision and multi-party transactions"]
     F129["tests/native/smoke.spec.ts<br/>exports: test/assertions<br/>TSDoc: Remote WebView and navigation restrictions"]
+    F141["tests/engine/test_reachability.py<br/>exports: test_reachable_even_with_cycles(); test_unreachable_only_when_exhausted(); test_budget_does_not_produce_false_proof(); test_terminal_start_and_invalid_budget()<br/>Python docstring: Check proof soundness, cycles and budget exceptions against observable graph behavior."]
+    F145["tests/engine/test_game_contracts.py<br/>exports: test_dice_moves_only_the_active_players_token(); test_pawn_promotion_occurs_before_advancing_turn(); test_economic_actions_do_not_embed_a_game_named_operator(); test_chess_dead_position_uses_sound_generic_reachability(); test_moneyproperty_doubles_detention_and_release_use_actions(); test_game_definition_is_built_from_entities_actions_and_objectives(); test_card_resolution_is_scoped_to_the_single_drawn_card(); test_chess_moves_cannot_capture_the_opposing_king()<br/>Python docstring: Exercise observed per-player action eligibility and atomic promotion ordering."]
+  end
+  subgraph TOOLS["Tools — source declarations"]
+    F130["tools/build_docs.py<br/>exports: render_source_docs()<br/>Python docstring: Generate Python, TSDoc and Rustdoc source/API documentation."]
+    F131["tools/check_spec.py<br/>exports: verify_document(); verify_builtin_shape(); verify_api(); verify_ast(); operator_inventory(); main()<br/>Python docstring: Validate typed seed references, four concrete fixtures, JSON/OpenAPI equivalence, AST and operator inventory."]
+    F132["tools/migrate_schema.py<br/>exports: emit() -&gt; list[Path]<br/>Python docstring: Convert reviewed Prisma SQL to Supabase versioned migrations without executing them."]
+    F136["tools/generate_ast.py<br/>exports: compile_mermaid() -&gt; str; main() -&gt; None<br/>Python docstring: Build single Mermaid source and configuration AST"]
+    F137["tools/check_semantics.py<br/>exports: check() -&gt; list[str]<br/>Python docstring: Validate cross-configuration hooks, fields and AST synchronization"]
+    F138["tools/build_operator_contract.py<br/>exports: operator_contract.json compiler<br/>Python docstring: Emit normative operator contracts from used typed calls"]
+    F144["tools/sync_api_schema.py<br/>exports: sync_config_schema()<br/>Python docstring: Embed canonical portable JSON Schema in OpenAPI without drift."]
+    F146["tools/build_prd.py<br/>exports: build()-&gt;str; replace_first(text,language,content)-&gt;str<br/>Python docstring: Regenerate linked PRD with canonical API, DATA, and source-tree listings; never embed schema or AST."]
+    F147["tools/register_manifest.py<br/>exports: register_manifest()-&gt;None<br/>Python docstring: Synchronize one source-file node per contract and exact tracked source tree."]
+    F148["tools/check_prd.py<br/>exports: verify()-&gt;None<br/>Python docstring: Verify linked SCHEMA and AST exist, source-tree and graph align, and inline API and DATA are fresh."]
+  end
+  subgraph META["Meta — source declarations"]
+    F002[".editorconfig<br/>exports: indent / whitespace<br/>File contract: Consistent editor indentation."]
+    F003[".env.example<br/>exports: variable names only<br/>File contract: Document public and server-only environment names."]
+    F008[".gitignore<br/>exports: build outputs<br/>File contract: Exclude generated caches and binaries."]
+    F009["LICENSE<br/>exports: license text<br/>File contract: Product distribution terms."]
+    F010["README.md<br/>exports: symlink -&gt; .agents/PRD.md<br/>Markdown: Entry to source of truth."]
+    F011["bun.lock<br/>exports: Bun lockfile<br/>File contract: Locked dependency graph."]
+    F012["package.json<br/>exports: bun workspaces<br/>Schema/document metadata: Root workspace and verify tasks."]
+    F133["tsconfig.json<br/>exports: TS project base<br/>Schema/document metadata: Strict TS and module-resolution defaults."]
+    F134["tsdoc.json<br/>exports: TSDoc grammar<br/>Schema/document metadata: Single standard for structured TSDoc tags."]
+    F135["typedoc.json<br/>exports: TypeDoc configuration<br/>Schema/document metadata: Generate docs from structured TSDoc declarations."]
+    F161[".github/docs-ui/assets/theme.css<br/>exports: Documentation site theme and interactive diagram controls.<br/>Documentation: Canonical, cross-validated source contract."]
+    F162[".github/docs-ui/assets/theme.js<br/>exports: Documentation interaction and virtual Mermaid renderer controls.<br/>Documentation: Canonical, cross-validated source contract."]
+    F163[".github/docs-ui/main.html<br/>exports: First-party documentation HTML page template.<br/>Documentation: Canonical, cross-validated source contract."]
+    F164[".github/scripts/check_spec_contracts.py<br/>exports: Validate API, portable games, hooks, Prisma relations, SQL references and Mermaid inventory.<br/>Documentation: Canonical, cross-validated source contract."]
+    F165[".github/scripts/docs_hooks.py<br/>exports: Generate documentation pages from tracked files, including interactive Mermaid source.<br/>Documentation: Canonical, cross-validated source contract."]
   end
   F001 -->|defines architecture| F149
   F001 -->|defines components| F151
   F001 -->|defines schema| F150
-  F149 -->|generates reference| F153
   F151 -->|enumerates source declarations| F149
   F150 -->|requires SQL integrity| F152
   F002 -->|governs repository editing| F012
   F003 -->|defines server environment| F035
   F003 -->|defines public environment| F069
-  F154 -->|reads graph| F149
-  F154 -->|renders| F153
   F004 -->|deploys API| F062
   F005 -->|deploys web| F112
   F006 -->|packages native releases| F025
-  F155 -->|verifies| F153
-  F155 -->|runs| F154
   F007 -->|runs browser checks| F118
   F007 -->|runs database checks| F122
   F007 -->|runs verification| F131
@@ -371,4 +377,412 @@ flowchart TB
   F133 -->|extends TypeScript defaults| F111
   F134 -->|defines documentation tags| F135
   F135 -->|configures documentation| F130
-  %% ARCHITECTURE_COUNTS files=152 relationships=200 connected_components=1 data_action_nodes=0
+  F001 -->|defines product scope for| F151
+  F001 -->|references normative contract| F153
+  F001 -->|references normative contract| F150
+  F001 -->|references normative contract| F152
+  F001 -->|references normative contract| F149
+  F151 -->|declares exact source inventory| F149
+  F150 -->|requires PostgreSQL-only constraints| F152
+  F164 -->|validates contract| F153
+  F164 -->|validates contract| F149
+  F164 -->|validates contract| F150
+  F164 -->|validates contract| F151
+  F164 -->|validates normative data| F155
+  F038 -->|imports portable reference| F155
+  F164 -->|validates normative data| F154
+  F038 -->|imports portable reference| F154
+  F164 -->|validates normative data| F156
+  F038 -->|imports portable reference| F156
+  F164 -->|validates normative data| F157
+  F038 -->|imports portable reference| F157
+  F164 -->|validates normative data| F158
+  F038 -->|imports portable reference| F158
+  F164 -->|validates normative data| F159
+  F038 -->|imports portable reference| F159
+  F164 -->|validates normative data| F160
+  F042 -->|validates grammar| F160
+  F153 -->|defines HTTP contract| F034
+  F159 -->|defines generic semantics| F053
+  F155 -->|defines transfer models| F040
+  F160 -->|defines bootstrap DML| F061
+  F165 -->|renders interactive Mermaid source| F149
+  F162 -->|pans/zooms Mermaid visualization| F149
+  F163 -->|loads architecture viewer| F162
+  F163 -->|styles architecture viewer| F161
+  F164 -->|verifies generated pages| F165
+
+  %% Public declaration graph: source-owned symbols with explicit interface responsibilities.
+  subgraph DECLARATIONS["Public API of implementation source files"]
+    D001["packages/server/api/__init__.py<br/>module<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D002["packages/server/api/app.py<br/>create_app()-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D003["packages/server/api/app.py<br/>FastAPI<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D004["packages/server/api/assets.py<br/>begin_upload()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D005["packages/server/api/assets.py<br/>finish_upload()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D006["packages/server/api/assets.py<br/>signed_url()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D007["packages/server/api/assets.py<br/>cleanup()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D008["packages/server/api/contracts.py<br/>Pydantic Models: Session<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D009["packages/server/api/contracts.py<br/>Game<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D010["packages/server/api/contracts.py<br/>Definition<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D011["packages/server/api/contracts.py<br/>Command<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D012["packages/server/api/contracts.py<br/>Event<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D013["packages/server/api/index.py<br/>app: FastAPI<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D014["packages/server/api/realtime.py<br/>private_channel_grant()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D015["packages/server/api/realtime.py<br/>authorize_subscription()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D016["packages/server/api/repository.py<br/>Repository.load/save/project + UOW<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D017["packages/server/api/routes.py<br/>mount_routes(app)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D018["packages/server/api/security.py<br/>principal()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D019["packages/server/api/security.py<br/>verify_csrf()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D020["packages/server/api/security.py<br/>require_membership()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D021["packages/server/api/services.py<br/>create_game()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D022["packages/server/api/services.py<br/>join_game()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D023["packages/server/api/services.py<br/>submit_action()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D024["packages/server/api/services.py<br/>publish_definition()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D025["packages/server/configuration/__init__.py<br/>module<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D026["packages/server/configuration/bootstrap.py<br/>import_builtins(repository)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D027["packages/server/configuration/models.py<br/>PortableConfig Pydantic + local references<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D028["packages/server/configuration/transfer.py<br/>import_json()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D029["packages/server/configuration/transfer.py<br/>export_json()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D030["packages/server/configuration/transfer.py<br/>canonicalize()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D031["packages/server/configuration/validation.py<br/>validate_references()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D032["packages/server/configuration/validation.py<br/>validate_types()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D033["packages/server/configuration/validation.py<br/>publish()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D034["packages/server/engine/__init__.py<br/>module<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D035["packages/server/engine/effects.py<br/>propose(effect,state,ctx)-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D036["packages/server/engine/effects.py<br/>Mutation[]<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D037["packages/server/engine/events.py<br/>encode_mutations()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D038["packages/server/engine/events.py<br/>replay()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D039["packages/server/engine/events.py<br/>digest()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D040["packages/server/engine/expressions.py<br/>evaluate(expr,ctx)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D041["packages/server/engine/expressions.py<br/>validate_dag(expr)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D042["packages/server/engine/hooks.py<br/>dispatch(hook,ctx)-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D043["packages/server/engine/hooks.py<br/>ActionResult[]<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D044["packages/server/engine/model.py<br/>EntityType<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D045["packages/server/engine/model.py<br/>Entity<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D046["packages/server/engine/model.py<br/>ActionDef<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D047["packages/server/engine/model.py<br/>GameState<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D048["packages/server/engine/model.py<br/>Transition<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D049["packages/server/engine/model.py<br/>Mutation<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D050["packages/server/engine/operators.py<br/>registry()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D051["packages/server/engine/operators.py<br/>evaluate_op()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D052["packages/server/engine/operators.py<br/>signature()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D053["packages/server/engine/randomness.py<br/>consume(trusted_stream,range)-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D054["packages/server/engine/randomness.py<br/>RandomSample<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D055["packages/server/engine/runtime.py<br/>initialize()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D056["packages/server/engine/runtime.py<br/>available_actions()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D057["packages/server/engine/runtime.py<br/>evaluate()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D058["packages/server/engine/runtime.py<br/>status()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D059["packages/server/engine/topology.py<br/>neighbors()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D060["packages/server/engine/topology.py<br/>ray()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D061["packages/server/engine/topology.py<br/>paths()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D062["packages/server/engine/topology.py<br/>track_advance()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D063["packages/server/engine/types.py<br/>parse_type()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D064["packages/server/engine/types.py<br/>check_type()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D065["packages/server/engine/types.py<br/>TypedValue<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D066["packages/server/engine/reachability.py<br/>exists_reachable(start,successors,target,canonical_key,max_states)-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D067["packages/server/engine/reachability.py<br/>bool<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D068["packages/server/engine/reachability.py<br/>no_reachable_terminal(...)-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D069["packages/server/engine/reachability.py<br/>bool<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D070["packages/server/engine/reachability.py<br/>ReachabilityLimit<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D071["packages/web/rsbuild.config.ts<br/>defineConfig()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D072["packages/web/src/App.tsx<br/>App():ReactElement<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D073["packages/web/src/api/assets.ts<br/>assetUrl()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D074["packages/web/src/api/assets.ts<br/>uploadAsset()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D075["packages/web/src/api/client.ts<br/>request&lt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D076["packages/web/src/api/client.ts<br/>T&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D077["packages/web/src/api/client.ts<br/>API error normalization<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D078["packages/web/src/api/realtime.ts<br/>subscribeGame(gameId, callback)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D079["packages/web/src/api/types.ts<br/>generated OpenAPI types<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D080["packages/web/src/app/pages.tsx<br/>HomePage<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D081["packages/web/src/app/pages.tsx<br/>AuthPage<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D082["packages/web/src/app/pages.tsx<br/>AccountPage<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D083["packages/web/src/app/pages.tsx<br/>DefinitionsPage<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D084["packages/web/src/app/pages.tsx<br/>GamePage<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D085["packages/web/src/app/query.ts<br/>QueryClient<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D086["packages/web/src/app/query.ts<br/>invalidateOnRevision()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D087["packages/web/src/app/router.tsx<br/>AppRoutes():ReactElement<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D088["packages/web/src/app/session.tsx<br/>SessionProvider()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D089["packages/web/src/app/session.tsx<br/>useSession()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D090["packages/web/src/editor/ActionEditor.tsx<br/>ActionEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D091["packages/web/src/editor/AssetEditor.tsx<br/>AssetEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D092["packages/web/src/editor/DefinitionEditor.tsx<br/>DefinitionEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D093["packages/web/src/editor/EntityEditor.tsx<br/>EntityEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D094["packages/web/src/editor/ExpressionEditor.tsx<br/>ExpressionEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D095["packages/web/src/editor/RolePhaseEditor.tsx<br/>RolePhaseEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D096["packages/web/src/editor/SpaceEditor.tsx<br/>SpaceEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D097["packages/web/src/editor/TransferEditor.tsx<br/>TransferEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D098["packages/web/src/editor/VisualEditor.tsx<br/>VisualEditor()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D099["packages/web/src/editor/useDraft.ts<br/>useDraft()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D100["packages/web/src/editor/useDraft.ts<br/>publish()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D101["packages/web/src/editor/useDraft.ts<br/>validate()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D102["packages/web/src/games/ActionPanel.tsx<br/>ActionPanel()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D103["packages/web/src/games/ActionPanel.tsx<br/>ParameterInput()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D104["packages/web/src/games/Clocks.tsx<br/>Clocks()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D105["packages/web/src/games/Decisions.tsx<br/>DecisionControls()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D106["packages/web/src/games/GameView.tsx<br/>GameView({gameId}):ReactElement<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D107["packages/web/src/games/History.tsx<br/>History({events})<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D108["packages/web/src/games/Invite.tsx<br/>Invite()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D109["packages/web/src/games/ObjectivePanel.tsx<br/>ObjectivePanel()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D110["packages/web/src/games/Participants.tsx<br/>ParticipantPanel()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D111["packages/web/src/games/useGame.ts<br/>useGame()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D112["packages/web/src/games/useGame.ts<br/>useAvailableActions()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D113["packages/web/src/games/useGame.ts<br/>useSubmitAction()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D114["packages/web/src/main.tsx<br/>createRoot().render(&lt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D115["packages/web/src/main.tsx<br/>App/&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D116["packages/web/src/rendering/Accessibility.ts<br/>getEntityAria()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D117["packages/web/src/rendering/Accessibility.ts<br/>focusNavigation()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D118["packages/web/src/rendering/Animation.tsx<br/>AnimatedEntity()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D119["packages/web/src/rendering/Animation.tsx<br/>useMotionProjection()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D120["packages/web/src/rendering/Interactions.tsx<br/>InteractionLayer()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D121["packages/web/src/rendering/Interactions.tsx<br/>usePointerActions()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D122["packages/web/src/rendering/Layout.ts<br/>resolveLayouts()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D123["packages/web/src/rendering/Layout.ts<br/>projectLocations()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D124["packages/web/src/rendering/Primitive.tsx<br/>Primitive({definition}):ReactElement<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D125["packages/web/src/rendering/Scene.tsx<br/>Scene({entities,scene}):ReactElement<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D126["packages/web/src/ui/button.tsx<br/>Button(props)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D127["packages/web/src/ui/card.tsx<br/>Card(props)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D128["packages/web/src/ui/dialog.tsx<br/>Dialog(props)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D129["packages/web/src/ui/input.tsx<br/>Input(props)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D130["packages/web/src/ui/select.tsx<br/>Select(props)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D131["packages/web/src/ui/tabs.tsx<br/>Tabs(props)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D132["packages/web/src/ui/toast.tsx<br/>Toast(props)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D133["packages/web/src/ui/tooltip.tsx<br/>Tooltip(props)<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D134["packages/database/prisma.config.ts<br/>pgSchema(bgwq): tables<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D135["packages/database/prisma.config.ts<br/>enum<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D136["packages/database/prisma.config.ts<br/>indexes<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D137["packages/database/prisma.config.ts<br/>FK<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D138["packages/database/prisma.config.ts<br/>checks<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D139["packages/native/src-tauri/build.rs<br/>tauri_build::build()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D140["packages/native/src-tauri/src/main.rs<br/>main() -&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D141["packages/native/src-tauri/src/main.rs<br/>run()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D142["tools/build_docs.py<br/>render_source_docs()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D143["tools/check_spec.py<br/>verify_document()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D144["tools/check_spec.py<br/>verify_builtin_shape()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D145["tools/check_spec.py<br/>verify_api()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D146["tools/check_spec.py<br/>verify_ast()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D147["tools/check_spec.py<br/>operator_inventory()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D148["tools/check_spec.py<br/>main()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D149["tools/migrate_schema.py<br/>emit() -&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D150["tools/migrate_schema.py<br/>list[Path]<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D151["tools/generate_ast.py<br/>compile_mermaid() -&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D152["tools/generate_ast.py<br/>str<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D153["tools/generate_ast.py<br/>main() -&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D154["tools/generate_ast.py<br/>None<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D155["tools/check_semantics.py<br/>check() -&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D156["tools/check_semantics.py<br/>list[str]<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D157["tools/build_operator_contract.py<br/>operator_contract.json compiler<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D158["tools/sync_api_schema.py<br/>sync_config_schema()<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D159["tools/build_prd.py<br/>build()-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D160["tools/build_prd.py<br/>str<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D161["tools/build_prd.py<br/>replace_first(text,language,content)-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D162["tools/build_prd.py<br/>str<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D163["tools/register_manifest.py<br/>register_manifest()-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D164["tools/register_manifest.py<br/>None<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D165["tools/check_prd.py<br/>verify()-&gt<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+    D166["tools/check_prd.py<br/>None<br/>Contract: implementation defined by owning source; documented using TSDoc/docstring/Rustdoc"]
+  end
+  F026 -->|declares source symbol| D001
+  F027 -->|declares source symbol| D002
+  F027 -->|declares source symbol| D003
+  F028 -->|declares source symbol| D004
+  F028 -->|declares source symbol| D005
+  F028 -->|declares source symbol| D006
+  F028 -->|declares source symbol| D007
+  F029 -->|declares source symbol| D008
+  F029 -->|declares source symbol| D009
+  F029 -->|declares source symbol| D010
+  F029 -->|declares source symbol| D011
+  F029 -->|declares source symbol| D012
+  F030 -->|declares source symbol| D013
+  F032 -->|declares source symbol| D014
+  F032 -->|declares source symbol| D015
+  F033 -->|declares source symbol| D016
+  F034 -->|declares source symbol| D017
+  F035 -->|declares source symbol| D018
+  F035 -->|declares source symbol| D019
+  F035 -->|declares source symbol| D020
+  F036 -->|declares source symbol| D021
+  F036 -->|declares source symbol| D022
+  F036 -->|declares source symbol| D023
+  F036 -->|declares source symbol| D024
+  F037 -->|declares source symbol| D025
+  F038 -->|declares source symbol| D026
+  F040 -->|declares source symbol| D027
+  F041 -->|declares source symbol| D028
+  F041 -->|declares source symbol| D029
+  F041 -->|declares source symbol| D030
+  F042 -->|declares source symbol| D031
+  F042 -->|declares source symbol| D032
+  F042 -->|declares source symbol| D033
+  F047 -->|declares source symbol| D034
+  F048 -->|declares source symbol| D035
+  F048 -->|declares source symbol| D036
+  F049 -->|declares source symbol| D037
+  F049 -->|declares source symbol| D038
+  F049 -->|declares source symbol| D039
+  F050 -->|declares source symbol| D040
+  F050 -->|declares source symbol| D041
+  F051 -->|declares source symbol| D042
+  F051 -->|declares source symbol| D043
+  F052 -->|declares source symbol| D044
+  F052 -->|declares source symbol| D045
+  F052 -->|declares source symbol| D046
+  F052 -->|declares source symbol| D047
+  F052 -->|declares source symbol| D048
+  F052 -->|declares source symbol| D049
+  F053 -->|declares source symbol| D050
+  F053 -->|declares source symbol| D051
+  F053 -->|declares source symbol| D052
+  F054 -->|declares source symbol| D053
+  F054 -->|declares source symbol| D054
+  F055 -->|declares source symbol| D055
+  F055 -->|declares source symbol| D056
+  F055 -->|declares source symbol| D057
+  F055 -->|declares source symbol| D058
+  F056 -->|declares source symbol| D059
+  F056 -->|declares source symbol| D060
+  F056 -->|declares source symbol| D061
+  F056 -->|declares source symbol| D062
+  F057 -->|declares source symbol| D063
+  F057 -->|declares source symbol| D064
+  F057 -->|declares source symbol| D065
+  F140 -->|declares source symbol| D066
+  F140 -->|declares source symbol| D067
+  F140 -->|declares source symbol| D068
+  F140 -->|declares source symbol| D070
+  F066 -->|declares source symbol| D071
+  F067 -->|declares source symbol| D072
+  F068 -->|declares source symbol| D073
+  F068 -->|declares source symbol| D074
+  F069 -->|declares source symbol| D075
+  F069 -->|declares source symbol| D076
+  F069 -->|declares source symbol| D077
+  F070 -->|declares source symbol| D078
+  F071 -->|declares source symbol| D079
+  F072 -->|declares source symbol| D080
+  F072 -->|declares source symbol| D081
+  F072 -->|declares source symbol| D082
+  F072 -->|declares source symbol| D083
+  F072 -->|declares source symbol| D084
+  F073 -->|declares source symbol| D085
+  F073 -->|declares source symbol| D086
+  F074 -->|declares source symbol| D087
+  F075 -->|declares source symbol| D088
+  F075 -->|declares source symbol| D089
+  F076 -->|declares source symbol| D090
+  F077 -->|declares source symbol| D091
+  F078 -->|declares source symbol| D092
+  F079 -->|declares source symbol| D093
+  F080 -->|declares source symbol| D094
+  F081 -->|declares source symbol| D095
+  F082 -->|declares source symbol| D096
+  F083 -->|declares source symbol| D097
+  F084 -->|declares source symbol| D098
+  F085 -->|declares source symbol| D099
+  F085 -->|declares source symbol| D100
+  F085 -->|declares source symbol| D101
+  F086 -->|declares source symbol| D102
+  F086 -->|declares source symbol| D103
+  F087 -->|declares source symbol| D104
+  F088 -->|declares source symbol| D105
+  F089 -->|declares source symbol| D106
+  F090 -->|declares source symbol| D107
+  F091 -->|declares source symbol| D108
+  F092 -->|declares source symbol| D109
+  F093 -->|declares source symbol| D110
+  F094 -->|declares source symbol| D111
+  F094 -->|declares source symbol| D112
+  F094 -->|declares source symbol| D113
+  F095 -->|declares source symbol| D114
+  F095 -->|declares source symbol| D115
+  F096 -->|declares source symbol| D116
+  F096 -->|declares source symbol| D117
+  F097 -->|declares source symbol| D118
+  F097 -->|declares source symbol| D119
+  F098 -->|declares source symbol| D120
+  F098 -->|declares source symbol| D121
+  F099 -->|declares source symbol| D122
+  F099 -->|declares source symbol| D123
+  F100 -->|declares source symbol| D124
+  F101 -->|declares source symbol| D125
+  F103 -->|declares source symbol| D126
+  F104 -->|declares source symbol| D127
+  F105 -->|declares source symbol| D128
+  F106 -->|declares source symbol| D129
+  F107 -->|declares source symbol| D130
+  F108 -->|declares source symbol| D131
+  F109 -->|declares source symbol| D132
+  F110 -->|declares source symbol| D133
+  F015 -->|declares source symbol| D134
+  F015 -->|declares source symbol| D135
+  F015 -->|declares source symbol| D136
+  F015 -->|declares source symbol| D137
+  F015 -->|declares source symbol| D138
+  F019 -->|declares source symbol| D139
+  F024 -->|declares source symbol| D140
+  F024 -->|declares source symbol| D141
+  F130 -->|declares source symbol| D142
+  F131 -->|declares source symbol| D143
+  F131 -->|declares source symbol| D144
+  F131 -->|declares source symbol| D145
+  F131 -->|declares source symbol| D146
+  F131 -->|declares source symbol| D147
+  F131 -->|declares source symbol| D148
+  F132 -->|declares source symbol| D149
+  F132 -->|declares source symbol| D150
+  F136 -->|declares source symbol| D151
+  F136 -->|declares source symbol| D152
+  F136 -->|declares source symbol| D153
+  F136 -->|declares source symbol| D154
+  F137 -->|declares source symbol| D155
+  F137 -->|declares source symbol| D156
+  F138 -->|declares source symbol| D157
+  F144 -->|declares source symbol| D158
+  F146 -->|declares source symbol| D159
+  F146 -->|declares source symbol| D160
+  F146 -->|declares source symbol| D161
+  F147 -->|declares source symbol| D163
+  F147 -->|declares source symbol| D164
+  F148 -->|declares source symbol| D165
+  F148 -->|declares source symbol| D166
+  subgraph COMMAND["Authoritative command control-flow contract"]
+    C01["1. Authenticate & authorize<br/>owner: packages/server/api/security.py"]
+    C02["2. Lock game and resolve idempotency<br/>owner: packages/server/api/services.py"]
+    C03["3. Load pinned definition and authoritative snapshot<br/>owner: packages/server/api/repository.py"]
+    C04["4. Validate action type and typed arguments<br/>owner: packages/server/engine/types.py"]
+    C05["5. Generate legal candidates and evaluate conditions<br/>owner: packages/server/engine/runtime.py"]
+    C06["6. Dispatch queued hooks deterministically<br/>owner: packages/server/engine/hooks.py"]
+    C07["7. Execute proposed effects and validate state<br/>owner: packages/server/engine/effects.py"]
+    C08["8. Record complete ordered event mutations<br/>owner: packages/server/engine/events.py"]
+    C09["9. Commit state, game results and one revision<br/>owner: packages/server/api/services.py"]
+    C10["10. Broadcast committed revision hint<br/>owner: packages/server/api/realtime.py"]
+    C11["11. Invalidate and reload authorized projection<br/>owner: packages/web/src/api/realtime.ts"]
+    C12["12. Render generic SVG scene<br/>owner: packages/web/src/rendering/Scene.tsx"]
+  end
+  F035 -->|implements authoritative stage| C01
+  F036 -->|implements authoritative stage| C02
+  C01 -->|next validated stage| C02
+  F033 -->|implements authoritative stage| C03
+  C02 -->|next validated stage| C03
+  F057 -->|implements authoritative stage| C04
+  C03 -->|next validated stage| C04
+  F055 -->|implements authoritative stage| C05
+  C04 -->|next validated stage| C05
+  F051 -->|implements authoritative stage| C06
+  C05 -->|next validated stage| C06
+  F048 -->|implements authoritative stage| C07
+  C06 -->|next validated stage| C07
+  F049 -->|implements authoritative stage| C08
+  C07 -->|next validated stage| C08
+  F036 -->|implements authoritative stage| C09
+  C08 -->|next validated stage| C09
+  F032 -->|implements authoritative stage| C10
+  C09 -->|next validated stage| C10
+  F070 -->|implements authoritative stage| C11
+  C10 -->|next validated stage| C11
+  F101 -->|implements authoritative stage| C12
+  C11 -->|next validated stage| C12
+  F094 -->|submits command via API| C01
+  C09 -->|transaction commits before notification| C10
+  %% Engine purity: the DB service never calls engine from inside a mutable effect, and the browser never mutates authoritative state.
+  %% Source modules: 162; public symbols: 164; authoritative stages: 12
