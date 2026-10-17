@@ -2,7 +2,7 @@
 
 BoardGamesWithQuests is a configuration-driven multiplayer board-game platform. One React application runs on Vercel and in Tauri WebViews; a separate Vercel-hosted Python/FastAPI application executes a generic deterministic engine. Supabase PostgreSQL owns all authoritative state and declarative configurations; Supabase Storage holds raster presentation assets. Configuration JSON is portable interchange and is not authoritative database state.
 
-This specification is organized into six sections. The normative relational schema and Mermaid AST are maintained separately in [SCHEMA](SCHEMA.md) and [AST](AST.md); the API and configuration data remain embedded below. Inline source comments are part of the documentation contract. The final repository must not acquire a second implementation of the UI or engine.
+This specification is organized into six sections. The normative relational schema and Mermaid AST are maintained separately in [SCHEMA](notes/requirements/SCHEMA.prisma), [INTEGRITY](notes/requirements/INTEGRITY.sql), [COMPONENTS](notes/requirements/COMPONENTS.md) and [AST](notes/requirements/AST.mmd); the API and configuration data remain embedded below. Inline source comments are part of the documentation contract. The final repository must not acquire a second implementation of the UI or engine.
 
 # 1. INVARIANTS
 
@@ -79,221 +79,7 @@ The web app uses **Wouter** for routing, SVG primitives for space/entity visuals
 
 # 2. COMPONENTS
 
-## 2.1 Technology and schema choice
-
-| Responsibility | Authoritative implementation |
-|---|---|
-| Routing/UI | Wouter, React, TypeScript, Bun, Rsbuild, Tailwind CSS, shadcn/ui, Motion |
-| Rendering | Generic SVG scene, typed visual templates and asset grants |
-| Native | Tauri 2 WebView loading production HTTPS frontend, platform signing |
-| API | Python FastAPI/Pydantic (separate Vercel project), cookie session, Origin/CSRF |
-| Engine | Pure Python functional interpreter, no database/network dependencies |
-| Database schema | **Drizzle PostgreSQL schema in TypeScript**, tooling-only package |
-| Runtime DB client | Python psycopg, not Drizzle |
-| Database and identity | Supabase PostgreSQL, Auth, private Broadcast, Storage |
-| Migrations | Reviewed SQL generated from Drizzle; SQL-only security functions and triggers |
-| API contract | OpenAPI 3.1 YAML and FastAPI conforming Pydantic models |
-| Tests | pytest (engine/API/DB), Playwright (browser), native smoke checks |
-| Documentation | Python docstrings, **TSDoc**, Rustdoc and OpenAPI summaries |
-
-Supabase provides a native declarative schema workflow, but its source format is SQL. Drizzle works against Supabase PostgreSQL and provides a typed, more readable single-source **table schema**. Because the engine is Python, Drizzle is only build-time schema tooling: Python reads the provisioned database through psycopg. Postgres-specific triggers, secret-field authorization, published immutability, and private Broadcast still require reviewed SQL routines. There is deliberately no competing ORM runtime model in TypeScript.
-
-The API and web deployments are separate Vercel projects; the web origin forwards `/api/*` to FastAPI. Native applications load that same HTTPS origin. Supabase owns Auth, relational state and Storage. Configurations are portable JSON, never the database's authoritative document format.
-
-## 2.2 Exact intended tracked source tree
-
-Every source path listed here has exactly one file node in the **single AST diagram** in [AST](AST.md). Generated build output, package caches, timestamped migration artifacts and generated native platform projects are not authored files.
-
-```text
-.
-.agents/
-  AST.md
-  PRD.md
-  SCHEMA.md
-.github/
-  workflows/
-    deploy-api.yml
-    deploy-web.yml
-    release-native.yml
-    verify.yml
-packages/
-  database/
-    src/
-      schema.ts
-    drizzle.config.ts
-    package.json
-  native/
-    src-tauri/
-      capabilities/
-        default.json
-      icons/
-        icon.icns
-        icon.ico
-        icon.png
-      src/
-        main.rs
-      Cargo.lock
-      Cargo.toml
-      build.rs
-      tauri.conf.json
-    package.json
-  server/
-    api/
-      __init__.py
-      app.py
-      assets.py
-      contracts.py
-      index.py
-      openapi.yaml
-      realtime.py
-      repository.py
-      routes.py
-      security.py
-      services.py
-    configuration/
-      __init__.py
-      bootstrap.py
-      configuration.schema.json
-      models.py
-      operator_contract.json
-      transfer.py
-      validation.py
-    data/
-      chess.json
-      english-draughts.json
-      international-draughts.json
-      moneyproperty.json
-    engine/
-      __init__.py
-      effects.py
-      events.py
-      expressions.py
-      hooks.py
-      model.py
-      operators.py
-      randomness.py
-      reachability.py
-      runtime.py
-      topology.py
-      types.py
-    supabase/
-      config.toml
-      security.sql
-      seed.sql
-    pyproject.toml
-    vercel.json
-  web/
-    src/
-      api/
-        assets.ts
-        client.ts
-        realtime.ts
-        types.ts
-      app/
-        pages.tsx
-        query.ts
-        router.tsx
-        session.tsx
-      editor/
-        ActionEditor.tsx
-        AssetEditor.tsx
-        DefinitionEditor.tsx
-        EntityEditor.tsx
-        ExpressionEditor.tsx
-        RolePhaseEditor.tsx
-        SpaceEditor.tsx
-        TransferEditor.tsx
-        VisualEditor.tsx
-        useDraft.ts
-      games/
-        ActionPanel.tsx
-        Clocks.tsx
-        Decisions.tsx
-        GameView.tsx
-        History.tsx
-        Invite.tsx
-        ObjectivePanel.tsx
-        Participants.tsx
-        useGame.ts
-      rendering/
-        Accessibility.ts
-        Animation.tsx
-        Interactions.tsx
-        Layout.ts
-        Primitive.tsx
-        Scene.tsx
-      ui/
-        button.tsx
-        card.tsx
-        dialog.tsx
-        input.tsx
-        select.tsx
-        tabs.tsx
-        toast.tsx
-        tooltip.tsx
-      App.tsx
-      main.tsx
-      styles.css
-    components.json
-    index.html
-    package.json
-    rsbuild.config.ts
-    tsconfig.json
-    vercel.json
-tests/
-  api/
-    test_contract.py
-    test_realtime.py
-  browser/
-    editor.spec.ts
-    games.spec.ts
-    package.json
-    playwright.config.ts
-    rendering.spec.ts
-  configuration/
-    test_assets.py
-    test_roundtrip.py
-  database/
-    test_integrity.py
-    test_schema.py
-    test_transactions.py
-  engine/
-    test_chess.py
-    test_draughts.py
-    test_execution.py
-    test_game_contracts.py
-    test_moneyproperty.py
-    test_reachability.py
-  native/
-    smoke.spec.ts
-tools/
-  build_docs.py
-  build_operator_contract.py
-  build_prd.py
-  check_prd.py
-  check_semantics.py
-  check_spec.py
-  generate_ast.py
-  migrate_schema.py
-  register_manifest.py
-  sync_api_schema.py
-.editorconfig
-.env.example
-.gitignore
-LICENSE
-README.md
-bun.lock
-package.json
-tsconfig.json
-tsdoc.json
-typedoc.json
-```
-
-## 2.3 Package boundaries
-
-`packages/database` declares all table/enum/index/FK/check structure. `packages/server/api` authenticates, authorizes, projects and transactionally persists; `engine` evaluates actions in pure immutable contexts; `configuration` imports/exports/validates JSON; `server/supabase` declares exceptional SQL routines, Auth/RealtIme policies, and data seed declarations. `packages/web` contains the only React UI and Wouter routes, including all concrete pages, the generic renderer and editor. `packages/native` is an HTTPS WebView wrapper only.
-
-`packages/server/supabase/security.sql` intentionally contains the only authored SQL DDL not expressible as ordinary Drizzle tables: security grants/policies, publication immutability triggers and private revision broadcasts. Drizzle-generated versioned SQL migrations remain reviewed deployment artifacts. `seed.sql` contains registry/reference DML and Storage bucket initialization, never authoritative game definitions.
+The complete intended file tree, package boundaries, tooling choices, and build requirements are defined in **[COMPONENTS.md](notes/requirements/COMPONENTS.md)**. It is normative alongside this PRD and must remain synchronized with the [Mermaid AST](notes/requirements/AST.mmd).
 
 # 3. API
 
@@ -2932,11 +2718,11 @@ components:
 
 # 4. SCHEMA
 
-The canonical, inline-documented Drizzle PostgreSQL schema and database security/Realtime routines are in **[SCHEMA.md](SCHEMA.md)**. This file is the sole normative schema declaration; implementation must conform to it.
+The authoritative, inline-documented Prisma PostgreSQL relational model is **[SCHEMA.prisma](notes/requirements/SCHEMA.prisma)**. Constraints, security routines, Supabase Auth references and Realtime functions that Prisma cannot represent are declared in **[INTEGRITY.sql](notes/requirements/INTEGRITY.sql)**. Neither is duplicated here. Their implementation must stay synchronized.
 
 # 5. AST
 
-The canonical source-file, declaration, dependency, and game-configuration Mermaid AST is in **[AST.md](AST.md)**. Each declared source path corresponds to one node in that diagram, including the two architecture documents.
+The canonical source-file, declaration, dependency, and game-configuration diagram is pure Mermaid source in **[AST.mmd](notes/requirements/AST.mmd)**. Its generated visual reference is **[reference_AST.svg](notes/requirements/diagrams/reference_AST.svg)**. [COMPONENTS.md](notes/requirements/COMPONENTS.md) defines the corresponding intended source-file inventory. The renderer and CI automation regenerate the SVG from AST.mmd.
 
 # 6. DATA
 
@@ -22090,7 +21876,7 @@ All four documents are complete structural instances of the interchange schema. 
 ```sql
 -- Registry metadata must be generated from engine/operators.py without drift.
 -- Binary assets are uploaded via server/asset service; metadata is relational.
--- Supabase Storage buckets are data rows and belong in DML, not in Drizzle schema.
+-- Supabase Storage buckets are data rows and belong in DML, not in Prisma schema.
 INSERT INTO storage.buckets(id,name,public, file_size_limit, allowed_mime_types)
 VALUES ('bgwq-visuals','bgwq-visuals',false,2097152,ARRAY['image/png','image/webp'])
 ON CONFLICT (id) DO NOTHING;
@@ -23953,4 +23739,4 @@ The JSON object below is the canonical per-operator semantic contract consumed b
 
 ## 6.5 Conformance gates
 
-The portable definitions, OpenAPI and Mermaid graph must pass structural and cross-reference validation. Game execution, actual Drizzle migrations, deferred SQL constraints and production browser behavior must additionally be tested against real implementations. A definition is not fully conformant while any operator remains unresolved. Source-file nodes and expression nodes are a deterministic architecture/configuration representation, not complete function-body source code; full source generation additionally requires each function's executable algorithm body.
+The portable definitions, OpenAPI and Mermaid graph must pass structural and cross-reference validation. Game execution, actual Prisma migrations, deferred SQL constraints and production browser behavior must additionally be tested against real implementations. A definition is not fully conformant while any operator remains unresolved. Source-file nodes and expression nodes are a deterministic architecture/configuration representation, not complete function-body source code; full source generation additionally requires each function's executable algorithm body.

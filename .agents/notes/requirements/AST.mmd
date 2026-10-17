@@ -1,16 +1,15 @@
-# BoardGamesWithQuests — AST
-
-
-One diagram declares one node per tracked source file with the interface/documentation requirements and declared dependency graph. It is a file/declaration contract; method bodies are constrained by DATA operator semantics and observable acceptance requirements, not inferred from arrow labels.
-
-```mermaid
 flowchart TB
   %% Each box maps to exactly one tracked source file.
   %% HTML label line 1: file; line 2: exported declarations; line 3: source documentation contract.
   subgraph META["META — tracked source"]
-    F149[".agents/AST.md<br/>exports: Single Mermaid file/declaration/action AST diagram<br/>Markdown: Normative source-declaration dependency and configuration expression graph."]
-    F150[".agents/SCHEMA.md<br/>exports: Drizzle table schema and PostgreSQL security/Realtime routines<br/>Markdown: Normative documented Drizzle schema and PostgreSQL-specific DDL."]
-    F001[".agents/PRD.md<br/>exports: architecture: INVARIANTS, COMPONENTS, API, DATA; links SCHEMA and AST<br/>Markdown: Normative product contract linking standalone SCHEMA and AST specifications."]
+    F151[".agents/notes/requirements/COMPONENTS.md<br/>exports: Exact intended source tree and technology boundaries<br/>Markdown: Normative file inventory synchronized with source declarations."]
+    F152[".agents/notes/requirements/INTEGRITY.sql<br/>exports: PostgreSQL-only constraints, Supabase Auth references and triggers<br/>SQL comments: Reviewed extension to Prisma schema."]
+    F153[".agents/notes/requirements/diagrams/reference_AST.svg<br/>exports: Generated SVG projection of AST.mmd<br/>SVG metadata: Regenerate through tracked automation, never edit by hand."]
+    F154[".github/scripts/render_reference_ast.py<br/>exports: render_reference_ast();verify_file_alignment()<br/>Python docstrings: Deterministically render the Mermaid graph to reference SVG."]
+    F155[".github/workflows/render-reference-ast.yml<br/>exports: AST diagram generation and verification workflow<br/>Workflow comments: Automatically maintain Mermaid-derived reference SVG."]
+    F149[".agents/notes/requirements/AST.mmd<br/>exports: Mermaid source for the single file/declaration/action graph<br/>Mermaid comments: Normative source-declaration dependency and action-expression graph."]
+    F150[".agents/notes/requirements/SCHEMA.prisma<br/>exports: Prisma models, indexes, relationships<br/>Prisma /// comments: Normative relational model; companion SQL in INTEGRITY.sql."]
+    F001[".agents/PRD.md<br/>exports: architecture: INVARIANTS, COMPONENTS, API, DATA; links COMPONENTS, SCHEMA, INTEGRITY and AST<br/>Markdown: Normative product contract linking standalone SCHEMA and AST specifications."]
     F002[".editorconfig<br/>exports: indent / whitespace<br/>File contract: Consistent editor indentation."]
     F003[".env.example<br/>exports: variable names only<br/>File contract: Document public and server-only environment names."]
     F004[".github/workflows/deploy-api.yml<br/>exports: deploy-api workflow<br/>Workflow comments: Deploy FastAPI Vercel project"]
@@ -24,7 +23,7 @@ flowchart TB
     F012["package.json<br/>exports: bun workspaces<br/>Schema/document metadata: Root workspace and verify tasks."]
     F130["tools/build_docs.py<br/>exports: render_source_docs()<br/>Python docstring: Generate Python, TSDoc and Rustdoc source/API documentation."]
     F131["tools/check_spec.py<br/>exports: verify_document(); verify_builtin_shape(); verify_api(); verify_ast(); operator_inventory(); main()<br/>Python docstring: Validate typed seed references, four concrete fixtures, JSON/OpenAPI equivalence, AST and operator inventory."]
-    F132["tools/migrate_schema.py<br/>exports: emit() -&gt; list[Path]<br/>Python docstring: Convert reviewed Drizzle SQL to Supabase versioned migrations without executing them."]
+    F132["tools/migrate_schema.py<br/>exports: emit() -&gt; list[Path]<br/>Python docstring: Convert reviewed Prisma SQL to Supabase versioned migrations without executing them."]
     F133["tsconfig.json<br/>exports: TS project base<br/>Schema/document metadata: Strict TS and module-resolution defaults."]
     F134["tsdoc.json<br/>exports: TSDoc grammar<br/>Schema/document metadata: Single standard for structured TSDoc tags."]
     F135["typedoc.json<br/>exports: TypeDoc configuration<br/>Schema/document metadata: Generate docs from structured TSDoc declarations."]
@@ -41,9 +40,8 @@ flowchart TB
     F148["tools/check_prd.py<br/>exports: verify()-&gt;None<br/>Python docstring: Verify linked SCHEMA and AST exist, source-tree and graph align, and inline API and DATA are fresh."]
   end
   subgraph DATABASE["DATABASE — tracked source"]
-    F013["packages/database/drizzle.config.ts<br/>exports: defineConfig({dialect:postgresql,schema})<br/>TSDoc: Generate reviewed migrations; auth schema filtered."]
-    F014["packages/database/package.json<br/>exports: drizzle-kit toolchain<br/>Schema/document metadata: Schema generation isolated from Python production runtime."]
-    F015["packages/database/src/schema.ts<br/>exports: pgSchema(bgwq): tables, enum, indexes, FK, checks<br/>TSDoc: Sole authored relational table/type declaration; all runtime authority database-side."]
+    F013["packages/database/package.json<br/>exports: defineConfig({dialect:postgresql,schema})<br/>TSDoc: Generate reviewed migrations; auth schema filtered."]
+    F015["packages/database/prisma.config.ts<br/>exports: pgSchema(bgwq): tables, enum, indexes, FK, checks<br/>TSDoc: Sole authored relational table/type declaration; all runtime authority database-side."]
   end
   subgraph NATIVE["NATIVE — tracked source"]
     F016["packages/native/package.json<br/>exports: Tauri build scripts<br/>Schema/document metadata: Platform build toolchain."]
@@ -85,7 +83,7 @@ flowchart TB
     F046["packages/server/data/moneyproperty.json<br/>exports: PortableGameDefinition v1<br/>Schema/document metadata: Complete seeded layout, declared actions, generic expressions and visual primitives."]
     F058["packages/server/pyproject.toml<br/>exports: Python dependencies and pytest<br/>File contract: FastAPI psycopg Pydantic and validation dependencies."]
     F059["packages/server/supabase/config.toml<br/>exports: Supabase local/auth/storage config<br/>File contract: Local Supabase services and migrations."]
-    F060["packages/server/supabase/security.sql<br/>exports: RLS, grants, functions, triggers, Broadcast<br/>SQL documentation: SQL exception: engine-independent PostgreSQL routines Drizzle cannot model."]
+    F060["packages/server/supabase/security.sql<br/>exports: RLS, grants, functions, triggers, Broadcast<br/>SQL documentation: SQL exception: engine-independent PostgreSQL routines Prisma cannot model."]
     F061["packages/server/supabase/seed.sql<br/>exports: Operator registry, hooks, buckets DML<br/>SQL documentation: Reference data is data, not schema; deployed after migration."]
     F062["packages/server/vercel.json<br/>exports: ASGI route and limits<br/>Schema/document metadata: Deploy Python entrypoint in separate Vercel project."]
   end
@@ -212,6 +210,16 @@ flowchart TB
   F001 -.-> F149
   F001 -.-> F150
   %% BEGIN GENERATED ENTITY-ACTION EXPRESSION AST
+  %% Source-level references to normative requirements and generated reference visualization.
+  F001 --> F151
+  F001 --> F150
+  F001 --> F149
+  F151 --> F149
+  F150 --> F152
+  F149 --> F153
+  F154 --> F149
+  F154 --> F153
+  F155 --> F154
   subgraph ACTION_AST["CONFIGURATION ACTION AST — full expression and effect structure"]
     A000001["chess: rook.move | command | phase:turn"]
     F043 -.-> A000001
@@ -5658,6 +5666,4 @@ flowchart TB
     X002722["literal | 0"]
     E002717 -->|"value"| X002722
   end
-  %% ACTION_AST_COUNTS files=148 actions=72 expression_nodes=2722
-```
-
+  %% ACTION_AST_COUNTS files=152 actions=72 expression_nodes=2722
