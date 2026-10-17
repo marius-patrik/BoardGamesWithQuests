@@ -58,9 +58,7 @@ def diagram_viewer_markup(content: str) -> str:
         '<div class="diagram-viewer" data-diagram-viewer>'
         '<div class="diagram-viewer__viewport" tabindex="0" role="region"'
         ' aria-label="Diagram: drag to pan, scroll to zoom">'
-        '<div class="diagram-viewer__canvas">'
-        + content
-        + "</div></div></div>"
+        '<div class="diagram-viewer__canvas">' + content + "</div></div></div>"
     )
 
 
@@ -156,9 +154,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                     + "\\n"
                 )
             else:
-                raw_url = posixpath.relpath(
-                    public_path(rel), start=dest.removesuffix(".md")
-                )
+                raw_url = posixpath.relpath(public_path(rel), start=dest.removesuffix(".md"))
                 safe_url = escape(raw_url, quote=True)
                 body = (
                     f"# {title}\\n\\n"
@@ -166,7 +162,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                         f'<img src="{safe_url}" alt="{escape(rel.stem, quote=True)}"'
                         ' loading="lazy" draggable="false">'
                     )
-                    + f'\\n[View original SVG]({raw_url})\\n'
+                    + f"\\n[View original SVG]({raw_url})\\n"
                 )
         pages.append((name, dest, body))
     from html import escape
