@@ -5,10 +5,11 @@
   "type": "module",
   "packageManager": "bun@1.3.0",
   "scripts": {
-    "dev": "rsbuild dev",
-    "build": "rsbuild build",
+    "dev": "bun run assets && rsbuild dev",
+    "build": "bun run assets && rsbuild build",
     "preview": "rsbuild preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "assets": "bun scripts/prepare-assets.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
@@ -18,7 +19,8 @@
     "motion": "^12.23.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.3.0",
+    "@supabase/supabase-js": "^2.76.1"
   },
   "devDependencies": {
     "@rsbuild/core": "^2.1.0",
