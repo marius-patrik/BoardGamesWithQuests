@@ -1,6 +1,6 @@
 // BoardGamesWithQuests — normative relational model.
 // Auth identities are supplied by Supabase-managed auth.users; their external FKs and
-// database-only security/constraints are declared in INTEGRITY.sql.
+// database-only security/constraints are declared in integrity.sql.
 // Python/psycopg uses the database at runtime. Prisma is a schema/migration tool only.
 
 // No generated TypeScript database client: Python/psycopg is the only runtime
@@ -87,7 +87,7 @@ model Profile {
   displayName String @map("display_name")
   username String? @unique
   createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
-  // Supabase auth.users is externally managed; database-level FK is in INTEGRITY.sql.
+  // Supabase auth.users is externally managed; database-level FK is in integrity.sql.
 
   @@map("profiles")
   @@schema("bgwq")
@@ -105,9 +105,9 @@ model Definition {
   versions Version[] @relation("R_versions_definitionId_definitions")
   ratings Rating[] @relation("R_ratings_definitionId_definitions")
 
-  // PostgreSQL partial unique index definition_owner_key (ownerId, key) WHERE ${t.ownerId} IS NOT NULL: INTEGRITY.sql
-  // PostgreSQL partial unique index builtin_definition_key (key) WHERE ${t.builtIn}: INTEGRITY.sql
-  // PostgreSQL CHECK constraint definition_builtin_ownership: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL partial unique index definition_owner_key (ownerId, key) WHERE ${t.ownerId} IS NOT NULL: integrity.sql
+  // PostgreSQL partial unique index builtin_definition_key (key) WHERE ${t.builtIn}: integrity.sql
+  // PostgreSQL CHECK constraint definition_builtin_ownership: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("definitions")
   @@schema("bgwq")
 }
@@ -131,7 +131,7 @@ model Version {
   games Game[] @relation("R_games_versionId_versions")
 
   @@unique([definitionId, number], map: "version_number_unique")
-  // PostgreSQL CHECK constraint version_bounds: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint version_bounds: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("versions")
   @@schema("bgwq")
 }
@@ -150,8 +150,8 @@ model Role {
 
   @@unique([versionId, key], map: "role_version_key")
   @@unique([versionId, id], map: "role_version_id")
-  // PostgreSQL CHECK constraint role_count: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint role_forward_row: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint role_count: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint role_forward_row: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("roles")
   @@schema("bgwq")
 }
@@ -170,7 +170,7 @@ model Phase {
 
   @@unique([versionId, key], map: "phase_version_key")
   @@unique([versionId, id], map: "phase_version_id")
-  // PostgreSQL partial unique index phase_single_initial (versionId) WHERE ${t.initial}: INTEGRITY.sql
+  // PostgreSQL partial unique index phase_single_initial (versionId) WHERE ${t.initial}: integrity.sql
   @@map("phases")
   @@schema("bgwq")
 }
@@ -222,7 +222,7 @@ model EntitySeed {
 
   @@unique([versionId, key], map: "seed_version_key")
   @@unique([versionId, id], map: "seed_version_id")
-  // PostgreSQL CHECK constraint seed_not_self: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint seed_not_self: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("entity_seeds")
   @@schema("bgwq")
 }
@@ -281,7 +281,7 @@ model SeedValue {
   referenceSeed EntitySeed? @relation("R_seedValues_versionId_refSeedId_entitySeeds", fields: [versionId, refSeedId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([seedId, fieldId])
-  // PostgreSQL CHECK constraint seed_value_one_payload: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint seed_value_one_payload: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("seed_values")
   @@schema("bgwq")
 }
@@ -296,7 +296,7 @@ model Operator {
   expressions Expression[] @relation("R_expressions_operatorKey_operators")
   effects Effect[] @relation("R_effects_operatorKey_operators")
 
-  // PostgreSQL CHECK constraint operator_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint operator_kind: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("operators")
   @@schema("bgwq")
 }
@@ -356,7 +356,7 @@ model Expression {
 
   @@unique([versionId, id], map: "expr_version_id")
   @@unique([versionId, key], map: "expr_version_key")
-  // PostgreSQL CHECK constraint expression_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint expression_kind: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("expressions")
   @@schema("bgwq")
 }
@@ -372,7 +372,7 @@ model ExpressionArgument {
   child Expression @relation("R_expressionArguments_versionId_childId_expressions", fields: [versionId, childId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([parentId, parameter, ordinal])
-  // PostgreSQL CHECK constraint expression_not_self: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint expression_not_self: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("expression_arguments")
   @@schema("bgwq")
 }
@@ -402,8 +402,8 @@ model Action {
   @@unique([entityTypeId, key], map: "action_owner_key")
   @@unique([versionId, id], map: "action_version_id")
   @@index([trigger, hookKey, priority], map: "action_hook_order")
-  // PostgreSQL CHECK constraint action_trigger_check: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint action_iterator_pair: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint action_trigger_check: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint action_iterator_pair: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("actions")
   @@schema("bgwq")
 }
@@ -487,10 +487,10 @@ model Asset {
   @@unique([versionId, key], map: "asset_version_key")
   @@unique([versionId, id], map: "asset_version_id")
   @@unique([bucket, path], map: "asset_storage_path")
-  // PostgreSQL CHECK constraint asset_size: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint asset_hash_lower_hex: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint asset_supported_mime: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint asset_path_nonempty: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint asset_size: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint asset_hash_lower_hex: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint asset_supported_mime: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint asset_path_nonempty: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("assets")
   @@schema("bgwq")
 }
@@ -531,7 +531,7 @@ model VisualPrimitive {
   asset Asset? @relation("R_visualPrimitives_versionId_assetId_assets", fields: [versionId, assetId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([templateId, layer, ordinal], map: "visual_primitive_order")
-  // PostgreSQL CHECK constraint visual_primitive_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint visual_primitive_kind: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("visual_primitives")
   @@schema("bgwq")
 }
@@ -562,8 +562,8 @@ model Game {
   @@unique([id, versionId], map: "game_version_id")
   @@unique([creatorId, creationKey], map: "game_creation_key")
   @@index([status, expiresAt], map: "games_expiry")
-  // PostgreSQL CHECK constraint game_revision_nonnegative: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint game_lifecycle_timestamps: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_revision_nonnegative: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_lifecycle_timestamps: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("games")
   @@schema("bgwq")
 }
@@ -595,7 +595,7 @@ model Participant {
   @@unique([gameId, userId], map: "participant_user_game")
   @@unique([gameId, seat], map: "participant_seat")
   @@index([userId, gameId], map: "participant_by_user")
-  // PostgreSQL CHECK constraint participant_seat_nonnegative: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint participant_seat_nonnegative: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("participants")
   @@schema("bgwq")
 }
@@ -645,7 +645,7 @@ model GameEntity {
   // PostgreSQL permits multiple NULL seed IDs; instantiated seeds remain unique.
   @@unique([gameId, seedId], map: "game_entity_seed_unique")
   @@index([gameId, locationId], map: "game_entity_location")
-  // PostgreSQL CHECK constraint runtime_entity_self: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint runtime_entity_self: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("game_entities")
   @@schema("bgwq")
 }
@@ -682,13 +682,13 @@ model GameValue {
   refParticipantId String? @db.Uuid @map("ref_participant_id")
   updatedRevision BigInt @map("updated_revision")
   version Game @relation("R_gameValues_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
-  gameEntitie GameEntity @relation("R_gameValues_gameId_entityId_gameEntities", fields: [gameId, entityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  gameEntity GameEntity @relation("R_gameValues_gameId_entityId_gameEntities", fields: [gameId, entityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
   field Field @relation("R_gameValues_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
   referenceEntity GameEntity? @relation("R_gameValues_gameId_refEntityId_gameEntities", fields: [gameId, refEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
   referenceParticipant Participant? @relation("R_gameValues_gameId_refParticipantId_participants", fields: [gameId, refParticipantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([entityId, fieldId])
-  // PostgreSQL CHECK constraint game_value_exactly_one: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_value_exactly_one: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("game_values")
   @@schema("bgwq")
 }
@@ -704,14 +704,14 @@ model GameComposite {
   typeKey String @map("type_key")
   createdRevision BigInt @map("created_revision")
   version Game @relation("R_gameComposites_gameId_versionId_games", fields: [gameId, versionId], references: [id, versionId], onDelete: NoAction, onUpdate: NoAction)
-  gameEntitie GameEntity @relation("R_gameComposites_gameId_ownerEntityId_gameEntities", fields: [gameId, ownerEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  gameEntity GameEntity @relation("R_gameComposites_gameId_ownerEntityId_gameEntities", fields: [gameId, ownerEntityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
   field Field @relation("R_gameComposites_versionId_fieldId_fields", fields: [versionId, fieldId], references: [versionId, id], onDelete: NoAction, onUpdate: NoAction)
   gameCompositeEntries GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_compositeId_gameComposites")
   gameCompositeEntries2 GameCompositeEntry[] @relation("R_gameCompositeEntries_gameId_childCompositeId_gameComposites")
 
   @@unique([gameId, id], map: "game_composite_game_id")
   @@unique([ownerEntityId, fieldId], map: "game_composite_owner_field")
-  // PostgreSQL CHECK constraint game_composite_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_composite_kind: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("game_composites")
   @@schema("bgwq")
 }
@@ -740,9 +740,9 @@ model GameCompositeEntry {
   @@unique([compositeId, ordinal], map: "game_composite_entry_order")
   // Multiple NULL keys represent list members; defined record-member keys are unique.
   @@unique([compositeId, memberKey], map: "game_composite_record_key")
-  // PostgreSQL CHECK constraint game_composite_entry_index: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint game_composite_entry_value: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint game_composite_no_self: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_composite_entry_index: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_composite_entry_value: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint game_composite_no_self: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("game_composite_entries")
   @@schema("bgwq")
 }
@@ -758,7 +758,7 @@ model Clock {
   participant Participant @relation("R_clocks_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([gameId, participantId])
-  // PostgreSQL CHECK constraint clock_nonnegative: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint clock_nonnegative: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("clocks")
   @@schema("bgwq")
 }
@@ -809,11 +809,11 @@ model EventValue {
   entityId String? @db.Uuid @map("entity_id")
   participantId String? @db.Uuid @map("participant_id")
   event Event @relation("R_eventValues_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
-  gameEntitie GameEntity? @relation("R_eventValues_gameId_entityId_gameEntities", fields: [gameId, entityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
+  gameEntity GameEntity? @relation("R_eventValues_gameId_entityId_gameEntities", fields: [gameId, entityId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
   participant Participant? @relation("R_eventValues_gameId_participantId_participants", fields: [gameId, participantId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([eventId, category, key, ordinal], map: "event_value_ordinal")
-  // PostgreSQL CHECK constraint event_value_one_payload: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint event_value_one_payload: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("event_values")
   @@schema("bgwq")
 }
@@ -845,7 +845,7 @@ model EventMutation {
   event Event @relation("R_eventMutations_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([eventId, ordinal], map: "mutation_event_ordinal")
-  // PostgreSQL CHECK constraint mutation_target_kind: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint mutation_target_kind: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("event_mutations")
   @@schema("bgwq")
 }
@@ -862,7 +862,7 @@ model Award {
   event Event @relation("R_awards_gameId_eventId_events", fields: [gameId, eventId], references: [gameId, id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([gameId, participantId, objectiveEntityId])
-  // PostgreSQL CHECK constraint award_points: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint award_points: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("awards")
   @@schema("bgwq")
 }
@@ -879,8 +879,8 @@ model Rating {
   definition Definition @relation("R_ratings_definitionId_definitions", fields: [definitionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([userId, definitionId])
-  // PostgreSQL CHECK constraint rating_counts: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
-  // PostgreSQL CHECK constraint rating_nonnegative: defined in INTEGRITY.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint rating_counts: defined in integrity.sql (not supported by Prisma Schema Language).
+  // PostgreSQL CHECK constraint rating_nonnegative: defined in integrity.sql (not supported by Prisma Schema Language).
   @@map("ratings")
   @@schema("bgwq")
 }

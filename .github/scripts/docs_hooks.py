@@ -40,6 +40,15 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
                     ".agents/notes/requirements/" in p.as_posix()
                     and p.suffix.lower() in {".mmd", ".yaml", ".json", ".prisma", ".sql"}
                 )
+                or (
+                    p.relative_to(root).parts[0] == "data"
+                    and p.suffix.lower() in {".json", ".sql"}
+                )
+                or p.relative_to(root).as_posix() in {
+                    "packages/server/api/openapi.yaml",
+                    "packages/server/supabase/schema.prisma",
+                    "packages/server/supabase/integrity.sql",
+                }
             )
         ),
         key=lambda p: p.relative_to(root).as_posix(),

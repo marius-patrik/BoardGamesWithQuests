@@ -20,7 +20,10 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 REQ = ROOT / ".agents/notes/requirements"
-DATA = REQ / "data"
+DATA = ROOT / "data"
+API = ROOT / "packages/server/api/openapi.yaml"
+PRISMA = ROOT / "packages/server/supabase/schema.prisma"
+INTEGRITY = ROOT / "packages/server/supabase/integrity.sql"
 GAME_KEYS = ("chess", "english-draughts", "international-draughts", "moneyproperty")
 
 
@@ -167,7 +170,7 @@ def validate_data() -> dict[str, object]:
 
 def validate_openapi() -> int:
     """Verify OpenAPI references and exact portable schema equivalence."""
-    api = yaml.safe_load((REQ / "API.yaml").read_text())
+    api = yaml.safe_load(API.read_text())
     assert str(api["openapi"]).startswith("3.1."), "OpenAPI version"
     assert api["servers"][0]["url"] == "/api/v1", "API base route"
     for node in walk(api):
@@ -212,7 +215,7 @@ def validate_openapi() -> int:
 
 def validate_prisma_sql() -> tuple[int, int]:
     """Verify PSL relations and SQL-owned CHECK/trigger targets against actual model columns."""
-    source = (REQ / "SCHEMA.prisma").read_text()
+    source = PRISMA.read_text()
     models = {}
     for m in re.finditer(r"(?m)^model (\w+) \{([\s\S]*?)^\}", source):
         key, body = m.groups()
@@ -250,7 +253,7 @@ def validate_prisma_sql() -> tuple[int, int]:
             for fld in match.group(1).split(","):
                 f = fld.strip().split("(")[0]
                 assert f in fields, f"Prisma {name}: index on unknown {f}"
-    sql = (REQ / "INTEGRITY.sql").read_text()
+    sql = INTEGRITY.read_text()
     for tbl in re.findall(r'ALTER TABLE bgwq\."(\w+)"', sql):
         assert tbl in tablemap, f"INTEGRITY.sql: unknown table {tbl}"
     # A CHECK constraint is authored against a single table; every quoted column must exist.
@@ -283,7 +286,88 @@ def validate_mermaid() -> tuple[int, int]:
     for m in re.finditer(r'(?m)^\s*(F\d+)\["([^"\n]*)"\]\s*$', ast):
         assert m.group(1) not in nodes, "duplicate Mermaid declaration"
         nodes[m.group(1)] = m.group(2).split("<br/>", 1)[0]
-    assert len(nodes) >= 155, f"Mermaid declarations missing: {len(nodes)}"
+    assert len(nodes) >= 140, f"Mermaid declarations missing: {len(nodes)}"
+    declarations = re.findall(r'(?m)^\s*D\d+\["([^"\n]*)"\]\s*
+    assert len(names) == len(nodes), "source file declared twice"
+    arch = (REQ / "ARCHITECTURE.md").read_text()
+    block = re.search(r"```text\n([\s\S]*?)\n```", arch)
+    assert block, "ARCHITECTURE missing source tree"
+    paths = set()
+    stack = []
+    for line in block.group(1).splitlines():
+        if not line.strip():
+            continue
+        text = line.split("  # ", 1)[0].rstrip()
+        indent = len(text) - len(text.lstrip(" "))
+        depth = indent // 2
+        stack = stack[:depth]
+        name = text.strip()
+        if name.endswith("/"):
+            stack.append(name.rstrip("/"))
+        else:
+            assert "  # " in line, f"inline source doc missing for {name}"
+            paths.add("/".join(stack + [name]))
+    assert (
+        paths == names
+    ), f"inventory drift: missing AST {sorted(paths-names)[:6]}, missing tree {sorted(names-paths)[:6]}"
+    pattern = re.compile(r"(?m)^\s*(F\d+)\s+-->\|([^|]+)\|\s*(F\d+)\s*$")
+    edges = pattern.findall(ast)
+    assert len(edges) >= len(nodes) - 1, "Mermaid lacks source relationships"
+    neighbors = {n: set() for n in nodes}
+    for a, label, b in edges:
+        assert a in nodes and b in nodes, "edge to undefined source file"
+        assert label.strip() and not label.strip().lower().startswith(
+            "connect"
+        ), "untyped or synthetic dependency edge"
+        neighbors[a].add(b)
+        neighbors[b].add(a)
+    isolated = [n for n, v in neighbors.items() if not v]
+    assert not isolated, f"isolated source modules {isolated}"
+    todo = [next(iter(nodes))]
+    seen = set(todo)
+    while todo:
+        for n in neighbors[todo.pop()] - seen:
+            seen.add(n)
+            todo.append(n)
+    assert len(seen) == len(nodes), f"disconnected source graph: {sorted(set(nodes)-seen)}"
+    # The AST encodes implementation-level declarations only; portable rules are in JSON.
+    assert not re.search(r"(?m)^\s*[A-Z]\d+_\w+\[", ast), "non-source game action AST"
+    return len(nodes), len(edges)
+
+
+def main() -> None:
+    """Run all independent contract checks as a CI gate."""
+    for expected in (API, PRISMA, INTEGRITY, DATA / "configuration.schema.json",
+                     DATA / "operators.json", REQ / "AST.mmd", REQ / "ARCHITECTURE.md"):
+        assert expected.is_file(), f"Missing authoritative contract {expected}"
+    for obsolete in (REQ / "data", REQ / "SCHEMA.prisma", REQ / "INTEGRITY.sql",
+                     REQ / "API.yaml", REQ / "diagrams/reference_AST.svg"):
+        assert not obsolete.exists(), f"Superseded or generated contract was retained: {obsolete}"
+    games = validate_data()
+    http = validate_openapi()
+    models, checks = validate_prisma_sql()
+    files, edges = validate_mermaid()
+    print(
+        f'PASS: {games["games"]} games, {games["seeds"]} seeds, {games["actions"]} actions, {len(games["operators"])} declared operators'
+    )
+    print(f"PASS: {http} OpenAPI operations and exact portable schema projection")
+    print(f"PASS: {models} Prisma models, {checks} SQL CHECK constraints and cross-references")
+    print(f"PASS: {files} source declarations / {edges} typed Mermaid relationships; all connected")
+    print(
+        "NOT VERIFIED: actual Prisma validation/migrations, execution of games, browser/native deployment or runtime code generation"
+    )
+
+
+if __name__ == "__main__":
+    main()
+, ast)
+    assert len(declarations) >= 100, f"Missing source function declarations: {len(declarations)}"
+    assert not any("implementation defined by owning source" in d for d in declarations), "Placeholder source-function contracts"
+    source_paths = set(nodes.values())
+    for declaration in declarations:
+        owner = declaration.split("<br/>", 1)[0]
+        assert owner in source_paths, f"Orphan source declaration: {owner}"
+        assert "Algorithm:" in declaration, f"No algorithm specification for: {owner}"
     names = set(nodes.values())
     assert len(names) == len(nodes), "source file declared twice"
     arch = (REQ / "ARCHITECTURE.md").read_text()

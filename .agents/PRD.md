@@ -80,10 +80,10 @@ The web app uses **Wouter** for routing, SVG primitives for space/entity visuals
 The product requirements above are defined by the following **single-source contracts**, which must agree with one another:
 
 - [ARCHITECTURE.md](notes/requirements/ARCHITECTURE.md) — source tree with inline responsibilities, package boundaries, frameworks, tooling, and deployment.
-- [API.yaml](notes/requirements/API.yaml) — complete OpenAPI 3.1 HTTP contract and payload schemas.
-- [SCHEMA.prisma](notes/requirements/SCHEMA.prisma) — relational PostgreSQL entities, fields, relations and indexes.
-- [INTEGRITY.sql](notes/requirements/INTEGRITY.sql) — PostgreSQL-only integrity and Supabase Auth/Realtime security (not expressible in Prisma Schema Language).
+- [openapi.yaml](../packages/server/api/openapi.yaml) — complete OpenAPI 3.1 HTTP contract and payload schemas.
+- [schema.prisma](../packages/server/supabase/schema.prisma) — relational PostgreSQL entities, fields, relations and indexes.
+- [integrity.sql](../packages/server/supabase/integrity.sql) — PostgreSQL-only integrity and Supabase Auth/Realtime security (not expressible in Prisma Schema Language).
 - [AST.mmd](notes/requirements/AST.mmd) — pure Mermaid source-declaration and dependency graph; rendered interactively by the documentation site, **without committing an SVG**.
-- [data/](notes/requirements/data/) — portable configuration JSON Schema, four self-contained game configurations, operator semantics and provisioning DML.
+- [data/](../data/) — portable configuration JSON Schema, four self-contained game configurations, operator semantics and provisioning DML.
 
 **Authority:** the API YAML, Prisma schema, Mermaid graph, and portable JSON files are normative inputs, not illustrations. The PRD defines product behavior and invariants; it does not duplicate their contents. A diagram specifies source architecture and exported interfaces, but is not an executable substitute for function bodies. Complete behavior is verified against a running generic engine and database, not inferred from document shape.

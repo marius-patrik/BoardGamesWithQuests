@@ -1,10 +1,10 @@
 -- BoardGamesWithQuests supplemental PostgreSQL declarations.
--- SCHEMA.prisma is authoritative for tables, enums, indexes and intra-bgwq FKs.
+-- schema.prisma is authoritative for tables, enums, indexes and intra-bgwq FKs.
 -- This file defines features Prisma schema language cannot safely model:
 -- CHECK constraints, partial unique indexes, Supabase-managed auth.users FKs,
 -- private Broadcast policies, publication immutability and revision/event parity.
 -- Reapply after Prisma Migrate; DO blocks are idempotent.
--- Changes to these contracts must be reviewed alongside SCHEMA.prisma.
+-- Changes to these contracts must be reviewed alongside schema.prisma.
 
 -- definition_builtin_ownership: definitions schema-level invariant.
 DO $bgwq_check$ BEGIN

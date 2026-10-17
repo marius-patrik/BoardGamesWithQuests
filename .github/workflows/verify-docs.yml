@@ -39,7 +39,21 @@ jobs:
           ast.parse(source)
           assert 'data-mermaid-viewer' in source
           assert Path('.agents/notes/requirements/AST.mmd').exists()
-          assert not Path('.agents/notes/requirements/diagrams/reference_AST.svg').exists()
+          for contract in (
+              'packages/server/api/openapi.yaml',
+              'packages/server/supabase/schema.prisma',
+              'packages/server/supabase/integrity.sql',
+              'data/configuration.schema.json', 'data/operators.json',
+              'data/chess.json', 'data/english-draughts.json',
+              'data/international-draughts.json', 'data/moneyproperty.json',
+          ):
+              assert Path(contract).is_file(), f'missing canonical source: {contract}'
+          for old in ('.agents/notes/requirements/data',
+                      '.agents/notes/requirements/API.yaml',
+                      '.agents/notes/requirements/SCHEMA.prisma',
+                      '.agents/notes/requirements/INTEGRITY.sql',
+                      '.agents/notes/requirements/diagrams/reference_AST.svg'):
+              assert not Path(old).exists(), f'stale duplicate source: {old}'
           PY
 
       - name: Verify repository-wide virtual documentation
@@ -54,6 +68,14 @@ jobs:
           assert 'data-switcher-versions' in homepage
           assert 'data-switcher-versions-group' in homepage
           assert (root / "site/assets/theme.css").is_file()
+          for source_page in (
+              'agents/notes/requirements/AST/index.html',
+              'packages/server/api/openapi/index.html',
+              'packages/server/supabase/schema/index.html',
+              'data/chess/index.html',
+              'data/configuration.schema/index.html',
+          ):
+              assert (root / 'site' / source_page).is_file(), f'missing rendered source: {source_page}'
           assert not (root / "theme").exists(), "theme assets now live under .github/docs-ui"
           assert (root / ".github/docs-ui/main.html").is_file()
           import subprocess
