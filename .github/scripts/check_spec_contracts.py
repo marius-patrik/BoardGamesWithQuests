@@ -48,7 +48,12 @@ def validate_data() -> dict[str, object]:
     schema = json.loads((DATA / "configuration.schema.json").read_text())
     jsonschema.Draft202012Validator.check_schema(schema)
     operator_registry = json.loads((DATA / "operators.json").read_text())["operators"]
-    hooks = set(re.findall(r"\('([a-z_]+(?:\.[a-z_]+)+)',\s*\d+", (ROOT / "packages/server/supabase/migrations/seed.sql").read_text()))
+    hooks = set(
+        re.findall(
+            r"\('([a-z_]+(?:\.[a-z_]+)+)',\s*\d+",
+            (ROOT / "packages/server/supabase/migrations/seed.sql").read_text(),
+        )
+    )
     counts = {"games": 0, "seeds": 0, "actions": 0, "operators": set()}
     for name in GAME_KEYS:
         doc = json.loads((DATA / f"{name}.json").read_text())
@@ -319,7 +324,9 @@ def validate_prisma_sql() -> tuple[int, int]:
         "CREATE CONSTRAINT TRIGGER check_game_revision_history" in sql
     ), "committed revision parity absent"
     assert "REFERENCES auth.users(id)" in sql, "Supabase Auth FK constraints absent"
-    assert "CREATE TRIGGER game_target_size_guard" in sql, "reference SQL omits bounded lobby target"
+    assert (
+        "CREATE TRIGGER game_target_size_guard" in sql
+    ), "reference SQL omits bounded lobby target"
     assert (
         "CREATE TRIGGER participant_capacity_guard" in sql and "FOR UPDATE OF g" in sql
     ), "concurrent joins lack enforced variable seat capacity"
