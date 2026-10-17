@@ -20,10 +20,18 @@ def test_gitlink_is_not_exposed_as_a_fake_source_file(tmp_path: Path) -> None:
     )
     (tmp_path / "README.md").write_text("# Actual source\\n", encoding="utf-8")
     subprocess.run(["git", "-C", str(tmp_path), "add", "README.md", ".gitmodules"], check=True)
-    subprocess.run([
-        "git", "-C", str(tmp_path), "update-index", "--add", "--cacheinfo",
-        "160000,fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4,.darkfactory",
-    ], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "update-index",
+            "--add",
+            "--cacheinfo",
+            "160000,fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4,.darkfactory",
+        ],
+        check=True,
+    )
     pages = build_docs.pages_for(tmp_path)
     assert {entry[0] for entry in pages} == {"README.md", ".gitmodules"}
     assert any("Actual source" in page[2] for page in pages)
