@@ -41,23 +41,14 @@ def test_sidebar_sections_exactly_match_git_tracked_directories():
         check=True,
         capture_output=True,
     ).stdout
-    paths = [
-        Path(name.decode("utf-8", "surrogateescape"))
-        for name in tracked.split(b"\0")
-        if name
-    ]
+    paths = [Path(name.decode("utf-8", "surrogateescape")) for name in tracked.split(b"\0") if name]
     # Git does not track empty folders, so only file ancestors may be sections.
     expected = {
-        "/" + "/".join(path.parts[:depth])
-        for path in paths
-        for depth in range(1, len(path.parts))
+        "/" + "/".join(path.parts[:depth]) for path in paths for depth in range(1, len(path.parts))
     }
     document = (SITE / "index.html").read_text(encoding="utf-8")
     sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
-    actual = {
-        unescape(name)
-        for name in re.findall(r'data-nav-section="([^"]+)"', sidebar)
-    }
+    actual = {unescape(name) for name in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
     assert actual == expected, (
         "Sidebar entries must correspond exactly to Git-tracked folders: "
         f"unexpected={sorted(actual - expected)}; missing={sorted(expected - actual)}"
