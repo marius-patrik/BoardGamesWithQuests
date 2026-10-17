@@ -1,6 +1,6 @@
 # BoardGamesWithQuests — Product Requirements Document
 
-**Product scope:** This is the target behavior; implementation progress is established by verified tests, not by the presence of source files. Reference UML: [reference_diagram.md](reference_diagram.md). Package ownership: [object_model.md](object_model.md).
+**Product scope:** This is the target behavior; implementation progress is established by verified tests, not by the presence of source files. Reference UML: [reference diagram](notes/reference_diagram.md). Package ownership: the canonical product contract.
 
 ## 1. Product
 
@@ -25,7 +25,7 @@ The complete user interface is a **React/Rsbuild** website, publicly hosted on *
 - No hard-coded game identity, royal king logic, pawn names or default board dimensions in shared engine. Domain-significant values are supplied explicitly.
 - No external chess rules library replacing the hand-implemented engine, unless separately approved. Modern approved runtime libraries for web/API/Supabase are allowed.
 - All public multiplayer state changes are authenticated, authorized, atomic and durable.
-- Existing source/reference UML is preserved as reference evidence; intentional divergence is registered in `object_model.md`.
+- Existing source/reference UML is preserved as reference evidence; intentional divergence is registered in the product requirements.
 - Permanent tests must assert real gameplay, API, UI and persistence behavior. Behavioral tests accompany every implementation chunk and are integrated into the permanent acceptance suite.
 - MkDocs, Material and mkdocstrings generate all documentation pages and navigation from Python source/docstrings. Strict builds have zero warnings or errors; repository specifications remain source references rather than static documentation pages or manual indices.
 
@@ -39,7 +39,7 @@ Forms for Board, Pieces, Rules, Quests and Clocks derive their allowed fields an
 
 ## 5. Naming and source UML
 
-English canonical names are used for shared domain types; the source-reference Czech naming and reference mapping remain in [reference_diagram.md](reference_diagram.md). Where the engine Python implementation needs Czech aliases, they bind to the same canonical domain class, not a parallel runtime. Canonical chess knight is `Knight`, not `Horse` or `Tower`. `GameView`/`PlayerView` are **React component responsibilities**, not classes to keep inside `engine/view`. See [object_model.md](object_model.md) for rationale and traceability.
+English canonical names are used for shared domain types; the source-reference Czech naming and reference mapping remain in [reference diagram](notes/reference_diagram.md). Where the engine Python implementation needs Czech aliases, they bind to the same canonical domain class, not a parallel runtime. Canonical chess knight is `Knight`, not `Horse` or `Tower`. `GameView`/`PlayerView` are **React component responsibilities**, not classes to keep inside `engine/view`. See the canonical product contract for rationale and traceability.
 
 ## 6. Package boundaries
 

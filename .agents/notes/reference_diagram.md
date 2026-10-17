@@ -15,7 +15,7 @@ The original source remains in [the external diagrams.net document](https://app.
 - **Source file**: `Šachy - diagram tříd.drawio`, with the full model on `Page-1` and the integration sketch on `MVC - GameView`.
 
 **Status**: this diagram is the assignment specification, **not** an inventory
-of completed gameplay. The independent [implementation diagram](object_model.md)
+of completed gameplay. The independent generated implementation diagram
 reflects the current partial codebase; later feature PRs must implement the
 remaining requirements. The rendered diagram is not evidence of implemented classes.
 
@@ -25,7 +25,7 @@ An inventory of the diagram, transcribed from the draw.io file. It records what
 the diagram **actually draws**, including where the diagram is inconsistent or
 incomplete, so that conformance claims elsewhere are checkable against it.
 
-Deviations from this inventory are recorded in `object_model.md`.
+Deviations from this inventory are recorded in `../PRD.md`.
 
 ---
 
@@ -63,14 +63,14 @@ Its operation compartment is prose rather than named operations, and enumerates:
 described as arriving "as a single parameter".
 
 The **`export writers`** box does **not** contain this list. It holds one field.
-Both facts are load-bearing: see `object_model.md` section 7.
+Both facts are load-bearing: see `../PRD.md` section 7.
 
 ### Free-standing notes on Page-1
 
 - **Validation timing**, still posed as an open question in the diagram:
   *"Validace tahu — Rozhodněme se, zda je lepší rozhodnout o proveditelnosti tahu
   pro každou figuru před tahem, nebo bezprostředně po kliknutí na konkrétní a pro
-  konkrétní figuru."* Resolved by `object_model.md` section 2 and FR-15.
+  konkrétní figuru."* Resolved by `../PRD.md` section 2 and FR-15.
 - *"Integer bude buď 1 nebo -1 podle barvy"*
 - *"Pro pěšáka se vektor vynásobí barvou"*
 
@@ -122,7 +122,7 @@ smoothing them over would make the deviations unverifiable.
 | `akutalizuj_hrace` | `u` and `t` are transposed relative to `aktualizuj_hrace` |
 | `Id_uzivatele: hrac` | a user id typed as a player |
 | `proveď_tah`, `over platnost` | Czech with diacritics inside member names |
-| `HracView` | **no class box exists.** It appears only as an attribute *type* on `GameManagerController`. The class is created as `PlayerView` — `object_model.md` section 15 |
+| `HracView` | **no class box exists.** It appears only as an attribute *type* on `GameManagerController`. The class is created as `PlayerView` — `../PRD.md` section 15 |
 
 ### Structural inconsistency
 
@@ -152,7 +152,7 @@ smoothing them over would make the deviations unverifiable.
 
 `List(Hrac)` and `List(Uzivatele)` cannot both hold. Page-1 is followed,
 because it is the full object model and page 2 is the integration sketch — see
-`object_model.md` section 14.
+`../PRD.md` section 14.
 
 Page-1 also writes `rozmery: Tuple = (8,8)`, hard-coding the default board size.
 That default is kept; nothing may rely on it.
@@ -181,9 +181,9 @@ listed here are already English in the diagram.
 | `User Manager` | `UserManager` | |
 | `Quest` | `Quest` | already English |
 | `Kwest` | `Quest` | appears only inside `splnene_kwesty` |
-| `Timer` | `Timer` | the configurable parent is `Clock` — `object_model.md` section 13 |
+| `Timer` | `Timer` | the configurable parent is `Clock` — `../PRD.md` section 13 |
 | `GameManagerController` | `GameManagerController` | already English; the diagram has no `GameController` or `WindowController` box |
 | `GameVeiw` | `GameView` | diagram typo |
 | `HracGameView` | `PlayerGameView` | the `Hrac` part is Czech |
 
-The normative alias table for the completed product is in [PRD §5](PRD.md#5-naming-requirements).
+The normative alias table for the completed product is in [PRD §5](../PRD.md#5-naming-requirements).

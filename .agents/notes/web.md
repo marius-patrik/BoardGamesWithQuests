@@ -11,5 +11,5 @@ bun run dev
 ```
 
 Build output is `dist/`. Use the separate Vercel web project
-`boardgameswithquests-web`. This is a functional React bootstrap but it
+`boardgameswithquests-web`. This is a functional React 
 contains no playable board games or account/session flows.

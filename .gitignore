@@ -54,3 +54,6 @@ logs/
 packages/server/.branches/
 packages/server/.temp/
 packages/server/supabase/.temp/
+
+# Web icon copied from canonical root asset during builds.
+packages/web/public/icon.svg
