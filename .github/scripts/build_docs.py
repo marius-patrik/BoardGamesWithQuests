@@ -162,7 +162,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                         f'<img src="{safe_url}" alt="{escape(rel.stem, quote=True)}"'
                         ' loading="lazy" draggable="false">'
                     )
-                    + f"\n[View original SVG]({raw_url})\n"
+                    + f'\n<a href="{safe_url}">View original SVG</a>\n'
                 )
         pages.append((name, dest, body))
     from html import escape
