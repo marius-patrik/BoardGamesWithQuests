@@ -1,6 +1,6 @@
-"""Versioned, bounded declarative condition/trigger validation.
+"""Versioned declarative validation, immutable data and traversal accounting.
 
-This module only validates configuration. It does not imply that a game can yet
+The declarative schema only validates configuration. It does not imply that a game can yet
 execute the validated operation set; no arbitrary string is ever evaluated as code.
 """
 
@@ -10,6 +10,23 @@ from typing import Any
 from collections.abc import Mapping
 from types import MappingProxyType
 import math
+
+
+def _json_work(value: Any) -> int:
+    """Measure deterministic JSON traversal and text-copy work.
+
+    Args:
+        value: Bounded validated JSON or its immutable representation.
+
+    Returns:
+        Nodes plus one work unit per 64 text characters.
+    """
+    if isinstance(value, Mapping):
+        return 1 + sum(1 + _json_work(child) for child in value.values())
+    if isinstance(value, (list, tuple)):
+        return 1 + sum(_json_work(child) for child in value)
+    return 1 + (len(value) // 64 if isinstance(value, str) else 0)
+
 
 MAX_DEPTH = 12
 MAX_NODES = 256

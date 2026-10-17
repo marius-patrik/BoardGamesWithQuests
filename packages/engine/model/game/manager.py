@@ -29,10 +29,10 @@ from engine.model.game.configuration import (
     board_from_definition,
     validate_definition,
 )
-from engine.model.game.hooks import HookInterpreter, PlannedEffect
+from engine.model.game.hooks import HookInterpreter, PlannedEffect, RuleProgram
 from engine.model.game.move import Move
 from engine.model.game.outcomes import resolve_outcome
-from engine.model.game.schema import freeze_json, thaw_json
+from engine.model.game.schema import freeze_json, thaw_json, _json_work
 from engine.model.game.snapshot_queries import SnapshotQueries
 from engine.model.game.validator import MoveValidator
 from engine.model.pieces.piece import Piece
@@ -43,22 +43,6 @@ MAX_SNAPSHOT_BYTES = 4194304
 # one traversal unit per value, and serialized text bounds its 64-character work.
 MAX_REPLAY_INITIAL_WORK = 2 * 65536 + MAX_SNAPSHOT_BYTES // 64
 MAX_REPLAY_WORK = MAX_EVENTS * MAX_EVALUATION_WORK + MAX_REPLAY_INITIAL_WORK
-
-
-def _json_work(value: Any) -> int:
-    """Measure deterministic JSON traversal and text-copy work.
-
-    Args:
-        value: Bounded validated JSON or its immutable representation.
-
-    Returns:
-        Nodes plus one work unit per 64 text characters.
-    """
-    if isinstance(value, Mapping):
-        return 1 + sum(1 + _json_work(child) for child in value.values())
-    if isinstance(value, (list, tuple)):
-        return 1 + sum(_json_work(child) for child in value)
-    return 1 + (len(value) // 64 if isinstance(value, str) else 0)
 
 
 class OperationEvaluation:
@@ -127,7 +111,7 @@ class GameManager:
         self._definition = definition
         self._lock = RLock()
         self._evaluation: OperationEvaluation | None = None
-        self._rule_work = _json_work(definition.rules)
+        self._program = RuleProgram(definition.rules)
         config = {
             "schema_version": 2,
             "name": definition.name,
@@ -159,6 +143,7 @@ class GameManager:
         if "starting_side" in definition.declared_optional_fields or definition.starting_side != 1:
             config["starting_side"] = definition.starting_side
         initial = definition.clock["initial_seconds"] * 1000
+        self._config = freeze_json(config)
         state: dict[str, Any] = {
             "version": 1,
             "game_id": game_id,
@@ -211,6 +196,29 @@ class GameManager:
             yield
         finally:
             self._evaluation = previous
+
+    def _copy_state(self, state: Mapping[str, Any]) -> dict[str, Any]:
+        """Isolate mutable session facts while sharing the pinned immutable config.
+
+        Args:
+            state: Owned authoritative or candidate state.
+
+        Returns:
+            Independent mutable fields with a read-only configuration reference.
+        """
+        mutable = {
+            key: value
+            for key, value in state.items()
+            if key not in {"config", "events", "position_history"}
+        }
+        self._charge(_json_work(mutable) + len(state["events"]) + len(state["position_history"]))
+        copied = thaw_json(mutable)
+        copied["config"] = self._config
+        # Executors append entries; existing event records and position strings
+        # are never mutated. Each projection owns both appendable containers.
+        copied["events"] = list(state["events"])
+        copied["position_history"] = list(state["position_history"])
+        return copied
 
     def _charge(self, units: int = 1) -> None:
         """Reserve aggregate work before an operation phase executes.
@@ -390,8 +398,9 @@ class GameManager:
                 return self._position_key(state)
         if self._evaluation.identity_probe_depth:
             raise QueryResolutionError("recursive position identity is not available")
-        self._charge(_json_work(state))
-        cache_key = json.dumps(thaw_json(state), sort_keys=True, separators=(",", ":"))
+        identity_input = {key: value for key, value in state.items() if key != "config"}
+        self._charge(_json_work(identity_input))
+        cache_key = json.dumps(thaw_json(identity_input), sort_keys=True, separators=(",", ":"))
         if cache_key in self._evaluation.identity_cache:
             return self._evaluation.identity_cache[cache_key]
         targets: dict[str, Any] = {}
@@ -401,7 +410,11 @@ class GameManager:
             if value is not None and target["legal_capture"]:
                 self._evaluation.identity_probe_depth += 1
                 try:
-                    value = value if self._legal_target_capture(thaw_json(state), value) else None
+                    value = (
+                        value
+                        if self._legal_target_capture(self._copy_state(state), value)
+                        else None
+                    )
                 finally:
                     self._evaluation.identity_probe_depth -= 1
             targets[name] = value
@@ -440,7 +453,10 @@ class GameManager:
         """
         side = state["active_side"]
         board = self._board(state)
-        for move in self._candidates(state, board, side, state["clocks"]["anchor_ms"]):
+        offered_intents = self._offers(state, board, side, state["clocks"]["anchor_ms"])
+        for move in self._candidates(
+            state, board, side, state["clocks"]["anchor_ms"], offered_intents
+        ):
             if move.end_pos != tuple(target):
                 continue
             try:
@@ -453,6 +469,8 @@ class GameManager:
                     move,
                     state["clocks"]["anchor_ms"],
                     enforce_clock=False,
+                    offered_intents=offered_intents,
+                    preview=True,
                 )
             except TransitionError:
                 continue
@@ -547,7 +565,6 @@ class GameManager:
         Returns:
             Trusted query registry and detached reference bindings.
         """
-        self._charge(_json_work(state))
         selectors = {"active": side, "opponent": -side}
         query_state = {
             "rule_state": state["rule_state"],
@@ -560,19 +577,7 @@ class GameManager:
                 "promotion": move.promotion if move else None,
             },
             "capture_paths": {name: self._paths(board, color) for name, color in selectors.items()},
-            "promotion_options": {
-                name: sorted(
-                    {
-                        option
-                        for record in self._placement(before_board or board)
-                        if record["side"] == color
-                        for option in self.definition.pieces[record["kind"]]
-                        .get("promotion", {})
-                        .get("options", ())
-                    }
-                )
-                for name, color in selectors.items()
-            },
+            "promotion_options": None,
             "clocks": {
                 name: max(
                     0,
@@ -586,11 +591,7 @@ class GameManager:
                 // 1000
                 for name, color in selectors.items()
             },
-            "position_key": (
-                None
-                if self._evaluation is not None and self._evaluation.identity_probe_depth
-                else self._position_key(state)
-            ),
+            "position_key": None,
             "position_history": state["position_history"],
             "position": {"board": state["board"], "active_side": state["active_side"]},
             "halfmove_count": state["halfmove_count"],
@@ -632,14 +633,105 @@ class GameManager:
                     "move.captures": len(captures),
                 }
             )
-        self._charge(_json_work(query_state))
+        snapshot_fields = {
+            "rule_state": "rule_state",
+            "special_rights": "special_rights",
+            "temporary_target": "temporary_targets",
+            "move_attribute": "move_attributes",
+            "capture_count": "capture_paths",
+            "capture_paths": "capture_paths",
+            "promotion_options": "promotion_options",
+            "clock_remaining": "clocks",
+            "history_count": "events",
+            "halfmove_count": "halfmove_count",
+            "last_action": "last_action",
+            "legal_move_count": "legal_move_counts",
+            "participant": "participants",
+            "position": "position",
+            "quest_progress": "quest_progress",
+            "repetition_count": "position_history",
+        }
+        field_work: dict[str, int] = {}
+        snapshots: dict[str, SnapshotQueries] = {}
+
+        def snapshot_query(name: str) -> Any:
+            """Bind only the field read by one snapshot operation.
+
+            Args:
+                name: Whitelisted snapshot query name.
+
+            Returns:
+                A query closure owning detached field data on its first use.
+            """
+
+            def invoke(params: Mapping[str, Any]) -> Any:
+                """Read a detached field from one isolated evaluation context.
+
+                Args:
+                    params: Closed declarative query parameters.
+
+                Returns:
+                    A detached query result.
+                """
+                field = snapshot_fields[name]
+                if name == "capture_count" and params.get("scope") == "candidate":
+                    field = "move_attributes"
+                if field == "promotion_options" and query_state[field] is None:
+                    records = self._placement(before_board or board)
+                    query_state[field] = {
+                        selector: sorted(
+                            {
+                                option
+                                for record in records
+                                if record["side"] == color
+                                for option in self.definition.pieces[record["kind"]]
+                                .get("promotion", {})
+                                .get("options", ())
+                            }
+                        )
+                        for selector, color in selectors.items()
+                    }
+                if field not in query_state:
+                    raise QueryResolutionError(f"snapshot field is unavailable: {field}")
+                if field not in snapshots:
+                    field_work[field] = _json_work(query_state[field])
+                    self._charge(2 * field_work[field])
+                    snapshots[field] = SnapshotQueries({field: thaw_json(query_state[field])})
+                self._charge(field_work[field])
+                return snapshots[field].bindings()[name](params)
+
+            return invoke
+
+        self._charge(len(query_state) + len(references))
         budget = self._evaluation.budget if self._evaluation is not None else None
         queries = {
             **BoardQueries(board, side, budget).bindings(),
-            **SnapshotQueries(query_state).bindings(),
+            **{
+                name: snapshot_query(name) for name in snapshot_fields if name != "repetition_count"
+            },
             "turn": BoardQueries(board, state["active_side"], budget).turn,
         }
 
+        def repetition(params: Mapping[str, Any]) -> int:
+            """Resolve position normalization only when repetition is queried.
+
+            Args:
+                params: Validated repetition query parameters.
+
+            Returns:
+                Occurrences of the effective position in the bound history.
+            """
+            key = (
+                None
+                if self._evaluation is not None and self._evaluation.identity_probe_depth
+                else self._position_key(state)
+            )
+            self._charge(3 * _json_work(state["position_history"]) + _json_work(key))
+            return SnapshotQueries(
+                {"position_key": key, "position_history": state["position_history"]}
+            ).repetition_count(params)
+
+        queries["repetition_count"] = repetition
         for name in BoardQueries(board, side, budget).bindings():
             if name == "turn":
                 continue
@@ -679,10 +771,11 @@ class GameManager:
 
             queries[name] = phased
 
-        def bounded_query(operation: Any) -> Any:
+        def bounded_query(name: str, operation: Any) -> Any:
             """Wrap a trusted query with its traversal reservation.
 
             Args:
+                name: Whitelisted operation identifier.
                 operation: Registered read-only query.
 
             Returns:
@@ -698,12 +791,14 @@ class GameManager:
                 Returns:
                     The query's independently validated JSON result.
                 """
-                self._charge(board.rows * board.cols + _json_work(query_state))
+                self._charge(1)
                 return operation(params)
 
             return invoke
 
-        return {name: bounded_query(operation) for name, operation in queries.items()}, references
+        return {
+            name: bounded_query(name, operation) for name, operation in queries.items()
+        }, references
 
     def _offers(
         self, state: dict[str, Any], board: Board, side: int, now_ms: int
@@ -805,7 +900,13 @@ class GameManager:
         return [Move(start, hops[-1], hops, choice) for choice in choices]
 
     def _candidate(
-        self, state: dict[str, Any], board: Board, move: Move, side: int, now_ms: int
+        self,
+        state: dict[str, Any],
+        board: Board,
+        move: Move,
+        side: int,
+        now_ms: int,
+        offered_intents: Mapping[Move, tuple[PlannedEffect, ...]] | None = None,
     ) -> tuple[list[list[int]], tuple[PlannedEffect, ...]]:
         """Require exact geometry or a complete server-enumerated capture chain.
 
@@ -815,6 +916,7 @@ class GameManager:
             move: Immutable intent.
             side: Active side being authorized.
             now_ms: Trusted evaluation timestamp.
+            offered_intents: Plans evaluated against exactly this observed state.
 
         Returns:
             Server-derived capture coordinates and offered auxiliary effects.
@@ -828,7 +930,9 @@ class GameManager:
         if piece is None or piece.getColor() != side:
             raise TransitionError("source does not belong to the active participant")
         self._promotion(piece, move, board.rows)
-        offers = self._offers(state, board, side, now_ms)
+        offers = (
+            self._offers(state, board, side, now_ms) if offered_intents is None else offered_intents
+        )
         if move in offers:
             target = board.get_piece_at(move.end_pos)
             if target is not None and target.getColor() == side:
@@ -886,7 +990,8 @@ class GameManager:
         Returns:
             Immutable effects in declared order.
         """
-        self._charge(self._rule_work)
+        if not self._program.rules(hook):
+            return ()
         queries, references = self._context(
             state,
             board,
@@ -901,11 +1006,7 @@ class GameManager:
             expired_side,
             event_actor,
         )
-        return (
-            HookInterpreter(thaw_json(self.definition.rules), queries, references)
-            .evaluate(hook)
-            .effects
-        )
+        return self._program.evaluate(hook, queries, references, self._charge).effects
 
     @staticmethod
     def _allowed(effects: tuple[PlannedEffect, ...]) -> bool:
@@ -1037,6 +1138,8 @@ class GameManager:
         now_ms: int,
         *,
         enforce_clock: bool = True,
+        offered_intents: Mapping[Move, tuple[PlannedEffect, ...]] | None = None,
+        preview: bool = False,
     ) -> tuple[dict[str, Any], Board, list[list[int]], tuple[PlannedEffect, ...], dict[str, Any]]:
         """Prepare the same complete isolated transition for execution and legal previews.
 
@@ -1048,6 +1151,9 @@ class GameManager:
             action_id: Stable action identifier.
             move: Complete candidate intent.
             now_ms: Trusted evaluation timestamp.
+            offered_intents: Plans owned by the observed-position enumeration.
+            preview: Discard-only legality projection. Position serialization is
+                unnecessary when no quest consumes the appended history entry.
             enforce_clock: Require action-time eligibility; position identity probes
                 evaluate capture legality independently of the built-in clock deadline.
 
@@ -1057,16 +1163,16 @@ class GameManager:
         Raises:
             TransitionError: Geometry, permission, clock or configured effects fail.
         """
-        self._charge(_json_work(state))
-        state = thaw_json(freeze_json(state))
+        observed = state
+        state = self._copy_state(state)
         elapsed = now_ms - state["clocks"]["anchor_ms"] if side == state["active_side"] else 0
         if enforce_clock and (elapsed < 0 or elapsed >= state["clocks"]["remaining_ms"][str(side)]):
             raise TransitionError("participant clock does not permit an action")
-        self._charge(_json_work(state))
-        observed = thaw_json(freeze_json(state))
         before_board = self._board(state)
         board = self._board(state)
-        captures, offered_effects = self._candidate(state, board, move, side, now_ms)
+        captures, offered_effects = self._candidate(
+            state, board, move, side, now_ms, offered_intents
+        )
         moving_piece = board.get_piece_at(move.start_pos)
         promotion = self._promotion(moving_piece, move, board.rows)
         reset = bool(captures)
@@ -1152,8 +1258,12 @@ class GameManager:
         )
         event["effects"] = emitted
         state["board"] = self._placement(board)
-        if self._evaluation is None or not self._evaluation.identity_probe_depth:
+        if (not preview or self.definition.quests) and (
+            self._evaluation is None or not self._evaluation.identity_probe_depth
+        ):
             state["position_history"].append(self._position_key(state))
+        if not self.definition.quests:
+            return state, board, captures, effects, event
         queries, references = self._context(
             state,
             board,
@@ -1172,7 +1282,12 @@ class GameManager:
         return state, board, captures, effects, event
 
     def _candidates(
-        self, state: dict[str, Any], board: Board, side: int, now_ms: int
+        self,
+        state: dict[str, Any],
+        board: Board,
+        side: int,
+        now_ms: int,
+        offered_intents: Mapping[Move, tuple[PlannedEffect, ...]] | None = None,
     ) -> list[Move]:
         """Build one bounded shared candidate set for authorization and identity probes.
 
@@ -1181,6 +1296,7 @@ class GameManager:
             board: Corresponding board.
             side: Evaluating participant side.
             now_ms: Trusted query timestamp.
+            offered_intents: Plans evaluated against this same observed position.
 
         Returns:
             Geometric, complete capture and declaratively offered intents.
@@ -1228,7 +1344,10 @@ class GameManager:
                         "candidate move enumeration exceeds bounded resources"
                     )
                 candidates.append(intent)
-        for move in self._offers(state, board, side, now_ms):
+        offers = (
+            self._offers(state, board, side, now_ms) if offered_intents is None else offered_intents
+        )
+        for move in offers:
             if move not in candidates:
                 if len(candidates) >= 4096:
                     raise QueryResolutionError(
@@ -1251,7 +1370,8 @@ class GameManager:
         if state["outcome"] is not None:
             return []
         board = self._board(state)
-        candidates = self._candidates(state, board, side, now_ms)
+        offered_intents = self._offers(state, board, side, now_ms)
+        candidates = self._candidates(state, board, side, now_ms, offered_intents)
         legal: list[Move] = []
         for move in candidates:
             try:
@@ -1263,6 +1383,8 @@ class GameManager:
                     "legal-preview",
                     move,
                     now_ms,
+                    offered_intents=offered_intents,
+                    preview=True,
                 )
             except TransitionError:
                 continue
@@ -1277,7 +1399,7 @@ class GameManager:
         """
         with self._lock, self._operation():
             self._charge(_json_work(self._state))
-            state = thaw_json(self._state)
+            state = self._copy_state(self._state)
             return self._legal_moves(state, state["active_side"], state["clocks"]["anchor_ms"])
 
     def get_state(self) -> dict[str, Any]:
@@ -1422,7 +1544,7 @@ class GameManager:
         if action["type"] == "claim_draw" and (side != active or expired):
             raise TransitionError("draw claim requires the active participant before expiry")
         original_board = self._board(state)
-        evaluation = thaw_json(freeze_json(state))
+        evaluation = self._copy_state(state)
         board = original_board
         intended = None
         captures: list[list[int]] = []
@@ -1552,7 +1674,7 @@ class GameManager:
         request = self._action(action)
         with self._lock, self._operation():
             self._charge(_json_work(self._state) + _json_work(request))
-            state = thaw_json(self._state)
+            state = self._copy_state(self._state)
             if actor_id not in state["participants"].values():
                 raise TransitionError("actor is not a game participant")
             for event in state["events"]:
@@ -1562,7 +1684,7 @@ class GameManager:
                     if (
                         event["actor"] == actor_id
                         and event["expected_revision"] == expected_revision
-                        and saved_request == request
+                        and thaw_json(saved_request) == request
                     ):
                         return thaw_json(freeze_json(event))
                     raise TransitionError("action identifier has a conflicting request")
@@ -1612,7 +1734,7 @@ class GameManager:
                 state["outcome"] = self._result((*effects, *terminal), state)
                 event["outcome"] = state["outcome"]
             self._charge(_json_work(state))
-            encoded = json.dumps(state, allow_nan=False, separators=(",", ":"))
+            encoded = json.dumps(thaw_json(state), allow_nan=False, separators=(",", ":"))
             if len(encoded.encode("utf-8")) > MAX_SNAPSHOT_BYTES:
                 raise TransitionError("snapshot exceeds bounded persistence size")
             self._state = freeze_json(state)
