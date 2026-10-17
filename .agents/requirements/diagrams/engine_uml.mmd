@@ -1,0 +1,124 @@
+classDiagram
+direction LR
+class GameService {
+  +create_game(actor, version_id, target, request_key) Game
+  +join_game(actor, invitation, seat) GameView
+  +submit_action(actor, game_id, command) GameView
+  +read_view(actor, game_id) GameView
+}
+class TransactionRepository {
+  +lock_game(game_id) GameRecord
+  +load_pinned_definition(version_id) DefinitionVersion
+  +load_authoritative_state(game_id) StateSnapshot
+  +commit_transition(transition, event) int
+  +find_idempotent_result(game_id, key) Event
+}
+class IdentityGuard {
+  +authenticate(session) Principal
+  +require_game_member(principal, game_id) Participant
+  +authorize_action(participant, command) void
+}
+class DefinitionValidator {
+  +validate_schema(document) DefinitionVersion
+  +validate_references(version) void
+  +validate_operator_budget(version) void
+  +validate_participant_bounds(version) void
+}
+class DefinitionVersion {
+  +id uuid
+  +min_participants int
+  +max_participants int
+  +semantics_version int
+  +published_at datetime
+}
+class GameState {
+  +game_id uuid
+  +version_id uuid
+  +target_participants int
+  +revision int64
+  +phase_id uuid
+  +active_participants ParticipantRef[]
+  +entities EntityState[]
+}
+class ParticipantRef {
+  +game_id uuid
+  +user_id uuid
+  +seat int
+  +role_id uuid
+}
+class Command {
+  +action_id uuid
+  +actor_id uuid
+  +source_entity_id uuid
+  +expected_revision int64
+  +idempotency_key string
+  +arguments TypedValue[]
+}
+class TypedValue {
+  +kind ValueKind
+  +value canonical
+}
+class CandidateEnumerator {
+  +enumerate(actor, state, version) ActionCandidate[]
+}
+class ExpressionEvaluator {
+  +evaluate(expr, context, budget) TypedValue
+}
+class EffectInterpreter {
+  +apply(effect, workspace, context) EffectResult
+}
+class HookScheduler {
+  +enqueue(hook, context) void
+  +drain_bounded(workspace) void
+}
+class TransitionWorkspace {
+  +state GameState
+  +mutations Mutation[]
+  +trusted_inputs TypedValue[]
+  +apply(mutation) void
+}
+class ObjectiveEvaluator {
+  +evaluate(state, workspace) Outcome[]
+}
+class EventRecord {
+  +game_id uuid
+  +revision int64
+  +request_digest string
+  +before_digest string
+  +after_digest string
+  +mutations Mutation[]
+  +trusted_inputs TypedValue[]
+}
+class ViewerProjection {
+  +project_state(participant, state) GameView
+  +available_actions(participant, state) ActionCandidate[]
+  +redact_secrets(viewer, state) GameView
+}
+class GameView {
+  +revision int64
+  +status string
+  +participants ParticipantRef[]
+  +available_actions ActionCandidate[]
+}
+GameService --> IdentityGuard : authenticates authorizes
+GameService --> TransactionRepository : controls transaction
+GameService --> CandidateEnumerator : checks legal action
+GameService --> TransitionWorkspace : proposes effects
+GameService --> ViewerProjection : projects viewer state
+TransactionRepository --> DefinitionVersion : loads immutable rules
+TransactionRepository --> GameState : locks and reads
+TransactionRepository --> EventRecord : append only atomic
+DefinitionValidator --> DefinitionVersion : approves publication
+GameState "1" o-- "2..*" ParticipantRef : occupied seats
+GameState "1" --> "1" DefinitionVersion : pins
+Command --> ParticipantRef : authenticated actor
+Command --> TypedValue : untrusted parameters
+CandidateEnumerator --> ExpressionEvaluator : pure predicates
+CandidateEnumerator --> DefinitionVersion : action templates
+TransitionWorkspace --> EffectInterpreter : applies typed effects
+TransitionWorkspace --> HookScheduler : bounded lifecycle
+TransitionWorkspace --> ObjectiveEvaluator : final outcomes
+TransitionWorkspace --> GameState : immutable before after
+EventRecord --> TransitionWorkspace : stores complete diff
+ViewerProjection --> GameState : authenticated read only
+ViewerProjection --> GameView : redacted response
