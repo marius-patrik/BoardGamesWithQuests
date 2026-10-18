@@ -654,6 +654,16 @@ flowchart LR
   n150ab2bfe8af4aa6c --> nd46017743d0da5b42
   n16d78b830903b8795["function_definition main"]
   n150ab2bfe8af4aa6c --> n16d78b830903b8795
+  nf82b40d222a1eb98e["package_desktop.py"]
+  n2092df3a19d2f7b13 --> nf82b40d222a1eb98e
+  n5c37adcd5d9481400["function_definition archive_bundle"]
+  nf82b40d222a1eb98e --> n5c37adcd5d9481400
+  n46ccfd4d93d244af9["function_definition build"]
+  nf82b40d222a1eb98e --> n46ccfd4d93d244af9
+  nb58a398e6708a6f8e["function_definition smoke"]
+  nf82b40d222a1eb98e --> nb58a398e6708a6f8e
+  n8855de36350a78584["function_definition main"]
+  nf82b40d222a1eb98e --> n8855de36350a78584
   n50f8f749b20de7e29["release_gate.py"]
   n2092df3a19d2f7b13 --> n50f8f749b20de7e29
   n18146ec0646429aaf["function_definition authorize_release"]
@@ -686,6 +696,14 @@ flowchart LR
   nd6487c9d1884235b7 --> n58b967f0eaae700a3
   n9ac875346544c2d84["function_definition test_image_and_diagram_viewers_offer_an_accessible_modal"]
   nd6487c9d1884235b7 --> n9ac875346544c2d84
+  n9ef040726b4477815["test_desktop_packaging_setup.py"]
+  nc9f5868186eb03f66 --> n9ef040726b4477815
+  n2b9aa3ef76e7108e6["class_definition DesktopPackagingInfrastructureTests"]
+  n9ef040726b4477815 --> n2b9aa3ef76e7108e6
+  nec635a34d0cea1975["function_definition test_archive_outputs_verified_sha256_for_each_supported_platform"]
+  n9ef040726b4477815 --> nec635a34d0cea1975
+  n5ff7ff04595ea1e8c["function_definition test_release_is_gated_on_real_platform_artifacts"]
+  n9ef040726b4477815 --> n5ff7ff04595ea1e8c
   n905320175c75255b2["test_docs_artifacts.py"]
   nc9f5868186eb03f66 --> n905320175c75255b2
   n82a0b29577da561c3["function_definition run_record"]
@@ -842,6 +860,8 @@ flowchart LR
   nbf32064a6a26ab2df --> n287ff0a0ecf3283a1
   n84354cf99c1713fc6["deploy-docs.yml"]
   nbf32064a6a26ab2df --> n84354cf99c1713fc6
+  n31779a8c658939353["desktop-build.yml"]
+  nbf32064a6a26ab2df --> n31779a8c658939353
   n76ec2fd65ee9dad06["governance-docs.yml"]
   nbf32064a6a26ab2df --> n76ec2fd65ee9dad06
   n14cf6130af7812ba5["main-source.yml"]

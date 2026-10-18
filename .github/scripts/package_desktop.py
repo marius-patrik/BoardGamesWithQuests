@@ -15,7 +15,6 @@ import tarfile
 import time
 import zipfile
 
-
 ROOT = Path(__file__).resolve().parents[2]
 PLATFORMS = {"windows-x64", "macos-arm64", "macos-x64", "linux-x64"}
 VERSION = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
@@ -56,14 +55,29 @@ def build(platform: str, version: str) -> Path:
     dist = ROOT / "dist/desktop"
     work = ROOT / "build/pyinstaller"
     args = [
-        sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--onedir",
-        "--windowed", "--name", "BoardGamesWithQuests",
-        "--paths", str(ROOT / "src"),
-        "--add-data", f"{games}{os.pathsep}games",
-        "--collect-submodules", "games",
-        "--copy-metadata", "boardgameswithquests",
-        "--distpath", str(dist), "--workpath", str(work),
-        "--specpath", str(ROOT / "build"),
+        sys.executable,
+        "-m",
+        "PyInstaller",
+        "--noconfirm",
+        "--clean",
+        "--onedir",
+        "--windowed",
+        "--name",
+        "BoardGamesWithQuests",
+        "--paths",
+        str(ROOT / "src"),
+        "--add-data",
+        f"{games}{os.pathsep}games",
+        "--collect-submodules",
+        "games",
+        "--copy-metadata",
+        "boardgameswithquests",
+        "--distpath",
+        str(dist),
+        "--workpath",
+        str(work),
+        "--specpath",
+        str(ROOT / "build"),
         str(entry),
     ]
     subprocess.run(args, cwd=ROOT, check=True)
@@ -89,8 +103,12 @@ def smoke(bundle: Path, platform: str) -> None:
     try:
         time.sleep(5)
         if process.poll() is not None:
-            error = process.stderr.read().decode("utf-8", errors="replace") if process.stderr else ""
-            raise RuntimeError(f"Packaged GUI exited before smoke interval: {process.returncode}: {error}")
+            error = (
+                process.stderr.read().decode("utf-8", errors="replace") if process.stderr else ""
+            )
+            raise RuntimeError(
+                f"Packaged GUI exited before smoke interval: {process.returncode}: {error}"
+            )
     finally:
         process.terminate()
         try:
@@ -107,9 +125,7 @@ def main() -> None:
     args = parser.parse_args()
     bundle = build(args.platform, args.version)
     smoke(bundle, args.platform)
-    archive, checksum = archive_bundle(
-        bundle, ROOT / "dist/release", args.platform, args.version
-    )
+    archive, checksum = archive_bundle(bundle, ROOT / "dist/release", args.platform, args.version)
     print(f"Verified desktop bundle: {bundle}")
     print(f"Release asset: {archive}")
     print(f"SHA256: {checksum}")
