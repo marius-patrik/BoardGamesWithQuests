@@ -4,9 +4,8 @@
 
 ## Linked issue
 
-<!-- Bind the scoped (possibly consolidated) work item with Closes/Fixes/Resolves #NUMBER: this is required by native issue-binding CI. Separately reference the unified master. NEVER use Closes #348 because the master must stay open until all work is verified. -->
-Closes #<scoped-issue-number>
-Refs #348
+<!-- Use 'Advances #348' for partial delivery and name the relevant acceptance gate; never auto-close the single master issue. -->
+Advances #348
 
 ## Changes and dependencies
 
