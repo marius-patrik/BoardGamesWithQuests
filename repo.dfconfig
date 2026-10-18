@@ -8,13 +8,11 @@
       "project_title": "BoardGamesWithQuests",
       "agent_slug": "boardgameswithquests-agent",
       "default_branch": "main",
-      "description": "Configurable chess/checkers app with declarative JSON game rules, React frontend, and Python backend on Vercel.",
+      "description": "Committed Python/Tkinter board-game engine with chess/checkers configuration and GitHub documentation.",
       "topics": [
         "chess",
         "checkers",
         "python",
-        "typescript",
-        "react",
         "game",
         "education"
       ],
@@ -155,7 +153,7 @@
         ]
       },
       "server": {
-        "description": "FastAPI, Supabase auth, transactional game persistence and Realtime",
+        "description": "Issue triage for server and persistence work",
         "keywords": [
           "server",
           "api",
@@ -167,7 +165,7 @@
         ]
       },
       "web": {
-        "description": "React/Rsbuild/TypeScript/Bun user interface and configuration forms",
+        "description": "Issue triage for web interface work",
         "keywords": [
           "react",
           "web",
@@ -178,7 +176,7 @@
         ]
       },
       "desktop": {
-        "description": "Tauri native wrapper for the hosted web UI",
+        "description": "Issue triage for native application work",
         "keywords": [
           "tauri",
           "desktop",
@@ -238,7 +236,7 @@
     "version": 1,
     "site": {
       "name": "BoardGamesWithQuests",
-      "description": "JSON-driven chess and checkers Python engine and React application"
+      "description": "Source-derived documentation for the committed Python engine and repository governance"
     },
     "home": "README.md"
   },
