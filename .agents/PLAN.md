@@ -1,52 +1,45 @@
 # Plan — BoardGamesWithQuests
 
-**Target:** standalone Python/Tkinter `v1.0.0` · **Integration:** `develop` · **Release:** `main`  
-**PR stack:** `#414 → #271 → #422` · **Current phase:** 0
+**Target:** standalone Python/Tkinter `v1.0.0` · **Integration:** `develop` · **Release:** `main`
+
+The repository foundation and release/provider setup on #414 are **handed off to the authorized local agent**. Their remaining work and acceptance are recorded in that agent's execution instructions, **not duplicated in this plan**. Do not treat #414 as merged or provider policies as enforced until the agent supplies verifiable evidence and the maintainer approves.
 
 ## Execution order
 
 | Phase | Owner | Remaining outcome | Status |
 | --- | --- | --- | --- |
-| **0 — Foundation** | **#414** | Verify repository/provider settings, release and docs infrastructure; finish review and merge | In progress |
-| **1 — Desktop** | **#271** | Complete application, mandatory GUI acceptance, native package verification and review | Pending |
-| **2 — Release** | Promotion PR | Integrate, approve `develop → main` and publish verified `v1.0.0` | Pending |
+| **1 — Desktop** | **#271** | Complete and verify the Python/Tkinter application, mandatory GUI acceptance and native packaged distributions | Pending #414 approval/integration |
+| **2 — Release** | Promotion PR | Approve `develop → main` and automatically publish verified `v1.0.0` | Pending desktop acceptance |
 | **3 — Migration** | **#422** | Complete and verify FastAPI, Supabase, React, Tauri and multiplayer | Deferred until v1.0.0 |
+
+**Stack:** `develop → #414 → #271 → #422`.
 
 ## Completion criteria
 
-- [ ] #414 is independently reviewed, its required live settings are verified, and it is approved and merged.
-- [ ] #271 provides complete playable chess/draughts through Tkinter, passing real-GUI acceptance, resolved reviews and verified standalone distributions for all four platform targets; it is approved and merged.
-- [ ] A reviewed same-repository `develop → main` promotion automatically publishes `v1.0.0` through PrideVer for the correct commit with four verified distributions and SHA256 checksums.
-- [ ] #422 remains excluded until desktop v1.0.0 is released and verified.
-
-## Phase 0 — Repository foundation (#414)
-
-- [ ] Independently review the final #414 diff, generated requirements/architecture documents, workflow security and release gates; correct findings and re-run required checks.
-- [ ] Verify actual `develop` branch rules, required check contexts, approvals and restrictions on force pushes/deletion.
-- [ ] With approved administrator access, bootstrap trusted `main-source` and release workflows on `main` and enforce PR-only same-repository `develop` promotion, strict quality checks, independent approval, resolved conversations, admin protection and restrictions on force pushes/deletion.
-- [ ] Verify GitHub Pages Actions publication and PR preview lifecycle; resolve unrelated Vercel web/API required-check interference without disabling relevant safeguards.
-- [ ] Inspect GitHub's live provider settings and final checks; obtain maintainer approval, merge #414 and verify the result.
-
-**Blocker:** Native GitHub protection administration currently returns HTTP 403 through the connected integration. Checked-in policy is not proof of provider enforcement. The existing packaging infrastructure cannot be accepted as functional desktop distributions until Phase 1 exercises the complete GUI.
+- [ ] #271 is mergeable after #414 integration; chess and draughts are playable through real Tkinter GUI acceptance, applicable reviews are addressed, and four native distributions are tested.
+- [ ] #271 is reviewed, approved and merged into `develop`.
+- [ ] Approved same-repository `develop → main` promotion automatically publishes `v1.0.0` through PrideVer for the exact commit with four verified distributions and checksums.
+- [ ] #422 remains excluded until the desktop release succeeds and is verified.
 
 ## Phase 1 — Python/Tkinter application (#271)
 
-- [ ] Bring #271 into alignment with the updated #414 base, resolve its current non-mergeable state, and inspect the consolidated desktop diff for duplicate state owners, imports, game definitions, resources and application boundaries.
-- [ ] Complete and verify chess, English draughts, clocks, quests, settings, notation/exports, persistence, error handling, new games and all real Tkinter interactions.
-- [ ] Replace ineffective tests; run mandatory real/virtual-display GUI acceptance without silent skips and verify the supported Python-version matrix.
-- [ ] Run Phase 0 native packaging against the complete application on Windows x64, macOS ARM64/x64 and Linux x64. Verify packaged startup, gameplay, bundled resources, persistence and checksums; ensure failures block publication.
-- [ ] Address remaining #271 review comments and applicable archived #405 feedback; update current-state requirements, architecture, notes, tests and generated docs in #271; independently review and obtain approval.
+- [ ] Synchronize #271 with the verified #414 result and resolve its current non-mergeable state; review the complete desktop diff, game/controller/view state, imports, configuration ownership and runtime resources.
+- [ ] Complete and verify chess and English-draughts rules and outcomes, clocks, quests, settings, notation/exports, persistence, error recovery, new games, and actual Tkinter interactions.
+- [ ] Correct ineffective tests and require actual/virtual-display GUI acceptance without silent skips; verify the Python 3.10–3.13 quality matrix.
+- [ ] Execute the native desktop packaging workflow defined on #414 against the finished `src/` app. Prove Windows x64, macOS ARM64/x64 and Linux x64 standalone startup, gameplay, resources, persistence, version and SHA256 artifacts; ensure failures block publishing.
+- [ ] Reconcile outstanding #271 reviews and applicable historical #405 feedback. Update approved requests, accepted architecture, notes, diagrams, tests and generated docs in the same PR. Complete independent final review and seek maintainer approval.
 
-## Phase 2 — v1.0.0 release
+## Phase 2 — v1.0.0 integration and release
 
-- [ ] Merge the approved #271 into `develop` and verify the integrated application, mandatory tests and platform artifacts.
-- [ ] Confirm native `main` protections and trusted source/release workflows are operational, then approve a reviewed same-repository `develop → main` PR.
-- [ ] Allow guarded PrideVer resolution of `v1.0.0` and automatic publication only after all required platform jobs and checksums pass.
-- [ ] Verify public release status, immutable tag, intended source SHA, four packaged downloads and checksums.
+- [ ] Merge approved #271 into `develop`; verify actual integrated GUI, tests and platform distributions.
+- [ ] Confirm the delegated #414 handoff established the live `main` protections and trusted workflows before opening release promotion.
+- [ ] Review and approve a same-repository `develop → main` PR with the exact intended SHA.
+- [ ] Run the guarded PrideVer and native platform matrix after promotion; publish only the complete `v1.0.0` release.
+- [ ] Independently verify public tag, source commit, all four downloads and their checksums.
 
-## Phase 3 — Architectural migration (#422; after v1.0.0)
+## Phase 3 — Architectural migration (#422, after v1.0.0)
 
-- [ ] Reconcile #422 with the released application and its owning specification issues; fix actual Rust/Tauri Linux GLib CI dependencies.
-- [ ] Complete FastAPI, Supabase authentication/persistence, React gameplay, Tauri, multiplayer, provider/deployment verification and applicable reviews; obtain explicit merge approval.
+- [ ] Refresh #422 against the released desktop baseline and reconcile its owning implementation issues; fix actual Rust/Tauri Linux GLib CI failures.
+- [ ] Complete FastAPI, Supabase authentication/database, React gameplay, Tauri, multiplayer, provider/deployment verification and applicable reviews; request maintainer approval before merging.
 
-**Document ownership:** [GOAL](GOAL.md) defines outcomes; this file is the sole phase plan; [TODO](TODO.md) contains the active queue; [SCRATCHPAD](SCRATCHPAD.md) holds temporary evidence. Approved requests and accepted decisions document only implemented reality. Proposed future contracts remain in issues.
+**Document ownership:** [GOAL](GOAL.md) contains outcomes, [TODO](TODO.md) the current queue, and [SCRATCHPAD](SCRATCHPAD.md) temporary evidence. The PRD and architecture describe actual code, not proposed future contracts. The delegated Phase 0 task has no competing tracked roadmap.
