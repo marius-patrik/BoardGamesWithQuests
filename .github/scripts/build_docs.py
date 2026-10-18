@@ -198,6 +198,22 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
             return match.group(1) + relative + suffix + match.group(3)
 
         linked_pages.append((source, dest, anchor.sub(link, body)))
+    # Generated AST and implementation UML are derived from this commit's
+    # *actual* Git-tracked code. Never retain stale Mermaid snapshot blobs:
+    # dynamically publish navigable viewers plus raw .mmd assets.
+    from html import escape
+
+    for source_path, diagram in sorted(diagram_generator().generated_assets(root).items()):
+        original = "." + source_path if source_path.startswith("agents/") else source_path
+        if original in destinations:
+            raise ValueError(f"Generated diagram must not also be a committed authority: {original}")
+        dest = namespace + "/" + public_path(Path(original)) + ".md"
+        if dest in used:
+            raise ValueError(f"Generated diagram page collision: {dest}")
+        used.add(dest)
+        graphic = '<pre class="mermaid">' + escape(diagram, quote=False) + "</pre>"
+        viewer = f"# {escape(original, quote=False)}\\n\\n" + diagram_viewer_markup(graphic) + "\\n"
+        linked_pages.append((original, dest, viewer))
     return linked_pages
 
 
