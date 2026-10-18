@@ -1,4 +1,8 @@
-"""Black-box checks against the actual built ProperDocs site, not mocked builders."""
+"""Black-box checks against a *built* ProperDocs artifact.
+
+Explicitly invoked by documentation workflows after the site build; deliberately
+excluded from normal Python test discovery, which runs before documentation builds.
+"""
 
 from __future__ import annotations
 
