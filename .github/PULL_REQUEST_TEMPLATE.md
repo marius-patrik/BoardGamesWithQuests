@@ -27,7 +27,7 @@ Closes #
 
 - [ ] Updated any affected `.agents/{notes,requests,decisions,rules}/` source record and regenerated README, PRD, ARCHITECTURE and AGENTS in one diff
 - [ ] `python3 .github/scripts/generate_documents.py --check` passes, including symlinks, submodule and `.github/tests/` ownership
-- [ ] Template policy differences (development integration or release mode) are not silently enforced without #350 ratification
+- [ ] Accepted G1 policy is respected: finish the old PR stack before #404, then target dependency-stacked implementation PRs to `develop`. No unrequested promotion to `main`. G2 version/release choice remains pending #350.
 
 ## Artifact alignment
 
