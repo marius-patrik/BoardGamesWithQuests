@@ -4,7 +4,8 @@
 
 ## Linked issue
 
-<!-- Reference the single active issue #348 and identify the specific acceptance gate. Do not auto-close the master issue. -->
+<!-- Bind the scoped (possibly consolidated) work item with Closes/Fixes/Resolves #NUMBER: this is required by native issue-binding CI. Separately reference the unified master. NEVER use Closes #348 because the master must stay open until all work is verified. -->
+Closes #<scoped-issue-number>
 Refs #348
 
 ## Changes and dependencies
