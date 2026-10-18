@@ -31,7 +31,7 @@ Closes #
 
 - [ ] Updated any affected `.agents/{notes,requests,decisions,rules}/` source record and regenerated README, PRD, ARCHITECTURE and AGENTS in one diff
 - [ ] `python3 .github/scripts/generate_documents.py --check` passes, including symlinks, submodule and `.github/tests/` ownership
-- [ ] The **actual** branch policy is described correctly: current native #331 → #343 → #271 stack targets existing `main`; the proposed `develop` cutover, branch protection and release-trigger hardening remain unexecuted work in #404. DarkFactory PrideVer is the accepted versioning authority; no unrequested release or promotion.
+- [ ] The **actual** branch policy is described correctly: current native #331 → #343 → #271 stack targets existing `main`; the proposed `develop` cutover, branch protection and release-trigger hardening remain unexecuted work in #348. DarkFactory PrideVer is the accepted versioning authority; no unrequested release or promotion.
 
 ## Artifact alignment
 
