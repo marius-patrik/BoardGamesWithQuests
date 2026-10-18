@@ -324,6 +324,10 @@ def render_published_mermaid(site: Path) -> None:
 
     pages = []
     for page in site.rglob("index.html"):
+        if not page.is_file():
+            # A tracked web index.html becomes a navigable file-named directory.
+            # Only actual generated HTML page files are Mermaid render inputs.
+            continue
         text = page.read_text(encoding="utf-8")
         if '<pre class="mermaid">' in text:
             pages.append((page, text))
