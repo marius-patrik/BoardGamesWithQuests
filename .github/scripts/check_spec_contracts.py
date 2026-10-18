@@ -65,7 +65,10 @@ def main() -> None:
     assert "Realtime" in graph["client_uml"]
     # Implementation branches may add SQL/Prisma/JSON; this check validates the
     # shared design diagrams only. Runtime/provider gates must execute separately.
-    assert "**Reference limitations:**" in prd and "not sufficient for deterministic code generation" in prd, "diagram limitations and non-executable API reference must be explicit"
+    assert (
+        "**Reference limitations:**" in prd
+        and "not sufficient for deterministic code generation" in prd
+    ), "diagram limitations and non-executable API reference must be explicit"
     print("PASS: 12 Mermaid design diagrams, 33 operations, 28 DTOs, 38 models, 101 operators")
     print("NOT VERIFIED: deployed APIs, game JSON, runtime operators, migrations, RLS or gameplay")
 
