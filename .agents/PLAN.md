@@ -1,7 +1,7 @@
 # Plan
 
-Use [master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348) for all future implementation plans and dependency ordering, and [issue #350](https://github.com/marius-patrik/BoardGamesWithQuests/issues/350) for proposed technical contracts.
+The [unified master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348) is the sole active planning, contract-ratification and remaining-work register. Autonomous product implementation and contract progression are paused at the maintainer's request.
 
-The existing PR stack is [#331](https://github.com/marius-patrik/BoardGamesWithQuests/pull/331) → [#343](https://github.com/marius-patrik/BoardGamesWithQuests/pull/343) → [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271), subject to independent review. [#404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404) records the **unexecuted** branch migration.
+The existing PR stack is [#331](https://github.com/marius-patrik/BoardGamesWithQuests/pull/331) → [#343](https://github.com/marius-patrik/BoardGamesWithQuests/pull/343) → [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271), requiring independent maintainer approval for each merge. The branch cutover and further implementation are unperformed proposals tracked in the master issue.
 
-For each PR, update governed source records and regenerate documents to reflect exactly the committed implementation, never an aspirational API, SQL/DSL, UI or game contract.
+Every authorized PR updates the affected governance records and generated documents in the same change as its actual implementation. No future contracts are committed prematurely.
