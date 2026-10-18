@@ -10,7 +10,7 @@ Own dependency order and evidence collection without inventing or prematurely do
 
 ## Inputs
 
-- Committed repository, issue #348 and scoped implementation issues, actual CI, available tools and authorized workers.
+- Committed repository, relevant implementation issues, actual CI, available tools and authorized workers.
 
 ## Procedure
 

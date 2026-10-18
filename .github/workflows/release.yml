@@ -57,6 +57,16 @@ jobs:
             --repository "$GITHUB_REPOSITORY" --run-sha "$GITHUB_SHA" \
             --live-sha "$live_main" --checkout-sha "$(git rev-parse HEAD)"
 
+      - name: Enforce Python release enablement before publishing
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path("repo.dfconfig").read_text(encoding="utf-8"))
+          if config["repo"]["environment"]["release"]["python"]["enabled"] is not True:
+              raise SystemExit("Python release publishing is disabled until packaged distribution is ready")
+          PY
+
       - name: Checkout pinned DarkFactory release authority
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
