@@ -1,12 +1,19 @@
 ---
 status: published
 ---
-# Source and documentation layout
+# Current source and repository layout
 
-- `src/chesswithquests/` is the Python/Tkinter application entry point.
-- `src/controller/` owns GUI action dispatch; `src/view/` owns Tkinter interface widgets.
-- `src/model/` contains the shared game model, validation, rules, clocks, quests, notation and users.
-- `src/games/chess/` and `src/games/checkers/` contain the individual game implementations and configuration modules.
-- `.agents/notes/`, `.agents/requests/`, `.agents/decisions/` and `.agents/rules/` generate README, PRD, architecture and contributor-rule documents.
-- `.github/tests/` owns repository tests and fixtures. `.github/workflows/` and `.github/scripts/` contain CI and source-generated documentation tools.
-- Root `README.md` and `CONTRIBUTING.md` link to the generated documents; `.darkfactory/installation.json` records the DarkFactory integration.
+| Path | Current responsibility |
+| --- | --- |
+| `src/chesswithquests/` | Application entry, installation diagnostic and Tkinter startup |
+| `src/controller/` | Square input, selection, game lifecycle and window state |
+| `src/model/game/` | Python-constructed game configs, board, validator, manager, rules, clocks and quests |
+| `src/model/misc/`, `src/model/pieces/`, `src/model/users/` | Game export/notation, shared pieces and user state |
+| `src/games/chess/`, `src/games/checkers/` | Python variant-specific boards, pieces, rules and clocks |
+| `src/view/` | Tkinter app, board/player/quest widgets, settings and Python source editor |
+| `.agents/notes/`, `requests/`, `decisions/`, `rules/` | Authored sources for generated README, PRD, ARCHITECTURE and AGENTS |
+| `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` | Outcomes, phase plan, open queue and temporary evidence |
+| `.agents/architecture/diagrams/`, `.agents/reference/` | Source-generated Mermaid and reference assets |
+| `.github/tests/`, `scripts/`, `workflows/` | CI, generated docs, test fixtures, packaging and guarded release |
+
+The old `packages/engine/` runtime does not exist in this PR's working tree. The hosted server/client/native layers are deferred to #422. The root README and CONTRIBUTING are symlinks to generated documentation.

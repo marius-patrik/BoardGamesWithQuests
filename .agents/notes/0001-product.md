@@ -3,4 +3,16 @@ status: published
 ---
 # BoardGamesWithQuests
 
-BoardGamesWithQuests is a Python/Tkinter desktop board-game application. Its `src/chesswithquests/` entry point starts the GUI, `src/controller/` connects user interaction to gameplay, and `src/model/` holds board state, rules, moves, users, clocks, and quests. `src/games/chess/` and `src/games/checkers/` define the available board-game variants. Native GitHub Actions provide development checks and documentation automation.
+BoardGamesWithQuests currently contains a recoverable Python/Tkinter desktop board-game application with chess and checkers code, configurable rules, quests, clocks, game history, settings, and notation/export helpers. The shipped `src/` tree is the current implementation; the planned JSON-only rule system and complete release are **not yet implemented**.
+
+## Current application
+
+`src/chesswithquests/` owns startup and installation checks. `src/controller/` handles square selections and game control. `src/model/` implements board state, move validation, rule composition, clocks, players, quests, and export helpers. `src/view/` owns Tkinter windows, board/player/quest panels and settings. `src/games/chess/` and `src/games/checkers/` provide Python-authored game compositions.
+
+## Important implementation boundary
+
+Game settings still load executable Python configuration modules, with a source editor and validator exposed through the UI. This contradicts the desired JSON-only game definition model and must be replaced before v1.0.0. Historical JSON engine work exists in earlier commits but is not currently wired to the GUI. Source test success does not establish full GUI or packaged application acceptance.
+
+## Delivery and governance
+
+The [Plan](../PLAN.md) records recovery and verification steps, [TODO](../TODO.md) tracks open actions, and [Scratchpad](../SCRATCHPAD.md) stores current evidence. Approved [requirements](../PRD.md) and accepted [architecture](../ARCHITECTURE.md) describe the actual code. GitHub Actions and DarkFactory provide checks and a disabled-until-ready desktop release pipeline.

@@ -10,7 +10,7 @@ After editing published notes, approved requests, accepted decisions or active r
 
 ## Procedure
 
-1. Edit `.agents/notes/*.md` (front matter `status: published`) for the README overview. Keep durable work plans in the owning issues; `.agents/PLAN.md` and `.agents/TODO.md` are empty optional working files.
+1. Edit `.agents/notes/*.md` (front matter `status: published`) for the README overview. Maintain the phase-level execution plan in `.agents/PLAN.md`, the current action queue in `.agents/TODO.md`, and temporary observations in `.agents/SCRATCHPAD.md`. Keep prospective implementation contracts in the owning issues; do not create another roadmap.
 2. Edit `.agents/requests/*.md` (approved) for PRD, `.agents/decisions/*.md` (accepted) for ARCHITECTURE, and `.agents/rules/*.md` (active) for AGENTS.
 3. Verify `.agents/` and `.github/` are real directories, and verify the tracked `.darkfactory/installation.json` integration metadata.
 4. Run `python3 .github/scripts/generate_documents.py --write`.

@@ -3,7 +3,7 @@ status: active
 ---
 # Planning and change delivery
 
-- Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Treat `.agents/PLAN.md` and `.agents/TODO.md` as optional working files; leave them empty unless they contain current actionable working notes.
+- Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Maintain the existing `.agents/PLAN.md` as the single phase-level execution plan, `.agents/TODO.md` as the current action queue, `.agents/SCRATCHPAD.md` as temporary investigation notes, and `.agents/GOAL.md` as the product goal. Keep prospective API/database/DSL contracts in the owning issues; keep these working documents synchronized with verified repo state.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
 - Work from a focused, issue-bound branch targeting the reviewed dependency. Prefer the repository's bot-authored PR workflow so the maintainer can independently review. Use only branches and review controls that are actually configured; separately approved migrations and release promotions must be verified before use.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
@@ -33,8 +33,7 @@ Preserve the repository's functioning issue and branch automation without
 creating overlapping management workflows.
 
 ### BoardGamesWithQuests: Planning and Review
-Record each work item's outcome, architectural interfaces, dependencies,
-review criteria and verification evidence in its implementation issue.
+Record each work item's detailed implementation contracts, proposed interfaces, review criteria and evidence in its implementation issue. Keep overall execution order, phase checkpoints and concrete next actions current in the root PLAN and TODO files.
 Align plans and specifications whenever decisions change; replace superseded
 instructions at their source. Conduct independent implementation, security
 and artifact review as applicable. Do not claim conformance until the

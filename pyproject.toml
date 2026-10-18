@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Configurable Python/Tkinter board games with quests"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "GPL-3.0-only" }
+license = { file = "LICENSE" }
 authors = [{ name = "marius-patrik" }]
 keywords = ["board games", "chess", "checkers", "tkinter", "quests"]
 dependencies = []

@@ -8,5 +8,3 @@ status: active
 - Write behavior-driven tests that exercise external outcomes and edge cases, not syntax assertions or mocks that replace the unit under test.
 - Relocate existing tests with every relevant change. The generator and CI must reject any tracked test paths outside `.github/tests/`.
 - Update test discovery and execution commands whenever structure changes. Report unexecuted tests or unavailable CI as blocked, not passing.
-
-
