@@ -21,7 +21,7 @@ No matchmaking, bots, spectator mode, social feed, leaderboard, or tournaments a
 
 - **Entity type**: `game | space | item | objective`. Types are domain metadata, not distinct interpreters. All seeded and dynamically created instances share one entity model.
 - **Action**: a configured command or an automatically triggered hook action, attached to one entity type. It may enumerate typed locals, evaluate a pure Boolean condition, and execute an ordered list of effects. There are no separate movement, rule, or quest pipelines.
-- **Objective**: a normal entity whose fields and actions encode progress, terminal game outcomes or optional quests. Permanent account XP/ratings are privileged settlement operations independent of author-defined effects.
+- **Objective**: a normal entity whose fields and actions encode progress, terminal game outcomes or optional quests. Permanent account XP/rating are privileged settlement operations independent of author-defined effects.
 - **Space**: an entity graph with directed or undirected links, optional grid coordinates, cyclic tracks, zones or ordered containment. Nothing in the engine requires a rectangular board.
 - **Participants**: each immutable published definition declares a validated `min_participants`/`max_participants` range, with seats allocated only to joined users; no engine, API, schema, or renderer assumes exactly two. Chess and both draughts require precisely two; MoneyProperty supports two through eight, while the core model supports other bounded counts and multi-party decisions.
 - **Phase**: a named action-eligibility state; turns may contain multiple phases, simultaneous eligibility, and decisions. No hardcoded two-player alternation.
@@ -355,7 +355,7 @@ The following diagrams specify the target structure before implementation. Their
 
 **Reference limitations:** These visual graphs describe design intent but cannot encode every expression, value, DTO field constraint or SQL predicate. They are **not sufficient for deterministic code generation**. Review and manually approve desired API contents before implementation; FastAPI then defines the actual OpenAPI 3.1 and generated client. **No automated diff or CI reference-vs-runtime API conformance gate is required.** Runtime HTTP/provider behavior is tested, while database/schema invariants require real migrations and external verification. A structural diagram is not implementation evidence.
 
-A new client authenticates through Supabase Auth directly; only provider-issued bearer JWTs authenticate private FastAPI requests, with no application session cookie or CSRF bootstrap. A game is activated only when its creator-pinned lobby target has been filled. These invariants are preserved across API, game model and database constraints.
+A new client authenticates through Supabase Auth directly; only provider-issued bearer JWTs authenticate **private** FastAPI requests, with no application session cookie or CSRF bootstrap. The only public game lookup is a limited `/game/{gameId}/invite` pending-lobby preview, authorized by possession of the unguessable UUIDv4 game ID; joining additionally requires Supabase Auth. Other game endpoints require verified participant membership. A game is activated only when its creator-pinned lobby target has been filled. These invariants are preserved across API, game model and database constraints.
 
 ### API ownership and persistence boundaries
 
@@ -365,13 +365,51 @@ This document fixes ownership and response behavior where a type schema alone ca
 | --- | --- | --- |
 | Identity: guest/login/link/upgrade/logout/refresh | **Supabase Auth JavaScript SDK and provider**, not FastAPI endpoints; app profile keyed by stable `auth.users.id` | Linking a verified identity preserves an anonymous UUID and game membership; SDK handles refresh/signout; access JWT may remain valid until expiry, so sensitive mutations need server session-liveness checks |
 | List/import/create/edit/publish definitions | Owner-bound `definitions`, `versions` and version-scoped rows; published versions immutable, all input through canonical JSON schema | Import validates every reference/operator; edit uses optimistic draft revision; publish is atomic or fully rejects without partial data |
-| Create game | Authenticated creator, published pinned version, `games(creator_id, creation_key)` | Identical retry returns the one pending game; key reuse with different request is a conflict; no game-state seed until valid activation |
-| Join game | Lock pending `games` row; authenticated `participants` seat/role scoped to the pinned version | Unique user and unique seat enforced, roles within bounded capacities; activation exactly once when the creator-selected immutable target participant count is reached |
+| Create game | Authenticated creator, published pinned version, `games(creator_id, creation_key)`; database ID is a CSPRNG-backed UUIDv4 used as the **only** join capability | Identical retry returns the same pending game ID; mismatching key use conflicts; no separate invite secret/hash, and no game-state seed until target-count activation |
+| Join game | `POST /game/{gameId}/join` with valid Supabase bearer identity; knowing a random UUIDv4 game ID is sufficient invitation proof **while pending**; lock game and authorize version/seat scope | Distinct user and unique seat; pending expires 24h, activated/expired games cannot accept new members; activate exactly at creator-selected target under one transaction; no independently revocable invite token |
 | Read a game / available actions / events | `participants(game_id,user_id)` membership gate and pinned version; state in `game_entities`, `game_values`, links and clock rows | Viewer-specific redaction, no hidden data or action candidates leaked; cursor/history replay is revision-stable |
 | Submit legal action | One SQL transaction: lock game, verify actor/role, check expected revision and digest/idempotency; run deterministic interpreter against isolated proposal | Append exactly one event with complete before/after mutations and trusted inputs; update game revision, state, active seats, clocks and terminal settlement atomically; same key+digest returns prior result, changed request rejects |
 | Claim private Realtime grant | Membership-backed `bgwq.can_listen_to_game`, short-lived grant, private topic | Channel is revision hint only; reconnect and gaps require HTTP refetch, not trust of Broadcast payload |
 | Terminal settlement | Same final action transaction; `game_outcomes` exactly one per occupied participant, optional authorized `awards` and `ratings` | Terminal state and rewards commit exactly once; no later gameplay commands except exact accepted idempotent retries |
 | Attach visual asset | Owner draft and version-pinned Storage path, MIME/size/digest checks | Grant expiry and asset ownership enforced; staged asset is not published until verified |
+
+### Accepted C1 API URI naming and invitation design (desired, not actual OpenAPI)
+
+Every **application HTTP resource path segment is singular**, including list/collection operations. Examples: `GET /game` is a resource collection, `GET /me/game` lists my games, `GET /game/{gameId}/event` returns event history. Do not introduce plural aliases; operation IDs such as `listMyGames` retain ordinary descriptive names. The 27 proposed operations are:
+
+| Method | Singular path | Proposed `operationId` |
+| --- | --- | --- |
+| `GET` | `/me` | `getMe` |
+| `PATCH` | `/me` | `updateMe` |
+| `GET` | `/me/game` | `listMyGames` |
+| `GET` | `/me/award` | `listAwards` |
+| `GET` | `/me/rating` | `listRatings` |
+| `GET` | `/definition` | `listDefinitions` |
+| `POST` | `/definition` | `createDefinition` |
+| `POST` | `/definition/import` | `importDefinition` |
+| `GET` | `/definition/{definitionId}` | `getDefinition` |
+| `DELETE` | `/definition/{definitionId}` | `deleteDefinition` |
+| `GET` | `/definition/{definitionId}/draft` | `getDraft` |
+| `PUT` | `/definition/{definitionId}/draft` | `saveDraft` |
+| `POST` | `/definition/{definitionId}/publish` | `publishDefinition` |
+| `POST` | `/definition/{definitionId}/duplicate` | `duplicateDefinition` |
+| `GET` | `/definition/{definitionId}/version/{version}/export` | `exportVersion` |
+| `POST` | `/definition/{definitionId}/asset` | `beginUpload` |
+| `POST` | `/definition/{definitionId}/asset/{assetId}/finalize` | `finalizeUpload` |
+| `DELETE` | `/definition/{definitionId}/asset/{assetId}` | `deleteAsset` |
+| `GET` | `/definition/{definitionId}/asset/{assetId}` | `getAsset` |
+| `POST` | `/game` | `createGame` |
+| `GET` | `/game/{gameId}` | `getGame` |
+| `GET` | `/game/{gameId}/invite` | `getInvite` |
+| `POST` | `/game/{gameId}/join` | `joinGame` |
+| `GET` | `/game/{gameId}/available-action` | `availableActions` |
+| `POST` | `/game/{gameId}/action` | `submitAction` |
+| `GET` | `/game/{gameId}/event` | `getEvents` |
+| `POST` | `/game/{gameId}/realtime-grant` | `realtimeGrant` |
+
+**Invitation choice B:** Creating a game produces a cryptographically unpredictable **UUIDv4 game ID** (122 random bits generated by a CSPRNG). The game ID **itself** is the invitation capability; no second token, hash, invite table, password or independently revocable invitation secret. The shareable frontend route is `/game/{gameId}/invite` on the app origin. `GET /game/{gameId}/invite` on the API origin returns **only** minimal pending-lobby information (published definition, configured participant target, occupied count, expiry and status) to anyone possessing that ID, without requiring a Supabase account. It must not include the creator or other user identities, private game state, secret cards, actions, event history, or participant tokens. Limit caching (`Cache-Control: no-store`), third-party referrers and capability-bearing telemetry/logs; brute-force ID enumeration must be infeasible. `POST /game/{gameId}/join` additionally requires a verified Supabase Bearer JWT and a distinct eligible participant and uses the game ID as invite proof. Joins are allowed only while pending (up to 24 hours); activation or expiry makes the ID unusable for new joins. Every other private game endpoint authorizes the user by actual participant membership rather than ID possession. This option offers **no independent invite revocation**; ending pending eligibility requires the game's lifecycle state, not a token revocation endpoint.
+
+**Unresolved:** exact join seat/role assignment, creator-seat creation semantics, common idempotency/revision convention, nested DTOs, pagination and detailed status/error cases remain in C1 review. This table is a **desired design artifact**, not executable API code or CI-to-implementation parity authority. Only implemented FastAPI produces the actual OpenAPI 3.1.
 
 ### Proposed application HTTP operation ownership (27 operations; Supabase Auth owns account lifecycle)
 
@@ -394,13 +432,13 @@ Every **proposed** `operationId` in the design graph has one planned service tra
 | `publishDefinition` | api/services.py + configuration/validation.py | version graph + protected publication timestamp | immutable published snapshot or rollback |
 | `duplicateDefinition` | api/services.py + configuration/transfer.py | new owner version graph with remapped local ids | distinct ownership; no asset leaks |
 | `exportVersion` | api/routes.py + configuration/transfer.py | immutable published version plus authorized assets | canonical portable JSON with stable local keys |
-| `beginUpload` | api/assets.py + security.py | assets staged owner/version + Storage ticket | bounded scoped signed upload |
-| `finalizeUpload` | api/assets.py + repository.py | assets digest/MIME verification and ready status | 409 mismatch; no published reference |
-| `deleteAsset` | api/assets.py + repository.py | unpublished owner version and asset reference graph | reject linked or published resource |
-| `getAsset` | api/assets.py + security.py | version-pinned authorized asset Storage grant | short-lived scoped retrieval |
+| `beginUpload` | api/asset.py + security.py | assets staged owner/version + Storage ticket | bounded scoped signed upload |
+| `finalizeUpload` | api/asset.py + repository.py | assets digest/MIME verification and ready status | 409 mismatch; no published reference |
+| `deleteAsset` | api/asset.py + repository.py | unpublished owner version and asset reference graph | reject linked or published resource |
+| `getAsset` | api/asset.py + security.py | version-pinned authorized asset Storage grant | short-lived scoped retrieval |
 | `createGame` | api/services.py + repository.py | games(creator_id,creation_key,target_participants) pinned versions | 201 pending game with immutable target; mismatching retry rejects |
 | `getGame` | api/services.py + engine projection | games participants and viewer-redacted state | 401/404 unauthorized; latest revision |
-| `getInvitation` | api/services.py + security.py | pending games and opaque invitation token | bounded pending eligibility; no private leak |
+| `getInvite` | api/services.py + repository.py | pending game looked up by unguessable UUIDv4 game ID (sole invite capability) | `GET /game/{gameId}/invite` permits a **non-sensitive** preview with ID alone, no member or hidden game state; unguessable or expired IDs cannot be enumerated; no separate invite-token store |
 | `joinGame` | api/services.py + repository.py | locked game participant seat and role, target-bound capacity | join once, 409 occupied/stale; activate only at creator-selected target |
 | `availableActions` | api/services.py + engine/runtime.py | pinned state plus authorized candidate enumeration | 200 legal viewer-scoped actions only |
 | `submitAction` | api/services.py + engine/runtime.py | locked games state events mutations outcomes awards | atomic revision, idempotency, rollback |

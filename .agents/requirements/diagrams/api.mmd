@@ -4,7 +4,8 @@ classDef endpoint fill:#22374d,color:#f0f9ff,stroke:#81accc
 classDef dto fill:#243f37,color:#ebfff5,stroke:#82bfaa
 classDef guard fill:#4d3e2c,color:#fff4d7,stroke:#d2ad6b
 client["React / Tauri authenticated caller"]:::guard
-guard["Supabase Bearer JWT verified by FastAPI; member authorization, revisions, idempotency and CORS"]:::guard
+guard["Supabase Bearer JWT for private routes; member authorization, revisions, idempotency and CORS"]
+inviteGuard["Unguessable UUIDv4 game ID: non-sensitive public pending preview only"]:::guard:::guard
 client --> guard
 subgraph GROUP_6["Accounts operations"]
 api6["GET /me&lt;br/&gt;getMe&lt;br/&gt;Read profile&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
@@ -16,113 +17,114 @@ api7 -.-> dto3
 api7 -.-> dto1
 api7 -.-> dto4
 guard --> api7
-api8["GET /me/games&lt;br/&gt;listMyGames&lt;br/&gt;List games&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api8["GET /me/game&lt;br/&gt;listMyGames&lt;br/&gt;List games&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api8 -.-> dto5
 api8 -.-> dto1
 guard --> api8
-api9["GET /me/awards&lt;br/&gt;listAwards&lt;br/&gt;List awards&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api9["GET /me/award&lt;br/&gt;listAwards&lt;br/&gt;List awards&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api9 -.-> dto6
 api9 -.-> dto1
 guard --> api9
-api10["GET /me/ratings&lt;br/&gt;listRatings&lt;br/&gt;List ratings&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api10["GET /me/rating&lt;br/&gt;listRatings&lt;br/&gt;List ratings&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api10 -.-> dto7
 api10 -.-> dto1
 guard --> api10
 end
 subgraph GROUP_11["Definitions operations"]
-api11["GET /definitions&lt;br/&gt;listDefinitions&lt;br/&gt;List published definitions&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api11["GET /definition&lt;br/&gt;listDefinitions&lt;br/&gt;List published definitions&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api11 -.-> dto8
 api11 -.-> dto1
 guard --> api11
-api12["POST /definitions&lt;br/&gt;createDefinition&lt;br/&gt;Create definition draft&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api12["POST /definition&lt;br/&gt;createDefinition&lt;br/&gt;Create definition draft&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api12 -.-> dto8
 api12 -.-> dto1
 api12 -.-> dto9
 guard --> api12
-api13["POST /definitions/import&lt;br/&gt;importDefinition&lt;br/&gt;Import portable JSON as draft&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api13["POST /definition/import&lt;br/&gt;importDefinition&lt;br/&gt;Import portable JSON as draft&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api13 -.-> dto8
 api13 -.-> dto1
 api13 -.-> dto10
 guard --> api13
-api14["GET /definitions/{definitionId}&lt;br/&gt;getDefinition&lt;br/&gt;Read definition&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api14["GET /definition/{definitionId}&lt;br/&gt;getDefinition&lt;br/&gt;Read definition&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api14 -.-> dto8
 api14 -.-> dto1
 guard --> api14
-api15["DELETE /definitions/{definitionId}&lt;br/&gt;deleteDefinition&lt;br/&gt;Delete unreferenced draft-owned definition&lt;br/&gt;204 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api15["DELETE /definition/{definitionId}&lt;br/&gt;deleteDefinition&lt;br/&gt;Delete unreferenced draft-owned definition&lt;br/&gt;204 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api15 -.-> dto1
 guard --> api15
-api16["GET /definitions/{definitionId}/draft&lt;br/&gt;getDraft&lt;br/&gt;Read editable version&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api16["GET /definition/{definitionId}/draft&lt;br/&gt;getDraft&lt;br/&gt;Read editable version&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api16 -.-> dto10
 api16 -.-> dto1
 guard --> api16
-api17["PUT /definitions/{definitionId}/draft&lt;br/&gt;saveDraft&lt;br/&gt;Replace editable version transactionally&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api17["PUT /definition/{definitionId}/draft&lt;br/&gt;saveDraft&lt;br/&gt;Replace editable version transactionally&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api17 -.-> dto10
 api17 -.-> dto1
 guard --> api17
-api18["POST /definitions/{definitionId}/publish&lt;br/&gt;publishDefinition&lt;br/&gt;Validate and publish immutable version&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api18["POST /definition/{definitionId}/publish&lt;br/&gt;publishDefinition&lt;br/&gt;Validate and publish immutable version&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api18 -.-> dto8
 api18 -.-> dto1
 guard --> api18
-api19["POST /definitions/{definitionId}/duplicate&lt;br/&gt;duplicateDefinition&lt;br/&gt;Create an owned copy&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api19["POST /definition/{definitionId}/duplicate&lt;br/&gt;duplicateDefinition&lt;br/&gt;Create an owned copy&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api19 -.-> dto8
 api19 -.-> dto1
 guard --> api19
-api20["GET /definitions/{definitionId}/versions/{version}/export&lt;br/&gt;exportVersion&lt;br/&gt;Export portable JSON incl. assets&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api20["GET /definition/{definitionId}/version/{version}/export&lt;br/&gt;exportVersion&lt;br/&gt;Export portable JSON incl. assets&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api20 -.-> dto10
 api20 -.-> dto1
 guard --> api20
 end
 subgraph GROUP_21["Assets operations"]
-api21["POST /definitions/{definitionId}/assets&lt;br/&gt;beginUpload&lt;br/&gt;Create restricted temporary upload grant&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api21["POST /definition/{definitionId}/asset&lt;br/&gt;beginUpload&lt;br/&gt;Create restricted temporary upload grant&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api21 -.-> dto11
 api21 -.-> dto1
 api21 -.-> dto12
 guard --> api21
-api22["POST /definitions/{definitionId}/assets/{assetId}/finalize&lt;br/&gt;finalizeUpload&lt;br/&gt;Verify integrity and mark ready&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api22["POST /definition/{definitionId}/asset/{assetId}/finalize&lt;br/&gt;finalizeUpload&lt;br/&gt;Verify integrity and mark ready&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api22 -.-> dto13
 api22 -.-> dto1
 guard --> api22
-api23["DELETE /definitions/{definitionId}/assets/{assetId}&lt;br/&gt;deleteAsset&lt;br/&gt;Delete unreferenced draft asset&lt;br/&gt;204 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api23["DELETE /definition/{definitionId}/asset/{assetId}&lt;br/&gt;deleteAsset&lt;br/&gt;Delete unreferenced draft asset&lt;br/&gt;204 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api23 -.-> dto1
 guard --> api23
-api24["GET /definitions/{definitionId}/assets/{assetId}&lt;br/&gt;getAsset&lt;br/&gt;Get authorized short-lived access&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api24["GET /definition/{definitionId}/asset/{assetId}&lt;br/&gt;getAsset&lt;br/&gt;Get authorized short-lived access&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api24 -.-> dto11
 api24 -.-> dto1
 guard --> api24
 end
 subgraph GROUP_25["Games operations"]
-api25["POST /games&lt;br/&gt;createGame&lt;br/&gt;Create invitation&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api25["POST /game&lt;br/&gt;createGame&lt;br/&gt;Create invitation&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api25 -.-> dto14
 api25 -.-> dto1
 api25 -.-> dto15
 guard --> api25
-api26["GET /games/{gameId}&lt;br/&gt;getGame&lt;br/&gt;Read authorized authoritative projection&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api26["GET /game/{gameId}&lt;br/&gt;getGame&lt;br/&gt;Read authorized authoritative projection&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api26 -.-> dto14
 api26 -.-> dto1
 guard --> api26
-api27["GET /games/{gameId}/invitation&lt;br/&gt;getInvitation&lt;br/&gt;Preview invitation&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api27["GET /game/{gameId}/invite&lt;br/&gt;getInvite&lt;br/&gt;Preview pending lobby by unguessable game ID without private data&lt;br/&gt;200 / 404 / 410 / 429"]:::endpoint
 api27 -.-> dto16
 api27 -.-> dto1
-guard --> api27
-api28["POST /games/{gameId}/join&lt;br/&gt;joinGame&lt;br/&gt;Join existing game idempotently&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+client --> inviteGuard
+inviteGuard --> api27
+api28["POST /game/{gameId}/join&lt;br/&gt;joinGame&lt;br/&gt;Join existing game idempotently&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api28 -.-> dto14
 api28 -.-> dto1
 api28 -.-> dto17
 guard --> api28
-api29["GET /games/{gameId}/available-actions&lt;br/&gt;availableActions&lt;br/&gt;Generate available actor actions&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api29["GET /game/{gameId}/available-action&lt;br/&gt;availableActions&lt;br/&gt;Generate available actor actions&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api29 -.-> dto18
 api29 -.-> dto1
 guard --> api29
-api30["POST /games/{gameId}/actions&lt;br/&gt;submitAction&lt;br/&gt;Execute authoritative action&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api30["POST /game/{gameId}/action&lt;br/&gt;submitAction&lt;br/&gt;Execute authoritative action&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api30 -.-> dto19
 api30 -.-> dto1
 api30 -.-> dto20
 guard --> api30
-api31["GET /games/{gameId}/events&lt;br/&gt;getEvents&lt;br/&gt;List accepted events&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api31["GET /game/{gameId}/event&lt;br/&gt;getEvents&lt;br/&gt;List accepted events&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api31 -.-> dto21
 api31 -.-> dto1
 guard --> api31
-api32["POST /games/{gameId}/realtime-grant&lt;br/&gt;realtimeGrant&lt;br/&gt;Authorize temporary game Broadcast subscription&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
+api32["POST /game/{gameId}/realtime-grant&lt;br/&gt;realtimeGrant&lt;br/&gt;Authorize temporary game Broadcast subscription&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api32 -.-> dto22
 api32 -.-> dto1
 guard --> api32
@@ -142,7 +144,7 @@ dto12["AssetUploadRequest"]:::dto
 dto13["Asset"]:::dto
 dto14["Game"]:::dto
 dto15["GameCreate"]:::dto
-dto16["Invitation"]:::dto
+dto16["Invite"]:::dto
 dto17["JoinRequest"]:::dto
 dto18["AvailableAction"]:::dto
 dto19["ActionResult"]:::dto
