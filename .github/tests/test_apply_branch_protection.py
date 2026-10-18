@@ -64,7 +64,10 @@ class BranchProtectionTests(unittest.TestCase):
     def test_admin_bypass_is_not_compliant(self) -> None:
         payload = protection.declared_policy()[2]
         existing = {
-            "required_status_checks": {"strict": True, "contexts": payload["required_status_checks"]["contexts"]},
+            "required_status_checks": {
+                "strict": True,
+                "contexts": payload["required_status_checks"]["contexts"],
+            },
             "enforce_admins": {"enabled": False},
             "required_pull_request_reviews": {"required_approving_review_count": 1},
             "required_conversation_resolution": {"enabled": True},

@@ -21,7 +21,9 @@ def authorize_dispatch(
     if event != "workflow_dispatch":
         raise ValueError("A release must be requested by an explicit workflow dispatch")
     if ref != "refs/heads/main" or repository != "marius-patrik/BoardGamesWithQuests":
-        raise ValueError("Only an authorized dispatch targeting the project main branch can release")
+        raise ValueError(
+            "Only an authorized dispatch targeting the project main branch can release"
+        )
     if any(not SHA.fullmatch(sha) for sha in (run_sha, live_main_sha, checkout_sha)):
         raise ValueError("Missing or invalid commit SHA")
     if run_sha != live_main_sha or checkout_sha != live_main_sha:
@@ -53,8 +55,12 @@ def main() -> int:
     try:
         if args.action == "dispatch":
             authorize_dispatch(
-                args.event, args.ref, args.repository,
-                args.run_sha, args.live_sha, args.checkout_sha,
+                args.event,
+                args.ref,
+                args.repository,
+                args.run_sha,
+                args.live_sha,
+                args.checkout_sha,
             )
         else:
             validate_existing_tag(args.tag, args.run_sha, args.assigned_sha)

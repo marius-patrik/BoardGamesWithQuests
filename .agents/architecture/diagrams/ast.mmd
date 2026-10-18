@@ -674,6 +674,14 @@ flowchart LR
   n150ab2bfe8af4aa6c --> nd46017743d0da5b42
   n16d78b830903b8795["function_definition main"]
   n150ab2bfe8af4aa6c --> n16d78b830903b8795
+  n50f8f749b20de7e29["release_gate.py"]
+  n2092df3a19d2f7b13 --> n50f8f749b20de7e29
+  n18146ec0646429aaf["function_definition authorize_dispatch"]
+  n50f8f749b20de7e29 --> n18146ec0646429aaf
+  n21cb90f4938a20502["function_definition validate_existing_tag"]
+  n50f8f749b20de7e29 --> n21cb90f4938a20502
+  ncd8e37feb16753cd1["function_definition main"]
+  n50f8f749b20de7e29 --> ncd8e37feb16753cd1
   nc9f5868186eb03f66["tests/"]
   nfad65243633b77700 --> nc9f5868186eb03f66
   nd6487c9d1884235b7["docs_site_acceptance.py"]
@@ -708,8 +716,10 @@ flowchart LR
   n7ffcab1b794872301 --> nc26fa8b712438ffc8
   n3d9fe75c30f67b9c7["function_definition test_exact_protection_is_compliant"]
   n7ffcab1b794872301 --> n3d9fe75c30f67b9c7
-  n2d2b252bd23bf481b["function_definition test_dry_run_does_not_call_github"]
+  n2d2b252bd23bf481b["function_definition test_admin_bypass_is_not_compliant"]
   n7ffcab1b794872301 --> n2d2b252bd23bf481b
+  n5109c6ca4f765d513["function_definition test_dry_run_does_not_call_github"]
+  n7ffcab1b794872301 --> n5109c6ca4f765d513
   n905320175c75255b2["test_docs_artifacts.py"]
   nc9f5868186eb03f66 --> n905320175c75255b2
   n82a0b29577da561c3["function_definition run_record"]
@@ -792,6 +802,34 @@ flowchart LR
   n08502483f6d83fd34 --> n390e462822152c5bb
   nbe59e9b775f50b83c["function_definition test_replaces_stale_deployed_preview_on_update"]
   n08502483f6d83fd34 --> nbe59e9b775f50b83c
+  n170f6914128af46f0["test_release_gate.py"]
+  nc9f5868186eb03f66 --> n170f6914128af46f0
+  n1e224dc3f7154dd0c["function_definition invoke"]
+  n170f6914128af46f0 --> n1e224dc3f7154dd0c
+  n198e3dd5de49210ec["function_definition dispatch"]
+  n170f6914128af46f0 --> n198e3dd5de49210ec
+  n80367b40f01eb09c0["class_definition ReleaseGateBehaviorTests"]
+  n170f6914128af46f0 --> n80367b40f01eb09c0
+  n3fa8187c8cf08ea6f["function_definition test_valid_explicit_main_head_dispatch_succeeds"]
+  n170f6914128af46f0 --> n3fa8187c8cf08ea6f
+  na524c364f4d8d7448["function_definition test_branch_push_and_pull_request_cannot_release"]
+  n170f6914128af46f0 --> na524c364f4d8d7448
+  n3282c6cdb1ccc73b1["function_definition test_other_ref_or_repository_cannot_release"]
+  n170f6914128af46f0 --> n3282c6cdb1ccc73b1
+  n17c2f348c67cd8d7e["function_definition test_stale_or_unrelated_head_is_rejected"]
+  n170f6914128af46f0 --> n17c2f348c67cd8d7e
+  n3796e4ec348430d03["function_definition test_invalid_commit_sha_is_rejected"]
+  n170f6914128af46f0 --> n3796e4ec348430d03
+  n88446191843603bad["function_definition test_unused_and_matching_tags_are_accepted"]
+  n170f6914128af46f0 --> n88446191843603bad
+  n28efe458bde80ff5f["function_definition test_existing_different_tag_commit_is_never_reused"]
+  n170f6914128af46f0 --> n28efe458bde80ff5f
+  n2f1b6c91207307c23["function_definition test_invalid_tag_or_ambiguous_assignment_is_rejected"]
+  n170f6914128af46f0 --> n2f1b6c91207307c23
+  n27ae330df7efa2e5f["function_definition test_release_job_has_only_manual_publication_entrypoint"]
+  n170f6914128af46f0 --> n27ae330df7efa2e5f
+  n1fb45649f8bccceb6["function_definition test_configuration_describes_existing_stack_not_proposed_clients"]
+  n170f6914128af46f0 --> n1fb45649f8bccceb6
   n015d86922f7e4e2cd["test_repository_structure.py"]
   nc9f5868186eb03f66 --> n015d86922f7e4e2cd
   n9de49b434737a7367["class_definition WorkspaceLayoutTests"]

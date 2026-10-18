@@ -25,14 +25,28 @@ def invoke(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 def dispatch(
-    *, event: str = "workflow_dispatch", ref: str = "refs/heads/main",
+    *,
+    event: str = "workflow_dispatch",
+    ref: str = "refs/heads/main",
     repository: str = "marius-patrik/BoardGamesWithQuests",
-    run_sha: str = SHA1, live_sha: str = SHA1, checkout_sha: str = SHA1,
+    run_sha: str = SHA1,
+    live_sha: str = SHA1,
+    checkout_sha: str = SHA1,
 ) -> subprocess.CompletedProcess[str]:
     return invoke(
-        "dispatch", "--event", event, "--ref", ref,
-        "--repository", repository, "--run-sha", run_sha,
-        "--live-sha", live_sha, "--checkout-sha", checkout_sha,
+        "dispatch",
+        "--event",
+        event,
+        "--ref",
+        ref,
+        "--repository",
+        repository,
+        "--run-sha",
+        run_sha,
+        "--live-sha",
+        live_sha,
+        "--checkout-sha",
+        checkout_sha,
     )
 
 
@@ -60,18 +74,23 @@ class ReleaseGateBehaviorTests(unittest.TestCase):
     def test_unused_and_matching_tags_are_accepted(self) -> None:
         self.assertEqual(invoke("tag", "--tag", "v1.2.3", "--run-sha", SHA1).returncode, 0)
         self.assertEqual(
-            invoke("tag", "--tag", "v1.2.3", "--run-sha", SHA1, "--assigned-sha", SHA1).returncode, 0,
+            invoke("tag", "--tag", "v1.2.3", "--run-sha", SHA1, "--assigned-sha", SHA1).returncode,
+            0,
         )
 
     def test_existing_different_tag_commit_is_never_reused(self) -> None:
         self.assertNotEqual(
-            invoke("tag", "--tag", "v1.2.3", "--run-sha", SHA1, "--assigned-sha", SHA2).returncode, 0,
+            invoke("tag", "--tag", "v1.2.3", "--run-sha", SHA1, "--assigned-sha", SHA2).returncode,
+            0,
         )
 
     def test_invalid_tag_or_ambiguous_assignment_is_rejected(self) -> None:
         self.assertNotEqual(invoke("tag", "--tag=-danger", "--run-sha", SHA1).returncode, 0)
         self.assertNotEqual(
-            invoke("tag", "--tag", "v1.2.3", "--run-sha", SHA1, "--assigned-sha", "wrong").returncode, 0,
+            invoke(
+                "tag", "--tag", "v1.2.3", "--run-sha", SHA1, "--assigned-sha", "wrong"
+            ).returncode,
+            0,
         )
 
     def test_release_job_has_only_manual_publication_entrypoint(self) -> None:
