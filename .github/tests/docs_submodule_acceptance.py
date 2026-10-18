@@ -33,5 +33,11 @@ def test_gitlink_is_not_exposed_as_a_fake_source_file(tmp_path: Path) -> None:
         check=True,
     )
     pages = build_docs.pages_for(tmp_path)
-    assert {entry[0] for entry in pages} == {"README.md", ".gitmodules"}
+    assert {entry[0] for entry in pages} == {
+        "README.md",
+        ".gitmodules",
+        ".agents/architecture/diagrams/ast.mmd",
+        ".agents/architecture/diagrams/uml.mmd",
+    }
+    assert ".darkfactory" not in {entry[0] for entry in pages}
     assert any("Actual source" in page[2] for page in pages)
