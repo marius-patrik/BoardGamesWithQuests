@@ -16,7 +16,10 @@ class BranchProtectionTests(unittest.TestCase):
         repo, branch, payload = protection.declared_policy()
         self.assertEqual(repo, "marius-patrik/BoardGamesWithQuests")
         self.assertEqual(branch, "main")
-        self.assertEqual(set(payload["required_status_checks"]["contexts"]), {"governed / released-df-quality", "governed / issue-binding / verify-bound-issue"})
+        self.assertEqual(
+            set(payload["required_status_checks"]["contexts"]),
+            {"governed / released-df-quality", "governed / issue-binding / verify-bound-issue"},
+        )
         self.assertTrue(payload["required_status_checks"]["strict"])
         self.assertFalse(payload["enforce_admins"])
         self.assertFalse(payload["allow_force_pushes"])
@@ -25,7 +28,13 @@ class BranchProtectionTests(unittest.TestCase):
     def test_missing_reviews_is_not_compliant(self) -> None:
         payload = protection.declared_policy()[2]
         existing = {
-            "required_status_checks": {"strict": True, "contexts": ["governed / released-df-quality", "governed / issue-binding / verify-bound-issue"]},
+            "required_status_checks": {
+                "strict": True,
+                "contexts": [
+                    "governed / released-df-quality",
+                    "governed / issue-binding / verify-bound-issue",
+                ],
+            },
             "enforce_admins": {"enabled": False},
             "required_pull_request_reviews": None,
             "required_conversation_resolution": {"enabled": True},
@@ -39,7 +48,10 @@ class BranchProtectionTests(unittest.TestCase):
         existing = {
             "required_status_checks": {
                 "strict": True,
-                "checks": [{"context": "governed / released-df-quality"}, {"context": "governed / issue-binding / verify-bound-issue"}],
+                "checks": [
+                    {"context": "governed / released-df-quality"},
+                    {"context": "governed / issue-binding / verify-bound-issue"},
+                ],
             },
             "enforce_admins": {"enabled": True},
             "required_pull_request_reviews": {"required_approving_review_count": 1},
@@ -50,8 +62,11 @@ class BranchProtectionTests(unittest.TestCase):
         self.assertTrue(protection.matches(existing, payload))
 
     def test_dry_run_does_not_call_github(self) -> None:
-        with patch("sys.argv", ["apply_branch_protection.py"]), patch.object(
-            protection, "github_api", side_effect=AssertionError("unexpected GitHub API call")
+        with (
+            patch("sys.argv", ["apply_branch_protection.py"]),
+            patch.object(
+                protection, "github_api", side_effect=AssertionError("unexpected GitHub API call")
+            ),
         ):
             self.assertEqual(protection.main(), 0)
 

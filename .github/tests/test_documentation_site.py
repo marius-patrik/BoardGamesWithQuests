@@ -62,7 +62,13 @@ def test_source_generated_diagrams_work_in_documentation():
     from urllib.parse import urlsplit
 
     for category, stem in (("implementation", "ast"), ("implementation", "uml")):
-        raw = SITE / "agents" / ("architecture" if category == "implementation" else "reference") / "diagrams" / (stem + ".mmd")
+        raw = (
+            SITE
+            / "agents"
+            / ("architecture" if category == "implementation" else "reference")
+            / "diagrams"
+            / (stem + ".mmd")
+        )
         page = (
             SITE
             / "repository-files"
@@ -101,7 +107,8 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
     incompatible = [
         name
         for name in names
-        if name.startswith(".agents/architecture/diagrams/") and name.endswith((".svg", ".dot", ".gv"))
+        if name.startswith(".agents/architecture/diagrams/")
+        and name.endswith((".svg", ".dot", ".gv"))
     ]
     assert not incompatible, f"Committed diagram sources must be Mermaid: {incompatible}"
 
@@ -111,7 +118,13 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         ("reference", "mvc"),
         ("reference", "uml"),
     ):
-        source = ROOT / ".agents" / ("architecture" if category == "implementation" else "reference") / "diagrams" / (name + ".mmd")
+        source = (
+            ROOT
+            / ".agents"
+            / ("architecture" if category == "implementation" else "reference")
+            / "diagrams"
+            / (name + ".mmd")
+        )
         assert source.is_file() and len(source.read_text(encoding="utf-8").splitlines()) > 12
         page = (
             SITE
@@ -156,7 +169,12 @@ def test_diagram_sources_are_grouped_by_source_ownership():
     sections = {unescape(s) for s in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
     assert "/.agents/architecture/diagrams" in sections
     assert "/.agents/reference/diagrams" in sections
-    for obsolete in ("reference-page1.mmd", "reference-mvc.mmd", "repository-ast.mmd", "implementation-uml.mmd"):
+    for obsolete in (
+        "reference-page1.mmd",
+        "reference-mvc.mmd",
+        "repository-ast.mmd",
+        "implementation-uml.mmd",
+    ):
         assert not (architecture / obsolete).exists()
         assert not (reference / obsolete).exists()
 
@@ -179,7 +197,13 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     ), "The original GUI mockup image was altered"
 
     page = (
-        SITE / "repository-files" / "agents" / "reference" / "images" / "GUI_mockup.svg" / "index.html"
+        SITE
+        / "repository-files"
+        / "agents"
+        / "reference"
+        / "images"
+        / "GUI_mockup.svg"
+        / "index.html"
     )
     assert page.is_file(), "The original image must have a navigable documentation page"
     html = page.read_text(encoding="utf-8")
@@ -262,7 +286,13 @@ def test_image_and_diagram_viewers_offer_an_accessible_modal():
     css = (SITE / "assets/theme.css").read_text(encoding="utf-8")
     script = (SITE / "assets/diagrams.js").read_text(encoding="utf-8")
     index = (
-        SITE / "repository-files" / "agents" / "reference" / "images" / "GUI_mockup.svg" / "index.html"
+        SITE
+        / "repository-files"
+        / "agents"
+        / "reference"
+        / "images"
+        / "GUI_mockup.svg"
+        / "index.html"
     )
     assert index.is_file()
     html = index.read_text(encoding="utf-8")

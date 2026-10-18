@@ -58,9 +58,15 @@ def declared_policy() -> tuple[str, str, dict]:
 def github_api(path: str, method: str = "GET", body: dict | None = None) -> dict:
     """Use the human's GitHub CLI identity; never read tokens into the script."""
     args = [
-        "gh", "api", "-H", "Accept: application/vnd.github+json",
-        "-H", f"X-GitHub-Api-Version: {API_VERSION}",
-        "--method", method, path,
+        "gh",
+        "api",
+        "-H",
+        "Accept: application/vnd.github+json",
+        "-H",
+        f"X-GitHub-Api-Version: {API_VERSION}",
+        "--method",
+        method,
+        path,
     ]
     if body is not None:
         args += ["--input", "-"]
@@ -84,7 +90,9 @@ def matches(existing: dict, payload: dict) -> bool:
     resolution = existing.get("required_conversation_resolution") or {}
     force = existing.get("allow_force_pushes") or {}
     deletion = existing.get("allow_deletions") or {}
-    actual_checks = {check["context"] for check in checks.get("checks", [])} | set(checks.get("contexts", []))
+    actual_checks = {check["context"] for check in checks.get("checks", [])} | set(
+        checks.get("contexts", [])
+    )
     return (
         checks.get("strict") is payload["required_status_checks"]["strict"]
         and set(payload["required_status_checks"]["contexts"]).issubset(actual_checks)
@@ -99,9 +107,12 @@ def matches(existing: dict, payload: dict) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--apply", action="store_true", help="Apply native protection (default: dry run)")
     parser.add_argument(
-        "--replace", action="store_true",
+        "--apply", action="store_true", help="Apply native protection (default: dry run)"
+    )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
         help="Allow replacement of an existing nonconforming branch-protection policy",
     )
     options = parser.parse_args()
@@ -124,7 +135,9 @@ def main() -> int:
             print("Existing native branch protection satisfies the declared policy.")
             return 0
         if not options.replace:
-            raise RuntimeError("Existing protection differs. Review manually; use --apply --replace only if overwriting is intended.")
+            raise RuntimeError(
+                "Existing protection differs. Review manually; use --apply --replace only if overwriting is intended."
+            )
     print("WARNING: Required review approvals are enforced even for the repository owner.")
     print("You cannot approve your own PR. A second reviewer or bot-authored release PR is needed.")
     github_api(endpoint, method="PUT", body=payload)

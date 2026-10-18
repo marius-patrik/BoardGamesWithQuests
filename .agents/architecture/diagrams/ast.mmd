@@ -50,12 +50,16 @@ flowchart LR
   nd62eeb7f75a05f38f --> nd8df6236c53d2bb8f
   n4b06774df4616edcc["0005-existing-code.md"]
   nd62eeb7f75a05f38f --> n4b06774df4616edcc
+  n4190e052417decbae["0006-agent-roles-and-skills.md"]
+  nd62eeb7f75a05f38f --> n4190e052417decbae
   n5ded58ca3ec08d498["notes/"]
   nb76abd85885f19e9e --> n5ded58ca3ec08d498
   n507827f74fae7d391["0001-product.md"]
   n5ded58ca3ec08d498 --> n507827f74fae7d391
   n4e73bde3fe180f2b0["0002-structure.md"]
   n5ded58ca3ec08d498 --> n4e73bde3fe180f2b0
+  n5b4ce5848d811dd97["0003-administration.md"]
+  n5ded58ca3ec08d498 --> n5b4ce5848d811dd97
   n1fc6caa52db94b307["reference/"]
   nb76abd85885f19e9e --> n1fc6caa52db94b307
   nf01460c1a13b504e7["diagrams/"]
@@ -568,6 +572,16 @@ flowchart LR
   nb914c06ad22602465 --> n56d8aa4f97d913c40
   n2092df3a19d2f7b13["scripts/"]
   nfad65243633b77700 --> n2092df3a19d2f7b13
+  n33ca7bf91bbe3626c["apply_branch_protection.py"]
+  n2092df3a19d2f7b13 --> n33ca7bf91bbe3626c
+  nf41eeca1ea551ec69["function_definition declared_policy"]
+  n33ca7bf91bbe3626c --> nf41eeca1ea551ec69
+  nec394714f758793b4["function_definition github_api"]
+  n33ca7bf91bbe3626c --> nec394714f758793b4
+  n2045fcf50bb2af291["function_definition matches"]
+  n33ca7bf91bbe3626c --> n2045fcf50bb2af291
+  n7a1c088b63ce19fa4["function_definition main"]
+  n33ca7bf91bbe3626c --> n7a1c088b63ce19fa4
   n3b9f839fbbebb1fb8["assemble_docs.py"]
   n2092df3a19d2f7b13 --> n3b9f839fbbebb1fb8
   ne3b7b0f2b0484d496["function_definition assemble"]
@@ -660,6 +674,18 @@ flowchart LR
   n150ab2bfe8af4aa6c --> n16d78b830903b8795
   nc9f5868186eb03f66["tests/"]
   nfad65243633b77700 --> nc9f5868186eb03f66
+  n7ffcab1b794872301["test_apply_branch_protection.py"]
+  nc9f5868186eb03f66 --> n7ffcab1b794872301
+  n0dc8bd9d4c43e62e6["class_definition BranchProtectionTests"]
+  n7ffcab1b794872301 --> n0dc8bd9d4c43e62e6
+  ndf103537c35cac2f6["function_definition test_policy_is_derived_from_repository_config"]
+  n7ffcab1b794872301 --> ndf103537c35cac2f6
+  nc26fa8b712438ffc8["function_definition test_missing_reviews_is_not_compliant"]
+  n7ffcab1b794872301 --> nc26fa8b712438ffc8
+  n3d9fe75c30f67b9c7["function_definition test_exact_protection_is_compliant"]
+  n7ffcab1b794872301 --> n3d9fe75c30f67b9c7
+  n2d2b252bd23bf481b["function_definition test_dry_run_does_not_call_github"]
+  n7ffcab1b794872301 --> n2d2b252bd23bf481b
   n905320175c75255b2["test_docs_artifacts.py"]
   nc9f5868186eb03f66 --> n905320175c75255b2
   n82a0b29577da561c3["function_definition run_record"]
@@ -744,16 +770,26 @@ flowchart LR
   n08502483f6d83fd34 --> nbe59e9b775f50b83c
   n599e008723231e657["test_documentation_site.py"]
   nc9f5868186eb03f66 --> n599e008723231e657
-  n66a694bc11ab0ac8d["function_definition tracked_paths"]
+  n66a694bc11ab0ac8d["function_definition test_repository_navigation_and_every_file_page"]
   n599e008723231e657 --> n66a694bc11ab0ac8d
-  nfe2bdd55f23a82ab7["function_definition public_path"]
+  nfe2bdd55f23a82ab7["function_definition test_sidebar_sections_exactly_match_git_tracked_directories"]
   n599e008723231e657 --> nfe2bdd55f23a82ab7
-  n3512379172c37c99c["function_definition test_every_tracked_file_has_a_published_navigation_page"]
+  n3512379172c37c99c["function_definition test_source_generated_diagrams_work_in_documentation"]
   n599e008723231e657 --> n3512379172c37c99c
-  nf8121cc9b8984874e["function_definition test_original_assignment_image_is_visible_and_unchanged"]
+  nf8121cc9b8984874e["function_definition test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images"]
   n599e008723231e657 --> nf8121cc9b8984874e
-  n581dd628e415853b3["function_definition test_actual_code_diagrams_are_available_from_the_built_site"]
+  n581dd628e415853b3["function_definition test_diagram_sources_are_grouped_by_source_ownership"]
   n599e008723231e657 --> n581dd628e415853b3
+  ne4e3fd2774a865495["function_definition test_original_gui_mockup_is_an_image_and_ships_unchanged"]
+  n599e008723231e657 --> ne4e3fd2774a865495
+  n58719cfacc2f83f85["function_definition test_published_docs_use_full_viewport_layout_with_operable_navigation_and_fullscreen"]
+  n599e008723231e657 --> n58719cfacc2f83f85
+  n5b580ee899e3baa73["function_definition test_reading_width_and_independent_fullscreen_buttons"]
+  n599e008723231e657 --> n5b580ee899e3baa73
+  n72a178c548dfaf5a1["function_definition test_navigation_sections_are_natively_collapsible_and_preserve_active_page"]
+  n599e008723231e657 --> n72a178c548dfaf5a1
+  nbee5e8dcbf9c26b7a["function_definition test_image_and_diagram_viewers_offer_an_accessible_modal"]
+  n599e008723231e657 --> nbee5e8dcbf9c26b7a
   n015d86922f7e4e2cd["test_repository_structure.py"]
   nc9f5868186eb03f66 --> n015d86922f7e4e2cd
   n9de49b434737a7367["class_definition WorkspaceLayoutTests"]

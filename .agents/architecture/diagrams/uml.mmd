@@ -1,5 +1,10 @@
 classDiagram
 direction LR
+  class nd01489ae07d01aa59["BranchProtectionTests"]
+  nd01489ae07d01aa59 : +test_policy_is_derived_from_repository_config()
+  nd01489ae07d01aa59 : +test_missing_reviews_is_not_compliant()
+  nd01489ae07d01aa59 : +test_exact_protection_is_compliant()
+  nd01489ae07d01aa59 : +test_dry_run_does_not_call_github()
   class nf4d4cc5884df6ad51["WorkspaceLayoutTests"]
   nf4d4cc5884df6ad51 : +test_native_github_and_agents_dirs()
   nf4d4cc5884df6ad51 : +test_darkfactory_installation_remains_a_tracked_file()
