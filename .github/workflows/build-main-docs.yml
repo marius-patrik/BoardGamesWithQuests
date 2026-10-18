@@ -38,6 +38,7 @@ jobs:
         run: |
           python .github/scripts/build_docs.py
           test -f site/index.html
+          python -m pytest -q .github/tests/test_documentation_site.py
           touch site/.nojekyll
 
       - name: Upload passing main site
