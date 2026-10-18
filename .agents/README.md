@@ -23,13 +23,13 @@ _Source: [0002-structure.md](notes/0002-structure.md)_
 
 ## Native GitHub protection verification
 
-`repo.dfconfig` declares the desired `main` policy: strict required checks, one independent approval, resolved conversations and protection against administrator bypass (`enforce_admins: true`). Only GitHub's actual settings enforce it; repository contents do not establish live compliance. Inspect the live settings with a repository administrator's GitHub CLI identity:
+`repo.dfconfig` declares the desired `main` policy: strict quality and `main-source` checks (reject every PR head except this repository's `development`), one independent approval, resolved conversations and protection against administrator bypass (`enforce_admins: true`). Only GitHub's actual settings enforce it; repository contents do not establish live compliance. Inspect the live settings with a repository administrator's GitHub CLI identity:
 
 ```bash
 python3 .github/scripts/apply_branch_protection.py
 ```
 
-The script is dry-run by default. An authorized administrator must inspect actual settings and apply the required policy via `--apply` (and separately opt into `--replace` if protection differs). GitHub's provider response, required check names, administrative enforcement and actual PR approval gate must be verified; no automation or source declaration substitutes for that evidence. The `develop`/release-only-`main` topology change is separately staged after existing reviewed PRs under [#348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348).
+The script is dry-run by default. An authorized administrator must inspect actual settings and apply the required policy via `--apply` (and separately opt into `--replace` if protection differs). GitHub's provider response, required check names, administrative enforcement and actual PR approval gate must be verified; no automation or source declaration substitutes for that evidence. The `development` ref has been created; a fork-base candidate at `a98e36d098a1ee9aa3e793cfc39040ad6e6d2e4e` is preserved in `release/fork-base`. Final default-branch migration and `main` ref replacement require repository administrator access, followed by verification of the enforced `main-source` check.
 
 _Source: [0003-administration.md](notes/0003-administration.md)_
 
@@ -46,10 +46,11 @@ python3 .github/scripts/generate_documents.py --check
 python3 -m unittest discover -s .github/tests -p test_repository_structure.py
 python3 -m unittest discover -s .github/tests -p test_apply_branch_protection.py
 python3 -m unittest discover -s .github/tests -p test_release_gate.py
+python3 -m unittest discover -s .github/tests -p test_main_source_policy.py
 ```
 
 Behavioral Python tests run with `pytest` after installing the relevant development dependencies. The documentation preview workflow builds the rendered site, exercises `.github/tests/docs_site_acceptance.py` and `.github/tests/test_docs_browser.mjs`, then uploads a source-verified preview artifact for the separate trusted Pages publisher. A successful preview build does not establish public deployment. Claims of real provider readiness require separate live verification.
 
-The project's review branch and release gate are the ones actually configured in GitHub and `repo.dfconfig`. PRs must not merge or release automatically without explicit maintainer authorization; the `.darkfactory/` installation metadata is repository-owned and is not a Git submodule.
+The project's review branch and release gate are the ones actually configured in GitHub and `repo.dfconfig`. PRs must not merge without explicit maintainer authorization; the approved `development` → `main` merge then automatically triggers the verified main-branch release; the `.darkfactory/` installation metadata is repository-owned and is not a Git submodule.
 
 _Source: [0004-contribution.md](notes/0004-contribution.md)_

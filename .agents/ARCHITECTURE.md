@@ -35,11 +35,11 @@ _Source: [0002-layout.md](decisions/0002-layout.md)_
 
 ### Decision
 
-GitHub's existing default and integration branch is `main` (as configured in `repo.dfconfig`); no `develop` branch has been established. Implementation PRs remain issue-bound and require independent maintainer review and explicit approval of their final revisions. Passing CI is necessary but not sufficient.
+A `development` branch now exists at the previous `main` commit, preserving the complete working tree and PR ancestry. GitHub still advertises the protected `main` branch as its default until the administrator completes the rename/reset and release-branch protection. The intended model is `development` for integration and `main` for reviewed release promotion. Implementation PRs remain issue-bound and require independent maintainer review and explicit approval of their final revisions. Passing CI is necessary but not sufficient.
 
 ### Consequences
 
-The separate `develop` integration / `main` release-branch migration is owned by the accepted sequencing in [#348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348): finish and review the existing implementation stack first, verify the fork base and provider protections, and cut over only upon separately authorized maintainer instruction. Do not advertise a non-existent branch or unconfigured source-branch restriction as active.
+The fork-source common ancestor has been verified as `a98e36d098a1ee9aa3e793cfc39040ad6e6d2e4e` and preserved by the `release/fork-base` branch. This repository commit includes a native `main-source` gate that rejects release PRs not originating from the same repository's `development`; native branch protection must **require** its `main-source` check and enforce approvals to make this effective. The administrator must still change the default and replace the protected `main` ref before describing the release-only main policy as live. Approval of each `development` → `main` PR is the authorization to trigger the normal main-push release.
 
 _Source: [0003-review.md](decisions/0003-review.md)_
 
@@ -48,11 +48,11 @@ _Source: [0003-review.md](decisions/0003-review.md)_
 
 ### Decision
 
-`repo.dfconfig` uses DarkFactory PrideVer; no separate tag-only or `VERSION`-file authority should be installed. The tracked `.github/workflows/release.yml` permits publication only through an explicit `workflow_dispatch` on the exact live `main` head, with a read-only pull-request trigger for verifying the workflow and metadata. It does not publish on branch pushes. DarkFactory remains the only authority for PrideVer resolution.
+`repo.dfconfig` uses DarkFactory PrideVer; no separate tag-only or `VERSION`-file authority should be installed. The tracked `.github/workflows/release.yml` automatically publishes the DarkFactory PrideVer GitHub Release when the protected `main` branch advances, including after a reviewed merge from `development`. It also permits explicit manual dispatch on `main`. Read-only pull-request validation does not release. Publication checks the exact live main HEAD and rejects tag reuse across different commits.
 
 ### Consequences
 
-Production promotion still requires human authorization and provider-side settings that enforce the reviewed branch and approval policy. Declaring `enforce_admins: true` in `repo.dfconfig` alone does not update GitHub's live protection; an authorized administrator must verify and apply it. The `develop` migration is gated on the reviewed existing stack under #348.
+The approved `development` → `main` merge supplies the release authorization; no second manual release command is required. Main protection must include the `main-source` status check, independent approval, strict up-to-date checking, required conversation resolution and administrator enforcement. Declaring these rules in `repo.dfconfig` alone does not change GitHub's provider state; the release topology becomes enforceable only after the pending admin cutover and protection application.
 
 _Source: [0004-release.md](decisions/0004-release.md)_
 

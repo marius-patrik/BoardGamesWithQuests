@@ -1,0 +1,25 @@
+name: Main Source Policy
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+permissions:
+  contents: read
+jobs:
+  main-source:
+    name: main-source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Restrict release PRs to the same-repository development branch
+        env:
+          SOURCE_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          if [ "$TARGET_BRANCH" != "main" ] ||
+             [ "$SOURCE_REPO" != "$GITHUB_REPOSITORY" ] ||
+             [ "$SOURCE_BRANCH" != "development" ]; then
+            echo "::error::Only the repository's development branch may propose merges to main"
+            exit 1
+          fi

@@ -34,7 +34,7 @@ def dispatch(
     checkout_sha: str = SHA1,
 ) -> subprocess.CompletedProcess[str]:
     return invoke(
-        "dispatch",
+        "release",
         "--event",
         event,
         "--ref",
@@ -51,16 +51,17 @@ def dispatch(
 
 
 class ReleaseGateBehaviorTests(unittest.TestCase):
-    def test_valid_explicit_main_head_dispatch_succeeds(self) -> None:
-        self.assertEqual(dispatch().returncode, 0)
+    def test_valid_main_push_and_explicit_dispatch_succeed(self) -> None:
+        self.assertEqual(dispatch(event="push").returncode, 0)
+        self.assertEqual(dispatch(event="workflow_dispatch").returncode, 0)
 
-    def test_branch_push_and_pull_request_cannot_release(self) -> None:
-        for event in ("push", "pull_request", "schedule"):
+    def test_pull_request_and_schedule_cannot_release(self) -> None:
+        for event in ("pull_request", "schedule"):
             with self.subTest(event=event):
                 self.assertNotEqual(dispatch(event=event).returncode, 0)
 
     def test_other_ref_or_repository_cannot_release(self) -> None:
-        self.assertNotEqual(dispatch(ref="refs/heads/develop").returncode, 0)
+        self.assertNotEqual(dispatch(ref="refs/heads/development").returncode, 0)
         self.assertNotEqual(dispatch(ref="refs/tags/v1.0.0").returncode, 0)
         self.assertNotEqual(dispatch(repository="another/project").returncode, 0)
 
@@ -93,22 +94,23 @@ class ReleaseGateBehaviorTests(unittest.TestCase):
             0,
         )
 
-    def test_release_job_has_only_manual_publication_entrypoint(self) -> None:
+    def test_release_job_runs_on_main_push_and_manual_dispatch(self) -> None:
         workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
         events = workflow.split("on:\n", 1)[1].split("\npermissions:", 1)[0]
         self.assertIn("  workflow_dispatch:", events)
         self.assertIn("  pull_request:", events)
-        self.assertNotIn("  push:", events)
+        self.assertIn("  push:\n    branches: [main]", events)
+        self.assertIn("github.event_name == 'push'", workflow)
         self.assertIn("github.event_name == 'workflow_dispatch'", workflow)
         self.assertIn("github.ref == 'refs/heads/main'", workflow)
-        self.assertIn("release_gate.py dispatch", workflow)
+        self.assertIn("release_gate.py release", workflow)
         self.assertIn("release_gate.py tag", workflow)
         self.assertNotIn("--prerelease", workflow)
 
     def test_configuration_describes_existing_stack_not_proposed_clients(self) -> None:
         config = json.loads((ROOT / "repo.dfconfig").read_text(encoding="utf-8"))
         identity = config["repo"]["identity"]
-        self.assertEqual(identity["development_branch"], "main")
+        self.assertEqual(identity["development_branch"], "development")
         description = identity["description"].lower()
         self.assertIn("python", description)
         self.assertNotIn("react", description)

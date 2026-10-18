@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed before a manually authorized release mutates tags or publishes artifacts."""
+"""Fail closed before a release from the verified main branch publishes immutable tags."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import sys
 SHA = re.compile(r"^[0-9a-f]{40}$")
 
 
-def authorize_dispatch(
+def authorize_release(
     event: str,
     ref: str,
     repository: str,
@@ -18,11 +18,11 @@ def authorize_dispatch(
     live_main_sha: str,
     checkout_sha: str,
 ) -> None:
-    if event != "workflow_dispatch":
-        raise ValueError("A release must be requested by an explicit workflow dispatch")
+    if event not in {"workflow_dispatch", "push"}:
+        raise ValueError("A release must be triggered by a main push or an explicit main dispatch")
     if ref != "refs/heads/main" or repository != "marius-patrik/BoardGamesWithQuests":
         raise ValueError(
-            "Only an authorized dispatch targeting the project main branch can release"
+            "Only a release event targeting the project main branch can publish"
         )
     if any(not SHA.fullmatch(sha) for sha in (run_sha, live_main_sha, checkout_sha)):
         raise ValueError("Missing or invalid commit SHA")
@@ -44,17 +44,17 @@ def validate_existing_tag(tag: str, candidate_sha: str, assigned_sha: str | None
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="action", required=True)
-    dispatch = commands.add_parser("dispatch")
+    release = commands.add_parser("release")
     for name in ("event", "ref", "repository", "run-sha", "live-sha", "checkout-sha"):
-        dispatch.add_argument(f"--{name}", required=True)
+        release.add_argument(f"--{name}", required=True)
     tag = commands.add_parser("tag")
     tag.add_argument("--tag", required=True)
     tag.add_argument("--run-sha", required=True)
     tag.add_argument("--assigned-sha")
     args = parser.parse_args()
     try:
-        if args.action == "dispatch":
-            authorize_dispatch(
+        if args.action == "release":
+            authorize_release(
                 args.event,
                 args.ref,
                 args.repository,

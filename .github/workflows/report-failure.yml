@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   report-failure:
-    if: github.event.workflow_run.head_branch == github.event.repository.default_branch
+    if: github.event.workflow_run.head_branch == 'development' || github.event.workflow_run.head_branch == github.event.repository.default_branch
     uses: marius-patrik/DarkFactory/.github/workflows/report-failure.yml@4a922f5be5ec3d928f9142424674b433e0f40b71
     with:
       pipeline-repo: marius-patrik/DarkFactory

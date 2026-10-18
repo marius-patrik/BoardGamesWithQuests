@@ -23,7 +23,7 @@ can provide an independent native approval. Each PR binds its actual tracked
 issue, contains one coherent responsibility and identifies remaining
 dependencies rather than bundling incomplete neighboring components.
 Synchronize with the target branch and rerun applicable checks before merge.
-Merges require explicit maintainer approval. Never promote to the release branch without a separate explicit request and verified repository protection.
+Merges require explicit maintainer approval. Only a reviewed same-repository `development` → `main` PR may promote to the release branch; that merged main commit automatically triggers the PrideVer release workflow after native protection is correctly applied.
 
 ### BoardGamesWithQuests: Issue and Project Tracking
 Bind every pull request to an implementation issue. Keep issues and project

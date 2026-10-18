@@ -16,7 +16,7 @@
         "game",
         "education"
       ],
-      "development_branch": "main"
+      "development_branch": "development"
     },
     "upstream": {
       "repo": "marius-patrik/DarkFactory",
@@ -187,7 +187,8 @@
           "branch": "main",
           "required_checks": [
             "governed / released-df-quality",
-            "governed / issue-binding / verify-bound-issue"
+            "governed / issue-binding / verify-bound-issue",
+            "main-source"
           ],
           "approvals": 1,
           "strict": true,

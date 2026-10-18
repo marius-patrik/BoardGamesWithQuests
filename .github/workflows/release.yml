@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  push:
+    branches: [main]
   pull_request:
     paths:
       - .github/workflows/release.yml
@@ -33,7 +35,7 @@ jobs:
         run: python3 -m unittest discover -s .github/tests -p test_release_gate.py
 
   release:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'marius-patrik/BoardGamesWithQuests'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && github.repository == 'marius-patrik/BoardGamesWithQuests'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,13 +46,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify this dispatch targets the live main HEAD
+      - name: Verify this release targets the live main HEAD
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           live_main="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
-          python3 .github/scripts/release_gate.py dispatch \
+          python3 .github/scripts/release_gate.py release \
             --event "$GITHUB_EVENT_NAME" --ref "$GITHUB_REF" \
             --repository "$GITHUB_REPOSITORY" --run-sha "$GITHUB_SHA" \
             --live-sha "$live_main" --checkout-sha "$(git rev-parse HEAD)"
@@ -93,7 +95,7 @@ jobs:
           echo "tag=$(jq -r '.tag // empty' "$RUNNER_TEMP/release.json")" >> "$GITHUB_OUTPUT"
           jq '{version,tag,mode,metadata_problems,steps}' "$RUNNER_TEMP/release.json" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Publish explicitly authorized release
+      - name: Publish release for verified main commit
         if: steps.resolve.outputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
@@ -107,7 +109,7 @@ jobs:
           fi
           python3 .github/scripts/release_gate.py tag "${tag_gate[@]}"
           live_main="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
-          python3 .github/scripts/release_gate.py dispatch \
+          python3 .github/scripts/release_gate.py release \
             --event "$GITHUB_EVENT_NAME" --ref "$GITHUB_REF" \
             --repository "$GITHUB_REPOSITORY" --run-sha "$GITHUB_SHA" \
             --live-sha "$live_main" --checkout-sha "$(git rev-parse HEAD)"

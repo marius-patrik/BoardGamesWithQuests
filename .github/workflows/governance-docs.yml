@@ -2,7 +2,7 @@ name: Generated governance sources
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [development, main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,3 +26,4 @@ jobs:
           python3 -m unittest discover -s .github/tests -p test_repository_structure.py
           python3 -m unittest discover -s .github/tests -p test_apply_branch_protection.py
           python3 -m unittest discover -s .github/tests -p test_release_gate.py
+          python3 -m unittest discover -s .github/tests -p test_main_source_policy.py
