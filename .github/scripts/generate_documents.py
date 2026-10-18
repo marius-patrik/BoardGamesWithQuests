@@ -80,7 +80,9 @@ def validate_layout() -> list[str]:
 
     # Future implementation contracts are issue-only until the owning implementation PR lands.
     if (WORKSPACE / "requirements").exists():
-        errors.append("Prospective implementation contracts belong in GitHub issues, not .agents/requirements/")
+        errors.append(
+            "Prospective implementation contracts belong in GitHub issues, not .agents/requirements/"
+        )
     if (ROOT / ".github/scripts/check_spec_contracts.py").exists():
         errors.append("Unimplemented target diagrams must not have a CI checker")
     for old in (
