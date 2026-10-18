@@ -10,4 +10,4 @@ The single program scope, dependency graph and acceptance gates are maintained i
 6. Implement remaining issues as dependency-stacked, issue-bound bot PRs feeding into `develop`, each independently reviewed and merged only with maintainer approval.
 7. Promote `develop` into the release `main` **only when explicitly requested separately by the maintainer**.
 
-The G1 branching choice is accepted, but #404 has not been executed; release/version controller choice G2 is pending.
+G1 and G2 are accepted: use `develop` for integration after #404, preserve **DarkFactory PrideVer** as the sole version/release authority, and release from `main` only on separate explicit maintainer request. The actual branch cutover and release-trigger hardening are still pending #404.
