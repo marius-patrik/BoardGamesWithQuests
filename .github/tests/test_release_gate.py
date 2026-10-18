@@ -95,7 +95,7 @@ class ReleaseGateBehaviorTests(unittest.TestCase):
 
     def test_release_job_has_only_manual_publication_entrypoint(self) -> None:
         workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
-        events = workflow.split("on:\\n", 1)[1].split("\\npermissions:", 1)[0]
+        events = workflow.split("on:\n", 1)[1].split("\npermissions:", 1)[0]
         self.assertIn("  workflow_dispatch:", events)
         self.assertIn("  pull_request:", events)
         self.assertNotIn("  push:", events)
