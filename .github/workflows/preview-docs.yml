@@ -33,6 +33,7 @@ jobs:
 
       - name: Verify documentation publication behavior
         run: |
+          python -m pytest -q .github/tests/docs_submodule_acceptance.py .github/tests/docs_diagrams_acceptance.py
           python -m pytest -q .github/tests/test_docs_publication.py
           if [ -f .github/tests/test_docs_artifacts.py ]; then
             python -m pytest -q .github/tests/test_docs_artifacts.py
