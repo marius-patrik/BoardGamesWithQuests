@@ -181,7 +181,15 @@ jobs:
             --event "$GITHUB_EVENT_NAME" --ref "$GITHUB_REF" \
             --repository "$GITHUB_REPOSITORY" --run-sha "$GITHUB_SHA" \
             --live-sha "$live_main" --checkout-sha "$(git rev-parse HEAD)"
-          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            # Never silently accept an earlier public release or stale draft assets.
+            state="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft')"
+            if [ "$state" != true ]; then
+              echo "::error::Existing published release must be reviewed; refusing to replace assets"
+              exit 1
+            fi
+            gh release upload "$TAG" dist/release/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
             gh release create "$TAG" dist/release/* \
               --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
               --title "$TAG" --notes-file dist/notes/release-notes.md --draft

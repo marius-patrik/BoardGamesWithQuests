@@ -8,11 +8,11 @@ import hashlib
 import os
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import sys
 import tarfile
 import time
+import tomllib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,7 +38,8 @@ def archive_bundle(bundle: Path, output: Path, platform: str, version: str) -> t
         archive = output / (stem + ".tar.gz")
         with tarfile.open(archive, "w:gz") as dest:
             dest.add(bundle, arcname=bundle.name)
-    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    with archive.open("rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
     checksum = output / (archive.name + ".sha256")
     checksum.write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
     return archive, checksum
@@ -52,6 +53,10 @@ def build(platform: str, version: str) -> Path:
     games = ROOT / "src/games"
     if not entry.is_file() or not games.is_dir():
         raise FileNotFoundError("Completed desktop sources under src/ are required")
+    # Read package identity from the actual branch. The Phase 0 engine uses
+    # "chesswithquests"; the consolidated desktop branch uses "boardgameswithquests".
+    with (ROOT / "pyproject.toml").open("rb") as source:
+        distribution = tomllib.load(source)["project"]["name"]
     dist = ROOT / "dist/desktop"
     work = ROOT / "build/pyinstaller"
     args = [
@@ -71,7 +76,7 @@ def build(platform: str, version: str) -> Path:
         "--collect-submodules",
         "games",
         "--copy-metadata",
-        "boardgameswithquests",
+        distribution,
         "--distpath",
         str(dist),
         "--workpath",

@@ -43,6 +43,9 @@ class DesktopPackagingInfrastructureTests(unittest.TestCase):
         self.assertIn("uses: ./.github/workflows/desktop-build.yml", release)
         self.assertIn("merge-multiple: true", release)
         self.assertIn("name: release-notes", release)
+        self.assertIn("gh release upload", release)
+        self.assertIn("--clobber", release)
+        self.assertIn("Existing published release must be reviewed", release)
         self.assertNotIn("name: desktop-release-notes", release)
         self.assertIn("sha256sum --check", release)
         self.assertIn("--draft", release)
@@ -52,6 +55,11 @@ class DesktopPackagingInfrastructureTests(unittest.TestCase):
             self.assertIn(platform, desktop)
         self.assertIn("Package and smoke-test the frozen GUI", desktop)
         self.assertIn("SETUPTOOLS_SCM_PRETEND_VERSION", desktop)
+
+    def test_packager_derives_metadata_from_the_checked_out_project(self) -> None:
+        script = (ROOT / ".github/scripts/package_desktop.py").read_text(encoding="utf-8")
+        self.assertIn('tomllib.load(source)["project"]["name"]', script)
+        self.assertNotIn('"--copy-metadata",\n        "boardgameswithquests",', script)
 
 
 if __name__ == "__main__":
