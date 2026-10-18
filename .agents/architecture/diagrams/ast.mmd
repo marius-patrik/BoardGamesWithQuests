@@ -1020,6 +1020,10 @@ flowchart LR
   n5f65b1147cf4c7caa --> n7df1ed9007d9d39e8
   n28318da418e0535ba["function_definition test_missing_documentation_root_fails_without_publishing"]
   n5f65b1147cf4c7caa --> n28318da418e0535ba
+  n661eba763e6beb218["test_docs_mermaid.py"]
+  nc9f5868186eb03f66 --> n661eba763e6beb218
+  nfb21f515ea8bffadd["function_definition test_diagram_renderer_ignores_index_html_named_directories"]
+  n661eba763e6beb218 --> nfb21f515ea8bffadd
   n08502483f6d83fd34["test_docs_publication.py"]
   nc9f5868186eb03f66 --> n08502483f6d83fd34
   n6bb9383ded1ecec78["function_definition invoke"]
@@ -1646,6 +1650,16 @@ flowchart LR
   n16c64a08f8f2b8efa --> n82069ce98ca6e1d49
   nfcf010a3b0752b94b["function_definition test_the_shipped_default_configuration_loads_with_no_configuration_at_all"]
   n16c64a08f8f2b8efa --> nfcf010a3b0752b94b
+  nfad5127a759f08193["test_server_bootstrap.py"]
+  nc9f5868186eb03f66 --> nfad5127a759f08193
+  n9701031a1e285a219["decorated_definition"]
+  nfad5127a759f08193 --> n9701031a1e285a219
+  n80dc5fcafa0b0e0d9["function_definition live_api"]
+  nfad5127a759f08193 --> n80dc5fcafa0b0e0d9
+  n5c7830226b1dd5946["function_definition test_definition_catalog_returns_only_implemented_bootstrap_data"]
+  nfad5127a759f08193 --> n5c7830226b1dd5946
+  naacfcb5d0b5e3b173["function_definition test_unimplemented_game_endpoints_are_not_advertised"]
+  nfad5127a759f08193 --> naacfcb5d0b5e3b173
   nc1e33141f006fa1b4["test_settings_surface.py"]
   nc9f5868186eb03f66 --> nc1e33141f006fa1b4
   n71c707f4bacc68fe9["decorated_definition"]
@@ -1868,12 +1882,20 @@ flowchart LR
   nbf32064a6a26ab2df --> n3feee3a065a9480cc
   n287ff0a0ecf3283a1["darkfactory.yml"]
   nbf32064a6a26ab2df --> n287ff0a0ecf3283a1
+  n1bc503fe266e72b04["deploy-api.yml"]
+  nbf32064a6a26ab2df --> n1bc503fe266e72b04
   n84354cf99c1713fc6["deploy-docs.yml"]
   nbf32064a6a26ab2df --> n84354cf99c1713fc6
+  nb1ce60c11d5d64d12["deploy-web.yml"]
+  nbf32064a6a26ab2df --> nb1ce60c11d5d64d12
   n76ec2fd65ee9dad06["governance-docs.yml"]
   nbf32064a6a26ab2df --> n76ec2fd65ee9dad06
   n14cf6130af7812ba5["main-source.yml"]
   nbf32064a6a26ab2df --> n14cf6130af7812ba5
+  ndb6803f300fd72b95["native-ios-signed.yml"]
+  nbf32064a6a26ab2df --> ndb6803f300fd72b95
+  n85d45b914e4a71838["native-release.yml"]
+  nbf32064a6a26ab2df --> n85d45b914e4a71838
   nc5611faa7a94a1ca4["open-pr.yml"]
   nbf32064a6a26ab2df --> nc5611faa7a94a1ca4
   n0bb25caaca528da62["preview-docs.yml"]
@@ -1884,6 +1906,8 @@ flowchart LR
   nbf32064a6a26ab2df --> nd3df90c45daec0479
   n1e8a52375031a480a["report-failure.yml"]
   nbf32064a6a26ab2df --> n1e8a52375031a480a
+  n6ac2ffd6d3797d958["supabase.yml"]
+  nbf32064a6a26ab2df --> n6ac2ffd6d3797d958
   n7319e776256e9b95b["verify-release-metadata.yml"]
   nbf32064a6a26ab2df --> n7319e776256e9b95b
   ndfaa9a79675e5b61b[".gitignore"]
@@ -1894,6 +1918,276 @@ flowchart LR
   root --> nbd84daf23e7f5febd
   n42c59af8a4bae559b["README.md"]
   root --> n42c59af8a4bae559b
+  n525518333d23bfd74["icon.svg"]
+  root --> n525518333d23bfd74
+  n943ebea6ff21f7351["packages/"]
+  root --> n943ebea6ff21f7351
+  n469a05a0a51f327f7["client/"]
+  n943ebea6ff21f7351 --> n469a05a0a51f327f7
+  na1fd6f567d5425572[".env.example"]
+  n469a05a0a51f327f7 --> na1fd6f567d5425572
+  n596c46455dbf6a364["biome.json"]
+  n469a05a0a51f327f7 --> n596c46455dbf6a364
+  n01d41934829298cd9["bun.lock"]
+  n469a05a0a51f327f7 --> n01d41934829298cd9
+  nf5706a06f87ad2764["components.json"]
+  n469a05a0a51f327f7 --> nf5706a06f87ad2764
+  nca03c487e503e4f83["index.html"]
+  n469a05a0a51f327f7 --> nca03c487e503e4f83
+  n5ebfe2b952cc1b922["package.json"]
+  n469a05a0a51f327f7 --> n5ebfe2b952cc1b922
+  n5c1999fdb722d67ef["postcss.config.mjs"]
+  n469a05a0a51f327f7 --> n5c1999fdb722d67ef
+  nb0f38e8f184ee114b["rsbuild.config.ts"]
+  n469a05a0a51f327f7 --> nb0f38e8f184ee114b
+  n27097399bbdde306e["scripts/"]
+  n469a05a0a51f327f7 --> n27097399bbdde306e
+  nc0cdd06a7dceca690["stage-icon.ts"]
+  n27097399bbdde306e --> nc0cdd06a7dceca690
+  ne5da6ad72148fe519["lexical_declaration"]
+  nc0cdd06a7dceca690 --> ne5da6ad72148fe519
+  n4d5482cd29ca8d2de["lexical_declaration"]
+  nc0cdd06a7dceca690 --> n4d5482cd29ca8d2de
+  nae49b09c6760f4c85["src/"]
+  n469a05a0a51f327f7 --> nae49b09c6760f4c85
+  nb9f7f04007e920649["app.tsx"]
+  nae49b09c6760f4c85 --> nb9f7f04007e920649
+  nb6e9a59a77644cee0["function_declaration App"]
+  nb9f7f04007e920649 --> nb6e9a59a77644cee0
+  n1e592273839b74a42["lexical_declaration"]
+  nb9f7f04007e920649 --> n1e592273839b74a42
+  n18dbc980f375e77aa["lexical_declaration"]
+  nb9f7f04007e920649 --> n18dbc980f375e77aa
+  n5cc97f484e357525e["lexical_declaration"]
+  nb9f7f04007e920649 --> n5cc97f484e357525e
+  nae3e7f3f5f5a454c9["function_declaration signOut"]
+  nb9f7f04007e920649 --> nae3e7f3f5f5a454c9
+  nfb06a296bb7ae3667["auth.ts"]
+  nae49b09c6760f4c85 --> nfb06a296bb7ae3667
+  n946a20c6ef5217d4c["lexical_declaration"]
+  nfb06a296bb7ae3667 --> n946a20c6ef5217d4c
+  n91cfbbe2bfaa2f567["lexical_declaration"]
+  nfb06a296bb7ae3667 --> n91cfbbe2bfaa2f567
+  nc138ec0f3935168b2["lexical_declaration"]
+  nfb06a296bb7ae3667 --> nc138ec0f3935168b2
+  n486d95e87361767cd["components/"]
+  nae49b09c6760f4c85 --> n486d95e87361767cd
+  n47c96f664ddf30c28["app-header.tsx"]
+  n486d95e87361767cd --> n47c96f664ddf30c28
+  nd1640b7a5df131a5d["function_declaration AppHeader"]
+  n47c96f664ddf30c28 --> nd1640b7a5df131a5d
+  n9ce95322a3d190f0a["auth-form.tsx"]
+  n486d95e87361767cd --> n9ce95322a3d190f0a
+  n83a55a26940617575["function_declaration AuthForm"]
+  n9ce95322a3d190f0a --> n83a55a26940617575
+  n04aa1c5db2966a08a["lexical_declaration"]
+  n9ce95322a3d190f0a --> n04aa1c5db2966a08a
+  nc68bc3cec21def554["lexical_declaration"]
+  n9ce95322a3d190f0a --> nc68bc3cec21def554
+  nb5a48bb7c059b49f6["lexical_declaration"]
+  n9ce95322a3d190f0a --> nb5a48bb7c059b49f6
+  n7c74698f1e3d802c0["lexical_declaration"]
+  n9ce95322a3d190f0a --> n7c74698f1e3d802c0
+  n2a6319d75b4c25123["lexical_declaration"]
+  n9ce95322a3d190f0a --> n2a6319d75b4c25123
+  n99fc6ac7d13839091["function_declaration submit"]
+  n9ce95322a3d190f0a --> n99fc6ac7d13839091
+  nff2a438db86e3a428["function_declaration continueAsGuest"]
+  n9ce95322a3d190f0a --> nff2a438db86e3a428
+  n603504c6dbb56ece6["definition-catalog.tsx"]
+  n486d95e87361767cd --> n603504c6dbb56ece6
+  n069a15147fae96cc7["type_alias_declaration Definition"]
+  n603504c6dbb56ece6 --> n069a15147fae96cc7
+  n9016fb6d55decd323["function_declaration DefinitionCatalog"]
+  n603504c6dbb56ece6 --> n9016fb6d55decd323
+  n8787f2a0ebbf9a868["lexical_declaration"]
+  n603504c6dbb56ece6 --> n8787f2a0ebbf9a868
+  n554dddfec236bb3c4["lexical_declaration"]
+  n603504c6dbb56ece6 --> n554dddfec236bb3c4
+  nea1eea60c0bdb9966["lexical_declaration"]
+  n603504c6dbb56ece6 --> nea1eea60c0bdb9966
+  ncbbdf1754ad296264["ui/"]
+  n486d95e87361767cd --> ncbbdf1754ad296264
+  n78bd8cfac83b449de["button.tsx"]
+  ncbbdf1754ad296264 --> n78bd8cfac83b449de
+  n2b463c72b5919d7ba["lexical_declaration"]
+  n78bd8cfac83b449de --> n2b463c72b5919d7ba
+  n1e3288a472291c316["type_alias_declaration ButtonProps"]
+  n78bd8cfac83b449de --> n1e3288a472291c316
+  n94b59a69615510603["function_declaration Button"]
+  n78bd8cfac83b449de --> n94b59a69615510603
+  n9aa8ab33b13b58ac4["lexical_declaration"]
+  n78bd8cfac83b449de --> n9aa8ab33b13b58ac4
+  n60bf80b4ed4972d8a["input.tsx"]
+  ncbbdf1754ad296264 --> n60bf80b4ed4972d8a
+  n7e786db98f50c92de["function_declaration Input"]
+  n60bf80b4ed4972d8a --> n7e786db98f50c92de
+  nac7877ade0b156d14["env.d.ts"]
+  nae49b09c6760f4c85 --> nac7877ade0b156d14
+  ndd9fc4987f5aab18d["interface_declaration ImportMetaEnv"]
+  nac7877ade0b156d14 --> ndd9fc4987f5aab18d
+  n36a72a224dce50fae["interface_declaration ImportMeta"]
+  nac7877ade0b156d14 --> n36a72a224dce50fae
+  n38dcc1182325ad464["hooks/"]
+  nae49b09c6760f4c85 --> n38dcc1182325ad464
+  n76f319fa680180238["use-auth-session.ts"]
+  n38dcc1182325ad464 --> n76f319fa680180238
+  n1776d165a20e215c2["function_declaration useAuthSession"]
+  n76f319fa680180238 --> n1776d165a20e215c2
+  nd46fc8f580215c5ed["lexical_declaration"]
+  n76f319fa680180238 --> nd46fc8f580215c5ed
+  n455b85885a68439cc["lexical_declaration"]
+  n76f319fa680180238 --> n455b85885a68439cc
+  n707de0b8df541f666["lexical_declaration"]
+  n76f319fa680180238 --> n707de0b8df541f666
+  n6b674d4409fab1ce9["lib/"]
+  nae49b09c6760f4c85 --> n6b674d4409fab1ce9
+  n783b4f49a6d10b033["class-names.ts"]
+  n6b674d4409fab1ce9 --> n783b4f49a6d10b033
+  nb6cf28b7711f0e30e["function_declaration mergeClassNames"]
+  n783b4f49a6d10b033 --> nb6cf28b7711f0e30e
+  nae36423b3d26f16a8["main.tsx"]
+  nae49b09c6760f4c85 --> nae36423b3d26f16a8
+  n09491d7113183695a["lexical_declaration"]
+  nae36423b3d26f16a8 --> n09491d7113183695a
+  n603a962e23ff5bf69["pages/"]
+  nae49b09c6760f4c85 --> n603a962e23ff5bf69
+  n398effdf74b76f514["auth-page.tsx"]
+  n603a962e23ff5bf69 --> n398effdf74b76f514
+  n57c8a913b4e00a7c3["function_declaration AuthPage"]
+  n398effdf74b76f514 --> n57c8a913b4e00a7c3
+  n3391451eec303b91c["games-page.tsx"]
+  n603a962e23ff5bf69 --> n3391451eec303b91c
+  nb143e1c61cddf723c["function_declaration GamesPage"]
+  n3391451eec303b91c --> nb143e1c61cddf723c
+  n93f01ab998c57e9aa["styles.css"]
+  nae49b09c6760f4c85 --> n93f01ab998c57e9aa
+  n258a61edede97f39c["declaration"]
+  n93f01ab998c57e9aa --> n258a61edede97f39c
+  n81fc06a5b74e31701["declaration"]
+  n93f01ab998c57e9aa --> n81fc06a5b74e31701
+  n0d0b0afdc7715f2a4["declaration"]
+  n93f01ab998c57e9aa --> n0d0b0afdc7715f2a4
+  n76e7d1535371d6574["declaration"]
+  n93f01ab998c57e9aa --> n76e7d1535371d6574
+  n1d50b30a0807c44ec["declaration"]
+  n93f01ab998c57e9aa --> n1d50b30a0807c44ec
+  n02dfd23e00b8ce0ca["declaration"]
+  n93f01ab998c57e9aa --> n02dfd23e00b8ce0ca
+  n7692f844d75486f64["declaration"]
+  n93f01ab998c57e9aa --> n7692f844d75486f64
+  n17212e1aea6873d0d["declaration"]
+  n93f01ab998c57e9aa --> n17212e1aea6873d0d
+  n2952b5a4346f6902b["declaration"]
+  n93f01ab998c57e9aa --> n2952b5a4346f6902b
+  n7a76777a9b5d877f0["declaration"]
+  n93f01ab998c57e9aa --> n7a76777a9b5d877f0
+  n2d998bde7921a3ad4["declaration"]
+  n93f01ab998c57e9aa --> n2d998bde7921a3ad4
+  n739b6e9530243f800["declaration"]
+  n93f01ab998c57e9aa --> n739b6e9530243f800
+  n7ad86afdeeeba891a["declaration"]
+  n93f01ab998c57e9aa --> n7ad86afdeeeba891a
+  n88f0353a8d3c1c0df["declaration"]
+  n93f01ab998c57e9aa --> n88f0353a8d3c1c0df
+  n1839756d577f1c0b5["declaration"]
+  n93f01ab998c57e9aa --> n1839756d577f1c0b5
+  n5a8f42ce46f901b1f["declaration"]
+  n93f01ab998c57e9aa --> n5a8f42ce46f901b1f
+  n41ca083a967b409e0["declaration"]
+  n93f01ab998c57e9aa --> n41ca083a967b409e0
+  n56ea4cce0fb97cbf1["declaration"]
+  n93f01ab998c57e9aa --> n56ea4cce0fb97cbf1
+  n8d6c58c16f4dcc13b["declaration"]
+  n93f01ab998c57e9aa --> n8d6c58c16f4dcc13b
+  nd4fdef15032ebc8e4["declaration"]
+  n93f01ab998c57e9aa --> nd4fdef15032ebc8e4
+  n399ba25c87dc188e9["declaration"]
+  n93f01ab998c57e9aa --> n399ba25c87dc188e9
+  ndd570213e4e27dd7a["declaration"]
+  n93f01ab998c57e9aa --> ndd570213e4e27dd7a
+  n984cbb1f7b0dc03a5["declaration"]
+  n93f01ab998c57e9aa --> n984cbb1f7b0dc03a5
+  nf0a5b92f43b45d420["declaration"]
+  n93f01ab998c57e9aa --> nf0a5b92f43b45d420
+  ncda15e0f4250ae7b3["declaration"]
+  n93f01ab998c57e9aa --> ncda15e0f4250ae7b3
+  n2b1e3264bdb2c82e8["declaration"]
+  n93f01ab998c57e9aa --> n2b1e3264bdb2c82e8
+  nda89fa91c030259bc["declaration"]
+  n93f01ab998c57e9aa --> nda89fa91c030259bc
+  nea6e4e10aa5d008e8["declaration"]
+  n93f01ab998c57e9aa --> nea6e4e10aa5d008e8
+  ne266f996e40d96d24["declaration"]
+  n93f01ab998c57e9aa --> ne266f996e40d96d24
+  n7be15c441d57eaba9["declaration"]
+  n93f01ab998c57e9aa --> n7be15c441d57eaba9
+  na3a5562ee15a94789["declaration"]
+  n93f01ab998c57e9aa --> na3a5562ee15a94789
+  n94d49980e746a8e44["declaration"]
+  n93f01ab998c57e9aa --> n94d49980e746a8e44
+  n622bc4a9bb0711d90["declaration"]
+  n93f01ab998c57e9aa --> n622bc4a9bb0711d90
+  n4f49ce9695a5f3b27["tsconfig.json"]
+  n469a05a0a51f327f7 --> n4f49ce9695a5f3b27
+  n01e671ce5fb28f2dc["vercel.json"]
+  n469a05a0a51f327f7 --> n01e671ce5fb28f2dc
+  n8b2c237c8aaf60869["native/"]
+  n943ebea6ff21f7351 --> n8b2c237c8aaf60869
+  neadcd1a788a36c650["biome.json"]
+  n8b2c237c8aaf60869 --> neadcd1a788a36c650
+  nd470f72a50318e753["bun.lock"]
+  n8b2c237c8aaf60869 --> nd470f72a50318e753
+  n267fca3090bbb8799["package.json"]
+  n8b2c237c8aaf60869 --> n267fca3090bbb8799
+  n5a2dbd4a06e494f55["scripts/"]
+  n8b2c237c8aaf60869 --> n5a2dbd4a06e494f55
+  n6ed545b42f3f9a5bf["verify-config.ts"]
+  n5a2dbd4a06e494f55 --> n6ed545b42f3f9a5bf
+  n59decd4c24ce40a56["lexical_declaration"]
+  n6ed545b42f3f9a5bf --> n59decd4c24ce40a56
+  n1d928055125d5b52b["src-tauri/"]
+  n8b2c237c8aaf60869 --> n1d928055125d5b52b
+  n6d053a9de56e097ab["Cargo.toml"]
+  n1d928055125d5b52b --> n6d053a9de56e097ab
+  n62c7ee6c9efb71cdc["build.rs"]
+  n1d928055125d5b52b --> n62c7ee6c9efb71cdc
+  n1c4a8dc8975344177["function_item main"]
+  n62c7ee6c9efb71cdc --> n1c4a8dc8975344177
+  nffdacc6cf4505c46b["src/"]
+  n1d928055125d5b52b --> nffdacc6cf4505c46b
+  na4e146e8d674ed89e["lib.rs"]
+  nffdacc6cf4505c46b --> na4e146e8d674ed89e
+  n00e267a1a4d529462["function_item run"]
+  na4e146e8d674ed89e --> n00e267a1a4d529462
+  na3a4752c921a61d50["main.rs"]
+  nffdacc6cf4505c46b --> na3a4752c921a61d50
+  ndc06717d105737c50["function_item main"]
+  na3a4752c921a61d50 --> ndc06717d105737c50
+  na617c915ed7a237b8["tauri.conf.json"]
+  n1d928055125d5b52b --> na617c915ed7a237b8
+  nde3c3bd0edae35bd7["tsconfig.json"]
+  n8b2c237c8aaf60869 --> nde3c3bd0edae35bd7
+  nb372680a7f226f40e["server/"]
+  n943ebea6ff21f7351 --> nb372680a7f226f40e
+  nca1c9ba7b027a4a8e["__init__.py"]
+  nb372680a7f226f40e --> nca1c9ba7b027a4a8e
+  n5e8292e583ebf0a20["api/"]
+  nb372680a7f226f40e --> n5e8292e583ebf0a20
+  n8209bd520c9e33177["index.py"]
+  n5e8292e583ebf0a20 --> n8209bd520c9e33177
+  nee81bea77d552c13d["decorated_definition"]
+  n8209bd520c9e33177 --> nee81bea77d552c13d
+  n94b5674421d53c4c8["function_definition list_definitions"]
+  n8209bd520c9e33177 --> n94b5674421d53c4c8
+  n32dc51df99f26f347["pytest.ini"]
+  nb372680a7f226f40e --> n32dc51df99f26f347
+  n082c518ca11369483["requirements.txt"]
+  nb372680a7f226f40e --> n082c518ca11369483
+  nfa83704eba33a7014["supabase/"]
+  nb372680a7f226f40e --> nfa83704eba33a7014
+  ne9c52b91908697b73["config.toml"]
+  nfa83704eba33a7014 --> ne9c52b91908697b73
   nb027812e179e11aad["properdocs.yml"]
   root --> nb027812e179e11aad
   n90d5d08d3a6b3fd1f["pyproject.toml"]

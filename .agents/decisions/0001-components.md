@@ -14,3 +14,6 @@ status: accepted
 ## Documentation and automation
 
 `.agents/` contains approved governance sources and generated reader documents. `.github/scripts/`, `.github/tests/` and `.github/workflows/` own source-derived documentation, repository verification and GitHub automation.
+## HTTP, browser and native adapters
+
+`packages/server/api/index.py` owns the HTTP application and the current empty definitions endpoint. `packages/client/` owns the browser UI and Supabase client wiring. `packages/native/` owns a Tauri desktop shell for the browser experience. These adapters do not implement a second game engine.

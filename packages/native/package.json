@@ -1,0 +1,19 @@
+{
+  "name": "@bgwq/native",
+  "version": "0.8.2",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.0",
+  "scripts": {
+    "tauri": "tauri",
+    "icon": "bun run verify-config && tauri icon ../../icon.svg",
+    "desktop": "tauri build",
+    "android": "tauri android build",
+    "ios": "tauri ios build",
+    "verify-config": "bun scripts/verify-config.ts"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.0",
+    "@biomejs/biome": "^2.5.0"
+  }
+}
