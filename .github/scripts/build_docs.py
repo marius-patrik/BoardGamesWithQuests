@@ -206,7 +206,9 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
     for source_path, diagram in sorted(diagram_generator().generated_assets(root).items()):
         original = "." + source_path if source_path.startswith("agents/") else source_path
         if original in destinations:
-            raise ValueError(f"Generated diagram must not also be a committed authority: {original}")
+            raise ValueError(
+                f"Generated diagram must not also be a committed authority: {original}"
+            )
         dest = namespace + "/" + public_path(Path(original)) + ".md"
         if dest in used:
             raise ValueError(f"Generated diagram page collision: {dest}")
