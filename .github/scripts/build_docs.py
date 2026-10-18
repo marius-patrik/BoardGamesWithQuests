@@ -214,7 +214,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
             raise ValueError(f"Generated diagram page collision: {dest}")
         used.add(dest)
         graphic = '<pre class="mermaid">' + escape(diagram, quote=False) + "</pre>"
-        viewer = f"# {escape(original, quote=False)}\\n\\n" + diagram_viewer_markup(graphic) + "\\n"
+        viewer = f"# {escape(original, quote=False)}\n\n" + diagram_viewer_markup(graphic) + "\n"
         linked_pages.append((original, dest, viewer))
     return linked_pages
 
