@@ -32,13 +32,13 @@ release metadata and issue/PR acceptance criteria. Delete contradictory
 references and unused duplicate implementations; never defer required
 synchronization to an unspecified cleanup.
 
-The PRD owns requirements and architecture decisions define responsibility;
-actual source and independently observed behavior determine implementation
-status. No plan, diagram, mock, passing build or hosted placeholder establishes
+GitHub issues own desired requirements and prospective implementation contracts;
+repository documentation describes actual source, configured controls, and independently
+observed behavior only. Each PR updates its own affected governance and tests. No plan, diagram, mock, passing build or hosted placeholder establishes
 operational functionality.
 
 ### 4. Language Consistency
-English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. The ASCII Czech compatibility aliases explicitly required by the PRD are allowed as additional bindings to the canonical classes; do not invent further non-English names.
+English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. Existing compatibility interfaces must be preserved or changed through tested implementation. No proposed aliases or naming conventions are treated as implemented contracts.
 
 ### 5. Change Granularity and Conventional Commits
 Use focused, descriptive Conventional Commits in the form
