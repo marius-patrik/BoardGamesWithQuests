@@ -6,7 +6,7 @@
 ## Orient before editing
 
 - Inspect the actual repository state, current branch, pending changes, open work and relevant documentation before choosing an implementation.
-- Treat `.agents/requests/` as the source of approved requirements, `.agents/decisions/` as recorded architecture choices, and `.agents/rules/` as operational guidance.
+- Treat GitHub issues as the only owner of *proposed* implementation requirements and contracts. `.agents/requests/` documents only actual committed capabilities, `.agents/decisions/` only actual architectural choices, and `.agents/rules/` active guidance.
 - Follow explicit project requirements and accepted decisions; do not invent a new scope or silently change established boundaries.
 - Report uncertainty as uncertainty. Do not represent unmerged code, planned work or failing checks as shipped behavior.
 
@@ -42,11 +42,11 @@ _Source: [0002-architecture.md](rules/0002-architecture.md)_
 
 ## Planning and change delivery
 
-- Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `.agents/TODO.md` aligned with actual progress.
+- Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Keep `.agents/PLAN.md` and `.agents/TODO.md` as concise links to live issues and actual progress, not competing product specifications.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
 - Work from a focused issue-bound bot-authored branch targeting the reviewed dependency. Finish #331 → #343 → #271 on the existing PR stack with explicit maintainer review and approval. After those merges, execute the separately approved #404 migration: rename old `main` to `develop` (not `development`) and create new `main` from the verified fork base. Subsequent issue PRs are dependency-stacked into `develop`.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
-- Describe actual changes, verification and remaining gaps precisely in the pull request. Keep unrelated discoveries visible as separate tracked work.
+- Describe actual changes, verification and remaining gaps precisely in the pull request; update the PRD, architecture and operational governance sources to match the implementation in this very PR. Keep unrelated discoveries visible as separate tracked work.
 - Use focused conventional commits such as `feat(ui): add navigation` or `fix(core): handle cancellation`.
 
 #### BoardGamesWithQuests: Change Granularity and Conventional Commits
@@ -144,8 +144,8 @@ _Source: [0004-verification.md](rules/0004-verification.md)_
 - Edit the canonical source records before regenerating projections: published `.agents/notes/*.md` own README; approved `.agents/requests/*.md` own PRD; accepted `.agents/decisions/*.md` own ARCHITECTURE; active `.agents/rules/*.md` own AGENTS.
 - Never maintain root `README.md`, root `CONTRIBUTING.md`, `.agents/README.md`, `.agents/AGENTS.md`, `.agents/PRD.md` or `.agents/ARCHITECTURE.md` as competing independent copies.
 - Run `python3 .github/scripts/generate_documents.py --write` after changing any source record, and `--check` before submission.
-- Keep `.agents/GOAL.md`, `.agents/PLAN.md` and `.agents/TODO.md` aligned with current project state; they are not generated.
-- Update code-facing documentation and architecture decisions in the same change that introduces the corresponding behavior.
+- Keep `.agents/GOAL.md`, `.agents/PLAN.md` and `.agents/TODO.md` aligned with current project state; they are not generated. Proposed implementation contracts, target diagrams, future schemas and acceptance criteria live in GitHub issues only.
+- Update every affected governance source record, generated projection, actual-code diagram, README/help/example and externally observable acceptance check **in the same PR** that introduces the corresponding behavior. Do not document features before implementation or defer documentation until another PR.
 - Describe what exists separately from what is planned. Keep generated documentation and release artifacts pinned to the actual source revision.
 - Write code, public identifiers, comments and repository documentation in English unless approved requirements mandate another language.
 
@@ -185,19 +185,19 @@ _Source: [0006-security.md](rules/0006-security.md)_
 
 - Prefer one durable record per fact; periodically reconcile branches, issues, pull requests and plans against reality.
 - Do not delete a branch containing unique commits without explicit approval and a verified recovery path.
-- Keep commits, generated files, links and imports free of stale paths or obsolete aliases.
+- Keep commits, generated files, links and imports free of stale paths or obsolete aliases. Do not commit proposed API DTOs, DSL/SQL target schemas, future game rulebooks or speculative target diagrams; record those designs solely in issues.
 - Only create CI workflows or dependencies when they verify real behavior or support required delivery; avoid speculative scaffolding.
 - Treat failures, blockers and decisions as durable project records rather than ephemeral chat history.
 
 #### BoardGamesWithQuests: Atomic Artifact Alignment
-Each change updates **every affected artifact** together: behavior, public
+Each pull request updates **every affected artifact and its governance records** together: behavior, public
 interfaces, schemas, migrations, game JSON, tests and fixtures, contracts,
 decisions, diagrams, generated documentation, examples, CI, deployments,
 release metadata and issue/PR acceptance criteria. Delete contradictory
 references and unused duplicate implementations; never defer required
 synchronization to an unspecified cleanup.
 
-The PRD owns requirements and architecture decisions define responsibility;
+GitHub issues own proposed requirements; the PRD and accepted architecture records describe committed implementation and its real responsibility boundaries;
 actual source and independently observed behavior determine implementation
 status. No plan, diagram, mock, passing build or hosted placeholder establishes
 operational functionality.
@@ -215,13 +215,12 @@ citations and ordered SQL migrations may carry required date identifiers.
 _Source: [0007-hygiene.md](rules/0007-hygiene.md)_
 
 
-## Versioning and release discipline
+## Verified versioning and release discipline
 
-- The maintainer accepted **DarkFactory PrideVer** as the single versioning/release authority (#350, G2). Retain `repo.dfconfig` mode `pridever`; do not add competing tag-only/file controllers or a tracked `VERSION` file.
-- Complete the current #331 → #343 → #271 stack before the separately reviewed #404 cutover. The integration branch will be `develop`, not `development`; the new release `main` begins at the verified fork base.
-- Normal dependency-stacked bot-authored PR merges into `develop` must **not** publish tags, releases, GitHub Pages production or Vercel production. A separate explicit maintainer request is required to review and promote `develop → main` for release.
-- GitHub Actions `release.yml` presently publishes a development prerelease upon `main` pushes and accepts dispatch. #404 must align these actual triggers and permissions with the explicit-release gate; do not mistake this policy text for live enforcement.
-- Publish tags and assets only from a separately approved release commit, never move an existing tag, and verify the actual version, source SHA, artifact hashes and deployment results. Never automatically merge or release on the basis of passing CI alone.
+- The committed `repo.dfconfig` currently uses DarkFactory PrideVer. Do not introduce another release controller or check in a competing `VERSION` file.
+- The actual release workflow currently runs on main pushes and manual dispatch; it is **not yet constrained** to explicitly authorized production promotions. Do not claim otherwise.
+- [Issue #404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404) owns proposed `develop` / release-main migration, release-trigger hardening and GitHub-provider enforcement; this change does not perform them.
+- Never publish tags, releases or deployments without explicit maintainer authorization, independently reviewed SHA and actually enforced provider protections. Do not move existing tags or use CI success as a substitute for approval.
 
 _Source: [0008-version-and-release.md](rules/0008-version-and-release.md)_
 
@@ -255,3 +254,15 @@ _Source: [0009-agent-roles-and-skills.md](rules/0009-agent-roles-and-skills.md)_
 - Update test discovery and execution commands whenever structure changes. Report unexecuted tests or unavailable CI as blocked, not passing.
 
 _Source: [0010-exclusive-tests.md](rules/0010-exclusive-tests.md)_
+
+
+## No prospective implementation contracts in tracked documentation
+
+- Describe only **implemented source, observed behavior and actually configured governance controls**. A class or configuration file does not establish a working product.
+- Maintain desired API shapes, DTO proposals, schema/DSL/operator registries, target class diagrams, target file trees and game-rule drafts **exclusively in GitHub issues**. Do not copy them into `.agents/requests/`, `.agents/decisions/`, `.agents/architecture/`, generated documentation or executable-looking placeholders before implementation.
+- **Every pull request updates all affected source records, generated governance documents, actual-code diagrams, docs, tests, examples and CI alongside the actual changes**, never in a promised cleanup PR. Regenerate `.agents/{README,PRD,ARCHITECTURE,AGENTS}.md` and run `.github/scripts/generate_documents.py --check`.
+- When code implements a reviewed issue, describe precisely which boundary works and which remains BLOCKED. Actual FastAPI OpenAPI derives from implemented Pydantic routes, not a hand-maintained proposed contract. No desired-vs-actual spec CI comparison is required.
+- Do not remove original assignment references merely because they are not current code; label them explicitly as reference inputs. Source-derived architecture is evidence of tracked declarations only, not successful external behavior.
+- Never merge, tag, deploy or weaken checks without the required independent maintainer review and provider verification.
+
+_Source: [0011-actual-state.md](rules/0011-actual-state.md)_
