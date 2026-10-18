@@ -4,8 +4,8 @@ classDef endpoint fill:#22374d,color:#f0f9ff,stroke:#81accc
 classDef dto fill:#243f37,color:#ebfff5,stroke:#82bfaa
 classDef guard fill:#4d3e2c,color:#fff4d7,stroke:#d2ad6b
 client["React / Tauri authenticated caller"]:::guard
-guard["Supabase Bearer JWT for private routes; member authorization, revisions, idempotency and CORS"]
-inviteGuard["Unguessable UUIDv4 game ID: non-sensitive public pending preview only"]:::guard:::guard
+guard["Supabase Bearer JWT for private routes and membership checks, revisions, idempotency and CORS"]:::guard
+inviteGuard["Unguessable UUIDv4 game ID is limited to pending lobby preview"]:::guard
 client --> guard
 subgraph GROUP_6["Accounts operations"]
 api6["GET /me&lt;br/&gt;getMe&lt;br/&gt;Read profile&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
