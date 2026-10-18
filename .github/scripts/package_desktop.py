@@ -12,7 +12,6 @@ import subprocess
 import sys
 import tarfile
 import time
-import tomllib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -55,6 +54,10 @@ def build(platform: str, version: str) -> Path:
         raise FileNotFoundError("Completed desktop sources under src/ are required")
     # Read package identity from the actual branch. The Phase 0 engine uses
     # "chesswithquests"; the consolidated desktop branch uses "boardgameswithquests".
+    # Packaging runners use Python 3.12; defer tomllib import so repository
+    # tests can still import this module on the supported Python 3.10 runtime.
+    import tomllib
+
     with (ROOT / "pyproject.toml").open("rb") as source:
         distribution = tomllib.load(source)["project"]["name"]
     dist = ROOT / "dist/desktop"
