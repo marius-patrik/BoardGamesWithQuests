@@ -18,7 +18,11 @@ class BranchProtectionTests(unittest.TestCase):
         self.assertEqual(branch, "main")
         self.assertEqual(
             set(payload["required_status_checks"]["contexts"]),
-            {"governed / released-df-quality", "governed / issue-binding / verify-bound-issue", "main-source"},
+            {
+                "governed / released-df-quality",
+                "governed / issue-binding / verify-bound-issue",
+                "main-source",
+            },
         )
         self.assertTrue(payload["required_status_checks"]["strict"])
         self.assertTrue(payload["enforce_admins"])

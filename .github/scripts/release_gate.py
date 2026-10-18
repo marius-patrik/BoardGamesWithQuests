@@ -21,9 +21,7 @@ def authorize_release(
     if event not in {"workflow_dispatch", "push"}:
         raise ValueError("A release must be triggered by a main push or an explicit main dispatch")
     if ref != "refs/heads/main" or repository != "marius-patrik/BoardGamesWithQuests":
-        raise ValueError(
-            "Only a release event targeting the project main branch can publish"
-        )
+        raise ValueError("Only a release event targeting the project main branch can publish")
     if any(not SHA.fullmatch(sha) for sha in (run_sha, live_main_sha, checkout_sha)):
         raise ValueError("Missing or invalid commit SHA")
     if run_sha != live_main_sha or checkout_sha != live_main_sha:

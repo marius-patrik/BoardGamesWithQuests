@@ -676,7 +676,7 @@ flowchart LR
   n150ab2bfe8af4aa6c --> n16d78b830903b8795
   n50f8f749b20de7e29["release_gate.py"]
   n2092df3a19d2f7b13 --> n50f8f749b20de7e29
-  n18146ec0646429aaf["function_definition authorize_dispatch"]
+  n18146ec0646429aaf["function_definition authorize_release"]
   n50f8f749b20de7e29 --> n18146ec0646429aaf
   n21cb90f4938a20502["function_definition validate_existing_tag"]
   n50f8f749b20de7e29 --> n21cb90f4938a20502
@@ -802,6 +802,14 @@ flowchart LR
   n08502483f6d83fd34 --> n390e462822152c5bb
   nbe59e9b775f50b83c["function_definition test_replaces_stale_deployed_preview_on_update"]
   n08502483f6d83fd34 --> nbe59e9b775f50b83c
+  n4c226bf73fa46aeac["test_main_source_policy.py"]
+  nc9f5868186eb03f66 --> n4c226bf73fa46aeac
+  n1ff6a4094456e9a6e["class_definition MainSourcePolicyTests"]
+  n4c226bf73fa46aeac --> n1ff6a4094456e9a6e
+  n5a7615ec264ef8328["function_definition test_main_gate_checks_only_the_development_head"]
+  n4c226bf73fa46aeac --> n5a7615ec264ef8328
+  n68683bb8177720562["function_definition test_main_protection_requires_the_source_check"]
+  n4c226bf73fa46aeac --> n68683bb8177720562
   n170f6914128af46f0["test_release_gate.py"]
   nc9f5868186eb03f66 --> n170f6914128af46f0
   n1e224dc3f7154dd0c["function_definition invoke"]
@@ -810,9 +818,9 @@ flowchart LR
   n170f6914128af46f0 --> n198e3dd5de49210ec
   n80367b40f01eb09c0["class_definition ReleaseGateBehaviorTests"]
   n170f6914128af46f0 --> n80367b40f01eb09c0
-  n3fa8187c8cf08ea6f["function_definition test_valid_explicit_main_head_dispatch_succeeds"]
+  n3fa8187c8cf08ea6f["function_definition test_valid_main_push_and_explicit_dispatch_succeed"]
   n170f6914128af46f0 --> n3fa8187c8cf08ea6f
-  na524c364f4d8d7448["function_definition test_branch_push_and_pull_request_cannot_release"]
+  na524c364f4d8d7448["function_definition test_pull_request_and_schedule_cannot_release"]
   n170f6914128af46f0 --> na524c364f4d8d7448
   n3282c6cdb1ccc73b1["function_definition test_other_ref_or_repository_cannot_release"]
   n170f6914128af46f0 --> n3282c6cdb1ccc73b1
@@ -826,7 +834,7 @@ flowchart LR
   n170f6914128af46f0 --> n28efe458bde80ff5f
   n2f1b6c91207307c23["function_definition test_invalid_tag_or_ambiguous_assignment_is_rejected"]
   n170f6914128af46f0 --> n2f1b6c91207307c23
-  n27ae330df7efa2e5f["function_definition test_release_job_has_only_manual_publication_entrypoint"]
+  n27ae330df7efa2e5f["function_definition test_release_job_runs_on_main_push_and_manual_dispatch"]
   n170f6914128af46f0 --> n27ae330df7efa2e5f
   n1fb45649f8bccceb6["function_definition test_configuration_describes_existing_stack_not_proposed_clients"]
   n170f6914128af46f0 --> n1fb45649f8bccceb6
@@ -866,6 +874,8 @@ flowchart LR
   nbf32064a6a26ab2df --> n84354cf99c1713fc6
   n76ec2fd65ee9dad06["governance-docs.yml"]
   nbf32064a6a26ab2df --> n76ec2fd65ee9dad06
+  n14cf6130af7812ba5["main-source.yml"]
+  nbf32064a6a26ab2df --> n14cf6130af7812ba5
   nc5611faa7a94a1ca4["open-pr.yml"]
   nbf32064a6a26ab2df --> nc5611faa7a94a1ca4
   n0bb25caaca528da62["preview-docs.yml"]
