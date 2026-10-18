@@ -1,6 +1,6 @@
 ## Scope and contract
 
-<!-- State the independently usable responsibility delivered; reference the authoritative requirement/plan. -->
+<!-- Document only observable behavior implemented at this PR head. Proposed application contracts stay in issue #348 until implemented, not in current-state repository docs. -->
 
 ## Linked issue
 
@@ -25,6 +25,10 @@ Refs #348
 
 ## Governance source verification
 
+- [ ] **Actual state:** every claim in README, PRD, ARCHITECTURE, AGENTS, code-derived diagrams and release/deployment docs is supported by **this final commit**; unimplemented designs stay in issue #348
+- [ ] **Same-PR reconciliation:** all affected authored governance records, generated projections, tests, examples, CI and documentation are updated **within this PR**, with no deferred clean-up
+- [ ] **No premature contracts:** proposed endpoints, DTOs, data schemas, operator registries, game rules or UI designs are not committed as if implemented
+
 - [ ] Updated any affected `.agents/{notes,requests,decisions,rules}/` source record and regenerated README, PRD, ARCHITECTURE and AGENTS in one diff
 - [ ] `python3 .github/scripts/generate_documents.py --check` passes, including symlinks, unchanged DarkFactory metadata and `.github/tests/` ownership
 - [ ] The base branch and review policy match the **actual GitHub configuration**; no branch cutover or release promotion is implied by this PR.
@@ -38,6 +42,12 @@ Refs #348
 - [ ] Independent reviewer has checked implementation, security and actual acceptance evidence
 - [ ] `.darkfactory/` and release/branch controls are unchanged unless separately authorized and verified
 - [ ] Draft remains unmerged pending explicit maintainer approval
+
+## Independent final-commit review
+
+- [ ] Reviewer inspected the actual diff, implementation and externally observed behavior, not only issue criteria or passing structural checks
+- [ ] Reviewer checked documentation links, source-derived diagrams and provider evidence; unavailable mandatory acceptance remains **BLOCKED**
+- [ ] Maintainer's explicit approval is required on the final SHA; neither a successful CI run nor an uploaded docs preview is deployment/merge approval
 
 ## Acceptance status
 
