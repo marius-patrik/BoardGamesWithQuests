@@ -1,5 +1,6 @@
 # TODO
 
-Use the repository's open GitHub issues as the sole list of unfinished work, dependency ordering and blockers. No separate unchecked implementation backlog is maintained in this file.
+Use the [unified master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348) for planned product work, desired technical contracts, outstanding dependencies and blockers. This file does not duplicate the issue backlog.
 
-When completing an issue, update the relevant implemented-source governance and validation evidence in the same pull request.
+- [ ] Independently review the governance migration on [PR #414](https://github.com/marius-patrik/BoardGamesWithQuests/pull/414) before maintainer approval.
+- [ ] Reconcile dependent implementation PRs and branch/release changes only when separately authorized, with actual provider and behavior checks.

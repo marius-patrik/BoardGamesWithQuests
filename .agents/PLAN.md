@@ -1,5 +1,5 @@
 # Plan
 
-The implementation dependency plan and uncompleted decisions are managed through GitHub issues and reviewed pull requests, not mirrored into permanent repository documents.
+The [unified master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348) is the sole active register for desired implementation contracts, acceptance criteria, pending dependencies and branch/release changes. Proposed API, database, engine, client and game behavior is not represented in repository files ahead of implementation.
 
-Every change must update all relevant approved source records, regenerate derived documentation, verify affected behaviors and reconcile the issue and pull-request acceptance evidence before maintainer review. Repository release controls must match the configured native GitHub policy before any promotion.
+The repository's PRs remain independently reviewable; no check result alone authorizes merge, branch migration or release. Every authorized implementation PR must update affected governance sources, generated projections, docs, examples and observable tests in the same change.

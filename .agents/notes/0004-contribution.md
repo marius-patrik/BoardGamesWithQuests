@@ -14,6 +14,6 @@ python3 -m unittest discover -s .github/tests -p test_repository_structure.py
 python3 -m unittest discover -s .github/tests -p test_apply_branch_protection.py
 ```
 
-Behavioral Python tests run with `pytest` after installing the relevant development dependencies. The documentation preview workflow builds the rendered site, exercises `.github/tests/docs_site_acceptance.py` and `.github/tests/test_docs_browser.mjs`, then publishes a preview through GitHub Pages Actions. Claims of real provider readiness require separate live verification.
+Behavioral Python tests run with `pytest` after installing the relevant development dependencies. The documentation preview workflow builds the rendered site, exercises `.github/tests/docs_site_acceptance.py` and `.github/tests/test_docs_browser.mjs`, then uploads a source-specific preview artifact for the trusted Pages publisher. A successful preview workflow does **not** prove that the publisher deployed the site or that its URL is reachable. Claims of real provider readiness require separate live verification.
 
 The project's review branch and release gate are the ones actually configured in GitHub and `repo.dfconfig`. PRs must not merge or release automatically without explicit maintainer authorization; the `.darkfactory/` installation metadata is repository-owned and is not a Git submodule.

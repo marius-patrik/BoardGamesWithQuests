@@ -1,5 +1,5 @@
 # Goal
 
-Maintain a coherent BoardGamesWithQuests repository whose governance, source-derived diagrams, tests and documentation describe only the actual committed implementation and observed behavior.
+Keep BoardGamesWithQuests source, tests, generated documentation and governance consistent with the code and **observable behavior actually present in the repository**. The committed application contains a Python engine/controller and chess/checkers configuration assets, not a deployed multiplayer API, web or native application.
 
-Requests for new capabilities and acceptance criteria are tracked in GitHub issues. Each implementation PR must incorporate its own accurate governance, documentation and external-behavior verification.
+Future requirements and contracts are maintained exclusively in the [unified master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348); each implementation PR must update all affected governance, tests and documentation alongside the behavior it actually delivers.
