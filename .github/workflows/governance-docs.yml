@@ -1,0 +1,19 @@
+name: Generated governance sources
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  governance-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - name: Verify source-generated governance documents and native layout
+        run: python3 .github/scripts/generate_documents.py --check
+      - name: Verify generator and native repository structure
+        run: python3 -m unittest discover -s .github/tests -p test_repository_structure.py

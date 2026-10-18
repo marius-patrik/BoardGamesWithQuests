@@ -23,6 +23,12 @@ Closes #
 - [ ] Unavailable mandatory external gates declared **BLOCKED**, never replaced by mocked passes
 - [ ] Typecheck, build, format, documentation and package validation pass where applicable
 
+## Governance source verification
+
+- [ ] Updated any affected `.agents/{notes,requests,decisions,rules}/` source record and regenerated README, PRD, ARCHITECTURE and AGENTS in one diff
+- [ ] `python3 .github/scripts/generate_documents.py --check` passes, including symlinks, unchanged DarkFactory metadata and `.github/tests/` ownership
+- [ ] Accepted G1 policy is respected: finish the old PR stack before #404, then target dependency-stacked implementation PRs to `develop`. No unrequested promotion to `main`. G2 version/release choice remains pending #350.
+
 ## Artifact alignment
 
 - [ ] APIs, implementations, configuration, schemas, migrations, game JSON, tests, documentation and diagrams agree
@@ -30,6 +36,7 @@ Closes #
 - [ ] No unused parallel authority, fake readiness, disposable scaffold or historical commentary introduced
 - [ ] No credentials or privileged operations exposed to public clients
 - [ ] Independent reviewer has checked implementation, security and actual acceptance evidence
+- [ ] `.darkfactory/` and release/branch controls are unchanged unless separately authorized and verified
 - [ ] Draft remains unmerged pending explicit maintainer approval
 
 ## Acceptance status

@@ -19,7 +19,7 @@ body:
       description: "Select the main responsibility affected."
       options:
         - "engine (area:model)"
-        - "games and exporters (area:game)"
+        - "declarative game definitions and rules (area:game)"
         - "server and persistence (area:server)"
         - "web interface (area:web)"
         - "desktop application (area:desktop)"

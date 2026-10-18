@@ -44,7 +44,9 @@ def diagram_generator() -> Any:
 
 def tracked_files(root: Path = ROOT) -> list[Path]:
     """Discover every tracked file and symlink through the Git index."""
-    return diagram_generator().tracked_paths(root)
+    # Only tracked file leaves become documentation pages. Never read a directory
+    # as a file, regardless of the source-control entry that introduced it.
+    return [path for path in diagram_generator().tracked_paths(root) if not path.is_dir()]
 
 
 def public_path(path: Path) -> str:
@@ -66,7 +68,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
     """Mirror every tracked repository file as one page, irrespective of language.
 
     Each tuple is (original Git path, generated documentation path, page body).
-    Markdown preserves existing relative links; all other files get code, text,
+    Markdown links follow the generated pages for tracked targets; all other files get code, text,
     or binary metadata pages. Only Git's tracked-file inventory determines scope.
     """
     import hashlib
@@ -158,7 +160,45 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                 )
             body = f"# {title}\n\n" + diagram_viewer_markup(graphic) + "\n"
         pages.append((name, dest, body))
-    return pages
+    # Rebase tracked Markdown links to the generated page corresponding to
+    # their target file. This includes non-Markdown source files, which live
+    # under the dynamically chosen repository-files namespace, and README
+    # symlinks whose contents originate in another source directory.
+    import posixpath
+    import re
+    from urllib.parse import unquote, urlsplit
+
+    destinations = {source: dest for source, dest, _ in pages}
+    anchor = re.compile(r"(?<!!)(\[[^\]\n]+\]\()([^\s)]+)(\))")
+    linked_pages: list[tuple[str, str, str]] = []
+    for source, dest, body in pages:
+        if not source.lower().endswith(".md"):
+            linked_pages.append((source, dest, body))
+            continue
+        actual = (root / source).resolve()
+        if not actual.is_relative_to(root.resolve()):
+            raise ValueError(f"Tracked Markdown symlink escapes repository: {source}")
+        source_dir = actual.relative_to(root.resolve()).parent
+
+        def link(match: re.Match[str]) -> str:
+            original = match.group(2)
+            parsed = urlsplit(original)
+            if parsed.scheme or parsed.netloc or not parsed.path or original.startswith("#"):
+                return match.group(0)
+            target = (root / source_dir / unquote(parsed.path)).resolve()
+            if not target.is_relative_to(root.resolve()):
+                return match.group(0)
+            other = destinations.get(target.relative_to(root.resolve()).as_posix())
+            if not other:
+                return match.group(0)
+            relative = posixpath.relpath(other, start=posixpath.dirname(dest) or ".")
+            suffix = ("?" + parsed.query if parsed.query else "") + (
+                "#" + parsed.fragment if parsed.fragment else ""
+            )
+            return match.group(1) + relative + suffix + match.group(3)
+
+        linked_pages.append((source, dest, anchor.sub(link, body)))
+    return linked_pages
 
 
 def navigation(pages: list[tuple[str, str, str]]) -> list[dict[str, Any]]:
