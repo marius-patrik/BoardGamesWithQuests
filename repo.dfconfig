@@ -7,18 +7,16 @@
       "display_name": "BoardGamesWithQuests",
       "project_title": "BoardGamesWithQuests",
       "agent_slug": "boardgameswithquests-agent",
-      "default_branch": "main",
-      "description": "BoardGamesWithQuests Python API/engine, Bun React web app and Tauri native client.",
+      "default_branch": "develop",
+      "description": "Python board-game engine with chess/checkers configuration, GitHub Pages documentation and DarkFactory automation",
       "topics": [
         "chess",
         "checkers",
         "python",
-        "typescript",
-        "react",
         "game",
         "education"
       ],
-      "development_branch": "main"
+      "development_branch": "develop"
     },
     "upstream": {
       "repo": "marius-patrik/DarkFactory",
@@ -58,7 +56,7 @@
       "$comment": "Logical ownership/triage areas; declarations do not claim that target functionality is complete.",
       "$default": "core",
       "rules": {
-        "description": "JSON-declared generic rule hooks, validators and rule composition",
+        "description": "Python game validators, legal move handling and rule-related source",
         "keywords": [
           "rule",
           "rules",
@@ -72,7 +70,7 @@
         ]
       },
       "pieces": {
-        "description": "Declarative pieces, movement/attack capabilities and symbols",
+        "description": "Python chess piece classes and movement implementations",
         "keywords": [
           "piece",
           "pieces",
@@ -86,7 +84,7 @@
         ]
       },
       "quests": {
-        "description": "JSON-declared quests, per-player state, rewards and completion",
+        "description": "Quest models and quest manager code in the Python engine",
         "keywords": [
           "quest",
           "quests",
@@ -97,7 +95,7 @@
         ]
       },
       "board": {
-        "description": "Game-neutral board, coordinates, variants and placements",
+        "description": "Python board model, coordinates and game configuration",
         "keywords": [
           "board",
           "square",
@@ -108,30 +106,27 @@
         ]
       },
       "docs": {
-        "description": "Documentation site, API reference, architecture notes",
+        "description": "Source-generated documentation, Mermaid diagrams and the docs UI",
         "keywords": [
           "doc",
           "docs",
           "documentation",
-          "mkdocs",
-          "mkdocstrings",
           "readme"
         ]
       },
       "ci": {
-        "description": "GitHub Actions workflows, containers, runner scripts, repository automation",
+        "description": "Native GitHub Actions, documentation and release automation",
         "keywords": [
           "ci",
           "action",
           "workflow",
           "pipeline",
-          "docker",
           "runner",
           "automation"
         ]
       },
       "core": {
-        "description": "Reusable Python game engine under the server package",
+        "description": "Existing Python controller, model wiring and application entry point",
         "keywords": [
           "controller",
           "model",
@@ -143,7 +138,7 @@
         ]
       },
       "game": {
-        "description": "Chess/checkers configuration JSON and game-owned export formats",
+        "description": "Chess and checkers configuration JSON and game-owned code",
         "keywords": [
           "chess",
           "checkers",
@@ -152,42 +147,6 @@
           "fen",
           "pgn",
           "game"
-        ]
-      },
-      "server": {
-        "description": "FastAPI, Supabase auth, transactional game persistence and Realtime",
-        "keywords": [
-          "server",
-          "api",
-          "fastapi",
-          "supabase",
-          "auth",
-          "database",
-          "realtime"
-        ]
-      },
-      "web": {
-        "description": "React/Rsbuild/TypeScript/Bun user interface and configuration forms",
-        "keywords": [
-          "react",
-          "web",
-          "typescript",
-          "rsbuild",
-          "bun",
-          "frontend"
-        ]
-      },
-      "native": {
-        "description": "Tauri 2 hosted-web client and desktop/mobile release assets",
-        "keywords": [
-          "tauri",
-          "native",
-          "android",
-          "ios",
-          "macos",
-          "linux",
-          "windows",
-          "bundle"
         ]
       }
     },
@@ -228,11 +187,12 @@
           "branch": "main",
           "required_checks": [
             "governed / released-df-quality",
-            "governed / issue-binding / verify-bound-issue"
+            "governed / issue-binding / verify-bound-issue",
+            "main-source"
           ],
           "approvals": 1,
           "strict": true,
-          "enforce_admins": false,
+          "enforce_admins": true,
           "resolve_conversations": true
         }
       ]
@@ -242,7 +202,7 @@
     "version": 1,
     "site": {
       "name": "BoardGamesWithQuests",
-      "description": "FastAPI server, reusable board-game engine, React web, Tauri native shell"
+      "description": "Python chess/checkers engine source, configuration assets and generated repository documentation"
     },
     "home": "README.md"
   },

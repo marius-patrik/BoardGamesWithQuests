@@ -5,28 +5,36 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "boardgameswithquests"
 dynamic = ["version"]
-description = "BoardGamesWithQuests Python server and reusable game engine"
+description = "Configurable Python/Tkinter board games with quests"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "GPL-3.0-only" }
 authors = [{ name = "marius-patrik" }]
-keywords = ["board games", "fastapi", "engine", "quests"]
-dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "httpx>=0.28,<1", "jsonschema>=4.25,<5"]
+keywords = ["board games", "chess", "checkers", "tkinter", "quests"]
+dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/marius-patrik/BoardGamesWithQuests"
 Documentation = "https://marius-patrik.github.io/BoardGamesWithQuests/"
 
+[project.gui-scripts]
+boardgameswithquests = "chesswithquests:main"
+
 [tool.setuptools_scm]
-# Tags are the package version source.
 
 [tool.setuptools]
-package-dir = {"" = "packages"}
+package-dir = {"" = "src"}
+include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ["packages"]
-include = ["server*"]
+where = ["src"]
+include = ["chesswithquests*", "controller*", "model*", "games*", "view*"]
 namespaces = true
+
+[tool.pytest.ini_options]
+testpaths = [".github/tests"]
+pythonpath = ["src"]
+markers = ["gui: requires a Tkinter display"]
 
 [tool.black]
 line-length = 100

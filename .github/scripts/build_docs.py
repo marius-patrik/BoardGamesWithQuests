@@ -44,7 +44,9 @@ def diagram_generator() -> Any:
 
 def tracked_files(root: Path = ROOT) -> list[Path]:
     """Discover every tracked file and symlink through the Git index."""
-    return diagram_generator().tracked_paths(root)
+    # Only tracked file leaves become documentation pages. Never read a directory
+    # as a file, regardless of the source-control entry that introduced it.
+    return [path for path in diagram_generator().tracked_paths(root) if not path.is_dir()]
 
 
 def public_path(path: Path) -> str:
@@ -362,8 +364,6 @@ def render_published_mermaid(site: Path) -> None:
 
     pages = []
     for page in site.rglob("index.html"):
-        if not page.is_file():
-            continue
         text = page.read_text(encoding="utf-8")
         if '<pre class="mermaid">' in text:
             pages.append((page, text))

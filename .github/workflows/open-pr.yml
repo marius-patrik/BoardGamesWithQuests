@@ -18,7 +18,7 @@ on:
       base:
         description: "Target branch"
         required: false
-        default: main
+        default: develop
         type: string
       draft:
         description: "Open as Draft"
@@ -50,7 +50,7 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
           GH_REPO: ${{ github.repository }}
           BRANCH: ${{ inputs.branch || github.event.pull_request.head.ref }}
-          BASE: ${{ inputs.base || github.event.pull_request.base.ref || 'main' }}
+          BASE: ${{ inputs.base || github.event.pull_request.base.ref || 'develop' }}
           TITLE: ${{ inputs.title || github.event.pull_request.title }}
           BODY: ${{ inputs.body || github.event.pull_request.body }}
           DRAFT: ${{ inputs.draft == true || github.event_name == 'pull_request' }}

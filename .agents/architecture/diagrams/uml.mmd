@@ -1,5 +1,28 @@
 classDiagram
 direction LR
+  class nf04a42578120c2039["MainSourcePolicyTests"]
+  nf04a42578120c2039 : +test_main_gate_checks_only_the_develop_head()
+  nf04a42578120c2039 : +test_main_protection_requires_the_source_check()
+  class ne1501b4c38390d44a["ReleaseGateBehaviorTests"]
+  ne1501b4c38390d44a : +test_valid_main_push_and_explicit_dispatch_succeed()
+  ne1501b4c38390d44a : +test_pull_request_and_schedule_cannot_release()
+  ne1501b4c38390d44a : +test_other_ref_or_repository_cannot_release()
+  ne1501b4c38390d44a : +test_stale_or_unrelated_head_is_rejected()
+  ne1501b4c38390d44a : +test_invalid_commit_sha_is_rejected()
+  ne1501b4c38390d44a : +test_unused_and_matching_tags_are_accepted()
+  ne1501b4c38390d44a : +test_existing_different_tag_commit_is_never_reused()
+  ne1501b4c38390d44a : +test_invalid_tag_or_ambiguous_assignment_is_rejected()
+  ne1501b4c38390d44a : +test_release_job_runs_on_main_push_and_manual_dispatch()
+  ne1501b4c38390d44a : +test_configuration_describes_existing_stack_not_proposed_clients()
+  class nf4d4cc5884df6ad51["WorkspaceLayoutTests"]
+  nf4d4cc5884df6ad51 : +test_native_github_and_agents_dirs()
+  nf4d4cc5884df6ad51 : +test_darkfactory_installation_is_tracked()
+  nf4d4cc5884df6ad51 : +test_generated_documents_are_identical_to_approved_records()
+  nf4d4cc5884df6ad51 : +test_layout_check_passes()
+  nf4d4cc5884df6ad51 : +test_unpublished_note_stays_out_of_readme()
+  nf4d4cc5884df6ad51 : +test_generator_exits_successfully()
+  nf4d4cc5884df6ad51 : +test_rejects_external_test_and_fixture_paths()
+  nf4d4cc5884df6ad51 : +test_future_design_contracts_are_only_in_issues()
   class nd371e629bfa293ffb["GameController"]
   nd371e629bfa293ffb : +__init__()
   nd371e629bfa293ffb : +select_square()

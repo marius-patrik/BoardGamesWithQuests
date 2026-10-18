@@ -7,13 +7,17 @@ on:
       - repo.dfconfig
       - .github/workflows/release.yml
       - .github/workflows/verify-release-metadata.yml
+      - .github/scripts/release_gate.py
+      - .github/tests/test_release_gate.py
   push:
-    branches: [main]
+    branches: [develop, main]
     paths:
       - pyproject.toml
       - repo.dfconfig
       - .github/workflows/release.yml
       - .github/workflows/verify-release-metadata.yml
+      - .github/scripts/release_gate.py
+      - .github/tests/test_release_gate.py
   workflow_dispatch:
 
 permissions:

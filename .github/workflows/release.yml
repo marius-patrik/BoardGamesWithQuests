@@ -3,6 +3,12 @@ name: Release
 on:
   push:
     branches: [main]
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - repo.dfconfig
+      - .github/tests/test_release_gate.py
+      - .github/scripts/release_gate.py
   workflow_dispatch:
     inputs:
       bump:
@@ -11,21 +17,45 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: repository-release
   cancel-in-progress: false
 
 jobs:
-  release:
+  verify-policy:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Verify fail-closed release authorization
+        run: python3 -m unittest discover -s .github/tests -p test_release_gate.py
+
+  release:
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && github.repository == 'marius-patrik/BoardGamesWithQuests'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository with tags
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Verify this release targets the live main HEAD
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          live_main="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
+          python3 .github/scripts/release_gate.py release \
+            --event "$GITHUB_EVENT_NAME" --ref "$GITHUB_REF" \
+            --repository "$GITHUB_REPOSITORY" --run-sha "$GITHUB_SHA" \
+            --live-sha "$live_main" --checkout-sha "$(git rev-parse HEAD)"
 
       - name: Checkout pinned DarkFactory release authority
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -65,13 +95,24 @@ jobs:
           echo "tag=$(jq -r '.tag // empty' "$RUNNER_TEMP/release.json")" >> "$GITHUB_OUTPUT"
           jq '{version,tag,mode,metadata_problems,steps}' "$RUNNER_TEMP/release.json" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Publish development snapshot
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.resolve.outputs.tag != ''
+      - name: Publish release for verified main commit
+        if: steps.resolve.outputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.resolve.outputs.tag }}
         run: |
           set -euo pipefail
+          git fetch origin --tags
+          tag_gate=(--tag "$TAG" --run-sha "$GITHUB_SHA")
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            tag_gate+=(--assigned-sha "$(git rev-list -n 1 "$TAG")")
+          fi
+          python3 .github/scripts/release_gate.py tag "${tag_gate[@]}"
+          live_main="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
+          python3 .github/scripts/release_gate.py release \
+            --event "$GITHUB_EVENT_NAME" --ref "$GITHUB_REF" \
+            --repository "$GITHUB_REPOSITORY" --run-sha "$GITHUB_SHA" \
+            --live-sha "$live_main" --checkout-sha "$(git rev-parse HEAD)"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Release $TAG already exists; no changes." >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -79,6 +120,5 @@ jobs:
           gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "Development $TAG" \
-            --notes-file "$RUNNER_TEMP/release-notes.md" \
-            --prerelease
+            --title "$TAG" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"

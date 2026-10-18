@@ -30,8 +30,6 @@ jobs:
       - name: Install documentation dependencies
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Validate Mermaid design contracts
-        run: python .github/scripts/check_spec_contracts.py
 
       - name: Verify documentation publication behavior
         run: |
@@ -48,6 +46,12 @@ jobs:
           python .github/scripts/build_docs.py
           test -f site/index.html
           touch site/.nojekyll
+
+      - name: Test the published documentation artifact
+        run: python -m pytest -q .github/tests/docs_site_acceptance.py
+
+      - name: Exercise published controls in Chromium
+        run: node .github/tests/test_docs_browser.mjs
 
       - name: Record exact PR head for publisher validation
         env:

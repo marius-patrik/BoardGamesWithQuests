@@ -74,7 +74,7 @@ class GameManager:
         self.current_move: Optional[Move] = None
         self.turn_started: Optional[float] = None
         self.clock = self._configuration_clock()
-        self.timer: Timer = timer or getattr(self.clock, "timer", None) or Timer()
+        self.timer: Timer = timer or getattr(self.clock, "timer", None) or Timer(getattr(self.clock, "initial_seconds", 600))
         self.game_logger: GameLogger = logger or GameLogger()
         self.move_validator: MoveValidator = validator or MoveValidator(self.board)
 
