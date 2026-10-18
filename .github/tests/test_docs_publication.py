@@ -101,9 +101,11 @@ def test_replaces_stale_deployed_preview_on_update(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     assert (site / "pr-328/index.html").read_text() == "new"
 
+
 def test_trusted_publisher_uses_repository_default_branch() -> None:
     """A PR preview must not require publisher scripts from the older release branch."""
-    workflow = (Path(__file__).resolve().parents[1] / "workflows/deploy-docs.yml").read_text(encoding="utf-8")
+    workflow = (Path(__file__).resolve().parents[1] / "workflows/deploy-docs.yml").read_text(
+        encoding="utf-8"
+    )
     assert "ref: ${{ github.event.repository.default_branch }}" in workflow
     assert "ref: main\n" not in workflow
-
