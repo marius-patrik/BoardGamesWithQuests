@@ -64,14 +64,9 @@ def test_navigation_matches_tracked_folders_plus_generated_real_code_diagrams():
         "/" + "/".join(p.parts[:n])
         for p in names for n in range(1, len(p.parts))
     }
-    # The only additional source pages are actual AST/UML generated from this
-    # exact repository tree. Derive their folder names from their generator.
-    import sys
-    sys.path.insert(0, str(ROOT / ".github/scripts"))
-    from generate_diagrams import generated_assets
-    for source in generated_assets(ROOT):
-        path = Path("." + source if source.startswith("agents/") else source)
-        expected.update("/" + "/".join(path.parts[:n]) for n in range(1, len(path.parts)))
+    # Generated code-viewer pages live only inside a folder with a real tracked
+    # README. No generated page may invent a new sidebar directory.
+    assert (ROOT / ".agents/architecture/diagrams/README.md").is_file()
     document = (SITE / "index.html").read_text(encoding="utf-8")
     sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
     actual = {unescape(p) for p in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
