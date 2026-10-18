@@ -1,23 +1,21 @@
 ---
 name: architecture-decisions
-description: Record durable engineering choices and regenerate the architecture document.
+description: Separate pending design choices in issues from accepted architecture implemented in code.
 ---
 # Architecture Decisions
 
 ## When to use
 
-Before material structural changes, ownership changes or irreversible technology decisions.
+When an implementation changes structure, module authority, provider boundaries or irreversible technology decisions.
 
 ## Procedure
 
-1. Establish current constraints and alternatives based on existing code.
-2. Describe the specific choice, trade-offs, rejected options and migration impact.
-3. Write an independently reviewable `.agents/decisions/<sequence>-<slug>.md` record with `status: accepted` only after approval.
-4. Reconcile superseded decisions; preserve history and avoid contradictory active architecture.
-5. Regenerate `.agents/ARCHITECTURE.md` and validate links and generated output.
+1. Inspect committed implementation and current issue decisions.
+2. Review **proposed** alternatives in the owning GitHub issue, not a prematurely accepted in-repo design record.
+3. Once the code change implements the accepted choice, write or update one `.agents/decisions/<sequence>-<slug>.md` source record describing **what actually changed** and its consequences.
+4. Remove or supersede contradictory source records in the same PR, and synchronize requests, rules, tests and source-derived diagrams.
+5. Regenerate `.agents/ARCHITECTURE.md` and verify the final commit. External behavior remains unverified until exercised.
 
-## Evidence of completion
+## Evidence
 
-Accepted decision record, updated architecture projection and a list of consumers/contracts affected.
-
-Follow `.agents/AGENTS.md` and the owning role's boundaries. Adapt commands to the detected toolchain; this file is reusable guidance, not executable automation.
+Implemented code, reviewed decision source and regenerated actual-state architecture. No speculative contracts in generated architecture.

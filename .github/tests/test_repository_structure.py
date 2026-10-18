@@ -90,6 +90,12 @@ class WorkspaceLayoutTests(unittest.TestCase):
         self.assertTrue(any("package/tests/test_bad.py" in e for e in errors), errors)
         self.assertTrue(any("other/fixtures/data.json" in e for e in errors), errors)
 
+    def test_future_design_contracts_are_only_in_issues(self) -> None:
+        self.assertFalse((ROOT / ".agents/requirements").exists())
+        self.assertFalse((ROOT / ".github/scripts/check_spec_contracts.py").exists())
+        self.assertTrue((ROOT / ".agents/requests/0001-current-repository.md").is_file())
+        self.assertFalse((ROOT / ".agents/requests/0001-boardgameswithquests.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

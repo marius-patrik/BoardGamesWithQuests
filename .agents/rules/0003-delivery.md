@@ -3,11 +3,11 @@ status: active
 ---
 # Planning and change delivery
 
-- Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `.agents/TODO.md` aligned with actual progress.
+- Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Keep `.agents/PLAN.md` and `.agents/TODO.md` as concise links to live issues and actual progress, not competing product specifications.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
 - Work from a focused issue-bound bot-authored branch targeting the reviewed dependency. Finish #331 → #343 → #271 on the existing PR stack with explicit maintainer review and approval. After those merges, execute the separately approved #404 migration: rename old `main` to `develop` (not `development`) and create new `main` from the verified fork base. Subsequent issue PRs are dependency-stacked into `develop`.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
-- Describe actual changes, verification and remaining gaps precisely in the pull request. Keep unrelated discoveries visible as separate tracked work.
+- Describe actual changes, verification and remaining gaps precisely in the pull request; update the PRD, architecture and operational governance sources to match the implementation in this very PR. Keep unrelated discoveries visible as separate tracked work.
 - Use focused conventional commits such as `feat(ui): add navigation` or `fix(core): handle cancellation`.
 
 ### BoardGamesWithQuests: Change Granularity and Conventional Commits

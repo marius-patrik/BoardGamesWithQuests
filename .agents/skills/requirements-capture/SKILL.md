@@ -1,24 +1,21 @@
 ---
 name: requirements-capture
-description: Turn owner requirements into durable approved request records and regenerate the PRD.
+description: Capture future product requirements in GitHub issues; document supported behavior only once implemented.
 ---
 # Requirements Capture
 
 ## When to use
 
-When scope, acceptance criteria, non-goals or user intent changes.
+When the maintainer requests a new capability or changes its desired contract.
 
 ## Procedure
 
-1. Check master product issue #348 and capture approved requirements in the existing canonical `.agents/requests/` record; create a second approved record only for a distinct, nonconflicting owner requirement.
-2. Give each record a `status:` in front matter; only approved requests enter the PRD.
-3. Specify observable outcomes, exclusions, affected actors and dependencies.
-4. Identify conflicts with existing approved records; reconcile rather than keeping two contradictory active requirements.
-5. Run the generator in `--write` mode and its `--check` validation.
-6. Record any unresolved product question instead of inventing a decision.
+1. Inspect the current code and [master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348).
+2. Record **future** behavior, API/DB/DSL/UX contracts, acceptance criteria and dependencies only in the owning GitHub issue; technical ratification belongs to #350.
+3. Reconcile contradictory issue requirements before implementation; do not copy them into `.agents/requests/`, PRD, decisions, or actual-code diagrams.
+4. During the implementing PR, verify actual external behavior first, then update the relevant approved `.agents/requests/` record to describe **only the implemented subset**, with affected decisions/rules/notes.
+5. Regenerate the four governed documents and run their consistency check; leave unimplemented scope open in issues.
 
-## Evidence of completion
+## Evidence
 
-Approved source record(s), a current generated PRD and a traceable acceptance checklist.
-
-Follow `.agents/AGENTS.md` and the owning role's boundaries. Adapt commands to the detected toolchain; this file is reusable guidance, not executable automation.
+Traceable issue decisions, implemented source/tests and matching commit-generated documentation. Issue approval is never runtime acceptance.

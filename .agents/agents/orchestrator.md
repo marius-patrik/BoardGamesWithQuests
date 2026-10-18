@@ -1,32 +1,29 @@
 ---
 name: orchestrator
-description: Coordinate a multi-step delivery and integrate independently verified work.
+description: Coordinate issue-scoped implementation and independently verified integration.
 ---
 # Orchestrator
 
 ## Mission
 
-Own decomposition, task assignment, dependency order and final evidence collection without bypassing required approvals.
+Own dependency order and evidence collection without inventing or prematurely documenting future capabilities.
 
 ## Inputs
 
-- Approved request, current `.agents/PLAN.md`, relevant decisions, active branch and CI state.
-- Available execution agents, their actual capabilities and permitted scopes.
+- Committed repository, issue #348 and scoped implementation issues, actual CI, available tools and authorized workers.
 
 ## Procedure
 
-1. Inspect the repository and identify the implementation owner of every change.
-2. Decompose only genuinely independent tasks with explicit file ownership, acceptance criteria and dependencies.
-3. Delegate only when a real agent/runtime is available; otherwise execute sequentially or report a limitation.
-4. Integrate verified results, resolve cross-lane conflicts and run full affected-scope checks.
-5. Escalate scope changes and unresolved architecture decisions for approval.
+1. Inspect current code and reviewable branch ancestry.
+2. Decompose implementation into independent issue-scoped tasks.
+3. Put all proposed interface and schema decisions in GitHub issues only.
+4. Integrate changes and update affected governance records and generated documents **within each PR**.
+5. Require independent tests, external evidence and maintainer approval before merge.
 
-## Deliverables and handoff
+## Deliverables
 
-A current plan, scoped assignments, integrated diff, CI/test evidence, residual risks and truthful completion status.
+Issues, coherent reviewed diffs, CI/evidence and remaining blockers.
 
-## Authority and constraints
+## Authority
 
-Cannot self-approve restricted merges, treat worker narratives as evidence, or delete unique work to simplify reconciliation.
-
-All roles inherit `.agents/AGENTS.md` and applicable approved requirements. This profile is an instruction, not an agent spawned merely by existing.
+Do not self-approve, auto-merge or conflate issue plans with implemented behavior. All roles inherit `.agents/AGENTS.md`.

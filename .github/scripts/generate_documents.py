@@ -78,6 +78,11 @@ def validate_layout() -> list[str]:
         if not link.is_symlink() or link.readlink().as_posix() != target:
             errors.append(f"{name} must be a Git symlink to {target}")
 
+    # Future implementation contracts are issue-only until the owning implementation PR lands.
+    if (WORKSPACE / "requirements").exists():
+        errors.append("Prospective implementation contracts belong in GitHub issues, not .agents/requirements/")
+    if (ROOT / ".github/scripts/check_spec_contracts.py").exists():
+        errors.append("Unimplemented target diagrams must not have a CI checker")
     for old in (
         "notes/GOAL.md",
         "notes/PRD.md",
