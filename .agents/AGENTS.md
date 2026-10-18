@@ -44,7 +44,7 @@ _Source: [0002-architecture.md](rules/0002-architecture.md)_
 
 - Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Keep `.agents/PLAN.md` and `.agents/TODO.md` as concise links to live issues and actual progress, not competing product specifications.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
-- Work from a focused issue-bound bot-authored branch targeting the reviewed dependency. Finish #331 → #343 → #271 on the existing PR stack with explicit maintainer review and approval. After those merges, execute the separately approved #404 migration: rename old `main` to `develop` (not `development`) and create new `main` from the verified fork base. Subsequent issue PRs are dependency-stacked into `develop`.
+- Work from a focused, issue-bound branch targeting the reviewed dependency. Prefer the repository's bot-authored PR workflow so the maintainer can independently review. Use only branches and review controls that are actually configured; separately approved migrations and release promotions must be verified before use.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
 - Describe actual changes, verification and remaining gaps precisely in the pull request; update the PRD, architecture and operational governance sources to match the implementation in this very PR. Keep unrelated discoveries visible as separate tracked work.
 - Use focused conventional commits such as `feat(ui): add navigation` or `fix(core): handle cancellation`.
@@ -62,7 +62,7 @@ can provide an independent native approval. Each PR binds its actual tracked
 issue, contains one coherent responsibility and identifies remaining
 dependencies rather than bundling incomplete neighboring components.
 Synchronize with the target branch and rerun applicable checks before merge.
-Merges require explicit maintainer approval. After cutover, promotion from `develop` into `main` requires a **separate explicit request**; regular integration merges must never publish to the release branch.
+Merges require explicit maintainer approval. Never promote to the release branch without a separate explicit request and verified repository protection.
 
 #### BoardGamesWithQuests: Issue and Project Tracking
 Bind every pull request to an implementation issue. Keep issues and project

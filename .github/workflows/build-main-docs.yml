@@ -40,6 +40,9 @@ jobs:
           test -f site/index.html
           touch site/.nojekyll
 
+      - name: Test the published documentation artifact
+        run: python -m pytest -q .github/tests/test_documentation_site.py
+
       - name: Exercise published controls in Chromium
         run: node .github/tests/test_docs_browser.mjs
 

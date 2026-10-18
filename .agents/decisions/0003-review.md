@@ -5,7 +5,7 @@ status: accepted
 
 ## Decision
 
-The repository presently uses `main`, with PRs #331 → #343 → #271 in a GitHub-native dependency stack. Every merge needs independent maintainer review and explicit approval on the final commit. CI is necessary but not sufficient.
+The repository's integration and release controls are the ones actually enforced by GitHub. Implementation PRs remain issue-bound and require independent maintainer review and explicit approval of their final revisions. Passing CI is necessary but not sufficient.
 
 ## Consequences
 
