@@ -40,7 +40,6 @@ def window(tk_root):
         child.destroy()
 
 
-<<<<<<< HEAD
 def _button_labels(widget):
     """Yield the label of every button under a widget.
 
@@ -56,42 +55,6 @@ def _button_labels(widget):
         yield from _button_labels(child)
 
 
-||||||| 582631b2
-=======
-def build_for(tk_root):
-    """Build a fresh application on the shared root and return its view.
-
-    Args:
-        tk_root: The session's Tk root.
-
-    Returns:
-        PlayerGameView: The view of a freshly dealt chess game.
-    """
-    from view.app import build_application
-
-    for child in tk_root.winfo_children():
-        child.destroy()
-    build_application(tk_root, show_modal=False)
-    tk_root.update()
-    return tk_root.game_view
-
-
-def _button_labels(widget):
-    """Yield the label of every button under a widget.
-
-    Args:
-        widget: The widget to walk.
-
-    Yields:
-        str: Each button's text.
-    """
-    for child in widget.winfo_children():
-        if child.winfo_class() in ("TButton", "Button"):
-            yield child.cget("text")
-        yield from _button_labels(child)
-
-
->>>>>>> fix/repin-agent-darkfactory
 def click(view, square) -> None:
     """Click a square the way the canvas does.
 
