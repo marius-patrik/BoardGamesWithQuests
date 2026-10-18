@@ -44,7 +44,7 @@ _Source: [0002-architecture.md](rules/0002-architecture.md)_
 
 - Translate the request into explicit acceptance criteria and a bounded plan before implementing. Keep `.agents/PLAN.md` and `.agents/TODO.md` aligned with actual progress.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
-- Work from a focused issue-bound bot-authored branch targeting the reviewed dependency. Existing #331 → #343 → #271 stack remains in place; `development`-only main-source enforcement must first be approved in #350 and applied with compatible branch/CI migration.
+- Work from a focused issue-bound bot-authored branch targeting the reviewed dependency. Finish #331 → #343 → #271 on the existing PR stack with explicit maintainer review and approval. After those merges, execute the separately approved #404 migration: rename old `main` to `develop` (not `development`) and create new `main` from the verified fork base. Subsequent issue PRs are dependency-stacked into `develop`.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
 - Describe actual changes, verification and remaining gaps precisely in the pull request. Keep unrelated discoveries visible as separate tracked work.
 - Use focused conventional commits such as `feat(ui): add navigation` or `fix(core): handle cancellation`.
@@ -62,7 +62,7 @@ can provide an independent native approval. Each PR binds its actual tracked
 issue, contains one coherent responsibility and identifies remaining
 dependencies rather than bundling incomplete neighboring components.
 Synchronize with the target branch and rerun applicable checks before merge.
-No merge or production promotion occurs without explicit maintainer approval.
+Merges require explicit maintainer approval. After cutover, promotion from `develop` into `main` requires a **separate explicit request**; regular integration merges must never publish to the release branch.
 
 #### BoardGamesWithQuests: Issue and Project Tracking
 Bind every pull request to an implementation issue. Keep issues and project
