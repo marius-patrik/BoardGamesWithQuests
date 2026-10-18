@@ -1,0 +1,50 @@
+name: Build Main Documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A passing main build is a reusable Actions artifact, not a Git branch.
+# PR previews are produced independently and never depend on this job.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install documentation dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Verify artifact selection and publication behavior
+        run: python -m pytest -q .github/tests/test_docs_publication.py .github/tests/test_docs_artifacts.py
+
+      - name: Install pinned Mermaid compiler
+        run: npm install --global --no-fund --no-audit @mermaid-js/mermaid-cli@11.16.0
+
+      - name: Build and validate main
+        run: |
+          python .github/scripts/build_docs.py
+          test -f site/index.html
+          touch site/.nojekyll
+
+      - name: Upload passing main site
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: docs-main
+          path: site/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90

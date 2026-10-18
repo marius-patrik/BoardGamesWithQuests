@@ -2,28 +2,10 @@
 
 from typing import Dict, Optional, Any
 
-<<<<<<< HEAD:packages/engine/model/users/manager.py
-<<<<<<< HEAD:packages/engine/model/users/manager.py
 try:
     from engine.model.users.user import User
 except ImportError:
     from .user import User
-||||||| b45d2e0f:src/model/users/manager.py
-try:
-    from model.users.user import User
-except ImportError:
-    from .user import User
-=======
-from model.users.user import User
->>>>>>> fix/independent-review-findings:src/model/users/manager.py
-||||||| 07086322:src/model/users/manager.py
-try:
-    from model.users.user import User
-except ImportError:
-    from .user import User
-=======
-from model.users.user import User
->>>>>>> tmp155:src/model/users/manager.py
 
 
 class UserManager:
@@ -106,22 +88,4 @@ class UserManager:
         domain boundary; this registry cannot validate the active configuration,
         turn, or authenticated participant.
         """
-<<<<<<< HEAD:packages/engine/model/users/manager.py
         raise PermissionError("moves must be committed through GameManager")
-||||||| b45d2e0f:src/model/users/manager.py
-        if move is not None and board is not None:
-            execute = getattr(move, "execute", None)
-            success = bool(execute(board)) if callable(execute) else False
-            if success:
-                self.record_history(f"Executed move: {move}")
-            return success
-        return True
-=======
-        if move is not None and board is not None:
-            execute = getattr(move, "execute", None)
-            success = bool(execute(board)) if callable(execute) else False
-            if success:
-                self.record_history(f"Executed move: {move}")
-            return success
-        return True
->>>>>>> fix/independent-review-findings:src/model/users/manager.py

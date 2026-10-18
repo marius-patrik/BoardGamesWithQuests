@@ -1,0 +1,116 @@
+flowchart LR
+%% PostgreSQL supplementary database guards: required behavioral design, not applied migration.
+%% Enforce during implementation using verified versioned migrations and RLS security policies.
+classDef table fill:#233d53,color:#f1f9ff,stroke:#76b4dc
+classDef guard fill:#31463c,color:#f5fffb,stroke:#84c2a5
+classDef boundary fill:#4c392e,color:#ffe8d6,stroke:#cda77c
+dbroot["Database runtime integrity<br/>PostgreSQL transactions + Supabase Auth/RLS"]:::boundary
+cat0["Session/identity"]:::guard
+dbroot --> cat0
+cat1["Version immutability"]:::guard
+dbroot --> cat1
+cat2["Participant and role capacity"]:::guard
+dbroot --> cat2
+cat3["Atomic revision/events"]:::guard
+dbroot --> cat3
+cat4["Private Broadcast"]:::guard
+dbroot --> cat4
+cat5["Supabase Auth FKs"]:::guard
+dbroot --> cat5
+cat6["Storage assets"]:::guard
+dbroot --> cat6
+tbl0["definitions<br/>ALTER TABLE bgwq.definitions ADD CONSTRAINT definition_builtin_own<br/>ALTER TABLE bgwq.definitions ADD CONSTRAINT fk_definitions_owner_i"]:::table
+cat1 -.-> tbl0
+tbl1["versions<br/>ALTER TABLE bgwq.versions ADD CONSTRAINT version_bounds CHECK (min<br/>DROP TRIGGER IF EXISTS immutable_version_header ON bgwq.versions"]:::table
+cat1 -.-> tbl1
+tbl2["roles<br/>ALTER TABLE bgwq.roles ADD CONSTRAINT role_count CHECK (minimum_co<br/>ALTER TABLE bgwq.roles ADD CONSTRAINT role_forward_row CHECK (forw"]:::table
+cat2 -.-> tbl2
+tbl3["phases"]:::table
+cat4 -.-> tbl3
+tbl4["entity_seeds<br/>ALTER TABLE bgwq.entity_seeds ADD CONSTRAINT seed_not_self CHECK ("]:::table
+cat1 -.-> tbl4
+tbl5["seed_values<br/>ALTER TABLE bgwq.seed_values ADD CONSTRAINT seed_value_one_payload"]:::table
+cat1 -.-> tbl5
+tbl6["operators<br/>ALTER TABLE bgwq.operators ADD CONSTRAINT operator_kind CHECK (kin"]:::table
+cat4 -.-> tbl6
+tbl7["expressions<br/>ALTER TABLE bgwq.expressions ADD CONSTRAINT expression_kind CHECK "]:::table
+cat1 -.-> tbl7
+tbl8["expression_arguments<br/>ALTER TABLE bgwq.expression_arguments ADD CONSTRAINT expression_no"]:::table
+cat1 -.-> tbl8
+tbl9["actions<br/>ALTER TABLE bgwq.actions ADD CONSTRAINT action_trigger_check CHECK<br/>ALTER TABLE bgwq.actions ADD CONSTRAINT action_iterator_pair CHECK"]:::table
+cat1 -.-> tbl9
+tbl10["assets<br/>ALTER TABLE bgwq.assets ADD CONSTRAINT asset_size CHECK (bytes BET<br/>ALTER TABLE bgwq.assets ADD CONSTRAINT asset_hash_lower_hex CHECK <br/>ALTER TABLE bgwq.assets ADD CONSTRAINT asset_supported_mime CHECK <br/>ALTER TABLE bgwq.assets ADD CONSTRAINT asset_path_nonempty CHECK ("]:::table
+cat6 -.-> tbl10
+tbl11["visual_primitives<br/>ALTER TABLE bgwq.visual_primitives ADD CONSTRAINT visual_primitive"]:::table
+cat6 -.-> tbl11
+tbl12["games<br/>ALTER TABLE bgwq.games ADD CONSTRAINT game_revision_nonnegative CH<br/>ALTER TABLE bgwq.games ADD CONSTRAINT game_lifecycle_timestamps CH<br/>ALTER TABLE bgwq.games ADD CONSTRAINT fk_games_creator_id_auth_use<br/>DROP TRIGGER IF EXISTS game_requires_publication ON bgwq.games"]:::table
+cat3 -.-> tbl12
+tbl13["participants<br/>ALTER TABLE bgwq.participants ADD CONSTRAINT participant_seat_nonn<br/>ALTER TABLE bgwq.participants ADD CONSTRAINT fk_participants_user_<br/>DROP TRIGGER IF EXISTS participant_capacity_guard ON bgwq.particip"]:::table
+cat2 -.-> tbl13
+tbl14["game_entities<br/>ALTER TABLE bgwq.game_entities ADD CONSTRAINT runtime_entity_self "]:::table
+cat3 -.-> tbl14
+tbl15["game_values<br/>ALTER TABLE bgwq.game_values ADD CONSTRAINT game_value_exactly_one"]:::table
+cat3 -.-> tbl15
+tbl16["game_composites<br/>ALTER TABLE bgwq.game_composites ADD CONSTRAINT game_composite_kin"]:::table
+cat3 -.-> tbl16
+tbl17["game_composite_entries<br/>ALTER TABLE bgwq.game_composite_entries ADD CONSTRAINT game_compos<br/>ALTER TABLE bgwq.game_composite_entries ADD CONSTRAINT game_compos<br/>ALTER TABLE bgwq.game_composite_entries ADD CONSTRAINT game_compos"]:::table
+cat3 -.-> tbl17
+tbl18["clocks<br/>ALTER TABLE bgwq.clocks ADD CONSTRAINT clock_nonnegative CHECK (re"]:::table
+cat4 -.-> tbl18
+tbl19["event_values<br/>ALTER TABLE bgwq.event_values ADD CONSTRAINT event_value_one_paylo<br/>DROP TRIGGER IF EXISTS immutable_event_values ON bgwq.event_values<br/>CREATE TRIGGER immutable_event_values BEFORE UPDATE OR DELETE ON b"]:::table
+cat3 -.-> tbl19
+tbl20["event_mutations<br/>ALTER TABLE bgwq.event_mutations ADD CONSTRAINT mutation_target_ki<br/>ALTER TABLE bgwq.event_mutations ADD CONSTRAINT mutation_typed_bef<br/>ALTER TABLE bgwq.event_mutations ADD CONSTRAINT mutation_typed_aft<br/>DROP TRIGGER IF EXISTS immutable_event_mutations ON bgwq.event_mut"]:::table
+cat3 -.-> tbl20
+tbl21["awards<br/>ALTER TABLE bgwq.awards ADD CONSTRAINT award_points CHECK (points&gt;"]:::table
+cat4 -.-> tbl21
+tbl22["ratings<br/>ALTER TABLE bgwq.ratings ADD CONSTRAINT rating_counts CHECK (games<br/>ALTER TABLE bgwq.ratings ADD CONSTRAINT rating_nonnegative CHECK (<br/>ALTER TABLE bgwq.ratings ADD CONSTRAINT fk_ratings_user_id_auth_us"]:::table
+cat4 -.-> tbl22
+tbl23["profiles<br/>ALTER TABLE bgwq.profiles ADD CONSTRAINT fk_profiles_user_id_auth_"]:::table
+cat5 -.-> tbl23
+tbl24["reject_published_version_mutation<br/>CREATE OR REPLACE FUNCTION bgwq.reject_published_version_mutation("]:::table
+cat3 -.-> tbl24
+tbl25["protect_version_header<br/>CREATE OR REPLACE FUNCTION bgwq.protect_version_header()"]:::table
+cat1 -.-> tbl25
+tbl26["reject_history_mutation<br/>CREATE OR REPLACE FUNCTION bgwq.reject_history_mutation()"]:::table
+cat3 -.-> tbl26
+tbl27["events<br/>DROP TRIGGER IF EXISTS immutable_event ON bgwq.events<br/>CREATE TRIGGER immutable_event BEFORE UPDATE OR DELETE ON bgwq.eve<br/>DROP TRIGGER IF EXISTS emit_revision_hint ON bgwq.events<br/>CREATE TRIGGER emit_revision_hint AFTER INSERT ON bgwq.events"]:::table
+cat3 -.-> tbl27
+tbl28["broadcast_revision<br/>CREATE OR REPLACE FUNCTION bgwq.broadcast_revision()"]:::table
+cat4 -.-> tbl28
+tbl29["can_listen_to_game<br/>CREATE OR REPLACE FUNCTION bgwq.can_listen_to_game(topic text)<br/>REVOKE ALL ON FUNCTION bgwq.can_listen_to_game(text) FROM PUBLIC<br/>GRANT EXECUTE ON FUNCTION bgwq.can_listen_to_game(text) TO authent"]:::table
+cat3 -.-> tbl29
+tbl30["assert_game_definition_published<br/>CREATE OR REPLACE FUNCTION bgwq.assert_game_definition_published()"]:::table
+cat3 -.-> tbl30
+tbl31["enforce_game_target_size<br/>CREATE OR REPLACE FUNCTION bgwq.enforce_game_target_size()"]:::table
+cat3 -.-> tbl31
+tbl32["enforce_participant_capacity<br/>CREATE OR REPLACE FUNCTION bgwq.enforce_participant_capacity()"]:::table
+cat2 -.-> tbl32
+tbl33["game_status"]:::table
+cat3 -.-> tbl33
+tbl34["game_outcomes<br/>DROP TRIGGER IF EXISTS immutable_game_outcomes ON bgwq.game_outcom<br/>CREATE TRIGGER immutable_game_outcomes BEFORE UPDATE OR DELETE ON "]:::table
+cat3 -.-> tbl34
+tbl35["assert_game_event_parity<br/>CREATE OR REPLACE FUNCTION bgwq.assert_game_event_parity()"]:::table
+cat3 -.-> tbl35
+cat4 -.-> cat3
+trig0["immutable_version_header<br/>database trigger"]:::guard
+trig0 --> tbl1
+trig1["immutable_event<br/>database trigger"]:::guard
+trig1 --> tbl27
+trig2["immutable_event_values<br/>database trigger"]:::guard
+trig2 --> tbl19
+trig3["immutable_event_mutations<br/>database trigger"]:::guard
+trig3 --> tbl20
+trig4["emit_revision_hint<br/>database trigger"]:::guard
+trig4 --> tbl27
+trig5["game_requires_publication<br/>database trigger"]:::guard
+trig5 --> tbl12
+trig6["game_target_size_guard<br/>database trigger"]:::guard
+trig6 --> tbl12
+trig7["participant_capacity_guard<br/>database trigger"]:::guard
+trig7 --> tbl13
+trig8["immutable_game_outcomes<br/>database trigger"]:::guard
+trig8 --> tbl34
+trig9["check_game_revision_history<br/>database trigger"]:::guard
+trig9 --> tbl12
+trig10["check_event_revision_history<br/>database trigger"]:::guard
+trig10 --> tbl27

@@ -316,32 +316,8 @@ class PlayerGameView(ttk.Frame):
             self.after(REFRESH_INTERVAL_MS, self._auto_refresh)
         except tk.TclError:  # pragma: no cover - the window may already be closing
             return
-<<<<<<< HEAD:src/view/player_game_view.py
 
 
 #: Czech alias for `PlayerGameView`, as `PRD.md` section 5 and `HracGameView` in the diagram
 #: require.
 HracGameView = PlayerGameView
-||||||| 582631b2:view/player_game_view.py
-=======
-
-    def stop_auto_refresh(self) -> None:
-        """Stop redrawing on a timer.
-
-        Returns:
-            None
-        """
-        self._refresh_job = None
-        for job in (getattr(self, "_refresh_job_id", None),):
-            if job is not None:
-                try:
-                    self.after_cancel(job)
-                except tk.TclError:  # pragma: no cover - the job may already be gone
-                    pass
-        self._refresh_job_id = None
-
-
-#: Czech alias for `PlayerGameView`, as `PRD.md` section 5 and `HracGameView` in the diagram
-#: require.
-HracGameView = PlayerGameView
->>>>>>> fix/repin-agent-darkfactory:view/player_game_view.py

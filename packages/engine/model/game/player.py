@@ -54,35 +54,3 @@ class Player:
             if callable(get_rating):
                 return int(get_rating())
         return 1200
-<<<<<<< HEAD:packages/engine/model/game/player.py
-<<<<<<< HEAD:packages/engine/model/game/player.py
-||||||| b45d2e0f:src/model/game/player.py
-
-<<<<<<< HEAD:packages/engine/model/game/player.py
-    # Aliases
-    get_elo_rating = getEloRating
-    get_color = getColor
-    get_user = getUser
-=======
-
-
-#: Czech alias for `Player`, as `PRD.md` section 5 and `Hrac` in the diagram require.
-Hrac = Player
->>>>>>> fix/independent-review-findings:src/model/game/player.py
-||||||| 07086322:src/model/game/player.py
-    # Aliases
-    get_elo_rating = getEloRating
-    get_color = getColor
-    get_user = getUser
-=======
-
-#: Czech alias for `Player`, as `PRD.md` section 5 and `Hrac` in the diagram require.
-Hrac = Player
->>>>>>> tmp155:src/model/game/player.py
-||||||| 582631b2:model/game/player.py
-=======
-
-
-#: Czech alias for `Player`, as `PRD.md` section 5 and `Hrac` in the diagram require.
-Hrac = Player
->>>>>>> fix/repin-agent-darkfactory:model/game/player.py

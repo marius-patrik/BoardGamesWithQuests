@@ -272,8 +272,8 @@ Each accepted action advances one revision and appends one event containing
 Move events retain this exact version-1 envelope, without an `action` field.
 Terminal events additionally contain the canonical `action`, with `move: null`,
 empty `captured` and `effects`, and the resolved `outcome`. Replay and retries
-interpret events without `action` as moves. SQL persistence must explicitly
-accept and verify both envelopes before terminal actions are exposed remotely.
+interpret events without `action` as moves. Private SQL validates both envelopes;
+authenticated HTTP and hosted terminal acceptance gate remote exposure.
 Post-move rules and quests inspect the accepted
 revision, appended action, updated halfmove count and next canonical turn.
 Post-move rules and quests bind `active` to the mover and `opponent` to the
@@ -421,9 +421,36 @@ activated game's participants, configuration or lifecycle.
 
 `commit_revision(game_uuid, actor_uuid, expected_revision, state_json,
 event_json)` retains its five-argument signature and returns the committed
-revision. It locks the row, requires the acting participant and turn, checks
-expected revision, immutable identity/configuration, canonical metadata,
-clock timestamp, one appended domain event and the closed move DTO. Updating the
+revision. It locks the row, requires participant membership and action-specific
+authorization, and checks expected revision, immutable identity/configuration,
+canonical metadata, clock timestamp and exactly one appended domain event.
+Moves retain exactly nine keys: `action_id`, `actor`, `at_ms`, `captured`,
+`effects`, `expected_revision`, `move`, `outcome`, `revision`. Terminal events
+have exactly those keys plus `action`, with `move:null`, `captured:[]` and
+`effects:[]`; snapshot version remains `1`. The closed action is `{type:resign}`,
+`{type:timeout}` or `{type:claim_draw,claim:<configured outcome rule ID>,
+intended_move:<closed move DTO or null>}`. No winner, clock or other assertion
+is accepted in the action. Claim IDs are nonempty UTF-8 strings bounded by
+262144 bytes; intended move coordinates and promotions use the move contract.
+
+Moves require the active participant and alternate the side. Either participant
+may resign. Claims require the active participant strictly before the running
+clock expires. Either participant may request timeout at or after expiry.
+Terminal commits preserve active side, board, captured pieces, rule state,
+special rights, temporary targets, quest progress, halfmove count and position
+history. Only the active clock is charged by `at_ms-anchor_ms`, clamped at zero;
+the anchor becomes `at_ms`, the inactive clock and increment remain unchanged,
+and no increment is credited. Timestamps are strict nonnegative safe integers
+and cannot precede the authoritative anchor. The trusted server supplies time.
+
+Terminal result and snapshot must agree exactly. Results have exactly `kind`,
+`cause`, `winner`, `priority`; winner is null or a participant UUID and priority
+is an integer in [-1000,1000]. Metadata must match a configured outcome proposal;
+literal side winners and direct player identity references are bound to session
+participants. Engine evaluation remains authoritative for dynamic expressions,
+predicates, claim eligibility, projected-move legality and proposal arbitration.
+Claims require a configured outcome rule and a draw with null winner. SQL never
+executes the rule interpreter or persists the projected claim position. Updating the
 snapshot and inserting the event occur in one transaction. A rejected call or
 failed event insertion leaves both unchanged. The database does not evaluate
 movement vectors, game rules or rewards; the server must supply an engine-
@@ -431,13 +458,13 @@ validated transition.
 
 Creation, activation and domain actions have separate idempotency scopes.
 `events.action_scope` is `activation` or `domain`, with unique
-`(game_id, action_scope, action_id)`. The domain scope is reserved for moves and terminal commands; terminal-command
-transitions require implementation and behavioral verification. Reusing a textual
+`(game_id, action_scope, action_id)`. The domain scope covers moves and the three closed terminal commands. Reusing a textual
 creation or activation key as a move key is valid. Reusing a key for different data within its scope is rejected.
 Each keyed event stores a SHA-256 fingerprint of its resulting canonical JSONB
 snapshot. A low-level exact commit retry supplies the accepted event and
 resulting snapshot and returns its accepted revision, including after later
-moves. Records without a keyed genesis fail closed.
+revisions and a terminal result. Exact retry detection precedes stale-revision
+and terminal-result rejection; conflicting key reuse is rejected. Records without a keyed genesis fail closed.
 
 A reconstructed engine's exact retry returns its accepted event at the requested revision while
 `get_state()` returns the loaded authoritative snapshot. If that validated
@@ -449,6 +476,13 @@ the SQL consumer scenario alone does not certify the public adapter.
 
 The forward lifecycle migration is
 `supabase/migrations/20261015082152_private_session_lifecycle.sql`.
+Terminal compatibility is defined by
+`supabase/migrations/20261016091616_terminal_action_compatibility.sql` and
+`tests/test_terminal_transactions.py`, which consumes actual engine outputs for
+resignation, timeout and ordinary/projected claims. The terminal suite covers
+both opening sides, authorization, strict clocks, immutable state, malformed
+assertions, restart, exact retries after a terminal result, rollback and
+concurrent terminal/move submissions.
 `tests/test_private_transactions.py` executes real isolated PostgreSQL
 transactions, concurrent connections and faults through the private functions.
 Snapshot validation enforces the engine recovery envelope of 65,536 JSON nodes
@@ -459,6 +493,9 @@ fixture supplies referential identities, not provider authentication evidence.
 The hosted provider transaction/privilege probe is
 `scripts/fixtures/provider_session_atomicity.sql`; it references three existing
 Auth identities and rolls back its private test rows.
+`scripts/fixtures/provider_terminal_atomicity.sql` exercises resignation,
+timeout and claims against the same private boundary, including an event-insert
+fault, exact retries and rollback of all fresh game rows.
 Provider execution, verified JWT/gameplay HTTP access, Realtime and classroom
 capacity remain distinct acceptance gates.
 
@@ -476,3 +513,39 @@ The documented shared-IP anonymous signup allowance is a classroom capacity
 risk (normally 30/hour/IP). Validate the actual project's settings and a
 classroom-size signup rehearsal before claiming free-tier capacity in G7.
 Unauthenticated/public game APIs and sign-in are not provided until G4.
+
+## Internal durable game store
+
+`server.persistence.GameStore` is the internal async lifecycle adapter. Its
+trusted inputs are verified canonical UUID identities, bounded action IDs,
+validated definitions, expected revisions, immutable moves and server timestamps.
+It uses operation-local psycopg connections, parameterized private SQL functions,
+verified TLS with GSS encryption disabled, disabled prepared statements and
+bounded connection and statement execution plus an active-operation deadline. It never reads Auth tables or retains authoritative state in memory.
+Creation recovers its UUID before allocation; activation recovers the stored
+genesis snapshot and persisted start time; accepted moves return their event
+with authoritative state without recommitting. New moves reconstruct GameManager and
+commit exactly one loaded revision by CAS, returning typed conflicts on races.
+Exactly two pure engine worker slots bound execution without a waiting queue.
+All engine construction, replay and JSON serialization are off the event loop.
+The ten-second active-operation deadline includes creation canonicalization.
+Cancellation drains the pinned driver cancellation bounds (five seconds to send
+and five seconds for query termination), then permits three seconds for rollback
+before forcing connection closure. This cleanup can extend response time.
+An unknown commit acknowledgement requires authoritative refetch or the exact
+same key and request; a new key or blind replay is unsafe. Cancelled or timed-out
+workers cannot use SQL or publish their output; occupied slots remain reserved
+until computation finishes. Active reads and activation recovery check canonical
+replay against row identity, pinned configuration, revision and genesis start time.
+DSNs require one explicit network host and verify-full TLS; sockets, hostaddr,
+multihost and service/options overrides are rejected. Disabled TLS is confined to
+explicit loopback-only test DSNs.
+Participant isolation occurs before engine reconstruction or private reads are
+returned. Database diagnostics and credentials never enter public exceptions.
+
+`tests/test_persistence_adapter.py` is the genuine Docker/PostgreSQL gate with
+actual service-role connections on a loopback ephemeral port. Dependency or
+Docker failure blocks acceptance. The read-only `python -m server.persistence
+--verify-provider` probe requires explicit credentials and an existing participant
+game; missing credentials fail explicitly. Neither probe certifies playable HTTP,
+Realtime or complete game rules. Catalog/gameplay readiness remains false.

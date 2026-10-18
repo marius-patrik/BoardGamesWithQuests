@@ -1,0 +1,24 @@
+{# Recursively collapsible documentation tree. Active branches open on navigation. #}
+{% macro render(items, depth, prefix) %}
+<ul class="nav nav--depth-{{ depth }}">
+  {%- for item in items %}
+    {%- if item.children %}
+    <li class="nav__section{% if item.active %} nav__section--active{% endif %}">
+      <details class="nav__group" data-nav-section="{{ prefix ~ '/' ~ item.title }}"
+               {% if item.active or depth == 0 %}open{% endif %}>
+        <summary class="nav__label">{{ item.title }}</summary>
+        {{ render(item.children, depth + 1, prefix ~ '/' ~ item.title) }}
+      </details>
+    </li>
+    {%- else %}
+    <li class="nav__item">
+      <a class="nav__link{% if item.active %} nav__link--active{% endif %}"
+         {% if item.active %}aria-current="page"{% endif %}
+         href="{{ item.url|url }}">{{ item.title }}</a>
+    </li>
+    {%- endif %}
+  {%- endfor %}
+</ul>
+{% endmacro %}
+
+{{ render(nav, 0, '') }}

@@ -339,7 +339,6 @@ this project adds beyond the diagram is registered in `notes/object_model.md`.
 | `Uzivatel` · `uzivatelske_jmeno`, `jmeno`, `email`, `elo`, `splnene_kwesty`, `pridej_quest()` | FR-60, FR-24 |
 | `User Manager` · `Id_uzivatele`, `log_uzivatelu`, `historie_uzivatele`, `proveď_tah()` | FR-60 |
 | `Quest` · `nazev`, `popis`, `validate()` | FR-18, FR-20 |
-<<<<<<< HEAD
 | `QuestManager` | FR-23 |
 | `ChessNotationWriter` · format list, `item` | FR-43 to FR-52 |
 | `MetadataWriter` | FR-48 |
@@ -348,25 +347,6 @@ this project adds beyond the diagram is registered in `notes/object_model.md`.
 | `GameVeiw` · `controller`, `aktualizuj_plochu()` | FR-37, FR-66. The diagram spells the class `GameVeiw`; no `GameView` class exists — `notes/object_model.md` section 15 |
 | `HracGameView` · `controller`, `akutalizuj_hrace()` | FR-38, FR-67 |
 | `HracView` | FR-38, FR-67 |
-||||||| 582631b2
-| `QuestManager` | FR-23 |
-| `ChessNotationWriter` · format list, `item` | FR-43 to FR-52 |
-| `MetadataWriter` | FR-48 |
-| `export writers` · `field` | FR-43 |
-| `GameManagerController` · `vyber_pole()` | FR-64 |
-| `GameView` · `controller`, `aktualizuj_plochu()` | FR-37, FR-65 |
-| `HracGameView` · `controller`, `akutalizuj_hrace()` | FR-38, FR-66 |
-| `HracView` | FR-38 |
-=======
-| `QuestManager` · `field`, `method(type): type` | FR-23. **`QuestManager` exists** (`model/misc/quest_manager.py`) but holds **neither** drawn member — see `notes/object_model.md` §23 |
-| `ChessNotationWriter` · format list, `item` | FR-43 to FR-52. **`item: attribute` is drawn but no member named `item` exists** in `ChessNotationWriter` (`model/misc/export_writers.py`) — see `notes/object_model.md` §23 |
-| `MetadataWriter` · `method(type): type` | FR-48. **Drawn, and no `method` member exists** in `MetadataWriter` (`model/misc/metadata.py`) — see `notes/object_model.md` §23 |
-| `export writers` · `field` | FR-43 — `ExportWriter.field` is declared at `model/misc/export_writers.py:46` |
-| `GameManagerController` · `vyber_pole()` | FR-65 |
-| `GameVeiw` · `controller`, `aktualizuj_plochu()` | FR-37, FR-66. The diagram spells the class `GameVeiw`; no `GameView` class exists — `notes/object_model.md` section 15 |
-| `HracGameView` · `controller`, `akutalizuj_hrace()` | FR-38, FR-67 |
-| `HracView` | FR-38, FR-67 |
->>>>>>> fix/repin-agent-darkfactory
 
 ### 7.11 Requirements added to close gaps in diagram coverage
 

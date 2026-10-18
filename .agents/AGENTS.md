@@ -1,117 +1,142 @@
-# Repository Engineering Rules
+# Repository Development Guidelines & Agent Rules
 
-## Source authority
+### 1. Externally Observable Verification
+Tests must exercise supported user, consumer or provider interfaces and assert
+meaningful outcomes. Testing isolated implementation details, internal class
+methods, mocked calls, imports, syntax or intentional unavailability is not
+acceptable behavior evidence. A black-box test may run locally: the contract
+crossed, rather than the test machine, determines whether the test is valid.
 
-The PRD defines product requirements; architecture decisions define system
-boundaries; PLAN defines unfulfilled work; SCRATCHPAD carries actionable work
-notes. Source code, schema, tests, live services and independently reproduced
-behavior determine whether a requirement is implemented. Never equate a
-successful build, mock, screenshot or status label with working functionality.
+Cover successful operations, malformed and hostile inputs, authorization,
+identity isolation, boundary conditions, concurrency, retries, idempotency,
+failure rollback and recovery after reload or process restart where applicable.
+Each fix needs a regression reproducing its observable defect. Provider,
+database, browser and deployment acceptance requires the actual service;
+unavailable mandatory gates are BLOCKED, never silently skipped or passed
+using mocks. Compilation and documentation checks never certify gameplay.
+Tests must be repeatable, isolated and capable of failing on broken behavior.
 
-## Timeless artifacts
+### 2. Generated Documentation and References
+Documentation and navigation are generated from tracked repository source,
+typed Google-style docstrings and the supported build tooling. Generated
+documentation output is never edited as its own authority. Strict documentation
+builds and source-derived architecture diagrams must succeed; supplied
+reference diagrams are immutable input assets, not mandatory duplicate runtime
+classes. Every affected link, example and diagram must remain correct.
 
-Every committed artifact must describe only an authoritative contract,
-implementation, decision, enduring requirement, or outstanding actionable task.
-Never retain chronology, dated progress reports, version comparisons, migration
-stories, abandoned designs, overwritten proposals, supersession notes, or
-narratives about how the implementation used to work. Remove replaced material
-instead of appending an explanation. Omit temporal qualifiers from headings,
-links, comments and prose. Git commit history and issue discussions preserve
-provenance. SQL migrations and immutable external assignment figures are
-functional exceptions only to the extent required for reproducibility.
+### 3. Atomic Artifact Alignment
+Each change updates **every affected artifact** together: behavior, public
+interfaces, schemas, migrations, game JSON, tests and fixtures, contracts,
+decisions, diagrams, generated documentation, examples, CI, deployments,
+release metadata and issue/PR acceptance criteria. Delete contradictory
+references and unused duplicate implementations; never defer required
+synchronization to an unspecified cleanup.
 
-## Source-generated documentation
+The PRD owns requirements and architecture decisions define responsibility;
+actual source and independently observed behavior determine implementation
+status. No plan, diagram, mock, passing build or hosted placeholder establishes
+operational functionality.
 
-MkDocs, Material and mkdocstrings generate all documentation pages, homepage
-content and navigation from tracked Python package source and Google-style
-docstrings. `mkdocs build --strict` and the ephemeral-source build wrapper must
-succeed with zero warnings and errors. Never commit static documentation pages,
-manual indices or documentation source directories. Retain authoritative
-specifications, architecture decisions and required source references in their
-repository locations; the site links to the exact checked-out Git revision.
-Generate implementation diagrams from source and preserve supplied reference
-figures as assets. Graphviz is a required build prerequisite.
+### 4. Language Consistency
+English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. The ASCII Czech compatibility aliases explicitly required by the PRD are allowed as additional bindings to the canonical classes; do not invent further non-English names.
 
-## Atomic artifact alignment — mandatory on every change
+### 5. Change Granularity and Conventional Commits
+Use focused, descriptive Conventional Commits in the form
+`<type>(scope): description`. Keep each change coherent and reviewable rather
+than manufacturing a commit for every class or bundling unrelated behavior.
 
-Treat each change as a dependency graph, not a source edit. In the same
-implementation chunk, update **all affected artifacts**: public interfaces,
-schemas, migrations, bundled JSON, engine and server behavior, frontend types,
-documentation, architecture decisions, diagrams, usage examples, test fixtures,
-behavioral tests, CI jobs, deployment configuration, issue/PR acceptance criteria
-and release metadata. Delete stale references and redundant implementations.
-Regenerate derived diagrams from source. Audit links and example commands.
-Do not close a chunk, request review or merge while related artifacts disagree.
-Never postpone corresponding behavior tests or docs synchronization to an
-unspecified cleanup milestone. A PR must list impact surfaces and independent
-reviewers verify the complete change graph.
+### 6. Verification and CI
+Run the genuine applicable behavior suite and independent adversarial review
+with every production change. Required status checks must accurately reflect
+their actual coverage. Typechecking, formatting, compilation, documentation
+and packaging are valid engineering checks but never substitute for a missing
+external behavior or security acceptance gate. Do not weaken required checks
+to manufacture a green PR.
 
-## Behavior-driven testing contract
+### 7. Branches and Pull Requests
+Use focused, descriptive, lowercase topic branches based on the intended
+target branch. Never push directly to protected `main`. Open Draft PRs
+through the repository's authorized bot-authored PR workflow so the maintainer
+can provide an independent native approval. Each PR binds its actual tracked
+issue, contains one coherent responsibility and identifies remaining
+dependencies rather than bundling incomplete neighboring components.
+Synchronize with the target branch and rerun applicable checks before merge.
+No merge or production promotion occurs without explicit maintainer approval.
 
-Tests must specify observable **inputs, actions and outcomes** through supported
-interfaces: legal and illegal game actions, HTTP responses, database effects,
-UI interactions, authentication decisions, event order, exported notation and
-user-visible recovery. Prefer an external actor or black-box consumer viewpoint,
-not assertions about code structure, class existence, imports, literals,
-formatting, mocked call counts or private implementation details.
+### 8. Format and Source Quality
+Use the repository's configured formatters and typecheckers. Format
+changes must remain scoped to relevant files and must not replace real
+behavior testing.
 
-For every behavior change, cover:
-- A representative successful user flow with explicit meaningful assertions.
-- Boundary values and malformed/hostile input; failure must be safe and specific.
-- Relevant state transitions, turn alternation, clocks, quests and terminal
-  outcomes, with no state mutation on rejected operations.
-- Identity isolation, wrong participant, missing permissions and revoked access.
-- Race conditions, simultaneous submissions, duplicates, stale revisions and
-  transaction rollback when shared mutable state is involved.
-- Persistence after process restart, retries, lost messages and reconnect.
-- A regression reproducing each resolved defect before the fix.
+### 9. Issue and Project Tracking
+Bind every pull request to an implementation issue. Keep issues and project
+board statuses consistent with verified results; do not close unfinished
+requirements or represent a blocked external acceptance as complete.
+Preserve the repository's functioning issue and branch automation without
+creating overlapping management workflows.
 
-Use parametrized fixture scenarios for each game definition, including castling,
-en passant, promotion and repetition; English capture chains; and international
-maximal capture, backward captures, flying kings and capture obstruction.
-Configuration tests must drive real JSON through the validator and interpreter.
+### 10. Planning and Review
+Record each work item's outcome, architectural interfaces, dependencies,
+review criteria and verification evidence in its implementation issue.
+Align plans and specifications whenever decisions change; replace superseded
+instructions at their source. Conduct independent implementation, security
+and artifact review as applicable. Do not claim conformance until the
+behavior, documentation and approved criteria agree.
 
-Use test doubles only at genuinely nondeterministic third-party boundaries;
-never mock the behavior being claimed as verified. Back each adapter contract
-with real integration tests against its actual provider. Public network, browser
-and database acceptance tests verify service behavior, not response shape alone.
-If an external integration cannot run, mark the gate **blocked**; do not replace
-it with a mocked pass or silently skip mandatory tests.
+### 11. Approval and Merge
+The maintainer must explicitly approve the final reviewed commit before
+merge. Passing CI is necessary but never sufficient for functional acceptance.
+Do not activate unattended auto-merge or proxy approval as a substitute for
+the maintainer's native review. Merged branches may be deleted after their
+commits and linked issues have been reconciled.
 
-All tests must be deterministic, isolated, independent of execution order and
-must clean up state. Tests must fail for an intentionally broken implementation.
-Every scenario has a link to its requirement or documented defect. Include
-independent adversarial review. Treat mutation/fault injection as additional
-evidence where practical. A syntax check, import smoke test or bare compilation
-never counts toward behavior acceptance.
+### 12. Request Authorization
+Record material implementation requirements and accepted scope in a linked
+issue. Preserve the user's meaning and acceptance criteria. Explicit user
+authorization for an implementation does not require a duplicate approval
+step. Escalate unresolved architectural decisions, credentials, unrelated
+data deletion or new financial commitments before taking such actions.
 
-Require test coverage with each production change. CI runs the real behavior
-suite and fails if it is missing, skipped in place of mandatory coverage, or
-reports unverified external requirements as passing. Run the relevant
-integration and end-to-end gates before approving a production release.
+### 13. DarkFactory Integration
+Use the installed DarkFactory-managed pipeline and `repo.dfconfig` as the
+single authoritative DarkFactory configuration. Keep supported native
+manifests when build tools require them. Do not maintain parallel workflow
+implementations, duplicate credentials configuration or copies of shared
+harness logic. Pin verified external workflow and action dependencies.
+Do not delete native manifests until their generation/replacement passes
+the actual consumer build and deployment checks.
 
-## Architecture and security
+### 14. Commit and Area Taxonomy
+Use Conventional Commit types `feat`, `fix`, `refactor`, `docs`,
+`test`, `chore` and `ci`. Use descriptive scopes. Assign issue
+areas by the actual affected responsibility: model, game, server, web,
+desktop, CI or documentation. A label is not a substitute for a verified
+capability or complete implementation.
 
-All game-authored rules, boards, piece behavior, clocks, quests, hooks and
-outcomes are bounded validated JSON, never executable Python/JavaScript,
-eval/exec, dynamic imports or arbitrary extensions. The shared engine contains
-only game-neutral trusted primitives and a single authoritative legal-commit
-boundary. No game-identity special cases, implicit board dimensions or clock
-defaults. The host verifies Supabase JWT identity, participant membership,
-turn, legal state and expected revision before an atomic durable commit.
-Supabase privileged credentials never reach public clients. Use participant-
-scoped authorization, safe Realtime reconciliation and database RLS.
+### 15. Timeless Repository Artifacts
+Tracked files contain only authoritative requirements, design decisions,
+working implementation descriptions, reproducible source inputs and
+actionable unfinished work. Do not keep implementation histories, dated
+progress narratives, superseded instructions, transitional comparisons,
+obsolete files or phase-relative labels that do not express a stable
+functional contract. Replace material at its source instead
+of appending chronicles. Git and issue history retain provenance; source
+citations and ordered SQL migrations may carry required date identifiers.
 
-## Repository collaboration
+### 16. No Disposable Production Implementations
+Do not add or retain placeholder UIs, bootstrap-only endpoints, fake
+health/readiness states, intermediate servers, throwaway CLIs or tests that
+merely certify an unavailable feature. Only permanent supported behavior
+belongs in a mergeable production path. Record unmet requirements as
+blocked without manufacturing substitutes.
 
-Use focused Conventional Commits, an issue-bound integration PR and independent
-review rounds. Keep `main` protected; no direct pushes or automatic integration
-without maintainer approval. Keep one `repo.dfconfig` for DarkFactory. Native
-build-tool metadata may exist where its ecosystem requires it; do not duplicate
-authority. Keep workflows pinned to verified immutable versions. Preserve the
-project boards, GPL licensing and supplied reference diagrams.
+Use Python namespace packages for directories that need no executable
+initialization; verify built distributions, import discovery and packaged
+resource loading before removing initializers.
 
-If an external operation is blocked or a new paid resource is required,
-continue independent work and record the actual blocker without fabricating
-success. Require green relevant CI, behavioral evidence, security review and
-maintainer approval before deployment is declared complete.
+### 17. Secrets and External Operations
+Never expose privileged service tokens to public consumers. Server
+authorization must verify the authenticated actor, not client-provided
+identity claims. Where an external provider is unavailable, a destructive
+operation is blocked or a paid resource is required, report the precise
+limitation. Do not claim unexecuted verification or side effects succeeded.
