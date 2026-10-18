@@ -6,6 +6,7 @@
 ## BoardGamesWithQuests
 
 BoardGamesWithQuests is a Python/Tkinter desktop board-game application. Its `src/chesswithquests/` entry point starts the GUI, `src/controller/` connects user interaction to gameplay, and `src/model/` holds board state, rules, moves, users, clocks, and quests. `src/games/chess/` and `src/games/checkers/` define the available board-game variants. Native GitHub Actions provide development checks and documentation automation.
+The platform bootstrap also contains a FastAPI definitions route in `packages/server/`, a React client in `packages/client/`, and a Tauri shell in `packages/native/`. The route currently responds with an empty definitions list; the API does not expose gameplay sessions.
 
 _Source: [0001-product.md](notes/0001-product.md)_
 
@@ -19,5 +20,8 @@ _Source: [0001-product.md](notes/0001-product.md)_
 - `.agents/notes/`, `.agents/requests/`, `.agents/decisions/` and `.agents/rules/` generate README, PRD, architecture and contributor-rule documents.
 - `.github/tests/` owns repository tests and fixtures. `.github/workflows/` and `.github/scripts/` contain CI and source-generated documentation tools.
 - Root `README.md` and `CONTRIBUTING.md` link to the generated documents; `.darkfactory/installation.json` records the DarkFactory integration.
+- `packages/server/` hosts the FastAPI HTTP boundary and Python service dependencies.
+- `packages/client/` hosts the React/Rsbuild UI and Supabase client configuration.
+- `packages/native/` hosts the native Tauri/WebView application shell.
 
 _Source: [0002-structure.md](notes/0002-structure.md)_

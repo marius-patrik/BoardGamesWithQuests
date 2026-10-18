@@ -10,3 +10,6 @@ status: published
 - `.agents/notes/`, `.agents/requests/`, `.agents/decisions/` and `.agents/rules/` generate README, PRD, architecture and contributor-rule documents.
 - `.github/tests/` owns repository tests and fixtures. `.github/workflows/` and `.github/scripts/` contain CI and source-generated documentation tools.
 - Root `README.md` and `CONTRIBUTING.md` link to the generated documents; `.darkfactory/installation.json` records the DarkFactory integration.
+- `packages/server/` hosts the FastAPI HTTP boundary and Python service dependencies.
+- `packages/client/` hosts the React/Rsbuild UI and Supabase client configuration.
+- `packages/native/` hosts the native Tauri/WebView application shell.
