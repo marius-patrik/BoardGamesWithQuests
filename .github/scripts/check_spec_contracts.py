@@ -69,7 +69,11 @@ def main() -> None:
         "**Reference limitations:**" in prd
         and "not sufficient for deterministic code generation" in prd
     ), "diagram limitations and non-executable API reference must be explicit"
-    print("PASS: 12 Mermaid diagrams, {} proposed app operations, {} DTOs, 38 models, 101 operators".format(nodes(graph["api"], "api"), nodes(graph["api_dtos"], "dto")))
+    print(
+        "PASS: 12 Mermaid diagrams, {} proposed app operations, {} DTOs, 38 models, 101 operators".format(
+            nodes(graph["api"], "api"), nodes(graph["api_dtos"], "dto")
+        )
+    )
     print("NOT VERIFIED: deployed APIs, game JSON, runtime operators, migrations, RLS or gameplay")
 
 
