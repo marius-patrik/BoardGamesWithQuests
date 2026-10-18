@@ -71,4 +71,8 @@ One deterministic generic Python engine evaluates bounded versioned JSON definit
 
 Ratify the API, relational schema, JSON/operator graph, engine and client contracts together in #350. Keep original references, target diagrams and generated actual-code diagrams as different artifacts.
 
+### API contract authority
+
+The **desired API shape** is recorded in GitHub issues, this project's PRD and reference API/DTO diagrams (or a reference-only OpenAPI example). These documents are design proposals, not a running contract. **The sole actual machine-readable API contract is OpenAPI 3.1 emitted by the implemented FastAPI/Pydantic application.** Generate TypeScript client types from that actual OpenAPI. Compare proposed versus implemented operations, request/response DTOs, authorization and errors; make discrepancies visible for maintainer review before declaring feature acceptance. Do not create a parallel hand-maintained executable OpenAPI YAML, synthesize placeholder routes to satisfy a speculative design, or claim passing a structural reference checker proves live HTTP behavior. Endpoint behavior still requires real HTTP/provider tests. The operation inventory remains to be ratified separately.
+
 _Source: [0005-system.md](decisions/0005-system.md)_
