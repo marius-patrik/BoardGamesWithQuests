@@ -13,7 +13,7 @@ BoardGamesWithQuests currently contains a recoverable Python/Tkinter desktop boa
 
 ### Important implementation boundary
 
-Game settings still load executable Python configuration modules, with a source editor and validator exposed through the UI. This contradicts the desired JSON-only game definition model and must be replaced before v1.0.0. Historical JSON engine work exists in earlier commits but is not currently wired to the GUI. Source test success does not establish full GUI or packaged application acceptance.
+Game settings still load executable Python configuration modules, with a source editor and validator exposed through the UI. This contradicts the desired JSON-only game definition model and must be replaced before v1.0.0. Pure JSON schema, condition and hook helpers have been restored from the archived work under `src/model/game/`, but they are not connected to the running game manager or Tkinter. The full revisioned JSON engine from #405 is still being reconciled. Source test success does not establish full GUI or packaged application acceptance.
 
 ### Delivery and governance
 
