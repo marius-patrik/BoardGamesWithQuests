@@ -40,6 +40,9 @@ jobs:
           test -f site/index.html
           touch site/.nojekyll
 
+      - name: Exercise published controls in Chromium
+        run: node .github/tests/test_docs_browser.mjs
+
       - name: Upload passing main site
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

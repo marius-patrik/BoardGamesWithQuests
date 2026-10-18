@@ -47,6 +47,9 @@ jobs:
           test -f site/index.html
           touch site/.nojekyll
 
+      - name: Exercise published controls in Chromium
+        run: node .github/tests/test_docs_browser.mjs
+
       - name: Record exact PR head for publisher validation
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
