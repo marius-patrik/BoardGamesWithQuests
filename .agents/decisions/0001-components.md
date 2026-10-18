@@ -1,12 +1,20 @@
 ---
 status: accepted
 ---
-# Application component boundaries
+# Python board-game component architecture
 
-## Python application
+## Discovery and configuration
 
-`packages/engine/` contains the application's Python entry point, `controller/` for application control and `model/` for board state, game transitions, pieces, users and quests. The model owns reusable game machinery, while `packages/chess/` and `packages/checkers/` provide game configuration assets.
+The `boardgameswithquests.games` Python entry-point group registers `chess` and `checkers`. `engine.model.game.configuration` reads each installed package's `config.json` using `importlib.resources`, validates its schema and exposes immutable `GameDefinition` metadata. The JSON describes board layouts, piece vectors, clocks, export formats and colors; it does not execute game-specific quest or rule code. Both installed definitions currently set `playable` to false.
 
-## Documentation and automation
+## Game domain
 
-`.github/scripts/` builds documentation and source-derived Mermaid diagrams from tracked inputs. `.github/workflows/` hosts native GitHub Actions; `.github/tests/` contains repository checks and acceptance tests. `.agents/` holds their authored documentation inputs and generated reader documents.
+`engine.model.game.board` owns the matrix of squares and piece placement. `engine.model.pieces` defines chess piece classes and movement characteristics. `Move` describes and executes a board transition. `MoveValidator` calculates allowed moves and evaluates chess check, checkmate and stalemate. `GameManager` coordinates players, turn order, the validator, timer and move logger. `Quest` models optional condition evaluation and explicit completion, and the quest manager holds quest state. User, metadata and notation/export modules are separate from the game manager.
+
+## Application boundary
+
+`engine.app.main` parses configuration selection and offers a non-graphical `--check` diagnostic. The `GameController` translates board-square clicks into selection, reselection and attempted moves. A Tkinter window is requested through the view interface only after the selected installed game is marked playable; the existing definitions do not claim that release acceptance has been achieved.
+
+## Automation and documentation
+
+`.agents/notes/`, `requests/`, `decisions/` and `rules/` are the authored sources for generated README, PRD, ARCHITECTURE and AGENTS; the Mermaid AST and application UML derive from tracked source. `.github/scripts/`, `workflows/` and `tests/` implement documentation generation, validations and GitHub Actions. `repo.dfconfig` configures DarkFactory integration, PrideVer and release/protection policy. Native GitHub branch protection remains a provider-side setting rather than a claim inferred from the repository config.
