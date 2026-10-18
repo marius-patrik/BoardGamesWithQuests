@@ -24,9 +24,10 @@ def declared_policy() -> tuple[str, str, dict]:
     config = json.loads(CONFIG.read_text(encoding="utf-8"))["repo"]
     identity = config["identity"]
     repo = f'{identity["owner"]}/{identity["repo"]}'
-    branch = identity["default_branch"]
-    if branch != "main":
-        raise ValueError(f"Refusing to protect unexpected default branch {branch!r}")
+    default_branch = identity["default_branch"]
+    if default_branch != "development" or identity.get("development_branch") != "development":
+        raise ValueError("Default and integration branch must be development")
+    branch = "main"
     lanes = [lane for lane in config["protection"]["lanes"] if lane["branch"] == branch]
     if len(lanes) != 1:
         raise ValueError("Expected exactly one declared protection lane for main")
