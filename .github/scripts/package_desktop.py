@@ -37,8 +37,11 @@ def archive_bundle(bundle: Path, output: Path, platform: str, version: str) -> t
         archive = output / (stem + ".tar.gz")
         with tarfile.open(archive, "w:gz") as dest:
             dest.add(bundle, arcname=bundle.name)
+    checksum_hash = hashlib.sha256()
     with archive.open("rb") as source:
-        digest = hashlib.file_digest(source, "sha256").hexdigest()
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            checksum_hash.update(chunk)
+    digest = checksum_hash.hexdigest()
     checksum = output / (archive.name + ".sha256")
     checksum.write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
     return archive, checksum
