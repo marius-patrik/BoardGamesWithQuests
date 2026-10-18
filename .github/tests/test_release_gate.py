@@ -61,7 +61,7 @@ class ReleaseGateBehaviorTests(unittest.TestCase):
                 self.assertNotEqual(dispatch(event=event).returncode, 0)
 
     def test_other_ref_or_repository_cannot_release(self) -> None:
-        self.assertNotEqual(dispatch(ref="refs/heads/development").returncode, 0)
+        self.assertNotEqual(dispatch(ref="refs/heads/develop").returncode, 0)
         self.assertNotEqual(dispatch(ref="refs/tags/v1.0.0").returncode, 0)
         self.assertNotEqual(dispatch(repository="another/project").returncode, 0)
 
@@ -110,8 +110,8 @@ class ReleaseGateBehaviorTests(unittest.TestCase):
     def test_configuration_describes_existing_stack_not_proposed_clients(self) -> None:
         config = json.loads((ROOT / "repo.dfconfig").read_text(encoding="utf-8"))
         identity = config["repo"]["identity"]
-        self.assertEqual(identity["development_branch"], "development")
-        self.assertEqual(identity["default_branch"], "development")
+        self.assertEqual(identity["development_branch"], "develop")
+        self.assertEqual(identity["default_branch"], "main")
         description = identity["description"].lower()
         self.assertIn("python", description)
         self.assertNotIn("react", description)

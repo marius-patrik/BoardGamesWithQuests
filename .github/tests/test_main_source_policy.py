@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class MainSourcePolicyTests(unittest.TestCase):
-    def test_main_gate_checks_only_the_development_head(self) -> None:
+    def test_main_gate_checks_only_the_develop_head(self) -> None:
         workflow = (ROOT / ".github/workflows/main-source.yml").read_text(encoding="utf-8")
         self.assertIn("  pull_request_target:", workflow)
         self.assertIn("    branches: [main]", workflow)
@@ -18,7 +18,7 @@ class MainSourcePolicyTests(unittest.TestCase):
         self.assertIn("SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}", workflow)
         self.assertIn("TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}", workflow)
         self.assertIn('[ "$SOURCE_REPO" != "$GITHUB_REPOSITORY" ]', workflow)
-        self.assertIn('[ "$SOURCE_BRANCH" != "development" ]', workflow)
+        self.assertIn('[ "$SOURCE_BRANCH" != "develop" ]', workflow)
         self.assertIn('[ "$TARGET_BRANCH" != "main" ]', workflow)
         self.assertNotIn("actions/checkout", workflow)
 

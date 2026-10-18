@@ -10,7 +10,7 @@ jobs:
     name: main-source
     runs-on: ubuntu-latest
     steps:
-      - name: Restrict release PRs to the same-repository development branch
+      - name: Restrict release PRs to the same-repository develop branch
         env:
           SOURCE_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
@@ -19,7 +19,7 @@ jobs:
           set -euo pipefail
           if [ "$TARGET_BRANCH" != "main" ] ||
              [ "$SOURCE_REPO" != "$GITHUB_REPOSITORY" ] ||
-             [ "$SOURCE_BRANCH" != "development" ]; then
-            echo "::error::Only the repository's development branch may propose merges to main"
+             [ "$SOURCE_BRANCH" != "develop" ]; then
+            echo "::error::Only the repository's develop branch may propose merges to main"
             exit 1
           fi

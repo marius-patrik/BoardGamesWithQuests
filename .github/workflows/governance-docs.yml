@@ -2,7 +2,7 @@ name: Generated governance sources
 on:
   pull_request:
   push:
-    branches: [development, main]
+    branches: [develop, main]
   workflow_dispatch:
 permissions:
   contents: read

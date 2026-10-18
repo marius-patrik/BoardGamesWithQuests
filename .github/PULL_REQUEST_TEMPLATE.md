@@ -31,7 +31,7 @@ Advances #348
 
 - [ ] Updated any affected `.agents/{notes,requests,decisions,rules}/` source record and regenerated README, PRD, ARCHITECTURE and AGENTS in one diff
 - [ ] `python3 .github/scripts/generate_documents.py --check` passes, including symlinks, unchanged DarkFactory metadata and `.github/tests/` ownership
-- [ ] The base branch and review policy match the **actual GitHub configuration**. Release PRs to `main` originate only from this repository's `development` and require the native `main-source` check; merging such a PR automatically releases via PrideVer once the admin cutover is verified.
+- [ ] The base branch and review policy match the **actual GitHub configuration**. Release PRs to `main` originate only from this repository's `develop` and require the native `main-source` check; merging such a PR automatically releases via PrideVer once the admin cutover is verified.
 
 ## Artifact alignment
 

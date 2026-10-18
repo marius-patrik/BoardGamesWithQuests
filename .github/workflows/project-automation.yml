@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [opened, edited, synchronize, closed, reopened, labeled, unlabeled, ready_for_review]
   push:
-    branches: [development, main]
+    branches: [develop, main]
   schedule:
     - cron: '43 5 * * *'
   workflow_dispatch:

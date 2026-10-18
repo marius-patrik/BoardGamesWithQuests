@@ -25,8 +25,8 @@ def declared_policy() -> tuple[str, str, dict]:
     identity = config["identity"]
     repo = f'{identity["owner"]}/{identity["repo"]}'
     default_branch = identity["default_branch"]
-    if default_branch != "development" or identity.get("development_branch") != "development":
-        raise ValueError("Default and integration branch must be development")
+    if default_branch != "main" or identity.get("development_branch") != "develop":
+        raise ValueError("Default must be main and integration must be develop")
     branch = "main"
     lanes = [lane for lane in config["protection"]["lanes"] if lane["branch"] == branch]
     if len(lanes) != 1:

@@ -10,7 +10,7 @@ on:
       - .github/scripts/release_gate.py
       - .github/tests/test_release_gate.py
   push:
-    branches: [development, main]
+    branches: [develop, main]
     paths:
       - pyproject.toml
       - repo.dfconfig
