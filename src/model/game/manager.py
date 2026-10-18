@@ -245,11 +245,6 @@ class GameManager:
         self.move_validator.notify_move_made(move, self.board)
         self.elapsed_seconds += self.charge_turn(mover)
         self.credit_increment(mover)
-        # Charge the mover for the time their move actually took, then credit the increment
-        # their completed move earns. Counting one second per move meant a clock that only ever
-        # moved when somebody played, which is not a clock.
-        self.charge_turn(mover)
-
         self.move_events.append(self._describe(move, mover))
         self.quest_manager.observe_move(self.move_events[-1])
 
@@ -300,10 +295,12 @@ class GameManager:
         if self.turn_started is None:
             return 0
         now = monotonic if monotonic is not None else time.monotonic()
-        elapsed = int(now - self.turn_started)
-        self.turn_started = None
+        elapsed = max(0, int(now - self.turn_started))
         if elapsed > 0:
             self.timer.tick(color if color is not None else self.active_player, elapsed)
+            # Keep the fractional remainder for the next poll. Restarting from
+            # now would lose every subsecond interval on frequent UI redraws.
+            self.turn_started += elapsed
         return elapsed
 
     def credit_increment(self, color: int) -> None:

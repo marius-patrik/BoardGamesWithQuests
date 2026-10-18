@@ -50,6 +50,6 @@ def test_the_writers_defaults_name_no_game():
     assert MetadataWriter().get_header("Event") == "Game"
 
     engine_source = (
-        pathlib.Path(__file__).parent.parent / "model" / "misc" / "metadata.py"
+        pathlib.Path(__file__).resolve().parents[2] / "src" / "model" / "misc" / "metadata.py"
     ).read_text(encoding="utf-8")
     assert "Chess Match" not in engine_source, "the engine named a specific game again"

@@ -1,4 +1,4 @@
-"""PGN metadata generation and header management for chess matches."""
+"""Metadata headers for a game and supported notation exports."""
 
 from typing import Dict, Optional
 from datetime import datetime
@@ -14,8 +14,8 @@ class MetadataWriter:
             headers: Optional dictionary of metadata headers to override defaults.
         """
         self.headers: Dict[str, str] = {
-            "Event": "Chess Match",
-            "Site": "ChessWithQuests",
+            "Event": "Game",
+            "Site": "BoardGamesWithQuests",
             "Date": datetime.now().strftime("%Y.%m.%d"),
             "Round": "1",
             "White": "Player 1",
