@@ -1,20 +1,24 @@
 ---
 status: accepted
 ---
-# Python board-game component architecture
+# Shared Python game-state architecture
 
-## Discovery and configuration
+## Decision: Board, moves and rule evaluation are separate
 
-The `boardgameswithquests.games` Python entry-point group registers `chess` and `checkers`. `engine.model.game.configuration` reads each installed package's `config.json` using `importlib.resources`, validates its schema and exposes immutable `GameDefinition` metadata. The JSON describes board layouts, piece vectors, clocks, export formats and colors; it does not execute game-specific quest or rule code. Both installed definitions currently set `playable` to false.
+`engine.model.game.board.Board` owns a rectangular matrix of optional piece objects, capture lists and placement/movement/replacement operations. Its built-in `setup_default_board` populates standard chess pieces on an 8×8 board. `engine.model.pieces` contains the concrete chess classes: Pawn, Rook, Horse, Bishop, Queen and King.
 
-## Game domain
+`engine.model.game.move.Move` stores origin, destination, move type, optional moving/captured/promoted pieces. `Move.validate` checks coordinate bounds (currently fixed at 8×8), origin occupancy and destination friendly-piece conflicts. `Move.execute` invokes `Board.move_piece` and optional destination replacement. Declared move types are metadata; execution is not a full general-purpose rules interpreter.
 
-`engine.model.game.board` owns the matrix of squares and piece placement. `engine.model.pieces` defines chess piece classes and movement characteristics. `Move` describes and executes a board transition. `MoveValidator` calculates allowed moves and evaluates chess check, checkmate and stalemate. `GameManager` coordinates players, turn order, the validator, timer and move logger. `Quest` models optional condition evaluation and explicit completion, and the quest manager holds quest state. User, metadata and notation/export modules are separate from the game manager.
+`MoveValidator` implements chess-oriented pseudo/legal moves, detection of king attacks/check, and checkmate/stalemate. `GameManager` owns `Board`, players with `1/-1` colors, active turn, `Timer`, `MoveValidator` and `GameLogger`. Its `make_move` validates the move and player, executes it, records it and changes the active side. Its state evaluation covers active-player timeout, checkmate, stalemate, check and in-progress. `save_log` remains a stub.
 
-## Application boundary
+## Decision: supporting game state stays modular
 
-`engine.app.main` parses configuration selection and offers a non-graphical `--check` diagnostic. The `GameController` translates board-square clicks into selection, reselection and attempted moves. A Tkinter window is requested through the view interface only after the selected installed game is marked playable; the existing definitions do not claim that release acceptance has been achieved.
+`Timer` holds two time balances and exposes reset/tick/increment/expiry. `Quest` holds condition callback, completion flag and reward points; `engine.model.misc.quest_manager.QuestManager` stores/evaluates quests and may award completion to a `User`. `engine.model.users` holds identity/rating/history; `engine.model.misc` also implements coordinate notation, PGN-style metadata and chess export helpers; `GameLogger` tracks moves in memory with optional output.
 
-## Automation and documentation
+## Data flow
 
-`.agents/notes/`, `requests/`, `decisions/` and `rules/` are the authored sources for generated README, PRD, ARCHITECTURE and AGENTS; the Mermaid AST and application UML derive from tracked source. `.github/scripts/`, `workflows/` and `tests/` implement documentation generation, validations and GitHub Actions. `repo.dfconfig` configures DarkFactory integration, PrideVer and release/protection policy. Native GitHub branch protection remains a provider-side setting rather than a claim inferred from the repository config.
+`GameController.handle_square_click` → `GameManager.make_move` → `MoveValidator.is_valid_move` → `Move.execute` → `Board.move_piece` → `GameLogger.log_move` → change active player. The controller returns an action descriptor and current game state.
+
+## Current limitation
+
+The in-memory engine is chess-centric and its declarative checkers configuration does not itself provide complete English-draughts gameplay. No database or hosted service owns this state on #414.
