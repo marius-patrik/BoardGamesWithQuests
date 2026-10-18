@@ -35,7 +35,7 @@ else Create pending game
 else Join invitation
   Page->>API: POST /game/{gameId}/join (idempotency key and Bearer JWT only)
   API->>DB: Lock game and assign lowest unoccupied seat plus first feasible role
-  DB-->>API: Assigned seat and role; pending or activate exactly at target
+  DB-->>API: Assigned seat and role and pending or activated state at target
   API-->>Page: Viewer-scoped GameView
 end
 Page->>API: GET /game/{gameId}
