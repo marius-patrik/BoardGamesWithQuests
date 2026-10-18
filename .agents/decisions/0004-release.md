@@ -9,4 +9,4 @@ status: accepted
 
 ## Consequences
 
-Those current triggers are **not yet compliant** with the separately requested production-promotion policy in [issue #404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404). Their security, branch settings and external side effects must be fixed and verified before cutover. Documentation cannot enforce a policy not yet backed by GitHub/provider configuration.
+Those current triggers are **not yet compliant** with the separately requested production-promotion policy in [master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348). Their security, branch settings and external side effects must be fixed and verified before cutover. Documentation cannot enforce a policy not yet backed by GitHub/provider configuration.

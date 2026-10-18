@@ -9,4 +9,4 @@ The checked-in legacy Python source under `packages/engine/` owns its app entry 
 
 ## Consequences
 
-No client app, FastAPI multiplayer lifecycle, Supabase schema, declarative engine contract, or native distribution is implemented by this governance PR. Proposed application architecture and acceptance criteria are tracked only in [#350](https://github.com/marius-patrik/BoardGamesWithQuests/issues/350) and dependent issues, to be documented in-repo only when corresponding code lands.
+No client app, FastAPI multiplayer lifecycle, Supabase schema, declarative engine contract, or native distribution is implemented by this governance PR. Proposed application architecture and acceptance criteria are tracked solely in [master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348), to be documented in-repo only when corresponding code lands.

@@ -39,7 +39,7 @@ The repository presently uses `main`, with PRs #331 → #343 → #271 in a GitHu
 
 ### Consequences
 
-The requested future `develop` integration and protected release-only `main` branch migration have **not occurred**. The intended cutover, exact fork-base verification, protected-branch changes and release approval policy are tracked in [issue #404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404). Do not represent that target topology as a current GitHub setting.
+The requested future `develop` integration and protected release-only `main` branch migration have **not occurred**. The intended cutover, exact fork-base verification, protected-branch changes and release approval policy are held as unexecuted work in [master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348). Do not represent that target topology as a current GitHub setting.
 
 _Source: [0003-review.md](decisions/0003-review.md)_
 
@@ -52,7 +52,7 @@ _Source: [0003-review.md](decisions/0003-review.md)_
 
 ### Consequences
 
-Those current triggers are **not yet compliant** with the separately requested production-promotion policy in [issue #404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404). Their security, branch settings and external side effects must be fixed and verified before cutover. Documentation cannot enforce a policy not yet backed by GitHub/provider configuration.
+Those current triggers are **not yet compliant** with the separately requested production-promotion policy in [master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348). Their security, branch settings and external side effects must be fixed and verified before cutover. Documentation cannot enforce a policy not yet backed by GitHub/provider configuration.
 
 _Source: [0004-release.md](decisions/0004-release.md)_
 
@@ -65,6 +65,6 @@ The checked-in legacy Python source under `packages/engine/` owns its app entry 
 
 ### Consequences
 
-No client app, FastAPI multiplayer lifecycle, Supabase schema, declarative engine contract, or native distribution is implemented by this governance PR. Proposed application architecture and acceptance criteria are tracked only in [#350](https://github.com/marius-patrik/BoardGamesWithQuests/issues/350) and dependent issues, to be documented in-repo only when corresponding code lands.
+No client app, FastAPI multiplayer lifecycle, Supabase schema, declarative engine contract, or native distribution is implemented by this governance PR. Proposed application architecture and acceptance criteria are tracked solely in [master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348), to be documented in-repo only when corresponding code lands.
 
 _Source: [0005-existing-code.md](decisions/0005-existing-code.md)_
