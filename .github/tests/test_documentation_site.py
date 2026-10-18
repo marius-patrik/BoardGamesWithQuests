@@ -1,4 +1,5 @@
 """Acceptance tests for the actual published documentation artifact."""
+
 from __future__ import annotations
 
 import subprocess
@@ -10,17 +11,22 @@ SITE = ROOT / "site"
 
 def tracked_paths() -> list[Path]:
     result = subprocess.run(
-        ["git", "ls-files", "-z", "--cached"], cwd=ROOT,
-        capture_output=True, check=True,
+        ["git", "ls-files", "-z", "--cached"],
+        cwd=ROOT,
+        capture_output=True,
+        check=True,
     )
     return [
         Path(value.decode("utf-8", "surrogateescape"))
-        for value in result.stdout.split(b"\0") if value
+        for value in result.stdout.split(b"\0")
+        if value
     ]
 
 
 def public_path(path: Path) -> Path:
-    return Path(*(segment.lstrip(".") if segment.startswith(".") else segment for segment in path.parts))
+    return Path(
+        *(segment.lstrip(".") if segment.startswith(".") else segment for segment in path.parts)
+    )
 
 
 def test_every_tracked_file_has_a_published_navigation_page() -> None:
