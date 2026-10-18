@@ -40,28 +40,14 @@ flowchart LR
   nba68bd0b89f7f1a7c --> n54540ac5fe02e9109
   nd62eeb7f75a05f38f["decisions/"]
   nb76abd85885f19e9e --> nd62eeb7f75a05f38f
-  na6c671c85114122d5["0001-source-records.md"]
-  nd62eeb7f75a05f38f --> na6c671c85114122d5
-  n3647ebcfb4152c174["0002-layout.md"]
-  nd62eeb7f75a05f38f --> n3647ebcfb4152c174
-  n34b2fa413e0018907["0003-review.md"]
-  nd62eeb7f75a05f38f --> n34b2fa413e0018907
-  nd8df6236c53d2bb8f["0004-release.md"]
-  nd62eeb7f75a05f38f --> nd8df6236c53d2bb8f
-  n4b06774df4616edcc["0005-existing-code.md"]
-  nd62eeb7f75a05f38f --> n4b06774df4616edcc
-  n4190e052417decbae["0006-agent-roles-and-skills.md"]
-  nd62eeb7f75a05f38f --> n4190e052417decbae
+  n7384ea2a56ca4b60d["0001-components.md"]
+  nd62eeb7f75a05f38f --> n7384ea2a56ca4b60d
   n5ded58ca3ec08d498["notes/"]
   nb76abd85885f19e9e --> n5ded58ca3ec08d498
   n507827f74fae7d391["0001-product.md"]
   n5ded58ca3ec08d498 --> n507827f74fae7d391
   n4e73bde3fe180f2b0["0002-structure.md"]
   n5ded58ca3ec08d498 --> n4e73bde3fe180f2b0
-  n5b4ce5848d811dd97["0003-administration.md"]
-  n5ded58ca3ec08d498 --> n5b4ce5848d811dd97
-  ne4dccfc340f2bebed["0004-contribution.md"]
-  n5ded58ca3ec08d498 --> ne4dccfc340f2bebed
   n1fc6caa52db94b307["reference/"]
   nb76abd85885f19e9e --> n1fc6caa52db94b307
   nf01460c1a13b504e7["diagrams/"]
@@ -76,8 +62,8 @@ flowchart LR
   n47147dba57f7460f2 --> nf0958200deaef83db
   n9408eb67def1ca05a["requests/"]
   nb76abd85885f19e9e --> n9408eb67def1ca05a
-  n1854a5d2a54ed1ab4["0001-current-repository.md"]
-  n9408eb67def1ca05a --> n1854a5d2a54ed1ab4
+  n212b52c2a59d14749["0001-components.md"]
+  n9408eb67def1ca05a --> n212b52c2a59d14749
   n83283128dfae90fe8["rules/"]
   nb76abd85885f19e9e --> n83283128dfae90fe8
   n1930a95fdea228bdf["0001-orientation.md"]
@@ -574,16 +560,6 @@ flowchart LR
   nb914c06ad22602465 --> n56d8aa4f97d913c40
   n2092df3a19d2f7b13["scripts/"]
   nfad65243633b77700 --> n2092df3a19d2f7b13
-  n33ca7bf91bbe3626c["apply_branch_protection.py"]
-  n2092df3a19d2f7b13 --> n33ca7bf91bbe3626c
-  nf41eeca1ea551ec69["function_definition declared_policy"]
-  n33ca7bf91bbe3626c --> nf41eeca1ea551ec69
-  nec394714f758793b4["function_definition github_api"]
-  n33ca7bf91bbe3626c --> nec394714f758793b4
-  n2045fcf50bb2af291["function_definition matches"]
-  n33ca7bf91bbe3626c --> n2045fcf50bb2af291
-  n7a1c088b63ce19fa4["function_definition main"]
-  n33ca7bf91bbe3626c --> n7a1c088b63ce19fa4
   n3b9f839fbbebb1fb8["assemble_docs.py"]
   n2092df3a19d2f7b13 --> n3b9f839fbbebb1fb8
   ne3b7b0f2b0484d496["function_definition assemble"]
@@ -706,20 +682,6 @@ flowchart LR
   nd6487c9d1884235b7 --> n58b967f0eaae700a3
   n9ac875346544c2d84["function_definition test_image_and_diagram_viewers_offer_an_accessible_modal"]
   nd6487c9d1884235b7 --> n9ac875346544c2d84
-  n7ffcab1b794872301["test_apply_branch_protection.py"]
-  nc9f5868186eb03f66 --> n7ffcab1b794872301
-  n0dc8bd9d4c43e62e6["class_definition BranchProtectionTests"]
-  n7ffcab1b794872301 --> n0dc8bd9d4c43e62e6
-  ndf103537c35cac2f6["function_definition test_policy_is_derived_from_repository_config"]
-  n7ffcab1b794872301 --> ndf103537c35cac2f6
-  nc26fa8b712438ffc8["function_definition test_missing_reviews_is_not_compliant"]
-  n7ffcab1b794872301 --> nc26fa8b712438ffc8
-  n3d9fe75c30f67b9c7["function_definition test_exact_protection_is_compliant"]
-  n7ffcab1b794872301 --> n3d9fe75c30f67b9c7
-  n2d2b252bd23bf481b["function_definition test_admin_bypass_is_not_compliant"]
-  n7ffcab1b794872301 --> n2d2b252bd23bf481b
-  n5109c6ca4f765d513["function_definition test_dry_run_does_not_call_github"]
-  n7ffcab1b794872301 --> n5109c6ca4f765d513
   n905320175c75255b2["test_docs_artifacts.py"]
   nc9f5868186eb03f66 --> n905320175c75255b2
   n82a0b29577da561c3["function_definition run_record"]
@@ -844,7 +806,7 @@ flowchart LR
   n015d86922f7e4e2cd --> n9de49b434737a7367
   n27ae467c1cc83faac["function_definition test_native_github_and_agents_dirs"]
   n015d86922f7e4e2cd --> n27ae467c1cc83faac
-  n71c755deff0060ab8["function_definition test_darkfactory_installation_remains_a_tracked_file"]
+  n71c755deff0060ab8["function_definition test_darkfactory_installation_is_tracked"]
   n015d86922f7e4e2cd --> n71c755deff0060ab8
   n6ba5c332d9289bde8["function_definition test_generated_documents_are_identical_to_approved_records"]
   n015d86922f7e4e2cd --> n6ba5c332d9289bde8

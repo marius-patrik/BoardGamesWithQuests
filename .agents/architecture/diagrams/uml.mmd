@@ -1,11 +1,5 @@
 classDiagram
 direction LR
-  class nd01489ae07d01aa59["BranchProtectionTests"]
-  nd01489ae07d01aa59 : +test_policy_is_derived_from_repository_config()
-  nd01489ae07d01aa59 : +test_missing_reviews_is_not_compliant()
-  nd01489ae07d01aa59 : +test_exact_protection_is_compliant()
-  nd01489ae07d01aa59 : +test_admin_bypass_is_not_compliant()
-  nd01489ae07d01aa59 : +test_dry_run_does_not_call_github()
   class nf04a42578120c2039["MainSourcePolicyTests"]
   nf04a42578120c2039 : +test_main_gate_checks_only_the_develop_head()
   nf04a42578120c2039 : +test_main_protection_requires_the_source_check()
@@ -22,7 +16,7 @@ direction LR
   ne1501b4c38390d44a : +test_configuration_describes_existing_stack_not_proposed_clients()
   class nf4d4cc5884df6ad51["WorkspaceLayoutTests"]
   nf4d4cc5884df6ad51 : +test_native_github_and_agents_dirs()
-  nf4d4cc5884df6ad51 : +test_darkfactory_installation_remains_a_tracked_file()
+  nf4d4cc5884df6ad51 : +test_darkfactory_installation_is_tracked()
   nf4d4cc5884df6ad51 : +test_generated_documents_are_identical_to_approved_records()
   nf4d4cc5884df6ad51 : +test_layout_check_passes()
   nf4d4cc5884df6ad51 : +test_unpublished_note_stays_out_of_readme()
