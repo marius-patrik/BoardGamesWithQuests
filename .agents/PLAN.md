@@ -12,7 +12,7 @@
 | 2 | Reconcile one authoritative versioned JSON game model in `src/model/` | Pending |
 | 3 | Complete executable chess and English-draughts configurations | Pending |
 | 4 | Adapt recovered Tkinter controllers, boards and views to the canonical engine | Pending |
-| 5 | Replace user-authored Python rule/quest editing with validated JSON settings | Pending |
+| 5 | Remove player-facing rule/quest editing and replace executable configuration with validated JSON settings for permitted properties | Pending |
 | 6 | Verify real gameplay, clocks, quests, save/export, hostile inputs and graphical interactions | Pending |
 | 7 | Build, run and verify four native platform distributions | Pending |
 | 8 | Resolve reviews, refresh source-governed docs and obtain approval to merge #271 | Pending |
@@ -44,7 +44,7 @@
 2. Implement and test chess special actions, checks, draws and notation; correct English-draughts short-range kings and compulsory/multiple captures. Keep international draughts separate and non-playable unless proven.
 3. Introduce a desktop session/controller adapter for local participant IDs, revisioned actions and monotonic clock timestamps, without HTTP or database dependencies.
 4. Update `src/controller/` and `src/view/` to render canonical state and send action intents. Preserve startup, selection, game switching, quest panels, clock refresh and error recovery; cancel abandoned Tk callbacks.
-5. Remove `src/view/code_editor.py` and `src/model/game/source_validation.py` **after** replacing their production callers with JSON editing; remove executable user rule/quest module composition.
+5. Remove `src/view/code_editor.py` and `src/model/game/source_validation.py` after eliminating their production callers. The UI must **not permit editing rules or quests**, whether as Python or raw JSON. Game definitions may contain trusted, immutable declarative rules/quests; settings expose only permitted non-executable user preferences and configuration fields.
 6. Keep immutable bundled definitions separate from atomic, validated user JSON in an OS-appropriate application-data directory.
 
 ## 3. Verify and package
