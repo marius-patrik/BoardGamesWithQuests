@@ -1,0 +1,60 @@
+name: Package Desktop Application
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: PrideVer-resolved release version
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: desktop / ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: windows-x64, runner: windows-2022 }
+          - { platform: macos-arm64, runner: macos-15 }
+          - { platform: macos-x64, runner: macos-15-intel }
+          - { platform: linux-x64, runner: ubuntu-22.04 }
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Linux Tkinter and virtual display
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth
+      - name: Install pinned packaging tools and application
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ inputs.version }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "pyinstaller==6.16.0" .
+      - name: Package and smoke-test the frozen GUI
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ inputs.version }}
+          PLATFORM: ${{ matrix.platform }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: python .github/scripts/package_desktop.py --platform "$PLATFORM" --version "$RELEASE_VERSION"
+      - name: Upload validated platform distribution
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: desktop-${{ matrix.platform }}
+          path: dist/release/
+          if-no-files-found: error
+          retention-days: 14
