@@ -6,8 +6,11 @@ on:
   pull_request:
     paths:
       - .github/workflows/release.yml
+      - .github/workflows/desktop-build.yml
+      - .github/scripts/package_desktop.py
       - repo.dfconfig
       - .github/tests/test_release_gate.py
+      - .github/tests/test_desktop_packaging_setup.py
       - .github/scripts/release_gate.py
   workflow_dispatch:
     inputs:
@@ -31,21 +34,23 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - name: Verify fail-closed release authorization
-        run: python3 -m unittest discover -s .github/tests -p test_release_gate.py
+      - name: Verify fail-closed release authorization and packaging
+        run: |
+          python3 -m unittest discover -s .github/tests -p test_release_gate.py
+          python3 -m unittest discover -s .github/tests -p test_desktop_packaging_setup.py
 
-  release:
+  prepare:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && github.repository == 'marius-patrik/BoardGamesWithQuests'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      version: ${{ steps.resolve.outputs.version }}
     steps:
-      - name: Checkout repository with tags
+      - name: Checkout exact release candidate with tags
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           persist-credentials: false
-
       - name: Verify this release targets the live main HEAD
         env:
           GH_TOKEN: ${{ github.token }}
@@ -56,7 +61,6 @@ jobs:
             --event "$GITHUB_EVENT_NAME" --ref "$GITHUB_REF" \
             --repository "$GITHUB_REPOSITORY" --run-sha "$GITHUB_SHA" \
             --live-sha "$live_main" --checkout-sha "$(git rev-parse HEAD)"
-
       - name: Enforce Python release enablement before publishing
         run: |
           python3 - <<'PY'
@@ -66,7 +70,6 @@ jobs:
           if config["repo"]["environment"]["release"]["python"]["enabled"] is not True:
               raise SystemExit("Python release publishing is disabled until packaged distribution is ready")
           PY
-
       - name: Checkout pinned DarkFactory release authority
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -74,42 +77,97 @@ jobs:
           ref: 368eb9d75d5d828e7ac17fe590d4dc17b028cebc
           path: .darkfactory-pipeline
           persist-credentials: false
-
       - name: Set up Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-
       - name: Install DarkFactory release runtime
         run: bun install --frozen-lockfile --cwd .darkfactory-pipeline
-
-      - name: Resolve version, assets and release notes
+      - name: Resolve authoritative release version and notes
         id: resolve
         env:
           REQUESTED_BUMP: ${{ inputs.bump }}
         run: |
           set -euo pipefail
           args=()
-          if [ -n "$REQUESTED_BUMP" ]; then args=(--bump "$REQUESTED_BUMP"); fi
+          if [ -n "$REQUESTED_BUMP" ]; then
+            args=(--bump "$REQUESTED_BUMP")
+          elif ! git show-ref --tags --verify --quiet refs/tags/v1.0.0; then
+            # PrideVer resolves the first complete desktop release from this explicit request.
+            args=(--bump 1.0.0)
+          fi
           bun .darkfactory-pipeline/packages/harness/src/release/cli.ts \
             --repo-root "$GITHUB_WORKSPACE" --notes-out "$RUNNER_TEMP/release-notes.md" \
             "${args[@]}" > "$RUNNER_TEMP/release.json"
-          if [ "$(jq -r '.tag // empty' "$RUNNER_TEMP/release.json")" = "" ] && \
-             [ -z "$REQUESTED_BUMP" ] && [ -z "$(git tag --points-at HEAD)" ]; then
-            bun .darkfactory-pipeline/packages/harness/src/release/cli.ts \
-              --repo-root "$GITHUB_WORKSPACE" --bump patch \
-              --notes-out "$RUNNER_TEMP/release-notes.md" > "$RUNNER_TEMP/release.json"
-          fi
           if [ "$(jq '.metadata_problems | length' "$RUNNER_TEMP/release.json")" -ne 0 ]; then
             jq -r '.metadata_problems[]' "$RUNNER_TEMP/release.json" >&2
             exit 1
           fi
-          echo "tag=$(jq -r '.tag // empty' "$RUNNER_TEMP/release.json")" >> "$GITHUB_OUTPUT"
+          tag="$(jq -r '.tag // empty' "$RUNNER_TEMP/release.json")"
+          version="$(jq -r '.version // empty' "$RUNNER_TEMP/release.json")"
+          if [ -n "$tag" ] && [ -z "$version" ]; then
+            echo "::error::PrideVer supplied a release tag without a version"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
           jq '{version,tag,mode,metadata_problems,steps}' "$RUNNER_TEMP/release.json" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Publish release for verified main commit
+      - name: Preserve release notes for verified publishing
         if: steps.resolve.outputs.tag != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: desktop-release-notes
+          path: ${{ runner.temp }}/release-notes.md
+          if-no-files-found: error
+
+  packages:
+    if: needs.prepare.outputs.tag != ''
+    needs: prepare
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+
+  publish:
+    if: needs.prepare.outputs.tag != ''
+    needs: [prepare, packages]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout exact release candidate with tags
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Download the four verified platform packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-*
+          merge-multiple: true
+          path: dist/release
+      - name: Restore PrideVer release notes
+        uses: actions/download-artifact@v4
+        with:
+          name: desktop-release-notes
+          path: dist/notes
+      - name: Verify exact platform assets and checksums
+        env:
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          cd dist/release
+          for platform in windows-x64 macos-arm64 macos-x64 linux-x64; do
+            extension=tar.gz
+            if [ "$platform" = windows-x64 ]; then extension=zip; fi
+            name="BoardGamesWithQuests-$RELEASE_VERSION-$platform.$extension"
+            test -s "$name"
+            test -s "$name.sha256"
+            sha256sum --check "$name.sha256"
+          done
+          test "$(find . -maxdepth 1 -type f | wc -l)" -eq 8
+      - name: Publish only a complete, verified release for the live main commit
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.resolve.outputs.tag }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           set -euo pipefail
           git fetch origin --tags
@@ -123,12 +181,23 @@ jobs:
             --event "$GITHUB_EVENT_NAME" --ref "$GITHUB_REF" \
             --repository "$GITHUB_REPOSITORY" --run-sha "$GITHUB_SHA" \
             --live-sha "$live_main" --checkout-sha "$(git rev-parse HEAD)"
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $TAG already exists; no changes." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$TAG" dist/release/* \
+              --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --title "$TAG" --notes-file dist/notes/release-notes.md --draft
           fi
-          gh release create "$TAG" \
-            --repo "$GITHUB_REPOSITORY" \
-            --target "$GITHUB_SHA" \
-            --title "$TAG" \
-            --notes-file "$RUNNER_TEMP/release-notes.md"
+          names="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
+          for platform in windows-x64 macos-arm64 macos-x64 linux-x64; do
+            extension=tar.gz
+            if [ "$platform" = windows-x64 ]; then extension=zip; fi
+            name="BoardGamesWithQuests-$RELEASE_VERSION-$platform.$extension"
+            printf '%s\n' "$names" | grep -Fxq "$name"
+            printf '%s\n' "$names" | grep -Fxq "$name.sha256"
+          done
+          test "$(printf '%s\n' "$names" | grep -c .)" -eq 8
+          git fetch origin --tags
+          python3 .github/scripts/release_gate.py tag \
+            --tag "$TAG" --run-sha "$GITHUB_SHA" \
+            --assigned-sha "$(git rev-list -n 1 "$TAG")"
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json url,isDraft,assets >> "$GITHUB_STEP_SUMMARY"
