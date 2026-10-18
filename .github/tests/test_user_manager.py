@@ -29,6 +29,8 @@ def test_user_manager_link_player():
 
 def test_user_manager_execute_move():
     manager = UserManager()
-    assert manager.execute_move() is True
+    with pytest.raises(PermissionError, match="GameManager"):
+        manager.execute_move()
+    assert manager.user_history == ""
     manager.record_history("Move recorded")
     assert "Move recorded" in manager.user_history

@@ -26,10 +26,10 @@ jobs:
     outputs:
       previews: ${{ steps.preview-index.outputs.json }}
     steps:
-      - name: Check out trusted publisher from main
+      - name: Check out trusted publisher from the default branch
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: main
+          ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
 
       - name: Collect latest passing, source-verified Actions artifacts

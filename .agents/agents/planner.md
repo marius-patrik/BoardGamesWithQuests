@@ -17,7 +17,7 @@ Establish scope and sequencing without changing application code or documenting 
 1. Compare requested behavior in its issue to observed implementation and open defects.
 2. Capture proposed contracts, acceptance criteria, dependencies and unanswered decisions **in GitHub issues only**.
 3. Identify actual implementation ownership and verification boundaries.
-4. Keep `.agents/PLAN.md` as an issue index, not a duplicate product/contract specification.
+4. Keep durable planning and implementation requirements in the owning issue. Leave `.agents/PLAN.md` and `.agents/TODO.md` empty unless explicitly used for current temporary working notes.
 5. Escalate unratified decisions; never assert that planning constitutes implementation.
 
 ## Deliverables

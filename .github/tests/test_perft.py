@@ -428,8 +428,10 @@ def test_a_repetition_is_counted_under_the_player_who_is_to_move_next():
     rule = _rule_of(game, "ThreefoldRepetitionRule")
     reasons = [_play(game, uci) for uci in ["g1 f3", "g8 f6", "f3 g1", "f6 g8"] * 3]
 
-    assert reasons[:9] == [None] * 9
-    assert reasons[9:] == ["threefold repetition"] * 3
+    # After White's ninth ply (the third Nf3), that exact position has
+    # occurred three times with Black to move: ply 1, ply 5, and ply 9.
+    assert reasons[:8] == [None] * 8
+    assert reasons[8:] == ["threefold repetition"] * 4
     assert max(rule.state["seen"].values()) == 3
 
 

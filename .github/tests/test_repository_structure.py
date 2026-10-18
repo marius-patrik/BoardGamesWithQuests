@@ -49,6 +49,13 @@ class WorkspaceLayoutTests(unittest.TestCase):
                 output,
             )
 
+    def test_generated_application_uml_excludes_test_and_ci_classes(self) -> None:
+        diagram = (ROOT / ".agents/architecture/diagrams/uml.mmd").read_text(encoding="utf-8")
+        self.assertIn('["GameController"]', diagram)
+        for name in ("WorkspaceLayoutTests", "ReleaseGateBehaviorTests", "MainSourcePolicyTests"):
+            with self.subTest(class_name=name):
+                self.assertNotIn(f'["{name}"]', diagram)
+
     def test_layout_check_passes(self) -> None:
         self.assertEqual(generator.validate_layout(), [])
 

@@ -168,6 +168,14 @@ class Move:
         if self.capture_from is not None:
             self.captured_piece = board.get_piece_at(self.capture_from)
             board.set_piece_at(self.capture_from, None)
+            # The taken piece is not necessarily on the move destination.
+            # Record it exactly once: move_piece() sees no target here.
+            if self.captured_piece is not None:
+                taken_color = self.captured_piece.getColor()
+                if taken_color in (1, "white"):
+                    board.captured_white.append(self.captured_piece)
+                else:
+                    board.captured_black.append(self.captured_piece)
         else:
             self.captured_piece = board.get_piece_at(self.end_pos)
 

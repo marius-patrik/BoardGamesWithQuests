@@ -54,3 +54,7 @@ class Player:
             if callable(get_rating):
                 return int(get_rating())
         return 1200
+
+
+# Diagram spelling refers to the same model class, not a second implementation.
+Hrac = Player
