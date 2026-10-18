@@ -114,7 +114,7 @@ def implementation_uml(root: Path) -> str:
     for path in tracked_paths(root):
         # Application UML describes production packages, not repository tests or
         # CI helpers. The repository AST still inventories every tracked file.
-        if path.relative_to(root).parts[0] != "packages":
+        if path.relative_to(root).parts[0] not in {"src", "packages"}:
             continue
         if path.suffix != ".py" or not path.is_file() or path.is_symlink():
             continue
