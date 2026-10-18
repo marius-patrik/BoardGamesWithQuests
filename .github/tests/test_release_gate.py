@@ -105,6 +105,8 @@ class ReleaseGateBehaviorTests(unittest.TestCase):
         self.assertIn("github.ref == 'refs/heads/main'", workflow)
         self.assertIn("release_gate.py release", workflow)
         self.assertIn("release_gate.py tag", workflow)
+        self.assertIn("Enforce Python release enablement before publishing", workflow)
+        self.assertIn('["environment"]["release"]["python"]["enabled"] is not True', workflow)
         self.assertNotIn("--prerelease", workflow)
 
     def test_configuration_describes_existing_stack_not_proposed_clients(self) -> None:
