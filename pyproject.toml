@@ -9,7 +9,7 @@ dynamic = ["version"]
 description = "A board game engine in which the configuration is the product: chess and checkers share one engine."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "NONE" }
+license = { file = "LICENSE" }
 authors = [{ name = "marius-patrik" }]
 keywords = ["chess", "checkers", "board game", "engine", "mvc", "quests"]
 classifiers = [
@@ -54,7 +54,7 @@ checkers = ["config.json"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests"]
+testpaths = [".github/tests"]
 pythonpath = ["packages", "."]
 
 [tool.black]

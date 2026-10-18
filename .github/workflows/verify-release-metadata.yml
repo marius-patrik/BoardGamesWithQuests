@@ -7,13 +7,17 @@ on:
       - repo.dfconfig
       - .github/workflows/release.yml
       - .github/workflows/verify-release-metadata.yml
+      - .github/scripts/release_gate.py
+      - .github/tests/test_release_gate.py
   push:
-    branches: [main]
+    branches: [develop, main]
     paths:
       - pyproject.toml
       - repo.dfconfig
       - .github/workflows/release.yml
       - .github/workflows/verify-release-metadata.yml
+      - .github/scripts/release_gate.py
+      - .github/tests/test_release_gate.py
   workflow_dispatch:
 
 permissions:
@@ -60,6 +64,8 @@ jobs:
           import re
           import sys
           import zipfile
+          import tomllib
+          from email.parser import Parser
 
           wheel_dir, expected = pathlib.Path(sys.argv[1]), sys.argv[2]
           wheels = list(wheel_dir.glob("*.whl"))
@@ -72,6 +78,15 @@ jobs:
               metadata = archive.read(metadata_paths[0]).decode("utf-8")
               match = re.search(r"^Version:\s*(.+)$", metadata, flags=re.MULTILINE)
               actual = match.group(1).strip() if match else None
+              project = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]
+              fields = Parser().parsestr(metadata)
+              normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
+              assert normalize(fields["Name"]) == normalize(project["name"])
+              license_name = project["license"]["file"]
+              assert license_name in fields.get_all("License-File", [])
+              licenses = [path for path in archive.namelist() if path.endswith("/" + license_name)]
+              assert len(licenses) == 1, licenses
+              assert archive.read(licenses[0]) == pathlib.Path(license_name).read_bytes()
               assert actual == expected, f"Tag {expected} produced wheel version {actual}"
               print(f"v{expected} -> {wheels[0].name} (Version: {actual})")
           PY

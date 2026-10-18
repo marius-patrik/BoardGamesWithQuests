@@ -30,6 +30,7 @@ jobs:
       - name: Install documentation dependencies
         run: python -m pip install -r requirements-dev.txt
 
+
       - name: Verify documentation publication behavior
         run: |
           python -m pytest -q .github/tests/test_docs_publication.py
@@ -43,11 +44,13 @@ jobs:
       - name: Build documentation from PR source
         run: |
           python .github/scripts/build_docs.py
-          python -m pytest -q .github/tests/test_documentation_site.py
           test -f site/index.html
           touch site/.nojekyll
 
-      - name: Exercise reader and image viewer in Chromium
+      - name: Test the published documentation artifact
+        run: python -m pytest -q .github/tests/docs_site_acceptance.py
+
+      - name: Exercise published controls in Chromium
         run: node .github/tests/test_docs_browser.mjs
 
       - name: Record exact PR head for publisher validation

@@ -112,6 +112,10 @@ def implementation_uml(root: Path) -> str:
     """Mermaid class diagram from actual tracked Python classes and inheritance."""
     modules: dict[str, ast.Module] = {}
     for path in tracked_paths(root):
+        # Application UML describes production packages, not repository tests or
+        # CI helpers. The repository AST still inventories every tracked file.
+        if path.relative_to(root).parts[0] != "packages":
+            continue
         if path.suffix != ".py" or not path.is_file() or path.is_symlink():
             continue
         relative = path.relative_to(root).with_suffix("")
@@ -173,8 +177,8 @@ def implementation_uml(root: Path) -> str:
 def generated_assets(root: Path) -> dict[str, str]:
     """Return solely Mermaid assets, under the repository diagrams folder."""
     return {
-        "agents/notes/diagrams/implementation/ast.mmd": repository_ast(root),
-        "agents/notes/diagrams/implementation/uml.mmd": implementation_uml(root),
+        "agents/architecture/diagrams/ast.mmd": repository_ast(root),
+        "agents/architecture/diagrams/uml.mmd": implementation_uml(root),
     }
 
 
