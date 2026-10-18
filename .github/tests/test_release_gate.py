@@ -111,7 +111,7 @@ class ReleaseGateBehaviorTests(unittest.TestCase):
         config = json.loads((ROOT / "repo.dfconfig").read_text(encoding="utf-8"))
         identity = config["repo"]["identity"]
         self.assertEqual(identity["development_branch"], "develop")
-        self.assertEqual(identity["default_branch"], "develop")
+        self.assertEqual(identity["default_branch"], "main")
         description = identity["description"].lower()
         self.assertIn("python", description)
         self.assertNotIn("react", description)

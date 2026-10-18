@@ -7,7 +7,7 @@
       "display_name": "BoardGamesWithQuests",
       "project_title": "BoardGamesWithQuests",
       "agent_slug": "boardgameswithquests-agent",
-      "default_branch": "develop",
+      "default_branch": "main",
       "description": "Python board-game engine with chess/checkers configuration, GitHub Pages documentation and DarkFactory automation",
       "topics": [
         "chess",
