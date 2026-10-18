@@ -1003,7 +1003,7 @@ class MaterialAhead(_AtGameEndQuest):
         """
         taken = event.captures_by(self.color)
         lost = event.captures_against(self.color)
-        self._advance(amount=abs(taken - lost), target=self.margin)
+        self._advance(amount=max(0, taken - lost), target=self.margin)
 
 
 class Pacifist(_AtGameEndQuest):
@@ -1071,6 +1071,7 @@ class CompositeQuest(_AtGameEndQuest):
         super().__init__(**kwargs)
         self.quests = list(quests)
         self.mode = mode
+        self._observed_move_count = 0
 
     def parameters(self) -> List[Field]:
         """Declare what the player may configure about this quest.
@@ -1094,6 +1095,7 @@ class CompositeQuest(_AtGameEndQuest):
         """
         for quest in self.quests:
             quest.observe_move(event)
+        self._observed_move_count += 1
 
     def _judge(self, event: ResultEvent) -> None:
         """Complete the quest when the combined quests are satisfied.
@@ -1108,7 +1110,9 @@ class CompositeQuest(_AtGameEndQuest):
         Returns:
             None
         """
-        for item in event.history:
+        # The game already delivered live moves. Only replay the suffix that
+        # this composite has not observed; otherwise every move is counted twice.
+        for item in event.history[self._observed_move_count :]:
             self.observe_move(item)
         for quest in self.quests:
             quest.observe_result(event)
