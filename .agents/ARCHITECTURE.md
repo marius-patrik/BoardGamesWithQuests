@@ -48,11 +48,11 @@ _Source: [0003-review.md](decisions/0003-review.md)_
 
 ### Decision
 
-`repo.dfconfig` uses DarkFactory PrideVer; no separate tag-only or `VERSION`-file authority should be installed. The committed release workflow currently accepts main pushes and manual dispatch, and can publish development prereleases.
+`repo.dfconfig` uses DarkFactory PrideVer; no separate tag-only or `VERSION`-file authority should be installed. The tracked `.github/workflows/release.yml` accepts main pushes and manual dispatch, and can publish development prereleases.
 
 ### Consequences
 
-Those current triggers are **not yet compliant** with the separately requested production-promotion policy in [issue #404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404). Their security, branch settings and external side effects must be fixed and verified before cutover. Documentation cannot enforce a policy not yet backed by GitHub/provider configuration.
+Any change to release authorization, branch topology or provider enforcement must be captured in its owning issue and implemented together with tested GitHub settings. Source policy by itself does not prove provider enforcement.
 
 _Source: [0004-release.md](decisions/0004-release.md)_
 
@@ -68,3 +68,16 @@ The checked-in legacy Python source under `packages/engine/` owns its app entry 
 No client app, FastAPI multiplayer lifecycle, Supabase schema, declarative engine contract, or native distribution is implemented by this governance PR. Proposed application architecture and acceptance criteria are tracked only in [#350](https://github.com/marius-patrik/BoardGamesWithQuests/issues/350) and dependent issues, to be documented in-repo only when corresponding code lands.
 
 _Source: [0005-existing-code.md](decisions/0005-existing-code.md)_
+
+
+## Portable agent roles and skills
+
+### Decision
+
+Keep the five repository-local roles (orchestrator, planner, implementer, reviewer and verifier) in `.agents/agents/` and task-focused procedures in `.agents/skills/<name>/SKILL.md`. All roles inherit generated `.agents/AGENTS.md`; procedures supplement rather than override approved requirements, human review or security controls.
+
+### Consequences
+
+These Markdown records are portable guidance, not a competing agent runtime. They do not prove a particular execution provider has discovered, installed or invoked a role or skill. Review and verification require reproducible evidence before a maintainer authorizes merge.
+
+_Source: [0006-agent-roles-and-skills.md](decisions/0006-agent-roles-and-skills.md)_

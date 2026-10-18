@@ -19,3 +19,16 @@ Physical `.agents/` and `.github/` directories own documentation, governance and
 `.agents/architecture/diagrams/` contains source-derived actual-code diagrams; `.agents/reference/` contains the original assignment artwork and reference diagrams, not current implementation contracts. The `.agents/agents/` and `.agents/skills/` trees are portable agent guidance; tests and fixtures are under `.github/tests/`. DarkFactory integration is configured by the existing tracked `.darkfactory/installation.json` file; this repository does not have a root Git submodule. Contribution policy lives in the [generated rules](AGENTS.md), not this overview.
 
 _Source: [0002-structure.md](notes/0002-structure.md)_
+
+
+## Native GitHub protection verification
+
+`repo.dfconfig` declares the intended `main` branch protection, but only GitHub's actual settings enforce it. Inspect the live settings with a repository administrator's GitHub CLI identity:
+
+```bash
+python3 .github/scripts/apply_branch_protection.py
+```
+
+The script is dry-run by default. Only use `--apply` after approval and after comparing the actual protection; divergent existing policies require an additional explicit `--replace`. PR review and required status checks must be verified against GitHub, not inferred from repository configuration.
+
+_Source: [0003-administration.md](notes/0003-administration.md)_

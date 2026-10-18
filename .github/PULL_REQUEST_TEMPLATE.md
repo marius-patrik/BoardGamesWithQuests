@@ -27,7 +27,7 @@ Closes #
 
 - [ ] Updated any affected `.agents/{notes,requests,decisions,rules}/` source record and regenerated README, PRD, ARCHITECTURE and AGENTS in one diff
 - [ ] `python3 .github/scripts/generate_documents.py --check` passes, including symlinks, unchanged DarkFactory metadata and `.github/tests/` ownership
-- [ ] Accepted G1 policy is respected: finish the old PR stack before #404, then target dependency-stacked implementation PRs to `develop`. No unrequested promotion to `main`. G2 version/release choice remains pending #350.
+- [ ] The base branch and review policy match the **actual GitHub configuration**; no branch cutover or release promotion is implied by this PR.
 
 ## Artifact alignment
 

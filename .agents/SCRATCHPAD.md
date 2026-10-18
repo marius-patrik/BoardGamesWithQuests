@@ -1,3 +1,3 @@
 # Scratchpad
 
-Non-normative notes only. Proposed API, DB, DSL, client and game contracts belong in GitHub issues, not authored PRD/architecture records. Once behavior is genuinely implemented in a reviewed PR, reconcile its source records, tests, generated diagrams and documentation atomically. Do not retain historical competing specifications.
+Non-normative working notes belong here only while actionable. Promote approved and implemented facts to their canonical records; keep unimplemented designs in issues. Clear obsolete working notes rather than retaining history in tracked source.

@@ -20,4 +20,4 @@ reference diagrams are immutable input assets, not mandatory duplicate runtime
 classes. Every affected link, example and diagram must remain correct.
 
 ### BoardGamesWithQuests: Language Consistency
-English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. The ASCII Czech compatibility aliases explicitly required by the PRD are allowed as additional bindings to the canonical classes; do not invent further non-English names.
+English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. Existing approved Czech compatibility aliases may remain additional bindings to canonical English classes; do not invent further non-English identifiers.

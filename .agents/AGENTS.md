@@ -158,7 +158,7 @@ reference diagrams are immutable input assets, not mandatory duplicate runtime
 classes. Every affected link, example and diagram must remain correct.
 
 #### BoardGamesWithQuests: Language Consistency
-English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. The ASCII Czech compatibility aliases explicitly required by the PRD are allowed as additional bindings to the canonical classes; do not invent further non-English names.
+English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. Existing approved Czech compatibility aliases may remain additional bindings to canonical English classes; do not invent further non-English identifiers.
 
 _Source: [0005-documentation.md](rules/0005-documentation.md)_
 
@@ -217,9 +217,9 @@ _Source: [0007-hygiene.md](rules/0007-hygiene.md)_
 
 ## Verified versioning and release discipline
 
-- The committed `repo.dfconfig` currently uses DarkFactory PrideVer. Do not introduce another release controller or check in a competing `VERSION` file.
-- The actual release workflow currently runs on main pushes and manual dispatch; it is **not yet constrained** to explicitly authorized production promotions. Do not claim otherwise.
-- [Issue #404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404) owns proposed `develop` / release-main migration, release-trigger hardening and GitHub-provider enforcement; this change does not perform them.
+- The committed `repo.dfconfig` uses DarkFactory PrideVer. Do not introduce another release controller or check in a competing `VERSION` file.
+- The tracked release workflow runs on main pushes and manual dispatch. Authorization of a specific production promotion requires separate verification, not an assertion in documentation.
+- A GitHub issue owns each proposed branch-topology or release-policy change until the associated reviewed implementation and actual provider configuration are verified.
 - Never publish tags, releases or deployments without explicit maintainer authorization, independently reviewed SHA and actually enforced provider protections. Do not move existing tags or use CI success as a substitute for approval.
 
 _Source: [0008-version-and-release.md](rules/0008-version-and-release.md)_
