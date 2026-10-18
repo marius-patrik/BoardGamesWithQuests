@@ -53,10 +53,10 @@ def test_tracked_files_are_published_and_gitlinks_are_not_read_as_files():
             continue
         public = "/".join(part.lstrip(".") for part in path.parts)
         if path.suffix.lower() == ".md":
-            dest = SITE / (
-                "/".join(public.split("/")[:-1]) + "/index.html"
+            dest = (
+                SITE.joinpath(*public.split("/")[:-1], "index.html")
                 if path.name.lower() == "readme.md"
-                else public.removesuffix(".md") + "/index.html"
+                else SITE / (public.removesuffix(".md") + "/index.html")
             )
         else:
             dest = SITE / "repository-files" / public / "index.html"

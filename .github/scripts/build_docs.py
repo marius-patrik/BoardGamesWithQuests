@@ -277,10 +277,11 @@ def on_files(files: Any, config: Any) -> Any:
         if current is not None:
             files.remove(current)
         files.append(File.generated(config, dest, content=source))
-    # Preserve every tracked SVG at its source-derived publication path.
-    # Their existence is discovered, never hard-coded by directory or filename.
+    # Publish tracked Mermaid reference sources and original SVG artwork at
+    # their real Git paths. The dynamically generated code diagrams above are
+    # handled separately and are not a second committed source authority.
     for path in grammar.tracked_paths(ROOT):
-        if path.suffix.lower() != ".svg":
+        if path.suffix.lower() not in {".mmd", ".svg"}:
             continue
         dest = public_path(path.relative_to(ROOT))
         current = files.get_file_from_path(dest)
