@@ -14,7 +14,7 @@ import build_docs
 def test_architecture_viewers_are_generated_from_current_python_source(tmp_path: Path) -> None:
     subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
     (tmp_path / "source.py").write_text(
-        "class LiveClass:\\n    def run(self):\\n        return 42\\n", encoding="utf-8"
+        "class LiveClass:\n    def run(self):\n        return 42\n", encoding="utf-8"
     )
     subprocess.run(["git", "-C", str(tmp_path), "add", "source.py"], check=True)
     pages = build_docs.pages_for(tmp_path)
