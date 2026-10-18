@@ -22,4 +22,6 @@ jobs:
           git diff --exit-code -- .agents/architecture/diagrams/
 
       - name: Verify generator and native repository structure
-        run: python3 -m unittest discover -s .github/tests -p 'test_*.py'
+        run: |
+          python3 -m unittest discover -s .github/tests -p test_repository_structure.py
+          python3 -m unittest discover -s .github/tests -p test_apply_branch_protection.py

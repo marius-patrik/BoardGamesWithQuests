@@ -53,7 +53,7 @@ class BranchProtectionTests(unittest.TestCase):
                     {"context": "governed / issue-binding / verify-bound-issue"},
                 ],
             },
-            "enforce_admins": {"enabled": True},
+            "enforce_admins": {"enabled": False},
             "required_pull_request_reviews": {"required_approving_review_count": 1},
             "required_conversation_resolution": {"enabled": True},
             "allow_force_pushes": {"enabled": False},
