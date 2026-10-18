@@ -29,7 +29,7 @@ _Source: [0002-structure.md](notes/0002-structure.md)_
 python3 .github/scripts/apply_branch_protection.py
 ```
 
-The script is dry-run by default. An authorized administrator must inspect actual settings and apply the required policy via `--apply` (and separately opt into `--replace` if protection differs). GitHub's provider response, required check names, administrative enforcement and actual PR approval gate must be verified; no automation or source declaration substitutes for that evidence. The `develop` ref has been created; a fork-base candidate at `a98e36d098a1ee9aa3e793cfc39040ad6e6d2e4e` is preserved in `release/fork-base`. Final `main` ref replacement and native protection changes require repository administrator access, followed by verification of the enforced `main-source` check.
+The script is dry-run by default. An authorized administrator must inspect actual settings and apply the required policy via `--apply` (and separately opt into `--replace` if protection differs). GitHub's provider response, required check names, administrative enforcement and actual PR approval gate must be verified; no automation or source declaration substitutes for that evidence. The `develop` ref has been created; a fork-base candidate at `a98e36d098a1ee9aa3e793cfc39040ad6e6d2e4e` is preserved in `release/fork-base`. Changing the GitHub default branch from `main` to `develop`, final `main` ref replacement, and native protection changes require repository administrator access, followed by verification of the enforced `main-source` check.
 
 _Source: [0003-administration.md](notes/0003-administration.md)_
 
