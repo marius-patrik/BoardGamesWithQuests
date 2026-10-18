@@ -33,7 +33,10 @@ class WorkspaceLayoutTests(unittest.TestCase):
         self.assertTrue(marker.is_file())
         result = subprocess.run(
             ["git", "ls-files", "--stage", "--", ".darkfactory/installation.json"],
-            cwd=ROOT, capture_output=True, text=True, check=True,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
         )
         self.assertTrue(result.stdout.startswith("100644 "), result.stdout)
         self.assertTrue(result.stdout.endswith("\t.darkfactory/installation.json\n"), result.stdout)
