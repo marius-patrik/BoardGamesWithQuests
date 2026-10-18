@@ -14,11 +14,12 @@ SITE = ROOT / "site"
 
 def tracked() -> list[Path]:
     raw = subprocess.run(
-        ["git", "ls-files", "--cached", "-z"], cwd=ROOT,
-        check=True, capture_output=True,
+        ["git", "ls-files", "--cached", "-z"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
     ).stdout
-    return [Path(item.decode("utf-8", "surrogateescape"))
-            for item in raw.split(b"\0") if item]
+    return [Path(item.decode("utf-8", "surrogateescape")) for item in raw.split(b"\0") if item]
 
 
 def page_for(path: str) -> Path:
@@ -60,17 +61,16 @@ def test_tracked_files_are_published_and_gitlinks_are_not_read_as_files():
 
 def test_navigation_matches_tracked_folders_plus_generated_real_code_diagrams():
     names = tracked()
-    expected = {
-        "/" + "/".join(p.parts[:n])
-        for p in names for n in range(1, len(p.parts))
-    }
+    expected = {"/" + "/".join(p.parts[:n]) for p in names for n in range(1, len(p.parts))}
     # Generated code-viewer pages live only inside a folder with a real tracked
     # README. No generated page may invent a new sidebar directory.
     assert (ROOT / ".agents/architecture/diagrams/README.md").is_file()
     document = (SITE / "index.html").read_text(encoding="utf-8")
     sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
     actual = {unescape(p) for p in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
-    assert actual == expected, f"Invented/missing sidebar groups: extra={actual-expected}; missing={expected-actual}"
+    assert (
+        actual == expected
+    ), f"Invented/missing sidebar groups: extra={actual-expected}; missing={expected-actual}"
 
 
 def test_generated_code_diagrams_and_preserved_reference_sources_render():
@@ -82,13 +82,18 @@ def test_generated_code_diagrams_and_preserved_reference_sources_render():
             path = f"agents/{group}/diagrams/{stem}.mmd"
             raw = SITE / path
             assert raw.is_file(), path
-            assert raw.read_text(encoding="utf-8").startswith(("flowchart", "classDiagram", "erDiagram"))
+            assert raw.read_text(encoding="utf-8").startswith(
+                ("flowchart", "classDiagram", "erDiagram")
+            )
             svg = rendered_svg(SITE / "repository-files" / path / "index.html")
             if group == "architecture" and stem == "uml":
                 assert "GameController" in svg, "Actual Python controller was omitted"
     assert not (ROOT / ".agents/requirements").exists()
     assert not list((ROOT / ".agents/architecture/diagrams").glob("*.mmd"))
-    assert {p.name for p in (ROOT / ".agents/reference/diagrams").glob("*.mmd")} == {"mvc.mmd", "uml.mmd"}
+    assert {p.name for p in (ROOT / ".agents/reference/diagrams").glob("*.mmd")} == {
+        "mvc.mmd",
+        "uml.mmd",
+    }
 
 
 def test_original_gui_artwork_is_unchanged_and_visually_published():
@@ -96,8 +101,11 @@ def test_original_gui_artwork_is_unchanged_and_visually_published():
     assert source.is_file()
     assert b"svg-source:excalidraw" in source.read_bytes()
     checksum = subprocess.run(
-        ["git", "hash-object", str(source)], cwd=ROOT, check=True,
-        text=True, capture_output=True,
+        ["git", "hash-object", str(source)],
+        cwd=ROOT,
+        check=True,
+        text=True,
+        capture_output=True,
     ).stdout.strip()
     assert checksum == "b693531ab78f3e07c1f6ff1452f59aa45d773a7d"
     page = SITE / "repository-files/agents/reference/images/GUI_mockup.svg/index.html"
