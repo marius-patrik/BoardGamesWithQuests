@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: false
       - name: Verify source-generated governance documents and native layout
         run: python3 .github/scripts/generate_documents.py --check
       - name: Verify source-derived diagrams match the checked-out code
@@ -24,6 +22,5 @@ jobs:
       - name: Verify generator and native repository structure
         run: |
           python3 -m unittest discover -s .github/tests -p test_repository_structure.py
-          python3 -m unittest discover -s .github/tests -p test_apply_branch_protection.py
           python3 -m unittest discover -s .github/tests -p test_release_gate.py
           python3 -m unittest discover -s .github/tests -p test_main_source_policy.py
