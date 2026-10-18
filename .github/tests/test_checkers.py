@@ -28,7 +28,7 @@ from model.game.configuration import load_configuration
 from model.game.games import games_root
 from model.game.rule import KIND_DRAW, KIND_WIN
 from model.game.validator import MoveValidator
-from tests.test_draughts_perft import coordinates, square_of
+from test_draughts_perft import coordinates, square_of
 
 #: White and Black.
 WHITE: int = 1

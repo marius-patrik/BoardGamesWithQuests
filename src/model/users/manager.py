@@ -2,10 +2,7 @@
 
 from typing import Dict, Optional, Any
 
-try:
-    from engine.model.users.user import User
-except ImportError:
-    from .user import User
+from .user import User
 
 
 class UserManager:

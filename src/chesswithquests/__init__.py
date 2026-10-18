@@ -73,7 +73,7 @@ def _version() -> str:
     except ImportError:  # pragma: no cover - Python 3.7 and older
         return "unknown"
     try:
-        return version("chesswithquests")
+        return version("boardgameswithquests")
     except PackageNotFoundError:
         return "unknown"
 
