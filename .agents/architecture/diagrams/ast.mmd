@@ -42,6 +42,12 @@ flowchart LR
   nb76abd85885f19e9e --> nd62eeb7f75a05f38f
   n7384ea2a56ca4b60d["0001-components.md"]
   nd62eeb7f75a05f38f --> n7384ea2a56ca4b60d
+  n8c3b493573d28235f["0002-configuration.md"]
+  nd62eeb7f75a05f38f --> n8c3b493573d28235f
+  n3ccbede2e41f39f9f["0003-application.md"]
+  nd62eeb7f75a05f38f --> n3ccbede2e41f39f9f
+  ne4a4cafeba9070516["0004-repository.md"]
+  nd62eeb7f75a05f38f --> ne4a4cafeba9070516
   n5ded58ca3ec08d498["notes/"]
   nb76abd85885f19e9e --> n5ded58ca3ec08d498
   n507827f74fae7d391["0001-product.md"]
@@ -64,6 +70,8 @@ flowchart LR
   nb76abd85885f19e9e --> n9408eb67def1ca05a
   n212b52c2a59d14749["0001-components.md"]
   n9408eb67def1ca05a --> n212b52c2a59d14749
+  na99dd75af0baca0d4["0002-delivery.md"]
+  n9408eb67def1ca05a --> na99dd75af0baca0d4
   n83283128dfae90fe8["rules/"]
   nb76abd85885f19e9e --> n83283128dfae90fe8
   n1930a95fdea228bdf["0001-orientation.md"]
@@ -650,6 +658,16 @@ flowchart LR
   n150ab2bfe8af4aa6c --> nd46017743d0da5b42
   n16d78b830903b8795["function_definition main"]
   n150ab2bfe8af4aa6c --> n16d78b830903b8795
+  nf82b40d222a1eb98e["package_desktop.py"]
+  n2092df3a19d2f7b13 --> nf82b40d222a1eb98e
+  n5c37adcd5d9481400["function_definition archive_bundle"]
+  nf82b40d222a1eb98e --> n5c37adcd5d9481400
+  n46ccfd4d93d244af9["function_definition build"]
+  nf82b40d222a1eb98e --> n46ccfd4d93d244af9
+  nb58a398e6708a6f8e["function_definition smoke"]
+  nf82b40d222a1eb98e --> nb58a398e6708a6f8e
+  n8855de36350a78584["function_definition main"]
+  nf82b40d222a1eb98e --> n8855de36350a78584
   n50f8f749b20de7e29["release_gate.py"]
   n2092df3a19d2f7b13 --> n50f8f749b20de7e29
   n18146ec0646429aaf["function_definition authorize_release"]
@@ -952,6 +970,20 @@ flowchart LR
   nf641419ebbb1eae37 --> n3ed523a16aa6d7145
   n5b75d3fc3d9fa7c18["function_definition test_find_move_returns_none_for_a_square_pair_that_is_not_a_move"]
   nf641419ebbb1eae37 --> n5b75d3fc3d9fa7c18
+  n9ef040726b4477815["test_desktop_packaging_setup.py"]
+  nc9f5868186eb03f66 --> n9ef040726b4477815
+  n2b9aa3ef76e7108e6["class_definition DesktopPackagingInfrastructureTests"]
+  n9ef040726b4477815 --> n2b9aa3ef76e7108e6
+  nec635a34d0cea1975["function_definition test_archive_outputs_verified_sha256_for_each_supported_platform"]
+  n9ef040726b4477815 --> nec635a34d0cea1975
+  n5ff7ff04595ea1e8c["function_definition test_bundler_output_requires_all_runtime_resources_and_actual_metadata"]
+  n9ef040726b4477815 --> n5ff7ff04595ea1e8c
+  n8e42107384dbca5fd["function_definition test_existing_public_and_draft_releases_are_never_reused"]
+  n9ef040726b4477815 --> n8e42107384dbca5fd
+  nac8634fb446e7df22["function_definition test_release_is_gated_on_real_platform_artifacts"]
+  n9ef040726b4477815 --> nac8634fb446e7df22
+  n6a5bd05585adb4726["function_definition test_packager_derives_metadata_from_the_checked_out_project"]
+  n9ef040726b4477815 --> n6a5bd05585adb4726
   n905320175c75255b2["test_docs_artifacts.py"]
   nc9f5868186eb03f66 --> n905320175c75255b2
   n82a0b29577da561c3["function_definition run_record"]
@@ -1222,8 +1254,10 @@ flowchart LR
   n4c226bf73fa46aeac --> n1ff6a4094456e9a6e
   n5a7615ec264ef8328["function_definition test_main_gate_checks_only_the_develop_head"]
   n4c226bf73fa46aeac --> n5a7615ec264ef8328
-  n68683bb8177720562["function_definition test_main_protection_requires_the_source_check"]
+  n68683bb8177720562["function_definition test_trusted_shell_accepts_only_same_repository_develop_promotions"]
   n4c226bf73fa46aeac --> n68683bb8177720562
+  n41a0610a23f18413c["function_definition test_main_protection_requires_the_source_check"]
+  n4c226bf73fa46aeac --> n41a0610a23f18413c
   n341e6bbae77020854["test_manager_exporters.py"]
   nc9f5868186eb03f66 --> n341e6bbae77020854
   n30108c139cf77d529["class_definition OnlyOneNotation"]
@@ -1870,6 +1904,8 @@ flowchart LR
   nbf32064a6a26ab2df --> n287ff0a0ecf3283a1
   n84354cf99c1713fc6["deploy-docs.yml"]
   nbf32064a6a26ab2df --> n84354cf99c1713fc6
+  n31779a8c658939353["desktop-build.yml"]
+  nbf32064a6a26ab2df --> n31779a8c658939353
   n76ec2fd65ee9dad06["governance-docs.yml"]
   nbf32064a6a26ab2df --> n76ec2fd65ee9dad06
   n14cf6130af7812ba5["main-source.yml"]
