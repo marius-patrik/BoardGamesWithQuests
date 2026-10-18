@@ -25,3 +25,4 @@ jobs:
         run: |
           python3 -m unittest discover -s .github/tests -p test_repository_structure.py
           python3 -m unittest discover -s .github/tests -p test_apply_branch_protection.py
+          python3 -m unittest discover -s .github/tests -p test_release_gate.py

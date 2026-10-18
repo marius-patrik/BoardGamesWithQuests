@@ -13,6 +13,6 @@ The reviewed governance sources and original assignment references are part of t
 
 The four generated `.agents/{README,PRD,ARCHITECTURE,AGENTS}.md` documents must be produced from reviewed `notes/`, `requests/`, `decisions/`, and `rules/` respectively. Root README and CONTRIBUTING are symbolic links; source files live in real `.agents/` and `.github/` directories. All repository tests and fixtures belong to `.github/tests/`, and `.darkfactory/installation.json` remains an ordinary tracked integration configuration file.
 
-**Desired implementation contracts belong exclusively in GitHub issues**, in the [unified master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348); archived child issues are references, not parallel active authorities. Never check in a prospective target API, DB, DSL, game configuration, future file-tree contract, mockup or executable-looking placeholder as if the repository supports it.
+**Desired implementation contracts belong exclusively in GitHub issues**, in the [single active planning and contract issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348). Never check in a prospective target API, DB, DSL, game configuration, future file-tree contract, mockup or executable-looking placeholder as if the repository supports it.
 
 **Every PR must update all affected authored governance records and regenerate their derived documents alongside the actual code change.** No issue approval or passing structural check alone makes unfinished functionality an implemented capability.

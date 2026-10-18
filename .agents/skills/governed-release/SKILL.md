@@ -12,9 +12,9 @@ When verifying an approved PR, reviewing the native dependency stack, proposing 
 
 1. Confirm the candidate code, approved scope and current integration branch.
 2. Read `repo.dfconfig` and the actual release workflow to determine the single installed versioning authority. Do not install template tag/file release publishers alongside DarkFactory PrideVer, and do not claim manual release enforcement until the live trigger and provider settings have been verified. Require generated-doc, behavioral and affected-package verification.
-3. Resolve PR dependencies and branch refs directly through GitHub. Only validate against branches that exist and are configured; a proposed integration-branch migration in an issue is not an active policy.
+3. Resolve PR dependencies and branch refs directly through GitHub. The configuration currently uses `main` as both default and integration. The requested `develop`/release `main` cutover remains gated on finishing the existing stack and verifying the fork-base and native protections under [#348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348); an issue declaration is not a live branch.
 4. Require actual native branch protection/reviewer approval before merge; do not call workflow policy equivalent to protection.
-5. Require explicit maintainer authorization for release-branch promotion. The tracked `release.yml` also triggers on `main` pushes; this is an actual workflow capability, not proof that a separately proposed manual-release policy is enforced. Verify commit, tag and published artifacts after an authorized release.
+5. Require explicit maintainer authorization for release promotion. The tracked `release.yml` publishes only on manual dispatch against live `main` HEAD and refuses to reuse a tag assigned to another SHA. Verify actual provider settings, commit, tag and published artifacts; merely checking the workflow source is not proof of a real release.
 6. If protection is missing, invoke the admin bootstrap procedure using an authorized account, or report that gate as blocked.
 
 ## Evidence of completion

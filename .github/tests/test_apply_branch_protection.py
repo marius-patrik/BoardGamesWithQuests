@@ -21,7 +21,7 @@ class BranchProtectionTests(unittest.TestCase):
             {"governed / released-df-quality", "governed / issue-binding / verify-bound-issue"},
         )
         self.assertTrue(payload["required_status_checks"]["strict"])
-        self.assertFalse(payload["enforce_admins"])
+        self.assertTrue(payload["enforce_admins"])
         self.assertFalse(payload["allow_force_pushes"])
         self.assertFalse(payload["allow_deletions"])
 
@@ -35,7 +35,7 @@ class BranchProtectionTests(unittest.TestCase):
                     "governed / issue-binding / verify-bound-issue",
                 ],
             },
-            "enforce_admins": {"enabled": False},
+            "enforce_admins": {"enabled": True},
             "required_pull_request_reviews": None,
             "required_conversation_resolution": {"enabled": True},
             "allow_force_pushes": {"enabled": False},
@@ -53,13 +53,25 @@ class BranchProtectionTests(unittest.TestCase):
                     {"context": "governed / issue-binding / verify-bound-issue"},
                 ],
             },
-            "enforce_admins": {"enabled": False},
+            "enforce_admins": {"enabled": True},
             "required_pull_request_reviews": {"required_approving_review_count": 1},
             "required_conversation_resolution": {"enabled": True},
             "allow_force_pushes": {"enabled": False},
             "allow_deletions": {"enabled": False},
         }
         self.assertTrue(protection.matches(existing, payload))
+
+    def test_admin_bypass_is_not_compliant(self) -> None:
+        payload = protection.declared_policy()[2]
+        existing = {
+            "required_status_checks": {"strict": True, "contexts": payload["required_status_checks"]["contexts"]},
+            "enforce_admins": {"enabled": False},
+            "required_pull_request_reviews": {"required_approving_review_count": 1},
+            "required_conversation_resolution": {"enabled": True},
+            "allow_force_pushes": {"enabled": False},
+            "allow_deletions": {"enabled": False},
+        }
+        self.assertFalse(protection.matches(existing, payload))
 
     def test_dry_run_does_not_call_github(self) -> None:
         with (

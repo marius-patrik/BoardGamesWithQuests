@@ -5,8 +5,8 @@ status: accepted
 
 ## Decision
 
-The repository's integration and release controls are the ones actually enforced by GitHub. Implementation PRs remain issue-bound and require independent maintainer review and explicit approval of their final revisions. Passing CI is necessary but not sufficient.
+GitHub's existing default and integration branch is `main` (as configured in `repo.dfconfig`); no `develop` branch has been established. Implementation PRs remain issue-bound and require independent maintainer review and explicit approval of their final revisions. Passing CI is necessary but not sufficient.
 
 ## Consequences
 
-Any alternative branch topology or release policy remains issue-only until its implementation and native GitHub enforcement are verified. Do not describe an unconfigured branch policy as active.
+The separate `develop` integration / `main` release-branch migration is owned by the accepted sequencing in [#348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348): finish and review the existing implementation stack first, verify the fork base and provider protections, and cut over only upon separately authorized maintainer instruction. Do not advertise a non-existent branch or unconfigured source-branch restriction as active.

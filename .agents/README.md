@@ -7,7 +7,7 @@
 
 The committed repository contains a Python engine, controller, game/piece/user models, chess and checkers configuration JSON, source-derived documentation and GitHub automation. Runtime capabilities require genuine external behavior testing; code presence alone is not proof.
 
-The [generated repository PRD](PRD.md) describes only these current source boundaries. Prospective product requirements, API/DB/DSL contracts, browser/native work and game milestones are recorded solely in the [unified master issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348).
+The [generated repository PRD](PRD.md) describes only these current source boundaries. Prospective product requirements, API/DB/DSL contracts, browser/native work and game milestones are recorded solely in the [unified backlog and contract register #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348).
 
 _Source: [0001-product.md](notes/0001-product.md)_
 
@@ -23,13 +23,13 @@ _Source: [0002-structure.md](notes/0002-structure.md)_
 
 ## Native GitHub protection verification
 
-`repo.dfconfig` declares the intended `main` branch protection, but only GitHub's actual settings enforce it. Inspect the live settings with a repository administrator's GitHub CLI identity:
+`repo.dfconfig` declares the desired `main` policy: strict required checks, one independent approval, resolved conversations and protection against administrator bypass (`enforce_admins: true`). Only GitHub's actual settings enforce it; repository contents do not establish live compliance. Inspect the live settings with a repository administrator's GitHub CLI identity:
 
 ```bash
 python3 .github/scripts/apply_branch_protection.py
 ```
 
-The script is dry-run by default. Only use `--apply` after approval and after comparing the actual protection; divergent existing policies require an additional explicit `--replace`. PR review and required status checks must be verified against GitHub, not inferred from repository configuration.
+The script is dry-run by default. An authorized administrator must inspect actual settings and apply the required policy via `--apply` (and separately opt into `--replace` if protection differs). GitHub's provider response, required check names, administrative enforcement and actual PR approval gate must be verified; no automation or source declaration substitutes for that evidence. The `develop`/release-only-`main` topology change is separately staged after existing reviewed PRs under [#348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348).
 
 _Source: [0003-administration.md](notes/0003-administration.md)_
 
@@ -45,9 +45,10 @@ python3 .github/scripts/generate_documents.py --write
 python3 .github/scripts/generate_documents.py --check
 python3 -m unittest discover -s .github/tests -p test_repository_structure.py
 python3 -m unittest discover -s .github/tests -p test_apply_branch_protection.py
+python3 -m unittest discover -s .github/tests -p test_release_gate.py
 ```
 
-Behavioral Python tests run with `pytest` after installing the relevant development dependencies. The documentation preview workflow builds the rendered site, exercises `.github/tests/docs_site_acceptance.py` and `.github/tests/test_docs_browser.mjs`, then uploads a source-specific preview artifact for the trusted Pages publisher. A successful preview workflow does **not** prove that the publisher deployed the site or that its URL is reachable. Claims of real provider readiness require separate live verification.
+Behavioral Python tests run with `pytest` after installing the relevant development dependencies. The documentation preview workflow builds the rendered site, exercises `.github/tests/docs_site_acceptance.py` and `.github/tests/test_docs_browser.mjs`, then uploads a source-verified preview artifact for the separate trusted Pages publisher. A successful preview build does not establish public deployment. Claims of real provider readiness require separate live verification.
 
 The project's review branch and release gate are the ones actually configured in GitHub and `repo.dfconfig`. PRs must not merge or release automatically without explicit maintainer authorization; the `.darkfactory/` installation metadata is repository-owned and is not a Git submodule.
 

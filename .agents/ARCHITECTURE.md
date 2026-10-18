@@ -35,11 +35,11 @@ _Source: [0002-layout.md](decisions/0002-layout.md)_
 
 ### Decision
 
-The repository's integration and release controls are the ones actually enforced by GitHub. Implementation PRs remain issue-bound and require independent maintainer review and explicit approval of their final revisions. Passing CI is necessary but not sufficient.
+GitHub's existing default and integration branch is `main` (as configured in `repo.dfconfig`); no `develop` branch has been established. Implementation PRs remain issue-bound and require independent maintainer review and explicit approval of their final revisions. Passing CI is necessary but not sufficient.
 
 ### Consequences
 
-Any alternative branch topology or release policy remains issue-only until its implementation and native GitHub enforcement are verified. Do not describe an unconfigured branch policy as active.
+The separate `develop` integration / `main` release-branch migration is owned by the accepted sequencing in [#348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348): finish and review the existing implementation stack first, verify the fork base and provider protections, and cut over only upon separately authorized maintainer instruction. Do not advertise a non-existent branch or unconfigured source-branch restriction as active.
 
 _Source: [0003-review.md](decisions/0003-review.md)_
 
@@ -48,11 +48,11 @@ _Source: [0003-review.md](decisions/0003-review.md)_
 
 ### Decision
 
-`repo.dfconfig` uses DarkFactory PrideVer; no separate tag-only or `VERSION`-file authority should be installed. The tracked `.github/workflows/release.yml` accepts main pushes and manual dispatch, and can publish development prereleases.
+`repo.dfconfig` uses DarkFactory PrideVer; no separate tag-only or `VERSION`-file authority should be installed. The tracked `.github/workflows/release.yml` permits publication only through an explicit `workflow_dispatch` on the exact live `main` head, with a read-only pull-request trigger for verifying the workflow and metadata. It does not publish on branch pushes. DarkFactory remains the only authority for PrideVer resolution.
 
 ### Consequences
 
-Any change to release authorization, branch topology or provider enforcement must be captured in its owning issue and implemented together with tested GitHub settings. Source policy by itself does not prove provider enforcement.
+Production promotion still requires human authorization and provider-side settings that enforce the reviewed branch and approval policy. Declaring `enforce_admins: true` in `repo.dfconfig` alone does not update GitHub's live protection; an authorized administrator must verify and apply it. The `develop` migration is gated on the reviewed existing stack under #348.
 
 _Source: [0004-release.md](decisions/0004-release.md)_
 
