@@ -6,4 +6,4 @@ Temporary findings, not requirements or architectural decisions. Promote confirm
 - **Engine limitations:** `Board.setup_default_board` initializes standard chess on 8×8; `Move.validate` hardcodes 8×8 bounds; `GameManager.save_log()` is a no-op. Do not present this engine as a complete generic draughts implementation.
 - **Packaging evidence:** #414 has the platform build matrix and a frozen-process smoke gate, but cannot run complete GUI acceptance until #271 contributes `src/`. Python release remains disabled.
 - **Provider evidence:** GitHub protection administration currently returns HTTP 403 for this integration. `main` protection/bootstrap must be checked by an authorized administrator. Vercel API/web status failures point to a build-rate limit, not Python test failures.
-- **Stack:** #414 → #271 → #422. Verify actual remote head/CI before every write; do not merge or release without approval.
+- **Stack integration risk:** #271 currently reports non-mergeable against #414 following governance changes. Recheck ancestry and conflicts before fixing the downstream branch.

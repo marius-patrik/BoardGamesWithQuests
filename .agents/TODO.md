@@ -1,31 +1,30 @@
 # TODO — Current work
 
-Task queue for the existing [Plan](PLAN.md). Mark complete only with verified evidence.
+Only outstanding work is tracked here. Phase-level scope and acceptance are in [PLAN](PLAN.md); remove tasks when verified complete.
 
 ## Phase 0 — #414
 
-- [x] Restore template-style GOAL, PLAN, TODO and SCRATCHPAD ownership; delete the redundant roadmap.
-- [x] Describe the current product architecture in approved requests and accepted decisions; regenerate docs.
-- [x] Add four-platform desktop build/release infrastructure while keeping Python publication disabled.
-- [ ] Independently review #414's final source and release security, then verify CI.
-- [ ] Inspect `develop` native protection, required check names and approval policy.
-- [ ] Obtain authorized `main` trusted-workflow bootstrap and native branch protection; verify provider enforcement.
-- [ ] Verify live GitHub Pages Actions publication and PR previews.
-- [ ] Reconcile irrelevant Vercel statuses with Python release checks.
-- [ ] Address any new review findings; request approval before merge.
+- [ ] Independently review the entire #414 diff, current requirements/architecture, release workflow security and final CI; correct any findings.
+- [ ] Verify native `develop` branch protection, required checks and approval settings.
+- [ ] Obtain authorized `main` trusted-workflow bootstrap and native protection; verify the actual provider configuration.
+- [ ] Verify GitHub Pages Actions publication and live PR previews.
+- [ ] Reconcile migration-only Vercel status checks with Python-required checks.
+- [ ] Obtain maintainer approval; merge #414 only after authorization and verify the merge.
 
 ## Phase 1 — #271
 
-- [ ] Audit final desktop model/controller/Tkinter behavior, eliminate duplicates and fix game/configuration/clock/quest/export defects.
-- [ ] Enforce real GUI acceptance without silent skips; run full Python quality matrix.
-- [ ] Build and smoke-test native executable assets on all Phase 0 runners.
-- [ ] Resolve applicable #271 reviews, inspect archived #405 feedback, regenerate documentation, obtain approval.
+- [ ] Align #271 with the final #414 base and repair its current non-mergeable state.
+- [ ] Complete and review engine/controller/Tkinter gameplay, configuration, clocks, quests, persistence and exports.
+- [ ] Require real/virtual-display GUI acceptance and correct ineffective tests; verify the Python quality matrix.
+- [ ] Build, install and smoke-test native Windows/macOS/Linux distributions using the Phase 0 infrastructure.
+- [ ] Address applicable #271/#405 feedback, regenerate current-state documents, independently review, and obtain approval.
 
 ## Phase 2 — Release
 
-- [ ] Merge approved #271, verify integrated acceptance and protected `develop → main` promotion.
-- [ ] Verify automatic `v1.0.0` publication and all binary/checksum assets.
+- [ ] Merge approved #271; verify integration and native platform assets.
+- [ ] Review and approve protected `develop → main` promotion.
+- [ ] Verify automatic `v1.0.0` release, exact tag/SHA, all binary downloads and checksums.
 
-## Phase 3 — Deferred
+## Phase 3 — Deferred until after v1.0.0
 
-- [ ] Resume #422 only after v1.0.0 and complete the migration independently.
+- [ ] Complete and verify #422's server, database, web, native and multiplayer migration.
