@@ -8,7 +8,6 @@ import tkinter as tk
 import pytest
 
 
-
 @pytest.fixture(scope="session")
 def tk_root():
     """Yield one Tk root for the whole session.
