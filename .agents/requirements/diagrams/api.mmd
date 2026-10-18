@@ -1,39 +1,11 @@
 flowchart LR
-%% Proposed API shape for manual review and approval BEFORE coding. Actual OpenAPI 3.1 comes from implemented FastAPI/Pydantic; no CI diagram-vs-implementation comparison.
+%% Proposed 27-operation APPLICATION API only. Identity/session handled by direct Supabase Auth SDK. Implementation FastAPI emits actual OpenAPI; no CI design parity check.
 classDef endpoint fill:#22374d,color:#f0f9ff,stroke:#81accc
 classDef dto fill:#243f37,color:#ebfff5,stroke:#82bfaa
 classDef guard fill:#4d3e2c,color:#fff4d7,stroke:#d2ad6b
 client["React / Tauri authenticated caller"]:::guard
-guard["Verified identity, CSRF, revision and idempotency boundary"]:::guard
+guard["Supabase Bearer JWT verified by FastAPI; member authorization, revisions, idempotency and CORS"]:::guard
 client --> guard
-subgraph GROUP_0["Identity operations"]
-api0["GET /session&lt;br/&gt;getSession&lt;br/&gt;Read authenticated session or bootstrap anonymous CSRF cookie&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
-api0 -.-> dto0
-api0 -.-> dto1
-guard --> api0
-api1["POST /auth/guest&lt;br/&gt;createGuest&lt;br/&gt;Create anonymous identity&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
-api1 -.-> dto0
-api1 -.-> dto1
-guard --> api1
-api2["POST /auth/register&lt;br/&gt;register&lt;br/&gt;Create account&lt;br/&gt;201 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
-api2 -.-> dto0
-api2 -.-> dto1
-api2 -.-> dto2
-guard --> api2
-api3["POST /auth/login&lt;br/&gt;login&lt;br/&gt;Authenticate&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
-api3 -.-> dto0
-api3 -.-> dto1
-api3 -.-> dto2
-guard --> api3
-api4["POST /auth/upgrade&lt;br/&gt;upgrade&lt;br/&gt;Upgrade guest without changing user ID&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
-api4 -.-> dto0
-api4 -.-> dto1
-api4 -.-> dto2
-guard --> api4
-api5["POST /auth/logout&lt;br/&gt;logout&lt;br/&gt;Invalidate session&lt;br/&gt;204 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
-api5 -.-> dto1
-guard --> api5
-end
 subgraph GROUP_6["Accounts operations"]
 api6["GET /me&lt;br/&gt;getMe&lt;br/&gt;Read profile&lt;br/&gt;200 / 401 / 403 / 404 / 409 / 422 / 429"]:::endpoint
 api6 -.-> dto3
@@ -156,9 +128,7 @@ api32 -.-> dto1
 guard --> api32
 end
 subgraph SCHEMAS["Referenced request/response schema components"]
-dto0["Session"]:::dto
 dto1["Error"]:::dto
-dto2["Credentials"]:::dto
 dto3["Profile"]:::dto
 dto4["ProfilePatch"]:::dto
 dto5["GameSummary"]:::dto

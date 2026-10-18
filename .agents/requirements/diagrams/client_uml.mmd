@@ -2,7 +2,7 @@ sequenceDiagram
 autonumber
 actor Player
 participant Router as Wouter routes
-participant Session as Session provider
+participant Session as Supabase Auth SDK session provider
 participant Page as Pages and reusable UI components
 participant API as Typed HTTP API
 participant Auth as Supabase Auth
@@ -11,20 +11,22 @@ participant Feed as Private Realtime
 Player->>Router: Navigate or follow game invitation
 Router->>Session: Load session and route protection
 alt Guest or registered login
-  Session->>Auth: Sign in or create anonymous identity
-  Auth-->>Session: Verified identity and session
+  Session->>Auth: Direct signInAnonymously / password / PKCE OAuth / linkIdentity
+  Auth-->>Session: Access JWT, refresh session and stable user UUID
 else Session expired
   Session-->>Router: Authentication required
   Router-->>Player: Login page with destination retained
 end
-Session->>API: GET /session (cookie)
-API-->>Session: Session and CSRF token
+Session->>Session: Obtain fresh Supabase access JWT
+Session->>API: GET /me (Authorization: Bearer access JWT)
+API->>API: Verify JWT issuer, signature, audience, expiry and actor
+API-->>Session: Authorized app profile
 Router->>Page: Render authenticated page
 alt Browse published definitions
   Page->>API: GET /definitions
   API-->>Page: Published version catalog
 else Create pending game
-  Page->>API: POST /games (version, target size, idempotency, CSRF)
+  Page->>API: POST /games (version, target size, idempotency, bearer JWT)
   API->>DB: Validate ownership and persist pending invitation
   DB-->>API: game_id and revision
   API-->>Page: GameView for creator
@@ -44,7 +46,7 @@ API-->>Page: Membership-scoped channel grant
 Page->>Feed: Subscribe to private revision topic
 loop One or more authorized participant commands
   Player->>Page: Choose action and typed parameters
-  Page->>API: POST /games/{gameId}/actions (revision, idempotency key, CSRF)
+  Page->>API: POST /games/{gameId}/actions (revision, idempotency key, bearer JWT)
   API->>DB: Lock, authenticate, validate, execute and commit
   alt Accepted
     DB-->>API: New revision and immutable event

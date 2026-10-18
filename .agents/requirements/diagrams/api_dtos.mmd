@@ -1,9 +1,9 @@
 flowchart LR
-%% Desired DTO design for manual review BEFORE implementation, not an actual contract. FastAPI/Pydantic generates the actual OpenAPI/DTO schemas; no CI reference parity comparison.
+%% Proposed 26 application DTO definitions; Supabase Auth owns credentials and session shapes. FastAPI generates actual OpenAPI; no design parity CI.
 classDef schema fill:#203d4d,color:#ecf9ff,stroke:#8cd4dd,stroke-width:2px
 classDef property fill:#243a37,color:#effef7,stroke:#81baa6
 classDef ref fill:#423c35,color:#fff6e6,stroke:#d9b38c
-root["API DTOs: 28 structural definitions<br/>request/response contracts from reviewed API reference"]:::schema
+root["Application DTOs: 26 structural definitions<br/>request/response contracts from reviewed API reference"]:::schema
 dto0["Error<br/>4 properties"]:::schema
 root -.-> dto0
 field0["code · REQUIRED<br/>*id002"]:::property
@@ -14,12 +14,6 @@ field2["request_id · REQUIRED<br/>*id001"]:::property
 dto0 --> field2
 field3["details<br/>object<br/>additionalProperties=true"]:::property
 dto0 --> field3
-dto1["Credentials<br/>2 properties"]:::schema
-root -.-> dto1
-field4["email · REQUIRED<br/>string<br/>format=email"]:::property
-dto1 --> field4
-field5["password · REQUIRED<br/>string<br/>minLength=8"]:::property
-dto1 --> field5
 dto2["Profile<br/>4 properties"]:::schema
 root -.-> dto2
 field6["id · REQUIRED<br/>*id001"]:::property
@@ -36,14 +30,6 @@ field10["display_name<br/>*id002"]:::property
 dto3 --> field10
 field11["username<br/>structured"]:::property
 dto3 --> field11
-dto4["Session<br/>3 properties"]:::schema
-root -.-> dto4
-field12["authenticated · REQUIRED<br/>boolean"]:::property
-dto4 --> field12
-field13["csrf_token · REQUIRED<br/>*id002"]:::property
-dto4 --> field13
-field14["profile<br/>structured"]:::property
-dto4 --> field14
 dto5["Definition<br/>8 properties"]:::schema
 root -.-> dto5
 field15["id · REQUIRED<br/>*id001"]:::property
@@ -324,7 +310,6 @@ field130["kind · REQUIRED<br/>string"]:::property
 dto27 --> field130
 field131["score · REQUIRED<br/>integer<br/>format=int64"]:::property
 dto27 --> field131
-field14 -.-> dto2
 field32 -.-> dto7
 field53 -.-> dto5
 field58 -.-> dto5
