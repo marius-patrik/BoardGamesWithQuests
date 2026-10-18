@@ -1,7 +1,7 @@
 ---
 status: accepted
 ---
-# Current version and release implementation
+# Versioning and release ownership
 
 ## Decision
 

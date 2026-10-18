@@ -5,7 +5,7 @@ status: accepted
 
 ## Decision
 
-Match template-repo's status-gated source-record system: published notes generate README; approved requests generate PRD; accepted decisions generate ARCHITECTURE; active rules generate AGENTS. The generated files are deterministic, committed and never edited separately.
+Use a status-gated source-record system: published notes generate README; approved requests generate PRD; accepted decisions generate ARCHITECTURE; active rules generate AGENTS. The generated files are deterministic, committed and never edited separately.
 
 Repository documents describe **only current tracked/observed capabilities**. Implementation designs, API shapes, data schemas, target diagrams and future rules belong only in GitHub issues, not in generated PRD or architectural records.
 

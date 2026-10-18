@@ -5,7 +5,7 @@ status: approved
 
 ## Committed source
 
-The repository includes the legacy Python engine, controller, models, and piece modules under `packages/engine/`, plus chess and checkers JSON configuration assets. It includes native GitHub automation, source-derived ProperDocs publication, pinned DarkFactory integration, and this governed documentation system. Source presence is not gameplay acceptance.
+The repository includes the Python engine, controller, models, and piece modules under `packages/engine/`, plus chess and checkers JSON configuration assets. It includes native GitHub automation, source-derived ProperDocs publication, pinned DarkFactory integration, and this governed documentation system. Source presence is not gameplay acceptance.
 
 The reviewed governance sources and original assignment references are part of the repository. Source-derived Mermaid architecture reflects *actual tracked code*, not a proposed implementation. The repository does **not** currently establish a working multiplayer FastAPI application, React/Tauri client, Supabase application database, or four playable game definitions.
 

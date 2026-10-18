@@ -7,7 +7,7 @@
 
 ### Decision
 
-Match template-repo's status-gated source-record system: published notes generate README; approved requests generate PRD; accepted decisions generate ARCHITECTURE; active rules generate AGENTS. The generated files are deterministic, committed and never edited separately.
+Use a status-gated source-record system: published notes generate README; approved requests generate PRD; accepted decisions generate ARCHITECTURE; active rules generate AGENTS. The generated files are deterministic, committed and never edited separately.
 
 Repository documents describe **only current tracked/observed capabilities**. Implementation designs, API shapes, data schemas, target diagrams and future rules belong only in GitHub issues, not in generated PRD or architectural records.
 
@@ -39,12 +39,12 @@ The repository's integration and release controls are the ones actually enforced
 
 ### Consequences
 
-The requested future `develop` integration and protected release-only `main` branch migration have **not occurred**. The intended cutover, exact fork-base verification, protected-branch changes and release approval policy are tracked in [issue #404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404). Do not represent that target topology as a current GitHub setting.
+Any alternative branch topology or release policy remains issue-only until its implementation and native GitHub enforcement are verified. Do not describe an unconfigured branch policy as active.
 
 _Source: [0003-review.md](decisions/0003-review.md)_
 
 
-## Current version and release implementation
+## Versioning and release ownership
 
 ### Decision
 
@@ -61,7 +61,7 @@ _Source: [0004-release.md](decisions/0004-release.md)_
 
 ### Decision
 
-The checked-in legacy Python source under `packages/engine/` owns its app entry point, controller and models; chess and checkers JSON assets live under their respective `packages/` directories. Documentation building and GitHub workflow automation live in `.github/`. Source-derived Mermaid diagrams represent those tracked source declarations.
+The checked-in Python source under `packages/engine/` owns its app entry point, controller and models; chess and checkers JSON assets live under their respective `packages/` directories. Documentation building and GitHub workflow automation live in `.github/`. Source-derived Mermaid diagrams represent those tracked source declarations.
 
 ### Consequences
 

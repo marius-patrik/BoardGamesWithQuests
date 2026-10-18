@@ -5,7 +5,7 @@ status: accepted
 
 ## Decision
 
-The checked-in legacy Python source under `packages/engine/` owns its app entry point, controller and models; chess and checkers JSON assets live under their respective `packages/` directories. Documentation building and GitHub workflow automation live in `.github/`. Source-derived Mermaid diagrams represent those tracked source declarations.
+The checked-in Python source under `packages/engine/` owns its app entry point, controller and models; chess and checkers JSON assets live under their respective `packages/` directories. Documentation building and GitHub workflow automation live in `.github/`. Source-derived Mermaid diagrams represent those tracked source declarations.
 
 ## Consequences
 
