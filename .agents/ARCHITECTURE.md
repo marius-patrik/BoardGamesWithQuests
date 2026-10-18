@@ -23,7 +23,7 @@
 
 ### Current limitation
 
-The in-memory engine is chess-centric and its declarative checkers configuration does not itself provide complete English-draughts gameplay. No database or hosted service owns this state on #414.
+The in-memory engine is chess-centric and its declarative checkers configuration does not itself provide complete English-draughts gameplay. The Python process owns this state in memory.
 
 _Source: [0001-components.md](decisions/0001-components.md)_
 
@@ -61,7 +61,7 @@ _Source: [0002-configuration.md](decisions/0002-configuration.md)_
 
 ### Responsibility boundary
 
-The functional historical Tkinter source has been recovered separately into #271's `src/view/` and `src/chesswithquests/` tree. The GUI implementation and acceptance must be documented as implemented only in that PR; no future server, web or Tauri runtime is part of this architecture.
+`engine.app` owns startup and game selection; controllers own interaction state. The installed view interface does not provide a playable Tkinter application.
 
 _Source: [0003-application.md](decisions/0003-application.md)_
 
@@ -82,8 +82,8 @@ Real root `.github/workflows/`, `scripts/`, `tests/` own Actions, document gener
 
 ### Guarded desktop packaging and publication
 
-`desktop-build.yml` defines Windows x64, macOS ARM64/x64, and Linux x64 native jobs. `package_desktop.py` builds a PyInstaller distribution, verifies that a frozen executable remains running for the smoke interval, and archives it with SHA256 sidecars. `release.yml` checks the exact live `main` commit, refuses disabled Python release publication, requests an authoritative PrideVer version, depends on the native matrix and verifies all four assets/checksums before publishing a draft as public.
+`desktop-build.yml` defines Windows x64, macOS ARM64/x64, and Linux x64 native jobs. `package_desktop.py` builds a PyInstaller distribution, verifies that a frozen executable remains running for the smoke interval, and archives it with SHA256 sidecars. It resolves distribution identity from `pyproject.toml` on Python 3.10–3.13 and rejects missing or altered frozen game resources. `release.yml` checks the exact live `main` commit, refuses disabled Python release publication, requests an authoritative PrideVer version, depends on the native matrix and verifies all four assets/checksums before publishing a new draft as public. Existing published releases and drafts are rejected rather than overwritten or reused.
 
-These are **implemented automation files**, not evidence that a complete GUI application has yet been packaged. Python publication is disabled and source on #414 lacks the Tkinter GUI that #271 must finish.
+These are **implemented automation files**, not evidence that a complete GUI application has yet been packaged. Python publication is disabled; the installed engine entry point does not provide a playable GUI.
 
 _Source: [0004-repository.md](decisions/0004-repository.md)_

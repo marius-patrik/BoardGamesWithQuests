@@ -706,10 +706,14 @@ flowchart LR
   n9ef040726b4477815 --> n2b9aa3ef76e7108e6
   nec635a34d0cea1975["function_definition test_archive_outputs_verified_sha256_for_each_supported_platform"]
   n9ef040726b4477815 --> nec635a34d0cea1975
-  n5ff7ff04595ea1e8c["function_definition test_release_is_gated_on_real_platform_artifacts"]
+  n5ff7ff04595ea1e8c["function_definition test_bundler_output_requires_all_runtime_resources_and_actual_metadata"]
   n9ef040726b4477815 --> n5ff7ff04595ea1e8c
-  n8e42107384dbca5fd["function_definition test_packager_derives_metadata_from_the_checked_out_project"]
+  n8e42107384dbca5fd["function_definition test_existing_public_and_draft_releases_are_never_reused"]
   n9ef040726b4477815 --> n8e42107384dbca5fd
+  nac8634fb446e7df22["function_definition test_release_is_gated_on_real_platform_artifacts"]
+  n9ef040726b4477815 --> nac8634fb446e7df22
+  n6a5bd05585adb4726["function_definition test_packager_derives_metadata_from_the_checked_out_project"]
+  n9ef040726b4477815 --> n6a5bd05585adb4726
   n905320175c75255b2["test_docs_artifacts.py"]
   nc9f5868186eb03f66 --> n905320175c75255b2
   n82a0b29577da561c3["function_definition run_record"]
@@ -800,8 +804,10 @@ flowchart LR
   n4c226bf73fa46aeac --> n1ff6a4094456e9a6e
   n5a7615ec264ef8328["function_definition test_main_gate_checks_only_the_develop_head"]
   n4c226bf73fa46aeac --> n5a7615ec264ef8328
-  n68683bb8177720562["function_definition test_main_protection_requires_the_source_check"]
+  n68683bb8177720562["function_definition test_trusted_shell_accepts_only_same_repository_develop_promotions"]
   n4c226bf73fa46aeac --> n68683bb8177720562
+  n41a0610a23f18413c["function_definition test_main_protection_requires_the_source_check"]
+  n4c226bf73fa46aeac --> n41a0610a23f18413c
   n170f6914128af46f0["test_release_gate.py"]
   nc9f5868186eb03f66 --> n170f6914128af46f0
   n1e224dc3f7154dd0c["function_definition invoke"]

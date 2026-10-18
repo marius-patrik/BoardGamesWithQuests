@@ -21,4 +21,4 @@ status: accepted
 
 ## Current limitation
 
-The in-memory engine is chess-centric and its declarative checkers configuration does not itself provide complete English-draughts gameplay. No database or hosted service owns this state on #414.
+The in-memory engine is chess-centric and its declarative checkers configuration does not itself provide complete English-draughts gameplay. The Python process owns this state in memory.

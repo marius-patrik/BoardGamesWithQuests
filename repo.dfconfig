@@ -188,7 +188,22 @@
           "required_checks": [
             "governed / released-df-quality",
             "governed / issue-binding / verify-bound-issue",
-            "main-source"
+            "main-source",
+            "governance-docs",
+            "preview"
+          ],
+          "approvals": 1,
+          "strict": true,
+          "enforce_admins": true,
+          "resolve_conversations": true
+        },
+        {
+          "branch": "develop",
+          "required_checks": [
+            "governed / released-df-quality",
+            "governed / issue-binding / verify-bound-issue",
+            "governance-docs",
+            "preview"
           ],
           "approvals": 1,
           "strict": true,

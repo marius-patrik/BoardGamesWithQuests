@@ -55,11 +55,17 @@ def build(platform: str, version: str) -> Path:
     games = ROOT / "src/games"
     if not entry.is_file() or not games.is_dir():
         raise FileNotFoundError("Completed desktop sources under src/ are required")
-    # Read package identity from the actual branch. The Phase 0 engine uses
-    # "chesswithquests"; the consolidated desktop branch uses "boardgameswithquests".
-    # Packaging runners use Python 3.12; defer tomllib import so repository
-    # tests can still import this module on the supported Python 3.10 runtime.
-    import tomllib
+    # Read the checked-out distribution identity on every supported Python.
+    try:
+        import tomllib
+    except ModuleNotFoundError:
+        import tomli as tomllib
+
+    resources = [
+        path for path in games.rglob("*") if path.is_file() and "__pycache__" not in path.parts
+    ]
+    if not resources:
+        raise FileNotFoundError("Desktop game runtime resources are empty")
 
     with (ROOT / "pyproject.toml").open("rb") as source:
         distribution = tomllib.load(source)["project"]["name"]
@@ -92,9 +98,17 @@ def build(platform: str, version: str) -> Path:
         str(entry),
     ]
     subprocess.run(args, cwd=ROOT, check=True)
-    if platform.startswith("macos"):
-        return dist / "BoardGamesWithQuests.app"
-    return dist / "BoardGamesWithQuests"
+    bundle = dist / (
+        "BoardGamesWithQuests.app" if platform.startswith("macos") else "BoardGamesWithQuests"
+    )
+    runtime = bundle / (
+        "Contents/Resources/games" if platform.startswith("macos") else "_internal/games"
+    )
+    for source in resources:
+        packaged = runtime / source.relative_to(games)
+        if not packaged.is_file() or packaged.read_bytes() != source.read_bytes():
+            raise FileNotFoundError(f"Missing or altered frozen runtime resource: {packaged}")
+    return bundle
 
 
 def smoke(bundle: Path, platform: str) -> None:

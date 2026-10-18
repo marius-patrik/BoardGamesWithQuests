@@ -15,4 +15,4 @@ status: accepted
 
 ## Responsibility boundary
 
-The functional historical Tkinter source has been recovered separately into #271's `src/view/` and `src/chesswithquests/` tree. The GUI implementation and acceptance must be documented as implemented only in that PR; no future server, web or Tauri runtime is part of this architecture.
+`engine.app` owns startup and game selection; controllers own interaction state. The installed view interface does not provide a playable Tkinter application.
