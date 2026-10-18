@@ -1,24 +1,22 @@
 ---
 name: governed-release
-description: Validate current review, integration and GitHub release evidence without bypassing native protection.
+description: Verify branch promotion, PrideVer releases and native GitHub checks against live provider evidence.
 ---
 # Governed Release
 
 ## When to use
 
-When verifying an approved PR, reviewing the native dependency stack, proposing a release or auditing the installed DarkFactory version authority.
+When validating a release candidate or checking the repository's release and promotion configuration.
 
 ## Procedure
 
-1. Confirm the candidate code, approved scope and current integration branch.
-2. Read `repo.dfconfig` and the actual release workflow to determine the single installed versioning authority. Do not install template tag/file release publishers alongside DarkFactory PrideVer, and do not claim manual release enforcement until the live trigger and provider settings have been verified. Require generated-doc, behavioral and affected-package verification.
-3. Resolve PR dependencies and branch refs directly through GitHub. The `develop` branch has been created at the old main HEAD, and `release/fork-base` pins the verified fork source. GitHub still reports `main` as the default but the owner has authorized making `develop` default. This native settings change, the protected release ref and its review rules have not yet been completed; `main` is not yet enforceably release-only.
-4. Require actual native branch protection/reviewer approval before merge; do not call workflow policy equivalent to protection.
-5. Require maintainer approval of the `develop` → `main` merge. The tracked `release.yml` automatically publishes the resulting `main` push (and supports manual dispatch), verifies the live main HEAD and refuses to reuse a tag assigned to another SHA. Verify actual provider settings, commit, tag and published artifacts; merely checking the workflow source is not proof of a real release.
-6. If protection is missing, invoke the admin bootstrap procedure using an authorized account, or report that gate as blocked.
+1. Check the current `develop` and `main` refs and the target PR's exact head SHA.
+2. Read `repo.dfconfig` and `.github/workflows/release.yml` to identify the installed PrideVer version and release mechanism.
+3. Inspect GitHub's native protection and required check results for `main` separately from the repository's declared policy; report unavailable provider evidence as a blocker.
+4. Confirm the release PR originates from this repository's `develop` branch, passes required checks, and has independent maintainer approval of the final revision.
+5. Verify that `main` contains the trusted release workflow before relying on a `push` trigger. A successful check on `develop` is not evidence of an automatic release from `main`.
+6. When a release is authorized and published, verify the release tag, version, commit SHA, and any assets on the actual GitHub release.
 
-## Evidence of completion
+## Evidence
 
-Verified commit SHA, version, tag, release, check results, review state and any remaining administrative blocker.
-
-Follow `.agents/AGENTS.md` and the owning role's boundaries. Adapt commands to the detected toolchain; this file is reusable guidance, not executable automation.
+GitHub PR review, branch protection, workflow run, released commit, version, tag and release asset evidence.

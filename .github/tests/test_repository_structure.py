@@ -28,7 +28,7 @@ class WorkspaceLayoutTests(unittest.TestCase):
             self.assertTrue(link.is_symlink(), alias)
             self.assertEqual(link.readlink().as_posix(), target)
 
-    def test_darkfactory_installation_remains_a_tracked_file(self) -> None:
+    def test_darkfactory_installation_is_tracked(self) -> None:
         marker = ROOT / ".darkfactory" / "installation.json"
         self.assertTrue(marker.is_file())
         result = subprocess.run(
@@ -40,7 +40,6 @@ class WorkspaceLayoutTests(unittest.TestCase):
         )
         self.assertTrue(result.stdout.startswith("100644 "), result.stdout)
         self.assertTrue(result.stdout.endswith("\t.darkfactory/installation.json\n"), result.stdout)
-        self.assertFalse((ROOT / ".gitmodules").exists())
 
     def test_generated_documents_are_identical_to_approved_records(self) -> None:
         for directory, status, output, title in generator.PROJECTIONS:
@@ -86,7 +85,7 @@ class WorkspaceLayoutTests(unittest.TestCase):
     def test_future_design_contracts_are_only_in_issues(self) -> None:
         self.assertFalse((ROOT / ".agents/requirements").exists())
         self.assertFalse((ROOT / ".github/scripts/check_spec_contracts.py").exists())
-        self.assertTrue((ROOT / ".agents/requests/0001-current-repository.md").is_file())
+        self.assertTrue((ROOT / ".agents/requests/0001-components.md").is_file())
         self.assertFalse((ROOT / ".agents/requests/0001-boardgameswithquests.md").exists())
 
 

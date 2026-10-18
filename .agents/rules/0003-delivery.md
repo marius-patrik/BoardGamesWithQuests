@@ -3,7 +3,7 @@ status: active
 ---
 # Planning and change delivery
 
-- Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Keep `.agents/PLAN.md` and `.agents/TODO.md` as concise links to live issues and actual progress, not competing product specifications.
+- Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Treat `.agents/PLAN.md` and `.agents/TODO.md` as optional working files; leave them empty unless they contain current actionable working notes.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
 - Work from a focused, issue-bound branch targeting the reviewed dependency. Prefer the repository's bot-authored PR workflow so the maintainer can independently review. Use only branches and review controls that are actually configured; separately approved migrations and release promotions must be verified before use.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
@@ -17,7 +17,7 @@ than manufacturing a commit for every class or bundling unrelated behavior.
 
 ### BoardGamesWithQuests: Branches and Pull Requests
 Use focused, descriptive, lowercase topic branches based on the intended
-target branch. Never push directly to protected `main`. Open Draft PRs
+target branch. Never push directly to protected integration or release branches. Open Draft PRs
 through the repository's authorized bot-authored PR workflow so the maintainer
 can provide an independent native approval. Each PR binds its actual tracked
 issue, contains one coherent responsibility and identifies remaining

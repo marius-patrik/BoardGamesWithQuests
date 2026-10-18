@@ -1,8 +1,6 @@
 ---
 status: published
 ---
-# BoardGamesWithQuests repository
+# BoardGamesWithQuests
 
-The committed repository contains a Python engine, controller, game/piece/user models, chess and checkers configuration JSON, source-derived documentation and GitHub automation. Runtime capabilities require genuine external behavior testing; code presence alone is not proof.
-
-The [generated repository PRD](../PRD.md) describes only these current source boundaries. Prospective product requirements, API/DB/DSL contracts, browser/native work and game milestones are recorded solely in the [unified backlog and contract register #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348).
+BoardGamesWithQuests contains a Python board-game engine under `packages/engine/`, with a controller, game-state models, chess piece implementations, and quest-related modules. `packages/chess/config.json` and `packages/checkers/config.json` hold game configuration data. Native GitHub Actions manage repository checks and documentation, and `.agents/` holds source records, diagrams, and engineering guidance.

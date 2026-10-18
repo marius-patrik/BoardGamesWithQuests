@@ -151,7 +151,7 @@ def validate_layout() -> list[str]:
             if is_test_directory or is_test_filename:
                 errors.append(f"Repository tests must live in .github/tests/: {path}")
 
-    # This repository uses tracked DarkFactory installation metadata, not a Git submodule.
+    # Confirm repository-owned DarkFactory integration metadata is present.
     if not (ROOT / ".darkfactory" / "installation.json").is_file():
         errors.append("Missing repository-owned .darkfactory/installation.json")
 

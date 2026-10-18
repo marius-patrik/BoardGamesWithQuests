@@ -1,8 +1,12 @@
 ---
 status: published
 ---
-# Tracked repository structure
+# Source and documentation layout
 
-Physical `.agents/` and `.github/` directories own documentation, governance and automation. The `.agents/{notes,requests,decisions,rules}/` source records generate `.agents/{README,PRD,ARCHITECTURE,AGENTS}.md`, and root `README.md` / `CONTRIBUTING.md` are symlinks. `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` are concise maintenance records.
-
-`.agents/architecture/diagrams/` contains source-derived actual-code diagrams; `.agents/reference/` contains the original assignment artwork and reference diagrams, not current implementation contracts. The `.agents/agents/` and `.agents/skills/` trees are portable agent guidance; tests and fixtures are under `.github/tests/`. DarkFactory integration is configured by the existing tracked `.darkfactory/installation.json` file; this repository does not have a root Git submodule. Contribution policy lives in the [generated rules](../AGENTS.md), not this overview.
+- `packages/engine/` contains the Python application entry point, controller and model packages.
+- `packages/chess/` and `packages/checkers/` contain JSON configuration assets.
+- `.agents/notes/`, `.agents/requests/`, `.agents/decisions/` and `.agents/rules/` generate the README, PRD, architecture and contributor-rules documents.
+- `.agents/architecture/diagrams/` contains source-derived Mermaid diagrams; `.agents/reference/` contains reference drawings and artwork.
+- `.agents/agents/` and `.agents/skills/` contain reusable guidance for development tasks.
+- `.github/scripts/`, `.github/workflows/` and `.github/tests/` contain documentation tooling, automation and tests.
+- Root `README.md` and `CONTRIBUTING.md` link to the generated documentation. `.darkfactory/installation.json` records the DarkFactory integration.

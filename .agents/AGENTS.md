@@ -42,7 +42,7 @@ _Source: [0002-architecture.md](rules/0002-architecture.md)_
 
 ## Planning and change delivery
 
-- Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Keep `.agents/PLAN.md` and `.agents/TODO.md` as concise links to live issues and actual progress, not competing product specifications.
+- Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Treat `.agents/PLAN.md` and `.agents/TODO.md` as optional working files; leave them empty unless they contain current actionable working notes.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
 - Work from a focused, issue-bound branch targeting the reviewed dependency. Prefer the repository's bot-authored PR workflow so the maintainer can independently review. Use only branches and review controls that are actually configured; separately approved migrations and release promotions must be verified before use.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
@@ -56,7 +56,7 @@ than manufacturing a commit for every class or bundling unrelated behavior.
 
 #### BoardGamesWithQuests: Branches and Pull Requests
 Use focused, descriptive, lowercase topic branches based on the intended
-target branch. Never push directly to protected `main`. Open Draft PRs
+target branch. Never push directly to protected integration or release branches. Open Draft PRs
 through the repository's authorized bot-authored PR workflow so the maintainer
 can provide an independent native approval. Each PR binds its actual tracked
 issue, contains one coherent responsibility and identifies remaining
@@ -144,9 +144,9 @@ _Source: [0004-verification.md](rules/0004-verification.md)_
 - Edit the canonical source records before regenerating projections: published `.agents/notes/*.md` own README; approved `.agents/requests/*.md` own PRD; accepted `.agents/decisions/*.md` own ARCHITECTURE; active `.agents/rules/*.md` own AGENTS.
 - Never maintain root `README.md`, root `CONTRIBUTING.md`, `.agents/README.md`, `.agents/AGENTS.md`, `.agents/PRD.md` or `.agents/ARCHITECTURE.md` as competing independent copies.
 - Run `python3 .github/scripts/generate_documents.py --write` after changing any source record, and `--check` before submission.
-- Keep `.agents/GOAL.md`, `.agents/PLAN.md` and `.agents/TODO.md` aligned with current project state; they are not generated. Proposed implementation contracts, target diagrams, future schemas and acceptance criteria live in GitHub issues only.
+- Keep `.agents/GOAL.md` focused on the product goal; `.agents/PLAN.md` and `.agents/TODO.md` are optional empty working files, not copies of issue trackers. Proposed implementation contracts, target diagrams, future schemas and acceptance criteria live in GitHub issues only.
 - Update every affected governance source record, generated projection, actual-code diagram, README/help/example and externally observable acceptance check **in the same PR** that introduces the corresponding behavior. Do not document features before implementation or defer documentation until another PR.
-- Describe what exists separately from what is planned. Keep generated documentation and release artifacts pinned to the actual source revision.
+- Describe implemented components and observed behavior in repository documents. Use issues and PR discussions for proposed behavior, historical migrations and provider setup still pending. Keep generated documentation and release artifacts pinned to the actual source revision.
 - Write code, public identifiers, comments and repository documentation in English unless approved requirements mandate another language.
 
 #### BoardGamesWithQuests: Generated Documentation and References
@@ -203,24 +203,24 @@ status. No plan, diagram, mock, passing build or hosted placeholder establishes
 operational functionality.
 
 #### BoardGamesWithQuests: Timeless Repository Artifacts
-Tracked files contain only authoritative requirements, design decisions,
+Tracked files contain only enduring, actually implemented requirements, design decisions,
 working implementation descriptions, reproducible source inputs and
 actionable unfinished work. Do not keep implementation histories, dated
 progress narratives, superseded instructions, transitional comparisons,
 obsolete files or phase-relative labels that do not express a stable
-functional contract. Replace material at its source instead
+functional contract. Describe what components do, without negative inventories of capabilities not implemented. Do not incorporate historical branch renames, PR numbers, incident narratives, migration commentary or repeated "legacy" disclaimers into architecture, requirements or README. Put operational restrictions in rules, and keep pending operations in issues/PRs. Replace material at its source instead
 of appending chronicles. Git and issue history retain provenance; source
 citations and ordered SQL migrations may carry required date identifiers.
 
 _Source: [0007-hygiene.md](rules/0007-hygiene.md)_
 
 
-## Verified versioning and release discipline
+## Versioning and releases
 
-- The committed `repo.dfconfig` uses DarkFactory PrideVer. Do not introduce another release controller or check in a competing `VERSION` file.
-- The tracked release workflow automatically publishes after an authorized update to protected `main` (including a reviewed `develop` → `main` merge), and supports manual re-dispatch. It verifies the exact live `main` SHA and immutable tag ownership. The merge approval is the authorization; a second release dispatch is not required.
-- The `develop` branch has been created at the former main HEAD. The release-branch bootstrap is represented by `release/fork-base`, pinned to the verified fork common ancestor. GitHub still reports `main` as its default branch although the owner has directed `develop` to become the default. Native default-branch configuration must be updated by a repository administrator before claiming the change is active. This keeps default-branch-only issue, schedule and dispatch automation on the integration branch when `main` is reset to the fork base. Until the protected release `main` ref replacement and required checks are applied, **the release-only main policy must not be claimed operational**.
-- The declared `main` protection requires an independent review, the `main-source` branch gate, strict checks, conversation resolution and administrator enforcement. GitHub must actually enforce these provider settings. Never move existing tags or treat CI success as approval. Never introduce a parallel release version authority.
+- `repo.dfconfig` selects DarkFactory PrideVer as the versioning authority. A release version or tag must not be authored by a competing independent source.
+- `.github/workflows/release.yml` configures automatic release publishing for `push` events on `main`, and manual dispatch explicitly targeting `main`. Its pull-request job validates the release policy without publishing.
+- The release job checks that the workflow revision and checkout identify the live `main` commit and rejects reuse of a tag pointing to a different commit.
+- Release promotion from `develop` to `main` requires a reviewed PR and verified native protection, including the same-repository source-branch policy and required checks. Workflow contents and checked-in configuration alone do not establish that GitHub enforces a protection setting.
 
 _Source: [0008-version-and-release.md](rules/0008-version-and-release.md)_
 
@@ -261,7 +261,7 @@ _Source: [0010-exclusive-tests.md](rules/0010-exclusive-tests.md)_
 - Describe only **implemented source, observed behavior and actually configured governance controls**. A class or configuration file does not establish a working product.
 - Maintain desired API shapes, DTO proposals, schema/DSL/operator registries, target class diagrams, target file trees and game-rule drafts **exclusively in GitHub issues**. Do not copy them into `.agents/requests/`, `.agents/decisions/`, `.agents/architecture/`, generated documentation or executable-looking placeholders before implementation.
 - **Every pull request updates all affected source records, generated governance documents, actual-code diagrams, docs, tests, examples and CI alongside the actual changes**, never in a promised cleanup PR. Regenerate `.agents/{README,PRD,ARCHITECTURE,AGENTS}.md` and run `.github/scripts/generate_documents.py --check`.
-- When code implements a reviewed issue, describe precisely which boundary works and which remains BLOCKED. Actual FastAPI OpenAPI derives from implemented Pydantic routes, not a hand-maintained proposed contract. No desired-vs-actual spec CI comparison is required.
+- Describe implemented components and their responsibilities, not a catalogue of missing or proposed features. Track blocked acceptance, pending provider settings and target designs in the owning issue or PR review. Actual FastAPI OpenAPI derives from implemented Pydantic routes, not a hand-maintained proposed contract. No desired-vs-actual spec CI comparison is required.
 - Do not remove original assignment references merely because they are not current code; label them explicitly as reference inputs. Source-derived architecture is evidence of tracked declarations only, not successful external behavior.
 - Never merge, tag, deploy or weaken checks without the required independent maintainer review and provider verification.
 

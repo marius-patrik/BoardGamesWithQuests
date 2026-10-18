@@ -1,11 +1,10 @@
 ## Scope and contract
 
-<!-- Document only observable behavior implemented at this PR head. Proposed application contracts stay in issue #348 until implemented, not in current-state repository docs. -->
+<!-- Document only observable behavior implemented at this PR head. Proposed contracts belong in their owning issue until implementation, not in current-state repository docs. -->
 
 ## Linked issue
 
-<!-- Use 'Advances #348' for partial delivery and name the relevant acceptance gate; never auto-close the single master issue. -->
-Advances #348
+<!-- Reference the owning issue (for example, Advances #123) and do not close it until all its acceptance criteria are met. -->
 
 ## Changes and dependencies
 
@@ -25,7 +24,7 @@ Advances #348
 
 ## Governance source verification
 
-- [ ] **Actual state:** every claim in README, PRD, ARCHITECTURE, AGENTS, code-derived diagrams and release/deployment docs is supported by **this final commit**; unimplemented designs stay in issue #348
+- [ ] **Actual state:** every claim in README, PRD, ARCHITECTURE, AGENTS, code-derived diagrams and release/deployment docs is supported by **this final commit**; unimplemented designs stay in issues
 - [ ] **Same-PR reconciliation:** all affected authored governance records, generated projections, tests, examples, CI and documentation are updated **within this PR**, with no deferred clean-up
 - [ ] **No premature contracts:** proposed endpoints, DTOs, data schemas, operator registries, game rules or UI designs are not committed as if implemented
 

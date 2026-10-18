@@ -1,0 +1,12 @@
+---
+status: accepted
+---
+# Application component boundaries
+
+## Python application
+
+`packages/engine/` contains the application's Python entry point, `controller/` for application control and `model/` for board state, game transitions, pieces, users and quests. The model owns reusable game machinery, while `packages/chess/` and `packages/checkers/` provide game configuration assets.
+
+## Documentation and automation
+
+`.github/scripts/` builds documentation and source-derived Mermaid diagrams from tracked inputs. `.github/workflows/` hosts native GitHub Actions; `.github/tests/` contains repository checks and acceptance tests. `.agents/` holds their authored documentation inputs and generated reader documents.

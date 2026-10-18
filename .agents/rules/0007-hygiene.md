@@ -23,11 +23,11 @@ status. No plan, diagram, mock, passing build or hosted placeholder establishes
 operational functionality.
 
 ### BoardGamesWithQuests: Timeless Repository Artifacts
-Tracked files contain only authoritative requirements, design decisions,
+Tracked files contain only enduring, actually implemented requirements, design decisions,
 working implementation descriptions, reproducible source inputs and
 actionable unfinished work. Do not keep implementation histories, dated
 progress narratives, superseded instructions, transitional comparisons,
 obsolete files or phase-relative labels that do not express a stable
-functional contract. Replace material at its source instead
+functional contract. Describe what components do, without negative inventories of capabilities not implemented. Do not incorporate historical branch renames, PR numbers, incident narratives, migration commentary or repeated "legacy" disclaimers into architecture, requirements or README. Put operational restrictions in rules, and keep pending operations in issues/PRs. Replace material at its source instead
 of appending chronicles. Git and issue history retain provenance; source
 citations and ordered SQL migrations may carry required date identifiers.
