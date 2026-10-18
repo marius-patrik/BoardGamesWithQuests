@@ -1,3 +1,3 @@
 # Scratchpad
 
-Temporary notes only. Promote requirements to `.agents/requests/`, decisions to `.agents/decisions/`, rules to `.agents/rules/`, published overview to `.agents/notes/`, and actionable work to GitHub issues. Do not accumulate stale product histories or alternative contracts here.
+Non-normative notes only. Proposed API, DB, DSL, client and game contracts belong in GitHub issues, not authored PRD/architecture records. Once behavior is genuinely implemented in a reviewed PR, reconcile its source records, tests, generated diagrams and documentation atomically. Do not retain historical competing specifications.

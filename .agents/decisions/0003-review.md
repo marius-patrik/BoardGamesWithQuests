@@ -1,16 +1,12 @@
 ---
 status: accepted
 ---
-# Issue-bound delivery and branch decision
+# Actual branch and review controls
 
 ## Decision
 
-Finish the existing GitHub-native #331 → #343 → #271 stack first with independent maintainer review and explicit approval for every merge to the existing `main`.
-
-After that stack is merged, carry out separately tracked issue #404: rename the accumulated existing `main` to `develop`, and create a new `main` at the verified repository fork-base commit. The exact fork-base ref and SHA must be confirmed before the cutover. Do not call this branch `development`.
-
-Remaining implementation uses dependency-ordered, bot-authored stacked PRs whose accepted changes merge into `develop` with the maintainer's review. Promotion from `develop` to `main` happens only on a separate explicit maintainer request. Never auto-merge or automatically publish the application from a routine integration merge.
+The repository presently uses `main`, with PRs #331 → #343 → #271 in a GitHub-native dependency stack. Every merge needs independent maintainer review and explicit approval on the final commit. CI is necessary but not sufficient.
 
 ## Consequences
 
-Recording G1 in #350 does not perform or authorize the disruptive cutover before its prerequisites are complete. Issue #404 owns verification of SHAs, recovery references, GitHub protection and default-branch changes, DarkFactory and workflow configurations, docs and deployment behavior. Versioning/release-controller choice G2 remains open.
+The requested future `develop` integration and protected release-only `main` branch migration have **not occurred**. The intended cutover, exact fork-base verification, protected-branch changes and release approval policy are tracked in [issue #404](https://github.com/marius-patrik/BoardGamesWithQuests/issues/404). Do not represent that target topology as a current GitHub setting.

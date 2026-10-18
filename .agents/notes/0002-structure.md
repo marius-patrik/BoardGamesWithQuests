@@ -1,8 +1,8 @@
 ---
 status: published
 ---
-# Repository structure
+# Tracked repository structure
 
-Real `.agents/` and `.github/` directories own project guidance and GitHub automation. Authored `.agents/notes/`, `requests/`, `decisions/` and `rules/` respectively generate `.agents/README.md`, `PRD.md`, `ARCHITECTURE.md`, `AGENTS.md`. Root `README.md` and `CONTRIBUTING.md` are Git symlinks to the generated overview and rules. `.agents/GOAL.md`, `PLAN.md`, `TODO.md`, `SCRATCHPAD.md` are maintained at root.
+Physical `.agents/` and `.github/` directories own documentation, governance and automation. The `.agents/{notes,requests,decisions,rules}/` source records generate `.agents/{README,PRD,ARCHITECTURE,AGENTS}.md`, and root `README.md` / `CONTRIBUTING.md` are symlinks. `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` are concise maintenance records.
 
-Preserve reviewed product design under `.agents/requirements/`, reference data/artwork under `.agents/reference/`, and source-derived actual diagrams under `.agents/architecture/`. Portable roles/skills live in `.agents/agents/` and `.agents/skills/`. Repository tests, browser fixtures and support belong only in `.github/tests/`. The pinned DarkFactory submodule is `.darkfactory`; installed project CI remains native to `.github/workflows/`.
+`.agents/architecture/diagrams/` contains source-derived actual-code diagrams; `.agents/reference/` contains the original assignment artwork and reference diagrams, not current implementation contracts. The `.agents/agents/` and `.agents/skills/` trees are portable agent guidance; tests and fixtures are under `.github/tests/`. DarkFactory is pinned as the `.darkfactory` submodule. Contribution policy lives in the [generated rules](../AGENTS.md), not this overview.
