@@ -8,7 +8,7 @@ participant API as Typed HTTP API
 participant Auth as Supabase Auth
 participant DB as Transaction repository
 participant Feed as Private Realtime
-Player->>Router: Open /game/{gameId}/invite share URL; UUIDv4 is the invite capability
+Player->>Router: Open /game/{gameId}/invite using game ID as invite capability
 Router->>API: GET /game/{gameId}/invite (minimal public preview)
 API-->>Router: Pending status, published definition, capacity and expiry only
 Router->>Session: Load or obtain Supabase Auth session before joining
