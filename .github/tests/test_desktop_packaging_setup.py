@@ -42,6 +42,8 @@ class DesktopPackagingInfrastructureTests(unittest.TestCase):
         self.assertIn("needs: [prepare, packages]", release)
         self.assertIn("uses: ./.github/workflows/desktop-build.yml", release)
         self.assertIn("merge-multiple: true", release)
+        self.assertIn("name: release-notes", release)
+        self.assertNotIn("name: desktop-release-notes", release)
         self.assertIn("sha256sum --check", release)
         self.assertIn("--draft", release)
         self.assertIn("--draft=false", release)
