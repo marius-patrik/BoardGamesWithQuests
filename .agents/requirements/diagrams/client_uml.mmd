@@ -29,13 +29,13 @@ alt Browse published definitions
   API-->>Page: Published version catalog
 else Create pending game
   Page->>API: POST /game (version, target size, idempotency, bearer JWT)
-  API->>DB: Validate ownership and persist pending invitation
-  DB-->>API: game_id and revision
-  API-->>Page: GameView for creator
+  API->>DB: Atomically create game and creator participant in first seat and feasible role
+  DB-->>API: game_id, assigned creator role and seat, pending revision
+  API-->>Page: Pending game with creator already in seat one
 else Join invitation
-  Page->>API: POST /game/{gameId}/join (seat and expected revision)
-  API->>DB: Lock game, assign unique occupied seat
-  DB-->>API: Pending or activate exactly at target seats
+  Page->>API: POST /game/{gameId}/join (idempotency key and Bearer JWT only)
+  API->>DB: Lock game and assign lowest unoccupied seat plus first feasible role
+  DB-->>API: Assigned seat and role; pending or activate exactly at target
   API-->>Page: Viewer-scoped GameView
 end
 Page->>API: GET /game/{gameId}

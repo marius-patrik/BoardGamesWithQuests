@@ -1,8 +1,9 @@
 classDiagram
 direction LR
 class GameService {
-  +create_game(actor, version_id, target, request_key) Game
-  +join_game(actor, invitation, seat) GameView
+  +create_game(actor, version_id, target, request_key) GameView
+  +join_game(actor, game_id, request_key) GameView
+  +assign_lowest_seat_and_feasible_role(game, actor, definition) ParticipantRef
   +submit_action(actor, game_id, command) GameView
   +read_view(actor, game_id) GameView
 }
@@ -14,7 +15,7 @@ class TransactionRepository {
   +find_idempotent_result(game_id, key) Event
 }
 class IdentityGuard {
-  +authenticate(session) Principal
+  +verify_supabase_bearer(jwt) Principal
   +require_game_member(principal, game_id) Participant
   +authorize_action(participant, command) void
 }

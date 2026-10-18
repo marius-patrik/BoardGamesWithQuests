@@ -1,6 +1,8 @@
 erDiagram
 %% Target PostgreSQL relational schema reference; not an applied migration.
 %% Derived from the reviewed Prisma design. The actual PSL and versioned SQL migrations belong to implementation PR #271.
+%% Creator is inserted as the first participant atomically with games on create. Joiners get lowest free seat and first feasible canonical-order role under the game row lock.
+%% Enforce unique(game_id,seat), unique(game_id,user_id), role version scope and role min/max target feasibility. No client seat selection.
     auth_users {
         uuid id PK
     }
