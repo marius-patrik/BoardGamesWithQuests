@@ -44,7 +44,7 @@ _Source: [0002-architecture.md](rules/0002-architecture.md)_
 
 - Translate desired functionality into an issue with explicit acceptance criteria and a bounded plan before implementing. Do not place future API/SQL/DSL/design contracts in repository documents. Keep `.agents/PLAN.md` and `.agents/TODO.md` as concise links to live issues and actual progress, not competing product specifications.
 - Prefer small, cohesive, independently verifiable changes. Delegate independent work only when boundaries and integration contracts are clear.
-- Work from a focused issue-bound bot-authored branch targeting the reviewed dependency. Finish #331 → #343 → #271 on the existing PR stack with explicit maintainer review and approval. After those merges, execute the separately approved #404 migration: rename old `main` to `develop` (not `development`) and create new `main` from the verified fork base. Subsequent issue PRs are dependency-stacked into `develop`.
+- Work from a focused issue-bound bot-authored branch targeting its reviewed dependency. The existing #331 → #343 → #271 PR stack targets the current `main` lineage, requiring explicit maintainer review and approval for every merge. Issue #404 records a separate, **unexecuted** branch migration proposal; do not change the live default branch or assume `develop` exists.
 - Preserve human approval gates; never bypass a review or required check merely to unblock a merge.
 - Describe actual changes, verification and remaining gaps precisely in the pull request; update the PRD, architecture and operational governance sources to match the implementation in this very PR. Keep unrelated discoveries visible as separate tracked work.
 - Use focused conventional commits such as `feat(ui): add navigation` or `fix(core): handle cancellation`.
@@ -146,7 +146,7 @@ _Source: [0004-verification.md](rules/0004-verification.md)_
 - Run `python3 .github/scripts/generate_documents.py --write` after changing any source record, and `--check` before submission.
 - Keep `.agents/GOAL.md`, `.agents/PLAN.md` and `.agents/TODO.md` aligned with current project state; they are not generated. Proposed implementation contracts, target diagrams, future schemas and acceptance criteria live in GitHub issues only.
 - Update every affected governance source record, generated projection, actual-code diagram, README/help/example and externally observable acceptance check **in the same PR** that introduces the corresponding behavior. Do not document features before implementation or defer documentation until another PR.
-- Describe what exists separately from what is planned. Keep generated documentation and release artifacts pinned to the actual source revision.
+- Describe only source, behaviors and controls that actually exist at this revision. Future implementation plans and designs belong solely in linked issues. Keep published documentation and release artifacts pinned to the exact source revision.
 - Write code, public identifiers, comments and repository documentation in English unless approved requirements mandate another language.
 
 #### BoardGamesWithQuests: Generated Documentation and References
@@ -158,7 +158,7 @@ reference diagrams are immutable input assets, not mandatory duplicate runtime
 classes. Every affected link, example and diagram must remain correct.
 
 #### BoardGamesWithQuests: Language Consistency
-English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. The ASCII Czech compatibility aliases explicitly required by the PRD are allowed as additional bindings to the canonical classes; do not invent further non-English names.
+English is canonical for code, public method names, variables, comments, docstrings, commit messages and repository documentation. Preserve existing verified compatibility interfaces when necessary; proposed aliases and language-specific API changes are issue-only until implemented and tested.
 
 _Source: [0005-documentation.md](rules/0005-documentation.md)_
 
@@ -203,9 +203,9 @@ status. No plan, diagram, mock, passing build or hosted placeholder establishes
 operational functionality.
 
 #### BoardGamesWithQuests: Timeless Repository Artifacts
-Tracked files contain only authoritative requirements, design decisions,
-working implementation descriptions, reproducible source inputs and
-actionable unfinished work. Do not keep implementation histories, dated
+Tracked files describe observed implementation, active governance decisions,
+reproducible source inputs and links to unfinished GitHub issues. Proposed
+requirements and prospective implementation contracts stay in issues only. Do not keep implementation histories, dated
 progress narratives, superseded instructions, transitional comparisons,
 obsolete files or phase-relative labels that do not express a stable
 functional contract. Replace material at its source instead

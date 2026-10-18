@@ -8,7 +8,7 @@ status: active
 - Run `python3 .github/scripts/generate_documents.py --write` after changing any source record, and `--check` before submission.
 - Keep `.agents/GOAL.md`, `.agents/PLAN.md` and `.agents/TODO.md` aligned with current project state; they are not generated. Proposed implementation contracts, target diagrams, future schemas and acceptance criteria live in GitHub issues only.
 - Update every affected governance source record, generated projection, actual-code diagram, README/help/example and externally observable acceptance check **in the same PR** that introduces the corresponding behavior. Do not document features before implementation or defer documentation until another PR.
-- Describe what exists separately from what is planned. Keep generated documentation and release artifacts pinned to the actual source revision.
+- Describe only source, behaviors and controls that actually exist at this revision. Future implementation plans and designs belong solely in linked issues. Keep published documentation and release artifacts pinned to the exact source revision.
 - Write code, public identifiers, comments and repository documentation in English unless approved requirements mandate another language.
 
 ### BoardGamesWithQuests: Generated Documentation and References
@@ -20,4 +20,4 @@ reference diagrams are immutable input assets, not mandatory duplicate runtime
 classes. Every affected link, example and diagram must remain correct.
 
 ### BoardGamesWithQuests: Language Consistency
-English is canonical for all code, method names, variables, comments, docstrings, commit messages and documentation. The ASCII Czech compatibility aliases explicitly required by the PRD are allowed as additional bindings to the canonical classes; do not invent further non-English names.
+English is canonical for code, public method names, variables, comments, docstrings, commit messages and repository documentation. Preserve existing verified compatibility interfaces when necessary; proposed aliases and language-specific API changes are issue-only until implemented and tested.

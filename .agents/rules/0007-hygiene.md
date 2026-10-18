@@ -23,9 +23,9 @@ status. No plan, diagram, mock, passing build or hosted placeholder establishes
 operational functionality.
 
 ### BoardGamesWithQuests: Timeless Repository Artifacts
-Tracked files contain only authoritative requirements, design decisions,
-working implementation descriptions, reproducible source inputs and
-actionable unfinished work. Do not keep implementation histories, dated
+Tracked files describe observed implementation, active governance decisions,
+reproducible source inputs and links to unfinished GitHub issues. Proposed
+requirements and prospective implementation contracts stay in issues only. Do not keep implementation histories, dated
 progress narratives, superseded instructions, transitional comparisons,
 obsolete files or phase-relative labels that do not express a stable
 functional contract. Replace material at its source instead
