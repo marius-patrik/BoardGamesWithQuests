@@ -217,10 +217,11 @@ _Source: [0007-hygiene.md](rules/0007-hygiene.md)_
 
 ## Versioning and release discipline
 
-- Keep the verified DarkFactory-controlled `pridever` release mode until an explicit approved #350 migration to template tags/file mode; never maintain parallel tag producers.
-- Do not introduce an unapproved VERSION file or silent PR version bump.
-- Create tags and GitHub Releases only from merged `main` commits; never move an existing tag. Verify the published release before claiming completion.
-- Keep current reviewed native PR stack and protected main. Consider the template `development` gate in #350; repository declarations alone do not configure actual GitHub protection.
+- The maintainer accepted **DarkFactory PrideVer** as the single versioning/release authority (#350, G2). Retain `repo.dfconfig` mode `pridever`; do not add competing tag-only/file controllers or a tracked `VERSION` file.
+- Complete the current #331 → #343 → #271 stack before the separately reviewed #404 cutover. The integration branch will be `develop`, not `development`; the new release `main` begins at the verified fork base.
+- Normal dependency-stacked bot-authored PR merges into `develop` must **not** publish tags, releases, GitHub Pages production or Vercel production. A separate explicit maintainer request is required to review and promote `develop → main` for release.
+- GitHub Actions `release.yml` presently publishes a development prerelease upon `main` pushes and accepts dispatch. #404 must align these actual triggers and permissions with the explicit-release gate; do not mistake this policy text for live enforcement.
+- Publish tags and assets only from a separately approved release commit, never move an existing tag, and verify the actual version, source SHA, artifact hashes and deployment results. Never automatically merge or release on the basis of passing CI alone.
 
 _Source: [0008-version-and-release.md](rules/0008-version-and-release.md)_
 
