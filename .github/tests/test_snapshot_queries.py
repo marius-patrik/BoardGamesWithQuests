@@ -26,11 +26,14 @@ def test_snapshot_queries_do_not_expose_mutable_session_state():
     assert queries.temporary_target({"name": "en_passant"}) is None
 
 
-@pytest.mark.parametrize("payload", [
-    {"rule_state": {"x": object()}},
-    {"rule_state": {"x": float("nan")}},
-    {"rule_state": {"x": (1, 2)}},
-])
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"rule_state": {"x": object()}},
+        {"rule_state": {"x": float("nan")}},
+        {"rule_state": {"x": (1, 2)}},
+    ],
+)
 def test_snapshot_rejects_executable_or_non_json_data(payload):
     with pytest.raises(QueryResolutionError):
         SnapshotQueries(payload)

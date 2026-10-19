@@ -1840,6 +1840,16 @@ flowchart LR
   nc1e33141f006fa1b4 --> nc77d808297c1c381b
   n69a1d8ee0d44e1f9d["function_definition _button_labels"]
   nc1e33141f006fa1b4 --> n69a1d8ee0d44e1f9d
+  n4f03b99caaadd68b7["test_snapshot_queries.py"]
+  nc9f5868186eb03f66 --> n4f03b99caaadd68b7
+  n67c151fe01e17484b["function_definition test_snapshot_queries_do_not_expose_mutable_session_state"]
+  n4f03b99caaadd68b7 --> n67c151fe01e17484b
+  n6057e685de830a616["decorated_definition"]
+  n4f03b99caaadd68b7 --> n6057e685de830a616
+  n81a18e6d27f0d646e["function_definition test_snapshot_rejects_executable_or_non_json_data"]
+  n4f03b99caaadd68b7 --> n81a18e6d27f0d646e
+  n8f263f65a841ae0d5["function_definition test_unknown_or_unbound_snapshot_facts_fail_closed"]
+  n4f03b99caaadd68b7 --> n8f263f65a841ae0d5
   n63ef048e5d84c2bd1["test_user_manager.py"]
   nc9f5868186eb03f66 --> n63ef048e5d84c2bd1
   n0f8f63117a6ca0277["function_definition test_user_manager_registration"]
@@ -3150,6 +3160,70 @@ flowchart LR
   n734d87972176e401e --> n5bca4ac2e124bd79d
   neffabcc0e7cf1f434["function_definition validate_hooks"]
   n734d87972176e401e --> neffabcc0e7cf1f434
+  n421aee39fa73b3a5d["snapshot_queries.py"]
+  n6aea57a87a15be9fd --> n421aee39fa73b3a5d
+  nd3c00ea5b603206a5["class_definition SnapshotQueries"]
+  n421aee39fa73b3a5d --> nd3c00ea5b603206a5
+  nef1e49ea7b2ee9450["function_definition __init__"]
+  n421aee39fa73b3a5d --> nef1e49ea7b2ee9450
+  n71780fbb140bd26af["decorated_definition"]
+  n421aee39fa73b3a5d --> n71780fbb140bd26af
+  n41c4c4a1aa178d947["function_definition _json_value"]
+  n421aee39fa73b3a5d --> n41c4c4a1aa178d947
+  n2eec621fea308662e["decorated_definition"]
+  n421aee39fa73b3a5d --> n2eec621fea308662e
+  n58b7545abbcf2d3eb["function_definition _key"]
+  n421aee39fa73b3a5d --> n58b7545abbcf2d3eb
+  ne30d6515e3baf253b["function_definition _field"]
+  n421aee39fa73b3a5d --> ne30d6515e3baf253b
+  nf34b72b335997961d["function_definition _lookup"]
+  n421aee39fa73b3a5d --> nf34b72b335997961d
+  n2c47374b2777c0e0a["function_definition _side_value"]
+  n421aee39fa73b3a5d --> n2c47374b2777c0e0a
+  nad80a0ed921f135d2["decorated_definition"]
+  n421aee39fa73b3a5d --> nad80a0ed921f135d2
+  n465c4042e4896457c["function_definition _count"]
+  n421aee39fa73b3a5d --> n465c4042e4896457c
+  n756c8c6be90cf6fc6["function_definition rule_state"]
+  n421aee39fa73b3a5d --> n756c8c6be90cf6fc6
+  n62037d22d0876ba0c["function_definition special_rights"]
+  n421aee39fa73b3a5d --> n62037d22d0876ba0c
+  na7900b91f447d1a35["function_definition temporary_target"]
+  n421aee39fa73b3a5d --> na7900b91f447d1a35
+  nae35def395b28eaa5["function_definition move_attribute"]
+  n421aee39fa73b3a5d --> nae35def395b28eaa5
+  nadf0832ea14e1595d["function_definition promotion_options"]
+  n421aee39fa73b3a5d --> nadf0832ea14e1595d
+  nc45790213cc229792["function_definition repetition_count"]
+  n421aee39fa73b3a5d --> nc45790213cc229792
+  nf9a19e3a9a20b6a74["function_definition clock_remaining"]
+  n421aee39fa73b3a5d --> nf9a19e3a9a20b6a74
+  n6cff4ca4751a502bf["decorated_definition"]
+  n421aee39fa73b3a5d --> n6cff4ca4751a502bf
+  nfb16446f1d7c4a2e4["function_definition _square"]
+  n421aee39fa73b3a5d --> nfb16446f1d7c4a2e4
+  n5c9d19d96ec540386["function_definition _capture_routes"]
+  n421aee39fa73b3a5d --> n5c9d19d96ec540386
+  n18c795cbd1ef27169["function_definition capture_count"]
+  n421aee39fa73b3a5d --> n18c795cbd1ef27169
+  n9592c1532beccbc56["function_definition capture_paths"]
+  n421aee39fa73b3a5d --> n9592c1532beccbc56
+  n597c46fdf4603527b["function_definition history_count"]
+  n421aee39fa73b3a5d --> n597c46fdf4603527b
+  n9b7593f5b619906b8["function_definition halfmove_count"]
+  n421aee39fa73b3a5d --> n9b7593f5b619906b8
+  n56b5618cdf19267ac["function_definition last_action"]
+  n421aee39fa73b3a5d --> n56b5618cdf19267ac
+  n489a21845e60821c3["function_definition legal_move_count"]
+  n421aee39fa73b3a5d --> n489a21845e60821c3
+  n48c4469a83ef84c23["function_definition participant"]
+  n421aee39fa73b3a5d --> n48c4469a83ef84c23
+  n8178b679453e7c624["function_definition position"]
+  n421aee39fa73b3a5d --> n8178b679453e7c624
+  n2f6febfd25b97641e["function_definition quest_progress"]
+  n421aee39fa73b3a5d --> n2f6febfd25b97641e
+  n8162888cf2c97726a["function_definition bindings"]
+  n421aee39fa73b3a5d --> n8162888cf2c97726a
   ne9d117127feadc7d0["source_validation.py"]
   n6aea57a87a15be9fd --> ne9d117127feadc7d0
   n12153fbacb6f12e44["class_definition _SourceLoader"]
