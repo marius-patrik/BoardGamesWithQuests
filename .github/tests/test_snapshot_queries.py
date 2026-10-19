@@ -47,6 +47,7 @@ def test_unknown_or_unbound_snapshot_facts_fail_closed():
     with pytest.raises(QueryResolutionError):
         queries.clock_remaining({"side": "active"})
 
+
 def test_versioned_rule_program_reads_trusted_snapshot_without_mutating_it():
     from model.game.hooks import RuleProgram
 
