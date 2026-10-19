@@ -29,9 +29,7 @@ def test_short_king_or_man_capture_does_not_modify_board():
     board = Board((8, 8), placement=[((5, 2), white), ((4, 3), black)])
     policy = CapturePolicy(False, False, False)
     result = CaptureEnumerator(board).enumerate((5, 2), policy)
-    assert result == [
-        {"start": [5, 2], "steps": [{"landing": [3, 4], "captured": [4, 3]}]}
-    ]
+    assert result == [{"start": [5, 2], "steps": [{"landing": [3, 4], "captured": [4, 3]}]}]
     assert board.get_piece_at((5, 2)) is white
     assert board.get_piece_at((4, 3)) is black
     assert board.get_piece_at((3, 4)) is None
