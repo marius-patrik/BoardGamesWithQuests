@@ -9,6 +9,70 @@ from typing import Any
 from model.game.conditions import QueryResolutionError
 
 
+MAX_EVALUATION_WORK = 250000
+
+
+class EvaluationBudgetExceeded(QueryResolutionError):
+    """A trusted aggregate work ceiling was exhausted without accepting partial results."""
+
+
+@dataclass
+class EvaluationBudget:
+    """Count shared deterministic work across one read, transition or replay.
+
+    Args:
+        limit: Trusted positive engine work ceiling, never supplied by game JSON.
+        used: Consumed work units, initialized to zero.
+        parent: Optional trusted aggregate counter charged with this child.
+    """
+
+    limit: int
+    used: int = 0
+    parent: EvaluationBudget | None = None
+
+    def __post_init__(self) -> None:
+        """Reject invalid trusted ceilings.
+
+        Raises:
+            ValueError: Limit or initial work count is invalid.
+        """
+        if (
+            type(self.limit) is not int
+            or self.limit < 1
+            or type(self.used) is not int
+            or self.used != 0
+            or (self.parent is not None and not isinstance(self.parent, EvaluationBudget))
+        ):
+            raise ValueError("evaluation budget needs a positive integer ceiling")
+
+    def consume(self, units: int = 1) -> None:
+        """Atomically reserve deterministic work in this counter and every parent.
+
+        Args:
+            units: Nonnegative strict integer work cost.
+
+        Raises:
+            ValueError: Cost or the trusted parent hierarchy is invalid.
+            EvaluationBudgetExceeded: Aggregate ceiling would be exceeded.
+        """
+        if type(units) is not int or units < 0:
+            raise ValueError("evaluation cost must be a nonnegative integer")
+        counters: list[EvaluationBudget] = []
+        counter: EvaluationBudget | None = self
+        while counter is not None:
+            if not isinstance(counter, EvaluationBudget) or any(
+                counter is entry for entry in counters
+            ):
+                raise ValueError("evaluation budget parent chain must be acyclic")
+            if units > counter.limit - counter.used:
+                raise EvaluationBudgetExceeded("aggregate evaluation work budget exceeded")
+            counters.append(counter)
+            counter = counter.parent
+        # All reservations succeed before any counter changes, so rejection is atomic.
+        for counter in counters:
+            counter.used += units
+
+
 @dataclass(frozen=True)
 class CapturePolicy:
     """Declarative capture movement policy for a selected piece class."""
