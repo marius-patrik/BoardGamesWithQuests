@@ -7,9 +7,9 @@ status: published
 | --- | --- |
 | `src/chesswithquests/` | Application entry, installation diagnostic and Tkinter startup |
 | `src/controller/` | Square input, selection, game lifecycle and window state |
-| `src/model/game/` | Python-constructed game configs, board, validator, manager, rules, clocks and quests |
+| `src/model/game/` | Active Python-constructed game manager/clock/quests plus recovered pure JSON v2 schema, definition, capture-policy and hook validation |
 | `src/model/misc/`, `src/model/pieces/`, `src/model/users/` | Game export/notation, shared pieces and user state |
-| `src/games/chess/`, `src/games/checkers/` | Python variant-specific boards, pieces, rules and clocks |
+| `src/games/chess/`, `src/games/checkers/` | Active Python variant implementations and separately installed archived non-playable JSON v2 definitions |
 | `src/view/` | Tkinter app, board/player/quest widgets, settings and Python source editor |
 | `.agents/notes/`, `requests/`, `decisions/`, `rules/` | Authored sources for generated README, PRD, ARCHITECTURE and AGENTS |
 | `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` | Outcomes, phase plan, open queue and temporary evidence |

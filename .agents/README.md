@@ -13,7 +13,7 @@ BoardGamesWithQuests currently contains a recoverable Python/Tkinter desktop boa
 
 ### Important implementation boundary
 
-Game settings still load executable Python configuration modules, with a source editor and validator exposed through the UI. This contradicts the desired JSON-only game definition model and must be replaced before v1.0.0. Pure JSON schema, condition and hook helpers have been restored from the archived work under `src/model/game/`, but they are not connected to the running game manager or Tkinter. The full revisioned JSON engine from #405 is still being reconciled. Source test success does not establish full GUI or packaged application acceptance.
+Game settings still load executable Python configuration modules, with a source editor and validator exposed through the UI. This contradicts the desired JSON-only game definition model and must be replaced before v1.0.0. Pure JSON schema, condition and hook helpers, a bounded version-2 definition parser and immutable built-in chess/English-draughts JSON definitions have been restored under `src/model/game/` and `src/games/`. These definitions remain marked non-playable and are not connected to the running game manager or Tkinter. The full revisioned JSON engine from #405 is still being reconciled. Source test success does not establish full GUI or packaged application acceptance.
 
 ### Delivery and governance
 
@@ -28,9 +28,9 @@ _Source: [0001-product.md](notes/0001-product.md)_
 | --- | --- |
 | `src/chesswithquests/` | Application entry, installation diagnostic and Tkinter startup |
 | `src/controller/` | Square input, selection, game lifecycle and window state |
-| `src/model/game/` | Python-constructed game configs, board, validator, manager, rules, clocks and quests |
+| `src/model/game/` | Active Python-constructed game manager/clock/quests plus recovered pure JSON v2 schema, definition, capture-policy and hook validation |
 | `src/model/misc/`, `src/model/pieces/`, `src/model/users/` | Game export/notation, shared pieces and user state |
-| `src/games/chess/`, `src/games/checkers/` | Python variant-specific boards, pieces, rules and clocks |
+| `src/games/chess/`, `src/games/checkers/` | Active Python variant implementations and separately installed archived non-playable JSON v2 definitions |
 | `src/view/` | Tkinter app, board/player/quest widgets, settings and Python source editor |
 | `.agents/notes/`, `requests/`, `decisions/`, `rules/` | Authored sources for generated README, PRD, ARCHITECTURE and AGENTS |
 | `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` | Outcomes, phase plan, open queue and temporary evidence |
