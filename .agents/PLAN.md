@@ -8,7 +8,7 @@
 
 | Stage | Deliverable | Status |
 | --- | --- | --- |
-| 1 | Account for #405's lost JSON-rule engine, tests and server-only work | In progress: immutable v2 game definitions, pure rule evaluator and read-only snapshot queries recovered |
+| 1 | Account for #405's lost JSON-rule engine, tests and server-only work | In progress: v2 definitions, pure rule evaluator, snapshot queries and capture geometry recovered |
 | 2 | Reconcile one authoritative versioned JSON game model in `src/model/` | Pending |
 | 3 | Complete executable chess and English-draughts configurations | Pending |
 | 4 | Adapt recovered Tkinter controllers, boards and views to the canonical engine | Pending |
