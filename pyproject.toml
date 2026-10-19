@@ -31,6 +31,10 @@ where = ["src"]
 include = ["chesswithquests*", "controller*", "model*", "games*", "view*"]
 namespaces = true
 
+[tool.setuptools.package-data]
+"games.chess" = ["config.json"]
+"games.checkers" = ["config.json"]
+
 [tool.pytest.ini_options]
 testpaths = [".github/tests"]
 pythonpath = ["src"]
