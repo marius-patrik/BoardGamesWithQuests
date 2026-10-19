@@ -98,7 +98,9 @@ def test_capture_policy_validates_declared_bounded_geometry():
         CapturePolicy.from_json({**accepted, "land_anywhere": True})
 
 
-@pytest.mark.parametrize("unsafe", ["../chess", "chess/__init__", ".", "__pycache__", "", "a" * 65, "CHECKERS"])
+@pytest.mark.parametrize(
+    "unsafe", ["../chess", "chess/__init__", ".", "__pycache__", "", "a" * 65, "CHECKERS"]
+)
 def test_bundled_game_selector_rejects_paths_and_executable_module_names(unsafe):
     with pytest.raises(ConfigurationError):
         load_bundled_definition(unsafe)
