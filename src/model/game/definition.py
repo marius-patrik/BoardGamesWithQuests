@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from importlib import resources
+import re
 import json
 from typing import Any
 from collections.abc import Mapping
@@ -167,13 +168,20 @@ def parse_definition_json(raw_json: str, package: str = "<custom>") -> GameDefin
         raise ConfigurationError(f"{package}: invalid configuration: {error}") from error
 
 
-def load_definition(package: str) -> GameDefinition:
-    """Load trusted built-in package JSON, using the same validator as user data."""
+def load_bundled_definition(name: str) -> GameDefinition:
+    """Load one bundled game as inert JSON without importing its Python package.
+
+    Game subdirectories are resource data, not executable plugins. An explicit
+    directory selector is never interpreted as a module name or filesystem path.
+    """
+    if type(name) is not str or re.fullmatch(r"[a-z][a-z0-9_]{0,63}", name) is None:
+        raise ConfigurationError("game identifier must be a bounded safe directory name")
     try:
-        raw_json = resources.files(package).joinpath("config.json").read_text("utf-8")
+        source = resources.files("games").joinpath(name).joinpath("config.json")
+        raw_json = source.read_text("utf-8")
     except (ModuleNotFoundError, OSError) as error:
-        raise ConfigurationError(f"{package}: missing config.json: {error}") from error
-    return parse_definition_json(raw_json, package)
+        raise ConfigurationError(f"game {name!r} has no bundled config.json") from error
+    return parse_definition_json(raw_json, f"games/{name}")
 
 
 def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:

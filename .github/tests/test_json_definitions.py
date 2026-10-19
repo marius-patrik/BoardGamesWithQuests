@@ -7,13 +7,13 @@ import json
 
 import pytest
 
-from model.game.definition import ConfigurationError, load_definition, parse_definition_json
+from model.game.definition import ConfigurationError, load_bundled_definition, parse_definition_json
 from model.game.schema import thaw_json
 
 
 def test_bundled_chess_and_english_draughts_have_valid_version_two_definitions():
-    chess = load_definition("games.chess")
-    english = load_definition("games.checkers")
+    chess = load_bundled_definition("games.chess")
+    english = load_bundled_definition("games.checkers")
     assert chess.name == "chess"
     assert english.name == "english_draughts"
     assert chess.board["rows"] == english.board["rows"] == 8
@@ -26,7 +26,7 @@ def test_bundled_chess_and_english_draughts_have_valid_version_two_definitions()
 
 
 def test_built_in_definition_is_immutable_and_has_detached_serialization():
-    definition = load_definition("games.checkers")
+    definition = load_bundled_definition("games.checkers")
     with pytest.raises(TypeError):
         definition.board["rows"] = 10
     first = thaw_json(definition.board)
@@ -36,7 +36,7 @@ def test_built_in_definition_is_immutable_and_has_detached_serialization():
 
 
 def test_rejects_duplicate_json_properties_including_nested_objects():
-    definition = load_definition("games.checkers")
+    definition = load_bundled_definition("games.checkers")
     document = '{"schema_version":2,"schema_version":2}'
     with pytest.raises(ConfigurationError, match="duplicate JSON field"):
         parse_definition_json(document)
@@ -58,7 +58,7 @@ def test_rejects_malformed_unknown_and_executable_json(bad):
 
 
 def test_rejects_unrecognized_python_rule_source_in_trusted_definition():
-    config = load_definition("games.checkers")
+    config = load_bundled_definition("games.checkers")
     data = {
         "schema_version": 2,
         "name": config.name,
@@ -96,3 +96,19 @@ def test_capture_policy_validates_declared_bounded_geometry():
         CapturePolicy.from_json({**accepted, "max_nodes": 10001})
     with pytest.raises(QueryResolutionError):
         CapturePolicy.from_json({**accepted, "land_anywhere": True})
+
+
+@pytest.mark.parametrize("unsafe", ["../chess", "chess/__init__", ".", "__pycache__", "", "a" * 65, "CHECKERS"])
+def test_bundled_game_selector_rejects_paths_and_executable_module_names(unsafe):
+    with pytest.raises(ConfigurationError):
+        load_bundled_definition(unsafe)
+
+
+def test_loader_does_not_import_variant_python_package(monkeypatch):
+    import sys
+
+    # Loading a game definition must not execute legacy variant Python source.
+    sys.modules.pop("games.checkers", None)
+    game = load_bundled_definition("checkers")
+    assert game.name == "english_draughts"
+    assert "games.checkers" not in sys.modules
