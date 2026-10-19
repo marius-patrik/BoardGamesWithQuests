@@ -10,3 +10,5 @@
 - **First recovered modules:** `schema.py`, `conditions.py`, `hooks.py` now reside under `src/model/game/` and have JSON-boundary tests. These helpers do **not** yet replace the source-executing game configuration or perform game transitions.
 
 - **Static schema source recovered:** `src/model/game/definition.py` validates bounded schema-v2 JSON and returns recursively immutable `GameDefinition` objects, using a pure `CapturePolicy` parser in `capture_policy.py`. Built-in archived `src/games/{chess,checkers}/config.json` resources are now tracked; they remain `playable: false`. Current legacy `Configuration` still controls gameplay, and the new validator is not yet wired to Tkinter.
+
+- **Read-only snapshot query groundwork:** `src/model/game/snapshot_queries.py` now provides defensive-copy, finite-JSON snapshot queries. Tests exercise source isolation, rejected non-JSON data, missing facts and a trusted `RuleProgram` evaluating an isolated snapshot rule-state fact. Neither query adapter nor rule program is yet a live desktop transition engine.
