@@ -45,8 +45,13 @@ def test_declarative_queries_cannot_evaluate_unbounded_work():
             {"rule_state": reader.rule_state},
             work=EvaluationBudget(1).consume,
         )
-    assert len(program.evaluate(
-        "permits_move",
-        {"rule_state": reader.rule_state},
-        work=EvaluationBudget(500).consume,
-    ).effects) == 1
+    assert (
+        len(
+            program.evaluate(
+                "permits_move",
+                {"rule_state": reader.rule_state},
+                work=EvaluationBudget(500).consume,
+            ).effects
+        )
+        == 1
+    )

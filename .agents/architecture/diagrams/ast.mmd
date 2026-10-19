@@ -1268,6 +1268,16 @@ flowchart LR
   ndfec4ef75d39bfba1 --> nafa627ad75e896656
   n017a8c2cf1be737c5["function_definition test_unbound_reference_raises_without_python_execution"]
   ndfec4ef75d39bfba1 --> n017a8c2cf1be737c5
+  nfa2c971b419f0c997["test_json_work_budget.py"]
+  nc9f5868186eb03f66 --> nfa2c971b419f0c997
+  n11b95dd35473a88cd["function_definition test_nested_work_reservations_fail_atomically_for_all_counters"]
+  nfa2c971b419f0c997 --> n11b95dd35473a88cd
+  necae415295d325bdf["decorated_definition"]
+  nfa2c971b419f0c997 --> necae415295d325bdf
+  nb84210fa44d70c5da["function_definition test_work_budget_requires_strict_positive_integer"]
+  nfa2c971b419f0c997 --> nb84210fa44d70c5da
+  n5467f564afc2c1291["function_definition test_declarative_queries_cannot_evaluate_unbounded_work"]
+  nfa2c971b419f0c997 --> n5467f564afc2c1291
   nde2e4622600c1471f["test_king.py"]
   nc9f5868186eb03f66 --> nde2e4622600c1471f
   nc52fdd46006bd51ae["function_definition test_king_inheritance"]
@@ -2600,14 +2610,24 @@ flowchart LR
   n235b011ff366c2695 --> n62158dbd30f879698
   n631d8206c6862393e["capture_policy.py"]
   n6aea57a87a15be9fd --> n631d8206c6862393e
-  n2a61f1e7a8ba36d69["decorated_definition"]
-  n631d8206c6862393e --> n2a61f1e7a8ba36d69
-  n385598d3d10b39cee["class_definition CapturePolicy"]
-  n631d8206c6862393e --> n385598d3d10b39cee
-  nd5682829d94dff9ac["decorated_definition"]
-  n631d8206c6862393e --> nd5682829d94dff9ac
-  nf2b6c0f830e00d99e["function_definition from_json"]
+  nfa38ecbe61ff7c000["class_definition EvaluationBudgetExceeded"]
+  n631d8206c6862393e --> nfa38ecbe61ff7c000
+  n9e5fd1a9d99d84f2c["decorated_definition"]
+  n631d8206c6862393e --> n9e5fd1a9d99d84f2c
+  nc907c3544a12746ce["class_definition EvaluationBudget"]
+  n631d8206c6862393e --> nc907c3544a12746ce
+  nf2b6c0f830e00d99e["function_definition __post_init__"]
   n631d8206c6862393e --> nf2b6c0f830e00d99e
+  nbf8717557ac26b2f8["function_definition consume"]
+  n631d8206c6862393e --> nbf8717557ac26b2f8
+  ncfe52ef85a9668232["decorated_definition"]
+  n631d8206c6862393e --> ncfe52ef85a9668232
+  n9994cf45d9d8c16b6["class_definition CapturePolicy"]
+  n631d8206c6862393e --> n9994cf45d9d8c16b6
+  n64f7a13ba033e89cf["decorated_definition"]
+  n631d8206c6862393e --> n64f7a13ba033e89cf
+  n4b8da2c95bed1804a["function_definition from_json"]
+  n631d8206c6862393e --> n4b8da2c95bed1804a
   n3b896ec7de831c3da["clock_fields.py"]
   n6aea57a87a15be9fd --> n3b896ec7de831c3da
   n62b85c7ea5ffd2a6a["function_definition clock_fields"]

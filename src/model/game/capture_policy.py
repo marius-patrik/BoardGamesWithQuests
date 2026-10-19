@@ -8,7 +8,6 @@ from typing import Any
 
 from model.game.conditions import QueryResolutionError
 
-
 MAX_EVALUATION_WORK = 250000
 
 
