@@ -18,6 +18,7 @@ from model.game.schema import (
     validate_hooks,
 )
 
+
 class ConfigurationError(ValueError):
     """The installed game's declarative settings are invalid."""
 

@@ -43,12 +43,15 @@ def test_rejects_duplicate_json_properties_including_nested_objects():
     assert definition.rules
 
 
-@pytest.mark.parametrize("bad", [
-    "{not valid JSON",
-    '{"rules":[]}',
-    '{"schema_version": 2, "python": "exec(1)"}',
-    '{"schema_version": NaN}',
-])
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "{not valid JSON",
+        '{"rules":[]}',
+        '{"schema_version": 2, "python": "exec(1)"}',
+        '{"schema_version": NaN}',
+    ],
+)
 def test_rejects_malformed_unknown_and_executable_json(bad):
     with pytest.raises(ConfigurationError):
         parse_definition_json(bad)

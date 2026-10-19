@@ -33,4 +33,3 @@ class CapturePolicy:
         if type(n) is not int or not 1 <= n <= 10000:
             raise QueryResolutionError("capture enumeration budget is invalid")
         return cls(obj["flying"], obj["land_anywhere"], obj["deferred_removal"], n)
-
