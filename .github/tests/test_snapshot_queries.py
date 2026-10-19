@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
-
 import pytest
 
 from model.game.conditions import QueryResolutionError
@@ -48,3 +46,28 @@ def test_unknown_or_unbound_snapshot_facts_fail_closed():
         queries.rule_state({"name": "counter", "extra": True})
     with pytest.raises(QueryResolutionError):
         queries.clock_remaining({"side": "active"})
+
+def test_versioned_rule_program_reads_trusted_snapshot_without_mutating_it():
+    from model.game.hooks import RuleProgram
+
+    source = {"rule_state": {"can_move": True}}
+    reader = SnapshotQueries(source)
+    rule = {
+        "id": "allow-when-authorized",
+        "hook": "permits_move",
+        "when": {
+            "op": "compare",
+            "relation": "eq",
+            "left": {"query": "rule_state", "params": {"name": "can_move"}},
+            "right": True,
+        },
+        "effects": [{"op": "permit", "params": {}}],
+    }
+    program = RuleProgram([rule])
+    accepted = program.evaluate("permits_move", {"rule_state": reader.rule_state})
+    assert [effect.op for effect in accepted.effects] == ["permit"]
+    assert source["rule_state"]["can_move"] is True
+    blocked = SnapshotQueries({"rule_state": {"can_move": False}})
+    rejected = program.evaluate("permits_move", {"rule_state": blocked.rule_state})
+    assert rejected.effects == ()
+    assert source["rule_state"]["can_move"] is True
