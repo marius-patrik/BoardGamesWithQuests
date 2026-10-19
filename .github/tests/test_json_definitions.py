@@ -107,10 +107,15 @@ def test_bundled_game_selector_rejects_paths_and_executable_module_names(unsafe)
 
 
 def test_loader_does_not_import_variant_python_package(monkeypatch):
-    import sys
+    import importlib
 
-    # Loading a game definition must not execute legacy variant Python source.
-    sys.modules.pop("games.checkers", None)
+    original = importlib.import_module
+
+    def guarded_import(name, package=None):
+        if name == "games.checkers":
+            pytest.fail("reading JSON must not import executable game configuration")
+        return original(name, package)
+
+    monkeypatch.setattr(importlib, "import_module", guarded_import)
     game = load_bundled_definition("checkers")
     assert game.name == "english_draughts"
-    assert "games.checkers" not in sys.modules
