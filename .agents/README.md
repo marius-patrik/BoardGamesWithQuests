@@ -28,7 +28,7 @@ _Source: [0001-product.md](notes/0001-product.md)_
 | --- | --- |
 | `src/chesswithquests/` | Application entry, installation diagnostic and Tkinter startup |
 | `src/controller/` | Square input, selection, game lifecycle and window state |
-| `src/model/game/` | Active Python-constructed game manager/clock/quests plus recovered pure JSON v2 schema, definition, capture-policy, hook and snapshot-query validation |
+| `src/model/game/` | Active Python-constructed game manager/clock/quests plus recovered JSON v2 schema, board-construction, bounded action-intent parsing, capture-policy, hook and snapshot-query validation |
 | `src/model/misc/`, `src/model/pieces/`, `src/model/users/` | Game export/notation, shared pieces and user state |
 | `src/games/chess/`, `src/games/checkers/` | Active Python variant implementations and separately installed archived non-playable JSON v2 definitions |
 | `src/view/` | Tkinter app, board/player/quest widgets, settings and Python source editor |

@@ -8,7 +8,7 @@
 
 | Stage | Deliverable | Status |
 | --- | --- | --- |
-| 1 | Account for #405's lost JSON-rule engine, tests and server-only work | In progress: definition, capture, rule, board queries and outcome helpers restored; authoritative transition manager still pending |
+| 1 | Account for #405's lost JSON-rule engine, tests and server-only work | In progress: deterministic board creation and closed Move JSON intents now supported; authoritative transition manager still pending |
 | 2 | Reconcile one authoritative versioned JSON game model in `src/model/` | Pending |
 | 3 | Complete executable chess and English-draughts configurations | Pending |
 | 4 | Adapt recovered Tkinter controllers, boards and views to the canonical engine | Pending |
