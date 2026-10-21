@@ -9,7 +9,7 @@
 
 `src/model/game/board.py` owns the current mutable board representation. `src/model/game/move.py`, `validator.py` and `rule.py` provide move actions, checks and composable Python rule evaluation. `src/model/game/manager.py` coordinates the constructed `Configuration`, players, turn state, active clocks, move/result events, quest manager, logs and exports. It exposes `make_move`, `get_valid_moves`, `get_state`, `finish_game` and `transcript` rather than the archived JSON engine's `submit_action` and versioned replay API.
 
-The existing canonical `Move` class now parses and serializes strict bounded JSON action intents with complete landing chains; `board_from_definition` constructs independent initial `Board` and `Piece` projections from game JSON and uses the current repeat/max-step conventions. These capabilities do not yet replace the legacy `GameManager.make_move` lifecycle.
+The existing `MoveValidator` also exposes a game-neutral `get_geometric_moves` query over the existing board and configured piece vectors, without invoking legacy rule-source hooks. The existing canonical `Move` class now parses and serializes strict bounded JSON action intents with complete landing chains; `board_from_definition` constructs independent initial `Board` and `Piece` projections from game JSON and uses the current repeat/max-step conventions. These capabilities do not yet replace the legacy `GameManager.make_move` lifecycle.
 
 ### Supporting state
 

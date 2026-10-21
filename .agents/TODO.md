@@ -3,6 +3,7 @@
 Detailed steps and acceptance are in [PLAN](PLAN.md). Do not mark unfinished runtime behavior as shipped.
 
 - [ ] Inventory #405 JSON engine, rules, tests and server-only functionality against live #271/#422; record each disposition.
+- [ ] Reconcile actual generic legal-action generation with one pure `MoveValidator.get_geometric_moves` pipeline, declared captures and complete offered actions.
 - [ ] Replace the old Python-loaded `GameManager` with the full #405 revisioned transition authority, adapting it to canonical JSON-derived `Board`/`Piece` and serializable bounded `Move` intents, with recovered read-only board/snapshot queries, outcome resolution, captures, effects and replay; prove first complete player-driven JSON transition before GUI migration.
 - [ ] Complete validated chess and English-draughts JSON and action/clock/quest semantics.
 - [ ] Migrate Tkinter session/controllers/views and permitted JSON settings; remove all rule/quest editing, executable user-authored Python and code-editor paths.
