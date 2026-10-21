@@ -47,3 +47,11 @@ def test_legacy_move_fields_do_not_leak_into_authoritative_action_intent():
         "hops": [[4, 3]],
         "promotion": None,
     }
+
+
+def test_legacy_effect_carrying_moves_do_not_collapse_by_coordinates():
+    first = Move((1, 0), (2, 0), move_type="normal")
+    second = Move((1, 0), (2, 0), move_type="en_passant")
+    assert first != second
+    assert len({first, second}) == 2
+    assert Move.from_json(first.to_json()) != first

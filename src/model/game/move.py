@@ -99,6 +99,7 @@ class Move:
         self.companion_end = _square(companion_end)
         self.hops = tuple((row, col) for row, col in hops) if hops is not None else (self.end_pos,)
         self.promotion = promotion
+        self._structured_intent = hops is not None
 
     @classmethod
     def from_json(cls, data: Any) -> "Move":
@@ -140,6 +141,10 @@ class Move:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Move):
             return NotImplemented
+        # Legacy Move instances also carry mutable piece/board effects.
+        # They retain object identity until all legacy rule classes are retired.
+        if not self._structured_intent or not other._structured_intent:
+            return self is other
         return (
             self.start_pos == other.start_pos
             and self.hops == other.hops
@@ -147,6 +152,8 @@ class Move:
         )
 
     def __hash__(self) -> int:
+        if not self._structured_intent:
+            return object.__hash__(self)
         return hash((self.start_pos, self.hops, self.promotion))
 
     @staticmethod
