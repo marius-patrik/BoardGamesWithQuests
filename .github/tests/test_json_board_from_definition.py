@@ -9,10 +9,7 @@ def test_chess_starting_state_is_constructed_from_json_not_chess_classes():
     definition = load_bundled_definition("chess")
     position = board_from_definition(definition)
     assert position.rows == position.cols == 8
-    placements = [
-        position.get_piece_at((r, c))
-        for r in range(8) for c in range(8)
-    ]
+    placements = [position.get_piece_at((r, c)) for r in range(8) for c in range(8)]
     assert len([piece for piece in placements if piece is not None]) == 32
     rook = position.get_piece_at((0, 0))
     assert rook.getType() == "rook"
@@ -30,17 +27,15 @@ def test_chess_starting_state_is_constructed_from_json_not_chess_classes():
 def test_english_draughts_uses_short_kings_and_12_men_each_side():
     definition = load_bundled_definition("checkers")
     position = board_from_definition(definition)
-    records = [
-        position.get_piece_at((r, c))
-        for r in range(8) for c in range(8)
-    ]
+    records = [position.get_piece_at((r, c)) for r in range(8) for c in range(8)]
     assert sum(p is not None and p.getColor() == 1 for p in records) == 12
     assert sum(p is not None and p.getColor() == -1 for p in records) == 12
     from model.game.board import Board
     from model.pieces.piece import Piece
 
     king = Piece(
-        color=1, piece_type="king",
+        color=1,
+        piece_type="king",
         vectors=[tuple(v) for v in definition.pieces["king"]["moves"]],
         attack_vectors=[tuple(v) for v in definition.pieces["king"]["attacks"]],
         max_steps=None if definition.pieces["king"]["repeat"] else 1,
