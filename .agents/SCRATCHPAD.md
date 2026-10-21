@@ -16,3 +16,5 @@
 - **Execution budgeting:** Pure `EvaluationBudget` instances now account for bounded rule-evaluation work and atomically reject exhausted nested counters. The registered `RuleProgram` accepts this budget; its effects are still only proposals, not production game transitions.
 
 - **Capture geometry recovered:** `src/model/game/capture_geometry.py` enumerates capture routes against a non-mutating board with bounded searches, and is tested for a short capture and rejection without board mutation. It is not yet the production legal-move evaluator.
+
+- **Recovered board/outcome queries:** `src/model/game/board_queries.py` now binds validated bounded declarative reads against the existing board/piece interface (including `getMaxSteps`, not the archived `canRepeat` API). `outcomes.py` arbitrates deterministic prioritized outcome proposals. Supporting tests prove observable board query results and conflict rejection; they **do not** demonstrate complete game submission or Tkinter acceptance.

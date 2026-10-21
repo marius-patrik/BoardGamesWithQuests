@@ -8,7 +8,7 @@
 
 | Stage | Deliverable | Status |
 | --- | --- | --- |
-| 1 | Account for #405's lost JSON-rule engine, tests and server-only work | In progress: v2 definitions, pure rule evaluator, snapshot queries and capture geometry recovered |
+| 1 | Account for #405's lost JSON-rule engine, tests and server-only work | In progress: definition, capture, rule, board queries and outcome helpers restored; authoritative transition manager still pending |
 | 2 | Reconcile one authoritative versioned JSON game model in `src/model/` | Pending |
 | 3 | Complete executable chess and English-draughts configurations | Pending |
 | 4 | Adapt recovered Tkinter controllers, boards and views to the canonical engine | Pending |
@@ -33,7 +33,7 @@
 ## 1. Recover the authoritative implementation
 
 1. Compare the historical GUI commit `43a3d01fab45a305d02ef26a4f86f0e7cd9a0d96`, closed #405 head `6002ac787664efceb0161d2bcbd3891927b69b34`, and live #271/#422 heads.
-2. Recover and check remaining archived `manager`, generic board/capture geometry, rule queries, snapshot queries, outcomes and replay against the v2 immutable definitions already staged under `src/model/game/definition.py` and `src/games/{chess,checkers}/config.json`.
+2. Adapt the full archived revisioned `packages/engine/model/game/manager.py` to the existing canonical `src/model/` board, move and piece types; connect the already recovered `BoardQueries`, outcome arbitration, captures and immutable JSON definitions without retaining a second manager. Preserve atomic revisions, idempotency and event replay.
 3. Account for discarded FastAPI auth, PostgreSQL transactions/migrations, concurrency and replay tests; assign server-only work to #422 without restoring that runtime into #271.
 4. Reconcile the recovered immutable v2 definition parser, bounded schema/hook evaluator and isolated read-only snapshot queries with generic board/clock/quest execution; restore deterministic events/replay as **one** authoritative implementation in `src/model/` and remove the competing Python-configured manager.
 5. Prove illegal actions do not change state, stale revisions fail, identical retries are idempotent and snapshots replay deterministically.
