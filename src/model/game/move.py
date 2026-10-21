@@ -69,6 +69,9 @@ class Move:
         capture_from: Optional[Tuple[int, int]] = None,
         companion_start: Optional[Tuple[int, int]] = None,
         companion_end: Optional[Tuple[int, int]] = None,
+        *,
+        hops: Optional[Tuple[Tuple[int, int], ...]] = None,
+        promotion: Optional[str] = None,
     ):
         """Initialize a Move instance.
 
@@ -94,6 +97,63 @@ class Move:
         self.capture_from = _square(capture_from)
         self.companion_start = _square(companion_start)
         self.companion_end = _square(companion_end)
+        self.hops = (
+            tuple((row, col) for row, col in hops)
+            if hops is not None
+            else (self.end_pos,)
+        )
+        self.promotion = promotion
+
+    @classmethod
+    def from_json(cls, data: Any) -> "Move":
+        """Parse an exact, bounded declarative action intent from inert JSON."""
+        if not isinstance(data, dict) or set(data) != {"start", "hops", "promotion"}:
+            raise ValueError("move intent requires exactly start, hops and promotion")
+
+        def square(value: Any) -> Tuple[int, int]:
+            if (
+                not isinstance(value, list)
+                or len(value) != 2
+                or any(type(axis) is not int or not 0 <= axis <= 255 for axis in value)
+            ):
+                raise ValueError("a move square must be a bounded JSON integer pair")
+            return (value[0], value[1])
+
+        start = square(data["start"])
+        hops = data["hops"]
+        if not isinstance(hops, list) or not 1 <= len(hops) <= 128:
+            raise ValueError("move intent requires one to 128 landing squares")
+        landings = tuple(square(hop) for hop in hops)
+        if start == landings[0]:
+            raise ValueError("the first landing must differ from the source")
+        promotion = data["promotion"]
+        if promotion is not None and (
+            not isinstance(promotion, str)
+            or not promotion
+            or len(promotion) > 128
+        ):
+            raise ValueError("promotion must name one bounded configured piece kind")
+        return cls(start, landings[-1], hops=landings, promotion=promotion)
+
+    def to_json(self) -> dict[str, Any]:
+        """Serialize only a game action intent; never include mutable piece objects."""
+        return {
+            "start": list(self.start_pos),
+            "hops": [list(square) for square in self.hops],
+            "promotion": self.promotion,
+        }
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Move):
+            return NotImplemented
+        return (
+            self.start_pos == other.start_pos
+            and self.hops == other.hops
+            and self.promotion == other.promotion
+        )
+
+    def __hash__(self) -> int:
+        return hash((self.start_pos, self.hops, self.promotion))
 
     @staticmethod
     def _bounds(board: Optional[Any]) -> Tuple[int, int]:
