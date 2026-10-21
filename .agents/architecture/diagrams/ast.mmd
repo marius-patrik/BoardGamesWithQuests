@@ -1290,6 +1290,18 @@ flowchart LR
   nb7a270c60dbe0ba7c --> n7d96d0aeed4c4b16c
   nfb462e8d6635d2afe["function_definition guarded_import"]
   nb7a270c60dbe0ba7c --> nfb462e8d6635d2afe
+  n5ca7df1f3bfc16631["test_json_geometric_actions.py"]
+  nc9f5868186eb03f66 --> n5ca7df1f3bfc16631
+  n4c45d7ad6cb05212f["function_definition test_chess_pawn_moves_follow_json_relative_vectors"]
+  n5ca7df1f3bfc16631 --> n4c45d7ad6cb05212f
+  n6929426a6c87f1e48["function_definition test_json_based_rook_geometry_respects_initial_blockers"]
+  n5ca7df1f3bfc16631 --> n6929426a6c87f1e48
+  nabfcf7ff9fcaa8dc3["function_definition test_geometric_candidates_never_consult_game_rule_plugins"]
+  n5ca7df1f3bfc16631 --> nabfcf7ff9fcaa8dc3
+  n38462eb9fe3ffc1b5["class_definition RuleThatMustNeverExecute"]
+  n5ca7df1f3bfc16631 --> n38462eb9fe3ffc1b5
+  nd91282021d6a99be2["function_definition available_moves"]
+  n5ca7df1f3bfc16631 --> nd91282021d6a99be2
   na80f8bfeba58b3704["test_json_move_intent.py"]
   nc9f5868186eb03f66 --> na80f8bfeba58b3704
   n7a64b1c2472b466f8["function_definition test_data_only_move_intent_round_trip_preserves_capture_landings_and_promotion"]
@@ -3470,34 +3482,36 @@ flowchart LR
   n4d01e0f249638d499 --> n21f8843c6cb5bba37
   ne3fe11473e01a5d26["function_definition add"]
   n4d01e0f249638d499 --> ne3fe11473e01a5d26
-  ne5270efd95969cb26["decorated_definition"]
-  n4d01e0f249638d499 --> ne5270efd95969cb26
-  nf04dd9ea6b0884f8e["function_definition _step_limit"]
-  n4d01e0f249638d499 --> nf04dd9ea6b0884f8e
-  n8d4dfb5e78b672e69["decorated_definition"]
-  n4d01e0f249638d499 --> n8d4dfb5e78b672e69
-  n266cd3d648e2405dd["function_definition _ray"]
-  n4d01e0f249638d499 --> n266cd3d648e2405dd
-  n9c37389991cc4cfa9["function_definition _rule_moves"]
+  n65f639a25314a1d93["function_definition get_geometric_moves"]
+  n4d01e0f249638d499 --> n65f639a25314a1d93
+  n22f0e980433d716d7["decorated_definition"]
+  n4d01e0f249638d499 --> n22f0e980433d716d7
+  n273a751665736c829["function_definition _step_limit"]
+  n4d01e0f249638d499 --> n273a751665736c829
+  n782e831958a981b40["decorated_definition"]
+  n4d01e0f249638d499 --> n782e831958a981b40
+  n9c37389991cc4cfa9["function_definition _ray"]
   n4d01e0f249638d499 --> n9c37389991cc4cfa9
-  nda7e083ee8cbb2dba["function_definition get_valid_moves"]
+  nda7e083ee8cbb2dba["function_definition _rule_moves"]
   n4d01e0f249638d499 --> nda7e083ee8cbb2dba
-  n0fe2880b9e5e563be["function_definition find_move"]
+  n0fe2880b9e5e563be["function_definition get_valid_moves"]
   n4d01e0f249638d499 --> n0fe2880b9e5e563be
-  n056a27025647751bd["function_definition get_legal_moves_for"]
+  n056a27025647751bd["function_definition find_move"]
   n4d01e0f249638d499 --> n056a27025647751bd
-  n6b2d1410a7cea6e04["function_definition is_permitted"]
+  n6b2d1410a7cea6e04["function_definition get_legal_moves_for"]
   n4d01e0f249638d499 --> n6b2d1410a7cea6e04
-  n6b24fdb74f8ab390a["function_definition get_all_valid_moves"]
+  n6b24fdb74f8ab390a["function_definition is_permitted"]
   n4d01e0f249638d499 --> n6b24fdb74f8ab390a
-  n7a9784876bf05bd84["function_definition is_valid_move"]
+  n7a9784876bf05bd84["function_definition get_all_valid_moves"]
   n4d01e0f249638d499 --> n7a9784876bf05bd84
-  n6a166f4f72770ac34["function_definition is_checkmate"]
+  n6a166f4f72770ac34["function_definition is_valid_move"]
   n4d01e0f249638d499 --> n6a166f4f72770ac34
-  n919aecc38924ed451["function_definition is_stalemate"]
+  n919aecc38924ed451["function_definition is_checkmate"]
   n4d01e0f249638d499 --> n919aecc38924ed451
-  nd66cb65a860e3f9e9["function_definition simulate_move"]
+  nd66cb65a860e3f9e9["function_definition is_stalemate"]
   n4d01e0f249638d499 --> nd66cb65a860e3f9e9
+  n50e160fea8d83ef90["function_definition simulate_move"]
+  n4d01e0f249638d499 --> n50e160fea8d83ef90
   ndb7372d6b4cda7dac["misc/"]
   n13d1ed874aaea7bd5 --> ndb7372d6b4cda7dac
   n8bfd0cc6fc538d816["export_writers.py"]

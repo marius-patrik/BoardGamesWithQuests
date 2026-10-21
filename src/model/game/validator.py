@@ -398,9 +398,7 @@ class MoveValidator:
         """
         return [
             move.end_pos
-            for move in self.get_candidate_moves(
-                start_pos, board, _with_rule_offers=False
-            )
+            for move in self.get_candidate_moves(start_pos, board, _with_rule_offers=False)
         ]
 
     @staticmethod
