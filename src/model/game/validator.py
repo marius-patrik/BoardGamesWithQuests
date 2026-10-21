@@ -287,7 +287,11 @@ class MoveValidator:
         return [move.end_pos for move in self.get_candidate_moves(start_pos, board)]
 
     def get_candidate_moves(
-        self, start_pos: Tuple[int, int], board: Optional[Board] = None
+        self,
+        start_pos: Tuple[int, int],
+        board: Optional[Board] = None,
+        *,
+        _with_rule_offers: bool = True,
     ) -> List[Move]:
         """Compute candidate move destinations, ignoring check constraints.
 
@@ -311,11 +315,15 @@ class MoveValidator:
         if piece is None:
             return []
 
-        moves: List[Move] = [
-            move
-            for move in self._rule_moves(b, piece)
-            if move is not None and move.start_pos == tuple(start_pos)
-        ]
+        moves: List[Move] = (
+            [
+                move
+                for move in self._rule_moves(b, piece)
+                if move is not None and move.start_pos == tuple(start_pos)
+            ]
+            if _with_rule_offers
+            else []
+        )
         seen = {move.end_pos for move in moves}
 
         quiet = piece.getDirections() or []
@@ -379,6 +387,21 @@ class MoveValidator:
                     add((nr, nc))
 
         return moves
+
+    def get_geometric_moves(
+        self, start_pos: Tuple[int, int], board: Optional[Board] = None
+    ) -> List[Tuple[int, int]]:
+        """Enumerate configured vectors without executing game-specific rule classes.
+
+        This is the game-neutral geometric query used by declarative legality.
+        The existing candidate implementation remains the sole vector walker.
+        """
+        return [
+            move.end_pos
+            for move in self.get_candidate_moves(
+                start_pos, board, _with_rule_offers=False
+            )
+        ]
 
     @staticmethod
     def _step_limit(piece: Piece, board: Board) -> int:
