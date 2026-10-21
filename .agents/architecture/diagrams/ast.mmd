@@ -1230,6 +1230,18 @@ flowchart LR
   ndde6cc9414ec2efa4 --> nd8c928bb2c8eec469
   n86656a08510eec010["function_definition test_the_window_asks_the_clock_so_it_runs_without_a_click"]
   ndde6cc9414ec2efa4 --> n86656a08510eec010
+  n50d0319c7394a98c1["test_json_board_and_outcomes.py"]
+  nc9f5868186eb03f66 --> n50d0319c7394a98c1
+  n2e39a5b6c4751e7f1["function_definition board_with_piece"]
+  n50d0319c7394a98c1 --> n2e39a5b6c4751e7f1
+  n68b0876ebd39a3dcb["function_definition test_board_queries_observe_one_rectangular_position"]
+  n50d0319c7394a98c1 --> n68b0876ebd39a3dcb
+  n0b3d72368fded2e71["function_definition test_query_budget_is_bounded_before_expensive_board_traversal"]
+  n50d0319c7394a98c1 --> n0b3d72368fded2e71
+  n63fa6de13db12fb38["function_definition test_rule_program_reads_real_board_query_not_a_private_local_map"]
+  n50d0319c7394a98c1 --> n63fa6de13db12fb38
+  n8d85cd3888dc12d0d["function_definition test_outcome_resolution_rejects_equal_priority_conflicts"]
+  n50d0319c7394a98c1 --> n8d85cd3888dc12d0d
   n2a9dbeee5bb1e8550["test_json_capture_geometry.py"]
   nc9f5868186eb03f66 --> n2a9dbeee5bb1e8550
   n01e061a1350314219["class_definition CandidatePiece"]
@@ -2624,6 +2636,42 @@ flowchart LR
   n235b011ff366c2695 --> n93bc897611f9c1041
   n62158dbd30f879698["function_definition apply_placement"]
   n235b011ff366c2695 --> n62158dbd30f879698
+  nbc087d7ed42cb12ec["board_queries.py"]
+  n6aea57a87a15be9fd --> nbc087d7ed42cb12ec
+  n56e5ada413a76533b["class_definition BoardQueries"]
+  nbc087d7ed42cb12ec --> n56e5ada413a76533b
+  nee501a8e6fb729bfa["function_definition __init__"]
+  nbc087d7ed42cb12ec --> nee501a8e6fb729bfa
+  ndbe1787d13aee01d8["function_definition _square"]
+  nbc087d7ed42cb12ec --> ndbe1787d13aee01d8
+  n2f38779bf1eca03a5["decorated_definition"]
+  nbc087d7ed42cb12ec --> n2f38779bf1eca03a5
+  nc037a623a714effae["function_definition _fields"]
+  nbc087d7ed42cb12ec --> nc037a623a714effae
+  n86449137834cc73b1["function_definition piece_at"]
+  nbc087d7ed42cb12ec --> n86449137834cc73b1
+  nec4f37277aaac1f88["function_definition board_dimension"]
+  nbc087d7ed42cb12ec --> nec4f37277aaac1f88
+  nd1b070173d85b9ff3["function_definition turn"]
+  nbc087d7ed42cb12ec --> nd1b070173d85b9ff3
+  n286878dcd18fe4a62["function_definition path_clear"]
+  nbc087d7ed42cb12ec --> n286878dcd18fe4a62
+  nc708fe4a73820acc9["function_definition pieces_matching"]
+  nbc087d7ed42cb12ec --> nc708fe4a73820acc9
+  n1c9f9f0166d49989f["function_definition squares_attacked"]
+  nbc087d7ed42cb12ec --> n1c9f9f0166d49989f
+  ne77fa028c17406540["function_definition _reserve_attacks"]
+  nbc087d7ed42cb12ec --> ne77fa028c17406540
+  n58d348e407fc325d7["function_definition integer"]
+  nbc087d7ed42cb12ec --> n58d348e407fc325d7
+  n5b4a4443ea2f83b1c["function_definition square_offset"]
+  nbc087d7ed42cb12ec --> n5b4a4443ea2f83b1c
+  n0167bdf2f01f8c2b2["function_definition json_value"]
+  nbc087d7ed42cb12ec --> n0167bdf2f01f8c2b2
+  n42da8a595519b2538["function_definition pieces_safe"]
+  nbc087d7ed42cb12ec --> n42da8a595519b2538
+  nf3c600161aa80542a["function_definition bindings"]
+  nbc087d7ed42cb12ec --> nf3c600161aa80542a
   n88ee875b584c02565["capture_geometry.py"]
   n6aea57a87a15be9fd --> n88ee875b584c02565
   n2f752bf226a5fb5f4["class_definition CaptureEnumerator"]
@@ -2918,6 +2966,14 @@ flowchart LR
   n8126908205aa5ea53 --> n13ffe91b3fc8c3237
   nbd81b4c57c9eaaee1["function_definition _disturbed"]
   n8126908205aa5ea53 --> nbd81b4c57c9eaaee1
+  ndd830c299e2bf21dc["outcomes.py"]
+  n6aea57a87a15be9fd --> ndd830c299e2bf21dc
+  n2649aef6f2ad2f2f6["decorated_definition"]
+  ndd830c299e2bf21dc --> n2649aef6f2ad2f2f6
+  n69419d9dd1d8141c8["class_definition Outcome"]
+  ndd830c299e2bf21dc --> n69419d9dd1d8141c8
+  nc3ff0fa91146b40ac["function_definition resolve_outcome"]
+  ndd830c299e2bf21dc --> nc3ff0fa91146b40ac
   n9f927cc47989ee348["player.py"]
   n6aea57a87a15be9fd --> n9f927cc47989ee348
   n51f18e821be50fa96["class_definition Player"]

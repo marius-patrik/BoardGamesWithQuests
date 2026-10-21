@@ -34,9 +34,7 @@ def test_board_queries_observe_one_rectangular_position():
     assert queries.board_dimension({"axis": "rows"}) == 6
     assert queries.board_dimension({"axis": "columns"}) == 9
     assert queries.turn({}) == 1
-    assert queries.piece_at({"square": [1, 2]}) == {
-        "kind": "rook", "side": 1, "moved": False
-    }
+    assert queries.piece_at({"square": [1, 2]}) == {"kind": "rook", "side": 1, "moved": False}
     assert queries.pieces_matching({"side": "active", "kind": "rook"}) == [
         {"square": [1, 2], "kind": "rook", "side": 1, "moved": False}
     ]
@@ -58,33 +56,60 @@ def test_query_budget_is_bounded_before_expensive_board_traversal():
 def test_rule_program_reads_real_board_query_not_a_private_local_map():
     board, _ = board_with_piece()
     query = BoardQueries(board, 1)
-    rules = [{
-        "id": "row-limit",
-        "hook": "permits_move",
-        "when": {
-            "op": "compare",
-            "relation": "eq",
-            "left": {"query": "board_dimension", "params": {"axis": "rows"}},
-            "right": 6,
-        },
-        "effects": [{"op": "permit", "params": {}}],
-    }]
-    effects = RuleProgram(rules).evaluate(
-        "permits_move", query.bindings(), work=EvaluationBudget(1000).consume
-    ).effects
+    rules = [
+        {
+            "id": "row-limit",
+            "hook": "permits_move",
+            "when": {
+                "op": "compare",
+                "relation": "eq",
+                "left": {"query": "board_dimension", "params": {"axis": "rows"}},
+                "right": 6,
+            },
+            "effects": [{"op": "permit", "params": {}}],
+        }
+    ]
+    effects = (
+        RuleProgram(rules)
+        .evaluate("permits_move", query.bindings(), work=EvaluationBudget(1000).consume)
+        .effects
+    )
     assert [effect.op for effect in effects] == ["permit"]
     assert board.get_piece_at((1, 2)) is not None
 
 
 def test_outcome_resolution_rejects_equal_priority_conflicts():
-    draw = PlannedEffect("propose_outcome", {
-        "kind": "draw", "cause": "agreement", "winner": None, "priority": 30,
-    })
-    victory = PlannedEffect("propose_outcome", {
-        "kind": "win", "cause": "mate", "winner": 1, "priority": 40,
-    })
+    draw = PlannedEffect(
+        "propose_outcome",
+        {
+            "kind": "draw",
+            "cause": "agreement",
+            "winner": None,
+            "priority": 30,
+        },
+    )
+    victory = PlannedEffect(
+        "propose_outcome",
+        {
+            "kind": "win",
+            "cause": "mate",
+            "winner": 1,
+            "priority": 40,
+        },
+    )
     assert resolve_outcome((draw, victory)).winner == 1
     with pytest.raises(QueryResolutionError, match="conflicting"):
-        resolve_outcome((draw, PlannedEffect("propose_outcome", {
-            "kind": "win", "cause": "mate", "winner": 1, "priority": 30,
-        })))
+        resolve_outcome(
+            (
+                draw,
+                PlannedEffect(
+                    "propose_outcome",
+                    {
+                        "kind": "win",
+                        "cause": "mate",
+                        "winner": 1,
+                        "priority": 30,
+                    },
+                ),
+            )
+        )
