@@ -489,3 +489,47 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         starting_side,
         freeze_json(position_identity),
     )
+
+
+def board_from_definition(definition: GameDefinition) -> "Board":
+    """Construct an independent game-neutral position using validated JSON data.
+
+    Game-specific piece classes are not imported. Every piece is instantiated
+    from its declared move/attack geometry, movement rights and symbols. The
+    returned board is a distinct mutable projection owned by its caller.
+    """
+    from model.game.board import Board
+    from model.pieces.piece import Piece
+
+    if not isinstance(definition, GameDefinition):
+        raise TypeError("a validated game definition is required")
+    rows = definition.board["rows"]
+    cols = definition.board["columns"]
+    placements: list[tuple[tuple[int, int], Piece]] = []
+    for record in definition.board["starting_pieces"]:
+        color = 1 if record["color"] == "white" else -1
+        kind = record["piece"]
+        spec = definition.pieces[kind]
+
+        def vectors(field: str) -> list[tuple[int, int]]:
+            return [
+                (row * color if spec.get("color_relative") else row, col)
+                for row, col in spec.get(field, ())
+            ]
+
+        symbols = spec["symbols"]
+        for square in record["squares"]:
+            piece = Piece(
+                color=color,
+                piece_type=kind,
+                vectors=vectors("moves"),
+                initial_vectors=vectors("initial_moves"),
+                attack_vectors=vectors("attacks"),
+                can_jump=spec["jump"],
+                max_steps=None if spec["repeat"] else 1,
+                name=kind,
+                symbols=(symbols["white"], symbols["black"]),
+                has_moved=False,
+            )
+            placements.append(((square[0], square[1]), piece))
+    return Board((rows, cols), placement=placements)
