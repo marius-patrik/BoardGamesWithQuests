@@ -1290,6 +1290,16 @@ flowchart LR
   nb7a270c60dbe0ba7c --> n7d96d0aeed4c4b16c
   nfb462e8d6635d2afe["function_definition guarded_import"]
   nb7a270c60dbe0ba7c --> nfb462e8d6635d2afe
+  na80f8bfeba58b3704["test_json_move_intent.py"]
+  nc9f5868186eb03f66 --> na80f8bfeba58b3704
+  n7a64b1c2472b466f8["function_definition test_data_only_move_intent_round_trip_preserves_capture_landings_and_promotion"]
+  na80f8bfeba58b3704 --> n7a64b1c2472b466f8
+  n0d7cc43acb2f4c166["decorated_definition"]
+  na80f8bfeba58b3704 --> n0d7cc43acb2f4c166
+  ne2ee4ab105bd67da8["function_definition test_move_intent_rejects_untrusted_or_ambiguous_json"]
+  na80f8bfeba58b3704 --> ne2ee4ab105bd67da8
+  n3e6474641f1da0140["function_definition test_legacy_move_fields_do_not_leak_into_authoritative_action_intent"]
+  na80f8bfeba58b3704 --> n3e6474641f1da0140
   ndfec4ef75d39bfba1["test_json_rule_foundation.py"]
   nc9f5868186eb03f66 --> ndfec4ef75d39bfba1
   n06705eb20d7c8d454["function_definition rule"]
@@ -2966,18 +2976,28 @@ flowchart LR
   n8126908205aa5ea53 --> n548eee244212107ec
   nd47645d27c74b299d["decorated_definition"]
   n8126908205aa5ea53 --> nd47645d27c74b299d
-  nb3f1469e126e9361a["function_definition _bounds"]
+  nb3f1469e126e9361a["function_definition from_json"]
   n8126908205aa5ea53 --> nb3f1469e126e9361a
-  n11c0737368d966685["function_definition validate"]
+  n11c0737368d966685["function_definition to_json"]
   n8126908205aa5ea53 --> n11c0737368d966685
-  ncfe728469ddb095c7["function_definition apply_to_board"]
+  ncfe728469ddb095c7["function_definition __eq__"]
   n8126908205aa5ea53 --> ncfe728469ddb095c7
-  n5f26a0fe64fdc167b["function_definition unapply_from_board"]
+  n5f26a0fe64fdc167b["function_definition __hash__"]
   n8126908205aa5ea53 --> n5f26a0fe64fdc167b
-  n13ffe91b3fc8c3237["function_definition execute"]
-  n8126908205aa5ea53 --> n13ffe91b3fc8c3237
-  nbd81b4c57c9eaaee1["function_definition _disturbed"]
+  nfbe34183b740c9c03["decorated_definition"]
+  n8126908205aa5ea53 --> nfbe34183b740c9c03
+  nbd81b4c57c9eaaee1["function_definition _bounds"]
   n8126908205aa5ea53 --> nbd81b4c57c9eaaee1
+  n2cb79f87ca7574486["function_definition validate"]
+  n8126908205aa5ea53 --> n2cb79f87ca7574486
+  n9125aba30d75c8a1b["function_definition apply_to_board"]
+  n8126908205aa5ea53 --> n9125aba30d75c8a1b
+  n2ff396ee44b7d6a19["function_definition unapply_from_board"]
+  n8126908205aa5ea53 --> n2ff396ee44b7d6a19
+  n4b0a7bb6a5cf4d427["function_definition execute"]
+  n8126908205aa5ea53 --> n4b0a7bb6a5cf4d427
+  n28c1501cbfcd1cc9e["function_definition _disturbed"]
+  n8126908205aa5ea53 --> n28c1501cbfcd1cc9e
   ndd830c299e2bf21dc["outcomes.py"]
   n6aea57a87a15be9fd --> ndd830c299e2bf21dc
   n2649aef6f2ad2f2f6["decorated_definition"]

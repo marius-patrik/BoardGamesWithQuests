@@ -97,11 +97,7 @@ class Move:
         self.capture_from = _square(capture_from)
         self.companion_start = _square(companion_start)
         self.companion_end = _square(companion_end)
-        self.hops = (
-            tuple((row, col) for row, col in hops)
-            if hops is not None
-            else (self.end_pos,)
-        )
+        self.hops = tuple((row, col) for row, col in hops) if hops is not None else (self.end_pos,)
         self.promotion = promotion
 
     @classmethod
@@ -128,9 +124,7 @@ class Move:
             raise ValueError("the first landing must differ from the source")
         promotion = data["promotion"]
         if promotion is not None and (
-            not isinstance(promotion, str)
-            or not promotion
-            or len(promotion) > 128
+            not isinstance(promotion, str) or not promotion or len(promotion) > 128
         ):
             raise ValueError("promotion must name one bounded configured piece kind")
         return cls(start, landings[-1], hops=landings, promotion=promotion)
