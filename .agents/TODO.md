@@ -2,9 +2,9 @@
 
 The implementation order, exact steps and exit gates are in [PLAN](PLAN.md).
 
-- [ ] Port #405 chess reference rules through a real versioned game session: illegal/unsafe castling, en passant discovered check, promotion, draws, dead material, replay and complete games.
-- [ ] Port English-draughts acceptance: compulsory and branching multi-jump captures, short kings, promotion continuation rules, terminal positions and complete games.
-- [ ] Verify variant-independent board dimensions, bounded hook evaluation and failure atomicity through publicly supported action submission.
+- [ ] Cross-check the recovered FIDE reference cases with independent complete-game/perft records and validate resulting clock/outcome/notation behavior.
+- [ ] Extend English-draughts reference coverage to complete opening-to-terminal games and independent perft/variant interactions beyond the current short-king, multi-jump and crowning tests.
+- [ ] Add missing non-square board, aggregate-budget and forced-effect-failure acceptance through the public revisioned action protocol.
 - [ ] Mark `chess` and `english_draughts` definitions playable only after full end-to-end reference acceptance.
 - [ ] Verify Tkinter clocks, expiration, game end, rewards, capture/promotion choice, reset, game switch and safe callback shutdown through obligatory Xvfb GUI acceptance.
 - [ ] Complete player-facing chess and draughts notation exports; verify exported complete-game contents through the real UI.

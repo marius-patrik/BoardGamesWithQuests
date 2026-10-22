@@ -8,9 +8,9 @@
 
 ### 1. Complete reference-game acceptance
 
-1. Port the independent chess rule scenarios from archived #405 `tests/test_chess_rules.py` onto the supported public `DesktopSession` or revisioned `GameManager` interface. Verify castling (including traversed check), en passant (including discovered check), promotion and captures, checkmate/stalemate, legal escapes, threefold/fivefold repetition, move-count claims, dead material, timeout, resign and snapshot replay.
-2. Port English-draughts reference positions from #405 and earlier gameplay tests onto the same authoritative JSON interface. Verify short kings, forced capture precedence, multi-jumps and branching routes, correct crowning timing, blocked-side outcomes and complete real games.
-3. Test non-square configurable board geometry, bounded rule work, malformed/hostile hooks and forced atomic rollback using supported action interfaces. Remove incorrect declarative clauses; implement missing generic operations rather than variant checks in engine code.
+1. Expand the recovered FIDE reference acceptance with independent complete-game records and perft positions, cross-check terminal adjudication, legal escapes and clock expiration against source rulebooks, and resolve any observed deviations through the canonical JSON engine.
+2. Extend the current English-draughts short-king, compulsory multi-jump, branching route, crowning-stop and last-piece outcome tests with full opening-to-terminal games, independently sourced move-count/perft positions and adversarial variant interactions.
+3. Exercise outstanding independent non-square positions, aggregate-budget exhaustion and effect-failure rollback through supported action APIs. Existing adversarial tests cover special offers, idempotency and invalid declarations; only add scenarios demonstrating new observable gaps.
 4. Only after the relevant end-to-end scenarios pass, change each bundled definition from `playable: false` to `true`. Do not mark either game ready based on opening-only tests.
 
 **Exit:** both shipped game definitions can complete and replay independent complete games and all their declared rules work through the public engine.
@@ -29,16 +29,15 @@
 ### 3. Validate native frozen application
 
 1. Verify the real Windows x64, macOS ARM64, macOS x64 and Linux x64 `desktop-build.yml` jobs for the final exact commit. Keep all produced artifacts from the PR run for inspection.
-2. Require every frozen executable to run the permanent `--check` installation diagnostic: load both bundled JSON definitions, accept an action, confirm idempotency and replay. Fail archive creation on any diagnostic failure.
-3. Extend frozen GUI smoke beyond process survival to real selection, move, game switch, export/preferences, restart and shutdown on each operating system. Do not treat source-run Xvfb widget tests as frozen application acceptance.
-4. Inspect archive platform naming, contents, version/metadata, copied assets and SHA256 sidecars. Reject unsigned/incomplete/mismatched publication inputs according to existing release policy.
+2. Extend frozen GUI smoke beyond process survival to real selection, move, game switch, export/preferences, restart and shutdown on each operating system. Do not treat source-run Xvfb widget tests as frozen application acceptance.
+3. Inspect archive platform naming, contents, version/metadata, copied assets and SHA256 sidecars. Reject unsigned/incomplete/mismatched publication inputs according to existing release policy.
 
 **Exit:** four fully functional self-contained native archives meet gameplay, metadata and checksum acceptance.
 
 ### 4. Reconcile quality and reviews
 
-1. Run the entire required Python 3.10–3.13 matrix against current public-interface tests. Repair actual errors, obsolete declarations and config/version regressions without reintroducing Python game configuration.
-2. Reconcile outstanding #271 review threads against the actual current diff; resolve the source editor complaint using tracked removal and verified GUI settings tests. Explain outdated server/web requirements as owned by #422 rather than pretending they exist in #271.
+1. Rerun the entire required Python 3.10–3.13 matrix after final gameplay and packaging changes; investigate exact-head failures and skips against real production contracts.
+2. Reconcile the remaining outdated #271 review threads against the current desktop-only diff, preserving #422 ownership of unfinished server/web tasks; do not treat a superseded source file as delivered hosted functionality.
 3. Inspect source-derived AST/UML diagrams and regenerate projections from canonical notes, requests, decisions and active rules. Ensure all records describe implementation in the PR rather than desired future features.
 4. Perform independent implementation/security/gameplay review, obtain the maintainer's native approval of the final commit and merge #271 only when complete.
 
