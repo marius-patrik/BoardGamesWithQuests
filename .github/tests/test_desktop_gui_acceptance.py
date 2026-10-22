@@ -33,8 +33,7 @@ def window(monkeypatch, tmp_path):
 def click_canvas(window, row, col):
     canvas = window.game_view.board_view.canvas
     size = window.game_view.board_view.square_size
-    canvas.event_generate("<Button-1>", x=int((col + 0.5) * size),
-                          y=int((row + 0.5) * size))
+    canvas.event_generate("<Button-1>", x=int((col + 0.5) * size), y=int((row + 0.5) * size))
     window.update()
 
 
@@ -70,7 +69,11 @@ def test_preferences_dialog_saves_and_reloads_supported_non_executable_settings(
     window.update()
     assert window.game_view.board_view.square_size == 64
     assert window.game_view.board_view.show_coordinates is False
-    record = Path(__import__("os").environ["XDG_CONFIG_HOME"]) / "BoardGamesWithQuests" / "preferences.json"
+    record = (
+        Path(__import__("os").environ["XDG_CONFIG_HOME"])
+        / "BoardGamesWithQuests"
+        / "preferences.json"
+    )
     saved = json.loads(record.read_text())
     assert saved == {"board_size": 64, "show_coordinates": False}
     next_dialog = open_settings(window, window.window_controller)
@@ -87,17 +90,21 @@ def test_game_switch_through_visible_new_game_modal_resets_board(window):
     modals = [child for child in window.winfo_children() if isinstance(child, tk.Toplevel)]
     assert modals
     selector = next(
-        widget for widget in modals[-1].winfo_children()[0].winfo_children()
+        widget
+        for widget in modals[-1].winfo_children()[0].winfo_children()
         if isinstance(widget, __import__("tkinter").ttk.Combobox)
     )
     selector.set("checkers")
     modal_start = next(
-        nested for nested in modals[-1].winfo_children()[0].winfo_children()
+        nested
+        for nested in modals[-1].winfo_children()[0].winfo_children()
         if isinstance(nested, __import__("tkinter").ttk.Frame)
     )
-    start_button = next(widget for widget in modal_start.winfo_children()
-                        if isinstance(widget, __import__("tkinter").ttk.Button)
-                        and widget.cget("text") == "Start")
+    start_button = next(
+        widget
+        for widget in modal_start.winfo_children()
+        if isinstance(widget, __import__("tkinter").ttk.Button) and widget.cget("text") == "Start"
+    )
     start_button.invoke()
     window.update()
     controller = window.window_controller.game_controller
