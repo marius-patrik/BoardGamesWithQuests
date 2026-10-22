@@ -127,10 +127,7 @@ def test_english_draughts_forced_capture_updates_authoritative_history():
     perform(session, (2, 3), (3, 2))
     perform(session, (5, 0), (4, 1))
     available = session.legal_actions()
-    capture = [
-        move for move in available
-        if move["start"] == [3, 2] and move["hops"] == [[5, 0]]
-    ]
+    capture = [move for move in available if move["start"] == [3, 2] and move["hops"] == [[5, 0]]]
     assert capture, available
     state = perform(session, (3, 2), (5, 0))["state"]
     assert state["revision"] == 3
