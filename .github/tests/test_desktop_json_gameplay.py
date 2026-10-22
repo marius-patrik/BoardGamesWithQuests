@@ -165,7 +165,6 @@ def test_quest_rewards_are_awarded_exactly_once_through_gameplay_and_replay():
     assert DesktopSession.recover(fifth).snapshot() == fifth
 
 
-
 def test_castling_moves_the_rook_and_king_atomically():
     session = DesktopSession("chess")
     for start, end in (
@@ -178,8 +177,7 @@ def test_castling_moves_the_rook_and_king_atomically():
     ):
         perform(session, start, end)
     before = session.snapshot()
-    assert any(m["start"] == [7, 4] and m["hops"][-1] == [7, 6]
-               for m in session.legal_actions())
+    assert any(m["start"] == [7, 4] and m["hops"][-1] == [7, 6] for m in session.legal_actions())
     after = perform(session, (7, 4), (7, 6))["state"]
     assert square(after, [7, 4]) is None
     assert square(after, [7, 6])["kind"] == "king"

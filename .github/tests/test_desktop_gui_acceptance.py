@@ -115,7 +115,6 @@ def test_game_switch_through_visible_new_game_modal_resets_board(window):
     assert window.game_view.history.size() == 0
 
 
-
 def test_snapshot_export_from_real_window_is_replayable(window, tmp_path, monkeypatch):
     from view import player_game_view
 
@@ -124,7 +123,8 @@ def test_snapshot_export_from_real_window_is_replayable(window, tmp_path, monkey
     destination = tmp_path / "game.json"
     # Only the OS-owned save-file selector is replaced with the chosen path.
     monkeypatch.setattr(
-        player_game_view.filedialog, "asksaveasfilename",
+        player_game_view.filedialog,
+        "asksaveasfilename",
         lambda **kwargs: str(destination),
     )
     window.game_view.export_game()
@@ -135,16 +135,22 @@ def test_snapshot_export_from_real_window_is_replayable(window, tmp_path, monkey
 
 def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
     from model.game.preferences import (
-        PreferencesError, load_preferences, save_preferences,
+        PreferencesError,
+        load_preferences,
+        save_preferences,
     )
 
     base = tmp_path / "attack"
     base.mkdir()
     with pytest.raises(PreferencesError):
-        save_preferences({
-            "board_size": 56, "show_coordinates": True,
-            "quests": [{"python": "raise SystemExit"}],
-        }, base)
+        save_preferences(
+            {
+                "board_size": 56,
+                "show_coordinates": True,
+                "quests": [{"python": "raise SystemExit"}],
+            },
+            base,
+        )
     assert not list(base.iterdir())
     (base / "preferences.json").write_text(
         '{"board_size": 56, "show_coordinates": true, "rules": []}',
