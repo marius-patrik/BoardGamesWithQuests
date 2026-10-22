@@ -165,3 +165,51 @@ def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
     with pytest.raises(PreferencesError):
         save_preferences({"board_size": 56, "show_coordinates": True}, base)
     assert outside.read_text() == "untouched"
+
+
+
+def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch):
+    from model.game.persistence import load_session
+    from view import player_game_view
+
+    click_canvas(window, 6, 4)
+    click_canvas(window, 4, 4)
+    previous = window.window_controller.game_controller.session.snapshot()
+    saved = tmp_path / "saved.json"
+    monkeypatch.setattr(
+        player_game_view.filedialog, "asksaveasfilename", lambda **kwargs: str(saved)
+    )
+    window.game_view.export_game()
+    assert load_session(saved).snapshot() == previous
+    window.window_controller.game_controller.new_game("checkers")
+    window.game_view.reload()
+    assert window.window_controller.game_controller.session.game == "checkers"
+    monkeypatch.setattr(
+        player_game_view.filedialog, "askopenfilename", lambda **kwargs: str(saved)
+    )
+    window.game_view.open_game()
+    assert window.window_controller.game_controller.session.snapshot() == previous
+    assert window.window_controller.game_controller.session.game == "chess"
+    assert window.game_view.history.size() == 1
+
+
+def test_bad_saved_game_preserves_live_window_and_reports_error(window, tmp_path, monkeypatch):
+    from model.game.persistence import SessionFileError, load_session
+    from view import player_game_view
+
+    before = window.window_controller.game_controller.session.snapshot()
+    bad = tmp_path / "invalid.json"
+    bad.write_text('{"revision": 1, "revision": 99}', encoding="utf-8")
+    monkeypatch.setattr(
+        player_game_view.filedialog, "askopenfilename", lambda **kwargs: str(bad)
+    )
+    errors = []
+    monkeypatch.setattr(
+        player_game_view.messagebox, "showerror",
+        lambda _title, message, **kwargs: errors.append(str(message)),
+    )
+    window.game_view.open_game()
+    assert errors and "duplicate" in errors[0]
+    assert window.window_controller.game_controller.session.snapshot() == before
+    with pytest.raises(SessionFileError):
+        load_session(bad)

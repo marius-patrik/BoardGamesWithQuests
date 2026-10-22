@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from model.game.persistence import SessionFileError, load_session, save_session
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 from typing import Any
@@ -53,6 +54,9 @@ class PlayerGameView(ttk.Frame):
             ttk.Button(heading, text="Settings", command=self.on_settings).pack(
                 side="right", padx=(0, 6)
             )
+        ttk.Button(heading, text="Open game", command=self.open_game).pack(
+            side="right", padx=(0, 6)
+        )
         ttk.Button(heading, text="Export", command=self.export_game).pack(side="right", padx=(0, 6))
         ttk.Button(heading, text="Quit", command=self._quit).pack(side="right", padx=(0, 6))
 
@@ -174,23 +178,33 @@ class PlayerGameView(ttk.Frame):
         self.board_view.show_coordinates = values["show_coordinates"]
         self.board_view.refresh()
 
-    def export_game(self) -> None:
-        target = filedialog.asksaveasfilename(
-            parent=self,
-            defaultextension=".json",
-            filetypes=[("Game snapshots", "*.json")],
+    def open_game(self) -> None:
+        source = filedialog.askopenfilename(
+            parent=self, filetypes=[("Saved games", "*.json")]
         )
-        if not target:
+        if not source:
             return
         try:
-            # This is a complete self-contained replayable JSON export.
-            with open(target, "w", encoding="utf-8") as stream:
-                json.dump(self.session.snapshot(), stream, indent=2, sort_keys=True)
-                stream.write("\n")
-        except OSError as error:
+            restored = load_session(source)
+        except (OSError, SessionFileError, ValueError, TypeError) as error:
+            messagebox.showerror("Open game", str(error), parent=self)
+            return
+        self.window_controller.game_controller.session = restored
+        self.reload()
+        self.status.set(f"Restored {restored.game}.")
+
+    def export_game(self) -> None:
+        destination = filedialog.asksaveasfilename(
+            parent=self, defaultextension=".json", filetypes=[("Saved games", "*.json")]
+        )
+        if not destination:
+            return
+        try:
+            save_session(self.session, destination)
+        except (OSError, SessionFileError, ValueError) as error:
             messagebox.showerror("Export", str(error), parent=self)
             return
-        self.status.set(f"Exported game to {target}")
+        self.status.set(f"Exported game to {destination}")
 
     def _quit(self) -> None:
         self.stop_auto_refresh()
