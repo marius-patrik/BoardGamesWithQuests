@@ -2,12 +2,6 @@ name: Desktop JSON Gameplay Acceptance
 
 on:
   pull_request:
-    paths:
-      - "src/**"
-      - ".github/tests/test_desktop_json_gameplay.py"
-      - ".github/tests/test_desktop_gui_acceptance.py"
-      - ".github/workflows/desktop-gameplay.yml"
-      - "pyproject.toml"
   workflow_dispatch:
 
 permissions:
@@ -51,4 +45,4 @@ jobs:
           sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth
           python -m pip install -e . pytest
       - name: Exercise the actual board, modal and settings widgets
-        run: xvfb-run -a python -m pytest -q .github/tests/test_desktop_gui_acceptance.py
+        run: xvfb-run -a python -m pytest -q .github/tests/desktop_gui_acceptance.py
