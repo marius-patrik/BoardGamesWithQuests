@@ -3,7 +3,6 @@
 from typing import Any, List, Optional, Tuple
 
 
-
 class Piece:
     """Generic piece projection constructed from a validated game definition.
 

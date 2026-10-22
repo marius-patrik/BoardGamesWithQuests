@@ -1148,22 +1148,18 @@ flowchart LR
   n235b011ff366c2695 --> n2969f98530cf89702
   na8fb0e88ab99a5cc2["function_definition __init__"]
   n235b011ff366c2695 --> na8fb0e88ab99a5cc2
-  nef2bfdcc2f7e589eb["function_definition value_fields"]
+  nef2bfdcc2f7e589eb["function_definition is_within_bounds"]
   n235b011ff366c2695 --> nef2bfdcc2f7e589eb
-  n5c54d0b96c2d61567["function_definition set_dimensions"]
+  n5c54d0b96c2d61567["function_definition get_piece_at"]
   n235b011ff366c2695 --> n5c54d0b96c2d61567
-  n74984f7a844f0e108["function_definition is_within_bounds"]
+  n74984f7a844f0e108["function_definition set_piece_at"]
   n235b011ff366c2695 --> n74984f7a844f0e108
-  neca8b66531036e526["function_definition get_piece_at"]
+  neca8b66531036e526["function_definition move_piece"]
   n235b011ff366c2695 --> neca8b66531036e526
-  n62178cc7f2322ff50["function_definition set_piece_at"]
+  n62178cc7f2322ff50["function_definition replace_piece"]
   n235b011ff366c2695 --> n62178cc7f2322ff50
-  n22e0268f80efd211b["function_definition move_piece"]
+  n22e0268f80efd211b["function_definition apply_placement"]
   n235b011ff366c2695 --> n22e0268f80efd211b
-  n93bc897611f9c1041["function_definition replace_piece"]
-  n235b011ff366c2695 --> n93bc897611f9c1041
-  n62158dbd30f879698["function_definition apply_placement"]
-  n235b011ff366c2695 --> n62158dbd30f879698
   nbc087d7ed42cb12ec["board_queries.py"]
   n6aea57a87a15be9fd --> nbc087d7ed42cb12ec
   n56e5ada413a76533b["class_definition BoardQueries"]
@@ -1284,18 +1280,6 @@ flowchart LR
   n7b86c52633afa4d29 --> nd544d345ca31d3edc
   n23d5b0ceb571dd2a9["function_definition vectors"]
   n7b86c52633afa4d29 --> n23d5b0ceb571dd2a9
-  n967d4dc7e25efbd5c["field.py"]
-  n6aea57a87a15be9fd --> n967d4dc7e25efbd5c
-  nc7f96b2930dbf5134["class_definition Field"]
-  n967d4dc7e25efbd5c --> nc7f96b2930dbf5134
-  n4d4148aecd7893c07["function_definition __init__"]
-  n967d4dc7e25efbd5c --> n4d4148aecd7893c07
-  nd04fe300de59f2d2e["function_definition validate"]
-  n967d4dc7e25efbd5c --> nd04fe300de59f2d2e
-  n28ae49ea69ebec38a["function_definition __repr__"]
-  n967d4dc7e25efbd5c --> n28ae49ea69ebec38a
-  ne752b45002a7e41b4["function_definition field_values"]
-  n967d4dc7e25efbd5c --> ne752b45002a7e41b4
   n443a3cc7cc0ef1089["games.py"]
   n6aea57a87a15be9fd --> n443a3cc7cc0ef1089
   nc44ca3ec654826491["function_definition available_games"]
@@ -1626,44 +1610,36 @@ flowchart LR
   n13d1ed874aaea7bd5 --> n71a789e78353ce3e5
   n3023f4598bc654099["piece.py"]
   n71a789e78353ce3e5 --> n3023f4598bc654099
-  n8f2506cd0e3bded23["function_definition _vectors_from_text"]
-  n3023f4598bc654099 --> n8f2506cd0e3bded23
-  nc1a0cd42a16ba9709["function_definition _vectors_as_text"]
+  n94cb4dec3a765e0ec["class_definition Piece"]
+  n3023f4598bc654099 --> n94cb4dec3a765e0ec
+  nc1a0cd42a16ba9709["function_definition __init__"]
   n3023f4598bc654099 --> nc1a0cd42a16ba9709
-  nbb7febec06ac4a712["class_definition Piece"]
-  n3023f4598bc654099 --> nbb7febec06ac4a712
-  nf1524d0e8ec00ac40["function_definition __init__"]
+  n10a660885313c59d8["function_definition _symbol_for"]
+  n3023f4598bc654099 --> n10a660885313c59d8
+  nf1524d0e8ec00ac40["function_definition getDirections"]
   n3023f4598bc654099 --> nf1524d0e8ec00ac40
-  n14ee44bb78fb6e36f["function_definition value_fields"]
+  n14ee44bb78fb6e36f["function_definition getAttackDirections"]
   n3023f4598bc654099 --> n14ee44bb78fb6e36f
-  n211f9470f6efab0d5["function_definition apply_values"]
+  n211f9470f6efab0d5["function_definition getMaxSteps"]
   n3023f4598bc654099 --> n211f9470f6efab0d5
-  n845f554669e107673["function_definition _symbol_for"]
+  n845f554669e107673["function_definition getInitialVectors"]
   n3023f4598bc654099 --> n845f554669e107673
-  n43d3a2f25672576c6["function_definition getDirections"]
+  n43d3a2f25672576c6["function_definition getSymbol"]
   n3023f4598bc654099 --> n43d3a2f25672576c6
-  ndf0080ce695861f84["function_definition getAttackDirections"]
+  ndf0080ce695861f84["function_definition getFen"]
   n3023f4598bc654099 --> ndf0080ce695861f84
-  n259d334ccb66cff40["function_definition getMaxSteps"]
+  n259d334ccb66cff40["function_definition hasMoved"]
   n3023f4598bc654099 --> n259d334ccb66cff40
-  nd2230526008b869ae["function_definition getInitialVectors"]
+  nd2230526008b869ae["function_definition setMoved"]
   n3023f4598bc654099 --> nd2230526008b869ae
-  n2d7e19bf482a5c533["function_definition getSymbol"]
+  n2d7e19bf482a5c533["function_definition canJump"]
   n3023f4598bc654099 --> n2d7e19bf482a5c533
-  nc6373093a5051960b["function_definition getFen"]
+  nc6373093a5051960b["function_definition getColor"]
   n3023f4598bc654099 --> nc6373093a5051960b
-  na9fb5abd2c03c8353["function_definition hasMoved"]
+  na9fb5abd2c03c8353["function_definition getType"]
   n3023f4598bc654099 --> na9fb5abd2c03c8353
-  n67173b032122e6da6["function_definition setMoved"]
+  n67173b032122e6da6["function_definition getName"]
   n3023f4598bc654099 --> n67173b032122e6da6
-  na3df9aaac70757293["function_definition canJump"]
-  n3023f4598bc654099 --> na3df9aaac70757293
-  nd5c38cdd8a1ecac38["function_definition getColor"]
-  n3023f4598bc654099 --> nd5c38cdd8a1ecac38
-  n46ee94a3915aeb7c5["function_definition getType"]
-  n3023f4598bc654099 --> n46ee94a3915aeb7c5
-  nf34393c16586bd74a["function_definition getName"]
-  n3023f4598bc654099 --> nf34393c16586bd74a
   n19674d186673a22e3["view/"]
   n3627e9e02e3c9833b --> n19674d186673a22e3
   n676d3424d0c583c67["app.py"]
