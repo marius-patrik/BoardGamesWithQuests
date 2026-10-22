@@ -462,3 +462,12 @@ def test_auxiliary_temporary_target_must_fit_the_configured_board() -> None:
         )
     )
     unchanged_rejection(game(data), Move((5, 2), (5, 4)), TransitionError)
+
+
+
+def test_unimplemented_status_hook_cannot_be_enabled_as_a_game_rule():
+    """The desktop consumer must not accept declarative no-op hook names."""
+    data = config()
+    data["rules"].append(rule("status-only", "status", []))
+    with pytest.raises(ConfigurationError):
+        game(data)
