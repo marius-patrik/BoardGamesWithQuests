@@ -149,7 +149,6 @@ def test_reset_recovers_original_position_without_leaking_previous_moves():
     assert reset["events"] == []
 
 
-
 def test_quest_rewards_are_awarded_exactly_once_through_gameplay_and_replay():
     session = DesktopSession("chess")
     assert session.snapshot()["quest_scores"] == {"white": 0, "black": 0}

@@ -11,8 +11,13 @@ class QuestCard(ttk.Frame):
     """Display one immutable definition and participant's earned progress."""
 
     def __init__(
-        self, master: tk.Misc, name: str, progress: dict[str, Any],
-        *, description: str, reward: int,
+        self,
+        master: tk.Misc,
+        name: str,
+        progress: dict[str, Any],
+        *,
+        description: str,
+        reward: int,
     ) -> None:
         super().__init__(master, padding=(8, 4))
         ttk.Label(self, text=name, font=("TkDefaultFont", 10, "bold")).pack(anchor="w")
@@ -57,9 +62,11 @@ class QuestList(ttk.Frame):
         for player, name, active, target, completed in rows:
             definition = definitions[name]
             card = QuestCard(
-                self, f"{player}: {name}",
+                self,
+                f"{player}: {name}",
                 {"active": active, "target": target, "completed": completed},
-                description=definition["description"], reward=definition["reward"],
+                description=definition["description"],
+                reward=definition["reward"],
             )
             card.pack(fill="x", pady=2)
             self.cards.append(card)
