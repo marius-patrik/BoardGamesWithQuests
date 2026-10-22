@@ -71,3 +71,79 @@ def test_wrong_actor_does_not_mutate_game_state():
     with pytest.raises(TransitionError):
         session.submit("black", 0, chess_pawn_action(session), action_id="wrong-turn")
     assert session.snapshot() == baseline
+
+
+def perform(session, source, target, promotion=None):
+    """Play the actual exact legal intent exposed to the current participant."""
+    snapshot = session.snapshot()
+    actor = snapshot["participants"][str(snapshot["active_side"])]
+    matching = [
+        move for move in session.legal_actions()
+        if move["start"] == list(source)
+        and move["hops"][-1] == list(target)
+        and move["promotion"] == promotion
+    ]
+    assert len(matching) == 1, {
+        "from": source, "to": target, "available": session.legal_actions()
+    }
+    return session.submit(
+        actor, snapshot["revision"], {"type": "move", "move": matching[0]},
+        action_id=f"ply-{snapshot['revision'] + 1}",
+    )
+
+
+def test_scholars_mate_from_normal_chess_start_using_full_rulebook():
+    """Seven actual player turns must end at an authoritative checkmate result."""
+    session = DesktopSession("chess")
+    script = [
+        ((6, 4), (4, 4)),  # e4
+        ((1, 4), (3, 4)),  # ... e5
+        ((7, 3), (3, 7)),  # Qh5
+        ((0, 1), (2, 2)),  # ... Nc6
+        ((7, 5), (4, 2)),  # Bc4
+        ((0, 6), (2, 5)),  # ... Nf6
+        ((3, 7), (1, 5)),  # Qxf7#
+    ]
+    for start, end in script:
+        result = perform(session, start, end)
+    state = result["state"]
+    assert state["revision"] == len(script)
+    assert len(state["events"]) == len(script)
+    assert state["outcome"] is not None
+    assert state["outcome"]["kind"] == "win"
+    assert state["outcome"]["winner"] == "white"
+    with pytest.raises(TransitionError):
+        session.submit("black", state["revision"], {"type": "resign"})
+    assert DesktopSession.recover(state).snapshot() == state
+
+
+def test_english_draughts_forced_capture_updates_authoritative_history():
+    """A real opening must produce a mandatory short capture and deterministic replay."""
+    session = DesktopSession("checkers")
+    assert len(session.snapshot()["board"]) == 24
+    perform(session, (5, 0), (4, 1))
+    perform(session, (2, 3), (3, 2))
+    available = session.legal_actions()
+    capture = [
+        move for move in available
+        if move["start"] == [4, 1] and move["hops"] == [[2, 3]]
+    ]
+    assert capture, available
+    state = perform(session, (4, 1), (2, 3))["state"]
+    assert state["revision"] == 3
+    assert len(state["captured"]) == 1
+    assert state["captured"][0]["side"] == -1
+    assert square(state, [3, 2]) is None
+    assert square(state, [2, 3])["side"] == 1
+    assert DesktopSession.recover(state).snapshot() == state
+
+
+def test_reset_recovers_original_position_without_leaking_previous_moves():
+    session = DesktopSession("chess")
+    before = session.snapshot()
+    perform(session, (6, 4), (4, 4))
+    reset = session.reset()
+    assert reset["revision"] == 0
+    assert reset["game_id"] != before["game_id"]
+    assert reset["board"] == before["board"]
+    assert reset["events"] == []
