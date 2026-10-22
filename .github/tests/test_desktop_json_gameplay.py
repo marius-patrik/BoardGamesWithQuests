@@ -206,13 +206,15 @@ def test_en_passant_removes_the_correct_opponent_pawn_and_replays():
     assert DesktopSession.recover(after).snapshot() == after
 
 
-
 def test_real_installation_check_executes_both_bundled_game_openings():
     import subprocess
     import sys
+
     completed = subprocess.run(
         [sys.executable, "-m", "chesswithquests", "--check"],
-        capture_output=True, text=True, timeout=90,
+        capture_output=True,
+        text=True,
+        timeout=90,
     )
     assert completed.returncode == 0, completed.stderr
     assert "configurations: chess, checkers" not in completed.stdout or (

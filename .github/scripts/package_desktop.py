@@ -124,9 +124,7 @@ def smoke(bundle: Path, platform: str) -> None:
     # A frozen application must load its actual embedded JSON rulebooks and
     # perform a real versioned game transition, idempotent retry and replay.
     # The --windowed Windows binary has no console; inspect its exit code.
-    check = subprocess.run(
-        [str(executable), "--check"], cwd=ROOT, capture_output=True, timeout=90
-    )
+    check = subprocess.run([str(executable), "--check"], cwd=ROOT, capture_output=True, timeout=90)
     if check.returncode != 0:
         raise RuntimeError(
             f"Frozen application game diagnostic failed ({check.returncode}): "

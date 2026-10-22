@@ -69,10 +69,17 @@ def report_installation() -> str:
             raise ValueError(f"{name}: no playable opening actions")
         actor = opening["participants"][str(opening["active_side"])]
         request = {"type": "move", "move": moves[0]}
-        accepted = session.submit(actor, opening["revision"], request, action_id="installation-check")
+        accepted = session.submit(
+            actor, opening["revision"], request, action_id="installation-check"
+        )
         if accepted["state"]["revision"] != opening["revision"] + 1:
             raise ValueError(f"{name}: transition did not commit exactly once")
-        if session.submit(actor, opening["revision"], request, action_id="installation-check")["event"] != accepted["event"]:
+        if (
+            session.submit(actor, opening["revision"], request, action_id="installation-check")[
+                "event"
+            ]
+            != accepted["event"]
+        ):
             raise ValueError(f"{name}: identical action retry is not idempotent")
         if DesktopSession.recover(accepted["state"]).snapshot() != accepted["state"]:
             raise ValueError(f"{name}: installed session does not replay")
