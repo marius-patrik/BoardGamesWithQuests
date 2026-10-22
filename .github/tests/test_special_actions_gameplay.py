@@ -443,6 +443,9 @@ def test_auxiliary_temporary_target_must_fit_the_configured_board() -> None:
         "special_rights": {},
         "temporary_targets": {"passing": None},
     }
+    # This custom definition deliberately does not declare the chess-specific
+    # castling/en-passant state selected by the bundled repetition policy.
+    data.pop("position_identity", None)
     data["rules"].append(
         rule(
             "outside-target",
