@@ -17,8 +17,10 @@ class MoveValidator:
         if piece.canJump():
             return 1
         maximum = piece.getMaxSteps()
-        return max(1, min(maximum, max(board.rows, board.cols))) if maximum else max(
-            board.rows, board.cols
+        return (
+            max(1, min(maximum, max(board.rows, board.cols)))
+            if maximum
+            else max(board.rows, board.cols)
         )
 
     @staticmethod
@@ -70,13 +72,21 @@ class MoveValidator:
         for direction in quiet:
             if direction in attacks:
                 for target in self._ray(
-                    position, start_pos, direction[0], direction[1], limit,
+                    position,
+                    start_pos,
+                    direction[0],
+                    direction[1],
+                    limit,
                     can_jump=piece.canJump(),
                 ):
                     admit(target, quiet_allowed=True, capture_allowed=True)
             else:
                 for target in self._ray(
-                    position, start_pos, direction[0], direction[1], limit,
+                    position,
+                    start_pos,
+                    direction[0],
+                    direction[1],
+                    limit,
                     can_jump=piece.canJump(),
                 ):
                     if position.get_piece_at(target) is not None:
@@ -86,7 +96,11 @@ class MoveValidator:
             if direction in quiet:
                 continue
             for target in self._ray(
-                position, start_pos, direction[0], direction[1], limit,
+                position,
+                start_pos,
+                direction[0],
+                direction[1],
+                limit,
                 can_jump=piece.canJump(),
             ):
                 admit(target, quiet_allowed=False, capture_allowed=True)
@@ -102,9 +116,9 @@ class MoveValidator:
                     continue
                 if any(
                     position.get_piece_at(
-                        (start_pos[0] + (dr // steps) * index,
-                         start_pos[1] + (dc // steps) * index)
-                    ) is not None
+                        (start_pos[0] + (dr // steps) * index, start_pos[1] + (dc // steps) * index)
+                    )
+                    is not None
                     for index in range(1, steps)
                 ):
                     continue
@@ -112,7 +126,9 @@ class MoveValidator:
         return candidates
 
     def is_square_attacked(
-        self, target_square: tuple[int, int], by_color: int,
+        self,
+        target_square: tuple[int, int],
+        by_color: int,
         board: Board | None = None,
     ) -> bool:
         """True for geometrically attacked squares, including king-protected squares."""
@@ -128,7 +144,10 @@ class MoveValidator:
                     continue
                 for dr, dc in piece.getAttackDirections() or []:
                     for target in self._ray(
-                        position, (row, col), dr, dc,
+                        position,
+                        (row, col),
+                        dr,
+                        dc,
                         self._step_limit(piece, position),
                         can_jump=piece.canJump(),
                     ):

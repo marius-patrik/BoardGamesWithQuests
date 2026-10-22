@@ -39,9 +39,7 @@ class Move:
             raise ValueError("complete capture path must end at the destination")
         if start == landings[0]:
             raise ValueError("source and first landing cannot match")
-        if promotion is not None and (
-            type(promotion) is not str or not 1 <= len(promotion) <= 128
-        ):
+        if promotion is not None and (type(promotion) is not str or not 1 <= len(promotion) <= 128):
             raise ValueError("promotion must name a bounded configured kind")
         object.__setattr__(self, "start_pos", start)
         object.__setattr__(self, "hops", landings)
