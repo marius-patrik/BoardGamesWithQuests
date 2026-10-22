@@ -17,8 +17,7 @@ from view.start_modal import StartModal
 APPLICATION_TITLE = "BoardGamesWithQuests"
 
 
-def build_application(root: tk.Tk, game: str = DEFAULT_GAME,
-                      show_modal: bool = True) -> tk.Tk:
+def build_application(root: tk.Tk, game: str = DEFAULT_GAME, show_modal: bool = True) -> tk.Tk:
     root.title(f"{APPLICATION_TITLE} - {game}")
     style = ttk.Style(root)
     style.theme_use(style.theme_names()[0])
@@ -28,7 +27,8 @@ def build_application(root: tk.Tk, game: str = DEFAULT_GAME,
     shell = ttk.Frame(root)
     shell.pack(fill="both", expand=True)
     view = PlayerGameView(
-        shell, controller,
+        shell,
+        controller,
         on_settings=lambda: open_settings(root, controller),
         on_new_game_request=lambda: _offer_modal(root, games, controller),
     )

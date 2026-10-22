@@ -33,8 +33,7 @@ class QuestList(ttk.Frame):
     def refresh(self, state: dict[str, Any]) -> None:
         progress = state.get("quest_progress", {})
         rows = tuple(
-            (player, quest_id, record.get("active"), record.get("target"),
-             record.get("completed"))
+            (player, quest_id, record.get("active"), record.get("target"), record.get("completed"))
             for player, quests in sorted(progress.items())
             for quest_id, record in sorted(quests.items())
         )[: self.limit]
@@ -48,8 +47,10 @@ class QuestList(ttk.Frame):
             ttk.Label(self, text="No active quests.").pack(anchor="w")
             return
         for player, name, active, target, completed in rows:
-            card = QuestCard(self, f"{player}: {name}", {
-                "active": active, "target": target, "completed": completed
-            })
+            card = QuestCard(
+                self,
+                f"{player}: {name}",
+                {"active": active, "target": target, "completed": completed},
+            )
             card.pack(fill="x", pady=2)
             self.cards.append(card)

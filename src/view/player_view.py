@@ -24,12 +24,8 @@ class PlayerView(ttk.Frame):
         self.clock = tk.StringVar(value=format_seconds(0))
         self.captured = tk.StringVar(value="Taken:")
         self.lost = tk.StringVar(value="Lost:")
-        ttk.Label(self, textvariable=self.name, font=("TkDefaultFont", 13, "bold")).pack(
-            anchor="w"
-        )
-        ttk.Label(self, textvariable=self.clock, font=("TkDefaultFont", 16)).pack(
-            anchor="w"
-        )
+        ttk.Label(self, textvariable=self.name, font=("TkDefaultFont", 13, "bold")).pack(anchor="w")
+        ttk.Label(self, textvariable=self.clock, font=("TkDefaultFont", 16)).pack(anchor="w")
         ttk.Label(self, textvariable=self.captured).pack(anchor="w")
         ttk.Label(self, textvariable=self.lost).pack(anchor="w")
 
@@ -37,9 +33,7 @@ class PlayerView(ttk.Frame):
         participant = state["participants"][str(self.side)]
         self.name.set(f"{'White' if self.side == 1 else 'Black'} · {participant}")
         self.clock.set(format_seconds((remaining_ms[str(self.side)] + 999) // 1000))
-        taken = [entry["kind"] for entry in state["captured"]
-                 if entry["side"] == -self.side]
-        lost = [entry["kind"] for entry in state["captured"]
-                if entry["side"] == self.side]
+        taken = [entry["kind"] for entry in state["captured"] if entry["side"] == -self.side]
+        lost = [entry["kind"] for entry in state["captured"] if entry["side"] == self.side]
         self.captured.set("Taken: " + ", ".join(taken) if taken else "Taken:")
         self.lost.set("Lost: " + ", ".join(lost) if lost else "Lost:")

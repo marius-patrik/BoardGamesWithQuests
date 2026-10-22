@@ -45,19 +45,16 @@ class PlayerGameView(ttk.Frame):
     def _build_layout(self, square_size: int) -> None:
         heading = ttk.Frame(self)
         heading.pack(fill="x")
-        ttk.Label(heading, text="BoardGamesWithQuests",
-                  font=("TkDefaultFont", 16, "bold")).pack(side="left")
+        ttk.Label(heading, text="BoardGamesWithQuests", font=("TkDefaultFont", 16, "bold")).pack(
+            side="left"
+        )
         ttk.Button(heading, text="New game", command=self.on_new_game).pack(side="right")
         if self.on_settings is not None:
             ttk.Button(heading, text="Settings", command=self.on_settings).pack(
                 side="right", padx=(0, 6)
             )
-        ttk.Button(heading, text="Export", command=self.export_game).pack(
-            side="right", padx=(0, 6)
-        )
-        ttk.Button(heading, text="Quit", command=self._quit).pack(
-            side="right", padx=(0, 6)
-        )
+        ttk.Button(heading, text="Export", command=self.export_game).pack(side="right", padx=(0, 6))
+        ttk.Button(heading, text="Quit", command=self._quit).pack(side="right", padx=(0, 6))
 
         self.top_player = PlayerView(self, -1)
         self.top_player.pack(fill="x")
@@ -65,15 +62,14 @@ class PlayerGameView(ttk.Frame):
         body.pack(fill="both", expand=True)
         left = ttk.Frame(body)
         left.pack(side="left", fill="both", expand=True)
-        ttk.Label(left, textvariable=self.turn, font=("TkDefaultFont", 12)).pack(
-            anchor="w"
-        )
+        ttk.Label(left, textvariable=self.turn, font=("TkDefaultFont", 12)).pack(anchor="w")
         try:
             config = load_preferences()
         except PreferencesError:
             config = dict(DEFAULTS)
         self.board_view = BoardView(
-            left, self.session.board_projection(),
+            left,
+            self.session.board_projection(),
             on_square_clicked=self.on_square_clicked,
             square_size=config["board_size"],
             show_coordinates=config["show_coordinates"],
@@ -84,14 +80,10 @@ class PlayerGameView(ttk.Frame):
 
         right = ttk.Frame(body, padding=(12, 0))
         right.pack(side="left", fill="both", expand=True)
-        ttk.Label(right, text="Quests", font=("TkDefaultFont", 12, "bold")).pack(
-            anchor="w"
-        )
+        ttk.Label(right, text="Quests", font=("TkDefaultFont", 12, "bold")).pack(anchor="w")
         self.quest_list = QuestList(right)
         self.quest_list.pack(fill="both", expand=True)
-        ttk.Label(right, text="Moves", font=("TkDefaultFont", 12, "bold")).pack(
-            anchor="w"
-        )
+        ttk.Label(right, text="Moves", font=("TkDefaultFont", 12, "bold")).pack(anchor="w")
         self.history = tk.Listbox(right, height=10, width=28)
         self.history.pack(fill="both", expand=True)
         ttk.Label(self, textvariable=self.status, relief="sunken", anchor="w").pack(
@@ -108,21 +100,17 @@ class PlayerGameView(ttk.Frame):
             ]
             choice = simpledialog.askinteger(
                 "Choose move",
-                "Select a complete capture route or promotion:\n"
-                + "\n".join(descriptions),
+                "Select a complete capture route or promotion:\n" + "\n".join(descriptions),
                 parent=self,
-                minvalue=1, maxvalue=len(options),
+                minvalue=1,
+                maxvalue=len(options),
             )
             if choice is not None:
-                result = self.window_controller.game_controller.submit_move(
-                    options[choice - 1]
-                )
+                result = self.window_controller.game_controller.submit_move(options[choice - 1])
                 if result["action"] == "moved":
                     self.window_controller.set_status("Move played.")
         controller = self.window_controller.game_controller
-        self.board_view.set_selection(
-            controller.selected_square, controller.highlighted_moves
-        )
+        self.board_view.set_selection(controller.selected_square, controller.highlighted_moves)
         if result["action"] == "invalid":
             self.status.set(result.get("message", "Invalid move."))
         self.refresh()
@@ -188,7 +176,8 @@ class PlayerGameView(ttk.Frame):
 
     def export_game(self) -> None:
         target = filedialog.asksaveasfilename(
-            parent=self, defaultextension=".json",
+            parent=self,
+            defaultextension=".json",
             filetypes=[("Game snapshots", "*.json")],
         )
         if not target:
