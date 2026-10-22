@@ -11,15 +11,16 @@ from model.game.session import DesktopSession
 def chess_pawn_action(session):
     return {
         "type": "move",
-        "move": next(move for move in session.legal_actions()
-                     if move["start"] == [6, 4] and move["hops"] == [[5, 4]]),
+        "move": next(
+            move
+            for move in session.legal_actions()
+            if move["start"] == [6, 4] and move["hops"] == [[5, 4]]
+        ),
     }
 
 
 def square(snapshot, coordinate):
-    return next(
-        (entry for entry in snapshot["board"] if entry["square"] == coordinate), None
-    )
+    return next((entry for entry in snapshot["board"] if entry["square"] == coordinate), None)
 
 
 def test_desktop_gameplay_actions_retry_stale_recovery_and_reset():
