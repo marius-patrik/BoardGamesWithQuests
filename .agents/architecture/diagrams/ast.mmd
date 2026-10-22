@@ -704,6 +704,10 @@ flowchart LR
   nfc5161158ee90ee7f --> nea385ebe9b2e2e5c0
   nd632930d4e0c88eab["function_definition test_hostile_preferences_are_not_accepted_or_executed"]
   nfc5161158ee90ee7f --> nd632930d4e0c88eab
+  n767e653167a3a9255["function_definition test_export_and_reopen_real_game_after_switch"]
+  nfc5161158ee90ee7f --> n767e653167a3a9255
+  n7fa88505d85be07b5["function_definition test_bad_saved_game_preserves_live_window_and_reports_error"]
+  nfc5161158ee90ee7f --> n7fa88505d85be07b5
   nd6487c9d1884235b7["docs_site_acceptance.py"]
   nc9f5868186eb03f66 --> nd6487c9d1884235b7
   n3cc24defd97d2b5a4["function_definition test_repository_navigation_and_every_file_page"]
@@ -1584,6 +1588,16 @@ flowchart LR
   ndd830c299e2bf21dc --> n69419d9dd1d8141c8
   nc3ff0fa91146b40ac["function_definition resolve_outcome"]
   ndd830c299e2bf21dc --> nc3ff0fa91146b40ac
+  nf7724c318a1fa4092["persistence.py"]
+  n6aea57a87a15be9fd --> nf7724c318a1fa4092
+  n6212767a5c383eb85["class_definition SessionFileError"]
+  nf7724c318a1fa4092 --> n6212767a5c383eb85
+  n7c4faebfecbc7dbfb["function_definition _unique_properties"]
+  nf7724c318a1fa4092 --> n7c4faebfecbc7dbfb
+  n508577ee14409baff["function_definition load_session"]
+  nf7724c318a1fa4092 --> n508577ee14409baff
+  n9847cc4b177468210["function_definition save_session"]
+  nf7724c318a1fa4092 --> n9847cc4b177468210
   n19ad7780742aba88f["preferences.py"]
   n6aea57a87a15be9fd --> n19ad7780742aba88f
   n31c4ec0d9592c782e["class_definition PreferencesError"]
@@ -1844,18 +1858,20 @@ flowchart LR
   n8a992638c42fe6679 --> n4f1bdbba5988ce973
   n5fdceb72018feb16a["function_definition apply_preferences"]
   n8a992638c42fe6679 --> n5fdceb72018feb16a
-  na0c730b8f503b9b47["function_definition export_game"]
+  na0c730b8f503b9b47["function_definition open_game"]
   n8a992638c42fe6679 --> na0c730b8f503b9b47
-  n2a9ea6567a33b47fa["function_definition _quit"]
+  n2a9ea6567a33b47fa["function_definition export_game"]
   n8a992638c42fe6679 --> n2a9ea6567a33b47fa
-  n91bf7e2fa40db9cd9["function_definition stop_auto_refresh"]
+  n91bf7e2fa40db9cd9["function_definition _quit"]
   n8a992638c42fe6679 --> n91bf7e2fa40db9cd9
-  n439e230728c690a5a["function_definition start_auto_refresh"]
+  n439e230728c690a5a["function_definition stop_auto_refresh"]
   n8a992638c42fe6679 --> n439e230728c690a5a
-  n0eaff7c692a83a2b2["function_definition _auto_refresh"]
+  n0eaff7c692a83a2b2["function_definition start_auto_refresh"]
   n8a992638c42fe6679 --> n0eaff7c692a83a2b2
-  n235fe4e42ba9701f9["function_definition destroy"]
+  n235fe4e42ba9701f9["function_definition _auto_refresh"]
   n8a992638c42fe6679 --> n235fe4e42ba9701f9
+  n5d8cdd2cfcac03f9e["function_definition destroy"]
+  n8a992638c42fe6679 --> n5d8cdd2cfcac03f9e
   n1ce2d2fa47f167aa0["player_view.py"]
   n19674d186673a22e3 --> n1ce2d2fa47f167aa0
   n127a020b096f9b48a["function_definition format_seconds"]

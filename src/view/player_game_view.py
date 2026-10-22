@@ -179,9 +179,7 @@ class PlayerGameView(ttk.Frame):
         self.board_view.refresh()
 
     def open_game(self) -> None:
-        source = filedialog.askopenfilename(
-            parent=self, filetypes=[("Saved games", "*.json")]
-        )
+        source = filedialog.askopenfilename(parent=self, filetypes=[("Saved games", "*.json")])
         if not source:
             return
         try:

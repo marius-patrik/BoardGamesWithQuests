@@ -167,7 +167,6 @@ def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
     assert outside.read_text() == "untouched"
 
 
-
 def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch):
     from model.game.persistence import load_session
     from view import player_game_view
@@ -184,9 +183,7 @@ def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch)
     window.window_controller.game_controller.new_game("checkers")
     window.game_view.reload()
     assert window.window_controller.game_controller.session.game == "checkers"
-    monkeypatch.setattr(
-        player_game_view.filedialog, "askopenfilename", lambda **kwargs: str(saved)
-    )
+    monkeypatch.setattr(player_game_view.filedialog, "askopenfilename", lambda **kwargs: str(saved))
     window.game_view.open_game()
     assert window.window_controller.game_controller.session.snapshot() == previous
     assert window.window_controller.game_controller.session.game == "chess"
@@ -200,12 +197,11 @@ def test_bad_saved_game_preserves_live_window_and_reports_error(window, tmp_path
     before = window.window_controller.game_controller.session.snapshot()
     bad = tmp_path / "invalid.json"
     bad.write_text('{"revision": 1, "revision": 99}', encoding="utf-8")
-    monkeypatch.setattr(
-        player_game_view.filedialog, "askopenfilename", lambda **kwargs: str(bad)
-    )
+    monkeypatch.setattr(player_game_view.filedialog, "askopenfilename", lambda **kwargs: str(bad))
     errors = []
     monkeypatch.setattr(
-        player_game_view.messagebox, "showerror",
+        player_game_view.messagebox,
+        "showerror",
         lambda _title, message, **kwargs: errors.append(str(message)),
     )
     window.game_view.open_game()
