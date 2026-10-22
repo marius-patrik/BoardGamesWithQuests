@@ -1270,9 +1270,7 @@ class GameManager:
         # repetition/quest-history cost for moves that never get committed.
         # Quest effects cannot affect authorization: they are applied only
         # after a complete accepted move has passed every failure boundary.
-        if not preview and (
-            self._evaluation is None or not self._evaluation.identity_probe_depth
-        ):
+        if not preview and (self._evaluation is None or not self._evaluation.identity_probe_depth):
             state["position_history"].append(self._position_key(state))
         if preview or not self.definition.quests:
             return state, board, captures, effects, event
