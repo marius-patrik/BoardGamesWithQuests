@@ -42,23 +42,24 @@ class SettingsDialog:
         ttk.Spinbox(body, from_=32, to=88, textvariable=self.size, width=7).pack(
             anchor="w", pady=(2, 8)
         )
-        ttk.Checkbutton(body, text="Show board coordinates",
-                        variable=self.coordinates).pack(anchor="w")
+        ttk.Checkbutton(body, text="Show board coordinates", variable=self.coordinates).pack(
+            anchor="w"
+        )
         if warning:
             ttk.Label(body, text=warning, wraplength=300).pack(anchor="w", pady=8)
         buttons = ttk.Frame(body)
         buttons.pack(fill="x", pady=(12, 0))
         ttk.Button(buttons, text="Save", command=self.save).pack(side="left")
-        ttk.Button(buttons, text="Cancel", command=self.close).pack(
-            side="left", padx=(8, 0)
-        )
+        ttk.Button(buttons, text="Cancel", command=self.close).pack(side="left", padx=(8, 0))
 
     def save(self) -> None:
         try:
-            values = save_preferences({
-                "board_size": self.size.get(),
-                "show_coordinates": self.coordinates.get(),
-            })
+            values = save_preferences(
+                {
+                    "board_size": self.size.get(),
+                    "show_coordinates": self.coordinates.get(),
+                }
+            )
         except (ValueError, tk.TclError, OSError) as error:
             messagebox.showerror("Settings", str(error), parent=self.window)
             return

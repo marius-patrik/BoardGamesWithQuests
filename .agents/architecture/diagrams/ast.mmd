@@ -2898,11 +2898,11 @@ flowchart LR
   n967d4dc7e25efbd5c --> ne752b45002a7e41b4
   n443a3cc7cc0ef1089["games.py"]
   n6aea57a87a15be9fd --> n443a3cc7cc0ef1089
-  nc44ca3ec654826491["function_definition games_root"]
+  nc44ca3ec654826491["function_definition available_games"]
   n443a3cc7cc0ef1089 --> nc44ca3ec654826491
-  n7770ccb5b6a0548de["function_definition available_games"]
+  n7770ccb5b6a0548de["function_definition configuration_path"]
   n443a3cc7cc0ef1089 --> n7770ccb5b6a0548de
-  n2ecf7c09d1408aa62["function_definition configuration_path"]
+  n2ecf7c09d1408aa62["function_definition games_root"]
   n443a3cc7cc0ef1089 --> n2ecf7c09d1408aa62
   ndd9f8a7d0cc70ff6b["hooks.py"]
   n6aea57a87a15be9fd --> ndd9f8a7d0cc70ff6b
@@ -3106,6 +3106,20 @@ flowchart LR
   n9f927cc47989ee348 --> n563fec07312360c49
   n3fb22d080c80eae1e["function_definition getEloRating"]
   n9f927cc47989ee348 --> n3fb22d080c80eae1e
+  n19ad7780742aba88f["preferences.py"]
+  n6aea57a87a15be9fd --> n19ad7780742aba88f
+  n31c4ec0d9592c782e["class_definition PreferencesError"]
+  n19ad7780742aba88f --> n31c4ec0d9592c782e
+  na0cb561fa617be3e2["function_definition preferences_directory"]
+  n19ad7780742aba88f --> na0cb561fa617be3e2
+  n79298de9c3228b4be["function_definition validate_preferences"]
+  n19ad7780742aba88f --> n79298de9c3228b4be
+  n394183565e777aaa7["function_definition _checked_directory"]
+  n19ad7780742aba88f --> n394183565e777aaa7
+  ndded9e61b425e4771["function_definition load_preferences"]
+  n19ad7780742aba88f --> ndded9e61b425e4771
+  n44081cf5e30dfb9f8["function_definition save_preferences"]
+  n19ad7780742aba88f --> n44081cf5e30dfb9f8
   na9429fbe287d4d6bc["quest.py"]
   n6aea57a87a15be9fd --> na9429fbe287d4d6bc
   nf3f814873404d24ed["class_definition Quest"]
@@ -3896,82 +3910,10 @@ flowchart LR
   n94cd813570fa898d5 --> nd964b4ca427ad3c3d
   nee58033c588dc196f["function_definition __init__"]
   n94cd813570fa898d5 --> nee58033c588dc196f
-  n844a3ca2a36287197["function_definition _build_selector"]
+  n844a3ca2a36287197["function_definition save"]
   n94cd813570fa898d5 --> n844a3ca2a36287197
-  ncd061682ec8dcd62f["function_definition configuration_names"]
+  ncd061682ec8dcd62f["function_definition close"]
   n94cd813570fa898d5 --> ncd061682ec8dcd62f
-  n31a45ad5b6e6e7e48["function_definition _selected"]
-  n94cd813570fa898d5 --> n31a45ad5b6e6e7e48
-  n54cd24b76a96cb9c9["function_definition add_configuration"]
-  n94cd813570fa898d5 --> n54cd24b76a96cb9c9
-  n8384f34d94f663bc4["function_definition rename_configuration"]
-  n94cd813570fa898d5 --> n8384f34d94f663bc4
-  n6dba648bd5c1b3c85["function_definition delete_configuration"]
-  n94cd813570fa898d5 --> n6dba648bd5c1b3c85
-  ndde5d994015e98631["function_definition _build_sections"]
-  n94cd813570fa898d5 --> ndde5d994015e98631
-  n8b30c4cf035bc3b97["function_definition _rebuild"]
-  n94cd813570fa898d5 --> n8b30c4cf035bc3b97
-  nad829eec4acd405d9["function_definition _tab"]
-  n94cd813570fa898d5 --> nad829eec4acd405d9
-  n93f11863b41e5a308["function_definition _build_board_tab"]
-  n94cd813570fa898d5 --> n93f11863b41e5a308
-  n9ef008f48566c503a["function_definition _build_pieces_tab"]
-  n94cd813570fa898d5 --> n9ef008f48566c503a
-  nf0a3a2ef74d83f8ca["function_definition _build_rules_tab"]
-  n94cd813570fa898d5 --> nf0a3a2ef74d83f8ca
-  na525a89b3676e1594["function_definition _build_quests_tab"]
-  n94cd813570fa898d5 --> na525a89b3676e1594
-  nfc002e5ddc08aa2dc["function_definition _build_clocks_tab"]
-  n94cd813570fa898d5 --> nfc002e5ddc08aa2dc
-  na57ce948c7c71c188["function_definition _frame"]
-  n94cd813570fa898d5 --> na57ce948c7c71c188
-  nfdedf964575919d6c["function_definition _add_fields"]
-  n94cd813570fa898d5 --> nfdedf964575919d6c
-  n50fbefd8117782a7d["function_definition _add_field"]
-  n94cd813570fa898d5 --> n50fbefd8117782a7d
-  nb91cec6e49c825e9d["function_definition _add_edit_button"]
-  n94cd813570fa898d5 --> nb91cec6e49c825e9d
-  n368e4ecd393541b06["function_definition _add_new_source"]
-  n94cd813570fa898d5 --> n368e4ecd393541b06
-  nedee05930d5cab00f["function_definition create_source"]
-  n94cd813570fa898d5 --> nedee05930d5cab00f
-  n7d0f891600d6a580f["function_definition open_editor"]
-  n94cd813570fa898d5 --> n7d0f891600d6a580f
-  n04e10c059eba92627["function_definition values"]
-  n94cd813570fa898d5 --> n04e10c059eba92627
-  ne21f5f3f33aee8166["function_definition section_values"]
-  n94cd813570fa898d5 --> ne21f5f3f33aee8166
-  nfa3ae29c86ff48653["decorated_definition"]
-  n94cd813570fa898d5 --> nfa3ae29c86ff48653
-  n99fee30bf65d34402["function_definition _collect"]
-  n94cd813570fa898d5 --> n99fee30bf65d34402
-  n9399ef01932cab175["function_definition save"]
-  n94cd813570fa898d5 --> n9399ef01932cab175
-  neebe5d510c859e729["function_definition reset"]
-  n94cd813570fa898d5 --> neebe5d510c859e729
-  n2af2bf3f0caca74ed["function_definition cancel"]
-  n94cd813570fa898d5 --> n2af2bf3f0caca74ed
-  ne2aaf283f3cd67c44["function_definition close"]
-  n94cd813570fa898d5 --> ne2aaf283f3cd67c44
-  nefc4c01933b19d8cb["function_definition wait"]
-  n94cd813570fa898d5 --> nefc4c01933b19d8cb
-  n97d17768c8a837357["function_definition _apply"]
-  n94cd813570fa898d5 --> n97d17768c8a837357
-  nde0cb353eb9950c12["function_definition _declared_by"]
-  n94cd813570fa898d5 --> nde0cb353eb9950c12
-  n79809bee6c64a1189["function_definition _rule_parameters"]
-  n94cd813570fa898d5 --> n79809bee6c64a1189
-  n619d5efe55b8bcd93["function_definition _safe_fields"]
-  n94cd813570fa898d5 --> n619d5efe55b8bcd93
-  na1bc8f1dfb26d4c8d["function_definition _probe"]
-  n94cd813570fa898d5 --> na1bc8f1dfb26d4c8d
-  n44cd0c4ffaaee113c["function_definition _names_in"]
-  n94cd813570fa898d5 --> n44cd0c4ffaaee113c
-  n5f6b0c3f954638264["function_definition _unused_name"]
-  n94cd813570fa898d5 --> n5f6b0c3f954638264
-  ndc8ceea32fc9a9080["function_definition _ask"]
-  n94cd813570fa898d5 --> ndc8ceea32fc9a9080
   n15ae2896b370f4ab7["start_modal.py"]
   n19674d186673a22e3 --> n15ae2896b370f4ab7
   n8487cf439f6bc2773["class_definition StartModal"]
