@@ -1,98 +1,55 @@
-"""The quest cards.
+"""Player-visible quest cards rendered from authoritative JSON progress."""
 
-Each quest in play is shown as a card: what it asks, how far along it is, and what it pays. The
-card reads the quest and never changes it, so what a player sees is what the rules believe.
-"""
+from __future__ import annotations
 
 import tkinter as tk
 from tkinter import ttk
-from typing import List
-
-from model.game.quest import Quest
-from model.misc.quest_manager import QuestManager
+from typing import Any
 
 
 class QuestCard(ttk.Frame):
-    """One quest: its name, its progress, and its reward."""
+    """Read-only reward and progress for one declared quest and participant."""
 
-    def __init__(self, master: tk.Misc, quest: Quest):
-        """Build a card for a quest.
-
-        Args:
-            master: The widget to build into.
-            quest: The `Quest` this card is about.
-        """
+    def __init__(self, master: tk.Misc, name: str, progress: dict[str, Any]) -> None:
         super().__init__(master, padding=(8, 4))
-        self.quest = quest
-
-        self.title = tk.StringVar()
-        self.progress = tk.StringVar()
-        self.reward = tk.StringVar()
-
-        heading = ttk.Frame(self)
-        heading.pack(fill="x")
-        ttk.Label(heading, textvariable=self.title, font=("TkDefaultFont", 11, "bold")).pack(
-            side="left"
+        ttk.Label(self, text=name, font=("TkDefaultFont", 10, "bold")).pack(anchor="w")
+        current = progress.get("active", 0)
+        target = progress.get("target", 1)
+        completed = progress.get("completed", False)
+        ttk.Label(self, text=f"{current}/{target} · {'Complete' if completed else 'Active'}").pack(
+            anchor="w"
         )
-        ttk.Label(heading, textvariable=self.reward).pack(side="right")
-
-        ttk.Label(self, textvariable=self.progress).pack(anchor="w")
-        self.refresh()
-
-    def refresh(self) -> None:
-        """Redraw this card from the quest as it now stands.
-
-        Returns:
-            None
-        """
-        current, target = self.quest.progress()
-        done = self.quest.validate()
-        self.title.set(f"{'✓' if done else '○'} {self.quest.name}")
-        self.progress.set(self.quest.description)
-        self.reward.set(f"{current}/{target}  ·  {self.quest.reward} pts")
 
 
 class QuestList(ttk.Frame):
-    """Every quest in play, as a column of cards."""
+    """Display active quests without invoking executable quest classes."""
 
-    def __init__(self, master: tk.Misc, quest_manager: QuestManager, limit: int = 6):
-        """Build the list.
-
-        Args:
-            master: The widget to build into.
-            quest_manager: The `QuestManager` whose quests are shown.
-            limit: How many cards to show at once, so a long roster does not fill the window.
-        """
+    def __init__(self, master: tk.Misc, limit: int = 6) -> None:
         super().__init__(master, padding=(8, 4))
-        self.quest_manager = quest_manager
         self.limit = limit
-        self.cards: List[QuestCard] = []
-        self.rebuild()
+        self._last: tuple[Any, ...] | None = None
+        self.cards: list[QuestCard] = []
 
-    def rebuild(self) -> None:
-        """Build one card per quest currently in play.
-
-        Returns:
-            None
-        """
+    def refresh(self, state: dict[str, Any]) -> None:
+        progress = state.get("quest_progress", {})
+        rows = tuple(
+            (player, quest_id, record.get("active"), record.get("target"),
+             record.get("completed"))
+            for player, quests in sorted(progress.items())
+            for quest_id, record in sorted(quests.items())
+        )[: self.limit]
+        if rows == self._last:
+            return
+        self._last = rows
         for card in self.cards:
             card.destroy()
         self.cards = []
-        for quest in self.quest_manager.in_play()[: self.limit]:
-            card = QuestCard(self, quest)
+        if not rows:
+            ttk.Label(self, text="No active quests.").pack(anchor="w")
+            return
+        for player, name, active, target, completed in rows:
+            card = QuestCard(self, f"{player}: {name}", {
+                "active": active, "target": target, "completed": completed
+            })
             card.pack(fill="x", pady=2)
             self.cards.append(card)
-
-    def refresh(self) -> None:
-        """Redraw every card, and pick up any quest that has come into play.
-
-        Returns:
-            None
-        """
-        shown = {card.quest for card in self.cards}
-        current = self.quest_manager.in_play()
-        if len(current[: self.limit]) != len(self.cards) or shown != set(current[: self.limit]):
-            self.rebuild()
-            return
-        for card in self.cards:
-            card.refresh()

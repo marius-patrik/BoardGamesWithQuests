@@ -1,44 +1,23 @@
-"""The whole game, on screen.
+"""Tkinter gameplay sourced exclusively from detached JSON session snapshots."""
 
-`PlayerGameView` is the window's arrangement: both player panels, the board, the turn
-indicator, the move history, the quest cards and the status footer. It owns the refresh and
-nothing else — every click goes to the controller and every redraw reads the model.
-"""
+from __future__ import annotations
 
+import json
 import tkinter as tk
-from tkinter import ttk
-from typing import Optional, Tuple
+from tkinter import filedialog, messagebox, simpledialog, ttk
+from typing import Any
 
 from controller.window_controller import WindowController
-from model.game.manager import GameManager
-from model.misc.notation import pos_to_algebraic
+from model.game.preferences import DEFAULTS, PreferencesError, load_preferences
 from view.game_view import BoardView
 from view.player_view import PlayerView
 from view.quest_view import QuestList
 
-#: How often the window redraws itself, in milliseconds. Clocks and quests both change without
-#: a click, so the view cannot wait for one.
 REFRESH_INTERVAL_MS = 500
-
-#: The states in which the game is over and no further move may be played.
-TERMINAL_STATES = (
-    GameManager.STATE_TIMEOUT,
-    GameManager.STATE_CHECKMATE,
-    GameManager.STATE_STALEMATE,
-)
-
-#: The state a game can be in, and what the footer says about it.
-STATE_LABELS = {
-    GameManager.STATE_TIMEOUT: "Time is up.",
-    GameManager.STATE_CHECKMATE: "Checkmate.",
-    GameManager.STATE_STALEMATE: "Stalemate — the game is drawn.",
-    GameManager.STATE_CHECK: "Check.",
-    GameManager.STATE_IN_PROGRESS: "",
-}
 
 
 class PlayerGameView(ttk.Frame):
-    """The playing window: panels, board, history, quests and a status footer."""
+    """Game board, participants, quests and move history; no independent authority."""
 
     def __init__(
         self,
@@ -47,277 +26,213 @@ class PlayerGameView(ttk.Frame):
         square_size: int = 56,
         on_settings=None,
         on_new_game_request=None,
-    ):
-        """Build the window.
-
-        Args:
-            master: The widget to build into.
-            window_controller: The controller every click and every refresh goes through.
-            square_size: The width and height of one board square, in pixels.
-        """
+    ) -> None:
         super().__init__(master, padding=10)
         self.window_controller = window_controller
         self.on_settings = on_settings
         self.on_new_game_request = on_new_game_request
-        self.manager: GameManager = window_controller.game_controller.game_manager
-
         self.turn = tk.StringVar()
-        self.status = tk.StringVar(value="Welcome to ChessWithQuests")
-
+        self.status = tk.StringVar(value="Ready")
+        self._timer_id: str | None = None
+        self._last_history: tuple[Any, ...] | None = None
         self._build_layout(square_size)
         self.refresh()
 
+    @property
+    def session(self):
+        return self.window_controller.game_controller.session
+
     def _build_layout(self, square_size: int) -> None:
-        """Place every widget.
-
-        Args:
-            square_size: The width and height of one board square, in pixels.
-
-        Returns:
-            None
-        """
         heading = ttk.Frame(self)
         heading.pack(fill="x")
-        ttk.Label(heading, text="ChessWithQuests", font=("TkDefaultFont", 16, "bold")).pack(
-            side="left"
-        )
+        ttk.Label(heading, text="BoardGamesWithQuests",
+                  font=("TkDefaultFont", 16, "bold")).pack(side="left")
         ttk.Button(heading, text="New game", command=self.on_new_game).pack(side="right")
         if self.on_settings is not None:
             ttk.Button(heading, text="Settings", command=self.on_settings).pack(
                 side="right", padx=(0, 6)
             )
-        ttk.Button(heading, text="Quit", command=self._quit).pack(side="right", padx=(0, 6))
+        ttk.Button(heading, text="Export", command=self.export_game).pack(
+            side="right", padx=(0, 6)
+        )
+        ttk.Button(heading, text="Quit", command=self._quit).pack(
+            side="right", padx=(0, 6)
+        )
 
-        top = self.manager.players[-1] if self.manager.players else None
-        bottom = self.manager.players[0] if self.manager.players else None
-
-        self.top_player = PlayerView(self, top, self.manager, side="top") if top else None
-        if self.top_player is not None:
-            self.top_player.pack(fill="x")
-
+        self.top_player = PlayerView(self, -1)
+        self.top_player.pack(fill="x")
         body = ttk.Frame(self)
         body.pack(fill="both", expand=True)
-
         left = ttk.Frame(body)
         left.pack(side="left", fill="both", expand=True)
-
-        ttk.Label(left, textvariable=self.turn, font=("TkDefaultFont", 12)).pack(anchor="w")
+        ttk.Label(left, textvariable=self.turn, font=("TkDefaultFont", 12)).pack(
+            anchor="w"
+        )
+        try:
+            config = load_preferences()
+        except PreferencesError:
+            config = dict(DEFAULTS)
         self.board_view = BoardView(
-            left,
-            self.manager.board,
+            left, self.session.board_projection(),
             on_square_clicked=self.on_square_clicked,
-            square_size=square_size,
+            square_size=config["board_size"],
+            show_coordinates=config["show_coordinates"],
         )
         self.board_view.pack(pady=6)
-        self.bottom_player = (
-            PlayerView(left, bottom, self.manager, side="bottom") if bottom else None
-        )
-        if self.bottom_player is not None:
-            # Packed into `left`, beside the board. Packed into `self` it came after `body`,
-            # which takes all the slack, so on a short window the panel and the footer were
-            # squeezed to nothing and silently stopped appearing.
-            self.bottom_player.pack(fill="x")
+        self.bottom_player = PlayerView(left, 1)
+        self.bottom_player.pack(fill="x")
 
         right = ttk.Frame(body, padding=(12, 0))
         right.pack(side="left", fill="both", expand=True)
-
-        ttk.Label(right, text="Quests", font=("TkDefaultFont", 12, "bold")).pack(anchor="w")
-        self.quest_list = QuestList(right, self.manager.quest_manager)
+        ttk.Label(right, text="Quests", font=("TkDefaultFont", 12, "bold")).pack(
+            anchor="w"
+        )
+        self.quest_list = QuestList(right)
         self.quest_list.pack(fill="both", expand=True)
-
-        ttk.Label(right, text="Moves", font=("TkDefaultFont", 12, "bold")).pack(anchor="w")
+        ttk.Label(right, text="Moves", font=("TkDefaultFont", 12, "bold")).pack(
+            anchor="w"
+        )
         self.history = tk.Listbox(right, height=10, width=28)
         self.history.pack(fill="both", expand=True)
-
         ttk.Label(self, textvariable=self.status, relief="sunken", anchor="w").pack(
             fill="x", pady=(8, 0)
         )
 
-    def on_square_clicked(self, position: Tuple[int, int]) -> None:
-        """Hand a clicked square to the controller and redraw.
-
-        Args:
-            position: The (row, col) the player clicked.
-
-        Returns:
-            None
-        """
-        # Only a finished game refuses clicks. Check is an ordinary position the player has to
-        # answer, so treating it as terminal froze the board for the rest of the game the
-        # moment anybody was put in check.
-        if self.manager.get_state() in TERMINAL_STATES:
-            self.refresh()
-            return
-
+    def on_square_clicked(self, position: tuple[int, int]) -> None:
         result = self.window_controller.on_square_clicked(position)
-        action = result.get("action")
-
-        if action in ("selected", "reselected"):
-            controller = self.window_controller.game_controller
-            self.board_view.set_selection(controller.selected_square, result.get("valid_moves", []))
-        else:
-            self.board_view.set_selection(None, [])
-
-        if action == "moved":
-            self.status.set("Move played.")
-            if self.manager.get_state() != GameManager.STATE_IN_PROGRESS:
-                self.manager.finish_game()
-        elif action == "invalid":
-            self.status.set("That is not a legal move.")
-
+        if result["action"] == "choose":
+            options = result["options"]
+            descriptions = [
+                f"{index + 1}. {move['hops']} {move['promotion'] or ''}"
+                for index, move in enumerate(options)
+            ]
+            choice = simpledialog.askinteger(
+                "Choose move",
+                "Select a complete capture route or promotion:\n"
+                + "\n".join(descriptions),
+                parent=self,
+                minvalue=1, maxvalue=len(options),
+            )
+            if choice is not None:
+                result = self.window_controller.game_controller.submit_move(
+                    options[choice - 1]
+                )
+                if result["action"] == "moved":
+                    self.window_controller.set_status("Move played.")
+        controller = self.window_controller.game_controller
+        self.board_view.set_selection(
+            controller.selected_square, controller.highlighted_moves
+        )
+        if result["action"] == "invalid":
+            self.status.set(result.get("message", "Invalid move."))
         self.refresh()
 
-    def reload(self, manager: GameManager) -> None:
-        """Point this view at a different game and redraw it.
-
-        Args:
-            manager: The `GameManager` of the game to show from now on.
-
-        Returns:
-            None
-        """
-        self.manager = manager
-        # The panels hold the manager and the quest manager they were built with, so swapping
-        # the game without rebinding them left the clocks and quests showing the old game.
-        for panel in (self.top_player, self.bottom_player):
-            if panel is not None:
-                panel.manager = manager
-        self.quest_list.quest_manager = manager.quest_manager
-        self.board_view.refresh(manager.board)
+    def reload(self) -> None:
+        """Redraw after a real game switch or session reset."""
+        self.window_controller.game_controller.reset_selection()
+        self._last_history = None
         self.board_view.set_selection(None, [])
-        self.quest_list.rebuild()
-        self.history.delete(0, "end")
         self.refresh()
 
     def on_new_game(self) -> None:
-        """Offer the game chooser again, then deal a new game of what was chosen.
-
-        Choosing the configuration is the player's decision and it belongs in front of every
-        game, not only the first one, so New game opens the same modal the program did.
-
-        Returns:
-            None
-        """
         if self.on_new_game_request is not None:
             self.on_new_game_request()
             return
-        self.manager.new_game()
-        self.window_controller.game_controller.reset_selection()
-        self.window_controller.set_status("New game.")
-        self.board_view.set_selection(None, [])
-        self.board_view.refresh(self.manager.board)
-        self.quest_list.rebuild()
-        self.refresh()
+        self.window_controller.game_controller.new_game()
+        self.reload()
+
+    @staticmethod
+    def _label(square: list[int], rows: int) -> str:
+        return f"{chr(ord('a') + square[1])}{rows - square[0]}"
 
     def refresh(self) -> None:
-        """Redraw every widget from the game as it now stands.
-
-        Returns:
-            None
-        """
-        board = self.manager.board
-        active = self.manager.active_player
-        state = self.manager.get_state()
-
-        self.board_view.refresh(board)
-        self.board_view.set_in_check(
-            self.manager.move_validator.find_royal(active, board)
-            if state == GameManager.STATE_CHECK
-            else None
-        )
-
-        if state in TERMINAL_STATES:
-            self.turn.set("Game over")
-        else:
-            self.turn.set("White to move" if active == 1 else "Black to move")
-
-        for panel in (self.top_player, self.bottom_player):
-            if panel is not None:
-                panel.refresh(board, active)
-        self.quest_list.refresh()
-
-        if state not in TERMINAL_STATES:
-            # B5: the footer was only ever set, never cleared, so it kept announcing the
-            # previous game's result.
+        state = self.session.snapshot()
+        self.board_view.refresh(self.session.board_projection())
+        remaining = self.session.clock_remaining()
+        self.top_player.refresh(state, remaining)
+        self.bottom_player.refresh(state, remaining)
+        active = "White" if state["active_side"] == 1 else "Black"
+        self.turn.set(f"{self.session.game} · {active} to move · turn {state['revision'] + 1}")
+        self.quest_list.refresh(state)
+        if state["outcome"] is not None:
+            self.status.set(f"Game ended: {state['outcome']['kind']}")
+        elif self.window_controller.status_message:
             self.status.set(self.window_controller.status_message)
-        label = STATE_LABELS.get(state, "")
-        if label and state in TERMINAL_STATES:
-            result = self.manager.result
-            if result is not None:
-                winner = result.winner
-                if winner == 1:
-                    label = f"Checkmate — White wins ({result.reason})."
-                elif winner == -1:
-                    label = f"Checkmate — Black wins ({result.reason})."
+
+        events = tuple(json.dumps(entry, sort_keys=True) for entry in state["events"])
+        if events != self._last_history:
+            self._last_history = events
+            self.history.delete(0, tk.END)
+            for event in state["events"]:
+                move = event.get("move")
+                if move is None:
+                    description = event.get("action", {}).get("type", "Result")
                 else:
-                    label = f"Draw ({result.reason})."
-            self.status.set(label)
+                    description = (
+                        self._label(move["start"], state["config"]["board"]["rows"])
+                        + " → "
+                        + " → ".join(
+                            self._label(square, state["config"]["board"]["rows"])
+                            for square in move["hops"]
+                        )
+                    )
+                    if move.get("promotion"):
+                        description += f"={move['promotion']}"
+                self.history.insert(tk.END, f"{event['revision']}. {description}")
+            self.history.yview_moveto(1.0)
 
-        self._refresh_history()
+    def apply_preferences(self, values: dict[str, Any]) -> None:
+        self.board_view.square_size = values["board_size"]
+        self.board_view.show_coordinates = values["show_coordinates"]
+        self.board_view.refresh()
 
-    def _refresh_history(self) -> None:
-        """Redraw the move list from the game's recorded moves.
-
-        Returns:
-            None
-        """
-        moves = self.manager.game_logger.get_moves()
-        if self.history.size() == len(moves):
+    def export_game(self) -> None:
+        target = filedialog.asksaveasfilename(
+            parent=self, defaultextension=".json",
+            filetypes=[("Game snapshots", "*.json")],
+        )
+        if not target:
             return
-        self.history.delete(0, "end")
-        for number, move in enumerate(moves, start=1):
-            # Notated rather than printed as coordinates: the notation helper is what the
-            # transcript uses, so the list and the export cannot disagree.
-            start = pos_to_algebraic(move.start_pos)
-            end = pos_to_algebraic(move.end_pos)
-            self.history.insert("end", f"{number}. {start} – {end}")
+        try:
+            # This is a complete self-contained replayable JSON export.
+            with open(target, "w", encoding="utf-8") as stream:
+                json.dump(self.session.snapshot(), stream, indent=2, sort_keys=True)
+                stream.write("\n")
+        except OSError as error:
+            messagebox.showerror("Export", str(error), parent=self)
+            return
+        self.status.set(f"Exported game to {target}")
 
     def _quit(self) -> None:
-        """Close the window.
-
-        Returns:
-            None
-        """
         self.stop_auto_refresh()
         self.window_controller.stop()
-        # The master is the shell frame, not the window: destroying it left the process alive
-        # with a blank window and a running mainloop.
         self.winfo_toplevel().destroy()
 
-    def start_auto_refresh(self, interval_ms: int = REFRESH_INTERVAL_MS) -> Optional[str]:
-        """Begin redrawing on a timer, so clocks and quests keep up on their own.
+    def stop_auto_refresh(self) -> None:
+        if self._timer_id is not None:
+            try:
+                self.after_cancel(self._timer_id)
+            except tk.TclError:
+                pass
+            self._timer_id = None
 
-        Args:
-            interval_ms: How often to redraw, in milliseconds.
-
-        Returns:
-            Optional[str]: The `after` job id, so a caller can cancel the refresh.
-        """
-        try:
-            self._refresh_job_id = self.after(interval_ms, self._auto_refresh)
-            return self._refresh_job_id
-        except tk.TclError:  # pragma: no cover - the window may already be closing
-            return None
+    def start_auto_refresh(self, interval_ms: int = REFRESH_INTERVAL_MS):
+        self.stop_auto_refresh()
+        self._timer_interval = interval_ms
+        self._timer_id = self.after(interval_ms, self._auto_refresh)
+        return self._timer_id
 
     def _auto_refresh(self) -> None:
-        """Charge the player to move, redraw, then queue the next pass.
-
-        The charge is what makes a clock a clock: the manager times a turn from a monotonic
-        reading, but only when it is asked, and nothing was asking. So the clock stood still
-        while the window was open and a player thought, and moved when they finally clicked.
-
-        Returns:
-            None
-        """
+        self._timer_id = None
         try:
-            if self.manager.get_state() in (GameManager.STATE_IN_PROGRESS, GameManager.STATE_CHECK):
-                self.manager.charge_turn()
+            if not self.winfo_exists() or not self.window_controller.is_running:
+                return
+            self.window_controller.tick_timer()
             self.refresh()
-            self.after(REFRESH_INTERVAL_MS, self._auto_refresh)
-        except tk.TclError:  # pragma: no cover - the window may already be closing
-            return
+            self._timer_id = self.after(self._timer_interval, self._auto_refresh)
+        except tk.TclError:
+            self._timer_id = None
 
-
-#: Czech alias for `PlayerGameView`, as `PRD.md` section 5 and `HracGameView` in the diagram
-#: require.
-HracGameView = PlayerGameView
+    def destroy(self) -> None:
+        self.stop_auto_refresh()
+        super().destroy()

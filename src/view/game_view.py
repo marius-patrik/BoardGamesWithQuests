@@ -139,7 +139,7 @@ class BoardView(ttk.Frame):
                 # Drawn from White's side: rank 1 at the bottom, the a-file on the left, which
                 # is how a player expects to read a board. Row 0 holds White's back rank, and
                 # `pos_to_algebraic` calls row 0 rank 1, so the view must agree with it.
-                board_row = board.rows - 1 - row
+                board_row = row
                 left, top = self._origin(col, row)
                 right = left + self.square_size
                 bottom = top + self.square_size
@@ -278,6 +278,6 @@ class BoardView(ttk.Frame):
         col = int(event.x // self.square_size)
         row = int(event.y // self.square_size)
         # The same inversion the draw applies: the top of the window is rank 8.
-        board_row = self.board.rows - 1 - row
+        board_row = row
         if self.board.is_within_bounds(board_row, col):
             self.on_square_clicked((board_row, col))
