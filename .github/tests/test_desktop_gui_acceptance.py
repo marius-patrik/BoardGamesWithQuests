@@ -113,3 +113,49 @@ def test_game_switch_through_visible_new_game_modal_resets_board(window):
     assert len(controller.session.snapshot()["board"]) == 24
     assert window.game_view.board_view.board.get_piece_at((7, 0)) is not None
     assert window.game_view.history.size() == 0
+
+
+
+def test_snapshot_export_from_real_window_is_replayable(window, tmp_path, monkeypatch):
+    from view import player_game_view
+
+    click_canvas(window, 6, 4)
+    click_canvas(window, 4, 4)
+    destination = tmp_path / "game.json"
+    # Only the OS-owned save-file selector is replaced with the chosen path.
+    monkeypatch.setattr(
+        player_game_view.filedialog, "asksaveasfilename",
+        lambda **kwargs: str(destination),
+    )
+    window.game_view.export_game()
+    saved = json.loads(destination.read_text(encoding="utf-8"))
+    assert saved["revision"] == 1
+    assert DesktopSession.recover(saved).snapshot() == saved
+
+
+def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
+    from model.game.preferences import (
+        PreferencesError, load_preferences, save_preferences,
+    )
+
+    base = tmp_path / "attack"
+    base.mkdir()
+    with pytest.raises(PreferencesError):
+        save_preferences({
+            "board_size": 56, "show_coordinates": True,
+            "quests": [{"python": "raise SystemExit"}],
+        }, base)
+    assert not list(base.iterdir())
+    (base / "preferences.json").write_text(
+        '{"board_size": 56, "show_coordinates": true, "rules": []}',
+        encoding="utf-8",
+    )
+    with pytest.raises(PreferencesError):
+        load_preferences(base)
+    (base / "preferences.json").unlink()
+    outside = tmp_path / "outside.json"
+    outside.write_text("untouched", encoding="utf-8")
+    (base / "preferences.json").symlink_to(outside)
+    with pytest.raises(PreferencesError):
+        save_preferences({"board_size": 56, "show_coordinates": True}, base)
+    assert outside.read_text() == "untouched"

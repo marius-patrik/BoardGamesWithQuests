@@ -163,3 +163,46 @@ def test_quest_rewards_are_awarded_exactly_once_through_gameplay_and_replay():
     assert fifth["quest_progress"]["white"]["first-capture"]["completed"]
     assert fifth["quest_scores"]["white"] == 15
     assert DesktopSession.recover(fifth).snapshot() == fifth
+
+
+
+def test_castling_moves_the_rook_and_king_atomically():
+    session = DesktopSession("chess")
+    for start, end in (
+        ((7, 6), (5, 5)),  # Nf3
+        ((0, 6), (2, 5)),  # ... Nf6
+        ((6, 6), (5, 6)),  # g3
+        ((1, 6), (2, 6)),  # ... g6
+        ((7, 5), (6, 6)),  # Bg2
+        ((0, 5), (1, 6)),  # ... Bg7
+    ):
+        perform(session, start, end)
+    before = session.snapshot()
+    assert any(m["start"] == [7, 4] and m["hops"][-1] == [7, 6]
+               for m in session.legal_actions())
+    after = perform(session, (7, 4), (7, 6))["state"]
+    assert square(after, [7, 4]) is None
+    assert square(after, [7, 6])["kind"] == "king"
+    assert square(after, [7, 7]) is None
+    assert square(after, [7, 5])["kind"] == "rook"
+    assert after["revision"] == before["revision"] + 1
+    assert DesktopSession.recover(after).snapshot() == after
+
+
+def test_en_passant_removes_the_correct_opponent_pawn_and_replays():
+    session = DesktopSession("chess")
+    for start, end in (
+        ((6, 4), (4, 4)),  # e4
+        ((1, 0), (2, 0)),  # ... a6
+        ((4, 4), (3, 4)),  # e5
+        ((1, 3), (3, 3)),  # ... d5
+    ):
+        perform(session, start, end)
+    before = session.snapshot()
+    legal = session.legal_actions()
+    assert any(m["start"] == [3, 4] and m["hops"][-1] == [2, 3] for m in legal)
+    after = perform(session, (3, 4), (2, 3))["state"]
+    assert square(after, [3, 3]) is None
+    assert square(after, [2, 3])["kind"] == "pawn"
+    assert len(after["captured"]) == len(before["captured"]) + 1
+    assert DesktopSession.recover(after).snapshot() == after
