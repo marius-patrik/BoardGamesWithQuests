@@ -1,18 +1,22 @@
 ---
 status: accepted
 ---
-# Current Python/Tkinter domain model
+# Authoritative local game domain
 
-## Board, moves and rules
+## State and transitions
 
-`src/model/game/board.py` owns the current mutable board representation. `src/model/game/move.py`, `validator.py` and `rule.py` provide move actions, checks and composable Python rule evaluation. `src/model/game/manager.py` coordinates the constructed `Configuration`, players, turn state, active clocks, move/result events, quest manager, logs and exports. It exposes `make_move`, `get_valid_moves`, `get_state`, `finish_game` and `transcript` rather than the archived JSON engine's `submit_action` and versioned replay API.
+`model.game.manager.GameManager` is the sole authoritative game transition owner. A session pins one validated `GameDefinition` and participant identities; each accepted action advances exactly one revision and records an event. Candidates are evaluated against isolated mutable projections and published as immutable JSON state only after all legal, rule, clock and effect checks pass. Duplicate identical action IDs return their original event, conflicting reuse is rejected, and `from_snapshot` reconstructs and validates state by event replay.
 
-The existing `MoveValidator` also exposes a game-neutral `get_geometric_moves` query over the existing board and configured piece vectors, without invoking legacy rule-source hooks. The existing canonical `Move` class now parses and serializes strict bounded JSON action intents with complete landing chains; `board_from_definition` constructs independent initial `Board` and `Piece` projections from game JSON and uses the current repeat/max-step conventions. These capabilities do not yet replace the legacy `GameManager.make_move` lifecycle.
+`model.game.session.DesktopSession` is the durable local application boundary. It creates and resets games, exposes detached state and board projections, enumerates legal actions, submits actor-bound moves, polls clock expiry and recovers from snapshots. It depends only on the Python domain and local time/IDs; no hosted runtime is involved.
 
-## Supporting state
+## Board and declarative rules
 
-`src/model/game/timer.py`, `clock_fields.py` and variant clock modules manage countdown and increments. `src/model/game/quest.py`, `quests.py` and `src/model/misc/quest_manager.py` manage executable Python quests and rewards. `src/model/misc/` owns notation, metadata and exporters; `src/model/users/` owns user data. These modules do not implement server-backed authentication or persistence.
+`Board` is generic rectangular storage for `Piece` values built from the immutable game JSON definition. `Move` represents an immutable source, complete landing chain and optional promotion; `MoveValidator` provides read-only geometric move/attack vectors. `CaptureEnumerator` calculates bounded capture chains. `RuleProgram` and `ConditionEvaluator` evaluate validated game-owned hook conditions using `BoardQueries` and `SnapshotQueries`; only whitelisted effects are committed. `resolve_outcome` rejects contradictory equal-priority terminal proposals.
 
-## Variants and limitations
+## Clock and quest state
 
-`src/games/chess/` and `src/games/checkers/` compose boards, pieces and named Python rules through `build_configuration()`. Checkers currently supplies flying kings, not English-draughts short-range kings. The canonical JSON-driven configuration and immutable transactional engine planned for v1.0.0 are not yet connected to this model; implementing them requires replacing the existing executable-configuration path, not adding a competing engine.
+The authoritative snapshot includes participant clocks, accepted event history, capture lists, per-participant quest progress and earned quest scores. Quest conditions run only after accepted moves; speculative legal-action previews cannot award rewards. Active time is charged at authoritative action submission. The UI draws detached current values and polls timeout from the session.
+
+## Game definitions
+
+`src/games/chess/config.json` and `src/games/checkers/config.json` define piece capabilities, initial placement, hooks and quests; their `playable` flag is currently false. English-draughts kings declare short-range movement, unlike flying variants.

@@ -3,16 +3,18 @@ status: published
 ---
 # BoardGamesWithQuests
 
-BoardGamesWithQuests currently contains a recoverable Python/Tkinter desktop board-game application with chess and checkers code, configurable rules, quests, clocks, game history, settings, and notation/export helpers. The shipped `src/` tree is the current implementation; the planned JSON-only rule system and complete release are **not yet implemented**.
+BoardGamesWithQuests is a local Python/Tkinter board-game application with chess and English-draughts game definitions, a generic JSON-driven game engine, and an interactive two-player board, history, clocks, quests and game selection. The built-in game definitions are trusted versioned JSON assets and currently remain marked `playable: false` pending full reference-game acceptance.
 
-## Current application
+## Application
 
-`src/chesswithquests/` owns startup and installation checks. `src/controller/` handles square selections and game control. `src/model/` implements board state, move validation, rule composition, clocks, players, quests, and export helpers. `src/view/` owns Tkinter windows, board/player/quest panels and settings. `src/games/chess/` and `src/games/checkers/` provide Python-authored game compositions.
+The `boardgameswithquests` entry point builds the Tkinter window and game chooser. Board clicks flow through `GameController` and a local `DesktopSession` to the canonical revisioned `GameManager`; only detached snapshots and render-only boards reach the widgets. The same game engine owns legal moves, captures, declarative rule/effect evaluation, revisioned actions, clock accounting, quest progress, prioritized outcomes and deterministic replay. Chess and English-draughts use the same engine and declared movement capabilities.
 
-## Important implementation boundary
+## Player data
 
-Game settings still load executable Python configuration modules, with a source editor and validator exposed through the UI. This contradicts the desired JSON-only game definition model and must be replaced before v1.0.0. Pure JSON schema, condition and hook helpers, an isolated read-only snapshot query adapter, a bounded version-2 definition parser and immutable built-in chess/English-draughts JSON definitions have been restored under `src/model/game/` and `src/games/`. These definitions remain marked non-playable and are not connected to the running game manager or Tkinter. The full revisioned JSON engine from #405 is still being reconciled. Source test success does not establish full GUI or packaged application acceptance.
+Bundled rules and quests cannot be edited through settings. The settings dialog accepts only board square size and coordinate display, and saves validated preferences atomically in the operating system's application-data directory. The interface can export the authoritative game snapshot as replayable JSON.
 
-## Delivery and governance
+## Verification and delivery
 
-The [Plan](../PLAN.md) records recovery and verification steps, [TODO](../TODO.md) tracks open actions, and [Scratchpad](../SCRATCHPAD.md) stores current evidence. Approved [requirements](../PRD.md) and accepted [architecture](../ARCHITECTURE.md) describe the actual code. GitHub Actions and DarkFactory provide checks and a disabled-until-ready desktop release pipeline.
+Source-driven requirements and architecture are published from `.agents/requests/` and `.agents/decisions/`. A dedicated GitHub Actions matrix exercises actual local-session gameplay on Python 3.10–3.13 and Tkinter clicks under Xvfb. The full inherited CI and four real native executable distributions still require acceptance before the disabled release publication may be enabled.
+
+The [Plan](../PLAN.md) and [TODO](../TODO.md) track the remaining functional and release criteria; [Scratchpad](../SCRATCHPAD.md) records investigation evidence.

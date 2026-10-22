@@ -1,19 +1,21 @@
 ---
 status: published
 ---
-# Current source and repository layout
+# Source and repository layout
 
-| Path | Current responsibility |
+| Path | Responsibility |
 | --- | --- |
-| `src/chesswithquests/` | Application entry, installation diagnostic and Tkinter startup |
-| `src/controller/` | Square input, selection, game lifecycle and window state |
-| `src/model/game/` | Active Python-constructed game manager/clock/quests plus recovered JSON v2 schema, board-construction, bounded action-intent parsing, capture-policy, hook and snapshot-query validation |
-| `src/model/misc/`, `src/model/pieces/`, `src/model/users/` | Game export/notation, shared pieces and user state |
-| `src/games/chess/`, `src/games/checkers/` | Active Python variant implementations and separately installed archived non-playable JSON v2 definitions |
-| `src/view/` | Tkinter app, board/player/quest widgets, settings and Python source editor |
-| `.agents/notes/`, `requests/`, `decisions/`, `rules/` | Authored sources for generated README, PRD, ARCHITECTURE and AGENTS |
-| `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` | Outcomes, phase plan, open queue and temporary evidence |
-| `.agents/architecture/diagrams/`, `.agents/reference/` | Source-generated Mermaid and reference assets |
-| `.github/tests/`, `scripts/`, `workflows/` | CI, generated docs, test fixtures, packaging and guarded release |
+| `src/chesswithquests/` | Application entry point, CLI arguments and bundled-resource diagnostics |
+| `src/model/game/definition.py`, `schema.py` | Strict versioned JSON game definitions and immutable snapshots of configuration |
+| `src/model/game/manager.py`, `session.py` | Authoritative revisioned game transitions/replay and local two-player desktop session |
+| `src/model/game/{board,move,validator,capture_geometry,capture_policy}.py` | Generic board, complete action intents, geometry and capture search |
+| `src/model/game/{hooks,conditions,board_queries,snapshot_queries,outcomes}.py` | Bounded declarative rules, trusted queries and terminal proposals |
+| `src/model/game/preferences.py` | Validated user display preferences and atomic OS-specific persistence |
+| `src/controller/` | Player input, action routing, selection state and window lifecycle |
+| `src/view/` | Tkinter board, history, players, quests, settings and game chooser |
+| `src/games/{chess,checkers}/config.json` | Immutable shipped rules and starting positions in versioned JSON |
+| `.github/tests/`, `.github/workflows/` | Central tests, native packaging, governance and guarded release automation |
+| `.agents/{notes,requests,decisions,rules}/` | Canonical sources of generated README, PRD, ARCHITECTURE and AGENTS |
+| `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` | Goal, execution plan, current queue and investigation evidence |
 
-The old `packages/engine/` runtime does not exist in this PR's working tree. The hosted server/client/native layers are deferred to #422. The root README and CONTRIBUTING are symlinks to generated documentation.
+Source-derived diagrams in `.agents/architecture/diagrams/` are generated from tracked code. Native builds target Windows x64, Linux x64 and both macOS architectures.

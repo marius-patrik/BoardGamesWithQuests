@@ -1,8 +1,10 @@
 ---
 status: accepted
 ---
-# Current application entry, controllers and Tkinter views
+# Desktop entry, controllers and Tkinter view ownership
 
-`src/chesswithquests/__init__.py` parses `--game` and `--check`, reports available games and invokes the Tkinter application via `view.app.build_application`. `src/controller/controller.py` selects active-player squares, requests legal destinations from the game manager and attempts moves. `src/controller/window_controller.py` tracks application window and status state.
+`chesswithquests:main` validates game selection and builds a local `DesktopSession` with two participants. `view.app.build_application` constructs the Tkinter game window and selector; `GameController` maps player square clicks to legal complete intents and submits them with expected revisions; `WindowController` owns window status and timeout polling.
 
-`src/view/app.py` coordinates window construction and game selection, while `game_view.py`, `player_game_view.py`, `player_view.py` and `quest_view.py` render the board and gameplay panels. `settings_dialog.py`, `code_editor.py` and `start_modal.py` handle settings, executable source editing and game selection. The domain is in-memory and uses the old mutable Python-configured manager, rather than the revisioned JSON transition API; full end-to-end widget and package acceptance remains unverified.
+The Tkinter `BoardView` renders detached board projections and selected/legal destinations, while `PlayerGameView` owns UI refresh, game switching, move-choice dialogs, history, JSON snapshot export and shutdown callback cancellation. `PlayerView` and `QuestList` display clock/capture status and immutable quest descriptions/progress. `SettingsDialog` edits only allowlisted persisted presentation preferences.
+
+`desktop-gameplay.yml` exercises these widgets under Xvfb; publication acceptance still requires complete game behavior and real frozen native executables.
