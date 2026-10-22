@@ -78,16 +78,17 @@ def perform(session, source, target, promotion=None):
     snapshot = session.snapshot()
     actor = snapshot["participants"][str(snapshot["active_side"])]
     matching = [
-        move for move in session.legal_actions()
+        move
+        for move in session.legal_actions()
         if move["start"] == list(source)
         and move["hops"][-1] == list(target)
         and move["promotion"] == promotion
     ]
-    assert len(matching) == 1, {
-        "from": source, "to": target, "available": session.legal_actions()
-    }
+    assert len(matching) == 1, {"from": source, "to": target, "available": session.legal_actions()}
     return session.submit(
-        actor, snapshot["revision"], {"type": "move", "move": matching[0]},
+        actor,
+        snapshot["revision"],
+        {"type": "move", "move": matching[0]},
         action_id=f"ply-{snapshot['revision'] + 1}",
     )
 
@@ -124,10 +125,7 @@ def test_english_draughts_forced_capture_updates_authoritative_history():
     perform(session, (5, 0), (4, 1))
     perform(session, (2, 3), (3, 2))
     available = session.legal_actions()
-    capture = [
-        move for move in available
-        if move["start"] == [4, 1] and move["hops"] == [[2, 3]]
-    ]
+    capture = [move for move in available if move["start"] == [4, 1] and move["hops"] == [[2, 3]]]
     assert capture, available
     state = perform(session, (4, 1), (2, 3))["state"]
     assert state["revision"] == 3
