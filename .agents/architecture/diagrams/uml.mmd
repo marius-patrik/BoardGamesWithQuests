@@ -4,6 +4,7 @@ direction LR
   nc4d8e416fd075d099 : +__init__()
   nc4d8e416fd075d099 : +select_square()
   nc4d8e416fd075d099 : +handle_square_click()
+  nc4d8e416fd075d099 : +submit_move()
   nc4d8e416fd075d099 : +reset_selection()
   nc4d8e416fd075d099 : +new_game()
   class n5a2872e9d721788b8["WindowController"]
@@ -310,6 +311,7 @@ direction LR
   nb5eb61502c245eff4 : +_candidates()
   nb5eb61502c245eff4 : +_legal_moves()
   nb5eb61502c245eff4 : +get_valid_moves()
+  nb5eb61502c245eff4 : +board_projection()
   nb5eb61502c245eff4 : +get_state()
   nb5eb61502c245eff4 : +_action()
   nb5eb61502c245eff4 : +submit()
@@ -480,6 +482,9 @@ direction LR
   nf2ef9a4a783104057 : +_new_manager()
   nf2ef9a4a783104057 : +game()
   nf2ef9a4a783104057 : +snapshot()
+  nf2ef9a4a783104057 : +board_projection()
+  nf2ef9a4a783104057 : +clock_remaining()
+  nf2ef9a4a783104057 : +poll_timeout()
   nf2ef9a4a783104057 : +legal_actions()
   nf2ef9a4a783104057 : +submit()
   nf2ef9a4a783104057 : +reset()
@@ -756,8 +761,6 @@ direction LR
   nd25f0c88f48f4b42e <|-- n383b010f3c73154c3
   nd25f0c88f48f4b42e <|-- n5b687c1eb24a44daf
   ndf7518d86e4c2cffe <|-- n535ab685a234ef98c
-  nc4d8e416fd075d099 --> nb5eb61502c245eff4 : game_manager
-  n5a2872e9d721788b8 --> nc4d8e416fd075d099 : game_controller
   n21cd2d43ca0a3f1e4 --> n928c5190002c51b19 : timer
   n1ec32986c4854be3c --> n928c5190002c51b19 : timer
   n6aed97faf9db3cb3d --> n6c226a47d78831afd : board

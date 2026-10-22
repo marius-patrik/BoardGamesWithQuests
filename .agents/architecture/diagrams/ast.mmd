@@ -2102,10 +2102,12 @@ flowchart LR
   n6bcbf8a919cf8d6b3 --> n14aae071308e51eb8
   ndc97c9d65e2be7c7b["function_definition handle_square_click"]
   n6bcbf8a919cf8d6b3 --> ndc97c9d65e2be7c7b
-  n838cbaae5bbe33c20["function_definition reset_selection"]
+  n838cbaae5bbe33c20["function_definition submit_move"]
   n6bcbf8a919cf8d6b3 --> n838cbaae5bbe33c20
-  nc0bed06e6bdeaa379["function_definition new_game"]
+  nc0bed06e6bdeaa379["function_definition reset_selection"]
   n6bcbf8a919cf8d6b3 --> nc0bed06e6bdeaa379
+  nf280adb2ad1fe2458["function_definition new_game"]
+  n6bcbf8a919cf8d6b3 --> nf280adb2ad1fe2458
   n8d1f6fcd8763c8e3b["window_controller.py"]
   n0b085be7ec56eb827 --> n8d1f6fcd8763c8e3b
   n373961dfa5680093c["class_definition WindowController"]
@@ -3028,24 +3030,26 @@ flowchart LR
   n6350ad12f86637839 --> na2c463b07c5cbc7e2
   n37c44343b27d2cc56["function_definition get_valid_moves"]
   n6350ad12f86637839 --> n37c44343b27d2cc56
-  na91ce0d7c69fbbd3d["function_definition get_state"]
+  na91ce0d7c69fbbd3d["function_definition board_projection"]
   n6350ad12f86637839 --> na91ce0d7c69fbbd3d
-  n3bd1c8e5c369f6fc0["decorated_definition"]
-  n6350ad12f86637839 --> n3bd1c8e5c369f6fc0
-  n37943b4b934a8263b["function_definition _action"]
-  n6350ad12f86637839 --> n37943b4b934a8263b
-  nb9f0983515ae6b044["function_definition submit"]
+  n4baa9370e0c621c96["function_definition get_state"]
+  n6350ad12f86637839 --> n4baa9370e0c621c96
+  n0aa318059699bceb0["decorated_definition"]
+  n6350ad12f86637839 --> n0aa318059699bceb0
+  nb9f0983515ae6b044["function_definition _action"]
   n6350ad12f86637839 --> nb9f0983515ae6b044
-  n5e9b9806c2e4637db["function_definition _result"]
+  n5e9b9806c2e4637db["function_definition submit"]
   n6350ad12f86637839 --> n5e9b9806c2e4637db
-  n0259a3593279dd6b6["function_definition _terminal_action"]
+  n0259a3593279dd6b6["function_definition _result"]
   n6350ad12f86637839 --> n0259a3593279dd6b6
-  n6db7b346ebbdcd750["function_definition submit_action"]
+  n6db7b346ebbdcd750["function_definition _terminal_action"]
   n6350ad12f86637839 --> n6db7b346ebbdcd750
-  ncf6f40797b21b42b9["decorated_definition"]
-  n6350ad12f86637839 --> ncf6f40797b21b42b9
-  n1384a6c3cc5c0e938["function_definition from_snapshot"]
-  n6350ad12f86637839 --> n1384a6c3cc5c0e938
+  nf5c6a8e418ccfd6cf["function_definition submit_action"]
+  n6350ad12f86637839 --> nf5c6a8e418ccfd6cf
+  nf383c9029d6d5c15e["decorated_definition"]
+  n6350ad12f86637839 --> nf383c9029d6d5c15e
+  n590a18c3befacf86d["function_definition from_snapshot"]
+  n6350ad12f86637839 --> n590a18c3befacf86d
   n8126908205aa5ea53["move.py"]
   n6aea57a87a15be9fd --> n8126908205aa5ea53
   n2f6891829f11d0ff0["function_definition _square"]
@@ -3406,16 +3410,22 @@ flowchart LR
   n9454933a9a0699e7c --> n4f3373c2ceabe58e8
   n220f3eddd411f47c5["function_definition snapshot"]
   n9454933a9a0699e7c --> n220f3eddd411f47c5
-  n44e9cc0bb09739164["function_definition legal_actions"]
+  n44e9cc0bb09739164["function_definition board_projection"]
   n9454933a9a0699e7c --> n44e9cc0bb09739164
-  n55d03023db2199089["function_definition submit"]
+  n55d03023db2199089["function_definition clock_remaining"]
   n9454933a9a0699e7c --> n55d03023db2199089
-  n2eddf05bbc2b9636b["function_definition reset"]
+  n2eddf05bbc2b9636b["function_definition poll_timeout"]
   n9454933a9a0699e7c --> n2eddf05bbc2b9636b
-  n43cd1782c31b414c6["decorated_definition"]
-  n9454933a9a0699e7c --> n43cd1782c31b414c6
-  n8616103264df369b8["function_definition recover"]
+  n9d61e91b04a868bf1["function_definition legal_actions"]
+  n9454933a9a0699e7c --> n9d61e91b04a868bf1
+  n8616103264df369b8["function_definition submit"]
   n9454933a9a0699e7c --> n8616103264df369b8
+  n32d162c972fac53d2["function_definition reset"]
+  n9454933a9a0699e7c --> n32d162c972fac53d2
+  n15eb7107639be672f["decorated_definition"]
+  n9454933a9a0699e7c --> n15eb7107639be672f
+  n186b0f3298be7eba2["function_definition recover"]
+  n9454933a9a0699e7c --> n186b0f3298be7eba2
   n421aee39fa73b3a5d["snapshot_queries.py"]
   n6aea57a87a15be9fd --> n421aee39fa73b3a5d
   nd3c00ea5b603206a5["class_definition SnapshotQueries"]
