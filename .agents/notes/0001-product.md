@@ -3,18 +3,20 @@ status: published
 ---
 # BoardGamesWithQuests
 
-BoardGamesWithQuests is a local Python/Tkinter board-game application with chess and English-draughts game definitions, a generic JSON-driven game engine, and an interactive two-player board, history, clocks, quests and game selection. The built-in game definitions are trusted versioned JSON assets and currently remain marked `playable: false` pending full reference-game acceptance.
+BoardGamesWithQuests provides a local Python/Tkinter chess and English-draughts application using immutable JSON game rules, two-player actions, clocks, quests, game history, settings and replayable JSON exports. Both shipped game definitions remain marked `playable: false` until full reference-game acceptance is verified.
 
-## Application
+## Desktop runtime
 
-The `boardgameswithquests` entry point builds the Tkinter window and game chooser. Board clicks flow through `GameController` and a local `DesktopSession` to the canonical revisioned `GameManager`; only detached snapshots and render-only boards reach the widgets. The same game engine owns legal moves, captures, declarative rule/effect evaluation, revisioned actions, clock accounting, quest progress, prioritized outcomes and deterministic replay. Chess and English-draughts use the same engine and declared movement capabilities.
+`src/chesswithquests/` owns startup, bundled-resource diagnostics and the installed application entry point. `src/model/game/` owns one revisioned, deterministic game engine and its local `DesktopSession`. `src/controller/` translates player clicks into legal actions. `src/view/` owns the Tkinter board, player and quest panels, game chooser and preferences.
 
-## Player data
+Game positions, movement, captures, conditions, effects, quests and outcomes come from strictly validated source-controlled JSON rulebooks. The executable Python rule packages, dynamic configuration loader and player-facing code editor are absent from the desktop application.
 
-Bundled rules and quests cannot be edited through settings. The settings dialog accepts only board square size and coordinate display, and saves validated preferences atomically in the operating system's application-data directory. The interface can export the authoritative game snapshot as replayable JSON.
+## Local player experience
 
-## Verification and delivery
+The application renders detached authoritative state, supports mouse-driven moves, displays available destinations and handles configured capture/promotion choices. Accepted actions update clock/turn ownership, quests and history atomically. Settings change only board-square size and coordinate display through validated, persistent JSON preferences. The application exports full, replayable session JSON.
 
-Source-driven requirements and architecture are published from `.agents/requests/` and `.agents/decisions/`. A dedicated GitHub Actions matrix exercises actual local-session gameplay on Python 3.10–3.13 and Tkinter clicks under Xvfb. The full inherited CI and four real native executable distributions still require acceptance before the disabled release publication may be enabled.
+## Delivery
 
-The [Plan](../PLAN.md) and [TODO](../TODO.md) track the remaining functional and release criteria; [Scratchpad](../SCRATCHPAD.md) records investigation evidence.
+`--check` validates installed game resources and performs a real opening action/idempotency/replay diagnostic without opening Tkinter. Source-driven documentation and diagrams and the dedicated real-GUI Xvfb acceptance workflow are tracked in `.github/`. Native Windows, macOS and Linux packaging is automated; final behavioral/native release acceptance and PrideVer publication remain pending.
+
+[Plan](../PLAN.md) · [TODO](../TODO.md) · [Scratchpad](../SCRATCHPAD.md).

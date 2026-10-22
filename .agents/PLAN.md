@@ -1,66 +1,58 @@
-# Plan — BoardGamesWithQuests
+# Plan — BoardGamesWithQuests v1.0.0
 
-**Target:** complete locally playable JSON-configured Python/Tkinter `v1.0.0`.  
-**Integration:** `develop` · **Release:** `main` · **Current owner:** PR #271.  
-**Stack:** `develop → #271 → #422` (governance PR #414 was merged).
+**Product:** local Python/Tkinter Chess and English Draughts.  
+**Integration PR:** #271 into `develop`. **Release:** reviewed `develop → main` promotion, then PrideVer v1.0.0.  
+**Release publication:** disabled until behavioral and native package acceptance.
 
-## Execution order
+## Remaining work in execution order
 
-| Stage | Deliverable | Status |
-| --- | --- | --- |
-| 1 | Account for #405's lost JSON-rule engine, tests and server-only work | In progress: deterministic board creation and closed Move JSON intents now supported; authoritative transition manager still pending |
-| 2 | Reconcile one authoritative versioned JSON game model in `src/model/` | Pending |
-| 3 | Complete executable chess and English-draughts configurations | Pending |
-| 4 | Adapt recovered Tkinter controllers, boards and views to the canonical engine | Pending |
-| 5 | Remove player-facing rule/quest editing and replace executable configuration with validated JSON settings for permitted properties | Pending |
-| 6 | Verify real gameplay, clocks, quests, save/export, hostile inputs and graphical interactions | Pending |
-| 7 | Build, run and verify four native platform distributions | Pending |
-| 8 | Resolve reviews, refresh source-governed docs and obtain approval to merge #271 | Pending |
-| 9 | Approve `develop → main`, publish verified v1.0.0 through PrideVer | Pending |
-| 10 | Complete post-release FastAPI/Supabase/React/Tauri migration on #422 | Deferred |
+### 1. Complete reference-game acceptance
 
-## Completion criteria
+1. Port the independent chess rule scenarios from archived #405 `tests/test_chess_rules.py` onto the supported public `DesktopSession` or revisioned `GameManager` interface. Verify castling (including traversed check), en passant (including discovered check), promotion and captures, checkmate/stalemate, legal escapes, threefold/fivefold repetition, move-count claims, dead material, timeout, resign and snapshot replay.
+2. Port English-draughts reference positions from #405 and earlier gameplay tests onto the same authoritative JSON interface. Verify short kings, forced capture precedence, multi-jumps and branching routes, correct crowning timing, blocked-side outcomes and complete real games.
+3. Test non-square configurable board geometry, bounded rule work, malformed/hostile hooks and forced atomic rollback using supported action interfaces. Remove incorrect declarative clauses; implement missing generic operations rather than variant checks in engine code.
+4. Only after the relevant end-to-end scenarios pass, change each bundled definition from `playable: false` to `true`. Do not mark either game ready based on opening-only tests.
 
-- [ ] Each substantial #405 implementation and test has a documented disposition: desktop recovery, post-release #422, verified replacement or intentional retirement.
-- [ ] The desktop application contains one canonical generic JSON engine; no user-provided Python is executed.
-- [ ] Supported chess and English-draughts definitions run to actual terminal outcomes through Tkinter, including clocks, quests, settings, persistence and export.
-- [ ] Python 3.10–3.13 tests and mandatory real/virtual-display GUI acceptance pass without required graphical skips.
-- [ ] Windows x64, macOS ARM64/x64 and Linux x64 packaged executables run successfully and have verified resources/checksums.
-- [ ] Applicable #271 and archived #405 feedback is resolved; the final diff/CI/governance are reviewed and #271 approved/merged.
-- [ ] An approved same-repository `develop → main` promotion publishes immutable v1.0.0 with all four verified downloads.
-- [ ] No unfinished server/web/native migration implementation ships in v1.0.0.
+**Exit:** both shipped game definitions can complete and replay independent complete games and all their declared rules work through the public engine.
 
-## 1. Recover the authoritative implementation
+### 2. Complete player-facing desktop behavior
 
-1. Compare the historical GUI commit `43a3d01fab45a305d02ef26a4f86f0e7cd9a0d96`, closed #405 head `6002ac787664efceb0161d2bcbd3891927b69b34`, and live #271/#422 heads.
-2. Adapt the full archived revisioned `packages/engine/model/game/manager.py` to the existing canonical `src/model/` board, move and piece types; connect the already recovered `BoardQueries`, outcome arbitration, captures and immutable JSON definitions without retaining a second manager. Preserve atomic revisions, idempotency and event replay.
-3. Account for discarded FastAPI auth, PostgreSQL transactions/migrations, concurrency and replay tests; assign server-only work to #422 without restoring that runtime into #271.
-4. Reconcile the recovered immutable v2 definition parser, bounded schema/hook evaluator and isolated read-only snapshot queries with generic board/clock/quest execution; restore deterministic events/replay as **one** authoritative implementation in `src/model/` and remove the competing Python-configured manager.
-5. Prove illegal actions do not change state, stale revisions fail, identical retries are idempotent and snapshots replay deterministically.
+1. Exercise legal highlights, alternative capture-route and promotion selection, rejected actions, game switching and game-ended behavior through real Tkinter canvas interactions on Xvfb.
+2. Verify authoritative clock progression/increment, expiration with no user click, timeout adjudication, cancellation of callbacks during window destruction and game switch, and nonmutation on rejection.
+3. Verify first-move/first-capture quest progress and once-only rewards for both participants; test interaction with terminal outcomes and replay.
+4. Implement actual player-facing notation export for chess and English draughts (in addition to the existing replayable JSON snapshot export), and verify full-game exported contents via the GUI.
+5. Exercise corrupted/oversized preferences, symlink and path escape rejection, atomic writing, restart persistence and recovery across complete application sessions.
+6. Extend mandatory UI acceptance to all supported Python versions where practical; ensure dedicated Xvfb gate remains mandatory and never silently skips.
 
-## 2. Finish game definitions and desktop integration
+**Exit:** both complete games, clocks, quests, errors, exports, reset/restart and shutdown work through the actual Tkinter UI, not only isolated engine tests.
 
-1. Convert shipped chess and English-draughts configurations to validated versioned JSON; do not expose the archived `playable: false` games as working until their rule acceptance passes.
-2. Implement and test chess special actions, checks, draws and notation; correct English-draughts short-range kings and compulsory/multiple captures. Keep international draughts separate and non-playable unless proven.
-3. Introduce a desktop session/controller adapter for local participant IDs, revisioned actions and monotonic clock timestamps, without HTTP or database dependencies.
-4. Update `src/controller/` and `src/view/` to render canonical state and send action intents. Preserve startup, selection, game switching, quest panels, clock refresh and error recovery; cancel abandoned Tk callbacks.
-5. Remove `src/view/code_editor.py` and `src/model/game/source_validation.py` after eliminating their production callers. The UI must **not permit editing rules or quests**, whether as Python or raw JSON. Game definitions may contain trusted, immutable declarative rules/quests; settings expose only permitted non-executable user preferences and configuration fields.
-6. Keep immutable bundled definitions separate from atomic, validated user JSON in an OS-appropriate application-data directory.
+### 3. Validate native frozen application
 
-## 3. Verify and package
+1. Verify the real Windows x64, macOS ARM64, macOS x64 and Linux x64 `desktop-build.yml` jobs for the final exact commit. Keep all produced artifacts from the PR run for inspection.
+2. Require every frozen executable to run the permanent `--check` installation diagnostic: load both bundled JSON definitions, accept an action, confirm idempotency and replay. Fail archive creation on any diagnostic failure.
+3. Extend frozen GUI smoke beyond process survival to real selection, move, game switch, export/preferences, restart and shutdown on each operating system. Do not treat source-run Xvfb widget tests as frozen application acceptance.
+4. Inspect archive platform naming, contents, version/metadata, copied assets and SHA256 sidecars. Reject unsigned/incomplete/mismatched publication inputs according to existing release policy.
 
-1. Port relevant historical/#405 chess, rule-budget, adversarial, terminal-action and draughts scenarios to `.github/tests/`.
-2. Replace ineffective tests and enforce required GUI acceptance under an actual or virtual Tkinter display; test complete chess/draughts games and JSON-settings round trips.
-3. Run the complete Python 3.10–3.13 quality matrix; inspect every skipped case.
-4. Adapt Phase 0's `.github/workflows/desktop-build.yml` and `package_desktop.py` to the final source, include immutable game resources and validate bundled launch/play/save/export on Windows x64, macOS ARM64/x64 and Linux x64.
-5. Require the release workflow to reject incomplete assets or checksum failures; keep `repo.dfconfig` release disabled until every acceptance gate is proven.
+**Exit:** four fully functional self-contained native archives meet gameplay, metadata and checksum acceptance.
 
-## 4. Review, integrate and release
+### 4. Reconcile quality and reviews
 
-1. Resolve #271's current review threads (including the objection to Python code editing) and relevant historical #405 defects with test-backed fixes.
-2. Update `.agents/notes/`, `requests/`, `decisions/` and source-derived diagrams **as functionality changes**, regenerate README/PRD/ARCHITECTURE/AGENTS and run CI.
-3. Independently review final #271 behavior, ownership and diff, obtain maintainer approval and merge into `develop`.
-4. Verify trusted release-branch protection and completed platform builds, obtain approval for same-repository `develop → main` promotion, then publish/verify `v1.0.0` through PrideVer.
-5. After v1.0.0, finish the remaining migration in #422 without introducing a second authoritative game engine.
+1. Run the entire required Python 3.10–3.13 matrix against current public-interface tests. Repair actual errors, obsolete declarations and config/version regressions without reintroducing Python game configuration.
+2. Reconcile outstanding #271 review threads against the actual current diff; resolve the source editor complaint using tracked removal and verified GUI settings tests. Explain outdated server/web requirements as owned by #422 rather than pretending they exist in #271.
+3. Inspect source-derived AST/UML diagrams and regenerate projections from canonical notes, requests, decisions and active rules. Ensure all records describe implementation in the PR rather than desired future features.
+4. Perform independent implementation/security/gameplay review, obtain the maintainer's native approval of the final commit and merge #271 only when complete.
 
-**Current caveat:** The recovered desktop GUI and extensive tests exist, but the active app still loads executable Python game/quest modules and does not contain #405's newer JSON rule engine. The earlier 424-passed/46-skipped source test run does not prove GUI or platform acceptance.
+**Exit:** zero unresolved actionable desktop review concerns, fully green final-head CI and explicit maintainer approval.
+
+### 5. Publish v1.0.0
+
+1. Verify the approved #271 merge on protected `develop`.
+2. Independently review the same-repository `develop → main` promotion, preserving current branch protection.
+3. Confirm PrideVer's release and exact main SHA, enable the gated desktop release only after all four frozen binaries have met acceptance, and publish v1.0.0 with matching assets and hashes.
+4. Verify the public release artifacts and disable/fail publication immediately on incomplete platform acceptance.
+
+**Exit:** v1.0.0 is a released, usable, verified four-platform Tkinter application.
+
+### Deferred (not part of v1.0.0)
+
+#422 owns FastAPI, Supabase, React, Tauri, hosted identity, multiplayer and persistence. Do not implement those here or start their release work before desktop v1.0.0.

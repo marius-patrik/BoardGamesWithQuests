@@ -41,23 +41,25 @@ Bundled `games/<identifier>/config.json` is loaded by the strict `load_bundled_d
 _Source: [0002-configuration.md](decisions/0002-configuration.md)_
 
 
-## Desktop entry, controllers and Tkinter view ownership
+## Desktop application and UI ownership
 
-`chesswithquests:main` validates game selection and builds a local `DesktopSession` with two participants. `view.app.build_application` constructs the Tkinter game window and selector; `GameController` maps player square clicks to legal complete intents and submits them with expected revisions; `WindowController` owns window status and timeout polling.
+`chesswithquests:main` validates game selection and launches a local JSON-backed `DesktopSession`. Its `--check` option loads all installed bundled definitions and accepts/retries/replays real opening moves without needing a display.
 
-The Tkinter `BoardView` renders detached board projections and selected/legal destinations, while `PlayerGameView` owns UI refresh, game switching, move-choice dialogs, history, JSON snapshot export and shutdown callback cancellation. `PlayerView` and `QuestList` display clock/capture status and immutable quest descriptions/progress. `SettingsDialog` edits only allowlisted persisted presentation preferences.
+`view.app.build_application` constructs Tkinter game selection and gameplay. `GameController` maps clicks to complete legal action intents and submits them with actor IDs and expected revisions. `WindowController` manages status and authoritative timeout polling. The widgets do not own independent game state.
 
-`desktop-gameplay.yml` exercises these widgets under Xvfb; publication acceptance still requires complete game behavior and real frozen native executables.
+`BoardView` renders detached board projections and legal highlights; `PlayerGameView` handles UI refresh, alternate action choice, game switching, history, JSON snapshot export and safe callback cancellation. `PlayerView` and `QuestList` render authoritative clock/captures and configured quest progress/rewards. `SettingsDialog` changes only validated persisted presentation preferences.
+
+`desktop-gameplay.yml` verifies these interactions under Xvfb, while `desktop-native-acceptance.yml` builds four self-contained frozen applications. The separate frozen GUI user-path acceptance remains an outstanding release requirement.
 
 _Source: [0003-application.md](decisions/0003-application.md)_
 
 
 ## Documentation, CI and desktop release architecture
 
-`.agents/GOAL.md`, `PLAN.md`, `TODO.md` and `SCRATCHPAD.md` are authored working records. `.github/scripts/generate_documents.py` produces README, PRD, ARCHITECTURE and AGENTS from approved source directories; the root README and CONTRIBUTING are symlinks. `.agents/architecture/diagrams/` contains source-derived Mermaid diagrams.
+`.agents/GOAL.md`, `PLAN.md`, `TODO.md` and `SCRATCHPAD.md` are authored records. `.github/scripts/generate_documents.py` builds README, PRD, ARCHITECTURE and AGENTS from the source-owned notes, approved requests, accepted decisions and active rules; the root README and CONTRIBUTING are symlinks. `.agents/architecture/diagrams/` contains source-derived Mermaid diagrams.
 
-`.github/tests/` owns all repository test resources. `desktop-gameplay.yml` verifies actual local-session gameplay on Python 3.10–3.13 and a real Tkinter user path on Xvfb. Other CI workflows enforce source quality, documentation, governance, release metadata and native package infrastructure. `develop` is the integration branch; `main` the protected release branch.
+`.github/tests/` owns all repository tests and fixtures. `desktop-gameplay.yml` runs the production local-session contract on Python 3.10–3.13 and runs real Tkinter tests under Xvfb. The GUI acceptance module is explicitly selected in that workflow because the default Python matrix is headless. `desktop-native-acceptance.yml` builds frozen Windows x64, macOS ARM64/x64 and Linux x64 archives on PRs without publishing.
 
-`desktop-build.yml` defines Windows x64, macOS ARM64/x64 and Linux x64 packaging. `package_desktop.py` produces artifacts and checksums. `release.yml` requires verified version/source identity and all expected platform assets. Python release publication remains disabled in `repo.dfconfig` until complete application and frozen-platform acceptance are verified.
+`desktop-build.yml` delegates packaging to `package_desktop.py`, which verifies copied game assets, a frozen `--check` real action/idempotency/replay diagnostic, GUI process startup and SHA256 sidecars. `release.yml` checks PrideVer, exact main source and complete platform assets before publication. Python publication remains disabled until reviewed end-to-end gameplay and platform acceptance.
 
 _Source: [0004-repository.md](decisions/0004-repository.md)_

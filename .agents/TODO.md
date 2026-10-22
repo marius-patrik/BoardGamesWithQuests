@@ -1,13 +1,14 @@
-# TODO — Current implementation queue
+# TODO — Outstanding v1.0.0 actions
 
-Detailed steps and acceptance are in [PLAN](PLAN.md). Do not mark unfinished runtime behavior as shipped.
+The implementation order, exact steps and exit gates are in [PLAN](PLAN.md).
 
-- [ ] Inventory #405 JSON engine, rules, tests and server-only functionality against live #271/#422; record each disposition.
-- [ ] Reconcile actual generic legal-action generation with one pure `MoveValidator.get_geometric_moves` pipeline, declared captures and complete offered actions.
-- [ ] Replace the old Python-loaded `GameManager` with the full #405 revisioned transition authority, adapting it to canonical JSON-derived `Board`/`Piece` and serializable bounded `Move` intents, with recovered read-only board/snapshot queries, outcome resolution, captures, effects and replay; prove first complete player-driven JSON transition before GUI migration.
-- [ ] Complete validated chess and English-draughts JSON and action/clock/quest semantics.
-- [ ] Migrate Tkinter session/controllers/views and permitted JSON settings; remove all rule/quest editing, executable user-authored Python and code-editor paths.
-- [ ] Run real engine/GUI adversarial and complete-game acceptance across supported Python versions.
-- [ ] Validate four native packaged executables from the implemented GUI; preserve disabled release until proven.
-- [ ] Reconcile #271/archived #405 reviews, update source documentation/diagrams, independently review and seek approval.
-- [ ] After approved #271 merge, verify protected promotion and v1.0.0 binaries; defer #422 until afterward.
+- [ ] Port #405 chess reference rules through a real versioned game session: illegal/unsafe castling, en passant discovered check, promotion, draws, dead material, replay and complete games.
+- [ ] Port English-draughts acceptance: compulsory and branching multi-jump captures, short kings, promotion continuation rules, terminal positions and complete games.
+- [ ] Verify variant-independent board dimensions, bounded hook evaluation and failure atomicity through publicly supported action submission.
+- [ ] Mark `chess` and `english_draughts` definitions playable only after full end-to-end reference acceptance.
+- [ ] Verify Tkinter clocks, expiration, game end, rewards, capture/promotion choice, reset, game switch and safe callback shutdown through obligatory Xvfb GUI acceptance.
+- [ ] Complete player-facing chess and draughts notation exports; verify exported complete-game contents through the real UI.
+- [ ] Prove preference recovery, filesystem boundary protection and restart behavior under hostile input through desktop user paths.
+- [ ] Verify the final frozen binaries on Windows x64, macOS ARM64/x64 and Linux x64: game actions, GUI, bundled JSON, installation diagnostic, persistence, exports, restart and checksums.
+- [ ] Resolve current #271 review threads and any relevant archived #405 review issues with traceable fixes; validate generated docs and exact-head Python 3.10–3.13 CI.
+- [ ] Obtain maintainer approval, merge #271 into `develop`, approve reviewed `develop → main` promotion and publish/verify gated v1.0.0.

@@ -1,10 +1,12 @@
 ---
 status: accepted
 ---
-# Desktop entry, controllers and Tkinter view ownership
+# Desktop application and UI ownership
 
-`chesswithquests:main` validates game selection and builds a local `DesktopSession` with two participants. `view.app.build_application` constructs the Tkinter game window and selector; `GameController` maps player square clicks to legal complete intents and submits them with expected revisions; `WindowController` owns window status and timeout polling.
+`chesswithquests:main` validates game selection and launches a local JSON-backed `DesktopSession`. Its `--check` option loads all installed bundled definitions and accepts/retries/replays real opening moves without needing a display.
 
-The Tkinter `BoardView` renders detached board projections and selected/legal destinations, while `PlayerGameView` owns UI refresh, game switching, move-choice dialogs, history, JSON snapshot export and shutdown callback cancellation. `PlayerView` and `QuestList` display clock/capture status and immutable quest descriptions/progress. `SettingsDialog` edits only allowlisted persisted presentation preferences.
+`view.app.build_application` constructs Tkinter game selection and gameplay. `GameController` maps clicks to complete legal action intents and submits them with actor IDs and expected revisions. `WindowController` manages status and authoritative timeout polling. The widgets do not own independent game state.
 
-`desktop-gameplay.yml` exercises these widgets under Xvfb; publication acceptance still requires complete game behavior and real frozen native executables.
+`BoardView` renders detached board projections and legal highlights; `PlayerGameView` handles UI refresh, alternate action choice, game switching, history, JSON snapshot export and safe callback cancellation. `PlayerView` and `QuestList` render authoritative clock/captures and configured quest progress/rewards. `SettingsDialog` changes only validated persisted presentation preferences.
+
+`desktop-gameplay.yml` verifies these interactions under Xvfb, while `desktop-native-acceptance.yml` builds four self-contained frozen applications. The separate frozen GUI user-path acceptance remains an outstanding release requirement.

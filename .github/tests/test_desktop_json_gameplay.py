@@ -217,7 +217,4 @@ def test_real_installation_check_executes_both_bundled_game_openings():
         timeout=90,
     )
     assert completed.returncode == 0, completed.stderr
-    assert "configurations: chess, checkers" not in completed.stdout or (
-        "accepted and replayed opening moves: 2" in completed.stdout
-    )
     assert "accepted and replayed opening moves: 2" in completed.stdout
