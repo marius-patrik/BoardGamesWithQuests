@@ -122,17 +122,22 @@ def test_english_draughts_forced_capture_updates_authoritative_history():
     """A real opening must produce a mandatory short capture and deterministic replay."""
     session = DesktopSession("checkers")
     assert len(session.snapshot()["board"]) == 24
-    perform(session, (5, 0), (4, 1))
+    # Official English draughts opens with Black.
+    assert session.snapshot()["active_side"] == -1
     perform(session, (2, 3), (3, 2))
+    perform(session, (5, 0), (4, 1))
     available = session.legal_actions()
-    capture = [move for move in available if move["start"] == [4, 1] and move["hops"] == [[2, 3]]]
+    capture = [
+        move for move in available
+        if move["start"] == [3, 2] and move["hops"] == [[5, 0]]
+    ]
     assert capture, available
-    state = perform(session, (4, 1), (2, 3))["state"]
+    state = perform(session, (3, 2), (5, 0))["state"]
     assert state["revision"] == 3
     assert len(state["captured"]) == 1
-    assert state["captured"][0]["side"] == -1
-    assert square(state, [3, 2]) is None
-    assert square(state, [2, 3])["side"] == 1
+    assert state["captured"][0]["side"] == 1
+    assert square(state, [4, 1]) is None
+    assert square(state, [5, 0])["side"] == -1
     assert DesktopSession.recover(state).snapshot() == state
 
 
