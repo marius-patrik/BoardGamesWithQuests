@@ -730,6 +730,90 @@ flowchart LR
   nc9f5868186eb03f66 --> n6f2a93de9994e922b
   n8b64577ca0364a8e1["chess_budget_reproducer.json"]
   n6f2a93de9994e922b --> n8b64577ca0364a8e1
+  n47f5bb700a9d81e04["test_chess_reference_gameplay.py"]
+  nc9f5868186eb03f66 --> n47f5bb700a9d81e04
+  n31f4c65ccf7a5090a["function_definition configuration"]
+  n47f5bb700a9d81e04 --> n31f4c65ccf7a5090a
+  nb8013da79175f43e0["function_definition session"]
+  n47f5bb700a9d81e04 --> nb8013da79175f43e0
+  n9cc8abde9251f0321["function_definition play"]
+  n47f5bb700a9d81e04 --> n9cc8abde9251f0321
+  nf6168f4f8511c1875["function_definition reject"]
+  n47f5bb700a9d81e04 --> nf6168f4f8511c1875
+  ndb409c03d0d53b5f8["function_definition test_complete_opening_has_twenty_moves_and_e4_recovers"]
+  n47f5bb700a9d81e04 --> ndb409c03d0d53b5f8
+  n5d73ac7484dea3089["decorated_definition"]
+  n47f5bb700a9d81e04 --> n5d73ac7484dea3089
+  n0e39b0ce2ff65a2a3["function_definition test_pawn_first_double_and_immediate_target"]
+  n47f5bb700a9d81e04 --> n0e39b0ce2ff65a2a3
+  n83b0715f406df68c5["decorated_definition"]
+  n47f5bb700a9d81e04 --> n83b0715f406df68c5
+  n3e46598ca559ea7f8["function_definition test_blocked_double_is_illegal_and_atomic"]
+  n47f5bb700a9d81e04 --> n3e46598ca559ea7f8
+  n7db30b3d5a79a154a["decorated_definition"]
+  n47f5bb700a9d81e04 --> n7db30b3d5a79a154a
+  n315ff88ecbc3cf9c6["function_definition test_pawn_diagonal_empty_square_cannot_be_captured"]
+  n47f5bb700a9d81e04 --> n315ff88ecbc3cf9c6
+  na42cfec207b3a4507["function_definition test_pawn_cannot_capture_straight_ahead_or_expose_pinned_king"]
+  n47f5bb700a9d81e04 --> na42cfec207b3a4507
+  na10093661822c987f["decorated_definition"]
+  n47f5bb700a9d81e04 --> na10093661822c987f
+  n6eb559f4f625e2c65["function_definition test_every_promotion_choice_immediately_replaces_pawn"]
+  n47f5bb700a9d81e04 --> n6eb559f4f625e2c65
+  n78b876d4186be1ea9["decorated_definition"]
+  n47f5bb700a9d81e04 --> n78b876d4186be1ea9
+  n8c5282d0abe52d0e3["function_definition test_promotion_requires_exact_legal_choice"]
+  n47f5bb700a9d81e04 --> n8c5282d0abe52d0e3
+  nb42e38d32c28116e2["decorated_definition"]
+  n47f5bb700a9d81e04 --> nb42e38d32c28116e2
+  n565e6f4de4fcc59df["function_definition test_en_passant_auxiliary_capture_and_discovered_check"]
+  n47f5bb700a9d81e04 --> n565e6f4de4fcc59df
+  nf8dcc28d652eb8dcb["decorated_definition"]
+  n47f5bb700a9d81e04 --> nf8dcc28d652eb8dcb
+  n9805ab64d8f7feeaa["function_definition test_castling_moves_both_pieces_and_consumes_rights"]
+  n47f5bb700a9d81e04 --> n9805ab64d8f7feeaa
+  nfc56e8464bdd32fd2["decorated_definition"]
+  n47f5bb700a9d81e04 --> nfc56e8464bdd32fd2
+  nce7884b42763e87c5["function_definition test_castling_out_of_through_or_into_check_rejects"]
+  n47f5bb700a9d81e04 --> nce7884b42763e87c5
+  n5893f7819d7933ef2["function_definition test_adjacent_kings_and_king_capture_are_rejected"]
+  n47f5bb700a9d81e04 --> n5893f7819d7933ef2
+  n1f7cd839d1f73f9ff["decorated_definition"]
+  n47f5bb700a9d81e04 --> n1f7cd839d1f73f9ff
+  neef9336430b19ada5["function_definition test_checkmate_and_stalemate_use_actual_legal_escape_set"]
+  n47f5bb700a9d81e04 --> neef9336430b19ada5
+  n5b906bcc44eeafa2c["function_definition test_promotion_capture_removes_rook_and_resets_halfmove"]
+  n47f5bb700a9d81e04 --> n5b906bcc44eeafa2c
+  n00751284b73630511["function_definition test_castling_right_cannot_return_after_rook_moves_back"]
+  n47f5bb700a9d81e04 --> n00751284b73630511
+  neea99f1adb3f1ba16["function_definition test_en_passant_expires_after_any_intervening_move"]
+  n47f5bb700a9d81e04 --> neea99f1adb3f1ba16
+  nb8a4e259ce4bab4e7["decorated_definition"]
+  n47f5bb700a9d81e04 --> nb8a4e259ce4bab4e7
+  nde85cc89c0375d91b["function_definition test_resignation_uses_actual_actor_and_retries_after_restart"]
+  n47f5bb700a9d81e04 --> nde85cc89c0375d91b
+  ne0207fd95785c8405["function_definition test_threefold_claim_after_repeated_knight_cycles"]
+  n47f5bb700a9d81e04 --> ne0207fd95785c8405
+  nfce7482bc5a7b7fc1["decorated_definition"]
+  n47f5bb700a9d81e04 --> nfce7482bc5a7b7fc1
+  n163f3d5e91e05df8f["function_definition test_reversible_move_thresholds_require_exact_number_of_halfmoves"]
+  n47f5bb700a9d81e04 --> n163f3d5e91e05df8f
+  n5aff745200d57a8c5["function_definition test_fivefold_repetition_is_automatic_without_claim"]
+  n47f5bb700a9d81e04 --> n5aff745200d57a8c5
+  nbfe43e9a6816252b0["decorated_definition"]
+  n47f5bb700a9d81e04 --> nbfe43e9a6816252b0
+  n618b65addf44e9eca["function_definition test_king_and_single_minor_is_dead_after_legal_move"]
+  n47f5bb700a9d81e04 --> n618b65addf44e9eca
+  n3d944de3a9edaa555["decorated_definition"]
+  n47f5bb700a9d81e04 --> n3d944de3a9edaa555
+  n33bb163bfc2617762["function_definition test_bishop_square_colors_affect_dead_material"]
+  n47f5bb700a9d81e04 --> n33bb163bfc2617762
+  n88471bffb9e1a0c50["function_definition test_resignation_against_bare_king_is_draw"]
+  n47f5bb700a9d81e04 --> n88471bffb9e1a0c50
+  nbdeb0fc8d61f6a796["decorated_definition"]
+  n47f5bb700a9d81e04 --> nbdeb0fc8d61f6a796
+  n589fc7c55849b1fff["function_definition test_timeout_in_familiar_dead_material_is_draw_not_opponents_win"]
+  n47f5bb700a9d81e04 --> n589fc7c55849b1fff
   n7847ac7dc6c4eea7a["test_desktop_json_gameplay.py"]
   nc9f5868186eb03f66 --> n7847ac7dc6c4eea7a
   n5c78090b30a7ed38c["function_definition chess_pawn_action"]
