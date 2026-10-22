@@ -284,27 +284,42 @@ direction LR
   nfda61d5e7bb7a480b : +file_path()
   class nb5eb61502c245eff4["GameManager"]
   nb5eb61502c245eff4 : +__init__()
-  nb5eb61502c245eff4 : +link_default_users()
-  nb5eb61502c245eff4 : +new_game()
-  nb5eb61502c245eff4 : +get_result()
-  nb5eb61502c245eff4 : +status()
-  nb5eb61502c245eff4 : +start_turn()
+  nb5eb61502c245eff4 : +_operation()
+  nb5eb61502c245eff4 : +_copy_state()
+  nb5eb61502c245eff4 : +_charge()
+  nb5eb61502c245eff4 : +definition()
+  nb5eb61502c245eff4 : +_identifier()
+  nb5eb61502c245eff4 : +_timestamp()
+  nb5eb61502c245eff4 : +_placement()
+  nb5eb61502c245eff4 : +_piece()
+  nb5eb61502c245eff4 : +_board()
+  nb5eb61502c245eff4 : +_raw_position_key()
+  nb5eb61502c245eff4 : +_position_key()
+  nb5eb61502c245eff4 : +_legal_target_capture()
+  nb5eb61502c245eff4 : +_paths()
+  nb5eb61502c245eff4 : +_context()
+  nb5eb61502c245eff4 : +_offers()
+  nb5eb61502c245eff4 : +_promotion()
+  nb5eb61502c245eff4 : +_intents()
+  nb5eb61502c245eff4 : +_candidate()
+  nb5eb61502c245eff4 : +_evaluate()
+  nb5eb61502c245eff4 : +_allowed()
+  nb5eb61502c245eff4 : +_complete_quest()
+  nb5eb61502c245eff4 : +_effects()
+  nb5eb61502c245eff4 : +_prepare_move()
+  nb5eb61502c245eff4 : +_candidates()
+  nb5eb61502c245eff4 : +_legal_moves()
   nb5eb61502c245eff4 : +get_valid_moves()
-  nb5eb61502c245eff4 : +cancel_move()
   nb5eb61502c245eff4 : +get_state()
-  nb5eb61502c245eff4 : +make_move()
-  nb5eb61502c245eff4 : +_configuration_clock()
-  nb5eb61502c245eff4 : +start_turn_clock()
-  nb5eb61502c245eff4 : +charge_turn()
-  nb5eb61502c245eff4 : +credit_increment()
-  nb5eb61502c245eff4 : +_describe()
-  nb5eb61502c245eff4 : +finish_game()
-  nb5eb61502c245eff4 : +offered_formats()
-  nb5eb61502c245eff4 : +default_format()
-  nb5eb61502c245eff4 : +writer_for()
-  nb5eb61502c245eff4 : +transcript()
-  nb5eb61502c245eff4 : +save_log()
-  class nb5e8d623baa374991["UnsupportedExportFormat"]
+  nb5eb61502c245eff4 : +_action()
+  nb5eb61502c245eff4 : +submit()
+  nb5eb61502c245eff4 : +_result()
+  nb5eb61502c245eff4 : +_terminal_action()
+  nb5eb61502c245eff4 : +submit_action()
+  nb5eb61502c245eff4 : +from_snapshot()
+  class n9f184d08711df6e4e["OperationEvaluation"]
+  n9f184d08711df6e4e : +__init__()
+  class nf3c197fb68564d603["TransitionError"]
   class n01459168837c3013c["Applied"]
   n01459168837c3013c : +squares
   n01459168837c3013c : +captures
@@ -742,18 +757,7 @@ direction LR
   n3415605a5be07770d --> nd25f0c88f48f4b42e : quests
   n3415605a5be07770d --> n3c81645bc35778e31 : rules
   nf976b2c22ca3fbdb7 --> n7d9eac03b039c1201 : history
-  nb5eb61502c245eff4 --> n6aed97faf9db3cb3d : board
-  nb5eb61502c245eff4 --> n3415605a5be07770d : configuration
-  nb5eb61502c245eff4 --> n7d9eac03b039c1201 : move_events
-  nb5eb61502c245eff4 --> nfda61d5e7bb7a480b : game_logger
-  nb5eb61502c245eff4 --> n8b5815b511426bf62 : current_move
-  nb5eb61502c245eff4 --> n42ba52d370abd247e : players
-  nb5eb61502c245eff4 --> n593525d6ad373b288 : result
-  nb5eb61502c245eff4 --> n928c5190002c51b19 : timer
-  nb5eb61502c245eff4 --> n1385e36b3a2d20d71 : move_validator
-  nb5eb61502c245eff4 --> n46b677bd7bd63c47e : metadata
-  nb5eb61502c245eff4 --> n173b7f99f1e59a4e1 : quest_manager
-  nb5eb61502c245eff4 --> n3b05518df56d99cab : users
+  nb5eb61502c245eff4 --> n9f184d08711df6e4e : _evaluation
   n5b687c1eb24a44daf --> nf976b2c22ca3fbdb7 : event
   n1385e36b3a2d20d71 --> n8b5815b511426bf62 : legal_candidates
   n1385e36b3a2d20d71 --> n3c81645bc35778e31 : rules
