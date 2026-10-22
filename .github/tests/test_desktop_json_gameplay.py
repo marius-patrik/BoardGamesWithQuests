@@ -204,3 +204,18 @@ def test_en_passant_removes_the_correct_opponent_pawn_and_replays():
     assert square(after, [2, 3])["kind"] == "pawn"
     assert len(after["captured"]) == len(before["captured"]) + 1
     assert DesktopSession.recover(after).snapshot() == after
+
+
+
+def test_real_installation_check_executes_both_bundled_game_openings():
+    import subprocess
+    import sys
+    completed = subprocess.run(
+        [sys.executable, "-m", "chesswithquests", "--check"],
+        capture_output=True, text=True, timeout=90,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "configurations: chess, checkers" not in completed.stdout or (
+        "accepted and replayed opening moves: 2" in completed.stdout
+    )
+    assert "accepted and replayed opening moves: 2" in completed.stdout

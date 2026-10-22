@@ -53,11 +53,34 @@ def report_installation() -> str:
         str: A report naming the located `games/` directory and every shipped
         configuration.
     """
+    from model.game.session import DesktopSession
+
     games = available_games()
+    if not games or DEFAULT_GAME not in games:
+        raise ValueError("bundled games are missing")
+    # This is an installed-product diagnostic, not an alternate gameplay engine.
+    # Resolve each bundled JSON rulebook from the installed runtime and run a
+    # real accepted action through the same local session used by Tkinter.
+    for name in games:
+        session = DesktopSession(name)
+        opening = session.snapshot()
+        moves = session.legal_actions()
+        if not moves:
+            raise ValueError(f"{name}: no playable opening actions")
+        actor = opening["participants"][str(opening["active_side"])]
+        request = {"type": "move", "move": moves[0]}
+        accepted = session.submit(actor, opening["revision"], request, action_id="installation-check")
+        if accepted["state"]["revision"] != opening["revision"] + 1:
+            raise ValueError(f"{name}: transition did not commit exactly once")
+        if session.submit(actor, opening["revision"], request, action_id="installation-check")["event"] != accepted["event"]:
+            raise ValueError(f"{name}: identical action retry is not idempotent")
+        if DesktopSession.recover(accepted["state"]).snapshot() != accepted["state"]:
+            raise ValueError(f"{name}: installed session does not replay")
     lines = [
         f"{APPLICATION_TITLE} {_version()}",
         f"games directory: {games_root()}",
-        f"configurations: {', '.join(games) if games else '(none found)'}",
+        f"configurations: {', '.join(games)}",
+        f"accepted and replayed opening moves: {len(games)}",
     ]
     return "\n".join(lines)
 
@@ -109,7 +132,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = build_arguments(argv)
 
     if args.check:
-        print(report_installation())
+        try:
+            report = report_installation()
+        except (OSError, ValueError, TypeError, RuntimeError) as error:
+            if sys.stderr is not None:
+                print(f"installation check failed: {error}", file=sys.stderr)
+            return 5
+        if sys.stdout is not None:
+            print(report)
         return 0
 
     try:

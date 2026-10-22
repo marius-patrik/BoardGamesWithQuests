@@ -121,6 +121,17 @@ def smoke(bundle: Path, platform: str) -> None:
         executable = bundle / "BoardGamesWithQuests"
     if not executable.is_file():
         raise FileNotFoundError(f"Frozen entry point missing: {executable}")
+    # A frozen application must load its actual embedded JSON rulebooks and
+    # perform a real versioned game transition, idempotent retry and replay.
+    # The --windowed Windows binary has no console; inspect its exit code.
+    check = subprocess.run(
+        [str(executable), "--check"], cwd=ROOT, capture_output=True, timeout=90
+    )
+    if check.returncode != 0:
+        raise RuntimeError(
+            f"Frozen application game diagnostic failed ({check.returncode}): "
+            + check.stderr.decode("utf-8", errors="replace")
+        )
     command = [str(executable)]
     if platform == "linux-x64":
         command = ["xvfb-run", "-a", *command]
