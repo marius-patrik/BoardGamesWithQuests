@@ -47,7 +47,7 @@ _Source: [0002-configuration.md](decisions/0002-configuration.md)_
 
 `view.app.build_application` constructs Tkinter game selection and gameplay. `GameController` maps clicks to complete legal action intents and submits them with actor IDs and expected revisions. `WindowController` manages status and authoritative timeout polling. The widgets do not own independent game state.
 
-`BoardView` renders detached board projections and legal highlights; `PlayerGameView` handles UI refresh, alternate action choice, game switching, history, JSON snapshot export and safe callback cancellation. `PlayerView` and `QuestList` render authoritative clock/captures and configured quest progress/rewards. `SettingsDialog` changes only validated persisted presentation preferences.
+`BoardView` renders detached board projections and legal highlights; `PlayerGameView` handles UI refresh, alternate action choice, game switching, history, atomic JSON snapshot export, replay-verified Open Game recovery and safe callback cancellation. `PlayerView` and `QuestList` render authoritative clock/captures and configured quest progress/rewards. `SettingsDialog` changes only validated persisted presentation preferences.
 
 `desktop-gameplay.yml` verifies these interactions under Xvfb, while `desktop-native-acceptance.yml` builds four self-contained frozen applications. The separate frozen GUI user-path acceptance remains an outstanding release requirement.
 

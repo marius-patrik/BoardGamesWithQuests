@@ -13,7 +13,7 @@ Game positions, movement, captures, conditions, effects, quests and outcomes com
 
 ## Local player experience
 
-The application renders detached authoritative state, supports mouse-driven moves, displays available destinations and handles configured capture/promotion choices. Accepted actions update clock/turn ownership, quests and history atomically. Settings change only board-square size and coordinate display through validated, persistent JSON preferences. The application exports full, replayable session JSON.
+The application renders detached authoritative state, supports mouse-driven moves, displays available destinations and handles configured capture/promotion choices. Accepted actions update clock/turn ownership, quests and history atomically. Settings change only board-square size and coordinate display through validated, persistent JSON preferences. The application atomically exports full replayable session JSON and can reopen a saved game after duplicate-property, size and deterministic-replay validation.
 
 ## Delivery
 

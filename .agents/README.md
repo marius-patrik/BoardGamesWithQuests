@@ -15,7 +15,7 @@ Game positions, movement, captures, conditions, effects, quests and outcomes com
 
 ### Local player experience
 
-The application renders detached authoritative state, supports mouse-driven moves, displays available destinations and handles configured capture/promotion choices. Accepted actions update clock/turn ownership, quests and history atomically. Settings change only board-square size and coordinate display through validated, persistent JSON preferences. The application exports full, replayable session JSON.
+The application renders detached authoritative state, supports mouse-driven moves, displays available destinations and handles configured capture/promotion choices. Accepted actions update clock/turn ownership, quests and history atomically. Settings change only board-square size and coordinate display through validated, persistent JSON preferences. The application atomically exports full replayable session JSON and can reopen a saved game after duplicate-property, size and deterministic-replay validation.
 
 ### Delivery
 
@@ -35,6 +35,7 @@ _Source: [0001-product.md](notes/0001-product.md)_
 | `src/model/game/manager.py`, `session.py` | Authoritative revisioned game transitions/replay and local two-player desktop session |
 | `src/model/game/{board,move,validator,capture_geometry,capture_policy}.py` | Generic board, complete action intents, geometry and capture search |
 | `src/model/game/{hooks,conditions,board_queries,snapshot_queries,outcomes}.py` | Bounded declarative rules, trusted queries and terminal proposals |
+| `src/model/game/persistence.py` | Bounded atomic saved-game export and replay-verified import |
 | `src/model/game/preferences.py` | Validated user display preferences and atomic OS-specific persistence |
 | `src/controller/` | Player input, action routing, selection state and window lifecycle |
 | `src/view/` | Tkinter board, history, players, quests, settings and game chooser |

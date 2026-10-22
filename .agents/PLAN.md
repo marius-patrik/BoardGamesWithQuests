@@ -21,7 +21,7 @@
 2. Verify authoritative clock progression/increment, expiration with no user click, timeout adjudication, cancellation of callbacks during window destruction and game switch, and nonmutation on rejection.
 3. Verify first-move/first-capture quest progress and once-only rewards for both participants; test interaction with terminal outcomes and replay.
 4. Implement actual player-facing notation export for chess and English draughts (in addition to the existing replayable JSON snapshot export), and verify full-game exported contents via the GUI.
-5. Exercise corrupted/oversized preferences, symlink and path escape rejection, atomic writing, restart persistence and recovery across complete application sessions.
+5. Extend saved-game and preferences import/export acceptance with oversized-file, symlink/path escape, interrupted-write and restart recovery cases through complete application sessions.
 6. Extend mandatory UI acceptance to all supported Python versions where practical; ensure dedicated Xvfb gate remains mandatory and never silently skips.
 
 **Exit:** both complete games, clocks, quests, errors, exports, reset/restart and shutdown work through the actual Tkinter UI, not only isolated engine tests.
