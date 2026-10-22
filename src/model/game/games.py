@@ -1,64 +1,37 @@
-"""Locating the shipped game configurations.
+"""Discover immutable bundled JSON game definitions, never executable rule plugins."""
 
-`games/` sits outside the package, so an installed distribution has to be able to find
-its own default configuration without anyone passing it a path. This module is the one
-place that knows where that directory is.
-"""
+from __future__ import annotations
 
-import os
-from typing import List
+from importlib import resources
+import re
 
-#: Name of the configuration a game runs when the player selects nothing.
 DEFAULT_GAME = "chess"
 
 
-def games_root() -> str:
-    """Return the absolute path of the shipped `games/` directory.
-
-    The directory is resolved relative to this module, so the answer is the same whether
-    the project runs from a source checkout or from an installed distribution.
-
-    Returns:
-        str: Absolute path to the directory holding the shipped configurations.
-    """
-    package_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    return os.path.join(package_root, "games")
-
-
-def available_games() -> List[str]:
-    """Return the names of every shipped configuration.
-
-    Returns:
-        List[str]: Configuration directory names, with the default first, then the rest
-        sorted. An empty list is returned when the `games/` directory is absent.
-    """
-    root = games_root()
-    if not os.path.isdir(root):
-        return []
-    names = [
-        name
-        for name in os.listdir(root)
-        if os.path.isdir(os.path.join(root, name)) and not name.startswith(("_", "."))
-    ]
-    others = sorted(name for name in names if name != DEFAULT_GAME)
-    if DEFAULT_GAME in names:
-        return [DEFAULT_GAME, *others]
-    return others
+def available_games() -> list[str]:
+    """Discover only validated source-controlled, packaged JSON definitions."""
+    names: list[str] = []
+    for entry in resources.files("games").iterdir():
+        if (
+            entry.is_dir()
+            and re.fullmatch(r"[a-z][a-z0-9_]{0,63}", entry.name) is not None
+            and entry.joinpath("config.json").is_file()
+        ):
+            names.append(entry.name)
+    return sorted(names, key=lambda name: (name != DEFAULT_GAME, name))
 
 
 def configuration_path(name: str) -> str:
-    """Return the absolute path of one configuration directory.
+    """Validate a bundled selector and return its inert resource identifier."""
+    from model.game.definition import ConfigurationError, load_bundled_definition
 
-    Args:
-        name: Configuration directory name, for example `chess`.
+    try:
+        load_bundled_definition(name)
+    except ConfigurationError as error:
+        raise FileNotFoundError(f"no bundled game definition {name!r}") from error
+    return name
 
-    Returns:
-        str: Absolute path to the configuration directory.
 
-    Raises:
-        FileNotFoundError: If no such configuration directory is shipped.
-    """
-    path = os.path.join(games_root(), name)
-    if not os.path.isdir(path):
-        raise FileNotFoundError(f"no shipped game configuration named {name!r} in {games_root()}")
-    return path
+def games_root() -> str:
+    """Describe the installed games resource location for installation diagnostics."""
+    return str(resources.files("games"))
