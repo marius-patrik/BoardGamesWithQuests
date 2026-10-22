@@ -121,8 +121,8 @@
   "pieces": {
     "man": {
       "symbols": {
-        "white": "\u26c0",
-        "black": "\u26c2"
+        "white": "⛀",
+        "black": "⛂"
       },
       "moves": [
         [
@@ -165,8 +165,8 @@
     },
     "king": {
       "symbols": {
-        "white": "\u26c1",
-        "black": "\u26c3"
+        "white": "⛁",
+        "black": "⛃"
       },
       "moves": [
         [
@@ -317,7 +317,32 @@
       ]
     }
   ],
-  "quests": [],
+  "quests": [
+    {
+      "id": "first-move",
+      "description": "Complete your first legal turn.",
+      "reward": 5,
+      "when": {
+        "op": "true"
+      }
+    },
+    {
+      "id": "first-capture",
+      "description": "Capture an opposing piece.",
+      "reward": 10,
+      "when": {
+        "op": "compare",
+        "relation": "gte",
+        "left": {
+          "query": "move_attribute",
+          "params": {
+            "name": "captures"
+          }
+        },
+        "right": 1
+      }
+    }
+  ],
   "halfmove_reset": {
     "op": "compare",
     "left": {

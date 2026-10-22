@@ -147,3 +147,20 @@ def test_reset_recovers_original_position_without_leaking_previous_moves():
     assert reset["game_id"] != before["game_id"]
     assert reset["board"] == before["board"]
     assert reset["events"] == []
+
+
+
+def test_quest_rewards_are_awarded_exactly_once_through_gameplay_and_replay():
+    session = DesktopSession("chess")
+    assert session.snapshot()["quest_scores"] == {"white": 0, "black": 0}
+    first = perform(session, (6, 4), (4, 4))["state"]
+    assert first["quest_progress"]["white"]["first-move"]["completed"]
+    assert first["quest_scores"] == {"white": 5, "black": 0}
+    second = perform(session, (1, 4), (3, 4))["state"]
+    assert second["quest_scores"] == {"white": 5, "black": 5}
+    perform(session, (7, 6), (5, 5))
+    perform(session, (0, 1), (2, 2))
+    fifth = perform(session, (5, 5), (3, 4))["state"]
+    assert fifth["quest_progress"]["white"]["first-capture"]["completed"]
+    assert fifth["quest_scores"]["white"] == 15
+    assert DesktopSession.recover(fifth).snapshot() == fifth

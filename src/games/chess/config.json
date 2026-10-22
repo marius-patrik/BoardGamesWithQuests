@@ -10519,7 +10519,32 @@
       ]
     }
   ],
-  "quests": [],
+  "quests": [
+    {
+      "id": "first-move",
+      "description": "Complete your first legal turn.",
+      "reward": 5,
+      "when": {
+        "op": "true"
+      }
+    },
+    {
+      "id": "first-capture",
+      "description": "Capture an opposing piece.",
+      "reward": 10,
+      "when": {
+        "op": "compare",
+        "relation": "gte",
+        "left": {
+          "query": "move_attribute",
+          "params": {
+            "name": "captures"
+          }
+        },
+        "right": 1
+      }
+    }
+  ],
   "initial_state": {
     "rule_state": {},
     "special_rights": {

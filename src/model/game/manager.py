@@ -168,6 +168,7 @@ class GameManager:
                 }
                 for identity in participant_ids
             },
+            "quest_scores": {identity: 0 for identity in participant_ids},
             "outcome": None,
             "revision": 0,
             "halfmove_count": 0,
@@ -1044,6 +1045,12 @@ class GameManager:
         if player not in state["quest_progress"] or quest_id not in state["quest_progress"][player]:
             raise TransitionError("quest completion needs a configured participant objective")
         progress = state["quest_progress"][player][quest_id]
+        if progress["completed"]:
+            return
+        reward = next(
+            quest["reward"] for quest in self.definition.quests if quest["id"] == quest_id
+        )
+        state["quest_scores"][player] += reward
         progress.update(active=progress["target"], completed=True)
 
     def _effects(
