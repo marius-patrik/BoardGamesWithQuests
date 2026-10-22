@@ -1403,6 +1403,11 @@ class GameManager:
             state = self._copy_state(self._state)
             return self._legal_moves(state, state["active_side"], state["clocks"]["anchor_ms"])
 
+    def board_projection(self) -> Board:
+        """Build a detached render-only board without sharing mutable engine facts."""
+        with self._lock, self._operation():
+            return self._board(self._state)
+
     def get_state(self) -> dict[str, Any]:
         """Return a detached complete session snapshot for durable storage.
 

@@ -49,6 +49,35 @@ class DesktopSession:
         """Return a detached, self-contained authoritative state and event history."""
         return self._manager.get_state()
 
+    def board_projection(self):
+        """Return a detached board for rendering; it can never change live state."""
+        return self._manager.board_projection()
+
+    def clock_remaining(self) -> dict[str, int]:
+        """Read both live clocks in milliseconds without writing session state."""
+        state = self.snapshot()
+        values = dict(state["clocks"]["remaining_ms"])
+        if state["outcome"] is None:
+            elapsed = max(0, self._now() - state["clocks"]["anchor_ms"])
+            side = str(state["active_side"])
+            values[side] = max(0, values[side] - elapsed)
+        return values
+
+    def poll_timeout(self) -> bool:
+        """Commit an authoritative timeout only when the active clock has expired."""
+        state = self.snapshot()
+        if state["outcome"] is not None:
+            return False
+        side = str(state["active_side"])
+        if self.clock_remaining()[side] > 0:
+            return False
+        actor = state["participants"][side]
+        try:
+            self.submit(actor, state["revision"], {"type": "timeout"})
+        except TransitionError:
+            return False
+        return True
+
     def legal_actions(self) -> list[dict[str, Any]]:
         """Return complete player-selectable moves, never live piece objects."""
         return [move.to_json() for move in self._manager.get_valid_moves()]

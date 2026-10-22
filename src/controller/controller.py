@@ -1,104 +1,90 @@
-"""Game controller mediating UI user interactions, piece selections, and game flow."""
+"""Translate Tkinter square selections to canonical desktop-session intents."""
 
-from typing import Optional, Tuple, List, Dict, Any
+from __future__ import annotations
 
-from model.game.manager import GameManager
+from typing import Any
+
+from model.game.manager import TransitionError
+from model.game.session import DesktopSession
+
+Square = tuple[int, int]
 
 
 class GameController:
-    """Handles board square selections, move executions, and UI dispatch."""
+    """Interpret player clicks without holding an independent game state."""
 
-    def __init__(self, game_manager: Optional[GameManager] = None):
-        """Initialize a GameController instance.
+    def __init__(self, session: DesktopSession | None = None):
+        self.session = session if session is not None else DesktopSession()
+        self.selected_square: Square | None = None
+        self.highlighted_moves: list[Square] = []
 
-        Args:
-            game_manager: Optional GameManager instance (defaults to new instance).
-        """
-        self.game_manager: GameManager = game_manager or GameManager()
-        self.selected_square: Optional[Tuple[int, int]] = None
-        self.highlighted_moves: List[Tuple[int, int]] = []
+    def select_square(self, pos: Square) -> list[Square]:
+        state = self.session.snapshot()
+        active = state["active_side"]
+        record = next(
+            (piece for piece in state["board"] if piece["square"] == list(pos)), None
+        )
+        if record is None or record["side"] != active:
+            self.reset_selection()
+            return []
+        actions = [
+            action for action in self.session.legal_actions()
+            if action["start"] == list(pos)
+        ]
+        self.selected_square = pos if actions else None
+        self.highlighted_moves = sorted({
+            tuple(action["hops"][-1]) for action in actions
+        })
+        return list(self.highlighted_moves)
 
-    def select_square(self, pos: Tuple[int, int]) -> List[Tuple[int, int]]:
-        """Select a piece at the position and calculate its legal destination squares.
-
-        Args:
-            pos: (row, col) coordinates to select.
-
-        Returns:
-            List of valid destination (row, col) coordinate tuples.
-        """
-        piece = self.game_manager.board.get_piece_at(pos)
-        if piece is not None and piece.getColor() == self.game_manager.active_player:
-            self.selected_square = pos
-            self.highlighted_moves = self.game_manager.move_validator.get_valid_moves(
-                pos, self.game_manager.board
-            )
-            return list(self.highlighted_moves)
-        self.selected_square = None
-        self.highlighted_moves = []
-        return []
-
-    def handle_square_click(self, pos: Tuple[int, int]) -> Dict[str, Any]:
-        """Process a board square click from the UI layer.
-
-        Args:
-            pos: (row, col) coordinates of the clicked square.
-
-        Returns:
-            Dictionary describing result action ("selected", "reselected", "moved", "invalid", "none").
-        """
+    def handle_square_click(self, pos: Square) -> dict[str, Any]:
+        state = self.session.snapshot()
+        if state["outcome"] is not None:
+            return {"action": "invalid", "message": "The game has ended.", "game_state": state}
         if self.selected_square is None:
-            moves = self.select_square(pos)
-            return {
-                "action": "selected" if self.selected_square else "none",
-                "selected": self.selected_square,
-                "valid_moves": moves,
-            }
-        else:
-            piece = self.game_manager.board.get_piece_at(pos)
-            if piece is not None and piece.getColor() == self.game_manager.active_player:
-                moves = self.select_square(pos)
-                return {
-                    "action": "reselected",
-                    "selected": self.selected_square,
-                    "valid_moves": moves,
-                }
+            targets = self.select_square(pos)
+            return {"action": "selected" if targets else "none",
+                    "selected": self.selected_square, "valid_moves": targets}
+        record = next(
+            (piece for piece in state["board"] if piece["square"] == list(pos)), None
+        )
+        if record is not None and record["side"] == state["active_side"]:
+            targets = self.select_square(pos)
+            return {"action": "reselected", "selected": self.selected_square,
+                    "valid_moves": targets}
+        options = [
+            move for move in self.session.legal_actions()
+            if move["start"] == list(self.selected_square) and move["hops"][-1] == list(pos)
+        ]
+        if not options:
+            self.reset_selection()
+            return {"action": "invalid", "message": "That is not a legal destination.",
+                    "game_state": state}
+        if len(options) > 1:
+            return {"action": "choose", "options": options,
+                    "selected": self.selected_square, "valid_moves": self.highlighted_moves}
+        return self.submit_move(options[0])
 
-            # The move the rules offered, not a fresh one from two squares. A rule may attach
-            # more than a destination — a capture chain, a promotion piece, a companion rook —
-            # and a rebuilt move carries none of it, so a draughts capture chain was refused.
-            move = self.game_manager.move_validator.find_move(
-                self.selected_square, pos, self.game_manager.board
+    def submit_move(self, move: dict[str, Any]) -> dict[str, Any]:
+        state = self.session.snapshot()
+        actor = state["participants"][str(state["active_side"])]
+        try:
+            result = self.session.submit(
+                actor, state["revision"], {"type": "move", "move": move}
             )
-            if move is None:
-                self.selected_square = None
-                self.highlighted_moves = []
-                return {
-                    "action": "invalid",
-                    "success": False,
-                    "from": self.selected_square,
-                    "to": pos,
-                    "game_state": self.game_manager.get_state(),
-                }
-            success = self.game_manager.make_move(move)
-            prev_selected = self.selected_square
-            self.selected_square = None
-            self.highlighted_moves = []
-
-            return {
-                "action": "moved" if success else "invalid",
-                "success": success,
-                "from": prev_selected,
-                "to": pos,
-                "game_state": self.game_manager.get_state(),
-            }
+        except (TransitionError, ValueError) as exc:
+            self.reset_selection()
+            return {"action": "invalid", "message": str(exc),
+                    "game_state": self.session.snapshot()}
+        self.reset_selection()
+        return {"action": "moved", "success": True,
+                "game_state": result["state"], "event": result["event"]}
 
     def reset_selection(self) -> None:
-        """Clear current piece selection and move highlights."""
         self.selected_square = None
         self.highlighted_moves = []
 
-    def new_game(self) -> None:
-        """Start a new game session and reset selections."""
-        self.game_manager = GameManager()
+    def new_game(self, game: str | None = None) -> dict[str, Any]:
+        result = self.session.reset(game)
         self.reset_selection()
+        return result
