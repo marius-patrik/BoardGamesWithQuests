@@ -1,0 +1,108 @@
+"""Actual Tkinter user-path acceptance under an obligatory Xvfb display."""
+
+from __future__ import annotations
+
+import json
+import tkinter as tk
+from pathlib import Path
+
+import pytest
+
+from model.game.session import DesktopSession
+from view.app import build_application, open_settings
+
+
+@pytest.fixture
+def window(monkeypatch, tmp_path):
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    root = tk.Tk()
+    root.geometry("1100x860")
+    build_application(root, "chess", show_modal=False)
+    root.update_idletasks()
+    root.update()
+    try:
+        yield root
+    finally:
+        try:
+            root.game_view.stop_auto_refresh()
+            root.destroy()
+        except tk.TclError:
+            pass
+
+
+def click_canvas(window, row, col):
+    canvas = window.game_view.board_view.canvas
+    size = window.game_view.board_view.square_size
+    canvas.event_generate("<Button-1>", x=int((col + 0.5) * size),
+                          y=int((row + 0.5) * size))
+    window.update()
+
+
+def test_real_board_clicks_submit_authoritative_pawn_move(window):
+    assert window.game_view.board_view.board.get_piece_at((6, 4)).getType() == "pawn"
+    click_canvas(window, 6, 4)
+    controller = window.window_controller.game_controller
+    assert controller.selected_square == (6, 4)
+    assert (5, 4) in controller.highlighted_moves
+    click_canvas(window, 5, 4)
+    state = controller.session.snapshot()
+    assert state["revision"] == 1
+    assert next((p for p in state["board"] if p["square"] == [6, 4]), None) is None
+    assert next((p for p in state["board"] if p["square"] == [5, 4]), None)["kind"] == "pawn"
+    assert window.game_view.board_view.board.get_piece_at((5, 4)).getType() == "pawn"
+    assert window.game_view.history.size() == 1
+    assert "→" in window.game_view.history.get(0)
+
+
+def test_clicking_illegal_destination_keeps_board_and_revision(window):
+    before = window.window_controller.game_controller.session.snapshot()
+    click_canvas(window, 6, 4)
+    click_canvas(window, 2, 4)
+    assert window.window_controller.game_controller.session.snapshot() == before
+    assert window.game_view.history.size() == 0
+
+
+def test_preferences_dialog_saves_and_reloads_supported_non_executable_settings(window):
+    dialog = open_settings(window, window.window_controller)
+    dialog.size.set(64)
+    dialog.coordinates.set(False)
+    dialog.save()
+    window.update()
+    assert window.game_view.board_view.square_size == 64
+    assert window.game_view.board_view.show_coordinates is False
+    record = Path(__import__("os").environ["XDG_CONFIG_HOME"]) / "BoardGamesWithQuests" / "preferences.json"
+    saved = json.loads(record.read_text())
+    assert saved == {"board_size": 64, "show_coordinates": False}
+    next_dialog = open_settings(window, window.window_controller)
+    assert next_dialog.size.get() == 64
+    assert next_dialog.coordinates.get() is False
+    next_dialog.close()
+
+
+def test_game_switch_through_visible_new_game_modal_resets_board(window):
+    window.game_view.on_new_game()
+    window.update()
+    from view.start_modal import StartModal
+
+    modals = [child for child in window.winfo_children() if isinstance(child, tk.Toplevel)]
+    assert modals
+    selector = next(
+        widget for widget in modals[-1].winfo_children()[0].winfo_children()
+        if isinstance(widget, __import__("tkinter").ttk.Combobox)
+    )
+    selector.set("checkers")
+    modal_start = next(
+        nested for nested in modals[-1].winfo_children()[0].winfo_children()
+        if isinstance(nested, __import__("tkinter").ttk.Frame)
+    )
+    start_button = next(widget for widget in modal_start.winfo_children()
+                        if isinstance(widget, __import__("tkinter").ttk.Button)
+                        and widget.cget("text") == "Start")
+    start_button.invoke()
+    window.update()
+    controller = window.window_controller.game_controller
+    assert controller.session.game == "checkers"
+    assert controller.session.snapshot()["revision"] == 0
+    assert len(controller.session.snapshot()["board"]) == 24
+    assert window.game_view.board_view.board.get_piece_at((7, 0)) is not None
+    assert window.game_view.history.size() == 0
