@@ -220,7 +220,6 @@ def test_real_installation_check_executes_both_bundled_game_openings():
     assert "accepted and replayed opening moves: 2" in completed.stdout
 
 
-
 def test_fools_mate_and_opening_legal_counts_through_real_session():
     session = DesktopSession("chess")
     assert len(session.legal_actions()) == 20
@@ -243,7 +242,4 @@ def test_english_draughts_initial_legal_count_and_forced_capture_precedence():
     legal = session.legal_actions()
     assert legal
     assert all(move["hops"][-1] != [4, 3] for move in legal)
-    assert all(
-        move["start"] == [3, 2] and move["hops"] == [[5, 0]]
-        for move in legal
-    )
+    assert all(move["start"] == [3, 2] and move["hops"] == [[5, 0]] for move in legal)
