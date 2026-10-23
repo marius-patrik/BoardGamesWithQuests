@@ -45,13 +45,16 @@ def test_recorded_full_tournament_game_through_actual_draughts_actions():
         end = _square(int(match.group(3)))
         capture = match.group(2) == "x"
         offered = [
-            move for move in session.legal_actions()
+            move
+            for move in session.legal_actions()
             if tuple(move["start"]) == start
             and tuple(move["hops"][-1]) == end
             and (
-                any(abs(hop[0] - src[0]) > 1 for src, hop in zip(
-                    [move["start"], *move["hops"][:-1]], move["hops"]
-                )) == capture
+                any(
+                    abs(hop[0] - src[0]) > 1
+                    for src, hop in zip([move["start"], *move["hops"][:-1]], move["hops"])
+                )
+                == capture
             )
         ]
         assert len(offered) == 1, (
@@ -61,7 +64,8 @@ def test_recorded_full_tournament_game_through_actual_draughts_actions():
         before = session.snapshot()
         actor = before["participants"][str(before["active_side"])]
         session.submit(
-            actor, before["revision"],
+            actor,
+            before["revision"],
             {"type": "move", "move": offered[0]},
             action_id=f"recorded-1981-game37-{index}",
         )
@@ -70,7 +74,9 @@ def test_recorded_full_tournament_game_through_actual_draughts_actions():
     assert state["active_side"] == 1, "Black played the last recorded move"
     assert state["outcome"] is None, "The original tournament game ended by resignation"
     final = session.submit(
-        "white", state["revision"], {"type": "resign"},
+        "white",
+        state["revision"],
+        {"type": "resign"},
         action_id="recorded-1981-game37-resignation",
     )["state"]
     assert final["outcome"]["kind"] == "win"
