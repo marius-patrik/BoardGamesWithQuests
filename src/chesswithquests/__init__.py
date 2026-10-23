@@ -13,7 +13,7 @@ from model.game.games import DEFAULT_GAME, available_games, configuration_path, 
 
 __all__ = ["main", "build_window"]
 
-APPLICATION_TITLE = "ChessWithQuests"
+APPLICATION_TITLE = "BoardGamesWithQuests"
 
 
 def build_arguments(argv: Optional[List[str]] = None) -> argparse.Namespace:

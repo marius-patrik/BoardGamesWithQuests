@@ -45,7 +45,7 @@ class StartModal:
         body = ttk.Frame(self.window, padding=20)
         body.pack(fill="both", expand=True)
 
-        ttk.Label(body, text="ChessWithQuests", font=("TkDefaultFont", 18, "bold")).pack(
+        ttk.Label(body, text="BoardGamesWithQuests", font=("TkDefaultFont", 18, "bold")).pack(
             pady=(0, 4)
         )
         ttk.Label(body, text="Choose a game to play.").pack(pady=(0, 14))
