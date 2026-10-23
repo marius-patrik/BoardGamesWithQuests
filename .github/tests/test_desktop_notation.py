@@ -79,3 +79,18 @@ def test_notation_requires_verified_snapshot_and_rejects_symlink(tmp_path):
     assert target.read_text(encoding="utf-8") == "untouched"
     with pytest.raises(NotationError):
         save_notation(session, tmp_path / "wrong.pdn")
+
+
+
+def test_pgn_black_checkmate_and_finished_game_result():
+    session = DesktopSession("chess")
+    for src, dst in [
+        ((6, 5), (5, 5)),
+        ((1, 4), (3, 4)),
+        ((6, 6), (4, 6)),
+        ((0, 3), (4, 7)),
+    ]:
+        perform(session, src, dst)
+    _, notation = render_notation(session.snapshot())
+    assert '[Result "0-1"]' in notation
+    assert "1. f3 e5 2. g4 Qh4# 0-1" in notation
