@@ -1,29 +1,12 @@
 ---
 status: approved
 ---
-# Current Python engine requirements
+# Implemented desktop components
 
-## Installed package and CLI
-
-- `pyproject.toml` packages `engine`, `chess` and `checkers` from `packages/` with Python >=3.10 and declares `chesswithquests = engine.app:main`.
-- `engine.app` accepts `--game` and `--check`; `--check` reports installed package names and readiness without creating a Tk window. Normal startup resolves a default or explicitly named game, fails closed on invalid/unplayable definitions and handles unavailable Tk or view code with distinct errors.
-- Both currently installed JSON game definitions explicitly set `playable: false`, so these entry points are not a claim of working GUI gameplay.
-
-## Discovery and game configuration
-
-- Installed packages register through `boardgameswithquests.games`. An entry-point name must match the discovered `config.json` name, duplicates must be rejected, and no more than one default game can be declared.
-- The implemented validator requires `schema_version: 1`, nonempty name/title, boolean default/playable flags, integer board dimensions between 1 and 256, nonempty piece definitions, distinct in-bounds starting squares, valid piece IDs and white/black team names.
-- Each declared piece requires symbols for both colors, nonzero integer movement/attack coordinate vectors and boolean jump/repeat properties. Clocks require nonnegative integer initial/increment seconds; exports are string identifiers and appearance an object.
-- The chess and English-draughts JSON files provide separate 8×8 layouts and piece metadata. Their declarations do not automatically instantiate complete game rules or gameplay.
-
-## Actual engine and controller behavior
-
-- `Board` owns a piece matrix and captured-piece collections; its built-in 8×8 setup creates the standard chess position. `Move` records origin/target/capture/promotion data; `Move.validate` currently assumes 8×8 coordinates.
-- `MoveValidator` calculates chess move legality, attacked squares and check/checkmate/stalemate. `GameManager` coordinates board, two players, active turn, timer, validator and logger; successful moves are executed/logged and toggle the active player. `GameManager.save_log` is presently a no-op.
-- `Timer` provides player clocks, reset, tick, increments and expiry. `Quest` represents condition-based completion and reward points; `QuestManager` registers, evaluates and optionally credits completed quests to users.
-- `GameController` routes square selections and attempted moves; `WindowController` holds running/status/dialog state and clock ticks. These are controller-side functions, not proof of a completed Tkinter widget tree.
-- Chess notation/metadata/export classes are part of the installed model, but existence of an export class does not prove end-to-end export acceptance.
-
-## Known scope boundary
-
-The model retains chess-specific assumptions and lacks a playable installed GUI. It is not yet a complete generic draughts or arbitrary-board engine. Current requirements must be updated in the owning implementation PR whenever those capabilities actually change.
+- `chesswithquests:main` exposes the installed `boardgameswithquests` GUI script, interactive game chooser and a `--check` installed-product diagnostic that loads bundled definitions and validates real opening submission, idempotent retry and replay.
+- `src/model/game/definition.py` validates strict version-2 trusted JSON rulebooks. The source-controlled chess and English-draughts definitions reside under `src/games/{chess,checkers}/config.json` and currently declare `playable: false`.
+- `src/model/game/manager.py` alone owns authoritative revisioned game state, participant/turn authorization, bound legal actions, effect preparation, accepted-action events, clocks, quest scores, terminal arbitration and deterministic replay. Rejections do not partially mutate authoritative game state. `session.py` provides the local game lifecycle through snapshot, legal actions, submit, reset, recovery and timeout polling.
+- `Board`, `Piece`, `Move`, `MoveValidator` and `CaptureEnumerator` implement generic rectangular boards, data-derived movement geometry, immutable complete action intents and bounded captures. `schema.py`, `hooks.py`, `conditions.py`, `board_queries.py`, `snapshot_queries.py` and `outcomes.py` own the inert rule vocabulary and trusted bounded queries/effects/outcome proposals.
+- `src/controller/` forwards square selection and action submission through `DesktopSession`; `src/view/` displays detached game state, legal choices, player clocks, quest progress and history, plus atomic replayable JSON game export, source-controlled PGN/PDN notation support, resignation and configured draw-claim actions, and an Open Game action that validates and reconstructs saved sessions without losing the current game on failure. Game-owned rules/quests cannot be edited from the UI.
+- `preferences.py` accepts only board-size/coordinate visibility preferences and stores them atomically in an OS-specific application-data directory, independently of immutable built-in rules.
+- `.github/tests/` centralizes repository-owned tests; `desktop-gameplay.yml` runs local-session behavior on Python 3.10–3.13 and actual Tkinter interactions under Xvfb. `desktop-native-acceptance.yml` invokes the four-OS executable packaging matrix without publishing a release.

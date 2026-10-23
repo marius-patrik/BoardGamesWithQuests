@@ -678,6 +678,42 @@ flowchart LR
   n50f8f749b20de7e29 --> ncd8e37feb16753cd1
   nc9f5868186eb03f66["tests/"]
   nfad65243633b77700 --> nc9f5868186eb03f66
+  n62b5b4726381980d4["conftest.py"]
+  nc9f5868186eb03f66 --> n62b5b4726381980d4
+  n07e7a6a1d887b578b["decorated_definition"]
+  n62b5b4726381980d4 --> n07e7a6a1d887b578b
+  n057db422f03b3f92e["function_definition tk_root"]
+  n62b5b4726381980d4 --> n057db422f03b3f92e
+  nfc5161158ee90ee7f["desktop_gui_acceptance.py"]
+  nc9f5868186eb03f66 --> nfc5161158ee90ee7f
+  n9140a79430b3bcee1["decorated_definition"]
+  nfc5161158ee90ee7f --> n9140a79430b3bcee1
+  n994d2e0b1c738c469["function_definition window"]
+  nfc5161158ee90ee7f --> n994d2e0b1c738c469
+  n26ac98b15d0e050d0["function_definition click_canvas"]
+  nfc5161158ee90ee7f --> n26ac98b15d0e050d0
+  nad6d299a14dfe5829["function_definition test_real_board_clicks_submit_authoritative_pawn_move"]
+  nfc5161158ee90ee7f --> nad6d299a14dfe5829
+  nb615ff1e057407291["function_definition test_clicking_illegal_destination_keeps_board_and_revision"]
+  nfc5161158ee90ee7f --> nb615ff1e057407291
+  n9dd4a173233da3131["function_definition test_preferences_dialog_saves_and_reloads_supported_non_executable_settings"]
+  nfc5161158ee90ee7f --> n9dd4a173233da3131
+  n2a1a8ca2984337bf4["function_definition test_game_switch_through_visible_new_game_modal_resets_board"]
+  nfc5161158ee90ee7f --> n2a1a8ca2984337bf4
+  nea385ebe9b2e2e5c0["function_definition test_snapshot_export_from_real_window_is_replayable"]
+  nfc5161158ee90ee7f --> nea385ebe9b2e2e5c0
+  nd632930d4e0c88eab["function_definition test_hostile_preferences_are_not_accepted_or_executed"]
+  nfc5161158ee90ee7f --> nd632930d4e0c88eab
+  n767e653167a3a9255["function_definition test_export_and_reopen_real_game_after_switch"]
+  nfc5161158ee90ee7f --> n767e653167a3a9255
+  n7fa88505d85be07b5["function_definition test_bad_saved_game_preserves_live_window_and_reports_error"]
+  nfc5161158ee90ee7f --> n7fa88505d85be07b5
+  n5e2bc52da8e55384c["function_definition test_notation_button_exports_actual_user_game_as_pgn"]
+  nfc5161158ee90ee7f --> n5e2bc52da8e55384c
+  nbc3bdcbed42ce17e8["function_definition test_resign_from_real_ui_commits_terminal_result_and_blocks_further_moves"]
+  nfc5161158ee90ee7f --> nbc3bdcbed42ce17e8
+  n2da179b6608c25e5d["function_definition test_unavailable_draw_claim_does_not_mutate_authoritative_game"]
+  nfc5161158ee90ee7f --> n2da179b6608c25e5d
   nd6487c9d1884235b7["docs_site_acceptance.py"]
   nc9f5868186eb03f66 --> nd6487c9d1884235b7
   n3cc24defd97d2b5a4["function_definition test_repository_navigation_and_every_file_page"]
@@ -700,6 +736,152 @@ flowchart LR
   nd6487c9d1884235b7 --> n58b967f0eaae700a3
   n9ac875346544c2d84["function_definition test_image_and_diagram_viewers_offer_an_accessible_modal"]
   nd6487c9d1884235b7 --> n9ac875346544c2d84
+  n6f2a93de9994e922b["fixtures/"]
+  nc9f5868186eb03f66 --> n6f2a93de9994e922b
+  n8b64577ca0364a8e1["chess_budget_reproducer.json"]
+  n6f2a93de9994e922b --> n8b64577ca0364a8e1
+  n47f5bb700a9d81e04["test_chess_reference_gameplay.py"]
+  nc9f5868186eb03f66 --> n47f5bb700a9d81e04
+  n31f4c65ccf7a5090a["function_definition configuration"]
+  n47f5bb700a9d81e04 --> n31f4c65ccf7a5090a
+  nb8013da79175f43e0["function_definition session"]
+  n47f5bb700a9d81e04 --> nb8013da79175f43e0
+  n9cc8abde9251f0321["function_definition play"]
+  n47f5bb700a9d81e04 --> n9cc8abde9251f0321
+  nf6168f4f8511c1875["function_definition reject"]
+  n47f5bb700a9d81e04 --> nf6168f4f8511c1875
+  ndb409c03d0d53b5f8["function_definition test_complete_opening_has_twenty_moves_and_e4_recovers"]
+  n47f5bb700a9d81e04 --> ndb409c03d0d53b5f8
+  n5d73ac7484dea3089["decorated_definition"]
+  n47f5bb700a9d81e04 --> n5d73ac7484dea3089
+  n0e39b0ce2ff65a2a3["function_definition test_pawn_first_double_and_immediate_target"]
+  n47f5bb700a9d81e04 --> n0e39b0ce2ff65a2a3
+  n83b0715f406df68c5["decorated_definition"]
+  n47f5bb700a9d81e04 --> n83b0715f406df68c5
+  n3e46598ca559ea7f8["function_definition test_blocked_double_is_illegal_and_atomic"]
+  n47f5bb700a9d81e04 --> n3e46598ca559ea7f8
+  n7db30b3d5a79a154a["decorated_definition"]
+  n47f5bb700a9d81e04 --> n7db30b3d5a79a154a
+  n315ff88ecbc3cf9c6["function_definition test_pawn_diagonal_empty_square_cannot_be_captured"]
+  n47f5bb700a9d81e04 --> n315ff88ecbc3cf9c6
+  na42cfec207b3a4507["function_definition test_pawn_cannot_capture_straight_ahead_or_expose_pinned_king"]
+  n47f5bb700a9d81e04 --> na42cfec207b3a4507
+  na10093661822c987f["decorated_definition"]
+  n47f5bb700a9d81e04 --> na10093661822c987f
+  n6eb559f4f625e2c65["function_definition test_every_promotion_choice_immediately_replaces_pawn"]
+  n47f5bb700a9d81e04 --> n6eb559f4f625e2c65
+  n78b876d4186be1ea9["decorated_definition"]
+  n47f5bb700a9d81e04 --> n78b876d4186be1ea9
+  n8c5282d0abe52d0e3["function_definition test_promotion_requires_exact_legal_choice"]
+  n47f5bb700a9d81e04 --> n8c5282d0abe52d0e3
+  nb42e38d32c28116e2["decorated_definition"]
+  n47f5bb700a9d81e04 --> nb42e38d32c28116e2
+  n565e6f4de4fcc59df["function_definition test_en_passant_auxiliary_capture_and_discovered_check"]
+  n47f5bb700a9d81e04 --> n565e6f4de4fcc59df
+  nf8dcc28d652eb8dcb["decorated_definition"]
+  n47f5bb700a9d81e04 --> nf8dcc28d652eb8dcb
+  n9805ab64d8f7feeaa["function_definition test_castling_moves_both_pieces_and_consumes_rights"]
+  n47f5bb700a9d81e04 --> n9805ab64d8f7feeaa
+  nfc56e8464bdd32fd2["decorated_definition"]
+  n47f5bb700a9d81e04 --> nfc56e8464bdd32fd2
+  nce7884b42763e87c5["function_definition test_castling_out_of_through_or_into_check_rejects"]
+  n47f5bb700a9d81e04 --> nce7884b42763e87c5
+  n5893f7819d7933ef2["function_definition test_adjacent_kings_and_king_capture_are_rejected"]
+  n47f5bb700a9d81e04 --> n5893f7819d7933ef2
+  n1f7cd839d1f73f9ff["decorated_definition"]
+  n47f5bb700a9d81e04 --> n1f7cd839d1f73f9ff
+  neef9336430b19ada5["function_definition test_checkmate_and_stalemate_use_actual_legal_escape_set"]
+  n47f5bb700a9d81e04 --> neef9336430b19ada5
+  n5b906bcc44eeafa2c["function_definition test_promotion_capture_removes_rook_and_resets_halfmove"]
+  n47f5bb700a9d81e04 --> n5b906bcc44eeafa2c
+  n00751284b73630511["function_definition test_castling_right_cannot_return_after_rook_moves_back"]
+  n47f5bb700a9d81e04 --> n00751284b73630511
+  neea99f1adb3f1ba16["function_definition test_en_passant_expires_after_any_intervening_move"]
+  n47f5bb700a9d81e04 --> neea99f1adb3f1ba16
+  nb8a4e259ce4bab4e7["decorated_definition"]
+  n47f5bb700a9d81e04 --> nb8a4e259ce4bab4e7
+  nde85cc89c0375d91b["function_definition test_resignation_uses_actual_actor_and_retries_after_restart"]
+  n47f5bb700a9d81e04 --> nde85cc89c0375d91b
+  ne0207fd95785c8405["function_definition test_threefold_claim_after_repeated_knight_cycles"]
+  n47f5bb700a9d81e04 --> ne0207fd95785c8405
+  nfce7482bc5a7b7fc1["decorated_definition"]
+  n47f5bb700a9d81e04 --> nfce7482bc5a7b7fc1
+  n163f3d5e91e05df8f["function_definition test_reversible_move_thresholds_require_exact_number_of_halfmoves"]
+  n47f5bb700a9d81e04 --> n163f3d5e91e05df8f
+  n5aff745200d57a8c5["function_definition test_fivefold_repetition_is_automatic_without_claim"]
+  n47f5bb700a9d81e04 --> n5aff745200d57a8c5
+  nbfe43e9a6816252b0["decorated_definition"]
+  n47f5bb700a9d81e04 --> nbfe43e9a6816252b0
+  n618b65addf44e9eca["function_definition test_king_and_single_minor_is_dead_after_legal_move"]
+  n47f5bb700a9d81e04 --> n618b65addf44e9eca
+  n3d944de3a9edaa555["decorated_definition"]
+  n47f5bb700a9d81e04 --> n3d944de3a9edaa555
+  n33bb163bfc2617762["function_definition test_bishop_square_colors_affect_dead_material"]
+  n47f5bb700a9d81e04 --> n33bb163bfc2617762
+  n88471bffb9e1a0c50["function_definition test_resignation_against_bare_king_is_draw"]
+  n47f5bb700a9d81e04 --> n88471bffb9e1a0c50
+  nbdeb0fc8d61f6a796["decorated_definition"]
+  n47f5bb700a9d81e04 --> nbdeb0fc8d61f6a796
+  n589fc7c55849b1fff["function_definition test_timeout_in_familiar_dead_material_is_draw_not_opponents_win"]
+  n47f5bb700a9d81e04 --> n589fc7c55849b1fff
+  n4c449eb73fa9aae78["test_desktop_full_draughts.py"]
+  nc9f5868186eb03f66 --> n4c449eb73fa9aae78
+  n2ccf14f22ad72ab8a["function_definition _square"]
+  n4c449eb73fa9aae78 --> n2ccf14f22ad72ab8a
+  n4c24cc2b049a97c8a["function_definition test_recorded_full_tournament_game_through_actual_draughts_actions"]
+  n4c449eb73fa9aae78 --> n4c24cc2b049a97c8a
+  n7847ac7dc6c4eea7a["test_desktop_json_gameplay.py"]
+  nc9f5868186eb03f66 --> n7847ac7dc6c4eea7a
+  n5c78090b30a7ed38c["function_definition chess_pawn_action"]
+  n7847ac7dc6c4eea7a --> n5c78090b30a7ed38c
+  n6835dbdba7bfec7c9["function_definition square"]
+  n7847ac7dc6c4eea7a --> n6835dbdba7bfec7c9
+  n8dddb847739133311["function_definition test_desktop_gameplay_actions_retry_stale_recovery_and_reset"]
+  n7847ac7dc6c4eea7a --> n8dddb847739133311
+  nc474342e8227b62c2["function_definition test_illegal_action_does_not_advance_session_or_clock"]
+  n7847ac7dc6c4eea7a --> nc474342e8227b62c2
+  nac195a75bfe677e74["function_definition test_wrong_actor_does_not_mutate_game_state"]
+  n7847ac7dc6c4eea7a --> nac195a75bfe677e74
+  n7f68f328279882594["function_definition perform"]
+  n7847ac7dc6c4eea7a --> n7f68f328279882594
+  n45870d8d176cba609["function_definition test_scholars_mate_from_normal_chess_start_using_full_rulebook"]
+  n7847ac7dc6c4eea7a --> n45870d8d176cba609
+  ne38b17e1a70f7b1d2["function_definition test_english_draughts_forced_capture_updates_authoritative_history"]
+  n7847ac7dc6c4eea7a --> ne38b17e1a70f7b1d2
+  nb150a3625b70d1674["function_definition test_reset_recovers_original_position_without_leaking_previous_moves"]
+  n7847ac7dc6c4eea7a --> nb150a3625b70d1674
+  n1fed95cbbf9e1f52b["function_definition test_quest_rewards_are_awarded_exactly_once_through_gameplay_and_replay"]
+  n7847ac7dc6c4eea7a --> n1fed95cbbf9e1f52b
+  ne48570e3bfc433f47["function_definition test_castling_moves_the_rook_and_king_atomically"]
+  n7847ac7dc6c4eea7a --> ne48570e3bfc433f47
+  nac4b501a68515c89c["function_definition test_en_passant_removes_the_correct_opponent_pawn_and_replays"]
+  n7847ac7dc6c4eea7a --> nac4b501a68515c89c
+  nd05f51c2552fb7375["function_definition test_real_installation_check_executes_both_bundled_game_openings"]
+  n7847ac7dc6c4eea7a --> nd05f51c2552fb7375
+  ne5c853faa7de926ff["function_definition test_fools_mate_and_opening_legal_counts_through_real_session"]
+  n7847ac7dc6c4eea7a --> ne5c853faa7de926ff
+  naf047f652cb4cf709["function_definition test_english_draughts_initial_legal_count_and_forced_capture_precedence"]
+  n7847ac7dc6c4eea7a --> naf047f652cb4cf709
+  n19dcf2deef5022c4e["function_definition test_english_draughts_resignation_is_visible_as_authoritative_terminal_result"]
+  n7847ac7dc6c4eea7a --> n19dcf2deef5022c4e
+  nb6092255e332472d8["function_definition test_english_draughts_clock_expiration_commits_and_replays_timeout"]
+  n7847ac7dc6c4eea7a --> nb6092255e332472d8
+  n9ed627cb7d5ca65b6["test_desktop_notation.py"]
+  nc9f5868186eb03f66 --> n9ed627cb7d5ca65b6
+  n9d4e25646cfd3b156["function_definition perform"]
+  n9ed627cb7d5ca65b6 --> n9d4e25646cfd3b156
+  nc397b9ea6ec4e8219["function_definition test_chess_pgn_scholars_mate_has_san_checkmate_result_and_roster"]
+  n9ed627cb7d5ca65b6 --> nc397b9ea6ec4e8219
+  n7bbb5394e4a9abe80["function_definition test_english_draughts_pdn_encodes_dark_square_numbers_and_capture"]
+  n9ed627cb7d5ca65b6 --> n7bbb5394e4a9abe80
+  nc907b043e61a3e6ca["function_definition test_notation_requires_verified_snapshot_and_rejects_symlink"]
+  n9ed627cb7d5ca65b6 --> nc907b043e61a3e6ca
+  n859f2a52479ce3248["function_definition test_pgn_black_checkmate_and_finished_game_result"]
+  n9ed627cb7d5ca65b6 --> n859f2a52479ce3248
+  nf2c5589f6e454379c["function_definition test_published_pdn_double_corner_dyke_reference_opening"]
+  n9ed627cb7d5ca65b6 --> nf2c5589f6e454379c
+  nb376cdb75ab1f7b6a["function_definition square"]
+  n9ed627cb7d5ca65b6 --> nb376cdb75ab1f7b6a
   n9ef040726b4477815["test_desktop_packaging_setup.py"]
   nc9f5868186eb03f66 --> n9ef040726b4477815
   n2b9aa3ef76e7108e6["class_definition DesktopPackagingInfrastructureTests"]
@@ -798,6 +980,128 @@ flowchart LR
   n08502483f6d83fd34 --> nbe59e9b775f50b83c
   n393cca407f25331de["function_definition test_trusted_publisher_uses_repository_default_branch"]
   n08502483f6d83fd34 --> n393cca407f25331de
+  nd04a30276dda00ceb["test_draughts_reference_gameplay.py"]
+  nc9f5868186eb03f66 --> nd04a30276dda00ceb
+  ned2b77b5ea913f3f9["function_definition session"]
+  nd04a30276dda00ceb --> ned2b77b5ea913f3f9
+  n5c69a7c9849e32e87["function_definition submit"]
+  nd04a30276dda00ceb --> n5c69a7c9849e32e87
+  n88981e5060ba8cae0["function_definition reject"]
+  nd04a30276dda00ceb --> n88981e5060ba8cae0
+  n63121413d803d284c["function_definition test_short_kings_move_only_one_square_when_no_capture_is_available"]
+  nd04a30276dda00ceb --> n63121413d803d284c
+  n399f3c85fd946891c["function_definition test_capture_is_compulsory_and_complete_multijump_is_atomic"]
+  nd04a30276dda00ceb --> n399f3c85fd946891c
+  ndead38f832cfdf109["function_definition test_alternative_capture_routes_are_distinct_exact_legal_intents"]
+  nd04a30276dda00ceb --> ndead38f832cfdf109
+  n745d3b914be95abfa["function_definition test_english_draughts_crowning_ends_capture_turn_before_new_king_jump"]
+  nd04a30276dda00ceb --> n745d3b914be95abfa
+  nb859226c118172f85["function_definition test_last_opponent_piece_captured_causes_game_over_and_replay"]
+  nd04a30276dda00ceb --> nb859226c118172f85
+  n50d0319c7394a98c1["test_json_board_and_outcomes.py"]
+  nc9f5868186eb03f66 --> n50d0319c7394a98c1
+  n2e39a5b6c4751e7f1["function_definition board_with_piece"]
+  n50d0319c7394a98c1 --> n2e39a5b6c4751e7f1
+  n68b0876ebd39a3dcb["function_definition test_board_queries_observe_one_rectangular_position"]
+  n50d0319c7394a98c1 --> n68b0876ebd39a3dcb
+  n0b3d72368fded2e71["function_definition test_query_budget_is_bounded_before_expensive_board_traversal"]
+  n50d0319c7394a98c1 --> n0b3d72368fded2e71
+  n63fa6de13db12fb38["function_definition test_rule_program_reads_real_board_query_not_a_private_local_map"]
+  n50d0319c7394a98c1 --> n63fa6de13db12fb38
+  n8d85cd3888dc12d0d["function_definition test_outcome_resolution_rejects_equal_priority_conflicts"]
+  n50d0319c7394a98c1 --> n8d85cd3888dc12d0d
+  ne3d1fe30457f269c6["test_json_board_from_definition.py"]
+  nc9f5868186eb03f66 --> ne3d1fe30457f269c6
+  n8abf31d7479c95d8a["function_definition test_chess_starting_state_is_constructed_from_json_not_chess_classes"]
+  ne3d1fe30457f269c6 --> n8abf31d7479c95d8a
+  n4e90f0c9bfc033bcc["function_definition test_english_draughts_uses_short_kings_and_12_men_each_side"]
+  ne3d1fe30457f269c6 --> n4e90f0c9bfc033bcc
+  n05c98e5d1ef228d26["function_definition test_separate_boards_do_not_mutate_bundled_or_other_session_state"]
+  ne3d1fe30457f269c6 --> n05c98e5d1ef228d26
+  n2a9dbeee5bb1e8550["test_json_capture_geometry.py"]
+  nc9f5868186eb03f66 --> n2a9dbeee5bb1e8550
+  n01e061a1350314219["class_definition CandidatePiece"]
+  n2a9dbeee5bb1e8550 --> n01e061a1350314219
+  n5626e84df7dd4cf17["function_definition __init__"]
+  n2a9dbeee5bb1e8550 --> n5626e84df7dd4cf17
+  n17b73c80013d38951["function_definition getColor"]
+  n2a9dbeee5bb1e8550 --> n17b73c80013d38951
+  n11b885f0bab5f758d["function_definition getType"]
+  n2a9dbeee5bb1e8550 --> n11b885f0bab5f758d
+  nfd902cea18599f16a["function_definition getAttackDirections"]
+  n2a9dbeee5bb1e8550 --> nfd902cea18599f16a
+  nbee0cd5e1a334fe33["function_definition test_short_king_or_man_capture_does_not_modify_board"]
+  n2a9dbeee5bb1e8550 --> nbee0cd5e1a334fe33
+  n5c61cddb9d3b23f49["function_definition test_capture_budget_rejection_preserves_original_position"]
+  n2a9dbeee5bb1e8550 --> n5c61cddb9d3b23f49
+  nb7a270c60dbe0ba7c["test_json_definitions.py"]
+  nc9f5868186eb03f66 --> nb7a270c60dbe0ba7c
+  nb4831941eba021ad3["function_definition test_bundled_chess_and_english_draughts_have_valid_version_two_definitions"]
+  nb7a270c60dbe0ba7c --> nb4831941eba021ad3
+  n81fa7523539e08c33["function_definition test_built_in_definition_is_immutable_and_has_detached_serialization"]
+  nb7a270c60dbe0ba7c --> n81fa7523539e08c33
+  n8830ca4b326db148a["function_definition test_rejects_duplicate_json_properties_including_nested_objects"]
+  nb7a270c60dbe0ba7c --> n8830ca4b326db148a
+  n5cca4b4e9efae321f["decorated_definition"]
+  nb7a270c60dbe0ba7c --> n5cca4b4e9efae321f
+  n53d1c6d12efc5e80a["function_definition test_rejects_malformed_unknown_and_executable_json"]
+  nb7a270c60dbe0ba7c --> n53d1c6d12efc5e80a
+  n1a4a2e023a030b149["function_definition test_rejects_unrecognized_python_rule_source_in_trusted_definition"]
+  nb7a270c60dbe0ba7c --> n1a4a2e023a030b149
+  n50e096dd01c1f8afd["function_definition test_capture_policy_validates_declared_bounded_geometry"]
+  nb7a270c60dbe0ba7c --> n50e096dd01c1f8afd
+  n98d82df78cedfc96a["decorated_definition"]
+  nb7a270c60dbe0ba7c --> n98d82df78cedfc96a
+  nf5a3a8642fccbb452["function_definition test_bundled_game_selector_rejects_paths_and_executable_module_names"]
+  nb7a270c60dbe0ba7c --> nf5a3a8642fccbb452
+  n7d96d0aeed4c4b16c["function_definition test_loader_does_not_import_variant_python_package"]
+  nb7a270c60dbe0ba7c --> n7d96d0aeed4c4b16c
+  nfb462e8d6635d2afe["function_definition guarded_import"]
+  nb7a270c60dbe0ba7c --> nfb462e8d6635d2afe
+  n5ca7df1f3bfc16631["test_json_geometric_actions.py"]
+  nc9f5868186eb03f66 --> n5ca7df1f3bfc16631
+  n4c45d7ad6cb05212f["function_definition test_chess_pawn_moves_follow_json_relative_vectors"]
+  n5ca7df1f3bfc16631 --> n4c45d7ad6cb05212f
+  n6929426a6c87f1e48["function_definition test_json_based_rook_geometry_respects_initial_blockers"]
+  n5ca7df1f3bfc16631 --> n6929426a6c87f1e48
+  nabfcf7ff9fcaa8dc3["function_definition test_geometric_candidates_never_consult_game_rule_plugins"]
+  n5ca7df1f3bfc16631 --> nabfcf7ff9fcaa8dc3
+  n38462eb9fe3ffc1b5["class_definition RuleThatMustNeverExecute"]
+  n5ca7df1f3bfc16631 --> n38462eb9fe3ffc1b5
+  nd91282021d6a99be2["function_definition available_moves"]
+  n5ca7df1f3bfc16631 --> nd91282021d6a99be2
+  na80f8bfeba58b3704["test_json_move_intent.py"]
+  nc9f5868186eb03f66 --> na80f8bfeba58b3704
+  n7a64b1c2472b466f8["function_definition test_data_only_move_intent_round_trip_preserves_capture_landings_and_promotion"]
+  na80f8bfeba58b3704 --> n7a64b1c2472b466f8
+  n0d7cc43acb2f4c166["decorated_definition"]
+  na80f8bfeba58b3704 --> n0d7cc43acb2f4c166
+  ne2ee4ab105bd67da8["function_definition test_move_intent_rejects_untrusted_or_ambiguous_json"]
+  na80f8bfeba58b3704 --> ne2ee4ab105bd67da8
+  ndfec4ef75d39bfba1["test_json_rule_foundation.py"]
+  nc9f5868186eb03f66 --> ndfec4ef75d39bfba1
+  n06705eb20d7c8d454["function_definition rule"]
+  ndfec4ef75d39bfba1 --> n06705eb20d7c8d454
+  n09c6026151c3a1d17["function_definition test_json_program_proposes_one_permit_without_executing_effects"]
+  ndfec4ef75d39bfba1 --> n09c6026151c3a1d17
+  n026569fffc7a165f8["function_definition test_unknown_executable_effect_is_rejected_at_definition_boundary"]
+  ndfec4ef75d39bfba1 --> n026569fffc7a165f8
+  n9af58c4bb22ad7232["function_definition test_unregistered_json_query_is_not_executable"]
+  ndfec4ef75d39bfba1 --> n9af58c4bb22ad7232
+  nafa627ad75e896656["function_definition test_json_snapshot_is_detached_and_nested_data_is_immutable"]
+  ndfec4ef75d39bfba1 --> nafa627ad75e896656
+  n017a8c2cf1be737c5["function_definition test_unbound_reference_raises_without_python_execution"]
+  ndfec4ef75d39bfba1 --> n017a8c2cf1be737c5
+  nfa2c971b419f0c997["test_json_work_budget.py"]
+  nc9f5868186eb03f66 --> nfa2c971b419f0c997
+  n11b95dd35473a88cd["function_definition test_nested_work_reservations_fail_atomically_for_all_counters"]
+  nfa2c971b419f0c997 --> n11b95dd35473a88cd
+  necae415295d325bdf["decorated_definition"]
+  nfa2c971b419f0c997 --> necae415295d325bdf
+  nb84210fa44d70c5da["function_definition test_work_budget_requires_strict_positive_integer"]
+  nfa2c971b419f0c997 --> nb84210fa44d70c5da
+  n5467f564afc2c1291["function_definition test_declarative_queries_cannot_evaluate_unbounded_work"]
+  nfa2c971b419f0c997 --> n5467f564afc2c1291
   n4c226bf73fa46aeac["test_main_source_policy.py"]
   nc9f5868186eb03f66 --> n4c226bf73fa46aeac
   n1ff6a4094456e9a6e["class_definition MainSourcePolicyTests"]
@@ -858,6 +1162,56 @@ flowchart LR
   n015d86922f7e4e2cd --> nc0c1e9dd4476c325b
   nc491e2be8e0e41dd7["function_definition test_future_design_contracts_are_only_in_issues"]
   n015d86922f7e4e2cd --> nc491e2be8e0e41dd7
+  ne0bc467b83e331b07["test_special_actions_gameplay.py"]
+  nc9f5868186eb03f66 --> ne0bc467b83e331b07
+  n6985d2d6db032c90d["function_definition rule"]
+  ne0bc467b83e331b07 --> n6985d2d6db032c90d
+  n6d9f30fac71c6a2c2["function_definition config"]
+  ne0bc467b83e331b07 --> n6d9f30fac71c6a2c2
+  ne5292790a6bad409b["function_definition offer"]
+  ne0bc467b83e331b07 --> ne5292790a6bad409b
+  n353b009030d17a21f["function_definition game"]
+  ne0bc467b83e331b07 --> n353b009030d17a21f
+  n03872eb692dbaea27["function_definition unchanged_rejection"]
+  ne0bc467b83e331b07 --> n03872eb692dbaea27
+  n425c46b088d90e882["function_definition test_auxiliary_offer_effect_runs_once_and_replays_without_read_mutation"]
+  ne0bc467b83e331b07 --> n425c46b088d90e882
+  n6ea3e714f0ba332c7["decorated_definition"]
+  ne0bc467b83e331b07 --> n6ea3e714f0ba332c7
+  n99db4f678787785a8["function_definition test_ambiguous_duplicate_wire_offers_fail_closed"]
+  ne0bc467b83e331b07 --> n99db4f678787785a8
+  n4b9a91043db4c5180["function_definition test_offer_never_overrides_explicit_denial_or_authorizes_unoffered_geometry"]
+  ne0bc467b83e331b07 --> n4b9a91043db4c5180
+  n6bc2a2fd52a3114b5["function_definition test_offer_cannot_claim_an_opponent_source"]
+  ne0bc467b83e331b07 --> n6bc2a2fd52a3114b5
+  n04c85aeafbe8ba3ea["function_definition safe_condition"]
+  ne0bc467b83e331b07 --> n04c85aeafbe8ba3ea
+  ne24df8db13f02df28["function_definition test_prospective_pin_rejects_exposure_and_auxiliary_capture_can_remove_the_threat"]
+  ne0bc467b83e331b07 --> ne24df8db13f02df28
+  naa2d6294c7bf18321["function_definition test_auxiliary_capture_exposing_the_destination_rolls_back_every_effect"]
+  ne0bc467b83e331b07 --> naa2d6294c7bf18321
+  n6bd48fd4c2dcd632e["function_definition test_capture_promotion_requires_choice_and_replays_replacement"]
+  ne0bc467b83e331b07 --> n6bd48fd4c2dcd632e
+  nd39e324c860ec77f9["function_definition test_automatic_crowning_stops_capture_chain_on_the_configured_boundary"]
+  ne0bc467b83e331b07 --> nd39e324c860ec77f9
+  n4d25d2f5d7933c450["decorated_definition"]
+  ne0bc467b83e331b07 --> n4d25d2f5d7933c450
+  nf63221c926e48291a["function_definition test_nested_effect_queries_fail_closed_for_overflow_and_invalid_types"]
+  ne0bc467b83e331b07 --> nf63221c926e48291a
+  nba0ba5f371ee9ec5c["decorated_definition"]
+  ne0bc467b83e331b07 --> nba0ba5f371ee9ec5c
+  n30884bbaf468dc3a2["function_definition test_hostile_nested_reference_nodes_never_enter_an_offer"]
+  ne0bc467b83e331b07 --> n30884bbaf468dc3a2
+  nd70c8f5a212e416f2["function_definition test_available_move_discovery_cannot_recurse_into_uncomputed_legal_counts"]
+  ne0bc467b83e331b07 --> nd70c8f5a212e416f2
+  n1b74ea74366e11bf4["function_definition test_aggregate_budget_covers_query_work_inside_special_offer_discovery"]
+  ne0bc467b83e331b07 --> n1b74ea74366e11bf4
+  n8bfa9a91b10b1f222["function_definition test_black_capture_promotes_on_its_configured_far_side_of_a_nonstandard_board"]
+  ne0bc467b83e331b07 --> n8bfa9a91b10b1f222
+  nc8436f5a2747f77f3["function_definition test_auxiliary_temporary_target_must_fit_the_configured_board"]
+  ne0bc467b83e331b07 --> nc8436f5a2747f77f3
+  nc8e89c212e402e01d["function_definition test_unimplemented_status_hook_cannot_be_enabled_as_a_game_rule"]
+  ne0bc467b83e331b07 --> nc8e89c212e402e01d
   nbf32064a6a26ab2df["workflows/"]
   nfad65243633b77700 --> nbf32064a6a26ab2df
   n936162c3846c6b099["agent.yml"]
@@ -874,6 +1228,10 @@ flowchart LR
   nbf32064a6a26ab2df --> n84354cf99c1713fc6
   n31779a8c658939353["desktop-build.yml"]
   nbf32064a6a26ab2df --> n31779a8c658939353
+  n87f4db9142e629397["desktop-gameplay.yml"]
+  nbf32064a6a26ab2df --> n87f4db9142e629397
+  n3ee937e9987856164["desktop-native-acceptance.yml"]
+  nbf32064a6a26ab2df --> n3ee937e9987856164
   n76ec2fd65ee9dad06["governance-docs.yml"]
   nbf32064a6a26ab2df --> n76ec2fd65ee9dad06
   n14cf6130af7812ba5["main-source.yml"]
@@ -898,410 +1256,6 @@ flowchart LR
   root --> nbd84daf23e7f5febd
   n42c59af8a4bae559b["README.md"]
   root --> n42c59af8a4bae559b
-  n943ebea6ff21f7351["packages/"]
-  root --> n943ebea6ff21f7351
-  necb2b764992968f98["checkers/"]
-  n943ebea6ff21f7351 --> necb2b764992968f98
-  n18eeab8cf2b42cadd["__init__.py"]
-  necb2b764992968f98 --> n18eeab8cf2b42cadd
-  n02248da184bf076e7["config.json"]
-  necb2b764992968f98 --> n02248da184bf076e7
-  na3f32d681faa10b80["chess/"]
-  n943ebea6ff21f7351 --> na3f32d681faa10b80
-  n8738df5b2ecdc0589["__init__.py"]
-  na3f32d681faa10b80 --> n8738df5b2ecdc0589
-  n82803d9579d4370b5["config.json"]
-  na3f32d681faa10b80 --> n82803d9579d4370b5
-  n92278199c1af016ac["engine/"]
-  n943ebea6ff21f7351 --> n92278199c1af016ac
-  nef49b535e73a1506b["__init__.py"]
-  n92278199c1af016ac --> nef49b535e73a1506b
-  ne3fbb11d0d7e5d3a7["__main__.py"]
-  n92278199c1af016ac --> ne3fbb11d0d7e5d3a7
-  nce409d3db40989117["app.py"]
-  n92278199c1af016ac --> nce409d3db40989117
-  ndb7e43c0cc52d1236["function_definition build_arguments"]
-  nce409d3db40989117 --> ndb7e43c0cc52d1236
-  n91a687b6ad61e9132["function_definition report_installation"]
-  nce409d3db40989117 --> n91a687b6ad61e9132
-  nebcccd1386dc7d320["function_definition build_window"]
-  nce409d3db40989117 --> nebcccd1386dc7d320
-  ne88e603387a1c0036["function_definition main"]
-  nce409d3db40989117 --> ne88e603387a1c0036
-  n673e50f5c65dbfc2c["controller/"]
-  n92278199c1af016ac --> n673e50f5c65dbfc2c
-  nfa52896590c1f2dfb["__init__.py"]
-  n673e50f5c65dbfc2c --> nfa52896590c1f2dfb
-  n74cc7cb20d3417d00["controller.py"]
-  n673e50f5c65dbfc2c --> n74cc7cb20d3417d00
-  n9359e099a06b0dc7f["class_definition GameController"]
-  n74cc7cb20d3417d00 --> n9359e099a06b0dc7f
-  ncf0d6a7ea613d1bcd["function_definition __init__"]
-  n74cc7cb20d3417d00 --> ncf0d6a7ea613d1bcd
-  nc826a83256578fa89["function_definition select_square"]
-  n74cc7cb20d3417d00 --> nc826a83256578fa89
-  n1c93c111c4d37c721["function_definition handle_square_click"]
-  n74cc7cb20d3417d00 --> n1c93c111c4d37c721
-  n3e596dcf74d7d3726["function_definition reset_selection"]
-  n74cc7cb20d3417d00 --> n3e596dcf74d7d3726
-  n92639db99e262d969["function_definition new_game"]
-  n74cc7cb20d3417d00 --> n92639db99e262d969
-  n5134dabdd86fc6a15["window_controller.py"]
-  n673e50f5c65dbfc2c --> n5134dabdd86fc6a15
-  nd83efaaf2ede23e39["class_definition WindowController"]
-  n5134dabdd86fc6a15 --> nd83efaaf2ede23e39
-  n29229dcdb4f519570["function_definition __init__"]
-  n5134dabdd86fc6a15 --> n29229dcdb4f519570
-  nf0805c84bdd410d98["function_definition start"]
-  n5134dabdd86fc6a15 --> nf0805c84bdd410d98
-  n58b6a422b459269b0["function_definition stop"]
-  n5134dabdd86fc6a15 --> n58b6a422b459269b0
-  nbeefea6a66615e7ef["function_definition set_status"]
-  n5134dabdd86fc6a15 --> nbeefea6a66615e7ef
-  n28fd46feb93dfeed8["function_definition show_dialog"]
-  n5134dabdd86fc6a15 --> n28fd46feb93dfeed8
-  nfe7d79b5f32fe92ce["function_definition close_dialog"]
-  n5134dabdd86fc6a15 --> nfe7d79b5f32fe92ce
-  n248d259cd6c457e19["function_definition on_square_clicked"]
-  n5134dabdd86fc6a15 --> n248d259cd6c457e19
-  n042f392ceb6292a53["function_definition tick_timer"]
-  n5134dabdd86fc6a15 --> n042f392ceb6292a53
-  n6b70a3274fbaa2f4b["model/"]
-  n92278199c1af016ac --> n6b70a3274fbaa2f4b
-  nd1a448a50e568973a["__init__.py"]
-  n6b70a3274fbaa2f4b --> nd1a448a50e568973a
-  n4dfa903545a34198e["game/"]
-  n6b70a3274fbaa2f4b --> n4dfa903545a34198e
-  n2826abed63388f1cf["__init__.py"]
-  n4dfa903545a34198e --> n2826abed63388f1cf
-  n69c8c02f2d4724c15["board.py"]
-  n4dfa903545a34198e --> n69c8c02f2d4724c15
-  nb5739ee1059225084["class_definition Board"]
-  n69c8c02f2d4724c15 --> nb5739ee1059225084
-  n8cae46b7560732660["function_definition __init__"]
-  n69c8c02f2d4724c15 --> n8cae46b7560732660
-  n605ba7ce2018e515d["function_definition is_within_bounds"]
-  n69c8c02f2d4724c15 --> n605ba7ce2018e515d
-  n9032b5821fa9b25cd["function_definition get_piece_at"]
-  n69c8c02f2d4724c15 --> n9032b5821fa9b25cd
-  n05358f9f6384a0b3f["function_definition set_piece_at"]
-  n69c8c02f2d4724c15 --> n05358f9f6384a0b3f
-  n092050994ed4fc802["function_definition move_piece"]
-  n69c8c02f2d4724c15 --> n092050994ed4fc802
-  nd55012f8068e4ae4d["function_definition replace_piece"]
-  n69c8c02f2d4724c15 --> nd55012f8068e4ae4d
-  n8f9b4f483ac79ad06["function_definition setup_default_board"]
-  n69c8c02f2d4724c15 --> n8f9b4f483ac79ad06
-  nabf1f51a6a2eb04b5["configuration.py"]
-  n4dfa903545a34198e --> nabf1f51a6a2eb04b5
-  nf5ede0f9acec2c979["class_definition ConfigurationError"]
-  nabf1f51a6a2eb04b5 --> nf5ede0f9acec2c979
-  n5b23dab3210711c2a["decorated_definition"]
-  nabf1f51a6a2eb04b5 --> n5b23dab3210711c2a
-  n67fdc93d0f91af06b["class_definition GameDefinition"]
-  nabf1f51a6a2eb04b5 --> n67fdc93d0f91af06b
-  n4f9c5153744545e83["function_definition load_definition"]
-  nabf1f51a6a2eb04b5 --> n4f9c5153744545e83
-  n98f3dfe763a6dc0e8["function_definition installed_definitions"]
-  nabf1f51a6a2eb04b5 --> n98f3dfe763a6dc0e8
-  n27801c7874095a053["function_definition named_definition"]
-  nabf1f51a6a2eb04b5 --> n27801c7874095a053
-  n048504738044a604a["games.py"]
-  n4dfa903545a34198e --> n048504738044a604a
-  nb8578a98b653c32c5["function_definition available_games"]
-  n048504738044a604a --> nb8578a98b653c32c5
-  n42d014e4d11d0ab87["function_definition default_configuration_name"]
-  n048504738044a604a --> n42d014e4d11d0ab87
-  n9ce0e989d76748074["function_definition configuration_path"]
-  n048504738044a604a --> n9ce0e989d76748074
-  n8bf0d211cf46a27f5["function_definition games_root"]
-  n048504738044a604a --> n8bf0d211cf46a27f5
-  n808ec959b1a6a1b0d["logger.py"]
-  n4dfa903545a34198e --> n808ec959b1a6a1b0d
-  n7c2b1fb2f97eb8d20["class_definition GameLogger"]
-  n808ec959b1a6a1b0d --> n7c2b1fb2f97eb8d20
-  n7782a9258e709d7a7["function_definition __init__"]
-  n808ec959b1a6a1b0d --> n7782a9258e709d7a7
-  n83b72db5f69e92b18["function_definition create_file"]
-  n808ec959b1a6a1b0d --> n83b72db5f69e92b18
-  n8692bd3e6e9e50084["function_definition log_move"]
-  n808ec959b1a6a1b0d --> n8692bd3e6e9e50084
-  n7d6326643f25dadc9["function_definition get_moves"]
-  n808ec959b1a6a1b0d --> n7d6326643f25dadc9
-  nd6d4b528e717a9fd4["decorated_definition"]
-  n808ec959b1a6a1b0d --> nd6d4b528e717a9fd4
-  nbd8b11ce4861e6821["function_definition file_path"]
-  n808ec959b1a6a1b0d --> nbd8b11ce4861e6821
-  n2578e2d31377b7715["manager.py"]
-  n4dfa903545a34198e --> n2578e2d31377b7715
-  n5755568a1dbc4ae3a["class_definition GameManager"]
-  n2578e2d31377b7715 --> n5755568a1dbc4ae3a
-  nd20d90e71bbb98ea6["function_definition __init__"]
-  n2578e2d31377b7715 --> nd20d90e71bbb98ea6
-  n765946664287c1051["function_definition start_turn"]
-  n2578e2d31377b7715 --> n765946664287c1051
-  n5e8fde0b8bf0ca575["function_definition get_valid_moves"]
-  n2578e2d31377b7715 --> n5e8fde0b8bf0ca575
-  n19f13764e0bd19324["function_definition cancel_move"]
-  n2578e2d31377b7715 --> n19f13764e0bd19324
-  n954b2d30423258cd8["function_definition save_log"]
-  n2578e2d31377b7715 --> n954b2d30423258cd8
-  n4185423431fc6f056["function_definition get_state"]
-  n2578e2d31377b7715 --> n4185423431fc6f056
-  n521ce2a4d77c70894["function_definition make_move"]
-  n2578e2d31377b7715 --> n521ce2a4d77c70894
-  na880f6404424af9de["move.py"]
-  n4dfa903545a34198e --> na880f6404424af9de
-  n90fedd879f01e9175["class_definition Move"]
-  na880f6404424af9de --> n90fedd879f01e9175
-  ne62f81d05c13ed88b["function_definition __init__"]
-  na880f6404424af9de --> ne62f81d05c13ed88b
-  n516a35e9ed8aae3d1["function_definition validate"]
-  na880f6404424af9de --> n516a35e9ed8aae3d1
-  n145d45976f661b88e["function_definition execute"]
-  na880f6404424af9de --> n145d45976f661b88e
-  nb7bb265feb686a187["player.py"]
-  n4dfa903545a34198e --> nb7bb265feb686a187
-  n95d1f21f0d5fee0b6["class_definition Player"]
-  nb7bb265feb686a187 --> n95d1f21f0d5fee0b6
-  n09e551b5dad11aa7a["function_definition __init__"]
-  nb7bb265feb686a187 --> n09e551b5dad11aa7a
-  nf9b7fcb68a08140be["function_definition getColor"]
-  nb7bb265feb686a187 --> nf9b7fcb68a08140be
-  nf19fec24a0cc28232["function_definition getUser"]
-  nb7bb265feb686a187 --> nf19fec24a0cc28232
-  n08f7ebb0477d6ecd1["function_definition setUser"]
-  nb7bb265feb686a187 --> n08f7ebb0477d6ecd1
-  n26a5cbc8cff92edc2["function_definition getEloRating"]
-  nb7bb265feb686a187 --> n26a5cbc8cff92edc2
-  n2ddf9654c5d9015c4["quest.py"]
-  n4dfa903545a34198e --> n2ddf9654c5d9015c4
-  n9cd6c9fd36506d958["class_definition Quest"]
-  n2ddf9654c5d9015c4 --> n9cd6c9fd36506d958
-  n30ec2d8ac7bfd1a0b["function_definition __init__"]
-  n2ddf9654c5d9015c4 --> n30ec2d8ac7bfd1a0b
-  n341b2b5b3754cf4e6["function_definition validate"]
-  n2ddf9654c5d9015c4 --> n341b2b5b3754cf4e6
-  n7dbf91e9922770664["function_definition complete"]
-  n2ddf9654c5d9015c4 --> n7dbf91e9922770664
-  n1765598f1e6d52509["timer.py"]
-  n4dfa903545a34198e --> n1765598f1e6d52509
-  n37d83c9fc93313865["class_definition Timer"]
-  n1765598f1e6d52509 --> n37d83c9fc93313865
-  n7d16a6d5da2d76098["function_definition __init__"]
-  n1765598f1e6d52509 --> n7d16a6d5da2d76098
-  ned1a6940bcccd9563["function_definition _get_player_index"]
-  n1765598f1e6d52509 --> ned1a6940bcccd9563
-  nae0bd069df9a8cdff["function_definition reset_time"]
-  n1765598f1e6d52509 --> nae0bd069df9a8cdff
-  n30eb4053a9afa008d["function_definition tick"]
-  n1765598f1e6d52509 --> n30eb4053a9afa008d
-  n3edfeefbcfb20fe49["function_definition add_time"]
-  n1765598f1e6d52509 --> n3edfeefbcfb20fe49
-  n592665a251af88847["function_definition get_time"]
-  n1765598f1e6d52509 --> n592665a251af88847
-  n3ac0a59498b2e7bca["function_definition is_expired"]
-  n1765598f1e6d52509 --> n3ac0a59498b2e7bca
-  n86cff47da676940bf["validator.py"]
-  n4dfa903545a34198e --> n86cff47da676940bf
-  n571b001f0a90782bc["class_definition MoveValidator"]
-  n86cff47da676940bf --> n571b001f0a90782bc
-  n0bdf5f0a6a488ef2b["function_definition __init__"]
-  n86cff47da676940bf --> n0bdf5f0a6a488ef2b
-  n2ebe838b590801003["function_definition set_board"]
-  n86cff47da676940bf --> n2ebe838b590801003
-  na41f1ee08887c55c0["function_definition set_move"]
-  n86cff47da676940bf --> na41f1ee08887c55c0
-  n1a071e955dc9cce24["function_definition find_king"]
-  n86cff47da676940bf --> n1a071e955dc9cce24
-  n78c0f8ef38546f95b["function_definition is_square_attacked"]
-  n86cff47da676940bf --> n78c0f8ef38546f95b
-  ncd80e98057ecee98e["function_definition is_check"]
-  n86cff47da676940bf --> ncd80e98057ecee98e
-  n7f24aedfefd466189["function_definition get_pseudo_legal_moves"]
-  n86cff47da676940bf --> n7f24aedfefd466189
-  nd9fe0f532deed4704["function_definition get_valid_moves"]
-  n86cff47da676940bf --> nd9fe0f532deed4704
-  n8c15ad75bc25fe830["function_definition get_all_valid_moves"]
-  n86cff47da676940bf --> n8c15ad75bc25fe830
-  nb7e9444f356e87645["function_definition is_valid_move"]
-  n86cff47da676940bf --> nb7e9444f356e87645
-  nf0e3c7e9716321cef["function_definition is_checkmate"]
-  n86cff47da676940bf --> nf0e3c7e9716321cef
-  n153576a326f73cd17["function_definition is_stalemate"]
-  n86cff47da676940bf --> n153576a326f73cd17
-  n99f9b07e8513030f4["function_definition simulate_move"]
-  n86cff47da676940bf --> n99f9b07e8513030f4
-  n799a2dbfd6683951b["misc/"]
-  n6b70a3274fbaa2f4b --> n799a2dbfd6683951b
-  naf0355f0641115132["__init__.py"]
-  n799a2dbfd6683951b --> naf0355f0641115132
-  n310f55b645f560932["export_writers.py"]
-  n799a2dbfd6683951b --> n310f55b645f560932
-  n3d3d35bd7c625df94["class_definition ExportWriter"]
-  n310f55b645f560932 --> n3d3d35bd7c625df94
-  na144f044790d13721["function_definition __init__"]
-  n310f55b645f560932 --> na144f044790d13721
-  n94f810af617e7bb44["function_definition export"]
-  n310f55b645f560932 --> n94f810af617e7bb44
-  nfd59cdc8ff3a932cf["class_definition ChessNotationWriter"]
-  n310f55b645f560932 --> nfd59cdc8ff3a932cf
-  n5a7917e977f9407ae["function_definition __init__"]
-  n310f55b645f560932 --> n5a7917e977f9407ae
-  n585d3aa385c02647b["function_definition to_stenographic"]
-  n310f55b645f560932 --> n585d3aa385c02647b
-  n2235e6e311a2c3714["function_definition to_fen"]
-  n310f55b645f560932 --> n2235e6e311a2c3714
-  n9009005103d66d5f8["function_definition to_pgn"]
-  n310f55b645f560932 --> n9009005103d66d5f8
-  n54403d9c29a1418a8["function_definition export"]
-  n310f55b645f560932 --> n54403d9c29a1418a8
-  nf891186f82344eeed["metadata.py"]
-  n799a2dbfd6683951b --> nf891186f82344eeed
-  n65bb394b2f7e4b0b7["class_definition MetadataWriter"]
-  nf891186f82344eeed --> n65bb394b2f7e4b0b7
-  ne792afba385670de2["function_definition __init__"]
-  nf891186f82344eeed --> ne792afba385670de2
-  n22a3b6ecb28d15e79["function_definition set_header"]
-  nf891186f82344eeed --> n22a3b6ecb28d15e79
-  ne6dcac311f1ea8072["function_definition get_header"]
-  nf891186f82344eeed --> ne6dcac311f1ea8072
-  n736244036d44e3bd1["function_definition format_pgn_headers"]
-  nf891186f82344eeed --> n736244036d44e3bd1
-  n1c18e152c6b5f6e4c["function_definition export"]
-  nf891186f82344eeed --> n1c18e152c6b5f6e4c
-  n8a25eb5a5e7e9a47a["notation.py"]
-  n799a2dbfd6683951b --> n8a25eb5a5e7e9a47a
-  n18a579b1507e5ab80["function_definition pos_to_algebraic"]
-  n8a25eb5a5e7e9a47a --> n18a579b1507e5ab80
-  n85add38021cd9817f["function_definition algebraic_to_pos"]
-  n8a25eb5a5e7e9a47a --> n85add38021cd9817f
-  n64283362639347f6d["quest_manager.py"]
-  n799a2dbfd6683951b --> n64283362639347f6d
-  nc0ea20f5374998d2a["class_definition QuestManager"]
-  n64283362639347f6d --> nc0ea20f5374998d2a
-  n66a620183c6d1b7e7["function_definition __init__"]
-  n64283362639347f6d --> n66a620183c6d1b7e7
-  n8f2574234df77a6fd["function_definition register_quest"]
-  n64283362639347f6d --> n8f2574234df77a6fd
-  ndf064840a9fbc88b0["function_definition get_quests"]
-  n64283362639347f6d --> ndf064840a9fbc88b0
-  n7c18bd03ca7e11559["function_definition check_quests"]
-  n64283362639347f6d --> n7c18bd03ca7e11559
-  nd42e29c8188c19729["function_definition get_completed_quests"]
-  n64283362639347f6d --> nd42e29c8188c19729
-  n8a3116af5d567ef43["pieces/"]
-  n6b70a3274fbaa2f4b --> n8a3116af5d567ef43
-  ne6f0b632f2e1f8623["__init__.py"]
-  n8a3116af5d567ef43 --> ne6f0b632f2e1f8623
-  n0f1b278e8fd60e386["bishop.py"]
-  n8a3116af5d567ef43 --> n0f1b278e8fd60e386
-  nc26eb1cb693720c1d["class_definition Bishop"]
-  n0f1b278e8fd60e386 --> nc26eb1cb693720c1d
-  n20e3942b137197c6d["function_definition __init__"]
-  n0f1b278e8fd60e386 --> n20e3942b137197c6d
-  n781bc70e60178f49e["horse.py"]
-  n8a3116af5d567ef43 --> n781bc70e60178f49e
-  nc643a1242047b4c9a["class_definition Horse"]
-  n781bc70e60178f49e --> nc643a1242047b4c9a
-  n679edaca5b6807da8["function_definition __init__"]
-  n781bc70e60178f49e --> n679edaca5b6807da8
-  n11dccf72b4d6d87aa["king.py"]
-  n8a3116af5d567ef43 --> n11dccf72b4d6d87aa
-  nd89f46209a41db616["class_definition King"]
-  n11dccf72b4d6d87aa --> nd89f46209a41db616
-  neff1b1601578986f1["function_definition __init__"]
-  n11dccf72b4d6d87aa --> neff1b1601578986f1
-  n49a10cb963a111056["function_definition hasMoved"]
-  n11dccf72b4d6d87aa --> n49a10cb963a111056
-  n3491e42fe6c041ee3["function_definition setMoved"]
-  n11dccf72b4d6d87aa --> n3491e42fe6c041ee3
-  n2fc8faf754233fffa["pawn.py"]
-  n8a3116af5d567ef43 --> n2fc8faf754233fffa
-  n994f2afba1ec6a922["class_definition Pawn"]
-  n2fc8faf754233fffa --> n994f2afba1ec6a922
-  n1ab89d52c93e6683b["function_definition __init__"]
-  n2fc8faf754233fffa --> n1ab89d52c93e6683b
-  nba3e378c1062feb0f["function_definition hasMoved"]
-  n2fc8faf754233fffa --> nba3e378c1062feb0f
-  n185ce753eb4060fe9["function_definition setMoved"]
-  n2fc8faf754233fffa --> n185ce753eb4060fe9
-  n9bf74105a7d7c4485["function_definition getInitialVectors"]
-  n2fc8faf754233fffa --> n9bf74105a7d7c4485
-  n70e72db4e1f120df2["piece.py"]
-  n8a3116af5d567ef43 --> n70e72db4e1f120df2
-  n10b7c360d095de9a8["class_definition Piece"]
-  n70e72db4e1f120df2 --> n10b7c360d095de9a8
-  ne57089d1d378da8ca["function_definition __init__"]
-  n70e72db4e1f120df2 --> ne57089d1d378da8ca
-  nf57f8930f1531f339["function_definition getDirections"]
-  n70e72db4e1f120df2 --> nf57f8930f1531f339
-  na24ba78924bb8298c["function_definition getAttackDirections"]
-  n70e72db4e1f120df2 --> na24ba78924bb8298c
-  n769508be63b69fb5b["function_definition canJump"]
-  n70e72db4e1f120df2 --> n769508be63b69fb5b
-  n2f7d1c009e56ad435["function_definition getColor"]
-  n70e72db4e1f120df2 --> n2f7d1c009e56ad435
-  na114a31e53b221e18["function_definition getType"]
-  n70e72db4e1f120df2 --> na114a31e53b221e18
-  n1460e76078e24cfd0["function_definition getName"]
-  n70e72db4e1f120df2 --> n1460e76078e24cfd0
-  n819bc707d256041a8["queen.py"]
-  n8a3116af5d567ef43 --> n819bc707d256041a8
-  n70d815818d5134674["class_definition Queen"]
-  n819bc707d256041a8 --> n70d815818d5134674
-  n2e23d8f2fa70ce4fe["function_definition __init__"]
-  n819bc707d256041a8 --> n2e23d8f2fa70ce4fe
-  na9c7a2f5bee754c31["rook.py"]
-  n8a3116af5d567ef43 --> na9c7a2f5bee754c31
-  n8a7ffbe59f2d8f452["class_definition Rook"]
-  na9c7a2f5bee754c31 --> n8a7ffbe59f2d8f452
-  n04f3d1bc023c5f726["function_definition __init__"]
-  na9c7a2f5bee754c31 --> n04f3d1bc023c5f726
-  n9816c8bcb704a5b28["function_definition hasMoved"]
-  na9c7a2f5bee754c31 --> n9816c8bcb704a5b28
-  n277364e059e3a4ea7["function_definition setMoved"]
-  na9c7a2f5bee754c31 --> n277364e059e3a4ea7
-  n423db502c5c5bd641["tower.py"]
-  n8a3116af5d567ef43 --> n423db502c5c5bd641
-  n144201b25fef5e534["users/"]
-  n6b70a3274fbaa2f4b --> n144201b25fef5e534
-  n2fafbed2e40c7d1fd["__init__.py"]
-  n144201b25fef5e534 --> n2fafbed2e40c7d1fd
-  n83b4d10b4177eafc5["manager.py"]
-  n144201b25fef5e534 --> n83b4d10b4177eafc5
-  na1a814886e2c2e844["class_definition UserManager"]
-  n83b4d10b4177eafc5 --> na1a814886e2c2e844
-  naad34f8f4398f88c8["function_definition __init__"]
-  n83b4d10b4177eafc5 --> naad34f8f4398f88c8
-  na72c4df74f934058f["function_definition register_user"]
-  n83b4d10b4177eafc5 --> na72c4df74f934058f
-  ncc7e47fa707a035cd["function_definition get_user"]
-  n83b4d10b4177eafc5 --> ncc7e47fa707a035cd
-  nfd80642454c1dffff["function_definition link_player"]
-  n83b4d10b4177eafc5 --> nfd80642454c1dffff
-  na2f13ff58b58e9c63["function_definition log_action"]
-  n83b4d10b4177eafc5 --> na2f13ff58b58e9c63
-  ne016d0182cc67091b["function_definition record_history"]
-  n83b4d10b4177eafc5 --> ne016d0182cc67091b
-  n3b52a1c1577dd1495["function_definition execute_move"]
-  n83b4d10b4177eafc5 --> n3b52a1c1577dd1495
-  n0fed65c7ae466d240["user.py"]
-  n144201b25fef5e534 --> n0fed65c7ae466d240
-  n97beaa477b03ee9d1["class_definition User"]
-  n0fed65c7ae466d240 --> n97beaa477b03ee9d1
-  n6e0f907afa081f061["function_definition __init__"]
-  n0fed65c7ae466d240 --> n6e0f907afa081f061
-  n5ddb195616e95e6a8["function_definition add_quest"]
-  n0fed65c7ae466d240 --> n5ddb195616e95e6a8
-  n1ed1f81976bf72094["function_definition get_completed_quests"]
-  n0fed65c7ae466d240 --> n1ed1f81976bf72094
-  n3b5a385135f510e28["function_definition getEloRating"]
-  n0fed65c7ae466d240 --> n3b5a385135f510e28
-  n4a16ee1876bb5210b["view/"]
-  n92278199c1af016ac --> n4a16ee1876bb5210b
-  n48c49161bfe24c91b["__init__.py"]
-  n4a16ee1876bb5210b --> n48c49161bfe24c91b
   nb027812e179e11aad["properdocs.yml"]
   root --> nb027812e179e11aad
   n90d5d08d3a6b3fd1f["pyproject.toml"]
@@ -1310,3 +1264,737 @@ flowchart LR
   root --> n424f31ee2b48e507d
   n0c069dda5b5d2988a["requirements-dev.txt"]
   root --> n0c069dda5b5d2988a
+  n3627e9e02e3c9833b["src/"]
+  root --> n3627e9e02e3c9833b
+  nfe18fdb9d3bf09e06["chesswithquests/"]
+  n3627e9e02e3c9833b --> nfe18fdb9d3bf09e06
+  n6b98031681d692e21["__init__.py"]
+  nfe18fdb9d3bf09e06 --> n6b98031681d692e21
+  nb8be059aa67e2ab2d["function_definition build_arguments"]
+  n6b98031681d692e21 --> nb8be059aa67e2ab2d
+  n45abc803fe490dcd2["function_definition report_installation"]
+  n6b98031681d692e21 --> n45abc803fe490dcd2
+  na3bb30bcd5c677cca["function_definition _version"]
+  n6b98031681d692e21 --> na3bb30bcd5c677cca
+  n3e54cf16180744e43["function_definition build_window"]
+  n6b98031681d692e21 --> n3e54cf16180744e43
+  n83c228c811db92cf7["function_definition main"]
+  n6b98031681d692e21 --> n83c228c811db92cf7
+  n7bbee9634a85e2b80["__main__.py"]
+  nfe18fdb9d3bf09e06 --> n7bbee9634a85e2b80
+  n0b085be7ec56eb827["controller/"]
+  n3627e9e02e3c9833b --> n0b085be7ec56eb827
+  n6bcbf8a919cf8d6b3["controller.py"]
+  n0b085be7ec56eb827 --> n6bcbf8a919cf8d6b3
+  nbf63274547ff2368b["class_definition GameController"]
+  n6bcbf8a919cf8d6b3 --> nbf63274547ff2368b
+  nbf502e5700fa2412e["function_definition __init__"]
+  n6bcbf8a919cf8d6b3 --> nbf502e5700fa2412e
+  n14aae071308e51eb8["function_definition select_square"]
+  n6bcbf8a919cf8d6b3 --> n14aae071308e51eb8
+  ndc97c9d65e2be7c7b["function_definition handle_square_click"]
+  n6bcbf8a919cf8d6b3 --> ndc97c9d65e2be7c7b
+  n838cbaae5bbe33c20["function_definition submit_move"]
+  n6bcbf8a919cf8d6b3 --> n838cbaae5bbe33c20
+  nc0bed06e6bdeaa379["function_definition reset_selection"]
+  n6bcbf8a919cf8d6b3 --> nc0bed06e6bdeaa379
+  nf280adb2ad1fe2458["function_definition new_game"]
+  n6bcbf8a919cf8d6b3 --> nf280adb2ad1fe2458
+  n8d1f6fcd8763c8e3b["window_controller.py"]
+  n0b085be7ec56eb827 --> n8d1f6fcd8763c8e3b
+  n373961dfa5680093c["class_definition WindowController"]
+  n8d1f6fcd8763c8e3b --> n373961dfa5680093c
+  n91914e22287bd0442["function_definition __init__"]
+  n8d1f6fcd8763c8e3b --> n91914e22287bd0442
+  nfb76e27ff81235ec3["function_definition start"]
+  n8d1f6fcd8763c8e3b --> nfb76e27ff81235ec3
+  n88f5f604c312f73d8["function_definition stop"]
+  n8d1f6fcd8763c8e3b --> n88f5f604c312f73d8
+  n5ac5328626892be4d["function_definition set_status"]
+  n8d1f6fcd8763c8e3b --> n5ac5328626892be4d
+  n2ad115aa2bbf0f632["function_definition show_dialog"]
+  n8d1f6fcd8763c8e3b --> n2ad115aa2bbf0f632
+  n2837c1d20891ee261["function_definition close_dialog"]
+  n8d1f6fcd8763c8e3b --> n2837c1d20891ee261
+  nee9750fc846d34de5["function_definition on_square_clicked"]
+  n8d1f6fcd8763c8e3b --> nee9750fc846d34de5
+  nc5ba6989e76a07590["function_definition tick_timer"]
+  n8d1f6fcd8763c8e3b --> nc5ba6989e76a07590
+  n43984f4113212cb1f["games/"]
+  n3627e9e02e3c9833b --> n43984f4113212cb1f
+  nc16ac50fba5508a32["__init__.py"]
+  n43984f4113212cb1f --> nc16ac50fba5508a32
+  n0ec5429ddf6e6a276["checkers/"]
+  n43984f4113212cb1f --> n0ec5429ddf6e6a276
+  nf41cad3ba3525f96c["config.json"]
+  n0ec5429ddf6e6a276 --> nf41cad3ba3525f96c
+  nf7f2d7add48e55c78["chess/"]
+  n43984f4113212cb1f --> nf7f2d7add48e55c78
+  nfeadff6aab0e96011["config.json"]
+  nf7f2d7add48e55c78 --> nfeadff6aab0e96011
+  n13d1ed874aaea7bd5["model/"]
+  n3627e9e02e3c9833b --> n13d1ed874aaea7bd5
+  n6aea57a87a15be9fd["game/"]
+  n13d1ed874aaea7bd5 --> n6aea57a87a15be9fd
+  n235b011ff366c2695["board.py"]
+  n6aea57a87a15be9fd --> n235b011ff366c2695
+  n2969f98530cf89702["class_definition Board"]
+  n235b011ff366c2695 --> n2969f98530cf89702
+  na8fb0e88ab99a5cc2["function_definition __init__"]
+  n235b011ff366c2695 --> na8fb0e88ab99a5cc2
+  nef2bfdcc2f7e589eb["function_definition is_within_bounds"]
+  n235b011ff366c2695 --> nef2bfdcc2f7e589eb
+  n5c54d0b96c2d61567["function_definition get_piece_at"]
+  n235b011ff366c2695 --> n5c54d0b96c2d61567
+  n74984f7a844f0e108["function_definition set_piece_at"]
+  n235b011ff366c2695 --> n74984f7a844f0e108
+  neca8b66531036e526["function_definition move_piece"]
+  n235b011ff366c2695 --> neca8b66531036e526
+  n62178cc7f2322ff50["function_definition replace_piece"]
+  n235b011ff366c2695 --> n62178cc7f2322ff50
+  n22e0268f80efd211b["function_definition apply_placement"]
+  n235b011ff366c2695 --> n22e0268f80efd211b
+  nbc087d7ed42cb12ec["board_queries.py"]
+  n6aea57a87a15be9fd --> nbc087d7ed42cb12ec
+  n56e5ada413a76533b["class_definition BoardQueries"]
+  nbc087d7ed42cb12ec --> n56e5ada413a76533b
+  nee501a8e6fb729bfa["function_definition __init__"]
+  nbc087d7ed42cb12ec --> nee501a8e6fb729bfa
+  ndbe1787d13aee01d8["function_definition _square"]
+  nbc087d7ed42cb12ec --> ndbe1787d13aee01d8
+  n2f38779bf1eca03a5["decorated_definition"]
+  nbc087d7ed42cb12ec --> n2f38779bf1eca03a5
+  nc037a623a714effae["function_definition _fields"]
+  nbc087d7ed42cb12ec --> nc037a623a714effae
+  n86449137834cc73b1["function_definition piece_at"]
+  nbc087d7ed42cb12ec --> n86449137834cc73b1
+  nec4f37277aaac1f88["function_definition board_dimension"]
+  nbc087d7ed42cb12ec --> nec4f37277aaac1f88
+  nd1b070173d85b9ff3["function_definition turn"]
+  nbc087d7ed42cb12ec --> nd1b070173d85b9ff3
+  n286878dcd18fe4a62["function_definition path_clear"]
+  nbc087d7ed42cb12ec --> n286878dcd18fe4a62
+  nc708fe4a73820acc9["function_definition pieces_matching"]
+  nbc087d7ed42cb12ec --> nc708fe4a73820acc9
+  n1c9f9f0166d49989f["function_definition squares_attacked"]
+  nbc087d7ed42cb12ec --> n1c9f9f0166d49989f
+  ne77fa028c17406540["function_definition _reserve_attacks"]
+  nbc087d7ed42cb12ec --> ne77fa028c17406540
+  n58d348e407fc325d7["function_definition integer"]
+  nbc087d7ed42cb12ec --> n58d348e407fc325d7
+  n5b4a4443ea2f83b1c["function_definition square_offset"]
+  nbc087d7ed42cb12ec --> n5b4a4443ea2f83b1c
+  n0167bdf2f01f8c2b2["function_definition json_value"]
+  nbc087d7ed42cb12ec --> n0167bdf2f01f8c2b2
+  n42da8a595519b2538["function_definition pieces_safe"]
+  nbc087d7ed42cb12ec --> n42da8a595519b2538
+  nf3c600161aa80542a["function_definition bindings"]
+  nbc087d7ed42cb12ec --> nf3c600161aa80542a
+  n88ee875b584c02565["capture_geometry.py"]
+  n6aea57a87a15be9fd --> n88ee875b584c02565
+  n2f752bf226a5fb5f4["class_definition CaptureEnumerator"]
+  n88ee875b584c02565 --> n2f752bf226a5fb5f4
+  nbf5c7d1fa75ec9599["function_definition __init__"]
+  n88ee875b584c02565 --> nbf5c7d1fa75ec9599
+  n55720f1dc75472c4c["function_definition enumerate"]
+  n88ee875b584c02565 --> n55720f1dc75472c4c
+  ne708caae48f050a47["function_definition candidates"]
+  n88ee875b584c02565 --> ne708caae48f050a47
+  n4f77a225f6757c5e3["function_definition dfs"]
+  n88ee875b584c02565 --> n4f77a225f6757c5e3
+  nd6b8d69621c79f22d["function_definition for_side"]
+  n88ee875b584c02565 --> nd6b8d69621c79f22d
+  n631d8206c6862393e["capture_policy.py"]
+  n6aea57a87a15be9fd --> n631d8206c6862393e
+  nfa38ecbe61ff7c000["class_definition EvaluationBudgetExceeded"]
+  n631d8206c6862393e --> nfa38ecbe61ff7c000
+  n9e5fd1a9d99d84f2c["decorated_definition"]
+  n631d8206c6862393e --> n9e5fd1a9d99d84f2c
+  nc907c3544a12746ce["class_definition EvaluationBudget"]
+  n631d8206c6862393e --> nc907c3544a12746ce
+  nf2b6c0f830e00d99e["function_definition __post_init__"]
+  n631d8206c6862393e --> nf2b6c0f830e00d99e
+  nbf8717557ac26b2f8["function_definition consume"]
+  n631d8206c6862393e --> nbf8717557ac26b2f8
+  ncfe52ef85a9668232["decorated_definition"]
+  n631d8206c6862393e --> ncfe52ef85a9668232
+  n9994cf45d9d8c16b6["class_definition CapturePolicy"]
+  n631d8206c6862393e --> n9994cf45d9d8c16b6
+  n64f7a13ba033e89cf["decorated_definition"]
+  n631d8206c6862393e --> n64f7a13ba033e89cf
+  n4b8da2c95bed1804a["function_definition from_json"]
+  n631d8206c6862393e --> n4b8da2c95bed1804a
+  n1a916b3fce3c5c0f3["conditions.py"]
+  n6aea57a87a15be9fd --> n1a916b3fce3c5c0f3
+  n64ee84e9143589a73["class_definition QueryResolutionError"]
+  n1a916b3fce3c5c0f3 --> n64ee84e9143589a73
+  ne23b30a353cd36b17["class_definition ConditionEvaluator"]
+  n1a916b3fce3c5c0f3 --> ne23b30a353cd36b17
+  nd55f9bb4687a6d310["function_definition __init__"]
+  n1a916b3fce3c5c0f3 --> nd55f9bb4687a6d310
+  nae7956ac132c8755e["function_definition resolve"]
+  n1a916b3fce3c5c0f3 --> nae7956ac132c8755e
+  n9314c6a4a44ecfeed["function_definition _query"]
+  n1a916b3fce3c5c0f3 --> n9314c6a4a44ecfeed
+  nc92e9e21b03d5fa6d["function_definition _value"]
+  n1a916b3fce3c5c0f3 --> nc92e9e21b03d5fa6d
+  naa199423775c6fce7["function_definition _equal"]
+  n1a916b3fce3c5c0f3 --> naa199423775c6fce7
+  ne0680a8c99eafd5e1["decorated_definition"]
+  n1a916b3fce3c5c0f3 --> ne0680a8c99eafd5e1
+  n6d1cce3cb6c6e6cdd["function_definition _equal"]
+  n1a916b3fce3c5c0f3 --> n6d1cce3cb6c6e6cdd
+  n021af12261b0308fe["function_definition _compare"]
+  n1a916b3fce3c5c0f3 --> n021af12261b0308fe
+  na0cb51483fe662365["function_definition evaluate"]
+  n1a916b3fce3c5c0f3 --> na0cb51483fe662365
+  nb17b4f4c438e2f342["function_definition _evaluate_validated"]
+  n1a916b3fce3c5c0f3 --> nb17b4f4c438e2f342
+  na2cd23760906f6817["function_definition walk"]
+  n1a916b3fce3c5c0f3 --> na2cd23760906f6817
+  n7b86c52633afa4d29["definition.py"]
+  n6aea57a87a15be9fd --> n7b86c52633afa4d29
+  nbf50e2f803e04e5b8["class_definition ConfigurationError"]
+  n7b86c52633afa4d29 --> nbf50e2f803e04e5b8
+  n00d2b24bd2559db9d["decorated_definition"]
+  n7b86c52633afa4d29 --> n00d2b24bd2559db9d
+  n6aad06673d6bbac16["class_definition GameDefinition"]
+  n7b86c52633afa4d29 --> n6aad06673d6bbac16
+  n198c068caf36b3d31["function_definition __post_init__"]
+  n7b86c52633afa4d29 --> n198c068caf36b3d31
+  n7f37a90f1dd8f4207["function_definition _unique_json_object"]
+  n7b86c52633afa4d29 --> n7f37a90f1dd8f4207
+  nf7020bc1e566df2ff["function_definition parse_definition_json"]
+  n7b86c52633afa4d29 --> nf7020bc1e566df2ff
+  n4a37864d4e7c6a3a3["function_definition load_bundled_definition"]
+  n7b86c52633afa4d29 --> n4a37864d4e7c6a3a3
+  n6e73a92ec96f19ef4["function_definition validate_definition"]
+  n7b86c52633afa4d29 --> n6e73a92ec96f19ef4
+  nd544d345ca31d3edc["function_definition board_from_definition"]
+  n7b86c52633afa4d29 --> nd544d345ca31d3edc
+  n23d5b0ceb571dd2a9["function_definition vectors"]
+  n7b86c52633afa4d29 --> n23d5b0ceb571dd2a9
+  n443a3cc7cc0ef1089["games.py"]
+  n6aea57a87a15be9fd --> n443a3cc7cc0ef1089
+  nc44ca3ec654826491["function_definition available_games"]
+  n443a3cc7cc0ef1089 --> nc44ca3ec654826491
+  n7770ccb5b6a0548de["function_definition configuration_path"]
+  n443a3cc7cc0ef1089 --> n7770ccb5b6a0548de
+  n2ecf7c09d1408aa62["function_definition games_root"]
+  n443a3cc7cc0ef1089 --> n2ecf7c09d1408aa62
+  ndd9f8a7d0cc70ff6b["hooks.py"]
+  n6aea57a87a15be9fd --> ndd9f8a7d0cc70ff6b
+  nda254cabebef5c21f["decorated_definition"]
+  ndd9f8a7d0cc70ff6b --> nda254cabebef5c21f
+  ne742bb6ba8eb95bcc["class_definition PlannedEffect"]
+  ndd9f8a7d0cc70ff6b --> ne742bb6ba8eb95bcc
+  n1d4e8de3ad3470f33["function_definition __post_init__"]
+  ndd9f8a7d0cc70ff6b --> n1d4e8de3ad3470f33
+  naa19b9713f1654976["decorated_definition"]
+  ndd9f8a7d0cc70ff6b --> naa19b9713f1654976
+  nb20a1316e3515598b["class_definition HookEvaluation"]
+  ndd9f8a7d0cc70ff6b --> nb20a1316e3515598b
+  n5ddf8603ad695c8b6["class_definition RuleProgram"]
+  ndd9f8a7d0cc70ff6b --> n5ddf8603ad695c8b6
+  n969487d0b0c281666["function_definition __init__"]
+  ndd9f8a7d0cc70ff6b --> n969487d0b0c281666
+  nc795f6b484a2c55dd["function_definition rules"]
+  ndd9f8a7d0cc70ff6b --> nc795f6b484a2c55dd
+  ne6416860cd61d96f7["function_definition evaluate"]
+  ndd9f8a7d0cc70ff6b --> ne6416860cd61d96f7
+  n55d14549790397cf4["class_definition HookInterpreter"]
+  ndd9f8a7d0cc70ff6b --> n55d14549790397cf4
+  nf44efc8520af03a61["function_definition __init__"]
+  ndd9f8a7d0cc70ff6b --> nf44efc8520af03a61
+  nd5b693320e77b2237["function_definition evaluate"]
+  ndd9f8a7d0cc70ff6b --> nd5b693320e77b2237
+  n6350ad12f86637839["manager.py"]
+  n6aea57a87a15be9fd --> n6350ad12f86637839
+  n5c67237f01d2a6e7f["class_definition OperationEvaluation"]
+  n6350ad12f86637839 --> n5c67237f01d2a6e7f
+  nb54fcc66a6ea135e9["function_definition __init__"]
+  n6350ad12f86637839 --> nb54fcc66a6ea135e9
+  nb1734d185ccf35765["class_definition TransitionError"]
+  n6350ad12f86637839 --> nb1734d185ccf35765
+  neb44c7a4dccc095e0["class_definition GameManager"]
+  n6350ad12f86637839 --> neb44c7a4dccc095e0
+  nea409d9fa3a06f507["function_definition __init__"]
+  n6350ad12f86637839 --> nea409d9fa3a06f507
+  n116dcfdaf321bb7f6["decorated_definition"]
+  n6350ad12f86637839 --> n116dcfdaf321bb7f6
+  nffb826c1a93570623["function_definition _operation"]
+  n6350ad12f86637839 --> nffb826c1a93570623
+  nf9531ee7733a2807f["function_definition _copy_state"]
+  n6350ad12f86637839 --> nf9531ee7733a2807f
+  nddb0bbe72d87a0ca3["function_definition _charge"]
+  n6350ad12f86637839 --> nddb0bbe72d87a0ca3
+  nf5bac408922d390f0["decorated_definition"]
+  n6350ad12f86637839 --> nf5bac408922d390f0
+  n50374577701ceb511["function_definition definition"]
+  n6350ad12f86637839 --> n50374577701ceb511
+  n158c71e01691fa9e9["decorated_definition"]
+  n6350ad12f86637839 --> n158c71e01691fa9e9
+  nc173f9cf2eac85e65["function_definition _identifier"]
+  n6350ad12f86637839 --> nc173f9cf2eac85e65
+  n889edec61a107025a["decorated_definition"]
+  n6350ad12f86637839 --> n889edec61a107025a
+  n9e7339415e06a06ec["function_definition _timestamp"]
+  n6350ad12f86637839 --> n9e7339415e06a06ec
+  nb9ebbcc98c15be388["function_definition _placement"]
+  n6350ad12f86637839 --> nb9ebbcc98c15be388
+  n95ebdb0e5f432211a["function_definition _piece"]
+  n6350ad12f86637839 --> n95ebdb0e5f432211a
+  naa892b3067beebb44["function_definition vectors"]
+  n6350ad12f86637839 --> naa892b3067beebb44
+  n040aba924a49354eb["function_definition _board"]
+  n6350ad12f86637839 --> n040aba924a49354eb
+  n5c5d05d959a16b136["decorated_definition"]
+  n6350ad12f86637839 --> n5c5d05d959a16b136
+  nce0a53aad9c98aa64["function_definition _raw_position_key"]
+  n6350ad12f86637839 --> nce0a53aad9c98aa64
+  ne2987cbf02552f296["function_definition _position_key"]
+  n6350ad12f86637839 --> ne2987cbf02552f296
+  n0ac1f88d028f68d7e["function_definition _legal_target_capture"]
+  n6350ad12f86637839 --> n0ac1f88d028f68d7e
+  n4b221a6475abbdb54["function_definition _paths"]
+  n6350ad12f86637839 --> n4b221a6475abbdb54
+  n2ee1ef161d83ed23a["function_definition _context"]
+  n6350ad12f86637839 --> n2ee1ef161d83ed23a
+  nb35113eabbfe87cb5["function_definition snapshot_query"]
+  n6350ad12f86637839 --> nb35113eabbfe87cb5
+  n94d90ddf054daa0bb["function_definition repetition"]
+  n6350ad12f86637839 --> n94d90ddf054daa0bb
+  n47b0a4c352ea19b33["function_definition bounded_query"]
+  n6350ad12f86637839 --> n47b0a4c352ea19b33
+  n3e1143fbd39a4c2a2["function_definition _offers"]
+  n6350ad12f86637839 --> n3e1143fbd39a4c2a2
+  nca402d15fcf607dd3["function_definition _promotion"]
+  n6350ad12f86637839 --> nca402d15fcf607dd3
+  n69e1467b18a7dd0c5["function_definition _intents"]
+  n6350ad12f86637839 --> n69e1467b18a7dd0c5
+  n63bd5e66e1be8a0e1["function_definition _candidate"]
+  n6350ad12f86637839 --> n63bd5e66e1be8a0e1
+  n0abb118b9df782b10["function_definition _evaluate"]
+  n6350ad12f86637839 --> n0abb118b9df782b10
+  n26d7906dbe37fca15["decorated_definition"]
+  n6350ad12f86637839 --> n26d7906dbe37fca15
+  nbc30d034095e00418["function_definition _allowed"]
+  n6350ad12f86637839 --> nbc30d034095e00418
+  n2ddfe364fa1afbe34["function_definition _complete_quest"]
+  n6350ad12f86637839 --> n2ddfe364fa1afbe34
+  n05101d12f062f5ee9["function_definition _effects"]
+  n6350ad12f86637839 --> n05101d12f062f5ee9
+  nff0a6a8f9ea2aecf1["function_definition _prepare_move"]
+  n6350ad12f86637839 --> nff0a6a8f9ea2aecf1
+  n5e14ed372897982a8["function_definition _candidates"]
+  n6350ad12f86637839 --> n5e14ed372897982a8
+  na2c463b07c5cbc7e2["function_definition _legal_moves"]
+  n6350ad12f86637839 --> na2c463b07c5cbc7e2
+  n37c44343b27d2cc56["function_definition get_valid_moves"]
+  n6350ad12f86637839 --> n37c44343b27d2cc56
+  na91ce0d7c69fbbd3d["function_definition board_projection"]
+  n6350ad12f86637839 --> na91ce0d7c69fbbd3d
+  n4baa9370e0c621c96["function_definition get_state"]
+  n6350ad12f86637839 --> n4baa9370e0c621c96
+  n0aa318059699bceb0["decorated_definition"]
+  n6350ad12f86637839 --> n0aa318059699bceb0
+  nb9f0983515ae6b044["function_definition _action"]
+  n6350ad12f86637839 --> nb9f0983515ae6b044
+  n5e9b9806c2e4637db["function_definition submit"]
+  n6350ad12f86637839 --> n5e9b9806c2e4637db
+  n0259a3593279dd6b6["function_definition _result"]
+  n6350ad12f86637839 --> n0259a3593279dd6b6
+  n6db7b346ebbdcd750["function_definition _terminal_action"]
+  n6350ad12f86637839 --> n6db7b346ebbdcd750
+  nf5c6a8e418ccfd6cf["function_definition submit_action"]
+  n6350ad12f86637839 --> nf5c6a8e418ccfd6cf
+  nf383c9029d6d5c15e["decorated_definition"]
+  n6350ad12f86637839 --> nf383c9029d6d5c15e
+  n590a18c3befacf86d["function_definition from_snapshot"]
+  n6350ad12f86637839 --> n590a18c3befacf86d
+  n8126908205aa5ea53["move.py"]
+  n6aea57a87a15be9fd --> n8126908205aa5ea53
+  n87977be01c623563d["decorated_definition"]
+  n8126908205aa5ea53 --> n87977be01c623563d
+  n58b5ac48c6cb9e011["class_definition Move"]
+  n8126908205aa5ea53 --> n58b5ac48c6cb9e011
+  n771b8c05d4b2ee639["decorated_definition"]
+  n8126908205aa5ea53 --> n771b8c05d4b2ee639
+  n548eee244212107ec["function_definition _square"]
+  n8126908205aa5ea53 --> n548eee244212107ec
+  n1c530d198ea179a2c["function_definition __init__"]
+  n8126908205aa5ea53 --> n1c530d198ea179a2c
+  n2c53a198db0f6c1e0["decorated_definition"]
+  n8126908205aa5ea53 --> n2c53a198db0f6c1e0
+  n11c0737368d966685["function_definition end_pos"]
+  n8126908205aa5ea53 --> n11c0737368d966685
+  n39e834f6103af5a74["decorated_definition"]
+  n8126908205aa5ea53 --> n39e834f6103af5a74
+  n5f26a0fe64fdc167b["function_definition from_json"]
+  n8126908205aa5ea53 --> n5f26a0fe64fdc167b
+  n13ffe91b3fc8c3237["function_definition to_json"]
+  n8126908205aa5ea53 --> n13ffe91b3fc8c3237
+  n6d0c69c2595965243["notation.py"]
+  n6aea57a87a15be9fd --> n6d0c69c2595965243
+  n93abfd35bdad6d57d["class_definition NotationError"]
+  n6d0c69c2595965243 --> n93abfd35bdad6d57d
+  n0b8fc33bd60719424["function_definition _escape"]
+  n6d0c69c2595965243 --> n0b8fc33bd60719424
+  n9c583dfb07fae22c8["function_definition _result"]
+  n6d0c69c2595965243 --> n9c583dfb07fae22c8
+  naa35f39c3f4bef954["function_definition _algebraic"]
+  n6d0c69c2595965243 --> naa35f39c3f4bef954
+  n46ff56ce1040c0748["function_definition _pdn_square"]
+  n6d0c69c2595965243 --> n46ff56ce1040c0748
+  n50abe3ad0319a61fc["function_definition _chess_token"]
+  n6d0c69c2595965243 --> n50abe3ad0319a61fc
+  n3787bf10703aeafc2["function_definition render_notation"]
+  n6d0c69c2595965243 --> n3787bf10703aeafc2
+  n11fc78fe9486d95d2["function_definition save_notation"]
+  n6d0c69c2595965243 --> n11fc78fe9486d95d2
+  ndd830c299e2bf21dc["outcomes.py"]
+  n6aea57a87a15be9fd --> ndd830c299e2bf21dc
+  n2649aef6f2ad2f2f6["decorated_definition"]
+  ndd830c299e2bf21dc --> n2649aef6f2ad2f2f6
+  n69419d9dd1d8141c8["class_definition Outcome"]
+  ndd830c299e2bf21dc --> n69419d9dd1d8141c8
+  nc3ff0fa91146b40ac["function_definition resolve_outcome"]
+  ndd830c299e2bf21dc --> nc3ff0fa91146b40ac
+  nf7724c318a1fa4092["persistence.py"]
+  n6aea57a87a15be9fd --> nf7724c318a1fa4092
+  n6212767a5c383eb85["class_definition SessionFileError"]
+  nf7724c318a1fa4092 --> n6212767a5c383eb85
+  n7c4faebfecbc7dbfb["function_definition _unique_properties"]
+  nf7724c318a1fa4092 --> n7c4faebfecbc7dbfb
+  n508577ee14409baff["function_definition load_session"]
+  nf7724c318a1fa4092 --> n508577ee14409baff
+  n9847cc4b177468210["function_definition save_session"]
+  nf7724c318a1fa4092 --> n9847cc4b177468210
+  n19ad7780742aba88f["preferences.py"]
+  n6aea57a87a15be9fd --> n19ad7780742aba88f
+  n31c4ec0d9592c782e["class_definition PreferencesError"]
+  n19ad7780742aba88f --> n31c4ec0d9592c782e
+  na0cb561fa617be3e2["function_definition preferences_directory"]
+  n19ad7780742aba88f --> na0cb561fa617be3e2
+  n79298de9c3228b4be["function_definition validate_preferences"]
+  n19ad7780742aba88f --> n79298de9c3228b4be
+  n394183565e777aaa7["function_definition _checked_directory"]
+  n19ad7780742aba88f --> n394183565e777aaa7
+  ndded9e61b425e4771["function_definition load_preferences"]
+  n19ad7780742aba88f --> ndded9e61b425e4771
+  n44081cf5e30dfb9f8["function_definition save_preferences"]
+  n19ad7780742aba88f --> n44081cf5e30dfb9f8
+  n734d87972176e401e["schema.py"]
+  n6aea57a87a15be9fd --> n734d87972176e401e
+  n33cc493ceccfe652a["function_definition _json_work"]
+  n734d87972176e401e --> n33cc493ceccfe652a
+  n6c31d670ea07ee660["function_definition freeze_json"]
+  n734d87972176e401e --> n6c31d670ea07ee660
+  nf9598393c167cab73["function_definition thaw_json"]
+  n734d87972176e401e --> nf9598393c167cab73
+  nfb583dff4c742380d["function_definition validate_effect"]
+  n734d87972176e401e --> nfb583dff4c742380d
+  n6d3ce4dce38c8113e["function_definition expression"]
+  n734d87972176e401e --> n6d3ce4dce38c8113e
+  n971c5a8adb636f9be["function_definition reject_reference"]
+  n734d87972176e401e --> n971c5a8adb636f9be
+  n749ccca85b54a474d["function_definition validate_reference"]
+  n734d87972176e401e --> n749ccca85b54a474d
+  n3011e6e862d518ec8["function_definition validate_embedded_references"]
+  n734d87972176e401e --> n3011e6e862d518ec8
+  na185d6a2d3e19895c["function_definition _bounded_json"]
+  n734d87972176e401e --> na185d6a2d3e19895c
+  ndda11906cfad03995["function_definition _check_params"]
+  n734d87972176e401e --> ndda11906cfad03995
+  n7e6c9223363349084["function_definition _value"]
+  n734d87972176e401e --> n7e6c9223363349084
+  n5bca4ac2e124bd79d["function_definition condition"]
+  n734d87972176e401e --> n5bca4ac2e124bd79d
+  neffabcc0e7cf1f434["function_definition validate_hooks"]
+  n734d87972176e401e --> neffabcc0e7cf1f434
+  n9454933a9a0699e7c["session.py"]
+  n6aea57a87a15be9fd --> n9454933a9a0699e7c
+  nbdfc4bfe1f115af67["class_definition DesktopSession"]
+  n9454933a9a0699e7c --> nbdfc4bfe1f115af67
+  nb624cc042b6f456fb["function_definition __init__"]
+  n9454933a9a0699e7c --> nb624cc042b6f456fb
+  n1fa928a113ce390a8["function_definition _now"]
+  n9454933a9a0699e7c --> n1fa928a113ce390a8
+  nfc1262078a04da996["function_definition _new_manager"]
+  n9454933a9a0699e7c --> nfc1262078a04da996
+  n75a53611292013c9a["decorated_definition"]
+  n9454933a9a0699e7c --> n75a53611292013c9a
+  n4f3373c2ceabe58e8["function_definition game"]
+  n9454933a9a0699e7c --> n4f3373c2ceabe58e8
+  n220f3eddd411f47c5["function_definition snapshot"]
+  n9454933a9a0699e7c --> n220f3eddd411f47c5
+  n44e9cc0bb09739164["function_definition board_projection"]
+  n9454933a9a0699e7c --> n44e9cc0bb09739164
+  n55d03023db2199089["function_definition clock_remaining"]
+  n9454933a9a0699e7c --> n55d03023db2199089
+  n2eddf05bbc2b9636b["function_definition poll_timeout"]
+  n9454933a9a0699e7c --> n2eddf05bbc2b9636b
+  n9d61e91b04a868bf1["function_definition legal_actions"]
+  n9454933a9a0699e7c --> n9d61e91b04a868bf1
+  n8616103264df369b8["function_definition submit"]
+  n9454933a9a0699e7c --> n8616103264df369b8
+  n32d162c972fac53d2["function_definition reset"]
+  n9454933a9a0699e7c --> n32d162c972fac53d2
+  n15eb7107639be672f["decorated_definition"]
+  n9454933a9a0699e7c --> n15eb7107639be672f
+  n186b0f3298be7eba2["function_definition recover"]
+  n9454933a9a0699e7c --> n186b0f3298be7eba2
+  n421aee39fa73b3a5d["snapshot_queries.py"]
+  n6aea57a87a15be9fd --> n421aee39fa73b3a5d
+  nd3c00ea5b603206a5["class_definition SnapshotQueries"]
+  n421aee39fa73b3a5d --> nd3c00ea5b603206a5
+  nef1e49ea7b2ee9450["function_definition __init__"]
+  n421aee39fa73b3a5d --> nef1e49ea7b2ee9450
+  n71780fbb140bd26af["decorated_definition"]
+  n421aee39fa73b3a5d --> n71780fbb140bd26af
+  n41c4c4a1aa178d947["function_definition _json_value"]
+  n421aee39fa73b3a5d --> n41c4c4a1aa178d947
+  n2eec621fea308662e["decorated_definition"]
+  n421aee39fa73b3a5d --> n2eec621fea308662e
+  n58b7545abbcf2d3eb["function_definition _key"]
+  n421aee39fa73b3a5d --> n58b7545abbcf2d3eb
+  ne30d6515e3baf253b["function_definition _field"]
+  n421aee39fa73b3a5d --> ne30d6515e3baf253b
+  nf34b72b335997961d["function_definition _lookup"]
+  n421aee39fa73b3a5d --> nf34b72b335997961d
+  n2c47374b2777c0e0a["function_definition _side_value"]
+  n421aee39fa73b3a5d --> n2c47374b2777c0e0a
+  nad80a0ed921f135d2["decorated_definition"]
+  n421aee39fa73b3a5d --> nad80a0ed921f135d2
+  n465c4042e4896457c["function_definition _count"]
+  n421aee39fa73b3a5d --> n465c4042e4896457c
+  n756c8c6be90cf6fc6["function_definition rule_state"]
+  n421aee39fa73b3a5d --> n756c8c6be90cf6fc6
+  n62037d22d0876ba0c["function_definition special_rights"]
+  n421aee39fa73b3a5d --> n62037d22d0876ba0c
+  na7900b91f447d1a35["function_definition temporary_target"]
+  n421aee39fa73b3a5d --> na7900b91f447d1a35
+  nae35def395b28eaa5["function_definition move_attribute"]
+  n421aee39fa73b3a5d --> nae35def395b28eaa5
+  nadf0832ea14e1595d["function_definition promotion_options"]
+  n421aee39fa73b3a5d --> nadf0832ea14e1595d
+  nc45790213cc229792["function_definition repetition_count"]
+  n421aee39fa73b3a5d --> nc45790213cc229792
+  nf9a19e3a9a20b6a74["function_definition clock_remaining"]
+  n421aee39fa73b3a5d --> nf9a19e3a9a20b6a74
+  n6cff4ca4751a502bf["decorated_definition"]
+  n421aee39fa73b3a5d --> n6cff4ca4751a502bf
+  nfb16446f1d7c4a2e4["function_definition _square"]
+  n421aee39fa73b3a5d --> nfb16446f1d7c4a2e4
+  n5c9d19d96ec540386["function_definition _capture_routes"]
+  n421aee39fa73b3a5d --> n5c9d19d96ec540386
+  n18c795cbd1ef27169["function_definition capture_count"]
+  n421aee39fa73b3a5d --> n18c795cbd1ef27169
+  n9592c1532beccbc56["function_definition capture_paths"]
+  n421aee39fa73b3a5d --> n9592c1532beccbc56
+  n597c46fdf4603527b["function_definition history_count"]
+  n421aee39fa73b3a5d --> n597c46fdf4603527b
+  n9b7593f5b619906b8["function_definition halfmove_count"]
+  n421aee39fa73b3a5d --> n9b7593f5b619906b8
+  n56b5618cdf19267ac["function_definition last_action"]
+  n421aee39fa73b3a5d --> n56b5618cdf19267ac
+  n489a21845e60821c3["function_definition legal_move_count"]
+  n421aee39fa73b3a5d --> n489a21845e60821c3
+  n48c4469a83ef84c23["function_definition participant"]
+  n421aee39fa73b3a5d --> n48c4469a83ef84c23
+  n8178b679453e7c624["function_definition position"]
+  n421aee39fa73b3a5d --> n8178b679453e7c624
+  n2f6febfd25b97641e["function_definition quest_progress"]
+  n421aee39fa73b3a5d --> n2f6febfd25b97641e
+  n8162888cf2c97726a["function_definition bindings"]
+  n421aee39fa73b3a5d --> n8162888cf2c97726a
+  n4d01e0f249638d499["validator.py"]
+  n6aea57a87a15be9fd --> n4d01e0f249638d499
+  nab1ab0b83cb96441f["class_definition MoveValidator"]
+  n4d01e0f249638d499 --> nab1ab0b83cb96441f
+  n634d9f220249dc614["function_definition __init__"]
+  n4d01e0f249638d499 --> n634d9f220249dc614
+  n4e1920bce52bd6f8c["decorated_definition"]
+  n4d01e0f249638d499 --> n4e1920bce52bd6f8c
+  n56f86d839ada15240["function_definition _step_limit"]
+  n4d01e0f249638d499 --> n56f86d839ada15240
+  ncea020891d32ae2b0["decorated_definition"]
+  n4d01e0f249638d499 --> ncea020891d32ae2b0
+  n38dab177a081448f6["function_definition _ray"]
+  n4d01e0f249638d499 --> n38dab177a081448f6
+  n63a1754ae10dd0ccd["function_definition get_geometric_moves"]
+  n4d01e0f249638d499 --> n63a1754ae10dd0ccd
+  n363deeaa3f7402f90["function_definition admit"]
+  n4d01e0f249638d499 --> n363deeaa3f7402f90
+  nb69b102ae3d135be4["function_definition is_square_attacked"]
+  n4d01e0f249638d499 --> nb69b102ae3d135be4
+  n71a789e78353ce3e5["pieces/"]
+  n13d1ed874aaea7bd5 --> n71a789e78353ce3e5
+  n3023f4598bc654099["piece.py"]
+  n71a789e78353ce3e5 --> n3023f4598bc654099
+  n94cb4dec3a765e0ec["class_definition Piece"]
+  n3023f4598bc654099 --> n94cb4dec3a765e0ec
+  nc1a0cd42a16ba9709["function_definition __init__"]
+  n3023f4598bc654099 --> nc1a0cd42a16ba9709
+  n10a660885313c59d8["function_definition _symbol_for"]
+  n3023f4598bc654099 --> n10a660885313c59d8
+  nf1524d0e8ec00ac40["function_definition getDirections"]
+  n3023f4598bc654099 --> nf1524d0e8ec00ac40
+  n14ee44bb78fb6e36f["function_definition getAttackDirections"]
+  n3023f4598bc654099 --> n14ee44bb78fb6e36f
+  n211f9470f6efab0d5["function_definition getMaxSteps"]
+  n3023f4598bc654099 --> n211f9470f6efab0d5
+  n845f554669e107673["function_definition getInitialVectors"]
+  n3023f4598bc654099 --> n845f554669e107673
+  n43d3a2f25672576c6["function_definition getSymbol"]
+  n3023f4598bc654099 --> n43d3a2f25672576c6
+  ndf0080ce695861f84["function_definition getFen"]
+  n3023f4598bc654099 --> ndf0080ce695861f84
+  n259d334ccb66cff40["function_definition hasMoved"]
+  n3023f4598bc654099 --> n259d334ccb66cff40
+  nd2230526008b869ae["function_definition setMoved"]
+  n3023f4598bc654099 --> nd2230526008b869ae
+  n2d7e19bf482a5c533["function_definition canJump"]
+  n3023f4598bc654099 --> n2d7e19bf482a5c533
+  nc6373093a5051960b["function_definition getColor"]
+  n3023f4598bc654099 --> nc6373093a5051960b
+  na9fb5abd2c03c8353["function_definition getType"]
+  n3023f4598bc654099 --> na9fb5abd2c03c8353
+  n67173b032122e6da6["function_definition getName"]
+  n3023f4598bc654099 --> n67173b032122e6da6
+  n19674d186673a22e3["view/"]
+  n3627e9e02e3c9833b --> n19674d186673a22e3
+  n676d3424d0c583c67["app.py"]
+  n19674d186673a22e3 --> n676d3424d0c583c67
+  n2bd124f279354b44c["function_definition build_application"]
+  n676d3424d0c583c67 --> n2bd124f279354b44c
+  n0dcab7be8174a0204["function_definition open_settings"]
+  n676d3424d0c583c67 --> n0dcab7be8174a0204
+  nf47fc2bd8bf289ee4["function_definition _offer_modal"]
+  n676d3424d0c583c67 --> nf47fc2bd8bf289ee4
+  n60189bd4df5032959["function_definition start"]
+  n676d3424d0c583c67 --> n60189bd4df5032959
+  nb34153b2ca614d5c6["game_view.py"]
+  n19674d186673a22e3 --> nb34153b2ca614d5c6
+  nd0dbe3818017cb070["class_definition BoardView"]
+  nb34153b2ca614d5c6 --> nd0dbe3818017cb070
+  n12995109183c22084["function_definition __init__"]
+  nb34153b2ca614d5c6 --> n12995109183c22084
+  n70c2b29eb71eefe9e["function_definition refresh"]
+  nb34153b2ca614d5c6 --> n70c2b29eb71eefe9e
+  n8c525235f0b60bbad["function_definition _fit_canvas"]
+  nb34153b2ca614d5c6 --> n8c525235f0b60bbad
+  nc5b8dcf68a9f37857["function_definition set_selection"]
+  nb34153b2ca614d5c6 --> nc5b8dcf68a9f37857
+  nf8a32cced396b9195["function_definition set_in_check"]
+  nb34153b2ca614d5c6 --> nf8a32cced396b9195
+  nfd171cc98c1c25601["function_definition redraw"]
+  nb34153b2ca614d5c6 --> nfd171cc98c1c25601
+  ne7ae81401f32cef7b["function_definition _origin"]
+  nb34153b2ca614d5c6 --> ne7ae81401f32cef7b
+  ncdc44b01beb0e5d90["function_definition _draw_piece"]
+  nb34153b2ca614d5c6 --> ncdc44b01beb0e5d90
+  nfe514c9a7218ea172["function_definition _draw_target"]
+  nb34153b2ca614d5c6 --> nfe514c9a7218ea172
+  n4e7c013682b4773a2["function_definition _draw_coordinates"]
+  nb34153b2ca614d5c6 --> n4e7c013682b4773a2
+  n71297d5aaa2ce1597["decorated_definition"]
+  nb34153b2ca614d5c6 --> n71297d5aaa2ce1597
+  n06993ec56b27f62d5["function_definition _file_label"]
+  nb34153b2ca614d5c6 --> n06993ec56b27f62d5
+  n221df7f1ba89772f9["function_definition _clicked"]
+  nb34153b2ca614d5c6 --> n221df7f1ba89772f9
+  n8a992638c42fe6679["player_game_view.py"]
+  n19674d186673a22e3 --> n8a992638c42fe6679
+  n3098448b9daa7b449["class_definition PlayerGameView"]
+  n8a992638c42fe6679 --> n3098448b9daa7b449
+  n39c5330b6327568de["function_definition __init__"]
+  n8a992638c42fe6679 --> n39c5330b6327568de
+  ndec9bc6d92009b17e["decorated_definition"]
+  n8a992638c42fe6679 --> ndec9bc6d92009b17e
+  n6f5fcd6a81c34bb12["function_definition session"]
+  n8a992638c42fe6679 --> n6f5fcd6a81c34bb12
+  n2b8caf14d595114e7["function_definition _build_layout"]
+  n8a992638c42fe6679 --> n2b8caf14d595114e7
+  nccbbccbd10a2a4a48["function_definition on_square_clicked"]
+  n8a992638c42fe6679 --> nccbbccbd10a2a4a48
+  n8c3a99d52217c6d7f["function_definition reload"]
+  n8a992638c42fe6679 --> n8c3a99d52217c6d7f
+  nf459540a9e6833d73["function_definition on_new_game"]
+  n8a992638c42fe6679 --> nf459540a9e6833d73
+  nb6c1fc4decedd7fb2["decorated_definition"]
+  n8a992638c42fe6679 --> nb6c1fc4decedd7fb2
+  n6e5e4a74f1113fc31["function_definition _label"]
+  n8a992638c42fe6679 --> n6e5e4a74f1113fc31
+  n4f1bdbba5988ce973["function_definition refresh"]
+  n8a992638c42fe6679 --> n4f1bdbba5988ce973
+  n5fdceb72018feb16a["function_definition apply_preferences"]
+  n8a992638c42fe6679 --> n5fdceb72018feb16a
+  na0c730b8f503b9b47["function_definition open_game"]
+  n8a992638c42fe6679 --> na0c730b8f503b9b47
+  n2a9ea6567a33b47fa["function_definition resign_game"]
+  n8a992638c42fe6679 --> n2a9ea6567a33b47fa
+  n91bf7e2fa40db9cd9["function_definition claim_draw"]
+  n8a992638c42fe6679 --> n91bf7e2fa40db9cd9
+  n439e230728c690a5a["function_definition export_notation"]
+  n8a992638c42fe6679 --> n439e230728c690a5a
+  n0eaff7c692a83a2b2["function_definition export_game"]
+  n8a992638c42fe6679 --> n0eaff7c692a83a2b2
+  n235fe4e42ba9701f9["function_definition _quit"]
+  n8a992638c42fe6679 --> n235fe4e42ba9701f9
+  n5d8cdd2cfcac03f9e["function_definition stop_auto_refresh"]
+  n8a992638c42fe6679 --> n5d8cdd2cfcac03f9e
+  n7436ae29a52b70a72["function_definition start_auto_refresh"]
+  n8a992638c42fe6679 --> n7436ae29a52b70a72
+  n3f55c83209743d2d1["function_definition _auto_refresh"]
+  n8a992638c42fe6679 --> n3f55c83209743d2d1
+  n6d46b9f13c808248d["function_definition destroy"]
+  n8a992638c42fe6679 --> n6d46b9f13c808248d
+  n1ce2d2fa47f167aa0["player_view.py"]
+  n19674d186673a22e3 --> n1ce2d2fa47f167aa0
+  n127a020b096f9b48a["function_definition format_seconds"]
+  n1ce2d2fa47f167aa0 --> n127a020b096f9b48a
+  n9055762ae4cf9b907["class_definition PlayerView"]
+  n1ce2d2fa47f167aa0 --> n9055762ae4cf9b907
+  nc41c2f933f77ced21["function_definition __init__"]
+  n1ce2d2fa47f167aa0 --> nc41c2f933f77ced21
+  nb37964fdcd221ec47["function_definition refresh"]
+  n1ce2d2fa47f167aa0 --> nb37964fdcd221ec47
+  n88e9958208f4bbd44["quest_view.py"]
+  n19674d186673a22e3 --> n88e9958208f4bbd44
+  nd00e6feaf96a8ea93["class_definition QuestCard"]
+  n88e9958208f4bbd44 --> nd00e6feaf96a8ea93
+  ne2c010e924022a440["function_definition __init__"]
+  n88e9958208f4bbd44 --> ne2c010e924022a440
+  nb37c964ffa0e15e9e["class_definition QuestList"]
+  n88e9958208f4bbd44 --> nb37c964ffa0e15e9e
+  n9f127ce07dfb90559["function_definition __init__"]
+  n88e9958208f4bbd44 --> n9f127ce07dfb90559
+  ne98166d3d4d317f41["function_definition refresh"]
+  n88e9958208f4bbd44 --> ne98166d3d4d317f41
+  n94cd813570fa898d5["settings_dialog.py"]
+  n19674d186673a22e3 --> n94cd813570fa898d5
+  nd964b4ca427ad3c3d["class_definition SettingsDialog"]
+  n94cd813570fa898d5 --> nd964b4ca427ad3c3d
+  nee58033c588dc196f["function_definition __init__"]
+  n94cd813570fa898d5 --> nee58033c588dc196f
+  n844a3ca2a36287197["function_definition save"]
+  n94cd813570fa898d5 --> n844a3ca2a36287197
+  ncd061682ec8dcd62f["function_definition close"]
+  n94cd813570fa898d5 --> ncd061682ec8dcd62f
+  n15ae2896b370f4ab7["start_modal.py"]
+  n19674d186673a22e3 --> n15ae2896b370f4ab7
+  n8487cf439f6bc2773["class_definition StartModal"]
+  n15ae2896b370f4ab7 --> n8487cf439f6bc2773
+  nbd23c75288f2e6c4c["function_definition __init__"]
+  n15ae2896b370f4ab7 --> nbd23c75288f2e6c4c
+  n1b15807faa9e0649c["function_definition _centre"]
+  n15ae2896b370f4ab7 --> n1b15807faa9e0649c
+  n39fe25373a2b7998e["function_definition _open_settings"]
+  n15ae2896b370f4ab7 --> n39fe25373a2b7998e
+  n6f276c1935a0635f1["function_definition start"]
+  n15ae2896b370f4ab7 --> n6f276c1935a0635f1
+  nd261e451b05dd070b["function_definition close"]
+  n15ae2896b370f4ab7 --> nd261e451b05dd070b
+  naf150a61b77394a55["function_definition wait"]
+  n15ae2896b370f4ab7 --> naf150a61b77394a55

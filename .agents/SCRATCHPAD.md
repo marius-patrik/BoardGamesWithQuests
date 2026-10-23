@@ -1,8 +1,9 @@
-# Scratchpad — Active investigation
+# Scratchpad — Current implementation acceptance risks
 
-Temporary evidence only; promote verified facts to their canonical documents and remove obsolete notes.
+- **Game-rule reference coverage:** The supported JSON desktop session can perform basic chess/draughts moves, special chess captures, terminal chess mate, once-only quest awards and deterministic replay. Independent #405 FIDE and adversarial special-action tests and direct English-draughts capture/crowning tests have been restored to the canonical public game manager; full opening-to-terminal draughts and external notation references remain unverified.
+- **Release status:** All four native workflows have successfully produced bootable PyInstaller bundles in a smoke-only run. The four-platform frozen `--check` bundled-game/action/replay diagnostic also passed in native PR CI. Genuine frozen GUI click/export/restart acceptance is still pending. A living GUI process for five seconds does not prove frozen interaction correctness.
+- **Test ownership:** Dedicated Xvfb acceptance resides at `.github/tests/desktop_gui_acceptance.py` and is invoked explicitly by `desktop-gameplay.yml`. The default headless pytest matrix discovers `test_*.py` and does not require a display. The UI acceptance job must fail if Xvfb is missing.
+- **Configuration boundary:** Player-facing editing of rules and quests and executable variant modules have been removed from the working application. The remaining mutable settings concern presentation, stored in a separate OS-specific preferences JSON. Source-derived architecture and requirements must not restore deleted executable paths.
+- **Deferred surface:** Hosted account/auth, multiplayer, database, web and Tauri work belong to #422, not the v1.0.0 desktop release or its mandatory acceptance.
 
-- #271 is currently non-mergeable against #414 and must be synchronized **after** the local agent completes and the maintainer approves Phase 0.
-- The implemented current-state #414 engine uses a standard 8×8 chess default board, `Move.validate()` hardcodes 8×8, and `GameManager.save_log()` is a stub; the recovered GUI and completed game behavior belong to #271.
-- The last inspected Python 3.12 suite on #271 reported **424 passed, 46 skipped**, so actual Tkinter GUI acceptance remains unverified.
-- The source packaging workflow prepares native artifacts but requires the finished `src/` UI from #271 before real platform artifact smoke tests can pass.
+- **Notation support added:** Chess now declares PGN and English draughts declares PDN. `model.game.notation` reconstructs accepted events through the authoritative manager, generates canonical SAN or numeric PDN, verifies final snapshot equality and writes output atomically. The Tkinter Notation action and gameplay/GUI tests are tracked; independent special-action references remain outstanding. PDN GameType `21` and black-first numbering follow the published PDN 3.0 standard.

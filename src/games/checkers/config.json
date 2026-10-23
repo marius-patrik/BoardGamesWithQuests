@@ -1,0 +1,421 @@
+{
+  "schema_version": 2,
+  "name": "english_draughts",
+  "title": "English Draughts",
+  "default": false,
+  "playable": false,
+  "board": {
+    "rows": 8,
+    "columns": 8,
+    "starting_pieces": [
+      {
+        "piece": "man",
+        "color": "black",
+        "squares": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            2,
+            7
+          ]
+        ]
+      },
+      {
+        "piece": "man",
+        "color": "white",
+        "squares": [
+          [
+            5,
+            0
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            7
+          ],
+          [
+            7,
+            0
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            7,
+            4
+          ],
+          [
+            7,
+            6
+          ]
+        ]
+      }
+    ]
+  },
+  "pieces": {
+    "man": {
+      "symbols": {
+        "white": "⛀",
+        "black": "⛂"
+      },
+      "moves": [
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "attacks": [
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "jump": false,
+      "repeat": false,
+      "notation": "",
+      "color_relative": true,
+      "capture_policy": {
+        "flying": false,
+        "land_anywhere": false,
+        "max_nodes": 4096,
+        "deferred_removal": false
+      },
+      "promotion": {
+        "rank": "far",
+        "options": [
+          "king"
+        ],
+        "mode": "automatic",
+        "stop_capture": true
+      }
+    },
+    "king": {
+      "symbols": {
+        "white": "⛁",
+        "black": "⛃"
+      },
+      "moves": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "attacks": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "jump": false,
+      "repeat": false,
+      "notation": "",
+      "capture_policy": {
+        "flying": false,
+        "land_anywhere": false,
+        "max_nodes": 4096,
+        "deferred_removal": false
+      }
+    }
+  },
+  "clock": {
+    "initial_seconds": 600,
+    "increment_seconds": 0
+  },
+  "exports": [
+    "pdn"
+  ],
+  "appearance": {
+    "light_square": "#E8DABC",
+    "dark_square": "#70573F"
+  },
+  "rules": [
+    {
+      "id": "legal_geometry",
+      "hook": "permits_move",
+      "when": {
+        "op": "true"
+      },
+      "effects": [
+        {
+          "op": "permit",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "compulsory_capture",
+      "hook": "permits_move",
+      "when": {
+        "op": "all",
+        "args": [
+          {
+            "op": "compare",
+            "left": {
+              "query": "capture_count",
+              "params": {
+                "scope": "maximum"
+              }
+            },
+            "relation": "gt",
+            "right": 0
+          },
+          {
+            "op": "compare",
+            "left": {
+              "query": "capture_count",
+              "params": {
+                "scope": "candidate"
+              }
+            },
+            "relation": "eq",
+            "right": 0
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "deny",
+          "params": {
+            "reason": "A capture is compulsory"
+          }
+        }
+      ]
+    },
+    {
+      "id": "last_move_wins",
+      "hook": "outcome",
+      "when": {
+        "op": "compare",
+        "left": {
+          "query": "legal_move_count",
+          "params": {
+            "side": "active"
+          }
+        },
+        "relation": "eq",
+        "right": 0
+      },
+      "effects": [
+        {
+          "op": "propose_outcome",
+          "params": {
+            "kind": "win",
+            "cause": "no_legal_moves",
+            "winner": {
+              "query": "json_value",
+              "params": {
+                "value": {
+                  "query": "participant",
+                  "params": {
+                    "side": "opponent"
+                  }
+                },
+                "path": [
+                  "id"
+                ]
+              }
+            },
+            "priority": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "resignation",
+      "hook": "outcome",
+      "when": {
+        "op": "compare",
+        "relation": "eq",
+        "left": {
+          "ref": "event.type"
+        },
+        "right": "resign"
+      },
+      "effects": [
+        {
+          "op": "propose_outcome",
+          "params": {
+            "kind": "win",
+            "cause": "resignation",
+            "winner": {
+              "ref": "player.opponent.id"
+            },
+            "priority": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "timeout",
+      "hook": "outcome",
+      "when": {
+        "op": "compare",
+        "relation": "eq",
+        "left": {
+          "ref": "event.type"
+        },
+        "right": "timeout"
+      },
+      "effects": [
+        {
+          "op": "propose_outcome",
+          "params": {
+            "kind": "win",
+            "cause": "timeout",
+            "winner": {
+              "ref": "player.opponent.id"
+            },
+            "priority": 80
+          }
+        }
+      ]
+    }
+  ],
+  "quests": [
+    {
+      "id": "first-move",
+      "description": "Complete your first legal turn.",
+      "reward": 5,
+      "when": {
+        "op": "true"
+      }
+    },
+    {
+      "id": "first-capture",
+      "description": "Capture an opposing piece.",
+      "reward": 10,
+      "when": {
+        "op": "compare",
+        "relation": "gte",
+        "left": {
+          "query": "move_attribute",
+          "params": {
+            "name": "captures"
+          }
+        },
+        "right": 1
+      }
+    }
+  ],
+  "halfmove_reset": {
+    "op": "compare",
+    "left": {
+      "query": "json_value",
+      "params": {
+        "value": {
+          "query": "piece_at",
+          "params": {
+            "square": {
+              "ref": "move.start"
+            },
+            "phase": "before"
+          }
+        },
+        "path": [
+          "kind"
+        ]
+      }
+    },
+    "relation": "eq",
+    "right": "man"
+  },
+  "starting_side": -1
+}

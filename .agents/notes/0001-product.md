@@ -3,12 +3,20 @@ status: published
 ---
 # BoardGamesWithQuests
 
-BoardGamesWithQuests combines a Python board-game model, configurable chess and English-draughts definitions, controllers, clocks, and quest-related models. The repository's first delivery target is a self-contained Python/Tkinter desktop app; the current branch contains the engine and installed game metadata, **not** the completed graphical app. The existing [Plan](../PLAN.md) governs delivery.
+BoardGamesWithQuests provides a local Python/Tkinter chess and English-draughts application using immutable JSON game rules, two-player actions, clocks, quests, game history, settings and replayable JSON exports. Both shipped game definitions remain marked `playable: false` until full reference-game acceptance is verified.
 
-## Current capabilities
+## Desktop runtime
 
-The shared engine includes a chess board and piece classes, move validation, turn/game-state coordination, players/users, per-player countdowns, quest evaluation, move logging and notation/export helpers. The `chess` and `checkers` packages install 8×8 declarative JSON configurations with placements and piece vectors; both currently declare `playable: false`. The `chesswithquests --check` command reports registered games without opening a window.
+`src/chesswithquests/` owns startup, bundled-resource diagnostics and the installed application entry point. `src/model/game/` owns one revisioned, deterministic game engine and its local `DesktopSession`. `src/controller/` translates player clicks into legal actions. `src/view/` owns the Tkinter board, player and quest panels, game chooser and preferences.
 
-## Documentation and verification
+Game positions, movement, captures, conditions, effects, quests and outcomes come from strictly validated source-controlled JSON rulebooks. The executable Python rule packages, dynamic configuration loader and player-facing code editor are absent from the desktop application.
 
-Current requirements are generated into the [PRD](../PRD.md) from approved `requests/`; the [Architecture](../ARCHITECTURE.md) derives from accepted `decisions/`. Outcomes, actions and investigation live in [Goal](../GOAL.md), [Plan](../PLAN.md), [TODO](../TODO.md) and [Scratchpad](../SCRATCHPAD.md). GitHub Actions and DarkFactory own tests, documentation builds and guarded release infrastructure. Passing engine checks does not itself establish complete playable desktop functionality.
+## Local player experience
+
+The application renders detached authoritative state, supports mouse-driven moves, displays available destinations and handles configured capture/promotion choices. Accepted actions update clock/turn ownership, quests and history atomically. Settings change only board-square size and coordinate display through validated, persistent JSON preferences. The application atomically exports full replayable session JSON, and can reopen a saved game after duplicate-property, size and deterministic-replay validation. Chess PGN and English-draughts PDN notation are generated from the exact replayed action history and offered through a separate Notation button. Resignation and configured draw claims are authoritative actions, not local UI results.
+
+## Delivery
+
+`--check` validates installed game resources and performs a real opening action/idempotency/replay diagnostic without opening Tkinter. Source-driven documentation and diagrams and the dedicated real-GUI Xvfb acceptance workflow are tracked in `.github/`. Native Windows, macOS and Linux packaging is automated; final behavioral/native release acceptance and PrideVer publication remain pending.
+
+[Plan](../PLAN.md) · [TODO](../TODO.md) · [Scratchpad](../SCRATCHPAD.md).
