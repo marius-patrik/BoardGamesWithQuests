@@ -259,6 +259,14 @@ def test_unavailable_draw_claim_does_not_mutate_authoritative_game(window, monke
         "askinteger",
         lambda *a, **k: 1,
     )
+    # A rejected claim displays a blocking Tk messagebox in the real UI.
+    # Capture that player-facing error instead of deadlocking the Xvfb runner.
+    monkeypatch.setattr(
+        player_game_view.messagebox,
+        "showerror",
+        lambda *a, **k: messages.append(a),
+    )
     window.game_view.claim_draw()
+    assert messages, "rejected claim must display a player-visible explanation"
     assert window.window_controller.game_controller.session.snapshot() == before
     assert window.window_controller.game_controller.session.snapshot()["outcome"] is None
