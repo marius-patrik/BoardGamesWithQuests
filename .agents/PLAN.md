@@ -1,81 +1,47 @@
-# Plan — BoardGamesWithQuests v1.0.0
+# Plan — Python/Tkinter v1.0.0
 
-**Implementation authority:** [v1.0.0 issue #430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). **Integration:** existing bot-authored [PR #271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271) → protected `develop`. **Release:** independent maintainer approval of `develop → main`, then PrideVer. **Future v2:** [issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348) / deferred PR #422.
+**Canonical release epic:** [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). **Exact, scoped task contracts:** [#431–#445](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). **Bot-authored integration PR:** [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271) → `develop`. **Release:** independently approved `develop → main` → PrideVer v1.0.0. **Future multiplayer v2:** [issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348) / deferred PR #422.
 
-**Delivery condition:** Four real, independently verified, downloadable and playable desktop distributions; a merged PR alone is insufficient. Release publication stays disabled until approval and all release gates pass.
+The implementation baseline is the **existing playable Tkinter GUI** and the substantially recovered historical JSON game engine, now integrated as `src/model/game/manager.py` + `DesktopSession`. Complete and refine this code **in place**, never reconstruct it. The final product must be clean/readable (no dead, duplicate or historical compatibility paths), rulebook-correct, visually polished and actually downloadable/playable as frozen Windows/macOS/Linux apps. Expanded exports and server/database/web/Tauri are outside the v1 scope.
 
-## Baseline — preserve actual recovered work
+**Contract precedence:** issue #430 is the integrated product/release definition of done. Its child issues own exact methods, file scopes, dependencies and behavioral acceptance. This PLAN records phase sequencing/current work, not a second implementation spec. The actual committed code/accepted decisions remain the authority for shipped behavior; issue #348 holds desired v2 contracts only.
 
-- The complete historical revisioned JSON `GameManager` from #405 has been substantially recovered into `src/model/game/manager.py` with conditions, hooks, queries, captures, events, replay, clocks, quests and outcomes. `DesktopSession` and current Tkinter controllers/views use it. **Do not rebuild an engine or GUI.**
-- The original Tkinter board renderer and game-selection experience are retained; historical player/quest panels were adapted. Historical behavior must be audited for intentional differences versus regressions.
-- Both bundled JSON definitions are present but still declare `playable: false`. Preserve that until independent complete-game and GUI release acceptance.
-- Mandatory source-run Tkinter/Xvfb and native build jobs exist, but green native `--check`/startup is not proof of frozen GUI functionality.
-- At the inspected v1 branch HEAD `41e4db90f301f3269c4543af05478193004ab6ae`, the four native jobs and real Tkinter acceptance passed; Python gameplay/quality failed on a draughts **timeout vs no_legal_moves terminal precedence** regression. Refresh exact-head evidence before any work.
-- All historical #271 inline threads were reported resolved; final independent gameplay, architecture, usability and release review remains necessary.
+## Scope, critical dependencies and current queue
 
-## Task sequence and gates
+| Gate | Scoped issue | Work | Dependency / permitted overlap |
+|---|---|---|---|
+| A1 | [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431) | **Test and integrate isolated terminal patch** | Critical path; candidate `0377a4e` still **unverified** on pytest |
+| A2 | [#432](https://github.com/marius-patrik/BoardGamesWithQuests/issues/432) | Test/CI inventory and authoritative acceptance design | Read-only; parallel with A1/A3/A4/A5 |
+| A3 | [#433](https://github.com/marius-patrik/BoardGamesWithQuests/issues/433) | Whole-source code quality, dead/duplicate architecture audit | Read-only; parallel with A1/A2/A4/A5 |
+| A4 | [#434](https://github.com/marius-patrik/BoardGamesWithQuests/issues/434) | FIDE/WCDF gameplay correctness + historical feature parity audit | Read-only; parallel with A1/A2/A3/A5 |
+| A5 | [#435](https://github.com/marius-patrik/BoardGamesWithQuests/issues/435) | Live Tkinter UX audit and concrete polish specification | Read-only; real display evidence required or marked blocked |
+| B1 | [#436](https://github.com/marius-patrik/BoardGamesWithQuests/issues/436) | Chess reference games and rulebook completion | After #431/#434; only one shared engine writer |
+| B2 | [#437](https://github.com/marius-patrik/BoardGamesWithQuests/issues/437) | English Draughts reference games and rulebook completion | After #431/#434; serialize shared changes with B1 |
+| B3 | [#438](https://github.com/marius-patrik/BoardGamesWithQuests/issues/438) | Clocks, quests, terminal/session lifecycle | After stable game rulebooks and audits |
+| B4 | [#439](https://github.com/marius-patrik/BoardGamesWithQuests/issues/439) | Local settings, saved game, restart and security hardening | After #431/#432; coordinate any view changes with C2 |
+| C1 | [#440](https://github.com/marius-patrik/BoardGamesWithQuests/issues/440) | Minimal evidence-backed production-code cleanup | After #433 and stabilized shared engine; no large blind rewrite |
+| C2 | [#441](https://github.com/marius-patrik/BoardGamesWithQuests/issues/441) | **Polish the existing Tkinter GUI**, screenshot/interaction-verified | After #435; stable local-session contract; nonoverlap with C1 |
+| C3 | [#442](https://github.com/marius-patrik/BoardGamesWithQuests/issues/442) | Replace weak tests with supported behavioral suites | After #432, coordinate with game/UI writers; no premature deletion |
+| D1 | [#443](https://github.com/marius-patrik/BoardGamesWithQuests/issues/443) | Actual four-platform **extracted frozen executable** acceptance | After final GUI/QA/persistence; source-run startup alone not enough |
+| D2 | [#444](https://github.com/marius-patrik/BoardGamesWithQuests/issues/444) | Independent exact-head code/UX/security/docs/CI/release audit | After integrated A–D1; blocked gaps become precise fix tasks |
+| R | [#445](https://github.com/marius-patrik/BoardGamesWithQuests/issues/445) | Maintainer-approved integration, protected promotion, release publication and verification | Only after #444 PASS + explicit approval at each gate |
 
-### A — Stabilize gameplay correctness (first)
+## Current blocking correction
 
-1. Reproduce and fix the terminal-precedence regression in the existing generic JSON engine/rulebook; verify explicit expiry, no legal moves, resignation, draw claims, retries, snapshots and atomic rollback. Never weaken the failing expectation to get green CI.
-2. Independently verify standard Chess and WCDF English Draughts complete opening-to-terminal games, reference positions/perft, legal actions, special moves, draws and captures/crowning; no testing only partial recorded games called “complete.”
-3. Verify clocks/increments and autonomous timeout, quests/one-time rewards, error paths, variable board shape, execution-budget failures, corrupt input, replay and secure local preferences.
-4. Mark each definition `playable: true` only after real supported game and UI gates pass.
+Agent Dispatch 01 committed `fix/430-terminal-outcome-correctness` at `0377a4ee9ebf5a14e1991a88203841e82f89abc0` against #271 baseline `daf90e8e1c1568a3f9718c2bd908c52b51622234`. Candidate changes English-draughts no-legal-moves outcome to match ordinary move events, binds timeout actor to expired active participant, and adds terminal regressions. **No pytest ran on the candidate.** The only reported successful check was formatting. Do not merge candidate into #271 or mark #431 complete until the real failing test, new regressions and supported Python matrix execute and pass. If CI execution is unavailable, preserve branch and report BLOCKED. Do not substitute source inspection or format for runtime evidence.
 
-**Exit:** One production engine, two independently verified rulesets and fully green affected game behavior; no known correctness regressions.
+## Test migration and final evidence
 
-### B — Deep code-quality and historical-parity review, then focused cleanup
+- [#432] inventories **every** existing `.github/tests/` case as retain/adapt/replace/delete and maps meaningful behavior to independent rulebook/perft/full-game, public DesktopSession, live Tkinter/Xvfb, restart/hostile input and **native frozen GUI** acceptance.
+- [#442] systematically replaces non-proving private implementation tests as equivalent stronger boundary coverage lands, rather than deleting all tests or stacking redundant suites. Keep narrowly justified pure-math/validator diagnostics supplementary.
+- Required display/provider/native tests are **FAIL/BLOCKED**, not secretly skipped. Only actual executed tests on the exact target SHA and host can count as passing. Run targeted tests while implementing; run Python 3.10–3.13 and the full real-GUI/native gates at final release.
+- Four target platforms are Windows x64, macOS ARM64, macOS x64 and Linux x64. Verify actual extracted frozen apps, game interaction, preferences, restart/shutdown, resources, hashes, PrideVer metadata and publishability. Do not mistake `--check` or a five-second process survival for a playable application.
 
-1. Read every production module under `src/` and the two JSON definitions. Compare the original playable Tkinter tree `43a3d01fab45a305d02ef26a4f86f0e7cd9a0d96` and recovered JSON tree `6002ac787664efceb0161d2bcbd3891927b69b34` against the actual PR #271 head.
-2. Inventory meaningful dead code, duplicate algorithms, unused aliases/compatibility, conflicting representations, misnamed responsibilities, unnecessary conversions, non-obvious complexity, unsafe filesystem paths and lost UI/game capabilities. Identify which historical features intentionally retired and which regressed. Check quest variety and default Fischer clocks explicitly.
-3. Correct only validated problems; preserve working domain and GUI architecture, remove retired paths without legacy shims. A large manager or JSON rulebook is not itself a defect—split only on a real cohesive boundary that improves comprehension and verification.
-4. Review performance where observed (legal generation, query recursion, snapshot copying, GUI refresh); keep deterministic bounded execution and a single authoritative state owner.
-5. Keep source-governed decisions/docs and generated diagrams accurate in the **same** implementation changes. No proposed v2 contracts in tracked files.
+## Orchestration policy
 
-**Exit:** Cohesive, maintainable source, zero unjustified parallel implementations, no unused historical production paths, no demonstrated behavior regressions.
+- Issue-owned scoped agents: one objective, exact base SHA, owned paths, pass criteria and structured handoff. Separate read-only audits from writers, isolate write branches/worktrees and never overwrite a concurrently changing #271 head. Serialized ownership for game engine and JSON.
+- The existing DarkFactory workflow is **not** confirmed to accept task-specific ad hoc dispatch; [DarkFactory #2694](https://github.com/marius-patrik/DarkFactory/issues/2694) requests that feature. Filing issues is not dispatching agents or running tests.
+- Orchestrator independently validates each candidate, reconciles integration and updates this PLAN/TODO as status changes. No external reviewer can self-approve, merge PR #271, change protected `main`, enable publication or publish a release.
+- Current-state docs, diagram sources/outputs, test paths and active rules must remain true to *committed code in the same PR*; prospective v2 content stays in issue #348.
 
-### C — Polish the existing Tkinter UX (not a rewrite)
-
-1. Capture actual before-state screenshots and run existing UI to identify concrete visual and interaction defects.
-2. Improve ttk visual system, text hierarchy, spacing, board/piece/target rendering, window resize/DPI behavior, player/quest/history panels, clock/turn/outcome feedback, discoverability, input dialogs, keyboard and accessible focus, game reset/switch and clean shutdown.
-3. Keep `DesktopSession` as sole state authority. Preserve the board renderer and existing event paths unless specific defects justify changes.
-4. Visually inspect the implemented UI after each substantial change, including native differences; confirm no clipping, stale widgets, broken actions or callbacks.
-
-**Exit:** Professional, responsive, intuitive and verified desktop UI on supported platforms.
-
-### D — **Replace** weak tests with a release-contract strategy
-
-1. **Inventory each current test:** map it to an observable player/consumer or deployment contract and independently sourced expected result, or classify `retain/adapt/replace/delete`. Most internal-only tests should be retired **after** the behavior they purport to cover has a genuine boundary test.
-2. Build a compact acceptance matrix: (a) real DesktopSession actor-visible legal/illegal/game results and replay, (b) independent rulebook/complete-game/perft references, (c) actual Tkinter mouse/keyboard/dialog/clock/reset UI paths, (d) hostile storage/resource/atomic recovery and failure boundaries, (e) four native **extracted frozen executable** end-to-end scenarios, (f) release/provenance policy.
-3. Do not test the implementation as its own oracle: private class/field checks, method-call/mocked-action counts, toy objects bypassing production rules, syntax/import-only tests and deliberate “unavailable” results are not product acceptance. Deterministic fake time *only at a supported host boundary* is acceptable to reproduce clocks; never replace engine/view with mocks.
-4. Keep only indispensable supplemental mathematical/validator tests, explicitly labeled diagnostic and never substituted for boundary acceptance. Prefer comprehensive nonduplicated user journeys. Validate both success and hostile/negative paths.
-5. Mandatory real GUI tests and packaged-app acceptance fail closed if unavailable; no essential skip interpreted as green. Iterate targeted checks, then run all release gates on the **exact** reviewed SHA. All tests/fixtures/harness code reside in `.github/tests/`.
-
-**Exit:** Small, coherent, behavior-first suites proving the actual playable application; old ineffective tests removed with no loss of meaningful coverage.
-
-### E — Four-platform production package validation
-
-1. Preserve working existing PyInstaller/native CI and PrideVer safeguards; extend real frozen tests beyond `--check`/process survival. Extract each archive on its actual Windows x64, macOS ARM64/x64 or Linux x64 runner; launch and interact with gameplay, use both definitions, settings, restart, shutdown, and confirm bundled JSON.
-2. Verify signed/intended provenance and version metadata, archive layout, matching SHA256 sidecars and publication fail-closed on missing/corrupt assets. If signing/installability requires external credentials, explicitly disclose blocked status; never fake evidence.
-3. Refresh final exact-head Python 3.10–3.13, required Xvfb, native four-platform checks and independently inspect test evidence plus UI visuals.
-
-**Exit:** Four confirmed usable downloadable platform packages.
-
-### F — Review, merge and publish v1.0.0
-
-1. Complete cross-component review of code quality, game correctness, UX, security, package acceptance and current-state docs. No review thread resolved only due to deleted old lines.
-2. Obtain maintainer approval of the **final** #271 SHA and merge into `develop` only on explicit authorization.
-3. Separately review and approve same-repo `develop → main` release promotion; enable gated publication only at the authorized release boundary. Keep PrideVer sole version authority.
-4. Publish and independently verify a public v1.0.0 GitHub release with four installable/playable platform assets, matching hashes/tag/source commit and accurate download instructions.
-
-**Exit:** Released and usable v1.0.0, not merely a passing draft PR.
-
-## Orchestrated execution / work ownership
-
-- One canonical v1 issue #430 and one active desktop PR #271. Read-only architecture/test inventory and read-only UX audit can overlap with the engine bugfix.
-- Scope each agent by task, exact pinned starting SHA, file ownership, acceptance, allowed writes and a structured evidence handoff; concurrency only for disjoint writes or isolated worktrees. Keep engine+JSON under one writer; independent QA/UX/packaging work cannot silently overlap a moving branch.
-- DF task-specific dispatch is requested in [DarkFactory #2694](https://github.com/marius-patrik/DarkFactory/issues/2694), **not yet implemented by opening the issue**. Use currently supported orchestration only; do not claim scoped agents were launched.
-- Never assign the entire migration/release to one unbounded agent. The orchestrator integrates verified handoffs, rechecks source/CI and keeps this plan and TODO current. No autonomous merge or publication.
-- After v1 public release, #422 owns the v2 work described in issue #348; do not introduce it in #271.
-
-**Scope:** Existing exports may continue operating, but no new export format or historical export-parity project is authorized for v1.
+**Completion:** publicly published v1.0.0, four verified downloadable and playable packages, exact correct source/tag/hash and required independent maintainer approvals. A merged #271 alone does not finish the project.
