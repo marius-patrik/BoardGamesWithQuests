@@ -11,23 +11,29 @@ from model.game.session import DesktopSession
 def perform(session, source, target):
     state = session.snapshot()
     moves = [
-        move for move in session.legal_actions()
-        if move["start"] == list(source) and move["hops"][-1] == list(target)
+        move
+        for move in session.legal_actions()
+        if move["start"] == list(source)
+        and move["hops"][-1] == list(target)
         and move["promotion"] is None
     ]
     assert len(moves) == 1
     return session.submit(
         state["participants"][str(state["active_side"])],
-        state["revision"], {"type": "move", "move": moves[0]},
+        state["revision"],
+        {"type": "move", "move": moves[0]},
     )["state"]
 
 
 def test_chess_pgn_scholars_mate_has_san_checkmate_result_and_roster(tmp_path):
     session = DesktopSession("chess")
     for src, dst in [
-        ((6, 4), (4, 4)), ((1, 4), (3, 4)),
-        ((7, 3), (3, 7)), ((0, 1), (2, 2)),
-        ((7, 5), (4, 2)), ((0, 6), (2, 5)),
+        ((6, 4), (4, 4)),
+        ((1, 4), (3, 4)),
+        ((7, 3), (3, 7)),
+        ((0, 1), (2, 2)),
+        ((7, 5), (4, 2)),
+        ((0, 6), (2, 5)),
         ((3, 7), (1, 5)),
     ]:
         perform(session, src, dst)
