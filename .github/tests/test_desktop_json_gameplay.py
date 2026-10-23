@@ -311,9 +311,7 @@ def test_draughts_timeout_with_no_geometric_move_is_not_no_legal_moves(monkeypat
     )
     before = session.snapshot()
     assert session.legal_actions() == []
-    monkeypatch.setattr(
-        time, "time_ns", lambda: (before["started_at_ms"] + 1001) * 1_000_000
-    )
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 1001) * 1_000_000)
     assert session.poll_timeout() is True
     terminal = session.snapshot()
     assert terminal["outcome"]["cause"] == "timeout"
@@ -323,22 +321,18 @@ def test_draughts_timeout_with_no_geometric_move_is_not_no_legal_moves(monkeypat
 
 
 def test_draughts_resignation_with_no_geometric_move_is_not_no_legal_moves(monkeypatch):
-    session = _positioned_draughts_session(
-        monkeypatch, [("man", -1, (7, 0)), ("man", 1, (5, 2))]
-    )
+    session = _positioned_draughts_session(monkeypatch, [("man", -1, (7, 0)), ("man", 1, (5, 2))])
     assert session.legal_actions() == []
-    terminal = session.submit(
-        "black", 0, {"type": "resign"}, action_id="trapped-resignation"
-    )["state"]
+    terminal = session.submit("black", 0, {"type": "resign"}, action_id="trapped-resignation")[
+        "state"
+    ]
     assert terminal["outcome"]["cause"] == "resignation"
     assert terminal["outcome"]["winner"] == "white"
     assert DesktopSession.recover(terminal).snapshot() == terminal
 
 
 def test_draughts_final_capture_produces_no_legal_moves_only_after_move(monkeypatch):
-    session = _positioned_draughts_session(
-        monkeypatch, [("man", -1, (2, 1)), ("man", 1, (3, 2))]
-    )
+    session = _positioned_draughts_session(monkeypatch, [("man", -1, (2, 1)), ("man", 1, (3, 2))])
     terminal = perform(session, (2, 1), (4, 3))["state"]
     assert terminal["outcome"]["cause"] == "no_legal_moves"
     assert terminal["outcome"]["winner"] == "black"
@@ -356,13 +350,9 @@ def test_late_move_rejected_without_consuming_clock_or_mutating_game(monkeypatch
     session = DesktopSession("checkers")
     before = session.snapshot()
     legal_move = session.legal_actions()[0]
-    monkeypatch.setattr(
-        time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000
-    )
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000)
     with pytest.raises(TransitionError):
-        session.submit(
-            "black", 0, {"type": "move", "move": legal_move}, action_id="late-move"
-        )
+        session.submit("black", 0, {"type": "move", "move": legal_move}, action_id="late-move")
     assert session.snapshot() == before
     assert session.poll_timeout() is True
     assert session.snapshot()["outcome"]["cause"] == "timeout"
@@ -374,9 +364,7 @@ def test_terminal_timeout_retry_and_conflicting_action_identifier(monkeypatch):
     session = DesktopSession("checkers")
     before = session.snapshot()
     assert session.legal_actions()
-    monkeypatch.setattr(
-        time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000
-    )
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000)
     assert session.poll_timeout() is True
     after = session.snapshot()
     accepted = after["events"][-1]
@@ -402,9 +390,7 @@ def test_chess_timeout_uses_configured_win_without_no_legal_moves(monkeypatch):
     session = DesktopSession("chess")
     before = session.snapshot()
     assert len(session.legal_actions()) == 20
-    monkeypatch.setattr(
-        time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000
-    )
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000)
     assert session.poll_timeout() is True
     after = session.snapshot()
     assert after["outcome"]["kind"] == "win"
@@ -431,17 +417,18 @@ def test_chess_draw_claim_requires_repetition_and_replays_when_eligible():
             perform(session, source, target)
     repeated = session.snapshot()
     assert repeated["outcome"] is None
-    result = session.submit(
-        "white", repeated["revision"], claim, action_id="eligible-threefold"
-    )
+    result = session.submit("white", repeated["revision"], claim, action_id="eligible-threefold")
     terminal = result["state"]
     assert terminal["outcome"]["kind"] == "draw"
     assert terminal["outcome"]["cause"] == "threefold"
     assert terminal["outcome"]["winner"] is None
     assert terminal["board"] == repeated["board"]
-    assert session.submit(
-        "white", repeated["revision"], claim, action_id="eligible-threefold"
-    )["event"] == result["event"]
+    assert (
+        session.submit("white", repeated["revision"], claim, action_id="eligible-threefold")[
+            "event"
+        ]
+        == result["event"]
+    )
     assert DesktopSession.recover(terminal).snapshot() == terminal
 
 
@@ -451,8 +438,10 @@ def test_failed_terminal_rule_evaluation_rolls_back_entire_session(monkeypatch, 
     from model.game.session import time
 
     timeout_condition = {
-        "op": "compare", "relation": "eq",
-        "left": {"ref": "event.type"}, "right": "timeout",
+        "op": "compare",
+        "relation": "eq",
+        "left": {"ref": "event.type"},
+        "right": "timeout",
     }
     if failure == "equal-priority-conflict":
         effect = {
@@ -470,7 +459,8 @@ def test_failed_terminal_rule_evaluation_rolls_back_entire_session(monkeypatch, 
             "args": [
                 timeout_condition,
                 {
-                    "op": "compare", "relation": "eq",
+                    "op": "compare",
+                    "relation": "eq",
                     "left": {
                         "query": "integer",
                         "params": {"operation": "floor_divide", "left": 1, "right": 0},
@@ -492,9 +482,7 @@ def test_failed_terminal_rule_evaluation_rolls_back_entire_session(monkeypatch, 
         extra_rules=(supplemental,),
     )
     before = session.snapshot()
-    monkeypatch.setattr(
-        time, "time_ns", lambda: (before["started_at_ms"] + 1001) * 1_000_000
-    )
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 1001) * 1_000_000)
     with pytest.raises(QueryResolutionError):
         session.poll_timeout()
     assert session.snapshot() == before
