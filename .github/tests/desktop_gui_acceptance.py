@@ -209,3 +209,21 @@ def test_bad_saved_game_preserves_live_window_and_reports_error(window, tmp_path
     assert window.window_controller.game_controller.session.snapshot() == before
     with pytest.raises(SessionFileError):
         load_session(bad)
+
+
+
+def test_notation_button_exports_actual_user_game_as_pgn(window, tmp_path, monkeypatch):
+    from view import player_game_view
+    click_canvas(window, 6, 4)
+    click_canvas(window, 4, 4)
+    target = tmp_path / "real-game.pgn"
+    monkeypatch.setattr(
+        player_game_view.filedialog, "asksaveasfilename",
+        lambda **kwargs: str(target),
+    )
+    window.game_view.export_notation()
+    assert target.exists()
+    contents = target.read_text("utf-8")
+    assert '[Result "*"]' in contents
+    assert "1. e4 *" in contents
+    assert window.window_controller.game_controller.session.snapshot()["revision"] == 1
