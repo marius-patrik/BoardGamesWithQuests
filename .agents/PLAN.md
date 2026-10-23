@@ -26,9 +26,19 @@ The implementation baseline is the **existing playable Tkinter GUI** and the sub
 | D2 | [#444](https://github.com/marius-patrik/BoardGamesWithQuests/issues/444) | Independent exact-head code/UX/security/docs/CI/release audit | After integrated A–D1; blocked gaps become precise fix tasks |
 | R | [#445](https://github.com/marius-patrik/BoardGamesWithQuests/issues/445) | Maintainer-approved integration, protected promotion, release publication and verification | Only after #444 PASS + explicit approval at each gate |
 
+## Audit intake — 2026-10-23 (reports, not implemented work)
+
+- Read-only **#432 test audit** received: 154 named Python tests/23 modules; retain useful real-session, GUI, security, governance and docs evidence, replace weak internal/self-oracle tests through [#450](https://github.com/marius-patrik/BoardGamesWithQuests/issues/450) under #442 without mass deleting first.
+- Read-only **#433 code-quality audit** received: 26 findings, including verified shadowed `ConditionEvaluator._equal` that bypasses recursive work charging. Address targeted [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) only after exclusive evaluator ownership; broader dead-code, duplication, snapshot and query optimizations remain measured/serialized under #440.
+- Read-only **#434 gameplay audit** received: investigate WCDF capture-removal policy, repetition and progress claims via [#449](https://github.com/marius-patrik/BoardGamesWithQuests/issues/449); #436/#438 own complete Chess and generic draw/clock/quest semantics. Keep source-backed, full-rulebook acceptance and immutable configurations.
+- Read-only **#435 Linux frozen GUI audit summary** received: 840×640 board/toolbar clipping, no keyboard board focus, weak outcome/pieces/capture choices/quest/history. Begin [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) responsive layout then [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) keyboard/focus sequentially; full 26-finding Markdown/ZIP/13 screenshot bytes **not yet available** to orchestrator, so further UX decomposition awaits evidence.
+- #431 terminal patch has already passed 1 original regression + 128 affected tests on each Python 3.10–3.13, plus 11 real Tkinter/Xvfb tests, in isolated [CI run 39936337058](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/39936337058). It remains **not integrated** into #271; do not add verification-only workflow to product branch. Exact integrated-head tests still needed.
+
+No audits changed production source or completed v1 acceptance. Agents must not infer that issue creation itself dispatched any work.
+
 ## Current blocking correction
 
-Agent Dispatch 01 committed `fix/430-terminal-outcome-correctness` at `0377a4ee9ebf5a14e1991a88203841e82f89abc0` against #271 baseline `daf90e8e1c1568a3f9718c2bd908c52b51622234`. Candidate changes English-draughts no-legal-moves outcome to match ordinary move events, binds timeout actor to expired active participant, and adds terminal regressions. **No pytest ran on the candidate.** The only reported successful check was formatting. Do not merge candidate into #271 or mark #431 complete until the real failing test, new regressions and supported Python matrix execute and pass. If CI execution is unavailable, preserve branch and report BLOCKED. Do not substitute source inspection or format for runtime evidence.
+Agent Dispatch 01 committed `fix/430-terminal-outcome-correctness` at `0377a4ee9ebf5a14e1991a88203841e82f89abc0` against #271 baseline `daf90e8e1c1568a3f9718c2bd908c52b51622234`. Candidate changes English-draughts no-legal-moves outcome to match ordinary move events, binds timeout actor to expired active participant, and adds terminal regressions. **No pytest ran on the candidate.** The only reported successful check was formatting. Candidate's required terminal and affected game tests have since executed and passed in isolated verification-only CI; integration into #271 and exact integrated-head CI remain pending. Do not substitute source inspection or format for runtime evidence.
 
 ## Test migration and final evidence
 

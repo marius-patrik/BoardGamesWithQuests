@@ -4,11 +4,20 @@
 
 ## Ready now — one fix and independent audits
 
-- [ ] [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431): **Verify agent's isolated terminal patch** `0377a4e` with real pytest/Python 3.10–3.13 before integrating into #271. Tests **not executed** yet; remain blocked until evidence.
+- [ ] [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431): **Verify agent's isolated terminal patch** `0377a4e` with real pytest/Python 3.10–3.13 before integrating into #271. The isolated candidate tests passed; integration/exact-head tests pending.
 - [ ] [#432](https://github.com/marius-patrik/BoardGamesWithQuests/issues/432): Audit every current test, classify retain/adapt/replace/delete, design genuine user-facing release acceptance.
 - [ ] [#433](https://github.com/marius-patrik/BoardGamesWithQuests/issues/433): Audit each production file for dead/duplicate/transitional code, readability, architectural ownership and correctness risks.
 - [ ] [#434](https://github.com/marius-patrik/BoardGamesWithQuests/issues/434): Audit independent Chess/WCDF rulebook cases and historical GUI/gameplay/quest/clock parity; no new export formats.
 - [ ] [#435](https://github.com/marius-patrik/BoardGamesWithQuests/issues/435): Inspect running Tkinter, capture visual evidence and specify exact UX polish corrections (or report environment blocker).
+
+## Received audit evidence and newly scoped corrections (2026-10-23)
+
+- [x] **Audit delivered** #432 — all-test inventory and replacement contract; **implementation pending** [#450](https://github.com/marius-patrik/BoardGamesWithQuests/issues/450), then parent #442.
+- [x] **Audit delivered** #433 — whole-codebase 26-finding report; **verified urgent correction pending** [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) (unmetered shadowed equality), broader #440.
+- [x] **Audit delivered** #434 — FIDE/WCDF parity; **gameplay fixes pending** [#449](https://github.com/marius-patrik/BoardGamesWithQuests/issues/449) and parent #436–#438.
+- [ ] **Audit summary received, full files missing** #435 — agent reports 26 UX findings/13 screenshots; retrieve and inspect ZIP/Markdown/image files. Known fixes pending [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) adaptive sizing, then [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) keyboard/focus; remainder #441 after full report.
+- [x] **Candidate executable verification** #431 — original regression + 128 affected tests pass on each Python 3.10–3.13, 11 Xvfb pass, [Actions run 39936337058](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/39936337058).
+- [ ] **Still outstanding:** integrate verified #431 candidate `0377a4e` into #271 only with authorization and exact-head CI; verification-only workflow stays isolated.
 
 ## Dependency gated implementation
 
