@@ -228,3 +228,35 @@ def test_notation_button_exports_actual_user_game_as_pgn(window, tmp_path, monke
     assert '[Result "*"]' in contents
     assert "1. e4 *" in contents
     assert window.window_controller.game_controller.session.snapshot()["revision"] == 1
+
+
+
+def test_resign_from_real_ui_commits_terminal_result_and_blocks_further_moves(
+    window, monkeypatch
+):
+    from view import player_game_view
+    monkeypatch.setattr(player_game_view.messagebox, "askyesno", lambda *a, **k: True)
+    window.game_view.resign_game()
+    state = window.window_controller.game_controller.session.snapshot()
+    assert state["outcome"]["kind"] == "win"
+    assert state["outcome"]["winner"] == "black"
+    assert state["revision"] == 1
+    click_canvas(window, 6, 4)
+    assert window.window_controller.game_controller.session.snapshot() == state
+    assert DesktopSession.recover(state).snapshot() == state
+
+
+def test_unavailable_draw_claim_does_not_mutate_authoritative_game(window, monkeypatch):
+    from view import player_game_view
+    before = window.window_controller.game_controller.session.snapshot()
+    messages = []
+    monkeypatch.setattr(
+        player_game_view.messagebox, "showinfo",
+        lambda *a, **k: messages.append(a),
+    )
+    monkeypatch.setattr(
+        player_game_view.simpledialog, "askinteger", lambda *a, **k: 1,
+    )
+    window.game_view.claim_draw()
+    assert window.window_controller.game_controller.session.snapshot() == before
+    assert window.window_controller.game_controller.session.snapshot()["outcome"] is None

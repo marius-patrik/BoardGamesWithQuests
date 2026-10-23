@@ -63,6 +63,12 @@ class PlayerGameView(ttk.Frame):
         )
         ttk.Button(heading, text="Export", command=self.export_game).pack(side="right", padx=(0, 6))
         ttk.Button(heading, text="Quit", command=self._quit).pack(side="right", padx=(0, 6))
+        ttk.Button(heading, text="Resign", command=self.resign_game).pack(
+            side="right", padx=(0, 6)
+        )
+        ttk.Button(heading, text="Claim draw", command=self.claim_draw).pack(
+            side="right", padx=(0, 6)
+        )
 
         self.top_player = PlayerView(self, -1)
         self.top_player.pack(fill="x")
@@ -194,6 +200,63 @@ class PlayerGameView(ttk.Frame):
         self.window_controller.game_controller.session = restored
         self.reload()
         self.status.set(f"Restored {restored.game}.")
+
+    def resign_game(self) -> None:
+        """End the active player's game using the authoritative result rules."""
+        state = self.session.snapshot()
+        if state["outcome"] is not None:
+            return
+        side = state["active_side"]
+        who = "White" if side == 1 else "Black"
+        if not messagebox.askyesno(
+            "Resign", f"{who}: resign this game?", parent=self
+        ):
+            return
+        actor = state["participants"][str(side)]
+        try:
+            self.session.submit(actor, state["revision"], {"type": "resign"})
+        except (ValueError, RuntimeError) as error:
+            messagebox.showerror("Resign", str(error), parent=self)
+            return
+        self.window_controller.game_controller.reset_selection()
+        self.refresh()
+
+    def claim_draw(self) -> None:
+        """Try only named game-owned claim conditions; do not grant local draws."""
+        state = self.session.snapshot()
+        if state["outcome"] is not None:
+            return
+        named = [
+            rule["id"] for rule in state["config"]["rules"]
+            if rule["hook"] == "outcome" and (
+                "claim" in rule["id"] or "threefold" in rule["id"]
+                or "fifty" in rule["id"]
+            )
+        ]
+        if not named:
+            messagebox.showinfo(
+                "Claim draw", "No draw claims are defined for this game.", parent=self
+            )
+            return
+        options = "\\n".join(f"{i + 1}. {name}" for i, name in enumerate(named))
+        selected = simpledialog.askinteger(
+            "Claim draw", "Select a configured draw claim:\\n" + options,
+            parent=self, minvalue=1, maxvalue=len(named),
+        )
+        if selected is None:
+            return
+        actor = state["participants"][str(state["active_side"])]
+        try:
+            self.session.submit(actor, state["revision"], {
+                "type": "claim_draw",
+                "claim": named[selected - 1],
+                "intended_move": None,
+            })
+        except (ValueError, RuntimeError) as error:
+            messagebox.showerror("Claim draw", str(error), parent=self)
+            return
+        self.window_controller.game_controller.reset_selection()
+        self.refresh()
 
     def export_notation(self) -> None:
         extension = ".pgn" if self.session.game == "chess" else ".pdn"
