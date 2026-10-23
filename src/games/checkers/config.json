@@ -283,15 +283,28 @@
       "id": "last_move_wins",
       "hook": "outcome",
       "when": {
-        "op": "compare",
-        "left": {
-          "query": "legal_move_count",
-          "params": {
-            "side": "active"
+        "op": "all",
+        "args": [
+          {
+            "op": "compare",
+            "relation": "eq",
+            "left": {
+              "ref": "event.type"
+            },
+            "right": "move"
+          },
+          {
+            "op": "compare",
+            "left": {
+              "query": "legal_move_count",
+              "params": {
+                "side": "active"
+              }
+            },
+            "relation": "eq",
+            "right": 0
           }
-        },
-        "relation": "eq",
-        "right": 0
+        ]
       },
       "effects": [
         {
