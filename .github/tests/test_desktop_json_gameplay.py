@@ -494,13 +494,9 @@ def test_timeout_rejects_nonactive_actor_without_awarding_the_wrong_winner(monke
 
     session = DesktopSession("checkers")
     before = session.snapshot()
-    monkeypatch.setattr(
-        time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000
-    )
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000)
     with pytest.raises(TransitionError):
-        session.submit(
-            "white", 0, {"type": "timeout"}, action_id="opponent-reports-flag"
-        )
+        session.submit("white", 0, {"type": "timeout"}, action_id="opponent-reports-flag")
     assert session.snapshot() == before
     assert session.poll_timeout() is True
     after = session.snapshot()
