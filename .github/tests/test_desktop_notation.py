@@ -81,7 +81,6 @@ def test_notation_requires_verified_snapshot_and_rejects_symlink(tmp_path):
         save_notation(session, tmp_path / "wrong.pdn")
 
 
-
 def test_pgn_black_checkmate_and_finished_game_result():
     session = DesktopSession("chess")
     for src, dst in [
