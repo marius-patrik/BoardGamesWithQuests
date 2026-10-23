@@ -1598,6 +1598,24 @@ flowchart LR
   n8126908205aa5ea53 --> n5f26a0fe64fdc167b
   n13ffe91b3fc8c3237["function_definition to_json"]
   n8126908205aa5ea53 --> n13ffe91b3fc8c3237
+  n6d0c69c2595965243["notation.py"]
+  n6aea57a87a15be9fd --> n6d0c69c2595965243
+  n93abfd35bdad6d57d["class_definition NotationError"]
+  n6d0c69c2595965243 --> n93abfd35bdad6d57d
+  n0b8fc33bd60719424["function_definition _escape"]
+  n6d0c69c2595965243 --> n0b8fc33bd60719424
+  n9c583dfb07fae22c8["function_definition _result"]
+  n6d0c69c2595965243 --> n9c583dfb07fae22c8
+  naa35f39c3f4bef954["function_definition _algebraic"]
+  n6d0c69c2595965243 --> naa35f39c3f4bef954
+  n46ff56ce1040c0748["function_definition _pdn_square"]
+  n6d0c69c2595965243 --> n46ff56ce1040c0748
+  n50abe3ad0319a61fc["function_definition _chess_token"]
+  n6d0c69c2595965243 --> n50abe3ad0319a61fc
+  n3787bf10703aeafc2["function_definition render_notation"]
+  n6d0c69c2595965243 --> n3787bf10703aeafc2
+  n11fc78fe9486d95d2["function_definition save_notation"]
+  n6d0c69c2595965243 --> n11fc78fe9486d95d2
   ndd830c299e2bf21dc["outcomes.py"]
   n6aea57a87a15be9fd --> ndd830c299e2bf21dc
   n2649aef6f2ad2f2f6["decorated_definition"]
@@ -1878,18 +1896,20 @@ flowchart LR
   n8a992638c42fe6679 --> n5fdceb72018feb16a
   na0c730b8f503b9b47["function_definition open_game"]
   n8a992638c42fe6679 --> na0c730b8f503b9b47
-  n2a9ea6567a33b47fa["function_definition export_game"]
+  n2a9ea6567a33b47fa["function_definition export_notation"]
   n8a992638c42fe6679 --> n2a9ea6567a33b47fa
-  n91bf7e2fa40db9cd9["function_definition _quit"]
+  n91bf7e2fa40db9cd9["function_definition export_game"]
   n8a992638c42fe6679 --> n91bf7e2fa40db9cd9
-  n439e230728c690a5a["function_definition stop_auto_refresh"]
+  n439e230728c690a5a["function_definition _quit"]
   n8a992638c42fe6679 --> n439e230728c690a5a
-  n0eaff7c692a83a2b2["function_definition start_auto_refresh"]
+  n0eaff7c692a83a2b2["function_definition stop_auto_refresh"]
   n8a992638c42fe6679 --> n0eaff7c692a83a2b2
-  n235fe4e42ba9701f9["function_definition _auto_refresh"]
+  n235fe4e42ba9701f9["function_definition start_auto_refresh"]
   n8a992638c42fe6679 --> n235fe4e42ba9701f9
-  n5d8cdd2cfcac03f9e["function_definition destroy"]
+  n5d8cdd2cfcac03f9e["function_definition _auto_refresh"]
   n8a992638c42fe6679 --> n5d8cdd2cfcac03f9e
+  n7436ae29a52b70a72["function_definition destroy"]
+  n8a992638c42fe6679 --> n7436ae29a52b70a72
   n1ce2d2fa47f167aa0["player_view.py"]
   n19674d186673a22e3 --> n1ce2d2fa47f167aa0
   n127a020b096f9b48a["function_definition format_seconds"]

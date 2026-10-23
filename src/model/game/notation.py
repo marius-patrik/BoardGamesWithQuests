@@ -19,8 +19,7 @@ from model.game.manager import GameManager
 from model.game.validator import MoveValidator
 from model.game.session import DesktopSession
 
-PIECE_LETTERS = {"king": "K", "queen": "Q", "rook": "R",
-                 "bishop": "B", "knight": "N", "pawn": ""}
+PIECE_LETTERS = {"king": "K", "queen": "Q", "rook": "R", "bishop": "B", "knight": "N", "pawn": ""}
 
 
 class NotationError(ValueError):
@@ -29,7 +28,9 @@ class NotationError(ValueError):
 
 def _escape(value: Any) -> str:
     """Protect PGN/PDN tag syntax from player-chosen identity strings."""
-    return str(value).replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ").replace("\r", " ")
+    return (
+        str(value).replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ").replace("\r", " ")
+    )
 
 
 def _result(state: Mapping[str, Any]) -> str:
@@ -62,14 +63,17 @@ def _pdn_square(square: list[int] | tuple[int, int]) -> str:
     return str(row * 4 + col // 2 + 1)
 
 
-def _chess_token(before: dict[str, Any], after: dict[str, Any],
-                 action: dict[str, Any], event: dict[str, Any],
-                 offered: list[dict[str, Any]], board) -> str:
+def _chess_token(
+    before: dict[str, Any],
+    after: dict[str, Any],
+    action: dict[str, Any],
+    event: dict[str, Any],
+    offered: list[dict[str, Any]],
+    board,
+) -> str:
     move = action["move"]
     start, end = move["start"], move["hops"][-1]
-    source_piece = next(
-        (piece for piece in before["board"] if piece["square"] == start), None
-    )
+    source_piece = next((piece for piece in before["board"] if piece["square"] == start), None)
     if source_piece is None:
         raise NotationError("notation source square contains no moving piece")
     kind = source_piece["kind"]
@@ -86,11 +90,13 @@ def _chess_token(before: dict[str, Any], after: dict[str, Any],
             disambig = chr(ord("a") + start[1])
         elif kind != "pawn":
             alternatives = [
-                other["start"] for other in offered
-                if other["start"] != start and other["hops"][-1] == end
+                other["start"]
+                for other in offered
+                if other["start"] != start
+                and other["hops"][-1] == end
                 and any(
-                    piece["square"] == other["start"]
-                    and piece["kind"] == kind for piece in before["board"]
+                    piece["square"] == other["start"] and piece["kind"] == kind
+                    for piece in before["board"]
                 )
             ]
             if alternatives:
@@ -111,13 +117,15 @@ def _chess_token(before: dict[str, Any], after: dict[str, Any],
     defending = after["active_side"]
     if after["outcome"] is None or after["outcome"]["kind"] == "win":
         opposing_king = next(
-            (piece["square"] for piece in after["board"]
-             if piece["kind"] == "king" and piece["side"] == defending), None
+            (
+                piece["square"]
+                for piece in after["board"]
+                if piece["kind"] == "king" and piece["side"] == defending
+            ),
+            None,
         )
         if opposing_king is not None:
-            checks = MoveValidator(board).is_square_attacked(
-                tuple(opposing_king), -defending
-            )
+            checks = MoveValidator(board).is_square_attacked(tuple(opposing_king), -defending)
             if checks:
                 terminal = after["outcome"]
                 mate = terminal is not None and terminal["kind"] == "win"
@@ -133,9 +141,9 @@ def render_notation(state: Mapping[str, Any]) -> tuple[str, str]:
         raise NotationError("notation is unavailable for this game")
     extension = ".pgn" if variant == "chess" else ".pdn"
     result = _result(current)
-    date = datetime.fromtimestamp(
-        current["started_at_ms"] / 1000, tz=timezone.utc
-    ).strftime("%Y.%m.%d")
+    date = datetime.fromtimestamp(current["started_at_ms"] / 1000, tz=timezone.utc).strftime(
+        "%Y.%m.%d"
+    )
     tags = [
         ("Event", "BoardGamesWithQuests"),
         ("Site", "Local"),
@@ -147,7 +155,7 @@ def render_notation(state: Mapping[str, Any]) -> tuple[str, str]:
     ]
     if variant == "english_draughts":
         tags.append(("GameType", "21"))
-    prefix = "\n".join('[' + key + ' "' + _escape(val) + '"]' for key, val in tags)
+    prefix = "\n".join("[" + key + ' "' + _escape(val) + '"]' for key, val in tags)
     replay = GameManager(
         validate_definition(current["config"], "<notation>"),
         current["game_id"],
@@ -161,11 +169,15 @@ def render_notation(state: Mapping[str, Any]) -> tuple[str, str]:
         action = event.get("action", {"type": "move", "move": event["move"]})
         offered = (
             [move.to_json() for move in replay.get_valid_moves()]
-            if action["type"] == "move" else []
+            if action["type"] == "move"
+            else []
         )
         actual = replay.submit_action(
-            event["actor"], event["expected_revision"], event["action_id"],
-            action, event["at_ms"],
+            event["actor"],
+            event["expected_revision"],
+            event["action_id"],
+            action,
+            event["at_ms"],
         )
         if actual != event:
             raise NotationError("event does not match authoritative replay")
@@ -174,9 +186,7 @@ def render_notation(state: Mapping[str, Any]) -> tuple[str, str]:
         ply += 1
         after = replay.get_state()
         if variant == "chess":
-            token = _chess_token(
-                before, after, action, actual, offered, replay.board_projection()
-            )
+            token = _chess_token(before, after, action, actual, offered, replay.board_projection())
         else:
             move = action["move"]
             sequence = [move["start"], *move["hops"]]
@@ -210,7 +220,9 @@ def save_notation(session: DesktopSession, path: str | os.PathLike[str]) -> str:
     temporary = None
     try:
         descriptor, temporary = tempfile.mkstemp(
-            prefix=".bgwq-notation-", suffix=extension, dir=target.parent,
+            prefix=".bgwq-notation-",
+            suffix=extension,
+            dir=target.parent,
         )
         with os.fdopen(descriptor, "wb") as stream:
             stream.write(data)
