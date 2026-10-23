@@ -93,3 +93,33 @@ def test_pgn_black_checkmate_and_finished_game_result():
     _, notation = render_notation(session.snapshot())
     assert '[Result "0-1"]' in notation
     assert "1. f3 e5 2. g4 Qh4# 0-1" in notation
+
+
+
+def test_published_pdn_double_corner_dyke_reference_opening():
+    """Compare actual move submission/export with PDN 3.0 published example."""
+    session = DesktopSession("checkers")
+
+    def square(value):
+        if not 1 <= value <= 32:
+            raise AssertionError("invalid published dark square")
+        row, offset = divmod(value - 1, 4)
+        return (row, offset * 2 + (1 if row % 2 == 0 else 0))
+
+    # Portable Draughts Notation 3.0 / Examples: Double Corner Dyke
+    opening = [
+        (9, 14), (22, 17), (11, 15), (25, 22),
+        (15, 19), (23, 16), (12, 19), (24, 15),
+        (10, 19), (17, 10),
+    ]
+    for src, dst in opening:
+        perform(session, square(src), square(dst))
+    state = session.snapshot()
+    assert state["revision"] == len(opening)
+    assert DesktopSession.recover(state).snapshot() == state
+    _, exported = render_notation(state)
+    expected = (
+        "1. 9-14 22-17 2. 11-15 25-22 3. 15-19 23x16 "
+        "4. 12x19 24x15 5. 10x19 17x10 *"
+    )
+    assert expected in exported
