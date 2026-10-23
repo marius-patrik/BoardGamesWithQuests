@@ -58,7 +58,7 @@ def test_english_draughts_pdn_encodes_dark_square_numbers_and_capture(tmp_path):
     extension, notation = render_notation(session.snapshot())
     assert extension == ".pdn"
     assert '[GameType "21"]' in notation
-    assert "1... 10-14 21-17 14x21 *" in notation
+    assert "1. 10-14 21-17 2. 14x21 *" in notation
     path = tmp_path / "capture.pdn"
     save_notation(session, path)
     assert path.read_text("utf-8") == notation

@@ -193,14 +193,13 @@ def render_notation(state: Mapping[str, Any]) -> tuple[str, str]:
             token = ("x" if actual["captured"] else "-").join(
                 _pdn_square(square) for square in sequence
             )
-        # Chess opens White; English draughts opens Black.
-        if before["active_side"] == 1:
+        # Move numbers follow the game's starting side. Unlike chess PGN,
+        # English draughts PDN numbers Black's opening with "1.", not "1...".
+        leading_side = 1 if variant == "chess" else -1
+        if before["active_side"] == leading_side:
             tokens.append(f"{(ply + 1) // 2}. {token}")
         else:
-            if ply == 1:
-                tokens.append(f"1... {token}")
-            else:
-                tokens.append(token)
+            tokens.append(token)
     if replay.get_state() != current:
         raise NotationError("notation does not reproduce the saved game")
     return extension, prefix + "\n\n" + " ".join([*tokens, result]) + "\n"
