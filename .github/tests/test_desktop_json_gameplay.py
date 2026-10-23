@@ -245,12 +245,13 @@ def test_english_draughts_initial_legal_count_and_forced_capture_precedence():
     assert all(move["start"] == [3, 2] and move["hops"] == [[5, 0]] for move in legal)
 
 
-
 def test_english_draughts_resignation_is_visible_as_authoritative_terminal_result():
     session = DesktopSession("checkers")
     state = session.snapshot()
     result = session.submit(
-        "black", state["revision"], {"type": "resign"},
+        "black",
+        state["revision"],
+        {"type": "resign"},
         action_id="black-resigns",
     )["state"]
     assert result["outcome"]["kind"] == "win"
