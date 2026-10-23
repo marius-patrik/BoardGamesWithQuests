@@ -1,13 +1,18 @@
 # Goal
 
-BoardGamesWithQuests is a configurable board-game project that combines chess, English draughts, game-state management and quests. The first product milestone is a **complete local Python/Tkinter application**; the later server/database/web/native-client architecture is a separate milestone.
+BoardGamesWithQuests first delivers a **complete, production-ready, downloadable and playable local Python/Tkinter v1.0.0** for Chess and English Draughts. Its existing GUI and substantially recovered authoritative JSON game engine are the implementation baseline: refine them rather than building replacements. The deferred multiplayer/server/database/React/Tauri platform is a **separate v2 milestone**.
 
-## Success criteria
+## v1.0.0 success
 
-- Verify chess and draughts gameplay, clocks, quests, settings, notation and the full Tkinter user flow through observable behavior.
-- Maintain one authoritative game engine, coherent controller/view ownership and no hosted-service dependency in desktop v1.
-- Build native Windows x64, macOS ARM64/x64 and Linux x64 packages; verify real installed startup, bundled resources, gameplay and checksums.
-- Release **v1.0.0** through approved `develop → main` promotion and DarkFactory PrideVer, with verified provider branch protections and all required assets.
-- Keep each PR's requirements, architecture, documentation, tests and diagrams consistent with code actually in that branch.
+- One generic JSON-configured engine and one desktop session authority; complete, rulebook-correct Chess and English Draughts, clocks, quests and local user preferences.
+- Cohesive, readable, maintainable source with no duplicated implementation, dead or misleading transitional paths, or player-authored executable rule code.
+- A polished **existing Tkinter interface**, verified through real interaction and visual inspection, with correct resizing, keyboard access, feedback, turns, board/game selection, quests, clocks and terminal states.
+- A replacement acceptance strategy based on **independent references and supported observable player interfaces**, not private method assertions or mocks standing in for gameplay. Fail closed for mandatory display/platform evidence.
+- Four genuinely usable frozen packages (Windows x64, macOS ARM64/x64, Linux x64), tested after extraction for actual GUI/gameplay, settings, restart, shutdown, bundled resources and artifact/checksum correctness.
+- Independent approval of PR #271, separately authorized protected `develop → main` promotion, and verified public PrideVer **v1.0.0 download** for all four platforms.
 
-**Working documents:** [Plan](PLAN.md) · [TODO](TODO.md) · [Scratchpad](SCRATCHPAD.md). Approved current requirements and accepted architecture are authored in `requests/` and `decisions/`. Proposed future API/database contracts remain in GitHub issues.
+Existing export behavior is factual where implemented, but **new/expanded export functionality is not a v1 development objective**. Avoid unrelated feature growth or rebuilding working components.
+
+**Issues:** [v1.0.0 completion #430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430) · [v2 target design #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348) · [DF task-scoped dispatch #2694](https://github.com/marius-patrik/DarkFactory/issues/2694). The v2 design is issue-only until implemented and approved; repository PRD, diagrams and architecture describe **actual committed behavior**.
+
+**Working records:** [Plan](PLAN.md) · [TODO](TODO.md) · [Scratchpad](SCRATCHPAD.md).

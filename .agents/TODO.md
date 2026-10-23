@@ -1,14 +1,15 @@
-# TODO — Outstanding v1.0.0 actions
+# TODO — v1.0.0 completion queue
 
-The implementation order, exact steps and exit gates are in [PLAN](PLAN.md).
+**Owner:** [v1 issue #430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Read [PLAN](PLAN.md) for ordered acceptance. **v2 architecture:** [issue #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348), deferred after v1 release. Do not start a second engine or GUI.
 
-- [ ] Cross-check the recovered FIDE reference cases with independent complete-game/perft records and validate resulting clock/outcome/notation behavior.
-- [ ] Extend English-draughts reference coverage to complete opening-to-terminal games and independent perft/variant interactions beyond the current short-king, multi-jump and crowning tests.
-- [ ] Add missing non-square board, aggregate-budget and forced-effect-failure acceptance through the public revisioned action protocol.
-- [ ] Mark `chess` and `english_draughts` definitions playable only after full end-to-end reference acceptance.
-- [ ] Verify Tkinter clocks, expiration, game end, rewards, capture/promotion choice, reset, game switch and safe callback shutdown through obligatory Xvfb GUI acceptance.
-- [ ] Extend the implemented PGN/PDN exports with independent special-action and complete-game notation reference cases, including UI-level export verification.
-- [ ] Extend preference and saved-game adversarial recovery across process restarts, symlink and path boundaries, oversized input and interrupted atomic writes.
-- [ ] Verify the final frozen binaries on Windows x64, macOS ARM64/x64 and Linux x64: game actions, GUI, bundled JSON, installation diagnostic, persistence, exports, restart and checksums.
-- [ ] Resolve current #271 review threads and any relevant archived #405 review issues with traceable fixes; validate generated docs and exact-head Python 3.10–3.13 CI.
-- [ ] Obtain maintainer approval, merge #271 into `develop`, approve reviewed `develop → main` promotion and publish/verify gated v1.0.0.
+- [ ] **P0 correctness:** Fix actual English-draughts timeout/no-legal-moves precedence on current #271 head. Verify terminal conflicts, repeated actions, atomic failures, replay and exact-head Python matrix.
+- [ ] **P0 inventory:** Read-only module-by-module cleanliness audit (dead/duplicate/misowned/historical code and misleading types), and historical Chess/draughts/quest/clock/UI parity classification.
+- [ ] **P0 test redesign:** Classify every `.github/tests/` test by real observable acceptance and independent oracle; design replacement application-boundary, real Tkinter, real native-binary suites. Replace ineffective tests as equivalent proven coverage lands, not as a mass deletion.
+- [ ] **P1 quality:** Apply focused readability/architecture cleanup; eliminate obsolete paths, unnecessary indirection and redundant state/logic without changing working gameplay. Independently review refactor diffs.
+- [ ] **P1 games:** Independently verify complete Chess/English-draughts games and rules, clocks/quests/outcomes, replay/budget/security; mark definitions playable only after complete proof.
+- [ ] **P1 GUI:** Visually inspect and polish the **existing Tkinter application** (layout, typography, board, player/quest/history, legal selection, dialogs, resize/DPI/focus/accessibility, feedback and shutdown) using actual screenshots and interactions.
+- [ ] **P1 native QA:** Exercise actual extracted Windows x64/macOS ARM64/macOS x64/Linux x64 frozen GUI and gameplay, preferences/restart/shutdown, bundled JSON/version/provenance and checksums. `--check` or five-second process survival alone is not acceptance.
+- [ ] **P0 release audit:** Run final exact-SHA CI and mandatory graphical/native gates; reconcile review feedback; regenerate truthful current-state docs and diagrams; obtain independent approval on #271.
+- [ ] **Maintainer gate:** Merge approved #271 into `develop`, separately authorize `develop → main`, publish via PrideVer and verify all four **public, downloadable, playable** v1.0.0 artifacts.
+
+**Deferred:** v2 FastAPI/Supabase/React/Tauri/multiplayer #348/#422. **Out of scope:** expanded exports, GUI/engine rebuild, speculative compatibility and new variants.
