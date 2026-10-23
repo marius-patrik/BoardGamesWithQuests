@@ -20,7 +20,7 @@
 1. Exercise legal highlights, alternative capture-route and promotion selection, rejected actions, game switching and game-ended behavior through real Tkinter canvas interactions on Xvfb.
 2. Verify authoritative clock progression/increment, expiration with no user click, timeout adjudication, cancellation of callbacks during window destruction and game switch, and nonmutation on rejection.
 3. Verify first-move/first-capture quest progress and once-only rewards for both participants; test interaction with terminal outcomes and replay.
-4. Implement actual player-facing notation export for chess and English draughts (in addition to the existing replayable JSON snapshot export), and verify full-game exported contents via the GUI.
+4. Extend the implemented PGN and PDN notation exporters with independent reference-game cases (castling, en passant, promotion, disambiguation, capture chains, terminal results), and verify full-game output through the actual Tkinter export button.
 5. Extend saved-game and preferences import/export acceptance with oversized-file, symlink/path escape, interrupted-write and restart recovery cases through complete application sessions.
 6. Extend mandatory UI acceptance to all supported Python versions where practical; ensure dedicated Xvfb gate remains mandatory and never silently skips.
 

@@ -11,6 +11,7 @@ status: published
 | `src/model/game/{board,move,validator,capture_geometry,capture_policy}.py` | Generic board, complete action intents, geometry and capture search |
 | `src/model/game/{hooks,conditions,board_queries,snapshot_queries,outcomes}.py` | Bounded declarative rules, trusted queries and terminal proposals |
 | `src/model/game/persistence.py` | Bounded atomic saved-game export and replay-verified import |
+| `src/model/game/notation.py` | Replay-verified PGN/PDN notation generation and atomic output to selected file paths |
 | `src/model/game/preferences.py` | Validated user display preferences and atomic OS-specific persistence |
 | `src/controller/` | Player input, action routing, selection state and window lifecycle |
 | `src/view/` | Tkinter board, history, players, quests, settings and game chooser |

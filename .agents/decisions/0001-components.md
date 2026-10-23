@@ -13,6 +13,10 @@ status: accepted
 
 `Board` is generic rectangular storage for `Piece` values built from the immutable game JSON definition. `Move` represents an immutable source, complete landing chain and optional promotion; `MoveValidator` provides read-only geometric move/attack vectors. `CaptureEnumerator` calculates bounded capture chains. `RuleProgram` and `ConditionEvaluator` evaluate validated game-owned hook conditions using `BoardQueries` and `SnapshotQueries`; only whitelisted effects are committed. `resolve_outcome` rejects contradictory equal-priority terminal proposals.
 
+## Notation and player-facing terminal actions
+
+The built-in JSON definitions declare the notation capability: chess PGN with SAN and English draughts PDN with numeric dark-square captures. `model.game.notation.render_notation` replays every accepted action through `GameManager`, verifies final snapshot identity and generates authoritative move text; it does not replicate game legality. Both notations and the replayable JSON snapshot are exported by the Tkinter interface using atomic writes and symlink rejection. Resignation and configured draw claims go through `DesktopSession.submit` and cannot be granted by UI state alone.
+
 ## Clock and quest state
 
 The authoritative snapshot includes participant clocks, accepted event history, capture lists, per-participant quest progress and earned quest scores. Quest conditions run only after accepted moves; speculative legal-action previews cannot award rewards. Active time is charged at authoritative action submission. The UI draws detached current values and polls timeout from the session.
