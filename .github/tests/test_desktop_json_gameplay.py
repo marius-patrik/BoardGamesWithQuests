@@ -243,3 +243,35 @@ def test_english_draughts_initial_legal_count_and_forced_capture_precedence():
     assert legal
     assert all(move["hops"][-1] != [4, 3] for move in legal)
     assert all(move["start"] == [3, 2] and move["hops"] == [[5, 0]] for move in legal)
+
+
+
+def test_english_draughts_resignation_is_visible_as_authoritative_terminal_result():
+    session = DesktopSession("checkers")
+    state = session.snapshot()
+    result = session.submit(
+        "black", state["revision"], {"type": "resign"},
+        action_id="black-resigns",
+    )["state"]
+    assert result["outcome"]["kind"] == "win"
+    assert result["outcome"]["winner"] == "white"
+    assert result["outcome"]["cause"] == "resignation"
+    assert not session.legal_actions()
+    assert DesktopSession.recover(result).snapshot() == result
+
+
+def test_english_draughts_clock_expiration_commits_and_replays_timeout(monkeypatch):
+    from model.game.session import time
+
+    session = DesktopSession("checkers")
+    state = session.snapshot()
+    expiration_ms = state["started_at_ms"] + 600_001
+    monkeypatch.setattr(time, "time_ns", lambda: expiration_ms * 1_000_000)
+    assert session.poll_timeout() is True
+    expired = session.snapshot()
+    assert expired["outcome"]["kind"] == "win"
+    assert expired["outcome"]["winner"] == "white"
+    assert expired["outcome"]["cause"] == "timeout"
+    assert expired["clocks"]["remaining_ms"]["-1"] == 0
+    assert session.poll_timeout() is False
+    assert DesktopSession.recover(expired).snapshot() == expired

@@ -317,6 +317,56 @@
           }
         }
       ]
+    },
+    {
+      "id": "resignation",
+      "hook": "outcome",
+      "when": {
+        "op": "compare",
+        "relation": "eq",
+        "left": {
+          "ref": "event.type"
+        },
+        "right": "resign"
+      },
+      "effects": [
+        {
+          "op": "propose_outcome",
+          "params": {
+            "kind": "win",
+            "cause": "resignation",
+            "winner": {
+              "ref": "player.opponent.id"
+            },
+            "priority": 80
+          }
+        }
+      ]
+    },
+    {
+      "id": "timeout",
+      "hook": "outcome",
+      "when": {
+        "op": "compare",
+        "relation": "eq",
+        "left": {
+          "ref": "event.type"
+        },
+        "right": "timeout"
+      },
+      "effects": [
+        {
+          "op": "propose_outcome",
+          "params": {
+            "kind": "win",
+            "cause": "timeout",
+            "winner": {
+              "ref": "player.opponent.id"
+            },
+            "priority": 80
+          }
+        }
+      ]
     }
   ],
   "quests": [
