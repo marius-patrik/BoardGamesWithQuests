@@ -580,7 +580,9 @@
     "initial_seconds": 600,
     "increment_seconds": 0
   },
-  "exports": [],
+  "exports": [
+    "pgn"
+  ],
   "appearance": {
     "light_square": "#F0D9B5",
     "dark_square": "#B58863"

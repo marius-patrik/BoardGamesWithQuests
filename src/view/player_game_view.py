@@ -261,7 +261,13 @@ class PlayerGameView(ttk.Frame):
         self.refresh()
 
     def export_notation(self) -> None:
-        extension = ".pgn" if self.session.game == "chess" else ".pdn"
+        supported = self.session.snapshot()["config"]["exports"]
+        if len(supported) != 1 or supported[0] not in ("pgn", "pdn"):
+            messagebox.showerror(
+                "Notation", "This game has no supported notation export.", parent=self
+            )
+            return
+        extension = "." + supported[0]
         destination = filedialog.asksaveasfilename(
             parent=self,
             defaultextension=extension,
