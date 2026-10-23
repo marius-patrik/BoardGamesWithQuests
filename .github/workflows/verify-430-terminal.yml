@@ -1,0 +1,64 @@
+# Task-local executable verification only. Do not cherry-pick this workflow into #271.
+# Production files match candidate 0377a4ee9ebf5a14e1991a88203841e82f89abc0.
+name: Verify #430 terminal correctness candidate
+
+on:
+  push:
+    branches:
+      - verify/430-terminal-outcome
+
+permissions:
+  contents: read
+
+jobs:
+  terminal:
+    name: terminal / Python ${{ matrix.python }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install application and pytest
+        run: python -m pip install -e . pytest
+      - name: Original English-draughts timeout regression
+        run: >
+          python -m pytest -q
+          .github/tests/test_desktop_json_gameplay.py::test_english_draughts_clock_expiration_commits_and_replays_timeout
+      - name: Terminal, full-game and JSON regression acceptance
+        run: >
+          python -m pytest -q
+          .github/tests/test_desktop_json_gameplay.py
+          .github/tests/test_chess_reference_gameplay.py
+          .github/tests/test_draughts_reference_gameplay.py
+          .github/tests/test_special_actions_gameplay.py
+          .github/tests/test_json_board_and_outcomes.py
+          .github/tests/test_desktop_full_draughts.py
+          .github/tests/test_json_work_budget.py
+          .github/tests/test_json_definitions.py
+
+  gui:
+    name: real Tkinter / Python 3.12
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - name: Install Tkinter and virtual X11 display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth
+          python -m pip install -e . pytest
+      - name: Exercise real Tkinter interface
+        run: xvfb-run -a python -m pytest -q .github/tests/desktop_gui_acceptance.py
