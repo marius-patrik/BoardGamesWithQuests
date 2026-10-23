@@ -710,6 +710,10 @@ flowchart LR
   nfc5161158ee90ee7f --> n7fa88505d85be07b5
   n5e2bc52da8e55384c["function_definition test_notation_button_exports_actual_user_game_as_pgn"]
   nfc5161158ee90ee7f --> n5e2bc52da8e55384c
+  nbc3bdcbed42ce17e8["function_definition test_resign_from_real_ui_commits_terminal_result_and_blocks_further_moves"]
+  nfc5161158ee90ee7f --> nbc3bdcbed42ce17e8
+  n2da179b6608c25e5d["function_definition test_unavailable_draw_claim_does_not_mutate_authoritative_game"]
+  nfc5161158ee90ee7f --> n2da179b6608c25e5d
   nd6487c9d1884235b7["docs_site_acceptance.py"]
   nc9f5868186eb03f66 --> nd6487c9d1884235b7
   n3cc24defd97d2b5a4["function_definition test_repository_navigation_and_every_file_page"]
@@ -1908,20 +1912,24 @@ flowchart LR
   n8a992638c42fe6679 --> n5fdceb72018feb16a
   na0c730b8f503b9b47["function_definition open_game"]
   n8a992638c42fe6679 --> na0c730b8f503b9b47
-  n2a9ea6567a33b47fa["function_definition export_notation"]
+  n2a9ea6567a33b47fa["function_definition resign_game"]
   n8a992638c42fe6679 --> n2a9ea6567a33b47fa
-  n91bf7e2fa40db9cd9["function_definition export_game"]
+  n91bf7e2fa40db9cd9["function_definition claim_draw"]
   n8a992638c42fe6679 --> n91bf7e2fa40db9cd9
-  n439e230728c690a5a["function_definition _quit"]
+  n439e230728c690a5a["function_definition export_notation"]
   n8a992638c42fe6679 --> n439e230728c690a5a
-  n0eaff7c692a83a2b2["function_definition stop_auto_refresh"]
+  n0eaff7c692a83a2b2["function_definition export_game"]
   n8a992638c42fe6679 --> n0eaff7c692a83a2b2
-  n235fe4e42ba9701f9["function_definition start_auto_refresh"]
+  n235fe4e42ba9701f9["function_definition _quit"]
   n8a992638c42fe6679 --> n235fe4e42ba9701f9
-  n5d8cdd2cfcac03f9e["function_definition _auto_refresh"]
+  n5d8cdd2cfcac03f9e["function_definition stop_auto_refresh"]
   n8a992638c42fe6679 --> n5d8cdd2cfcac03f9e
-  n7436ae29a52b70a72["function_definition destroy"]
+  n7436ae29a52b70a72["function_definition start_auto_refresh"]
   n8a992638c42fe6679 --> n7436ae29a52b70a72
+  n3f55c83209743d2d1["function_definition _auto_refresh"]
+  n8a992638c42fe6679 --> n3f55c83209743d2d1
+  n6d46b9f13c808248d["function_definition destroy"]
+  n8a992638c42fe6679 --> n6d46b9f13c808248d
   n1ce2d2fa47f167aa0["player_view.py"]
   n19674d186673a22e3 --> n1ce2d2fa47f167aa0
   n127a020b096f9b48a["function_definition format_seconds"]

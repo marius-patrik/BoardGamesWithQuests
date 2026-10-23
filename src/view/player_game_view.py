@@ -63,9 +63,7 @@ class PlayerGameView(ttk.Frame):
         )
         ttk.Button(heading, text="Export", command=self.export_game).pack(side="right", padx=(0, 6))
         ttk.Button(heading, text="Quit", command=self._quit).pack(side="right", padx=(0, 6))
-        ttk.Button(heading, text="Resign", command=self.resign_game).pack(
-            side="right", padx=(0, 6)
-        )
+        ttk.Button(heading, text="Resign", command=self.resign_game).pack(side="right", padx=(0, 6))
         ttk.Button(heading, text="Claim draw", command=self.claim_draw).pack(
             side="right", padx=(0, 6)
         )
@@ -208,9 +206,7 @@ class PlayerGameView(ttk.Frame):
             return
         side = state["active_side"]
         who = "White" if side == 1 else "Black"
-        if not messagebox.askyesno(
-            "Resign", f"{who}: resign this game?", parent=self
-        ):
+        if not messagebox.askyesno("Resign", f"{who}: resign this game?", parent=self):
             return
         actor = state["participants"][str(side)]
         try:
@@ -227,11 +223,10 @@ class PlayerGameView(ttk.Frame):
         if state["outcome"] is not None:
             return
         named = [
-            rule["id"] for rule in state["config"]["rules"]
-            if rule["hook"] == "outcome" and (
-                "claim" in rule["id"] or "threefold" in rule["id"]
-                or "fifty" in rule["id"]
-            )
+            rule["id"]
+            for rule in state["config"]["rules"]
+            if rule["hook"] == "outcome"
+            and ("claim" in rule["id"] or "threefold" in rule["id"] or "fifty" in rule["id"])
         ]
         if not named:
             messagebox.showinfo(
@@ -240,18 +235,25 @@ class PlayerGameView(ttk.Frame):
             return
         options = "\\n".join(f"{i + 1}. {name}" for i, name in enumerate(named))
         selected = simpledialog.askinteger(
-            "Claim draw", "Select a configured draw claim:\\n" + options,
-            parent=self, minvalue=1, maxvalue=len(named),
+            "Claim draw",
+            "Select a configured draw claim:\\n" + options,
+            parent=self,
+            minvalue=1,
+            maxvalue=len(named),
         )
         if selected is None:
             return
         actor = state["participants"][str(state["active_side"])]
         try:
-            self.session.submit(actor, state["revision"], {
-                "type": "claim_draw",
-                "claim": named[selected - 1],
-                "intended_move": None,
-            })
+            self.session.submit(
+                actor,
+                state["revision"],
+                {
+                    "type": "claim_draw",
+                    "claim": named[selected - 1],
+                    "intended_move": None,
+                },
+            )
         except (ValueError, RuntimeError) as error:
             messagebox.showerror("Claim draw", str(error), parent=self)
             return
