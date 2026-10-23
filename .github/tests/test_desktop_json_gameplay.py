@@ -218,3 +218,32 @@ def test_real_installation_check_executes_both_bundled_game_openings():
     )
     assert completed.returncode == 0, completed.stderr
     assert "accepted and replayed opening moves: 2" in completed.stdout
+
+
+
+def test_fools_mate_and_opening_legal_counts_through_real_session():
+    session = DesktopSession("chess")
+    assert len(session.legal_actions()) == 20
+    perform(session, (6, 5), (5, 5))  # f3
+    assert len(session.legal_actions()) == 20
+    perform(session, (1, 4), (3, 4))  # ... e5
+    perform(session, (6, 6), (4, 6))  # g4
+    state = perform(session, (0, 3), (4, 7))["state"]  # ... Qh4#
+    assert state["outcome"]["kind"] == "win"
+    assert state["outcome"]["winner"] == "black"
+    assert not session.legal_actions()
+    assert DesktopSession.recover(state).snapshot() == state
+
+
+def test_english_draughts_initial_legal_count_and_forced_capture_precedence():
+    session = DesktopSession("checkers")
+    assert len(session.legal_actions()) == 7
+    perform(session, (2, 3), (3, 2))
+    perform(session, (5, 0), (4, 1))
+    legal = session.legal_actions()
+    assert legal
+    assert all(move["hops"][-1] != [4, 3] for move in legal)
+    assert all(
+        move["start"] == [3, 2] and move["hops"] == [[5, 0]]
+        for move in legal
+    )
