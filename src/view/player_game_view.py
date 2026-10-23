@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from model.game.persistence import SessionFileError, load_session, save_session
+from model.game.notation import NotationError, save_notation
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 from typing import Any
@@ -55,6 +56,9 @@ class PlayerGameView(ttk.Frame):
                 side="right", padx=(0, 6)
             )
         ttk.Button(heading, text="Open game", command=self.open_game).pack(
+            side="right", padx=(0, 6)
+        )
+        ttk.Button(heading, text="Notation", command=self.export_notation).pack(
             side="right", padx=(0, 6)
         )
         ttk.Button(heading, text="Export", command=self.export_game).pack(side="right", padx=(0, 6))
@@ -190,6 +194,22 @@ class PlayerGameView(ttk.Frame):
         self.window_controller.game_controller.session = restored
         self.reload()
         self.status.set(f"Restored {restored.game}.")
+
+    def export_notation(self) -> None:
+        extension = ".pgn" if self.session.game == "chess" else ".pdn"
+        destination = filedialog.asksaveasfilename(
+            parent=self,
+            defaultextension=extension,
+            filetypes=[("Game notation", "*" + extension)],
+        )
+        if not destination:
+            return
+        try:
+            save_notation(self.session, destination)
+        except (OSError, NotationError, ValueError) as error:
+            messagebox.showerror("Notation", str(error), parent=self)
+            return
+        self.status.set(f"Exported notation to {destination}")
 
     def export_game(self) -> None:
         destination = filedialog.asksaveasfilename(
