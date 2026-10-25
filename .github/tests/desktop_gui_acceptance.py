@@ -371,4 +371,3 @@ def test_responsive_preferences_keep_saved_size_without_cropping(window):
     window.update()
     assert compact_size < view.board_view.square_size <= 88
     assert view.board_view.canvas.winfo_width() == 8 * view.board_view.square_size
-
