@@ -24,10 +24,20 @@ class PlayerView(ttk.Frame):
         self.clock = tk.StringVar(value=format_seconds(0))
         self.captured = tk.StringVar(value="Taken:")
         self.lost = tk.StringVar(value="Lost:")
-        ttk.Label(self, textvariable=self.name, font=("TkDefaultFont", 13, "bold")).pack(anchor="w")
-        ttk.Label(self, textvariable=self.clock, font=("TkDefaultFont", 16)).pack(anchor="w")
-        ttk.Label(self, textvariable=self.captured).pack(anchor="w")
-        ttk.Label(self, textvariable=self.lost).pack(anchor="w")
+        # Compact panels preserve both clocks without consuming four rows per player.
+        self.columnconfigure(1, weight=1)
+        ttk.Label(self, textvariable=self.name, font=("TkDefaultFont", 13, "bold")).grid(
+            row=0, column=0, sticky="w", padx=(0, 12)
+        )
+        ttk.Label(self, textvariable=self.clock, font=("TkDefaultFont", 16)).grid(
+            row=0, column=1, sticky="e"
+        )
+        ttk.Label(self, textvariable=self.captured, wraplength=210).grid(
+            row=1, column=0, sticky="nw", padx=(0, 12)
+        )
+        ttk.Label(self, textvariable=self.lost, wraplength=210).grid(
+            row=1, column=1, sticky="ne"
+        )
 
     def refresh(self, state: dict[str, Any], remaining_ms: dict[str, int]) -> None:
         participant = state["participants"][str(self.side)]
