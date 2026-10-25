@@ -386,6 +386,7 @@ def test_timeout_in_familiar_dead_material_is_draw_not_opponents_win(minor, expi
         or r["id"].startswith("timeout-")
     ]
     game = GameManager(validate_definition(data), "timeout", ("white", "black"), 0)
-    event = game.submit_action("black", 0, "flag", {"type": "timeout"}, 0)
+    actor = "white" if expired_side == 1 else "black"
+    event = game.submit_action(actor, 0, "flag", {"type": "timeout"}, 0)
     assert event["outcome"]["kind"] == "draw" and event["outcome"]["winner"] is None
     assert GameManager.from_snapshot(game.get_state()).get_state() == game.get_state()

@@ -1554,8 +1554,11 @@ class GameManager:
         if elapsed < 0:
             raise TransitionError("authoritative timestamp cannot run backwards")
         expired = elapsed >= state["clocks"]["remaining_ms"][str(active)]
-        if action["type"] == "timeout" and not expired:
-            raise TransitionError("timeout requires the authoritative active clock deadline")
+        if action["type"] == "timeout":
+            if side != active:
+                raise TransitionError("timeout must name the expired active participant")
+            if not expired:
+                raise TransitionError("timeout requires the authoritative active clock deadline")
         if action["type"] == "claim_draw" and (side != active or expired):
             raise TransitionError("draw claim requires the active participant before expiry")
         original_board = self._board(state)

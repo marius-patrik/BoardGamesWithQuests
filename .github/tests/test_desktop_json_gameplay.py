@@ -276,3 +276,230 @@ def test_english_draughts_clock_expiration_commits_and_replays_timeout(monkeypat
     assert expired["clocks"]["remaining_ms"]["-1"] == 0
     assert session.poll_timeout() is False
     assert DesktopSession.recover(expired).snapshot() == expired
+
+
+def _positioned_draughts_session(monkeypatch, pieces, *, clock_seconds=600, extra_rules=()):
+    """Run an actual bundled-rulebook variant through the production desktop boundary."""
+    import json
+    from importlib import resources
+
+    import model.game.session as session_module
+    from model.game.definition import validate_definition
+
+    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data["clock"]["initial_seconds"] = clock_seconds
+    data["board"]["starting_pieces"] = [
+        {
+            "piece": kind,
+            "color": "black" if side == -1 else "white",
+            "squares": [list(position)],
+        }
+        for kind, side, position in pieces
+    ]
+    data["rules"].extend(extra_rules)
+    definition = validate_definition(data)
+    monkeypatch.setattr(session_module, "load_bundled_definition", lambda game: definition)
+    return DesktopSession("checkers")
+
+
+def test_draughts_timeout_with_no_geometric_move_is_not_no_legal_moves(monkeypatch):
+    from model.game.session import time
+
+    # Black on its final row cannot advance even before the clock expires.
+    session = _positioned_draughts_session(
+        monkeypatch, [("man", -1, (7, 0)), ("man", 1, (5, 2))], clock_seconds=1
+    )
+    before = session.snapshot()
+    assert session.legal_actions() == []
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 1001) * 1_000_000)
+    assert session.poll_timeout() is True
+    terminal = session.snapshot()
+    assert terminal["outcome"]["cause"] == "timeout"
+    assert terminal["outcome"]["winner"] == "white"
+    assert terminal["clocks"]["remaining_ms"]["-1"] == 0
+    assert DesktopSession.recover(terminal).snapshot() == terminal
+
+
+def test_draughts_resignation_with_no_geometric_move_is_not_no_legal_moves(monkeypatch):
+    session = _positioned_draughts_session(monkeypatch, [("man", -1, (7, 0)), ("man", 1, (5, 2))])
+    assert session.legal_actions() == []
+    terminal = session.submit("black", 0, {"type": "resign"}, action_id="trapped-resignation")[
+        "state"
+    ]
+    assert terminal["outcome"]["cause"] == "resignation"
+    assert terminal["outcome"]["winner"] == "white"
+    assert DesktopSession.recover(terminal).snapshot() == terminal
+
+
+def test_draughts_final_capture_produces_no_legal_moves_only_after_move(monkeypatch):
+    session = _positioned_draughts_session(monkeypatch, [("man", -1, (2, 1)), ("man", 1, (3, 2))])
+    terminal = perform(session, (2, 1), (4, 3))["state"]
+    assert terminal["outcome"]["cause"] == "no_legal_moves"
+    assert terminal["outcome"]["winner"] == "black"
+    assert len(terminal["captured"]) == 1
+    assert session.legal_actions() == []
+    with pytest.raises(TransitionError):
+        session.submit("white", terminal["revision"], {"type": "resign"})
+    assert session.snapshot() == terminal
+    assert DesktopSession.recover(terminal).snapshot() == terminal
+
+
+def test_late_move_rejected_without_consuming_clock_or_mutating_game(monkeypatch):
+    from model.game.session import time
+
+    session = DesktopSession("checkers")
+    before = session.snapshot()
+    legal_move = session.legal_actions()[0]
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000)
+    with pytest.raises(TransitionError):
+        session.submit("black", 0, {"type": "move", "move": legal_move}, action_id="late-move")
+    assert session.snapshot() == before
+    assert session.poll_timeout() is True
+    assert session.snapshot()["outcome"]["cause"] == "timeout"
+
+
+def test_terminal_timeout_retry_and_conflicting_action_identifier(monkeypatch):
+    from model.game.session import time
+
+    session = DesktopSession("checkers")
+    before = session.snapshot()
+    assert session.legal_actions()
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000)
+    assert session.poll_timeout() is True
+    after = session.snapshot()
+    accepted = after["events"][-1]
+    assert accepted["outcome"]["cause"] == "timeout"
+    retry = session.submit(
+        "black", before["revision"], {"type": "timeout"}, action_id=accepted["action_id"]
+    )
+    assert retry["event"] == accepted
+    assert retry["state"] == after
+    with pytest.raises(TransitionError):
+        session.submit(
+            "black", before["revision"], {"type": "resign"}, action_id=accepted["action_id"]
+        )
+    with pytest.raises(TransitionError):
+        session.submit("black", after["revision"], {"type": "resign"}, action_id="new-terminal")
+    assert session.snapshot() == after
+    assert DesktopSession.recover(after).snapshot() == after
+
+
+def test_chess_timeout_uses_configured_win_without_no_legal_moves(monkeypatch):
+    from model.game.session import time
+
+    session = DesktopSession("chess")
+    before = session.snapshot()
+    assert len(session.legal_actions()) == 20
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000)
+    assert session.poll_timeout() is True
+    after = session.snapshot()
+    assert after["outcome"]["kind"] == "win"
+    assert after["outcome"]["cause"] == "timeout-win-1"
+    assert after["outcome"]["winner"] == "black"
+    assert DesktopSession.recover(after).snapshot() == after
+
+
+def test_chess_draw_claim_requires_repetition_and_replays_when_eligible():
+    session = DesktopSession("chess")
+    claim = {"type": "claim_draw", "claim": "threefold", "intended_move": None}
+    before = session.snapshot()
+    with pytest.raises(TransitionError):
+        session.submit("white", 0, claim, action_id="premature-threefold")
+    assert session.snapshot() == before
+
+    for _ in range(2):
+        for source, target in (
+            ((7, 6), (5, 5)),
+            ((0, 6), (2, 5)),
+            ((5, 5), (7, 6)),
+            ((2, 5), (0, 6)),
+        ):
+            perform(session, source, target)
+    repeated = session.snapshot()
+    assert repeated["outcome"] is None
+    result = session.submit("white", repeated["revision"], claim, action_id="eligible-threefold")
+    terminal = result["state"]
+    assert terminal["outcome"]["kind"] == "draw"
+    assert terminal["outcome"]["cause"] == "threefold"
+    assert terminal["outcome"]["winner"] is None
+    assert terminal["board"] == repeated["board"]
+    assert (
+        session.submit("white", repeated["revision"], claim, action_id="eligible-threefold")[
+            "event"
+        ]
+        == result["event"]
+    )
+    assert DesktopSession.recover(terminal).snapshot() == terminal
+
+
+@pytest.mark.parametrize("failure", ["equal-priority-conflict", "invalid-arithmetic"])
+def test_failed_terminal_rule_evaluation_rolls_back_entire_session(monkeypatch, failure):
+    from model.game.conditions import QueryResolutionError
+    from model.game.session import time
+
+    timeout_condition = {
+        "op": "compare",
+        "relation": "eq",
+        "left": {"ref": "event.type"},
+        "right": "timeout",
+    }
+    if failure == "equal-priority-conflict":
+        effect = {
+            "op": "propose_outcome",
+            "params": {"kind": "draw", "cause": "contradiction", "winner": None, "priority": 80},
+        }
+        condition = timeout_condition
+    else:
+        effect = {
+            "op": "propose_outcome",
+            "params": {"kind": "draw", "cause": "unreachable", "winner": None, "priority": 50},
+        }
+        condition = {
+            "op": "all",
+            "args": [
+                timeout_condition,
+                {
+                    "op": "compare",
+                    "relation": "eq",
+                    "left": {
+                        "query": "integer",
+                        "params": {"operation": "floor_divide", "left": 1, "right": 0},
+                    },
+                    "right": 0,
+                },
+            ],
+        }
+    supplemental = {
+        "id": "terminal-conflict-fixture",
+        "hook": "outcome",
+        "when": condition,
+        "effects": [effect],
+    }
+    session = _positioned_draughts_session(
+        monkeypatch,
+        [("man", -1, (2, 1)), ("man", 1, (5, 2))],
+        clock_seconds=1,
+        extra_rules=(supplemental,),
+    )
+    before = session.snapshot()
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 1001) * 1_000_000)
+    with pytest.raises(QueryResolutionError):
+        session.poll_timeout()
+    assert session.snapshot() == before
+    assert session.legal_actions()
+
+
+def test_timeout_rejects_nonactive_actor_without_awarding_the_wrong_winner(monkeypatch):
+    from model.game.session import time
+
+    session = DesktopSession("checkers")
+    before = session.snapshot()
+    monkeypatch.setattr(time, "time_ns", lambda: (before["started_at_ms"] + 600_001) * 1_000_000)
+    with pytest.raises(TransitionError):
+        session.submit("white", 0, {"type": "timeout"}, action_id="opponent-reports-flag")
+    assert session.snapshot() == before
+    assert session.poll_timeout() is True
+    after = session.snapshot()
+    assert after["outcome"]["cause"] == "timeout"
+    assert after["outcome"]["winner"] == "white"
+    assert DesktopSession.recover(after).snapshot() == after
