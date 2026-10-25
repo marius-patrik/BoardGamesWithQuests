@@ -305,13 +305,22 @@ def test_responsive_live_board_actions_and_clocks(tmp_path, monkeypatch, game, s
             assert canvas.winfo_width() >= board.board.cols * board.square_size
             assert canvas.winfo_height() >= board.board.rows * board.square_size
             for widget in (
-                canvas, view.top_player, view.bottom_player,
-                view.quest_viewport, view.history,
+                canvas,
+                view.top_player,
+                view.bottom_player,
+                view.quest_viewport,
+                view.history,
             ):
                 inside(widget)
             for name in (
-                "New game", "Open game", "Settings", "Quit",
-                "Claim draw", "Resign", "Export", "Notation",
+                "New game",
+                "Open game",
+                "Settings",
+                "Quit",
+                "Claim draw",
+                "Resign",
+                "Export",
+                "Notation",
             ):
                 button = view.action_buttons[name]
                 inside(button)
@@ -322,12 +331,13 @@ def test_responsive_live_board_actions_and_clocks(tmp_path, monkeypatch, game, s
             session = root.window_controller.game_controller.session
             actions = session.legal_actions()
             move = next(
-                action for action in actions
+                action
+                for action in actions
                 if sum(
-                    a["start"] == action["start"] and
-                    a["hops"][-1] == action["hops"][-1]
+                    a["start"] == action["start"] and a["hops"][-1] == action["hops"][-1]
                     for a in actions
-                ) == 1
+                )
+                == 1
             )
             click_canvas(root, *move["start"])
             assert root.window_controller.game_controller.selected_square == tuple(move["start"])
