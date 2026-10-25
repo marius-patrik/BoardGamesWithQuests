@@ -149,9 +149,7 @@ class PlayerGameView(ttk.Frame):
         )
         self.quest_viewport.bind(
             "<Configure>",
-            lambda event: self.quest_viewport.itemconfigure(
-                self._quest_window, width=event.width
-            ),
+            lambda event: self.quest_viewport.itemconfigure(self._quest_window, width=event.width),
         )
         self.quest_viewport.bind(
             "<Prior>", lambda _event: self.quest_viewport.yview_scroll(-1, "pages")
@@ -182,9 +180,7 @@ class PlayerGameView(ttk.Frame):
         history_panel.rowconfigure(0, weight=1)
         self.history = tk.Listbox(history_panel, height=4, width=24)
         self.history.grid(row=0, column=0, sticky="nsew")
-        history_scroll = ttk.Scrollbar(
-            history_panel, orient="vertical", command=self.history.yview
-        )
+        history_scroll = ttk.Scrollbar(history_panel, orient="vertical", command=self.history.yview)
         history_scroll.grid(row=0, column=1, sticky="ns")
         self.history.configure(yscrollcommand=history_scroll.set)
         # A long save path must not expand the minimum window beyond its viewport.
