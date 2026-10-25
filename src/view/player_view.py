@@ -35,9 +35,7 @@ class PlayerView(ttk.Frame):
         ttk.Label(self, textvariable=self.captured, wraplength=210).grid(
             row=1, column=0, sticky="nw", padx=(0, 12)
         )
-        ttk.Label(self, textvariable=self.lost, wraplength=210).grid(
-            row=1, column=1, sticky="ne"
-        )
+        ttk.Label(self, textvariable=self.lost, wraplength=210).grid(row=1, column=1, sticky="ne")
 
     def refresh(self, state: dict[str, Any], remaining_ms: dict[str, int]) -> None:
         participant = state["participants"][str(self.side)]
