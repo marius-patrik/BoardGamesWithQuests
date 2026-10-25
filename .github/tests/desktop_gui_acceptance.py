@@ -392,11 +392,16 @@ def test_temporary_visual_evidence_capture():
                 root.update()
                 capture = subprocess.run(
                     ["import", "-window", str(root.winfo_id()), "png:-"],
-                    capture_output=True, check=True, timeout=15,
+                    capture_output=True,
+                    check=True,
+                    timeout=15,
                 )
                 reduced = subprocess.run(
                     ["convert", "png:-", "-resize", "70%", "-colors", "48", "PNG8:-"],
-                    input=capture.stdout, capture_output=True, check=True, timeout=15,
+                    input=capture.stdout,
+                    capture_output=True,
+                    check=True,
+                    timeout=15,
                 )
                 captures.append(
                     f"BGWQ_SCREENSHOT_{game}_{width}x{height}="
