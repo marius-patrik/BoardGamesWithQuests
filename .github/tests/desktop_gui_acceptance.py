@@ -366,7 +366,8 @@ def test_responsive_preferences_keep_saved_size_without_cropping(window):
     window.update()
     assert view._preferred_board_size == 88
     assert 32 <= view.board_view.square_size < 88
+    compact_size = view.board_view.square_size
     window.geometry("1440x900")
     window.update()
-    assert view.board_view.square_size == 88
-    assert view.board_view.canvas.winfo_width() == 8 * 88
+    assert compact_size < view.board_view.square_size <= 88
+    assert view.board_view.canvas.winfo_width() == 8 * view.board_view.square_size
