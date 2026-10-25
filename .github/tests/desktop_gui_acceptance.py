@@ -371,3 +371,38 @@ def test_responsive_preferences_keep_saved_size_without_cropping(window):
     window.update()
     assert compact_size < view.board_view.square_size <= 88
     assert view.board_view.canvas.winfo_width() == 8 * view.board_view.square_size
+
+
+def test_temporary_visual_evidence_capture():
+    """One-shot CI evidence collector; remove this verification-only test afterward."""
+    import base64
+    import shutil
+    import subprocess
+
+    if not shutil.which("import") or not shutil.which("convert"):
+        pytest.fail("BGWQ_CAPTURE_UNAVAILABLE: ImageMagick import/convert missing")
+    captures = []
+    for game in ("chess", "checkers"):
+        for width, height in ((840, 640), (1100, 760)):
+            root = tk.Tk()
+            root.geometry(f"{width}x{height}")
+            build_application(root, game, show_modal=False)
+            try:
+                root.update_idletasks()
+                root.update()
+                capture = subprocess.run(
+                    ["import", "-window", str(root.winfo_id()), "png:-"],
+                    capture_output=True, check=True, timeout=15,
+                )
+                reduced = subprocess.run(
+                    ["convert", "png:-", "-resize", "70%", "-colors", "48", "PNG8:-"],
+                    input=capture.stdout, capture_output=True, check=True, timeout=15,
+                )
+                captures.append(
+                    f"BGWQ_SCREENSHOT_{game}_{width}x{height}="
+                    + base64.b64encode(reduced.stdout).decode("ascii")
+                )
+            finally:
+                root.game_view.stop_auto_refresh()
+                root.destroy()
+    pytest.fail("TEMPORARY_CAPTURE_ONLY\n" + "\n".join(captures))
