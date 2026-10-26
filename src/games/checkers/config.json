@@ -152,7 +152,7 @@
         "flying": false,
         "land_anywhere": false,
         "max_nodes": 4096,
-        "deferred_removal": false
+        "deferred_removal": true
       },
       "promotion": {
         "rank": "far",
@@ -211,7 +211,7 @@
         "flying": false,
         "land_anywhere": false,
         "max_nodes": 4096,
-        "deferred_removal": false
+        "deferred_removal": true
       }
     }
   },
@@ -332,6 +332,109 @@
       ]
     },
     {
+      "id": "threefold",
+      "hook": "outcome",
+      "when": {
+        "op": "all",
+        "args": [
+          {
+            "op": "compare",
+            "relation": "eq",
+            "left": {
+              "ref": "event.type"
+            },
+            "right": "claim_draw"
+          },
+          {
+            "op": "compare",
+            "relation": "eq",
+            "left": {
+              "ref": "event.claim"
+            },
+            "right": "threefold"
+          },
+          {
+            "op": "compare",
+            "relation": "ne",
+            "left": {
+              "query": "move_attribute",
+              "params": {
+                "name": "start"
+              }
+            },
+            "right": null
+          },
+          {
+            "op": "compare",
+            "relation": "gte",
+            "left": {
+              "query": "repetition_count",
+              "params": {
+                "scope": "position"
+              }
+            },
+            "right": 3
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "propose_outcome",
+          "params": {
+            "kind": "draw",
+            "cause": "threefold",
+            "winner": null,
+            "priority": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "forty-move",
+      "hook": "outcome",
+      "when": {
+        "op": "all",
+        "args": [
+          {
+            "op": "compare",
+            "relation": "eq",
+            "left": {
+              "ref": "event.type"
+            },
+            "right": "claim_draw"
+          },
+          {
+            "op": "compare",
+            "relation": "eq",
+            "left": {
+              "ref": "event.claim"
+            },
+            "right": "forty-move"
+          },
+          {
+            "op": "compare",
+            "relation": "gte",
+            "left": {
+              "query": "halfmove_count",
+              "params": {}
+            },
+            "right": 80
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "propose_outcome",
+          "params": {
+            "kind": "draw",
+            "cause": "forty-move",
+            "winner": null,
+            "priority": 10
+          }
+        }
+      ]
+    },
+    {
       "id": "resignation",
       "hook": "outcome",
       "when": {
@@ -408,6 +511,12 @@
       }
     }
   ],
+  "position_identity": {
+    "moved_kinds": [],
+    "rule_state": [],
+    "rights": [],
+    "targets": []
+  },
   "halfmove_reset": {
     "op": "compare",
     "left": {

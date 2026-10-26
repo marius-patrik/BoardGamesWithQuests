@@ -605,7 +605,16 @@ def test_claim_prompt_has_real_newlines_and_game_validates_claim(window, monkeyp
     assert window.window_controller.game_controller.session.snapshot() == prior
     window.window_controller.game_controller.new_game("checkers")
     window.game_view.reload(clean=True)
-    assert window.game_view.action_buttons["Claim draw"].instate(["disabled"])
+    # WCDF now configures named threefold and 40-move claims. The button
+    # is available, but the engine must reject an ineligible claim.
+    assert not window.game_view.action_buttons["Claim draw"].instate(["disabled"])
+    draughts_before = window.window_controller.game_controller.session.snapshot()
+    window.game_view.claim_draw()
+    assert len(prompts) == 2
+    assert "threefold repetition" in prompts[-1]
+    assert "Forty Move" in prompts[-1]
+    assert len(messages) == 2 and "not available" in messages[-1]
+    assert window.window_controller.game_controller.session.snapshot() == draughts_before
 
 
 def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monkeypatch):
