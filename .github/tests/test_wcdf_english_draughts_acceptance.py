@@ -336,7 +336,6 @@ def test_wcdf_third_repetition_with_declared_next_move_not_moved_flag():
     assert GameManager.from_snapshot(after).get_state() == after
 
 
-
 def test_wcdf_repetition_claim_is_available_through_actual_desktop_session(monkeypatch):
     import model.game.session as session_module
 
