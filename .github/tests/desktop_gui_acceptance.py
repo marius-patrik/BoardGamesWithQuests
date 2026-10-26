@@ -392,8 +392,6 @@ def _play_one_legal_move(window):
 
 
 def _game_chooser(window):
-    from view.start_modal import StartModal
-
     return next(child for child in window.winfo_children() if isinstance(child, tk.Toplevel))
 
 
@@ -408,7 +406,7 @@ def test_terminal_result_and_postgame_actions_are_authoritative(window, game, mo
     window.update()
     state = window.window_controller.game_controller.session.snapshot()
     assert state["outcome"]["kind"] == "win"
-    assert "Black wins" not in window.game_view.turn.get() or state["outcome"]["winner"] == "black"
+    assert state["outcome"]["winner"] == "white"
     assert "wins" in window.game_view.turn.get()
     assert "resignation" in window.game_view.turn.get()
     assert "to move" not in window.game_view.turn.get()
@@ -425,12 +423,10 @@ def test_terminal_result_and_postgame_actions_are_authoritative(window, game, mo
 
 
 def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
-    from view.start_modal import StartModal
-
     _play_one_legal_move(window)
     before = window.window_controller.game_controller.session.snapshot()
     title = window.title()
-    answers = iter((None, False))
+    answers = iter((None, False, False))
     monkeypatch.setattr(
         "view.player_game_view.messagebox.askyesnocancel", lambda *a, **k: next(answers)
     )
@@ -457,9 +453,6 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
         if isinstance(widget, __import__("tkinter").ttk.Button) and widget.cget("text") == "Start"
     )
     # Closing the chooser after selecting Discard must NOT discard the running session.
-    modal.event_generate("<Escape>")
-    modal.event_generate("<WM_DELETE_WINDOW>") if False else None
-    modal_obj.master.master.event_generate("<Escape>")
     # Close using the actual Cancel button instead of mutating the game controller.
     cancel = next(
         widget
