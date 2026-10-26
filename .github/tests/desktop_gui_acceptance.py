@@ -373,7 +373,6 @@ def test_responsive_preferences_keep_saved_size_without_cropping(window):
     assert view.board_view.canvas.winfo_width() == 8 * view.board_view.square_size
 
 
-
 # #451: the widgets below run with the real bundled game engine under Xvfb.
 # Only OS-owned file/dialog responses are scripted; game state and legal moves are not mocked.
 def _play_one_legal_move(window):
@@ -395,9 +394,7 @@ def _play_one_legal_move(window):
 def _game_chooser(window):
     from view.start_modal import StartModal
 
-    return next(
-        child for child in window.winfo_children() if isinstance(child, tk.Toplevel)
-    )
+    return next(child for child in window.winfo_children() if isinstance(child, tk.Toplevel))
 
 
 @pytest.mark.parametrize("game", ["chess", "checkers"])
@@ -445,7 +442,8 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
     window.update()
     modal = _game_chooser(window)
     modal_obj = next(
-        widget for widget in modal.winfo_children()[0].winfo_children()
+        widget
+        for widget in modal.winfo_children()[0].winfo_children()
         if isinstance(widget, __import__("tkinter").ttk.Combobox)
     )
     assert set(modal_obj.cget("values")) == {"Chess", "English Draughts"}
@@ -456,8 +454,7 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
         for frame in modal.winfo_children()[0].winfo_children()
         if isinstance(frame, __import__("tkinter").ttk.Frame)
         for widget in frame.winfo_children()
-        if isinstance(widget, __import__("tkinter").ttk.Button)
-        and widget.cget("text") == "Start"
+        if isinstance(widget, __import__("tkinter").ttk.Button) and widget.cget("text") == "Start"
     )
     # Closing the chooser after selecting Discard must NOT discard the running session.
     modal.event_generate("<Escape>")
@@ -465,9 +462,9 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
     modal_obj.master.master.event_generate("<Escape>")
     # Close using the actual Cancel button instead of mutating the game controller.
     cancel = next(
-        widget for widget in modal.winfo_children()[0].winfo_children()
-        if isinstance(widget, __import__("tkinter").ttk.Button)
-        and widget.cget("text") == "Cancel"
+        widget
+        for widget in modal.winfo_children()[0].winfo_children()
+        if isinstance(widget, __import__("tkinter").ttk.Button) and widget.cget("text") == "Cancel"
     )
     cancel.invoke()
     window.update()
@@ -478,10 +475,13 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
     window.update()
     chooser = _game_chooser(window)
     body = chooser.winfo_children()[0]
-    select = next(w for w in body.winfo_children() if isinstance(w, __import__("tkinter").ttk.Combobox))
+    select = next(
+        w for w in body.winfo_children() if isinstance(w, __import__("tkinter").ttk.Combobox)
+    )
     select.set("English Draughts")
     start = next(
-        w for frame in body.winfo_children()
+        w
+        for frame in body.winfo_children()
         if isinstance(frame, __import__("tkinter").ttk.Frame)
         for w in frame.winfo_children()
         if isinstance(w, __import__("tkinter").ttk.Button) and w.cget("text") == "Start"
@@ -505,14 +505,17 @@ def test_open_cancel_and_failed_replay_preserve_session_title_and_revision(
     bad = tmp_path / "invalid.json"
     bad.write_text('{"revision": 1, "revision": 4}', encoding="utf-8")
     answers = iter((None, False, False))
-    monkeypatch.setattr(player_game_view.messagebox, "askyesnocancel", lambda *a, **k: next(answers))
+    monkeypatch.setattr(
+        player_game_view.messagebox, "askyesnocancel", lambda *a, **k: next(answers)
+    )
     filepaths = iter((str(bad), ""))
     monkeypatch.setattr(
         player_game_view.filedialog, "askopenfilename", lambda **kwargs: next(filepaths)
     )
     errors = []
     monkeypatch.setattr(
-        player_game_view.messagebox, "showerror",
+        player_game_view.messagebox,
+        "showerror",
         lambda _title, message, **kwargs: errors.append(message),
     )
     window.game_view.open_game()  # initial Cancel, file chooser must not open
@@ -542,12 +545,11 @@ def test_save_then_open_switches_title_and_retains_replay(window, tmp_path, monk
     save_before_open = tmp_path / "checkers.json"
     monkeypatch.setattr(player_game_view.messagebox, "askyesnocancel", lambda *a, **k: True)
     monkeypatch.setattr(
-        player_game_view.filedialog, "asksaveasfilename",
+        player_game_view.filedialog,
+        "asksaveasfilename",
         lambda **k: str(save_before_open),
     )
-    monkeypatch.setattr(
-        player_game_view.filedialog, "askopenfilename", lambda **k: str(chess_save)
-    )
+    monkeypatch.setattr(player_game_view.filedialog, "askopenfilename", lambda **k: str(chess_save))
     window.game_view.open_game()
     window.update()
     assert load_session(save_before_open).snapshot() == checkers
@@ -570,11 +572,13 @@ def test_save_cancel_and_io_error_abort_destructive_new_game(window, tmp_path, m
     assert window.title() == title
     errors = []
     monkeypatch.setattr(
-        player_game_view.messagebox, "showerror",
+        player_game_view.messagebox,
+        "showerror",
         lambda _title, msg, **kwargs: errors.append(msg),
     )
     monkeypatch.setattr(
-        player_game_view.filedialog, "asksaveasfilename",
+        player_game_view.filedialog,
+        "asksaveasfilename",
         lambda **k: str(tmp_path / "no-such-directory" / "bad.json"),
     )
     window.game_view.on_new_game()
@@ -594,7 +598,8 @@ def test_claim_prompt_has_real_newlines_and_game_validates_claim(window, monkeyp
         lambda title, prompt, **kwargs: prompts.append(prompt) or 1,
     )
     monkeypatch.setattr(
-        player_game_view.messagebox, "showerror",
+        player_game_view.messagebox,
+        "showerror",
         lambda title, message, **kwargs: messages.append(message),
     )
     prior = window.window_controller.game_controller.session.snapshot()
