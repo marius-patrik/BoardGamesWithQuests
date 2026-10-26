@@ -135,11 +135,14 @@ class HookInterpreter:
         self._program = RuleProgram(rules)
         self._conditions = ConditionEvaluator(queries, references)
 
-    def evaluate(self, hook: str) -> HookEvaluation:
+    def evaluate(
+        self, hook: str, work: Callable[[int], None] | None = None
+    ) -> HookEvaluation:
         """Collect validated immutable effects without authorizing or applying them.
 
         Args:
             hook: One recognized lifecycle hook.
+            work: Optional trusted aggregate reservation callback.
 
         Returns:
             Ordered matched rule identities and immutable resolved effects.
@@ -147,4 +150,6 @@ class HookInterpreter:
         Raises:
             ValueError: Hook, query resolution or resolved effect data is invalid.
         """
-        return self._program.evaluate(hook, self._conditions._queries, self._conditions._references)
+        return self._program.evaluate(
+            hook, self._conditions._queries, self._conditions._references, work=work
+        )
