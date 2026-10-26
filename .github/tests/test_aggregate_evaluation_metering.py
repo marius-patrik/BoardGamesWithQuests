@@ -49,7 +49,14 @@ def _predicate(expensive: bool, *, eligible: bool = True) -> dict:
     }
 
 
-def _manager(game: str, stage: str, expensive: bool, *, eligible_draw: bool = True) -> GameManager:
+def _manager(
+    game: str,
+    stage: str,
+    expensive: bool,
+    *,
+    eligible_draw: bool = True,
+    earlier_reward: bool = False,
+) -> GameManager:
     data = json.loads(
         resources.files("games").joinpath(game, "config.json").read_text(encoding="utf-8")
     )
@@ -81,6 +88,16 @@ def _manager(game: str, stage: str, expensive: bool, *, eligible_draw: bool = Tr
                 "reward": 7,
             }
         ]
+        if earlier_reward:
+            data["quests"].insert(
+                0,
+                {
+                    "id": "earlier-quest",
+                    "description": "Awarded before the next condition is evaluated",
+                    "when": {"op": "true"},
+                    "reward": 3,
+                },
+            )
     elif stage == "draw":
         data["rules"].append(
             {
@@ -244,3 +261,37 @@ def test_ineligible_named_claim_is_budgeted_before_terminal_dispatch():
             1,
         )
     assert expensive.get_state() == before
+
+
+@pytest.mark.parametrize("game", ["chess", "checkers"])
+def test_late_quest_exhaustion_discards_earlier_proposed_reward(game):
+    """The first quest is completed on a candidate before the second fails.
+
+    The board has already moved, its clock and revision changed, an event
+    appended, and the first quest's score/progress mutated on the discarded
+    candidate. None of those candidate updates may reach committed state.
+    """
+    cheap = _manager(game, "quest", expensive=False, earlier_reward=True)
+    baseline_cost, _ = _execute(cheap, game, "quest", MAX_EVALUATION_WORK)
+    cheap_state = cheap.get_state()
+    actor = cheap_state["events"][0]["actor"]
+    assert cheap_state["quest_scores"][actor] == 10
+    assert all(item["completed"] for item in cheap_state["quest_progress"][actor].values())
+
+    expensive = _manager(game, "quest", expensive=True, earlier_reward=True)
+    before = expensive.get_state()
+    with pytest.raises(EvaluationBudgetExceeded, match="aggregate evaluation work"):
+        _execute(expensive, game, "quest", baseline_cost + 16)
+    assert expensive.get_state() == before
+    assert before["quest_scores"] == {"white": 0, "black": 0}
+    assert all(
+        not item["completed"]
+        for participant in before["quest_progress"].values()
+        for item in participant.values()
+    )
+
+    consumed, event = _execute(expensive, game, "quest", MAX_EVALUATION_WORK)
+    assert consumed > baseline_cost + 16
+    accepted = expensive.get_state()
+    assert accepted["quest_scores"][event["actor"]] == 10
+    assert GameManager.from_snapshot(accepted).get_state() == accepted
