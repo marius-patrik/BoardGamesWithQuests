@@ -226,16 +226,19 @@ def test_capture_removal_policy_matches_wcdf_and_replay_is_atomic():
     assert GameManager.from_snapshot(after).get_state() == after
 
 
-
 def test_four_jump_king_cycle_returns_to_source_without_recapturing_a_piece():
     # The four distinct jumped men may be captured only once each (WCDF 1.20).
     # Both geometrically symmetric complete routes end back on the source.
-    game = reference_game([
-        ("king", -1, (2, 3)),
-        ("man", 1, (3, 2)), ("man", 1, (3, 4)),
-        ("man", 1, (5, 2)), ("man", 1, (5, 4)),
-        ("man", 1, (7, 0)),
-    ])
+    game = reference_game(
+        [
+            ("king", -1, (2, 3)),
+            ("man", 1, (3, 2)),
+            ("man", 1, (3, 4)),
+            ("man", 1, (5, 2)),
+            ("man", 1, (5, 4)),
+            ("man", 1, (7, 0)),
+        ]
+    )
     clockwise = Move((2, 3), (2, 3), hops=((4, 5), (6, 3), (4, 1), (2, 3)))
     anticlockwise = Move((2, 3), (2, 3), hops=((4, 1), (6, 3), (4, 5), (2, 3)))
     assert set(game.get_valid_moves()) == {clockwise, anticlockwise}
@@ -245,7 +248,10 @@ def test_four_jump_king_cycle_returns_to_source_without_recapturing_a_piece():
     event = act(game, clockwise)
     assert len(event["captured"]) == 4
     assert {tuple(s) for s in event["captured"]} == {
-        (3, 2), (3, 4), (5, 2), (5, 4),
+        (3, 2),
+        (3, 4),
+        (5, 2),
+        (5, 4),
     }
     assert piece(game.get_state(), (2, 3))["kind"] == "king"
     assert GameManager.from_snapshot(game.get_state()).get_state() == game.get_state()

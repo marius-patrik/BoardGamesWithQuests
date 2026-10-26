@@ -1316,20 +1316,22 @@ flowchart LR
   n4140519c11052d3eb --> n434bbbda8f16a09e5
   n7cf18099a208c71c7["function_definition test_capture_removal_policy_matches_wcdf_and_replay_is_atomic"]
   n4140519c11052d3eb --> n7cf18099a208c71c7
-  n17bd122232ddd3959["function_definition test_crowning_finishes_turn_and_new_king_cannot_jump_back_same_turn"]
+  n17bd122232ddd3959["function_definition test_four_jump_king_cycle_returns_to_source_without_recapturing_a_piece"]
   n4140519c11052d3eb --> n17bd122232ddd3959
-  na20ff8e8d788b8bb1["function_definition test_no_remaining_or_no_available_opponent_move_is_decisive"]
+  na20ff8e8d788b8bb1["function_definition test_crowning_finishes_turn_and_new_king_cannot_jump_back_same_turn"]
   n4140519c11052d3eb --> na20ff8e8d788b8bb1
-  nac1cfe13ae935c61b["function_definition kings"]
+  nac1cfe13ae935c61b["function_definition test_no_remaining_or_no_available_opponent_move_is_decisive"]
   n4140519c11052d3eb --> nac1cfe13ae935c61b
-  n1d60a1833d74290ed["function_definition test_wcdf_third_repetition_with_declared_next_move_not_moved_flag"]
+  n1d60a1833d74290ed["function_definition kings"]
   n4140519c11052d3eb --> n1d60a1833d74290ed
-  n2a8ae81344584e836["function_definition test_no_progress_claim_requires_both_players_forty_moves"]
+  n2a8ae81344584e836["function_definition test_wcdf_third_repetition_with_declared_next_move_not_moved_flag"]
   n4140519c11052d3eb --> n2a8ae81344584e836
-  n2f1f880551ad1a241["function_definition test_uncrowned_man_advancement_resets_no_progress_even_without_capture"]
+  n2f1f880551ad1a241["function_definition test_no_progress_claim_requires_both_players_forty_moves"]
   n4140519c11052d3eb --> n2f1f880551ad1a241
-  naa0f5017ca2157ce1["function_definition test_premature_claim_wrong_actor_timeout_and_resignation_are_atomic"]
+  naa0f5017ca2157ce1["function_definition test_uncrowned_man_advancement_resets_no_progress_even_without_capture"]
   n4140519c11052d3eb --> naa0f5017ca2157ce1
+  nd6f675e22753434dd["function_definition test_premature_claim_wrong_actor_timeout_and_resignation_are_atomic"]
+  n4140519c11052d3eb --> nd6f675e22753434dd
   nbf32064a6a26ab2df["workflows/"]
   nfad65243633b77700 --> nbf32064a6a26ab2df
   n936162c3846c6b099["agent.yml"]
