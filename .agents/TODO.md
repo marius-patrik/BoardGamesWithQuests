@@ -1,10 +1,23 @@
+## Verified implementation status (2026-10-26)
+
+- [x] [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431) — terminal-outcome patch corrected, integrated, exact-head Python 3.10–3.13 / real Xvfb green; CLOSED.
+- [x] [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) — duplicated unmetered equality removed; accepted budget/atomicity regression and exact integrated CI; CLOSED.
+- [x] [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) — responsive Tkinter layout/controls/Canvas with live compact-window screenshots and real Xvfb acceptance; CLOSED. Native frozen UX still pending #443.
+- [ ] [#456](https://github.com/marius-patrik/BoardGamesWithQuests/issues/456) — independently reproduce and meter halfmove-reset, quest and named-draw evaluation under aggregate budget; verify rejection **after partially mutated candidate**, replay and rollback.
+- [ ] [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) — keyboard board focus/navigation/play through existing controller; after #447 (now complete).
+- [ ] #436–#438/#449 complete independently verified FIDE/WCDF gameplay, clocks and quests; #439 persistence; #440 other real source-quality issues; #442/#450 replace nonproving tests with user-behavior acceptance.
+- [ ] #451–#454 complete terminal/game lifecycle, rendering/choices, quest/history hierarchy and native ttk/dialog polish **sequentially** after #448.
+- [ ] #443 actual extracted frozen interactive four-OS validation; #444 independent final audit; #445 maintainer-approved merge/promotion/PrideVer publication.
+
+**Source verified at:** `dfb35fb3e1a1f4cb42fc5889c79c4dda3162e67e`. The following docs update is not gameplay code; full CI must run again at resulting current HEAD.
+
 # TODO — v1.0.0 scoped execution queue
 
 **Parent:** [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). [PLAN](PLAN.md) owns phases and sequencing; individual linked issues own detailed instructions/acceptance. **Existing engine/GUI must be preserved and polished, not rewritten.**
 
 ## Ready now — one fix and independent audits
 
-- [ ] [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431): **Verify agent's isolated terminal patch** `0377a4e` with real pytest/Python 3.10–3.13 before integrating into #271. The isolated candidate tests passed; integration/exact-head tests pending.
+- [x] [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431): Terminal fix integrated and exact-head Python 3.10–3.13/Xvfb validated; CLOSED.
 - [x] [#432](https://github.com/marius-patrik/BoardGamesWithQuests/issues/432): Audit every current test, classify retain/adapt/replace/delete, design genuine user-facing release acceptance.
 - [x] [#433](https://github.com/marius-patrik/BoardGamesWithQuests/issues/433): Audit each production file for dead/duplicate/transitional code, readability, architectural ownership and correctness risks.
 - [x] [#434](https://github.com/marius-patrik/BoardGamesWithQuests/issues/434): Audit independent Chess/WCDF rulebook cases and historical GUI/gameplay/quest/clock parity; no new export formats.
@@ -13,11 +26,11 @@
 ## Received audit evidence and newly scoped corrections (2026-10-23)
 
 - [x] **Audit delivered** #432 — all-test inventory and replacement contract; **implementation pending** [#450](https://github.com/marius-patrik/BoardGamesWithQuests/issues/450), then parent #442.
-- [x] **Audit delivered** #433 — whole-codebase 26-finding report; **verified urgent correction pending** [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) (unmetered shadowed equality), broader #440.
+- [x] **Audit delivered** #433 — whole-codebase 26-finding report; **metered equality corrected and integrated** [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) (unmetered shadowed equality), broader #440.
 - [x] **Audit delivered** #434 — FIDE/WCDF parity; **gameplay fixes pending** [#449](https://github.com/marius-patrik/BoardGamesWithQuests/issues/449) and parent #436–#438.
-- [x] **Full GUI audit received and inspected** #435 — exact frozen Linux evidence ZIP: 41,761-byte report + 13 PNGs; all 26 UX findings routed in #435 and parent #441. The read-only audit #435 is closed. Implement sequential [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) responsive layout → [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) board keyboard → [#451](https://github.com/marius-patrik/BoardGamesWithQuests/issues/451) lifecycle/terminal → [#452](https://github.com/marius-patrik/BoardGamesWithQuests/issues/452) visual board/route choice → [#453](https://github.com/marius-patrik/BoardGamesWithQuests/issues/453) quests/history → [#454](https://github.com/marius-patrik/BoardGamesWithQuests/issues/454) dialogs/ttk/native polish. **None of those fixes are implemented yet.**
+- [x] **Full GUI audit received and inspected** #435 — exact frozen Linux evidence ZIP: 41,761-byte report + 13 PNGs; all 26 UX findings routed in #435 and parent #441. The read-only audit #435 is closed. Responsive layout [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) integrated; implement [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) board keyboard → [#451](https://github.com/marius-patrik/BoardGamesWithQuests/issues/451) lifecycle/terminal → [#452](https://github.com/marius-patrik/BoardGamesWithQuests/issues/452) visual board/route choice → [#453](https://github.com/marius-patrik/BoardGamesWithQuests/issues/453) quests/history → [#454](https://github.com/marius-patrik/BoardGamesWithQuests/issues/454) dialogs/ttk/native polish. **#447 is implemented and integrated; #448 and #451–#454 remain pending.**
 - [x] **Candidate executable verification** #431 — original regression + 128 affected tests pass on each Python 3.10–3.13, 11 Xvfb pass, [Actions run 39936337058](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/39936337058).
-- [ ] **Still outstanding:** integrate verified #431 candidate `0377a4e` into #271 only with authorization and exact-head CI; verification-only workflow stays isolated.
+- [x] **#431 integrated** into #271 with exact-head CI; verification-only workflow was not imported.
 
 ## Dependency gated implementation
 
