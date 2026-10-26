@@ -7,6 +7,7 @@ The existing 91-ply Tinsley-Long 1981 game is independently replayed through
 DesktopSession by test_desktop_full_draughts.py; keep that test unchanged.
 No alternate production move generator or modified/pruned JSON rules are used.
 """
+
 from __future__ import annotations
 
 from importlib import resources
@@ -91,53 +92,75 @@ def test_wcdfs_shipped_initial_setup_and_seven_black_opening_choices():
     assert all(sum(p["square"]) % 2 == 1 for p in state["board"])
     assert len(session.legal_actions()) == 7
     assert {tuple(m["start"]) for m in session.legal_actions()} == {
-        (2, 1), (2, 3), (2, 5), (2, 7),
+        (2, 1),
+        (2, 3),
+        (2, 5),
+        (2, 7),
     }
     assert state["config"]["pieces"]["man"]["capture_policy"]["flying"] is False
     assert state["config"]["pieces"]["king"]["capture_policy"]["flying"] is False
 
 
 def test_men_advance_forward_only_and_cannot_capture_backwards():
-    game = reference_game([
-        ("man", -1, (2, 3)), ("man", 1, (7, 0)),
-    ])
+    game = reference_game(
+        [
+            ("man", -1, (2, 3)),
+            ("man", 1, (7, 0)),
+        ]
+    )
     assert set(game.get_valid_moves()) == {
-        Move((2, 3), (3, 2)), Move((2, 3), (3, 4)),
+        Move((2, 3), (3, 2)),
+        Move((2, 3), (3, 4)),
     }
     reject(game, {"type": "move", "move": Move((2, 3), (1, 2)).to_json()})
-    game = reference_game([
-        ("man", -1, (4, 3)), ("man", 1, (3, 2)),
-        ("man", 1, (7, 0)),
-    ])
+    game = reference_game(
+        [
+            ("man", -1, (4, 3)),
+            ("man", 1, (3, 2)),
+            ("man", 1, (7, 0)),
+        ]
+    )
     # A diagonally backward enemy is not capturable by an uncrowned man.
     assert Move((4, 3), (2, 1)) not in game.get_valid_moves()
 
 
 def test_king_moves_and_captures_one_step_or_one_jump_not_flying():
-    game = reference_game([
-        ("king", -1, (2, 3)), ("man", 1, (7, 0)),
-    ])
+    game = reference_game(
+        [
+            ("king", -1, (2, 3)),
+            ("man", 1, (7, 0)),
+        ]
+    )
     legal = set(game.get_valid_moves())
     assert {
-        Move((2, 3), (1, 2)), Move((2, 3), (1, 4)),
-        Move((2, 3), (3, 2)), Move((2, 3), (3, 4)),
+        Move((2, 3), (1, 2)),
+        Move((2, 3), (1, 4)),
+        Move((2, 3), (3, 2)),
+        Move((2, 3), (3, 4)),
     } == legal
     assert Move((2, 3), (4, 5)) not in legal
-    game = reference_game([
-        ("king", -1, (2, 3)), ("man", 1, (1, 2)),
-        ("man", 1, (7, 0)),
-    ])
+    game = reference_game(
+        [
+            ("king", -1, (2, 3)),
+            ("man", 1, (1, 2)),
+            ("man", 1, (7, 0)),
+        ]
+    )
     assert Move((2, 3), (0, 1)) in game.get_valid_moves()
     assert all(m.hops[0] == (0, 1) for m in game.get_valid_moves())
 
 
 def test_compulsory_captures_allow_shorter_and_longer_alternatives():
     # WCDF 1.20: no maximum-capture rule; either full route is legal.
-    game = reference_game([
-        ("man", -1, (2, 3)),
-        ("man", 1, (3, 2)), ("man", 1, (3, 4)),
-        ("man", 1, (5, 6)), ("man", 1, (7, 0)),
-    ])
+    game = reference_game(
+        [
+            ("man", -1, (2, 3)),
+            ("man", 1, (3, 2)),
+            ("man", 1, (3, 4)),
+            ("man", 1, (5, 6)),
+            ("man", 1, (7, 0)),
+        ]
+    )
     short = Move((2, 3), (4, 1))
     long = Move((2, 3), (6, 7), hops=((4, 5), (6, 7)))
     assert set(game.get_valid_moves()) == {short, long}
@@ -154,12 +177,16 @@ def test_compulsory_captures_allow_shorter_and_longer_alternatives():
 
 
 def test_two_distinct_complete_capture_sequences_with_same_end_are_not_collapsed():
-    game = reference_game([
-        ("man", -1, (2, 3)),
-        ("man", 1, (3, 2)), ("man", 1, (5, 2)),
-        ("man", 1, (3, 4)), ("man", 1, (5, 4)),
-        ("man", 1, (7, 0)),
-    ])
+    game = reference_game(
+        [
+            ("man", -1, (2, 3)),
+            ("man", 1, (3, 2)),
+            ("man", 1, (5, 2)),
+            ("man", 1, (3, 4)),
+            ("man", 1, (5, 4)),
+            ("man", 1, (7, 0)),
+        ]
+    )
     left = Move((2, 3), (6, 3), hops=((4, 1), (6, 3)))
     right = Move((2, 3), (6, 3), hops=((4, 5), (6, 3)))
     assert {left, right} == set(game.get_valid_moves())
@@ -175,11 +202,14 @@ def test_capture_removal_policy_matches_wcdf_and_replay_is_atomic():
     # In short-jump geometry each landing has the start row's parity, while
     # jumped-square rows have the opposite parity: no already-captured square
     # can serve as a later landing. This is not an FMJD/flying-king rule.
-    game = reference_game([
-        ("king", -1, (2, 3)),
-        ("man", 1, (3, 4)), ("man", 1, (5, 6)),
-        ("man", 1, (7, 0)),
-    ])
+    game = reference_game(
+        [
+            ("king", -1, (2, 3)),
+            ("man", 1, (3, 4)),
+            ("man", 1, (5, 6)),
+            ("man", 1, (7, 0)),
+        ]
+    )
     assert all(
         game.get_state()["config"]["pieces"][kind]["capture_policy"]["deferred_removal"]
         for kind in ("man", "king")
@@ -197,10 +227,14 @@ def test_capture_removal_policy_matches_wcdf_and_replay_is_atomic():
 
 
 def test_crowning_finishes_turn_and_new_king_cannot_jump_back_same_turn():
-    game = reference_game([
-        ("man", -1, (5, 0)), ("man", 1, (6, 1)),
-        ("man", 1, (6, 3)), ("man", 1, (7, 6)),
-    ])
+    game = reference_game(
+        [
+            ("man", -1, (5, 0)),
+            ("man", 1, (6, 1)),
+            ("man", 1, (6, 3)),
+            ("man", 1, (7, 6)),
+        ]
+    )
     assert set(game.get_valid_moves()) == {Move((5, 0), (7, 2))}
     event = act(game, Move((5, 0), (7, 2)))
     assert event["captured"] == [[6, 1]]
@@ -253,7 +287,9 @@ def test_wcdf_third_repetition_with_declared_next_move_not_moved_flag():
     assert game.get_state() == before
     event = claim(game, "threefold", intended=CYCLE[3])
     assert event["outcome"] == {
-        "kind": "draw", "cause": "threefold", "winner": None,
+        "kind": "draw",
+        "cause": "threefold",
+        "winner": None,
     }
     after = game.get_state()
     assert after["board"] == before["board"]  # A prospective move is NOT played.
@@ -278,16 +314,21 @@ def test_no_progress_claim_requires_both_players_forty_moves():
     assert eligible["halfmove_count"] == 80
     event = claim(game, "forty-move")
     assert event["outcome"] == {
-        "kind": "draw", "cause": "forty-move", "winner": None,
+        "kind": "draw",
+        "cause": "forty-move",
+        "winner": None,
     }
     assert GameManager.from_snapshot(game.get_state()).get_state() == game.get_state()
 
 
 def test_uncrowned_man_advancement_resets_no_progress_even_without_capture():
-    game = reference_game([
-        ("king", -1, (2, 1)), ("man", -1, (2, 5)),
-        ("king", 1, (5, 6)),
-    ])
+    game = reference_game(
+        [
+            ("king", -1, (2, 1)),
+            ("man", -1, (2, 5)),
+            ("king", 1, (5, 6)),
+        ]
+    )
     act(game, Move((2, 1), (3, 0)))
     act(game, Move((5, 6), (4, 7)))
     assert game.get_state()["halfmove_count"] == 2
