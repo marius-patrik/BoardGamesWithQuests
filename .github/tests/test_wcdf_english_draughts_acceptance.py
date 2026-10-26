@@ -226,6 +226,31 @@ def test_capture_removal_policy_matches_wcdf_and_replay_is_atomic():
     assert GameManager.from_snapshot(after).get_state() == after
 
 
+
+def test_four_jump_king_cycle_returns_to_source_without_recapturing_a_piece():
+    # The four distinct jumped men may be captured only once each (WCDF 1.20).
+    # Both geometrically symmetric complete routes end back on the source.
+    game = reference_game([
+        ("king", -1, (2, 3)),
+        ("man", 1, (3, 2)), ("man", 1, (3, 4)),
+        ("man", 1, (5, 2)), ("man", 1, (5, 4)),
+        ("man", 1, (7, 0)),
+    ])
+    clockwise = Move((2, 3), (2, 3), hops=((4, 5), (6, 3), (4, 1), (2, 3)))
+    anticlockwise = Move((2, 3), (2, 3), hops=((4, 1), (6, 3), (4, 5), (2, 3)))
+    assert set(game.get_valid_moves()) == {clockwise, anticlockwise}
+    before = game.get_state()
+    reject(game, {"type": "move", "move": Move((2, 3), (4, 5)).to_json()})
+    assert game.get_state() == before
+    event = act(game, clockwise)
+    assert len(event["captured"]) == 4
+    assert {tuple(s) for s in event["captured"]} == {
+        (3, 2), (3, 4), (5, 2), (5, 4),
+    }
+    assert piece(game.get_state(), (2, 3))["kind"] == "king"
+    assert GameManager.from_snapshot(game.get_state()).get_state() == game.get_state()
+
+
 def test_crowning_finishes_turn_and_new_king_cannot_jump_back_same_turn():
     game = reference_game(
         [
@@ -346,7 +371,6 @@ def test_premature_claim_wrong_actor_timeout_and_resignation_are_atomic():
             action_id=f"premature-{name}",
         )
     reject(game, {"type": "timeout"}, action_id="premature-timeout")
-    reject(game, {"type": "resign"}, actor="white", action_id="wrong-resigner") if False else None
     # Resignation by either side is supported; the active player resigns here.
     before = game.get_state()
     event = game.submit_action("black", 0, "black-resigns", {"type": "resign"}, 1)
