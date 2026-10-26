@@ -7,7 +7,7 @@ from tkinter import ttk
 from typing import Any
 
 from controller.controller import GameController
-from controller.window_controller import WindowController
+from controller.window_controller import WindowController, display_game_name
 from model.game.games import DEFAULT_GAME, available_games
 from model.game.session import DesktopSession
 from view.player_game_view import PlayerGameView
@@ -62,7 +62,7 @@ def _offer_modal(
 ) -> None:
     def start(game: str) -> None:
         controller.game_controller.new_game(game)
-        controller.set_status(f"Playing {controller.game_title().split(' - ', 1)[-1]}.")
+        controller.set_status(f"Playing {display_game_name(game)}.")
         root.game_view.reload(clean=True)
 
     def cancel() -> None:
