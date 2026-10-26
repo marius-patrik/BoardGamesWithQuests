@@ -89,6 +89,7 @@ class PlayerGameView(ttk.Frame):
         self.status = tk.StringVar(value="Ready")
         self._timer_id: str | None = None
         self._last_history: tuple[Any, ...] | None = None
+        self._presented_terminal_key: tuple[str, int] | None = None
         # Save-point metadata only: never a duplicate authoritative game snapshot.
         self._saved_state_key = self._state_key(self.session.snapshot())
         self._build_layout(square_size)
@@ -360,12 +361,18 @@ class PlayerGameView(ttk.Frame):
         self.bottom_player.refresh(state, remaining)
         game_name = display_game_name(self.session.game)
         if finished:
+            terminal_key = self._state_key(state)
+            if self._presented_terminal_key != terminal_key:
+                self._presented_terminal_key = terminal_key
+                self.window_controller.set_status(
+                    "Game finished. You can save the result or start another game."
+                )
             self.turn.set(f"{game_name} · {outcome_description(state)}")
-            self.status.set("Game finished. You can save this result or start another game.")
         else:
+            self._presented_terminal_key = None
             active = "White" if state["active_side"] == 1 else "Black"
             self.turn.set(f"{game_name} · {active} to move · turn {state['revision'] + 1}")
-            self.status.set(self.window_controller.status_message or "Ready")
+        self.status.set(self.window_controller.status_message or "Ready")
         self._refresh_actions(state)
         self.quest_list.refresh(state)
 
@@ -496,7 +503,8 @@ class PlayerGameView(ttk.Frame):
         except (OSError, NotationError, ValueError) as error:
             messagebox.showerror("Notation", str(error), parent=self)
             return
-        self.status.set(f"Exported notation to {destination}")
+        self.window_controller.set_status(f"Exported notation to {destination}")
+        self.status.set(self.window_controller.status_message)
 
     def export_game(self) -> bool:
         """Use the existing validated atomic session exporter as the Save action."""
@@ -511,7 +519,8 @@ class PlayerGameView(ttk.Frame):
             messagebox.showerror("Save game", f"Unable to save the game:\n{error}", parent=self)
             return False
         self._mark_clean()
-        self.status.set(f"Saved game to {destination}")
+        self.window_controller.set_status(f"Saved game to {destination}")
+        self.status.set(self.window_controller.status_message)
         return True
 
     def _quit(self) -> None:
