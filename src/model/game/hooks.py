@@ -135,9 +135,7 @@ class HookInterpreter:
         self._program = RuleProgram(rules)
         self._conditions = ConditionEvaluator(queries, references)
 
-    def evaluate(
-        self, hook: str, work: Callable[[int], None] | None = None
-    ) -> HookEvaluation:
+    def evaluate(self, hook: str, work: Callable[[int], None] | None = None) -> HookEvaluation:
         """Collect validated immutable effects without authorizing or applying them.
 
         Args:
