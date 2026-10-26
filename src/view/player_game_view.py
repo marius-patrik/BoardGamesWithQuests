@@ -27,6 +27,7 @@ OUTCOME_CAUSES = {
     "threefold": "threefold repetition",
     "fivefold": "fivefold repetition",
     "fifty-move": "fifty-move rule",
+    "forty-move": "40-move rule",
     "seventy-five-move": "seventy-five-move rule",
     "dead-material": "insufficient mating material",
     "same-color-bishops": "insufficient mating material",
@@ -61,12 +62,29 @@ def outcome_description(state: dict[str, Any]) -> str:
 
 
 def configured_draw_claims(state: dict[str, Any]) -> list[str]:
-    """Only advertise names defined by the current authoritative rulebook."""
+    """Discover configured claims from event.claim comparisons, not rule names."""
+
+    def declares_claim(condition: Any, claim: str) -> bool:
+        if isinstance(condition, list):
+            return any(declares_claim(child, claim) for child in condition)
+        if not isinstance(condition, dict):
+            return False
+        if condition.get("op") == "compare" and condition.get("relation") == "eq":
+            left, right = condition.get("left"), condition.get("right")
+            if (left == {"ref": "event.claim"} and right == claim) or (
+                right == {"ref": "event.claim"} and left == claim
+            ):
+                return True
+        return any(
+            declares_claim(value, claim)
+            for key, value in condition.items()
+            if key in ("args", "arg")
+        )
+
     return [
         rule["id"]
         for rule in state["config"]["rules"]
-        if rule["hook"] == "outcome"
-        and ("claim" in rule["id"] or "threefold" in rule["id"] or "fifty" in rule["id"])
+        if rule["hook"] == "outcome" and declares_claim(rule["when"], rule["id"])
     ]
 
 
