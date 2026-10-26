@@ -336,6 +336,55 @@ def test_wcdf_third_repetition_with_declared_next_move_not_moved_flag():
     assert GameManager.from_snapshot(after).get_state() == after
 
 
+
+def test_wcdf_repetition_claim_is_available_through_actual_desktop_session(monkeypatch):
+    import model.game.session as session_module
+
+    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data["board"]["starting_pieces"] = [
+        {"piece": "king", "color": "black", "squares": [[2, 1]]},
+        {"piece": "king", "color": "white", "squares": [[5, 6]]},
+    ]
+    definition = validate_definition(data)
+    monkeypatch.setattr(session_module, "load_bundled_definition", lambda _: definition)
+    desktop = DesktopSession("checkers")
+    for index in range(7):
+        move = CYCLE[index % 4].to_json()
+        before = desktop.snapshot()
+        assert move in desktop.legal_actions()
+        desktop.submit(
+            before["participants"][str(before["active_side"])],
+            before["revision"],
+            {"type": "move", "move": move},
+            action_id=f"wcdf-desktop-ply-{index}",
+        )
+    before = desktop.snapshot()
+    actor = before["participants"][str(before["active_side"])]
+    with pytest.raises(TransitionError):
+        desktop.submit(
+            actor,
+            before["revision"],
+            {"type": "claim_draw", "claim": "threefold", "intended_move": None},
+            action_id="wcdf-desktop-invalid-claim",
+        )
+    assert desktop.snapshot() == before
+    accepted = desktop.submit(
+        actor,
+        before["revision"],
+        {
+            "type": "claim_draw",
+            "claim": "threefold",
+            "intended_move": CYCLE[3].to_json(),
+        },
+        action_id="wcdf-desktop-legal-claim",
+    )
+    result = accepted["state"]
+    assert result["outcome"]["kind"] == "draw"
+    assert result["outcome"]["cause"] == "threefold"
+    assert result["board"] == before["board"]
+    assert DesktopSession.recover(result).snapshot() == result
+
+
 def test_no_progress_claim_requires_both_players_forty_moves():
     # WCDF 1.32.2: 40 previous moves *per player* = 80 halfmoves, no man
     # advance and no piece removed. King quiet moves increment the counter.
