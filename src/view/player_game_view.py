@@ -70,7 +70,6 @@ def configured_draw_claims(state: dict[str, Any]) -> list[str]:
     ]
 
 
-
 class PlayerGameView(ttk.Frame):
     """Game board, participants, quests and move history; no independent authority."""
 
@@ -407,7 +406,9 @@ class PlayerGameView(ttk.Frame):
         try:
             restored = load_session(source)
         except (OSError, SessionFileError, ValueError, TypeError) as error:
-            messagebox.showerror("Open game", f"Unable to open the saved game:\n{error}", parent=self)
+            messagebox.showerror(
+                "Open game", f"Unable to open the saved game:\n{error}", parent=self
+            )
             return
         # Replay verification has completed before the live session is replaced.
         self.window_controller.game_controller.session = restored
