@@ -606,3 +606,23 @@ def test_claim_prompt_has_real_newlines_and_game_validates_claim(window, monkeyp
     window.window_controller.game_controller.new_game("checkers")
     window.game_view.reload(clean=True)
     assert window.game_view.action_buttons["Claim draw"].instate(["disabled"])
+
+
+def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monkeypatch):
+    from view import player_game_view
+    from model.game.persistence import load_session
+
+    monkeypatch.setattr(player_game_view.messagebox, "askyesno", lambda *args, **kwargs: True)
+    window.game_view.resign_game()
+    state = window.window_controller.game_controller.session.snapshot()
+    target = tmp_path / "final-game.json"
+    monkeypatch.setattr(
+        player_game_view.filedialog, "asksaveasfilename", lambda **kwargs: str(target)
+    )
+    assert window.game_view.export_game() is True
+    window.game_view.refresh()  # same periodic refresh path as the running Tk clock
+    assert "Saved game" in window.game_view.status.get()
+    assert target.name in window.game_view.status.get()
+    assert load_session(target).snapshot() == state
+    assert "wins" in window.game_view.turn.get()
+    assert window.game_view.action_buttons["Resign"].instate(["disabled"])
