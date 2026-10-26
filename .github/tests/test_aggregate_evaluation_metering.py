@@ -49,9 +49,7 @@ def _predicate(expensive: bool, *, eligible: bool = True) -> dict:
     }
 
 
-def _manager(
-    game: str, stage: str, expensive: bool, *, eligible_draw: bool = True
-) -> GameManager:
+def _manager(game: str, stage: str, expensive: bool, *, eligible_draw: bool = True) -> GameManager:
     data = json.loads(
         resources.files("games").joinpath(game, "config.json").read_text(encoding="utf-8")
     )
@@ -215,9 +213,11 @@ def test_ineligible_named_claim_is_budgeted_before_terminal_dispatch():
     with cheap._operation(cheap_budget):
         with pytest.raises(TransitionError, match="named draw claim is not eligible"):
             cheap.submit_action(
-                "white", 0, "ineligible-claim", {
-                    "type": "claim_draw", "claim": "budgeted-draw", "intended_move": None
-                }, 1
+                "white",
+                0,
+                "ineligible-claim",
+                {"type": "claim_draw", "claim": "budgeted-draw", "intended_move": None},
+                1,
             )
     assert cheap.get_state() == cheap_before
 
@@ -226,17 +226,21 @@ def test_ineligible_named_claim_is_budgeted_before_terminal_dispatch():
     with expensive._operation(EvaluationBudget(cheap_budget.used + 16)):
         with pytest.raises(EvaluationBudgetExceeded, match="aggregate evaluation work"):
             expensive.submit_action(
-                "white", 0, "ineligible-claim", {
-                    "type": "claim_draw", "claim": "budgeted-draw", "intended_move": None
-                }, 1
+                "white",
+                0,
+                "ineligible-claim",
+                {"type": "claim_draw", "claim": "budgeted-draw", "intended_move": None},
+                1,
             )
     assert expensive.get_state() == before
     # The full budget still rejects the claim for its actual ineligibility,
     # rather than converting budget failure into a draw or a terminal event.
     with pytest.raises(TransitionError, match="named draw claim is not eligible"):
         expensive.submit_action(
-            "white", 0, "ineligible-claim", {
-                "type": "claim_draw", "claim": "budgeted-draw", "intended_move": None
-            }, 1
+            "white",
+            0,
+            "ineligible-claim",
+            {"type": "claim_draw", "claim": "budgeted-draw", "intended_move": None},
+            1,
         )
     assert expensive.get_state() == before
