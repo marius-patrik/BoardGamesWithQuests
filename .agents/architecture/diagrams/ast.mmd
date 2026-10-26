@@ -714,6 +714,12 @@ flowchart LR
   nfc5161158ee90ee7f --> nbc3bdcbed42ce17e8
   n2da179b6608c25e5d["function_definition test_unavailable_draw_claim_does_not_mutate_authoritative_game"]
   nfc5161158ee90ee7f --> n2da179b6608c25e5d
+  n594ce90cdf05ae6a6["decorated_definition"]
+  nfc5161158ee90ee7f --> n594ce90cdf05ae6a6
+  nffddf580be5188798["function_definition test_responsive_live_board_actions_and_clocks"]
+  nfc5161158ee90ee7f --> nffddf580be5188798
+  nd1d8a3fba1fe46875["function_definition test_responsive_preferences_keep_saved_size_without_cropping"]
+  nfc5161158ee90ee7f --> nd1d8a3fba1fe46875
   nd6487c9d1884235b7["docs_site_acceptance.py"]
   nc9f5868186eb03f66 --> nd6487c9d1884235b7
   n3cc24defd97d2b5a4["function_definition test_repository_navigation_and_every_file_page"]
@@ -736,6 +742,18 @@ flowchart LR
   nd6487c9d1884235b7 --> n58b967f0eaae700a3
   n9ac875346544c2d84["function_definition test_image_and_diagram_viewers_offer_an_accessible_modal"]
   nd6487c9d1884235b7 --> n9ac875346544c2d84
+  n268d23e59de41ad81["evidence/"]
+  nc9f5868186eb03f66 --> n268d23e59de41ad81
+  n4d0d62da18c1f4279["ux447/"]
+  n268d23e59de41ad81 --> n4d0d62da18c1f4279
+  n89c9b95721befbd09["after-checkers-1100x760-70pct.png"]
+  n4d0d62da18c1f4279 --> n89c9b95721befbd09
+  ndab07efff07355585["after-checkers-840x640-70pct.png"]
+  n4d0d62da18c1f4279 --> ndab07efff07355585
+  ne81cbba44e1e9f2d7["after-chess-1100x760-70pct.png"]
+  n4d0d62da18c1f4279 --> ne81cbba44e1e9f2d7
+  n1042c779ec1fee65f["after-chess-840x640-70pct.png"]
+  n4d0d62da18c1f4279 --> n1042c779ec1fee65f
   n6f2a93de9994e922b["fixtures/"]
   nc9f5868186eb03f66 --> n6f2a93de9994e922b
   n8b64577ca0364a8e1["chess_budget_reproducer.json"]
@@ -1906,26 +1924,28 @@ flowchart LR
   nb34153b2ca614d5c6 --> n70c2b29eb71eefe9e
   n8c525235f0b60bbad["function_definition _fit_canvas"]
   nb34153b2ca614d5c6 --> n8c525235f0b60bbad
-  nc5b8dcf68a9f37857["function_definition set_selection"]
+  nc5b8dcf68a9f37857["function_definition fit_to"]
   nb34153b2ca614d5c6 --> nc5b8dcf68a9f37857
-  nf8a32cced396b9195["function_definition set_in_check"]
+  nf8a32cced396b9195["function_definition set_selection"]
   nb34153b2ca614d5c6 --> nf8a32cced396b9195
-  nfd171cc98c1c25601["function_definition redraw"]
+  nfd171cc98c1c25601["function_definition set_in_check"]
   nb34153b2ca614d5c6 --> nfd171cc98c1c25601
-  ne7ae81401f32cef7b["function_definition _origin"]
+  ne7ae81401f32cef7b["function_definition redraw"]
   nb34153b2ca614d5c6 --> ne7ae81401f32cef7b
-  ncdc44b01beb0e5d90["function_definition _draw_piece"]
+  ncdc44b01beb0e5d90["function_definition _origin"]
   nb34153b2ca614d5c6 --> ncdc44b01beb0e5d90
-  nfe514c9a7218ea172["function_definition _draw_target"]
+  nfe514c9a7218ea172["function_definition _draw_piece"]
   nb34153b2ca614d5c6 --> nfe514c9a7218ea172
-  n4e7c013682b4773a2["function_definition _draw_coordinates"]
+  n4e7c013682b4773a2["function_definition _draw_target"]
   nb34153b2ca614d5c6 --> n4e7c013682b4773a2
-  n71297d5aaa2ce1597["decorated_definition"]
-  nb34153b2ca614d5c6 --> n71297d5aaa2ce1597
-  n06993ec56b27f62d5["function_definition _file_label"]
-  nb34153b2ca614d5c6 --> n06993ec56b27f62d5
-  n221df7f1ba89772f9["function_definition _clicked"]
+  n40df8c13f91f021fd["function_definition _draw_coordinates"]
+  nb34153b2ca614d5c6 --> n40df8c13f91f021fd
+  n83b0848b697fda9ce["decorated_definition"]
+  nb34153b2ca614d5c6 --> n83b0848b697fda9ce
+  n221df7f1ba89772f9["function_definition _file_label"]
   nb34153b2ca614d5c6 --> n221df7f1ba89772f9
+  n3a3db93a9f114574b["function_definition _clicked"]
+  nb34153b2ca614d5c6 --> n3a3db93a9f114574b
   n8a992638c42fe6679["player_game_view.py"]
   n19674d186673a22e3 --> n8a992638c42fe6679
   n3098448b9daa7b449["class_definition PlayerGameView"]
@@ -1938,40 +1958,48 @@ flowchart LR
   n8a992638c42fe6679 --> n6f5fcd6a81c34bb12
   n2b8caf14d595114e7["function_definition _build_layout"]
   n8a992638c42fe6679 --> n2b8caf14d595114e7
-  nccbbccbd10a2a4a48["function_definition on_square_clicked"]
+  nccbbccbd10a2a4a48["function_definition add_action"]
   n8a992638c42fe6679 --> nccbbccbd10a2a4a48
-  n8c3a99d52217c6d7f["function_definition reload"]
+  n8c3a99d52217c6d7f["function_definition _resize_board"]
   n8a992638c42fe6679 --> n8c3a99d52217c6d7f
-  nf459540a9e6833d73["function_definition on_new_game"]
+  nf459540a9e6833d73["function_definition _fit_board"]
   n8a992638c42fe6679 --> nf459540a9e6833d73
-  nb6c1fc4decedd7fb2["decorated_definition"]
-  n8a992638c42fe6679 --> nb6c1fc4decedd7fb2
-  n6e5e4a74f1113fc31["function_definition _label"]
+  n298881d23aa4e449f["function_definition _scroll_quests"]
+  n8a992638c42fe6679 --> n298881d23aa4e449f
+  n6e5e4a74f1113fc31["function_definition on_square_clicked"]
   n8a992638c42fe6679 --> n6e5e4a74f1113fc31
-  n4f1bdbba5988ce973["function_definition refresh"]
+  n4f1bdbba5988ce973["function_definition reload"]
   n8a992638c42fe6679 --> n4f1bdbba5988ce973
-  n5fdceb72018feb16a["function_definition apply_preferences"]
+  n5fdceb72018feb16a["function_definition on_new_game"]
   n8a992638c42fe6679 --> n5fdceb72018feb16a
-  na0c730b8f503b9b47["function_definition open_game"]
-  n8a992638c42fe6679 --> na0c730b8f503b9b47
-  n2a9ea6567a33b47fa["function_definition resign_game"]
+  n14f5a008d591a8b9f["decorated_definition"]
+  n8a992638c42fe6679 --> n14f5a008d591a8b9f
+  n2a9ea6567a33b47fa["function_definition _label"]
   n8a992638c42fe6679 --> n2a9ea6567a33b47fa
-  n91bf7e2fa40db9cd9["function_definition claim_draw"]
+  n91bf7e2fa40db9cd9["function_definition refresh"]
   n8a992638c42fe6679 --> n91bf7e2fa40db9cd9
-  n439e230728c690a5a["function_definition export_notation"]
+  n439e230728c690a5a["function_definition apply_preferences"]
   n8a992638c42fe6679 --> n439e230728c690a5a
-  n0eaff7c692a83a2b2["function_definition export_game"]
+  n0eaff7c692a83a2b2["function_definition open_game"]
   n8a992638c42fe6679 --> n0eaff7c692a83a2b2
-  n235fe4e42ba9701f9["function_definition _quit"]
+  n235fe4e42ba9701f9["function_definition resign_game"]
   n8a992638c42fe6679 --> n235fe4e42ba9701f9
-  n5d8cdd2cfcac03f9e["function_definition stop_auto_refresh"]
+  n5d8cdd2cfcac03f9e["function_definition claim_draw"]
   n8a992638c42fe6679 --> n5d8cdd2cfcac03f9e
-  n7436ae29a52b70a72["function_definition start_auto_refresh"]
+  n7436ae29a52b70a72["function_definition export_notation"]
   n8a992638c42fe6679 --> n7436ae29a52b70a72
-  n3f55c83209743d2d1["function_definition _auto_refresh"]
+  n3f55c83209743d2d1["function_definition export_game"]
   n8a992638c42fe6679 --> n3f55c83209743d2d1
-  n6d46b9f13c808248d["function_definition destroy"]
+  n6d46b9f13c808248d["function_definition _quit"]
   n8a992638c42fe6679 --> n6d46b9f13c808248d
+  n8d6a2af2e52b531bb["function_definition stop_auto_refresh"]
+  n8a992638c42fe6679 --> n8d6a2af2e52b531bb
+  n8b7ac34af0abd782a["function_definition start_auto_refresh"]
+  n8a992638c42fe6679 --> n8b7ac34af0abd782a
+  n1b9a8d3d7979ef6ef["function_definition _auto_refresh"]
+  n8a992638c42fe6679 --> n1b9a8d3d7979ef6ef
+  n1b35be644e7afc7ec["function_definition destroy"]
+  n8a992638c42fe6679 --> n1b35be644e7afc7ec
   n1ce2d2fa47f167aa0["player_view.py"]
   n19674d186673a22e3 --> n1ce2d2fa47f167aa0
   n127a020b096f9b48a["function_definition format_seconds"]

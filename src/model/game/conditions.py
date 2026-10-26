@@ -125,29 +125,6 @@ class ConditionEvaluator:
             )
         return left == right
 
-    @staticmethod
-    def _equal(left: Any, right: Any) -> bool:
-        """Compare JSON values recursively without boolean or numeric coercion.
-
-        Args:
-            left: First validated JSON value.
-            right: Second validated JSON value.
-
-        Returns:
-            Whether every corresponding value has the same type and value.
-        """
-        if type(left) is not type(right):
-            return False
-        if isinstance(left, list):
-            return len(left) == len(right) and all(
-                ConditionEvaluator._equal(a, b) for a, b in zip(left, right)
-            )
-        if isinstance(left, dict):
-            return left.keys() == right.keys() and all(
-                ConditionEvaluator._equal(value, right[key]) for key, value in left.items()
-            )
-        return left == right
-
     def _compare(self, relation: str, left: Any, right: Any) -> bool:
         """Apply an explicitly selected comparison without JSON type coercion.
 

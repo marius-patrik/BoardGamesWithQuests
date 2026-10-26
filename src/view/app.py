@@ -19,6 +19,8 @@ APPLICATION_TITLE = "BoardGamesWithQuests"
 
 def build_application(root: tk.Tk, game: str = DEFAULT_GAME, show_modal: bool = True) -> tk.Tk:
     root.title(f"{APPLICATION_TITLE} - {game}")
+    # Enforced compact viewport: smaller windows must not silently crop gameplay.
+    root.minsize(840, 640)
     style = ttk.Style(root)
     style.theme_use(style.theme_names()[0])
     games = available_games()

@@ -270,3 +270,104 @@ def test_unavailable_draw_claim_does_not_mutate_authoritative_game(window, monke
     assert messages, "rejected claim must display a player-visible explanation"
     assert window.window_controller.game_controller.session.snapshot() == before
     assert window.window_controller.game_controller.session.snapshot()["outcome"] is None
+
+
+@pytest.mark.parametrize("game", ["chess", "checkers"])
+@pytest.mark.parametrize("size", [(840, 640), (1024, 768), (1100, 760), (1440, 900)])
+def test_responsive_live_board_actions_and_clocks(tmp_path, monkeypatch, game, size):
+    """Check actual Tk bounds and play two moves across a viewport resize."""
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    root = tk.Tk()
+    root.geometry(f"{size[0]}x{size[1]}")
+    build_application(root, game, show_modal=False)
+    try:
+        root.update_idletasks()
+        root.update()
+        view = root.game_view
+        canvas = view.board_view.canvas
+
+        def inside(widget):
+            assert widget.winfo_ismapped()
+            assert widget.winfo_width() > 0 and widget.winfo_height() > 0
+            assert widget.winfo_rootx() >= root.winfo_rootx()
+            assert widget.winfo_rooty() >= root.winfo_rooty()
+            assert widget.winfo_rootx() + widget.winfo_width() <= (
+                root.winfo_rootx() + root.winfo_width()
+            )
+            assert widget.winfo_rooty() + widget.winfo_height() <= (
+                root.winfo_rooty() + root.winfo_height()
+            )
+
+        def inspect():
+            assert root.winfo_width() >= 840 and root.winfo_height() >= 640
+            board = view.board_view
+            assert board.square_size >= 32
+            assert canvas.winfo_width() >= board.board.cols * board.square_size
+            assert canvas.winfo_height() >= board.board.rows * board.square_size
+            for widget in (
+                canvas,
+                view.top_player,
+                view.bottom_player,
+                view.quest_viewport,
+                view.history,
+            ):
+                inside(widget)
+            for name in (
+                "New game",
+                "Open game",
+                "Settings",
+                "Quit",
+                "Claim draw",
+                "Resign",
+                "Export",
+                "Notation",
+            ):
+                button = view.action_buttons[name]
+                inside(button)
+                # Confirm all actions belong to a live Tk keyboard focus cycle.
+                assert button.tk.call("tk_focusNext", button._w)
+
+        def play_one_move():
+            session = root.window_controller.game_controller.session
+            actions = session.legal_actions()
+            move = next(
+                action
+                for action in actions
+                if sum(
+                    a["start"] == action["start"] and a["hops"][-1] == action["hops"][-1]
+                    for a in actions
+                )
+                == 1
+            )
+            click_canvas(root, *move["start"])
+            assert root.window_controller.game_controller.selected_square == tuple(move["start"])
+            click_canvas(root, *move["hops"][-1])
+
+        inspect()
+        before = root.window_controller.game_controller.session.snapshot()["revision"]
+        play_one_move()
+        assert root.window_controller.game_controller.session.snapshot()["revision"] == before + 1
+        root.geometry("1100x760" if size[0] == 840 else "840x640")
+        root.update_idletasks()
+        root.update()
+        inspect()
+        play_one_move()
+        assert root.window_controller.game_controller.session.snapshot()["revision"] == before + 2
+    finally:
+        root.game_view.stop_auto_refresh()
+        root.destroy()
+
+
+def test_responsive_preferences_keep_saved_size_without_cropping(window):
+    view = window.game_view
+    window.geometry("840x640")
+    window.update()
+    view.apply_preferences({"board_size": 88, "show_coordinates": True})
+    window.update()
+    assert view._preferred_board_size == 88
+    assert 32 <= view.board_view.square_size < 88
+    compact_size = view.board_view.square_size
+    window.geometry("1440x900")
+    window.update()
+    assert compact_size < view.board_view.square_size <= 88
+    assert view.board_view.canvas.winfo_width() == 8 * view.board_view.square_size

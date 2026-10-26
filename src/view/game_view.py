@@ -99,6 +99,25 @@ class BoardView(ttk.Frame):
             height=self.board.rows * self.square_size,
         )
 
+    def fit_to(self, width: int, height: int, preferred_size: int) -> None:
+        """Keep the complete board visible without changing saved preferences.
+
+        The Canvas remains the renderer, and its actual square_size continues to
+        govern both drawing and click-to-square mapping.
+        """
+        size = max(
+            1,
+            min(
+                preferred_size,
+                max(1, width // self.board.cols),
+                max(1, height // self.board.rows),
+            ),
+        )
+        if size != self.square_size:
+            self.square_size = size
+            self._fit_canvas()
+            self.redraw()
+
     def set_selection(self, selected: Optional[Square], targets: List[Square]) -> None:
         """Show which piece is selected and where it may go.
 
