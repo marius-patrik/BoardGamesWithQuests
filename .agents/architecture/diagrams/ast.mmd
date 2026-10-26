@@ -778,6 +778,8 @@ flowchart LR
   nc9f5868186eb03f66 --> n6f2a93de9994e922b
   n8b64577ca0364a8e1["chess_budget_reproducer.json"]
   n6f2a93de9994e922b --> n8b64577ca0364a8e1
+  n3f452c23e8a49d396["chess_opera_game_1858.json"]
+  n6f2a93de9994e922b --> n3f452c23e8a49d396
   ndcf15fb8fa3f70468["test_aggregate_evaluation_metering.py"]
   nc9f5868186eb03f66 --> ndcf15fb8fa3f70468
   n299f6393853a07bb4["function_definition _predicate"]
@@ -800,6 +802,66 @@ flowchart LR
   ndcf15fb8fa3f70468 --> na9bcc18067ed233e6
   n0b4557f81d607b461["function_definition test_late_quest_exhaustion_discards_earlier_proposed_reward"]
   ndcf15fb8fa3f70468 --> n0b4557f81d607b461
+  n22fd8c8b5bae0ad9c["test_chess_fide_full_definition.py"]
+  nc9f5868186eb03f66 --> n22fd8c8b5bae0ad9c
+  n289c41f4b4d8988d0["function_definition square"]
+  n22fd8c8b5bae0ad9c --> n289c41f4b4d8988d0
+  nb1d1afe67c4336cc8["function_definition fen_placement"]
+  n22fd8c8b5bae0ad9c --> nb1d1afe67c4336cc8
+  n4103b239c4edbe049["function_definition choice"]
+  n22fd8c8b5bae0ad9c --> n4103b239c4edbe049
+  nd3baed408e7649b0a["function_definition play"]
+  n22fd8c8b5bae0ad9c --> nd3baed408e7649b0a
+  ndf7d371b429a11273["function_definition reject"]
+  n22fd8c8b5bae0ad9c --> ndf7d371b429a11273
+  n650224d19bae5c76a["function_definition reference_position"]
+  n22fd8c8b5bae0ad9c --> n650224d19bae5c76a
+  n659bf806ed16030ed["function_definition reference_move"]
+  n22fd8c8b5bae0ad9c --> n659bf806ed16030ed
+  na040e08e88527583b["function_definition test_full_initial_position_and_exact_legal_move_set"]
+  n22fd8c8b5bae0ad9c --> na040e08e88527583b
+  ndd3335d0491fac942["function_definition test_published_morphy_opera_game_reaches_exact_checkmate_and_replays"]
+  n22fd8c8b5bae0ad9c --> ndd3335d0491fac942
+  n73eab16bbe3af1fca["function_definition test_live_en_passant_captures_correct_pawn"]
+  n22fd8c8b5bae0ad9c --> n73eab16bbe3af1fca
+  n6b556077b4062755a["function_definition test_en_passant_right_expires_after_any_intervening_move"]
+  n22fd8c8b5bae0ad9c --> n6b556077b4062755a
+  naf15bb97193ee04da["function_definition test_live_kingside_castling_moves_rook_and_consumes_rights"]
+  n22fd8c8b5bae0ad9c --> naf15bb97193ee04da
+  nd2847fdb1a8bd216c["function_definition test_castling_blocked_from_initial_position"]
+  n22fd8c8b5bae0ad9c --> nd2847fdb1a8bd216c
+  n64ce412ac24d093ea["function_definition test_en_passant_discovered_check_is_illegal_with_full_rulebook"]
+  n22fd8c8b5bae0ad9c --> n64ce412ac24d093ea
+  nb0ac177b83f00c9d7["function_definition test_pinned_rook_cannot_expose_own_king"]
+  n22fd8c8b5bae0ad9c --> nb0ac177b83f00c9d7
+  ne4dd64acc6f2287fc["decorated_definition"]
+  n22fd8c8b5bae0ad9c --> ne4dd64acc6f2287fc
+  n991256cbd0c7e0913["function_definition test_all_four_promotions_with_full_rules_and_deterministic_replay"]
+  n22fd8c8b5bae0ad9c --> n991256cbd0c7e0913
+  nf42d05ece9d9d1dec["function_definition test_threefold_claim_rejected_at_two_appearances_and_accepted_at_three"]
+  n22fd8c8b5bae0ad9c --> nf42d05ece9d9d1dec
+  nee2bc452d52e670a6["function_definition test_fivefold_repetition_automatically_ends_real_game"]
+  n22fd8c8b5bae0ad9c --> nee2bc452d52e670a6
+  n8c0ec837f5c45e1e9["decorated_definition"]
+  n22fd8c8b5bae0ad9c --> n8c0ec837f5c45e1e9
+  n187922baf1111d8aa["function_definition test_dead_king_only_and_single_minor_positions_end_as_draw"]
+  n22fd8c8b5bae0ad9c --> n187922baf1111d8aa
+  n52da06234a6b12d86["function_definition test_resignation_against_king_without_mating_possibility_is_draw"]
+  n22fd8c8b5bae0ad9c --> n52da06234a6b12d86
+  n778ab5ce0753d64d9["function_definition test_timeout_with_mating_material_awards_other_participant"]
+  n22fd8c8b5bae0ad9c --> n778ab5ce0753d64d9
+  n2d119cadfcb911c79["function_definition test_fifty_move_claim_from_opening_is_rejected_atomically"]
+  n22fd8c8b5bae0ad9c --> n2d119cadfcb911c79
+  n04b4060e250aa0a92["function_definition test_full_rulebook_stalemate_after_queen_move_is_not_checkmate"]
+  n22fd8c8b5bae0ad9c --> n04b4060e250aa0a92
+  n5a1e23beb268bd07d["decorated_definition"]
+  n22fd8c8b5bae0ad9c --> n5a1e23beb268bd07d
+  n575f1b369791fa992["function_definition test_castling_out_of_through_or_into_check_is_forbidden"]
+  n22fd8c8b5bae0ad9c --> n575f1b369791fa992
+  n188df591a513b8319["function_definition test_promotion_capture_replaces_pawn_and_removes_captured_rook"]
+  n22fd8c8b5bae0ad9c --> n188df591a513b8319
+  nfb1625b92483d2dbb["function_definition test_intended_move_threefold_claim_does_not_commit_proposed_move"]
+  n22fd8c8b5bae0ad9c --> nfb1625b92483d2dbb
   n47f5bb700a9d81e04["test_chess_reference_gameplay.py"]
   nc9f5868186eb03f66 --> n47f5bb700a9d81e04
   n31f4c65ccf7a5090a["function_definition configuration"]
