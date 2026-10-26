@@ -22,7 +22,7 @@ from model.game.manager import GameManager, TransitionError
 from model.game.move import Move
 
 
-def _predicate(expensive: bool) -> dict:
+def _predicate(expensive: bool, *, eligible: bool = True) -> dict:
     """Both predicates are true and have equal static JSON size.
 
     Only the number of dynamically compared elements differs. The cheap
@@ -32,17 +32,26 @@ def _predicate(expensive: bool) -> dict:
     """
     left = list(range(72))
     right = left.copy()
-    if not expensive:
-        right[0] = -1
+    if eligible:
+        # Two successful predicates: full equality or immediate inequality.
+        if not expensive:
+            right[0] = -1
+        relation = "eq" if expensive else "ne"
+    else:
+        # Two rejected claims: the first unequal element is early or late.
+        right[-1 if expensive else 0] = -1
+        relation = "eq"
     return {
         "op": "compare",
-        "relation": "eq" if expensive else "ne",
+        "relation": relation,
         "left": left,
         "right": right,
     }
 
 
-def _manager(game: str, stage: str, expensive: bool) -> GameManager:
+def _manager(
+    game: str, stage: str, expensive: bool, *, eligible_draw: bool = True
+) -> GameManager:
     data = json.loads(
         resources.files("games").joinpath(game, "config.json").read_text(encoding="utf-8")
     )
@@ -79,7 +88,7 @@ def _manager(game: str, stage: str, expensive: bool) -> GameManager:
             {
                 "id": "budgeted-draw",
                 "hook": "outcome",
-                "when": _predicate(expensive),
+                "when": _predicate(expensive, eligible=eligible_draw),
                 "effects": [
                     {
                         "op": "propose_outcome",
@@ -192,3 +201,42 @@ def test_ineligible_named_draw_claim_is_rejected_without_side_effects():
             1,
         )
     assert manager.get_state() == original
+
+
+def test_ineligible_named_claim_is_budgeted_before_terminal_dispatch():
+    """A failed claim must meter the selected predicate before terminal hooks.
+
+    This cannot pass accidentally through a *later* full outcome evaluation:
+    the rejected named claim exits before that outcome hook is dispatched.
+    """
+    cheap = _manager("chess", "draw", expensive=False, eligible_draw=False)
+    cheap_before = cheap.get_state()
+    cheap_budget = EvaluationBudget(MAX_EVALUATION_WORK)
+    with cheap._operation(cheap_budget):
+        with pytest.raises(TransitionError, match="named draw claim is not eligible"):
+            cheap.submit_action(
+                "white", 0, "ineligible-claim", {
+                    "type": "claim_draw", "claim": "budgeted-draw", "intended_move": None
+                }, 1
+            )
+    assert cheap.get_state() == cheap_before
+
+    expensive = _manager("chess", "draw", expensive=True, eligible_draw=False)
+    before = expensive.get_state()
+    with expensive._operation(EvaluationBudget(cheap_budget.used + 16)):
+        with pytest.raises(EvaluationBudgetExceeded, match="aggregate evaluation work"):
+            expensive.submit_action(
+                "white", 0, "ineligible-claim", {
+                    "type": "claim_draw", "claim": "budgeted-draw", "intended_move": None
+                }, 1
+            )
+    assert expensive.get_state() == before
+    # The full budget still rejects the claim for its actual ineligibility,
+    # rather than converting budget failure into a draw or a terminal event.
+    with pytest.raises(TransitionError, match="named draw claim is not eligible"):
+        expensive.submit_action(
+            "white", 0, "ineligible-claim", {
+                "type": "claim_draw", "claim": "budgeted-draw", "intended_move": None
+            }, 1
+        )
+    assert expensive.get_state() == before
