@@ -6,7 +6,6 @@ from typing import Any
 
 from controller.controller import GameController
 
-
 GAME_LABELS = {"chess": "Chess", "checkers": "English Draughts"}
 
 
@@ -68,7 +67,9 @@ class WindowController:
                 rows = result["game_state"]["config"]["board"]["rows"]
                 route = [move["start"], *move["hops"]]
                 self.set_status(
-                    "Played " + " → ".join(square_name(tuple(square), rows) for square in route) + "."
+                    "Played "
+                    + " → ".join(square_name(tuple(square), rows) for square in route)
+                    + "."
                 )
         elif action in ("selected", "reselected"):
             state = self.game_controller.session.snapshot()
