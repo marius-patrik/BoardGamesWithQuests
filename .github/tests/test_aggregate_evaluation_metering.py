@@ -12,7 +12,11 @@ from importlib import resources
 
 import pytest
 
-from model.game.capture_policy import EvaluationBudget, EvaluationBudgetExceeded, MAX_EVALUATION_WORK
+from model.game.capture_policy import (
+    EvaluationBudget,
+    EvaluationBudgetExceeded,
+    MAX_EVALUATION_WORK,
+)
 from model.game.definition import validate_definition
 from model.game.manager import GameManager, TransitionError
 from model.game.move import Move
@@ -97,11 +101,7 @@ def _manager(game: str, stage: str, expensive: bool) -> GameManager:
 def _request(state: dict, game: str, stage: str) -> dict:
     if stage == "draw":
         return {"type": "claim_draw", "claim": "budgeted-draw", "intended_move": None}
-    move = (
-        Move((6, 4), (5, 4))
-        if game == "chess"
-        else Move((2, 3), (3, 2))
-    )
+    move = Move((6, 4), (5, 4)) if game == "chess" else Move((2, 3), (3, 2))
     return {"type": "move", "move": move.to_json()}
 
 
@@ -185,8 +185,10 @@ def test_ineligible_named_draw_claim_is_rejected_without_side_effects():
     original = manager.get_state()
     with pytest.raises(TransitionError, match="name one configured outcome rule"):
         manager.submit_action(
-            "white", 0, "wrong-draw", {
-                "type": "claim_draw", "claim": "not-a-rule", "intended_move": None
-            }, 1
+            "white",
+            0,
+            "wrong-draw",
+            {"type": "claim_draw", "claim": "not-a-rule", "intended_move": None},
+            1,
         )
     assert manager.get_state() == original
