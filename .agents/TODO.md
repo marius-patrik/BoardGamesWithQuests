@@ -1,12 +1,21 @@
+## Maintainer release-scope change — 2026-10-26
+
+- [x] **Drop optional keyboard-controlled board:** #448 closed `not_planned`; no dispatch 04A, pointer gameplay and standard Tk buttons/dialogs remain v1 supported.
+- [ ] **Run dispatch 04B now:** [#456](https://github.com/marius-patrik/BoardGamesWithQuests/issues/456) for budgeted halfmove/quest/claim evaluation and late-mutation rollback, Python 3.10–3.13 evidence.
+- [ ] **Concurrent separate-owner UI:** [#451](https://github.com/marius-patrik/BoardGamesWithQuests/issues/451) terminal/lifecycle/safe New/Open, if available. Then #452–#454 sequentially.
+- [ ] Complete FIDE/WCDF gameplay, coherent code, behavioral acceptance, four extracted native apps, final independent audit and publication (#436–#445/#449/#450).
+
+---
+
 ## Verified implementation status (2026-10-26)
 
 - [x] [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431) — terminal-outcome patch corrected, integrated, exact-head Python 3.10–3.13 / real Xvfb green; CLOSED.
 - [x] [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) — duplicated unmetered equality removed; accepted budget/atomicity regression and exact integrated CI; CLOSED.
 - [x] [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) — responsive Tkinter layout/controls/Canvas with live compact-window screenshots and real Xvfb acceptance; CLOSED. Native frozen UX still pending #443.
 - [ ] [#456](https://github.com/marius-patrik/BoardGamesWithQuests/issues/456) — independently reproduce and meter halfmove-reset, quest and named-draw evaluation under aggregate budget; verify rejection **after partially mutated candidate**, replay and rollback.
-- [ ] [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) — keyboard board focus/navigation/play through existing controller; after #447 (now complete).
+- [x] [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) — **closed not planned**: optional keyboard-controlled board play is deferred from v1 per maintainer, not a release gate.
 - [ ] #436–#438/#449 complete independently verified FIDE/WCDF gameplay, clocks and quests; #439 persistence; #440 other real source-quality issues; #442/#450 replace nonproving tests with user-behavior acceptance.
-- [ ] #451–#454 complete terminal/game lifecycle, rendering/choices, quest/history hierarchy and native ttk/dialog polish **sequentially** after #448.
+- [ ] #451–#454 complete terminal/game lifecycle, pointer-based action choices, quest/history hierarchy and native ttk/dialog polish **sequentially after #447; #448 is not a prerequisite**.
 - [ ] #443 actual extracted frozen interactive four-OS validation; #444 independent final audit; #445 maintainer-approved merge/promotion/PrideVer publication.
 
 **Source verified at:** `dfb35fb3e1a1f4cb42fc5889c79c4dda3162e67e`. The following docs update is not gameplay code; full CI must run again at resulting current HEAD.
@@ -28,7 +37,7 @@
 - [x] **Audit delivered** #432 — all-test inventory and replacement contract; **implementation pending** [#450](https://github.com/marius-patrik/BoardGamesWithQuests/issues/450), then parent #442.
 - [x] **Audit delivered** #433 — whole-codebase 26-finding report; **metered equality corrected and integrated** [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) (unmetered shadowed equality), broader #440.
 - [x] **Audit delivered** #434 — FIDE/WCDF parity; **gameplay fixes pending** [#449](https://github.com/marius-patrik/BoardGamesWithQuests/issues/449) and parent #436–#438.
-- [x] **Full GUI audit received and inspected** #435 — exact frozen Linux evidence ZIP: 41,761-byte report + 13 PNGs; all 26 UX findings routed in #435 and parent #441. The read-only audit #435 is closed. Responsive layout [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) integrated; implement [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) board keyboard → [#451](https://github.com/marius-patrik/BoardGamesWithQuests/issues/451) lifecycle/terminal → [#452](https://github.com/marius-patrik/BoardGamesWithQuests/issues/452) visual board/route choice → [#453](https://github.com/marius-patrik/BoardGamesWithQuests/issues/453) quests/history → [#454](https://github.com/marius-patrik/BoardGamesWithQuests/issues/454) dialogs/ttk/native polish. **#447 is implemented and integrated; #448 and #451–#454 remain pending.**
+- [x] **Full GUI audit received and inspected** #435 — exact frozen Linux evidence ZIP: 41,761-byte report + 13 PNGs; all 26 UX findings routed in #435 and parent #441. The read-only audit #435 is closed. Responsive layout [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) integrated; skip [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) keyboard board (closed not planned); implement [#451](https://github.com/marius-patrik/BoardGamesWithQuests/issues/451) lifecycle/terminal → [#452](https://github.com/marius-patrik/BoardGamesWithQuests/issues/452) visual board/route choice → [#453](https://github.com/marius-patrik/BoardGamesWithQuests/issues/453) quests/history → [#454](https://github.com/marius-patrik/BoardGamesWithQuests/issues/454) dialogs/ttk/native polish. **#447 implemented; #448 deliberately deferred; #451–#454 remain pending.**
 - [x] **Candidate executable verification** #431 — original regression + 128 affected tests pass on each Python 3.10–3.13, 11 Xvfb pass, [Actions run 39936337058](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/39936337058).
 - [x] **#431 integrated** into #271 with exact-head CI; verification-only workflow was not imported.
 
