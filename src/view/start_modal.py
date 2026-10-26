@@ -9,6 +9,8 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Callable, List, Optional
 
+from controller.window_controller import display_game_name
+
 
 class StartModal:
     """A modal dialog offering the shipped configurations, settings, and Start."""
@@ -20,6 +22,7 @@ class StartModal:
         default: str,
         on_start: Callable[[str], None],
         on_settings: Optional[Callable[[], None]] = None,
+        on_cancel: Optional[Callable[[], None]] = None,
     ):
         """Build the modal.
 
@@ -32,9 +35,11 @@ class StartModal:
         """
         self.on_start = on_start
         self.on_settings = on_settings
-        self.choice = tk.StringVar(
-            value=default if default in games else (games[0] if games else "")
-        )
+        self.on_cancel = on_cancel
+        self._accepted = False
+        self._game_ids = {display_game_name(game): game for game in games}
+        selected = default if default in games else (games[0] if games else "")
+        self.choice = tk.StringVar(value=display_game_name(selected))
 
         self.window = tk.Toplevel(master)
         self.window.title("New game")
@@ -51,7 +56,7 @@ class StartModal:
         ttk.Label(body, text="Choose a game to play.").pack(pady=(0, 14))
 
         self.selector = ttk.Combobox(
-            body, textvariable=self.choice, values=games, state="readonly", width=28
+            body, textvariable=self.choice, values=list(self._game_ids), state="readonly", width=28
         )
         self.selector.pack(pady=(0, 18))
 
@@ -107,7 +112,10 @@ class StartModal:
         Returns:
             None
         """
-        chosen = self.choice.get()
+        chosen = self._game_ids.get(self.choice.get())
+        if chosen is None:
+            return
+        self._accepted = True
         self.close()
         self.on_start(chosen)
 
@@ -122,6 +130,8 @@ class StartModal:
         except tk.TclError:  # pragma: no cover - the grab may already be gone
             pass
         self.window.destroy()
+        if not self._accepted and self.on_cancel is not None:
+            self.on_cancel()
 
     def wait(self) -> None:
         """Hold the modal open until it is answered.

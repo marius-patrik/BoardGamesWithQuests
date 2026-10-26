@@ -9,13 +9,65 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 from typing import Any
 
-from controller.window_controller import WindowController
+from controller.window_controller import WindowController, display_game_name
 from model.game.preferences import DEFAULTS, PreferencesError, load_preferences
 from view.game_view import BoardView
 from view.player_view import PlayerView
 from view.quest_view import QuestList
 
 REFRESH_INTERVAL_MS = 500
+
+OUTCOME_CAUSES = {
+    "resignation": "resignation",
+    "resignation-draw": "resignation with insufficient winning material",
+    "checkmate": "checkmate",
+    "stalemate": "stalemate",
+    "no_legal_moves": "no legal moves",
+    "timeout": "time expired",
+    "threefold": "threefold repetition",
+    "fivefold": "fivefold repetition",
+    "fifty-move": "fifty-move rule",
+    "seventy-five-move": "seventy-five-move rule",
+    "dead-material": "insufficient mating material",
+    "same-color-bishops": "insufficient mating material",
+}
+
+
+def outcome_description(state: dict[str, Any]) -> str:
+    """Render the committed result, without inferring terminal rules in the UI."""
+    outcome = state["outcome"]
+    if outcome is None:
+        return ""
+    cause = outcome["cause"]
+    if cause.startswith("timeout-draw-"):
+        reason = "time expired with insufficient winning material"
+    elif cause.startswith("timeout-win-"):
+        reason = "time expired"
+    else:
+        reason = OUTCOME_CAUSES.get(cause, cause.replace("_", " ").replace("-", " "))
+    if outcome["kind"] == "draw":
+        return f"Draw — {reason}."
+    winner = outcome.get("winner")
+    if winner is None:
+        return f"Game finished — {reason}."
+    participants = state["participants"]
+    if winner in (1, "1", participants["1"]):
+        side = "White"
+    elif winner in (-1, "-1", participants["-1"]):
+        side = "Black"
+    else:
+        side = str(winner)
+    return f"{side} wins — {reason}."
+
+
+def configured_draw_claims(state: dict[str, Any]) -> list[str]:
+    """Only advertise names defined by the current authoritative rulebook."""
+    return [
+        rule["id"]
+        for rule in state["config"]["rules"]
+        if rule["hook"] == "outcome"
+        and ("claim" in rule["id"] or "threefold" in rule["id"] or "fifty" in rule["id"])
+    ]
 
 
 class PlayerGameView(ttk.Frame):
@@ -37,8 +89,39 @@ class PlayerGameView(ttk.Frame):
         self.status = tk.StringVar(value="Ready")
         self._timer_id: str | None = None
         self._last_history: tuple[Any, ...] | None = None
+        self._presented_terminal_key: tuple[str, int] | None = None
+        # Save-point metadata only: never a duplicate authoritative game snapshot.
+        self._saved_state_key = self._state_key(self.session.snapshot())
         self._build_layout(square_size)
         self.refresh()
+
+    @staticmethod
+    def _state_key(state: dict[str, Any]) -> tuple[str, int]:
+        return state["game_id"], state["revision"]
+
+    def _mark_clean(self) -> None:
+        self._saved_state_key = self._state_key(self.session.snapshot())
+
+    def _has_unsaved_progress(self) -> bool:
+        state = self.session.snapshot()
+        return state["revision"] > 0 and self._state_key(state) != self._saved_state_key
+
+    def _confirm_replace(self) -> bool:
+        """Protect an in-progress game before another session can replace it."""
+        if not self._has_unsaved_progress():
+            return True
+        answer = messagebox.askyesnocancel(
+            "Unsaved game",
+            "Save the current game before replacing it?\n\n"
+            "Yes: Save a game file\nNo: Discard progress\nCancel: Keep playing",
+            parent=self,
+            default=messagebox.CANCEL,
+        )
+        if answer is None:
+            return False
+        if answer is False:
+            return True
+        return self.export_game()
 
     @property
     def session(self):
@@ -204,6 +287,8 @@ class PlayerGameView(ttk.Frame):
             self.quest_viewport.yview_scroll(direction * max(1, abs(event.delta) // 120), "units")
 
     def on_square_clicked(self, position: tuple[int, int]) -> None:
+        if self.session.snapshot()["outcome"] is not None:
+            return
         result = self.window_controller.on_square_clicked(position)
         if result["action"] == "choose":
             options = result["options"]
@@ -228,38 +313,68 @@ class PlayerGameView(ttk.Frame):
             self.status.set(result.get("message", "Invalid move."))
         self.refresh()
 
-    def reload(self) -> None:
+    def reload(self, *, clean: bool = False) -> None:
         """Redraw after a real game switch or session reset."""
         self.window_controller.game_controller.reset_selection()
+        if clean:
+            self._mark_clean()
         self._last_history = None
         self.board_view.set_selection(None, [])
+        self.winfo_toplevel().title(self.window_controller.game_title())
         self.refresh()
 
     def on_new_game(self) -> None:
+        if not self._confirm_replace():
+            return
         if self.on_new_game_request is not None:
             self.on_new_game_request()
             return
         self.window_controller.game_controller.new_game()
-        self.reload()
+        self.reload(clean=True)
 
     @staticmethod
     def _label(square: list[int], rows: int) -> str:
         return f"{chr(ord('a') + square[1])}{rows - square[0]}"
 
+    def _refresh_actions(self, state: dict[str, Any]) -> None:
+        """Controls reflect the committed session, not a parallel UI lifecycle."""
+        finished = state["outcome"] is not None
+        availability = {
+            "Resign": not finished,
+            "Claim draw": not finished and bool(configured_draw_claims(state)),
+            "Notation": state["config"]["exports"] in (["pgn"], ["pdn"]),
+        }
+        for label, enabled in availability.items():
+            self.action_buttons[label].configure(state="normal" if enabled else "disabled")
+        # New/Open/Export/Settings/Quit remain available after the result is committed.
+
     def refresh(self) -> None:
         state = self.session.snapshot()
+        finished = state["outcome"] is not None
+        if finished:
+            self.window_controller.game_controller.reset_selection()
+            self.board_view.set_selection(None, [])
         self.board_view.refresh(self.session.board_projection())
         self._fit_board()
         remaining = self.session.clock_remaining()
         self.top_player.refresh(state, remaining)
         self.bottom_player.refresh(state, remaining)
-        active = "White" if state["active_side"] == 1 else "Black"
-        self.turn.set(f"{self.session.game} · {active} to move · turn {state['revision'] + 1}")
+        game_name = display_game_name(self.session.game)
+        if finished:
+            terminal_key = self._state_key(state)
+            if self._presented_terminal_key != terminal_key:
+                self._presented_terminal_key = terminal_key
+                self.window_controller.set_status(
+                    "Game finished. You can save the result or start another game."
+                )
+            self.turn.set(f"{game_name} · {outcome_description(state)}")
+        else:
+            self._presented_terminal_key = None
+            active = "White" if state["active_side"] == 1 else "Black"
+            self.turn.set(f"{game_name} · {active} to move · turn {state['revision'] + 1}")
+        self.status.set(self.window_controller.status_message or "Ready")
+        self._refresh_actions(state)
         self.quest_list.refresh(state)
-        if state["outcome"] is not None:
-            self.status.set(f"Game ended: {state['outcome']['kind']}")
-        elif self.window_controller.status_message:
-            self.status.set(self.window_controller.status_message)
 
         events = tuple(json.dumps(entry, sort_keys=True) for entry in state["events"])
         if events != self._last_history:
@@ -290,17 +405,22 @@ class PlayerGameView(ttk.Frame):
         self.board_view.refresh()
 
     def open_game(self) -> None:
+        if not self._confirm_replace():
+            return
         source = filedialog.askopenfilename(parent=self, filetypes=[("Saved games", "*.json")])
         if not source:
             return
         try:
             restored = load_session(source)
         except (OSError, SessionFileError, ValueError, TypeError) as error:
-            messagebox.showerror("Open game", str(error), parent=self)
+            messagebox.showerror(
+                "Open game", f"Unable to open the saved game:\n{error}", parent=self
+            )
             return
+        # Replay verification has completed before the live session is replaced.
         self.window_controller.game_controller.session = restored
-        self.reload()
-        self.status.set(f"Restored {restored.game}.")
+        self.window_controller.set_status(f"Opened {display_game_name(restored.game)}.")
+        self.reload(clean=True)
 
     def resign_game(self) -> None:
         """End the active player's game using the authoritative result rules."""
@@ -325,21 +445,19 @@ class PlayerGameView(ttk.Frame):
         state = self.session.snapshot()
         if state["outcome"] is not None:
             return
-        named = [
-            rule["id"]
-            for rule in state["config"]["rules"]
-            if rule["hook"] == "outcome"
-            and ("claim" in rule["id"] or "threefold" in rule["id"] or "fifty" in rule["id"])
-        ]
+        named = configured_draw_claims(state)
         if not named:
             messagebox.showinfo(
                 "Claim draw", "No draw claims are defined for this game.", parent=self
             )
             return
-        options = "\\n".join(f"{i + 1}. {name}" for i, name in enumerate(named))
+        options = "\n".join(
+            f"{i + 1}. {OUTCOME_CAUSES.get(name, name.replace('-', ' ').title())}"
+            for i, name in enumerate(named)
+        )
         selected = simpledialog.askinteger(
             "Claim draw",
-            "Select a configured draw claim:\\n" + options,
+            "Choose a draw claim (the game verifies eligibility):\n" + options,
             parent=self,
             minvalue=1,
             maxvalue=len(named),
@@ -358,7 +476,9 @@ class PlayerGameView(ttk.Frame):
                 },
             )
         except (ValueError, RuntimeError) as error:
-            messagebox.showerror("Claim draw", str(error), parent=self)
+            messagebox.showerror(
+                "Claim draw", f"That draw claim is not available:\n{error}", parent=self
+            )
             return
         self.window_controller.game_controller.reset_selection()
         self.refresh()
@@ -383,20 +503,25 @@ class PlayerGameView(ttk.Frame):
         except (OSError, NotationError, ValueError) as error:
             messagebox.showerror("Notation", str(error), parent=self)
             return
-        self.status.set(f"Exported notation to {destination}")
+        self.window_controller.set_status(f"Exported notation to {destination}")
+        self.status.set(self.window_controller.status_message)
 
-    def export_game(self) -> None:
+    def export_game(self) -> bool:
+        """Use the existing validated atomic session exporter as the Save action."""
         destination = filedialog.asksaveasfilename(
             parent=self, defaultextension=".json", filetypes=[("Saved games", "*.json")]
         )
         if not destination:
-            return
+            return False
         try:
             save_session(self.session, destination)
         except (OSError, SessionFileError, ValueError) as error:
-            messagebox.showerror("Export", str(error), parent=self)
-            return
-        self.status.set(f"Exported game to {destination}")
+            messagebox.showerror("Save game", f"Unable to save the game:\n{error}", parent=self)
+            return False
+        self._mark_clean()
+        self.window_controller.set_status(f"Saved game to {destination}")
+        self.status.set(self.window_controller.status_message)
+        return True
 
     def _quit(self) -> None:
         self.stop_auto_refresh()
