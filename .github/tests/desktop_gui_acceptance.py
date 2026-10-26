@@ -401,12 +401,14 @@ def test_terminal_result_and_postgame_actions_are_authoritative(window, game, mo
         window.window_controller.game_controller.new_game(game)
         window.game_view.reload(clean=True)
     _play_one_legal_move(window)
+    before = window.window_controller.game_controller.session.snapshot()
+    expected_winner = before["participants"][str(-before["active_side"])]
     monkeypatch.setattr("view.player_game_view.messagebox.askyesno", lambda *a, **k: True)
     window.game_view.resign_game()
     window.update()
     state = window.window_controller.game_controller.session.snapshot()
     assert state["outcome"]["kind"] == "win"
-    assert state["outcome"]["winner"] == "white"
+    assert state["outcome"]["winner"] == expected_winner
     assert "wins" in window.game_view.turn.get()
     assert "resignation" in window.game_view.turn.get()
     assert "to move" not in window.game_view.turn.get()
