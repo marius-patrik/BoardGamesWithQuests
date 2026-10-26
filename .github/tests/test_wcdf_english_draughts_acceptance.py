@@ -284,11 +284,13 @@ def test_no_remaining_or_no_available_opponent_move_is_decisive():
     # A white man on (1,0) is blocked by a black man on (0,1): the
     # occupied forward square cannot be jumped off-board. All pieces are
     # on legally reachable ranks (unlike an uncrowned man on a king-row).
-    blocked = reference_game([
-        ("man", -1, (2, 1)),
-        ("man", -1, (0, 1)),
-        ("man", 1, (1, 0)),
-    ])
+    blocked = reference_game(
+        [
+            ("man", -1, (2, 1)),
+            ("man", -1, (0, 1)),
+            ("man", 1, (1, 0)),
+        ]
+    )
     event = act(blocked, Move((2, 1), (3, 2)))
     assert event["outcome"]["cause"] == "no_legal_moves"
     assert event["outcome"]["winner"] == "black"
