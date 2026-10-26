@@ -1222,9 +1222,9 @@ class GameManager:
                 before_board=before_board,
                 projected_board=board,
             )
-            extra_reset = ConditionEvaluator(queries, references).evaluate(
-                thaw_json(self.definition.halfmove_reset)
-            )
+            evaluator = ConditionEvaluator(queries, references)
+            evaluator._work = self._charge
+            extra_reset = evaluator.evaluate(thaw_json(self.definition.halfmove_reset))
             state["halfmove_count"] = (
                 0 if captures or extra_reset else observed["halfmove_count"] + 1
             )
@@ -1285,6 +1285,7 @@ class GameManager:
             projected_board=board,
         )
         evaluator = ConditionEvaluator(queries, references)
+        evaluator._work = self._charge
         for quest in self.definition.quests:
             self._charge(_json_work(quest))
             if evaluator.evaluate(thaw_json(quest["when"])):
@@ -1620,7 +1621,9 @@ class GameManager:
                 expired_side,
             )
             self._charge(_json_work(selected))
-            plan = HookInterpreter(thaw_json(selected), queries, references).evaluate("outcome")
+            plan = HookInterpreter(thaw_json(selected), queries, references).evaluate(
+                "outcome", work=self._charge
+            )
             claimed = self._result(plan.effects, state)
             if (
                 not plan.matched_rule_ids
