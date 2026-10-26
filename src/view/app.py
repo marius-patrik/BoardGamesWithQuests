@@ -18,7 +18,7 @@ APPLICATION_TITLE = "BoardGamesWithQuests"
 
 
 def build_application(root: tk.Tk, game: str = DEFAULT_GAME, show_modal: bool = True) -> tk.Tk:
-    root.title(f"{APPLICATION_TITLE} - {game}")
+    root.title(f"{APPLICATION_TITLE}")
     # Enforced compact viewport: smaller windows must not silently crop gameplay.
     root.minsize(840, 640)
     style = ttk.Style(root)
@@ -26,6 +26,7 @@ def build_application(root: tk.Tk, game: str = DEFAULT_GAME, show_modal: bool = 
     games = available_games()
     controller = WindowController(GameController(DesktopSession(game)))
     controller.start()
+    root.title(controller.game_title())
     shell = ttk.Frame(root)
     shell.pack(fill="both", expand=True)
     view = PlayerGameView(
@@ -40,7 +41,7 @@ def build_application(root: tk.Tk, game: str = DEFAULT_GAME, show_modal: bool = 
     root.available_games = games
     view.start_auto_refresh()
     if show_modal:
-        root.after(50, lambda: _offer_modal(root, games, controller))
+        root.after(50, lambda: _offer_modal(root, games, controller, initial=True))
     return root
 
 
@@ -56,12 +57,20 @@ def open_settings(root: tk.Tk, controller: WindowController) -> SettingsDialog:
     return dialog
 
 
-def _offer_modal(root: tk.Tk, games: list[str], controller: WindowController) -> None:
+def _offer_modal(
+    root: tk.Tk, games: list[str], controller: WindowController, *, initial: bool = False
+) -> None:
     def start(game: str) -> None:
         controller.game_controller.new_game(game)
-        controller.set_status(f"Playing {game}.")
-        root.title(f"{APPLICATION_TITLE} - {game}")
-        root.game_view.reload()
+        controller.set_status(f"Playing {controller.game_title().split(' - ', 1)[-1]}.")
+        root.game_view.reload(clean=True)
+
+    def cancel() -> None:
+        # The initial chooser is optional: an already running default session
+        # remains playable. Later New game cancellation is a strict no-op.
+        if initial:
+            controller.set_status("Continuing the default game.")
+            root.game_view.refresh()
 
     StartModal(
         root,
@@ -69,4 +78,5 @@ def _offer_modal(root: tk.Tk, games: list[str], controller: WindowController) ->
         default=controller.game_controller.session.game,
         on_start=start,
         on_settings=lambda: open_settings(root, controller),
+        on_cancel=cancel,
     )
