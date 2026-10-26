@@ -1,57 +1,38 @@
-## Maintainer release-scope change — 2026-10-26
+# Current action queue — Python/Tkinter v1.0.0
 
-- [x] **Drop optional keyboard-controlled board:** #448 closed `not_planned`; no dispatch 04A, pointer gameplay and standard Tk buttons/dialogs remain v1 supported.
-- [ ] **Run dispatch 04B now:** [#456](https://github.com/marius-patrik/BoardGamesWithQuests/issues/456) for budgeted halfmove/quest/claim evaluation and late-mutation rollback, Python 3.10–3.13 evidence.
-- [ ] **Concurrent separate-owner UI:** [#451](https://github.com/marius-patrik/BoardGamesWithQuests/issues/451) terminal/lifecycle/safe New/Open, if available. Then #452–#454 sequentially.
-- [ ] Complete FIDE/WCDF gameplay, coherent code, behavioral acceptance, four extracted native apps, final independent audit and publication (#436–#445/#449/#450).
+**Reconciled 2026-10-26.** Canonical parent: [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Implementation branch: bot-authored draft [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271). This queue is not evidence that an agent has been dispatched. Check the live issue and PR head before executing any item.
 
----
+## Start now (two independent ownership domains)
 
-## Verified implementation status (2026-10-26)
+- [ ] **[P0] #438 draw / claims lifecycle:** One writer for `src/model/game/manager.py`, bounded engine/session/hook modules, and narrowly necessary `src/view/player_game_view.py`/controller interactions. Complete authorized mutual draw offers and pointer-selected canonical intended-move claims; prove replay/rollback/idempotency/clock/quest with actual Tk GUI. Coordinate #452/#453 view ownership.
+- [ ] **[P0] #439 persistence/security:** Separate writer for `src/model/game/preferences.py`, `src/model/game/persistence.py` and a distinct test module. Real restart/file-safety/invalid data checks. Treat `manager.py`, `session.py` and all `src/view/` as READ-ONLY while #438 is active; report defects needing another owner.
+- [ ] **[P0] Orchestrator integration:** Review independent task diffs against newest #271 HEAD, re-run behavioral and Xvfb checks, reconcile generated docs and issue states. Do not merge protected branches.
 
-- [x] [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431) — terminal-outcome patch corrected, integrated, exact-head Python 3.10–3.13 / real Xvfb green; CLOSED.
-- [x] [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) — duplicated unmetered equality removed; accepted budget/atomicity regression and exact integrated CI; CLOSED.
-- [x] [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) — responsive Tkinter layout/controls/Canvas with live compact-window screenshots and real Xvfb acceptance; CLOSED. Native frozen UX still pending #443.
-- [ ] [#456](https://github.com/marius-patrik/BoardGamesWithQuests/issues/456) — independently reproduce and meter halfmove-reset, quest and named-draw evaluation under aggregate budget; verify rejection **after partially mutated candidate**, replay and rollback.
-- [x] [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) — **closed not planned**: optional keyboard-controlled board play is deferred from v1 per maintainer, not a release gate.
-- [ ] #436–#438/#449 complete independently verified FIDE/WCDF gameplay, clocks and quests; #439 persistence; #440 other real source-quality issues; #442/#450 replace nonproving tests with user-behavior acceptance.
-- [ ] #451–#454 complete terminal/game lifecycle, pointer-based action choices, quest/history hierarchy and native ttk/dialog polish **sequentially after #447; #448 is not a prerequisite**.
-- [ ] #443 actual extracted frozen interactive four-OS validation; #444 independent final audit; #445 maintainer-approved merge/promotion/PrideVer publication.
+## After first integration
 
-**Source verified at:** `dfb35fb3e1a1f4cb42fc5889c79c4dda3162e67e`. The following docs update is not gameplay code; full CI must run again at resulting current HEAD.
+- [ ] [#436](https://github.com/marius-patrik/BoardGamesWithQuests/issues/436): Finish FIDE exceptional terminal/timeout and 50/75 threshold/intended-move evidence; real Chess GUI. Avoid a parallel generic engine writer.
+- [ ] [#437](https://github.com/marius-patrik/BoardGamesWithQuests/issues/437) / [#449](https://github.com/marius-patrik/BoardGamesWithQuests/issues/449): Final WCDF playable certification, actual agreement/prospective claims and capture chooser UI after #438/#452.
+- [ ] [#452](https://github.com/marius-patrik/BoardGamesWithQuests/issues/452): Human-readable pointer route/promotion choices, pieces, targets, screenshots (after #438 releases view ownership).
+- [ ] [#453](https://github.com/marius-patrik/BoardGamesWithQuests/issues/453): Quests/history/player hierarchy, 100+ moves/quests and scroll behavior (after #452).
+- [ ] [#454](https://github.com/marius-patrik/BoardGamesWithQuests/issues/454): ttk/native dialogs, settings, focus, measured redraw (last GUI batch).
+- [ ] [#440](https://github.com/marius-patrik/BoardGamesWithQuests/issues/440): Audit-sourced code-quality cleanup without functional rewrite (after shared engine stabilizes).
+- [ ] [#450](https://github.com/marius-patrik/BoardGamesWithQuests/issues/450) / [#442](https://github.com/marius-patrik/BoardGamesWithQuests/issues/442): Evidence-mapped test redesign, real public-boundary acceptance, no premature test deletion (coordinate test-file ownership).
+- [ ] [#443](https://github.com/marius-patrik/BoardGamesWithQuests/issues/443): Actual extracted frozen UI journeys on all four systems; source/binary/checksum proof.
+- [ ] [#444](https://github.com/marius-patrik/BoardGamesWithQuests/issues/444): Independent final release audit, exact HEAD.
+- [ ] [#445](https://github.com/marius-patrik/BoardGamesWithQuests/issues/445): Only after independent PASS and separate explicit maintainer approvals, merge/promote/publish and verify public PrideVer v1.0.0.
 
-# TODO — v1.0.0 scoped execution queue
+## Verified completed, not to be reassigned
 
-**Parent:** [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). [PLAN](PLAN.md) owns phases and sequencing; individual linked issues own detailed instructions/acceptance. **Existing engine/GUI must be preserved and polished, not rewritten.**
+- [x] #414 governance merged.
+- [x] Read-only #432/#433/#434/#435 audits completed (implementation recommendations remain routed above).
+- [x] #431 terminal outcome/actor fix; #446 recursive equality metering; #456 aggregate budget and rollback; #447 responsive layout; #451 lifecycle UI — all verified/integrated.
+- [x] #448 keyboard board navigation explicitly deferred (`not_planned`) and not a v1 gate.
+- [x] Chess #436 independently verified base reference test module and game fixture integrated; **full FIDE certification remains open**.
+- [x] WCDF #437/#449 scoped rules/config and acceptance tests integrated; **full user-playable certification remains open**.
 
-## Ready now — one fix and independent audits
+## Open release caveats
 
-- [x] [#431](https://github.com/marius-patrik/BoardGamesWithQuests/issues/431): Terminal fix integrated and exact-head Python 3.10–3.13/Xvfb validated; CLOSED.
-- [x] [#432](https://github.com/marius-patrik/BoardGamesWithQuests/issues/432): Audit every current test, classify retain/adapt/replace/delete, design genuine user-facing release acceptance.
-- [x] [#433](https://github.com/marius-patrik/BoardGamesWithQuests/issues/433): Audit each production file for dead/duplicate/transitional code, readability, architectural ownership and correctness risks.
-- [x] [#434](https://github.com/marius-patrik/BoardGamesWithQuests/issues/434): Audit independent Chess/WCDF rulebook cases and historical GUI/gameplay/quest/clock parity; no new export formats.
-- [x] [#435](https://github.com/marius-patrik/BoardGamesWithQuests/issues/435): Complete GUI/UX audit delivered, 13 frozen screenshots and full specification inspected; implementation remains #441/#447/#448/#451–#454.
-
-## Received audit evidence and newly scoped corrections (2026-10-23)
-
-- [x] **Audit delivered** #432 — all-test inventory and replacement contract; **implementation pending** [#450](https://github.com/marius-patrik/BoardGamesWithQuests/issues/450), then parent #442.
-- [x] **Audit delivered** #433 — whole-codebase 26-finding report; **metered equality corrected and integrated** [#446](https://github.com/marius-patrik/BoardGamesWithQuests/issues/446) (unmetered shadowed equality), broader #440.
-- [x] **Audit delivered** #434 — FIDE/WCDF parity; **gameplay fixes pending** [#449](https://github.com/marius-patrik/BoardGamesWithQuests/issues/449) and parent #436–#438.
-- [x] **Full GUI audit received and inspected** #435 — exact frozen Linux evidence ZIP: 41,761-byte report + 13 PNGs; all 26 UX findings routed in #435 and parent #441. The read-only audit #435 is closed. Responsive layout [#447](https://github.com/marius-patrik/BoardGamesWithQuests/issues/447) integrated; skip [#448](https://github.com/marius-patrik/BoardGamesWithQuests/issues/448) keyboard board (closed not planned); implement [#451](https://github.com/marius-patrik/BoardGamesWithQuests/issues/451) lifecycle/terminal → [#452](https://github.com/marius-patrik/BoardGamesWithQuests/issues/452) visual board/route choice → [#453](https://github.com/marius-patrik/BoardGamesWithQuests/issues/453) quests/history → [#454](https://github.com/marius-patrik/BoardGamesWithQuests/issues/454) dialogs/ttk/native polish. **#447 implemented; #448 deliberately deferred; #451–#454 remain pending.**
-- [x] **Candidate executable verification** #431 — original regression + 128 affected tests pass on each Python 3.10–3.13, 11 Xvfb pass, [Actions run 39936337058](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/39936337058).
-- [x] **#431 integrated** into #271 with exact-head CI; verification-only workflow was not imported.
-
-## Dependency gated implementation
-
-- [ ] [#436](https://github.com/marius-patrik/BoardGamesWithQuests/issues/436): Complete/reference-verify Chess through the existing JSON/session engine.
-- [ ] [#437](https://github.com/marius-patrik/BoardGamesWithQuests/issues/437): Complete/reference-verify English Draughts through the same engine.
-- [ ] [#438](https://github.com/marius-patrik/BoardGamesWithQuests/issues/438): Finalize clocks, quests, rewards and session terminal transitions.
-- [ ] [#439](https://github.com/marius-patrik/BoardGamesWithQuests/issues/439): Harden preferences, saved session, hostile storage, process restart and lifecycle.
-- [ ] [#440](https://github.com/marius-patrik/BoardGamesWithQuests/issues/440): Apply evidence-based source cleanup without parallel authorities or feature regressions.
-- [ ] [#441](https://github.com/marius-patrik/BoardGamesWithQuests/issues/441): Polish existing Tkinter layout/interactions with before/after screenshots and real GUI acceptance.
-- [ ] [#442](https://github.com/marius-patrik/BoardGamesWithQuests/issues/442): Replace ineffective tests with independent game, public session, real GUI and negative-boundary acceptance.
-- [ ] [#443](https://github.com/marius-patrik/BoardGamesWithQuests/issues/443): Exercise **extracted frozen GUI** and representative gameplay on all four native platforms; verify hashes/version/resources.
-- [ ] [#444](https://github.com/marius-patrik/BoardGamesWithQuests/issues/444): Independently inspect exact-head code, final CI, current-state docs/diagrams, UX and native release evidence.
-- [ ] [#445](https://github.com/marius-patrik/BoardGamesWithQuests/issues/445): Obtain maintainer approvals, protected merge/promotion, publish via PrideVer and verify public playable v1.0.0 downloads.
-
-**Out of scope:** export feature expansion, a second engine/GUI, post-release FastAPI/Supabase/React/Tauri. **Future design:** [#348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348), implementation deferred #422. Task-specific DF dispatch requested [DarkFactory #2694](https://github.com/marius-patrik/DarkFactory/issues/2694).
+- Neither Chess nor Draughts is yet `playable:true`; active v1 release remains **NO-GO**.
+- Existing Actions green at prior code SHA does **not** prove final-head or frozen GUI acceptance. Two unrelated Vercel commit statuses fail with build-rate-limit indication; confirm actual branch required checks.
+- PR #271 is DRAFT and has an outstanding CHANGES_REQUESTED review disposition; all 44 currently enumerated review threads are resolved, but resolved threads do not equal approval.
+- PR #422 is downstream/deferred V2, not to be folded into v1; source-level future contract belongs to #348.
