@@ -142,9 +142,15 @@ class GameManager:
             config["position_identity"] = thaw_json(definition.position_identity)
         if "starting_side" in definition.declared_optional_fields or definition.starting_side != 1:
             config["starting_side"] = definition.starting_side
-        if "draw_offer_timing" in definition.declared_optional_fields or definition.draw_offer_timing != "any_time":
+        if (
+            "draw_offer_timing" in definition.declared_optional_fields
+            or definition.draw_offer_timing != "any_time"
+        ):
             config["draw_offer_timing"] = definition.draw_offer_timing
-        if "draw_agreement_minimum_moves" in definition.declared_optional_fields or definition.draw_agreement_minimum_moves:
+        if (
+            "draw_agreement_minimum_moves" in definition.declared_optional_fields
+            or definition.draw_agreement_minimum_moves
+        ):
             config["draw_agreement_minimum_moves"] = definition.draw_agreement_minimum_moves
         initial = definition.clock["initial_seconds"] * 1000
         self._config = freeze_json(config)
@@ -1456,8 +1462,7 @@ class GameManager:
             return [
                 rule["id"]
                 for rule in self.definition.rules
-                if rule["hook"] == "outcome"
-                and self._mentions_claim(rule["when"], rule["id"])
+                if rule["hook"] == "outcome" and self._mentions_claim(rule["when"], rule["id"])
             ]
 
     def draw_action_availability(self) -> dict[str, Any]:
@@ -1502,9 +1507,7 @@ class GameManager:
                 if state["outcome"] is not None:
                     return {"current": False, "intended_moves": []}
                 actor = state["participants"][str(state["active_side"])]
-                legal = self._legal_moves(
-                    state, state["active_side"], state["clocks"]["anchor_ms"]
-                )
+                legal = self._legal_moves(state, state["active_side"], state["clocks"]["anchor_ms"])
             if len(legal) > 256:
                 raise TransitionError("draw claim projection has too many candidates")
             result: dict[str, Any] = {"current": False, "intended_moves": []}
@@ -1663,7 +1666,9 @@ class GameManager:
             if kind == "accept_draw" and self.definition.draw_agreement_minimum_moves:
                 moved = {event["actor"] for event in state["events"] if event["move"] is not None}
                 if len(moved) != 2:
-                    raise TransitionError("both participants must have made a move before agreeing to draw")
+                    raise TransitionError(
+                        "both participants must have made a move before agreeing to draw"
+                    )
             state["pending_draw_offer"] = None
         state["revision"] += 1
         event = {

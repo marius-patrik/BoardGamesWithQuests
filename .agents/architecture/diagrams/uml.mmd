@@ -88,6 +88,8 @@ direction LR
   ndc75e2de5a96f023b : +declared_optional_fields
   ndc75e2de5a96f023b : +starting_side
   ndc75e2de5a96f023b : +position_identity
+  ndc75e2de5a96f023b : +draw_offer_timing
+  ndc75e2de5a96f023b : +draw_agreement_minimum_moves
   ndc75e2de5a96f023b : +__post_init__()
   class n5aff68d126a7b527e["HookEvaluation"]
   n5aff68d126a7b527e : +matched_rule_ids
@@ -133,9 +135,14 @@ direction LR
   nb5eb61502c245eff4 : +get_valid_moves()
   nb5eb61502c245eff4 : +board_projection()
   nb5eb61502c245eff4 : +get_state()
+  nb5eb61502c245eff4 : +_mentions_claim()
+  nb5eb61502c245eff4 : +configured_draw_claims()
+  nb5eb61502c245eff4 : +draw_action_availability()
+  nb5eb61502c245eff4 : +draw_claim_candidates()
   nb5eb61502c245eff4 : +_action()
   nb5eb61502c245eff4 : +submit()
   nb5eb61502c245eff4 : +_result()
+  nb5eb61502c245eff4 : +_draw_agreement_action()
   nb5eb61502c245eff4 : +_terminal_action()
   nb5eb61502c245eff4 : +submit_action()
   nb5eb61502c245eff4 : +from_snapshot()
@@ -169,6 +176,9 @@ direction LR
   nf2ef9a4a783104057 : +clock_remaining()
   nf2ef9a4a783104057 : +poll_timeout()
   nf2ef9a4a783104057 : +legal_actions()
+  nf2ef9a4a783104057 : +configured_draw_claims()
+  nf2ef9a4a783104057 : +draw_claim_candidates()
+  nf2ef9a4a783104057 : +draw_action_availability()
   nf2ef9a4a783104057 : +submit()
   nf2ef9a4a783104057 : +reset()
   nf2ef9a4a783104057 : +recover()
@@ -254,6 +264,9 @@ direction LR
   nb1c381cb69b92add3 : +apply_preferences()
   nb1c381cb69b92add3 : +open_game()
   nb1c381cb69b92add3 : +resign_game()
+  nb1c381cb69b92add3 : +offer_draw()
+  nb1c381cb69b92add3 : +respond_draw()
+  nb1c381cb69b92add3 : +_choose_intended_move()
   nb1c381cb69b92add3 : +claim_draw()
   nb1c381cb69b92add3 : +export_notation()
   nb1c381cb69b92add3 : +export_game()

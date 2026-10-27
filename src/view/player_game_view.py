@@ -336,12 +336,10 @@ class PlayerGameView(ttk.Frame):
         availability = {
             "Resign": not finished,
             "Claim draw": not finished and bool(self.session.configured_draw_claims()),
-            "Offer draw": not finished and bool(
-                self.session.draw_action_availability()["offer_actors"]
-            ),
-            "Respond draw": not finished and (
-                self.session.draw_action_availability()["response_actor"] is not None
-            ),
+            "Offer draw": not finished
+            and bool(self.session.draw_action_availability()["offer_actors"]),
+            "Respond draw": not finished
+            and (self.session.draw_action_availability()["response_actor"] is not None),
             "Notation": state["config"]["exports"] in (["pgn"], ["pdn"]),
         }
         for label, enabled in availability.items():
@@ -459,8 +457,7 @@ class PlayerGameView(ttk.Frame):
             actor = actors[0]
         else:
             labels = [
-                "White" if actor == state["participants"]["1"] else "Black"
-                for actor in actors
+                "White" if actor == state["participants"]["1"] else "Black" for actor in actors
             ]
             choice = simpledialog.askinteger(
                 "Offer draw",
@@ -474,7 +471,8 @@ class PlayerGameView(ttk.Frame):
                 return
             actor = actors[choice - 1]
         if not messagebox.askyesno(
-            "Offer draw", "Offer your opponent a draw? The offer cannot be withdrawn.",
+            "Offer draw",
+            "Offer your opponent a draw? The offer cannot be withdrawn.",
             parent=self,
         ):
             return

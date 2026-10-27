@@ -90,7 +90,9 @@ class GameDefinition:
             "draw_agreement_minimum_moves",
         }:
             raise ValueError("unknown declared optional configuration fields")
-        if type(self.draw_agreement_minimum_moves) is not int or self.draw_agreement_minimum_moves not in (0, 1):
+        if type(
+            self.draw_agreement_minimum_moves
+        ) is not int or self.draw_agreement_minimum_moves not in (0, 1):
             raise ValueError("draw agreement minimum moves must be zero or one")
         if self.draw_offer_timing not in ("any_time", "after_move"):
             raise ValueError("unknown draw offer timing policy")
@@ -210,7 +212,14 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         or not TOP_LEVEL_FIELDS <= set(data)
         or not set(data)
         <= TOP_LEVEL_FIELDS
-        | {"initial_state", "halfmove_reset", "position_identity", "starting_side", "draw_offer_timing", "draw_agreement_minimum_moves"}
+        | {
+            "initial_state",
+            "halfmove_reset",
+            "position_identity",
+            "starting_side",
+            "draw_offer_timing",
+            "draw_agreement_minimum_moves",
+        }
     ):
         raise ConfigurationError(f"{package}: missing or unknown top-level fields")
     try:
@@ -498,7 +507,15 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         freeze_json(initial_state),
         freeze_json(halfmove_reset),
         frozenset(
-            set(data) & {"initial_state", "halfmove_reset", "position_identity", "starting_side", "draw_offer_timing", "draw_agreement_minimum_moves"}
+            set(data)
+            & {
+                "initial_state",
+                "halfmove_reset",
+                "position_identity",
+                "starting_side",
+                "draw_offer_timing",
+                "draw_agreement_minimum_moves",
+            }
         ),
         starting_side,
         freeze_json(position_identity),

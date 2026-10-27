@@ -27,7 +27,9 @@ def take_turn(manager: GameManager, *, at: int = 1000) -> tuple[str, str]:
     actor = state["participants"][str(state["active_side"])]
     opponent = next(identity for identity in state["participants"].values() if identity != actor)
     move = manager.get_valid_moves()[0].to_json()
-    manager.submit_action(actor, state["revision"], "first-move", {"type": "move", "move": move}, at)
+    manager.submit_action(
+        actor, state["revision"], "first-move", {"type": "move", "move": move}, at
+    )
     return actor, opponent
 
 
@@ -64,16 +66,17 @@ def test_agreement_is_an_authoritative_nonmoving_result_and_replays(name):
         # FIDE 5.2.3: both participants must make a move before agreement.
         state = manager.get_state()
         manager.submit_action(
-            respondent, state["revision"], "second-move",
-            {"type": "move", "move": manager.get_valid_moves()[0].to_json()}, 1100,
+            respondent,
+            state["revision"],
+            "second-move",
+            {"type": "move", "move": manager.get_valid_moves()[0].to_json()},
+            1100,
         )
         mover, respondent = respondent, mover
     prior = manager.get_state()
     offer = send(manager, mover, "offer_draw", at=1200, action_id="offer")
     pending = manager.get_state()
-    assert pending["pending_draw_offer"] == {
-        "actor": mover, "revision": prior["revision"] + 1
-    }
+    assert pending["pending_draw_offer"] == {"actor": mover, "revision": prior["revision"] + 1}
     assert pending["active_side"] == prior["active_side"]
     assert pending["board"] == prior["board"]
     assert pending["position_history"] == prior["position_history"]
@@ -82,13 +85,19 @@ def test_agreement_is_an_authoritative_nonmoving_result_and_replays(name):
     assert pending["clocks"] == prior["clocks"]
     assert offer["outcome"] is None and offer["action"] == {"type": "offer_draw"}
     assert GameManager.from_snapshot(pending).get_state() == pending
-    assert manager.submit_action(mover, prior["revision"], "offer", {"type": "offer_draw"}, 99000) == offer
+    assert (
+        manager.submit_action(mover, prior["revision"], "offer", {"type": "offer_draw"}, 99000)
+        == offer
+    )
     assert manager.get_state() == pending
 
     accepted = send(manager, respondent, "accept_draw", at=2300, action_id="accept")
     final = manager.get_state()
     assert final["outcome"] == {
-        "kind": "draw", "cause": "agreement", "winner": None, "priority": 1000
+        "kind": "draw",
+        "cause": "agreement",
+        "winner": None,
+        "priority": 1000,
     }
     assert accepted["outcome"] == final["outcome"]
     assert final["pending_draw_offer"] is None
@@ -103,7 +112,12 @@ def test_agreement_is_an_authoritative_nonmoving_result_and_replays(name):
         prior["clocks"]["remaining_ms"][active] - (2300 - prior["clocks"]["anchor_ms"])
     )
     assert GameManager.from_snapshot(final).get_state() == final
-    assert manager.submit_action(respondent, prior["revision"] + 1, "accept", {"type": "accept_draw"}, 99999) == accepted
+    assert (
+        manager.submit_action(
+            respondent, prior["revision"] + 1, "accept", {"type": "accept_draw"}, 99999
+        )
+        == accepted
+    )
     denied(manager, mover, {"type": "offer_draw"}, at=2400)
     denied(manager, respondent, {"type": "reject_draw"}, at=2401)
 
@@ -135,7 +149,8 @@ def test_declining_or_playing_a_legal_move_expires_offer_without_double_clock_ch
     assert next_state["pending_draw_offer"] is None
     assert next_state["clocks"]["remaining_ms"][str(before["active_side"])] == (
         before["clocks"]["remaining_ms"][str(before["active_side"])]
-        - 1200 + before["clocks"]["increment_ms"]
+        - 1200
+        + before["clocks"]["increment_ms"]
     )
     assert GameManager.from_snapshot(next_state).get_state() == next_state
 
@@ -168,8 +183,11 @@ def test_fide_offers_are_valid_outside_preferred_post_move_window():
     first, second = take_turn(manager)
     state = manager.get_state()
     manager.submit_action(
-        second, state["revision"], "second-move",
-        {"type": "move", "move": manager.get_valid_moves()[0].to_json()}, 1100
+        second,
+        state["revision"],
+        "second-move",
+        {"type": "move", "move": manager.get_valid_moves()[0].to_json()},
+        1100,
     )
     send(manager, first, "offer_draw", at=1200, action_id="offer-after-moves")
     result = send(manager, second, "accept_draw", at=1300, action_id="accept-after-moves")
@@ -221,9 +239,9 @@ def test_clock_expiry_rejects_pending_agreement_without_mutation(name):
     mover, other = take_turn(manager)
     send(manager, mover, "offer_draw", at=1100, action_id="offer")
     state = manager.get_state()
-    deadline = state["clocks"]["anchor_ms"] + state["clocks"]["remaining_ms"][
-        str(state["active_side"])
-    ]
+    deadline = (
+        state["clocks"]["anchor_ms"] + state["clocks"]["remaining_ms"][str(state["active_side"])]
+    )
     denied(manager, other, {"type": "accept_draw"}, at=deadline)
     denied(manager, other, {"type": "reject_draw"}, at=deadline + 1)
     assert GameManager.from_snapshot(state).get_state() == state

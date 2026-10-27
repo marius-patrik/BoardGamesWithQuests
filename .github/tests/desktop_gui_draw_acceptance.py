@@ -58,13 +58,15 @@ def square(name):
 def chess_advance(session, uci):
     state = session.snapshot()
     options = [
-        move for move in session.legal_actions()
+        move
+        for move in session.legal_actions()
         if move["start"] == square(uci[:2]) and move["hops"][-1] == square(uci[2:4])
     ]
     assert len(options) == 1
     session.submit(
         state["participants"][str(state["active_side"])],
-        state["revision"], {"type": "move", "move": options[0]},
+        state["revision"],
+        {"type": "move", "move": options[0]},
     )
 
 
@@ -97,7 +99,8 @@ def draw_ready_wcdf(monkeypatch):
         state = session.snapshot()
         session.submit(
             state["participants"][str(state["active_side"])],
-            state["revision"], {"type": "move", "move": route[index % 4]},
+            state["revision"],
+            {"type": "move", "move": route[index % 4]},
         )
     return session
 
@@ -137,7 +140,8 @@ def test_wcdf_real_offer_reject_preserves_game_and_clock_anchor(window, monkeypa
     legal = session.legal_actions()[0]
     session.submit(
         state["participants"][str(state["active_side"])],
-        state["revision"], {"type": "move", "move": legal},
+        state["revision"],
+        {"type": "move", "move": legal},
     )
     window.game_view.refresh()
     before = session.snapshot()
@@ -157,9 +161,7 @@ def test_wcdf_real_offer_reject_preserves_game_and_clock_anchor(window, monkeypa
 
 @pytest.mark.parametrize("game", ["chess", "checkers"])
 @pytest.mark.parametrize("button", ["Cancel", "Use intended move"])
-def test_real_prospective_claim_modal_cancellation_or_acceptance(
-    window, monkeypatch, game, button
-):
+def test_real_prospective_claim_modal_cancellation_or_acceptance(window, monkeypatch, game, button):
     from view import player_game_view as view
 
     session = draw_ready_chess() if game == "chess" else draw_ready_wcdf(monkeypatch)
@@ -185,9 +187,7 @@ def test_real_prospective_claim_modal_cancellation_or_acceptance(
         assert DesktopSession.recover(after).snapshot() == after
 
 
-def test_actual_legal_multi_hop_route_is_displayed_complete_and_cancelable(
-    window, monkeypatch
-):
+def test_actual_legal_multi_hop_route_is_displayed_complete_and_cancelable(window, monkeypatch):
     import model.game.session as session_module
 
     data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
@@ -197,7 +197,9 @@ def test_actual_legal_multi_hop_route_is_displayed_complete_and_cancelable(
         {"piece": "man", "color": "white", "squares": [[7, 0]]},
     ]
     with monkeypatch.context() as patch:
-        patch.setattr(session_module, "load_bundled_definition", lambda _: validate_definition(data))
+        patch.setattr(
+            session_module, "load_bundled_definition", lambda _: validate_definition(data)
+        )
         session = DesktopSession("checkers")
     window.window_controller.game_controller.session = session
     window.game_view.reload(clean=True)

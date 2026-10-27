@@ -26,13 +26,15 @@ def chess_move(session, uci):
     before = session.snapshot()
     start, end = chess_square(uci[:2]), chess_square(uci[2:4])
     candidates = [
-        move for move in session.legal_actions()
+        move
+        for move in session.legal_actions()
         if move["start"] == start and move["hops"][-1] == end
     ]
     assert len(candidates) == 1
     session.submit(
         before["participants"][str(before["active_side"])],
-        before["revision"], {"type": "move", "move": candidates[0]},
+        before["revision"],
+        {"type": "move", "move": candidates[0]},
         action_id="chess-" + str(before["revision"]),
     )
     return candidates[0]
@@ -63,8 +65,10 @@ def advance_checkers(manager, turns):
         assert move in manager.get_valid_moves()
         manager.submit_action(
             state["participants"][str(state["active_side"])],
-            state["revision"], f"checkers-move-{index}",
-            {"type": "move", "move": move.to_json()}, index + 1,
+            state["revision"],
+            f"checkers-move-{index}",
+            {"type": "move", "move": move.to_json()},
+            index + 1,
         )
 
 
@@ -75,13 +79,12 @@ def test_fide_prospective_repetition_is_projected_from_real_moves_without_commit
     before = session.snapshot()
     options = session.draw_claim_candidates("threefold")
     assert options["current"] is False
-    intended = {
-        "start": chess_square("f6"), "hops": [chess_square("g8")], "promotion": None
-    }
+    intended = {"start": chess_square("f6"), "hops": [chess_square("g8")], "promotion": None}
     assert intended in options["intended_moves"]
     assert session.snapshot() == before
     result = session.submit(
-        "black", before["revision"],
+        "black",
+        before["revision"],
         {"type": "claim_draw", "claim": "threefold", "intended_move": intended},
         action_id="fide-prospective",
     )
@@ -100,7 +103,8 @@ def test_fide_claim_from_current_position_is_distinct_from_intended_claim():
     assert options["current"] is True
     assert session.snapshot() == before
     state = session.submit(
-        "white", before["revision"],
+        "white",
+        before["revision"],
         {"type": "claim_draw", "claim": "threefold", "intended_move": None},
         action_id="fide-current",
     )["state"]
@@ -117,7 +121,8 @@ def test_wcdf_third_repetition_claim_requires_complete_prospective_move():
     assert candidates["intended_moves"] == [checkers_cycle(3).to_json()]
     assert manager.get_state() == before
     action = {
-        "type": "claim_draw", "claim": "threefold",
+        "type": "claim_draw",
+        "claim": "threefold",
         "intended_move": checkers_cycle(3).to_json(),
     }
     event = manager.submit_action("white", 7, "wcdf-prospective", action, 8)
@@ -135,9 +140,12 @@ def test_wcdf_forty_completed_moves_cannot_be_claimed_prospectively_at_79():
     assert current == {"current": False, "intended_moves": []}
     with pytest.raises(TransitionError):
         manager.submit_action(
-            "white", 79, "premature-forty",
+            "white",
+            79,
+            "premature-forty",
             {
-                "type": "claim_draw", "claim": "forty-move",
+                "type": "claim_draw",
+                "claim": "forty-move",
                 "intended_move": checkers_cycle(3).to_json(),
             },
             80,
@@ -159,7 +167,5 @@ def test_invalid_claim_discovery_and_preview_are_atomic():
     assert set(manager.configured_draw_claims()) == {"threefold", "forty-move"}
     with pytest.raises(TransitionError):
         manager.draw_claim_candidates("not-a-configured-claim")
-    assert manager.draw_claim_candidates("threefold") == {
-        "current": False, "intended_moves": []
-    }
+    assert manager.draw_claim_candidates("threefold") == {"current": False, "intended_moves": []}
     assert manager.get_state() == before
