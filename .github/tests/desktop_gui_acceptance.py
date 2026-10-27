@@ -680,12 +680,8 @@ def choose_rendered_route(window, index, expected_text, button="Play selected mo
         assert all("[[" not in text and "]]" not in text for text in options)
         bounds = listbox.bbox(index)
         assert bounds is not None
-        listbox.event_generate(
-            "<Button-1>", x=bounds[0] + 5, y=bounds[1] + bounds[3] // 2
-        )
-        listbox.event_generate(
-            "<ButtonRelease-1>", x=bounds[0] + 5, y=bounds[1] + bounds[3] // 2
-        )
+        listbox.event_generate("<Button-1>", x=bounds[0] + 5, y=bounds[1] + bounds[3] // 2)
+        listbox.event_generate("<ButtonRelease-1>", x=bounds[0] + 5, y=bounds[1] + bounds[3] // 2)
         assert listbox.curselection() == (index,)
         observations.append((options, window.game_view.session.snapshot()["revision"]))
         confirm = next(
@@ -700,7 +696,9 @@ def choose_rendered_route(window, index, expected_text, button="Play selected mo
 
 
 @pytest.mark.parametrize("route_index, middle", [(0, "b4"), (1, "f4")])
-def test_pointer_selects_complete_branched_draughts_capture(window, monkeypatch, route_index, middle):
+def test_pointer_selects_complete_branched_draughts_capture(
+    window, monkeypatch, route_index, middle
+):
     session = prepared_position(
         monkeypatch,
         "checkers",
@@ -781,8 +779,7 @@ def test_pointer_selects_every_chess_promotion_variant(window, monkeypatch, prom
     assert state["revision"] == 1
     assert state["events"][-1]["move"] == promoted[choice]
     assert any(
-        p["square"] == [0, 0] and p["kind"] == promotion and p["side"] == 1
-        for p in state["board"]
+        p["square"] == [0, 0] and p["kind"] == promotion and p["side"] == 1 for p in state["board"]
     )
 
 
