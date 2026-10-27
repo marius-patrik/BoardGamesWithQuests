@@ -1040,40 +1040,6 @@ flowchart LR
   n9ef040726b4477815 --> nac8634fb446e7df22
   n6a5bd05585adb4726["function_definition test_packager_derives_metadata_from_the_checked_out_project"]
   n9ef040726b4477815 --> n6a5bd05585adb4726
-  n831770c6e52850ebd["test_desktop_persistence_acceptance.py"]
-  nc9f5868186eb03f66 --> n831770c6e52850ebd
-  ncd973937994381dd6["function_definition _process"]
-  n831770c6e52850ebd --> ncd973937994381dd6
-  nd89a28a9242615b5d["decorated_definition"]
-  n831770c6e52850ebd --> nd89a28a9242615b5d
-  ne79163f26f22276f6["function_definition test_save_exit_reopen_and_continue_in_another_process"]
-  n831770c6e52850ebd --> ne79163f26f22276f6
-  n663d9ef8d1451961f["function_definition test_settings_survive_an_actual_process_restart_and_reject_corruption"]
-  n831770c6e52850ebd --> n663d9ef8d1451961f
-  n2b4189f00f9c0d868["decorated_definition"]
-  n831770c6e52850ebd --> n2b4189f00f9c0d868
-  n128036754d5f9dc99["function_definition test_reject_hostile_settings_without_overwriting_existing_values"]
-  n831770c6e52850ebd --> n128036754d5f9dc99
-  n0905f6f96a5a98279["decorated_definition"]
-  n831770c6e52850ebd --> n0905f6f96a5a98279
-  n8063e30ec726f88f0["function_definition test_invalid_save_is_rejected_without_mutating_an_active_game"]
-  n831770c6e52850ebd --> n8063e30ec726f88f0
-  n7098ffa6c50a0fccd["function_definition test_atomic_overwrite_and_failed_save_preserve_live_state_and_prior_file"]
-  n831770c6e52850ebd --> n7098ffa6c50a0fccd
-  nf62af6b9651c061ea["function_definition test_symlinked_parent_and_traversal_are_rejected_for_both_data_types"]
-  n831770c6e52850ebd --> nf62af6b9651c061ea
-  n31ed718cb7371eea1["function_definition test_reject_nonregular_saved_game_and_preferences_files"]
-  n831770c6e52850ebd --> n31ed718cb7371eea1
-  nc933d00b4585d6dd9["function_definition test_read_only_targets_and_unwritable_directories_preserve_existing_data"]
-  n831770c6e52850ebd --> nc933d00b4585d6dd9
-  n2ae5a15a41cd1ab16["function_definition test_interrupted_replacement_cleans_temp_and_preserves_old_files"]
-  n831770c6e52850ebd --> n2ae5a15a41cd1ab16
-  n6a6a6c9f610c158ff["function_definition interrupted"]
-  n831770c6e52850ebd --> n6a6a6c9f610c158ff
-  n6329a6b1715523660["function_definition test_concurrent_target_change_causes_non_destructive_save_rejection"]
-  n831770c6e52850ebd --> n6329a6b1715523660
-  nddaca18f0dfe759af["function_definition change_target"]
-  n831770c6e52850ebd --> nddaca18f0dfe759af
   n905320175c75255b2["test_docs_artifacts.py"]
   nc9f5868186eb03f66 --> n905320175c75255b2
   n82a0b29577da561c3["function_definition run_record"]
@@ -1904,22 +1870,12 @@ flowchart LR
   n6aea57a87a15be9fd --> nf7724c318a1fa4092
   n6212767a5c383eb85["class_definition SessionFileError"]
   nf7724c318a1fa4092 --> n6212767a5c383eb85
-  n7c4faebfecbc7dbfb["function_definition _is_symlink_or_junction"]
+  n7c4faebfecbc7dbfb["function_definition _unique_properties"]
   nf7724c318a1fa4092 --> n7c4faebfecbc7dbfb
-  n508577ee14409baff["function_definition _checked_parent"]
+  n508577ee14409baff["function_definition load_session"]
   nf7724c318a1fa4092 --> n508577ee14409baff
-  n9847cc4b177468210["function_definition _regular_file_identity"]
+  n9847cc4b177468210["function_definition save_session"]
   nf7724c318a1fa4092 --> n9847cc4b177468210
-  n970341465aebf0207["function_definition _unique_properties"]
-  nf7724c318a1fa4092 --> n970341465aebf0207
-  nd7d27fc30bd847923["function_definition _reject_constant"]
-  nf7724c318a1fa4092 --> nd7d27fc30bd847923
-  n60dd49b660af52b5e["function_definition _sync_directory"]
-  nf7724c318a1fa4092 --> n60dd49b660af52b5e
-  n27c6b5b46813bc713["function_definition load_session"]
-  nf7724c318a1fa4092 --> n27c6b5b46813bc713
-  n04b903fe523c29d69["function_definition save_session"]
-  nf7724c318a1fa4092 --> n04b903fe523c29d69
   n19ad7780742aba88f["preferences.py"]
   n6aea57a87a15be9fd --> n19ad7780742aba88f
   n31c4ec0d9592c782e["class_definition PreferencesError"]
@@ -1928,22 +1884,12 @@ flowchart LR
   n19ad7780742aba88f --> na0cb561fa617be3e2
   n79298de9c3228b4be["function_definition validate_preferences"]
   n19ad7780742aba88f --> n79298de9c3228b4be
-  n394183565e777aaa7["function_definition _is_symlink_or_junction"]
+  n394183565e777aaa7["function_definition _checked_directory"]
   n19ad7780742aba88f --> n394183565e777aaa7
-  ndded9e61b425e4771["function_definition _checked_directory"]
+  ndded9e61b425e4771["function_definition load_preferences"]
   n19ad7780742aba88f --> ndded9e61b425e4771
-  n44081cf5e30dfb9f8["function_definition _regular_file_identity"]
+  n44081cf5e30dfb9f8["function_definition save_preferences"]
   n19ad7780742aba88f --> n44081cf5e30dfb9f8
-  n437e3789af94f9220["function_definition _unique_properties"]
-  n19ad7780742aba88f --> n437e3789af94f9220
-  n89d40eb1c5ac98d57["function_definition _reject_constant"]
-  n19ad7780742aba88f --> n89d40eb1c5ac98d57
-  n0414077d445bdf9de["function_definition _sync_directory"]
-  n19ad7780742aba88f --> n0414077d445bdf9de
-  nd0ee29219f5685376["function_definition load_preferences"]
-  n19ad7780742aba88f --> nd0ee29219f5685376
-  n72ec827efee922c1c["function_definition save_preferences"]
-  n19ad7780742aba88f --> n72ec827efee922c1c
   n734d87972176e401e["schema.py"]
   n6aea57a87a15be9fd --> n734d87972176e401e
   n33cc493ceccfe652a["function_definition _json_work"]
