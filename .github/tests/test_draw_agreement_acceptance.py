@@ -257,13 +257,17 @@ def test_fide_offer_does_not_survive_offering_players_checkmating_move():
         start_square = [8 - int(start[1]), ord(start[0]) - ord("a")]
         end_square = [8 - int(end[1]), ord(end[0]) - ord("a")]
         candidates = [
-            move for move in manager.get_valid_moves()
+            move
+            for move in manager.get_valid_moves()
             if list(move.start_pos) == start_square and list(move.end_pos) == end_square
         ]
         assert len(candidates) == 1
         return manager.submit_action(
-            actor, state["revision"], f"mate-ply-{at}",
-            {"type": "move", "move": candidates[0].to_json()}, at,
+            actor,
+            state["revision"],
+            f"mate-ply-{at}",
+            {"type": "move", "move": candidates[0].to_json()},
+            at,
         )
 
     play("white", "f2", "f3", 1)
