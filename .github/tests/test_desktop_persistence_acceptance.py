@@ -316,7 +316,6 @@ def test_reject_nonregular_saved_game_and_preferences_files(tmp_path):
         save_session(DesktopSession("chess"), game_directory)
 
 
-
 def test_read_only_targets_and_unwritable_directories_preserve_existing_data(tmp_path):
     game = DesktopSession("chess")
     game_path = tmp_path / "game.json"
