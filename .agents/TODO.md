@@ -1,11 +1,12 @@
 # Current action queue — Python/Tkinter v1.0.0
 
-**Reconciled 2026-10-26.** Canonical parent: [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Implementation branch: bot-authored draft [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271). This queue is not evidence that an agent has been dispatched. Check the live issue and PR head before executing any item.
+**Reconciled 2026-10-27.** Canonical parent: [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Implementation branch: bot-authored draft [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271). This queue is not evidence that an agent has been dispatched. Check the live issue and PR head before executing any item.
 
 ## Start now (two independent ownership domains)
 
-- [ ] **[P0] #438 draw / claims lifecycle:** One writer for `src/model/game/manager.py`, bounded engine/session/hook modules, and narrowly necessary `src/view/player_game_view.py`/controller interactions. Complete authorized mutual draw offers and pointer-selected canonical intended-move claims; prove replay/rollback/idempotency/clock/quest with actual Tk GUI. Coordinate #452/#453 view ownership.
-- [ ] **[P0] #439 persistence/security:** Separate writer for `src/model/game/preferences.py`, `src/model/game/persistence.py` and a distinct test module. Real restart/file-safety/invalid data checks. Treat `manager.py`, `session.py` and all `src/view/` as READ-ONLY while #438 is active; report defects needing another owner.
+- [ ] **[P0] #438 draw / claims lifecycle — AGENT A DISPATCHED:** One writer for `src/model/game/manager.py`, bounded engine/session/hook modules, and narrowly necessary `src/view/player_game_view.py`/controller interactions. Complete authorized mutual draw offers and pointer-selected canonical intended-move claims; prove replay/rollback/idempotency/clock/quest with actual Tk GUI. Coordinate #452/#453 view ownership.
+- [x] **[P0] #439 persistence/security SOURCE INTEGRATED:** Independent three-file review and atomic blob integration in #271 at `52043693` (agent candidate `8c84d395`); subprocess Chess/Draughts/settings and hostile-file tests included; no conflicting manager/session/view writes.
+- [ ] **[P0] #439 ACCEPTANCE PENDING:** Verify final exact-head governed matrix and native #443 extracted package file/restart behavior before issue closure.
 - [ ] **[P0] Orchestrator integration:** Review independent task diffs against newest #271 HEAD, re-run behavioral and Xvfb checks, reconcile generated docs and issue states. Do not merge protected branches.
 
 ## After first integration
@@ -29,6 +30,7 @@
 - [x] #448 keyboard board navigation explicitly deferred (`not_planned`) and not a v1 gate.
 - [x] Chess #436 independently verified base reference test module and game fixture integrated; **full FIDE certification remains open**.
 - [x] WCDF #437/#449 scoped rules/config and acceptance tests integrated; **full user-playable certification remains open**.
+- [x] 14 obsolete task/verification branches deleted with exact SHA and open-PR/protection safeguards (Actions #40468515823). Current active/ref branches retained.
 
 ## Open release caveats
 
