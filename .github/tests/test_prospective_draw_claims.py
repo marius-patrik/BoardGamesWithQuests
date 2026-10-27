@@ -174,21 +174,26 @@ def test_fide_prospective_fifty_move_threshold_from_ninety_nine_quiet_plies():
         {"piece": "king", "color": "black", "squares": [[0, 4]]},
         {"piece": "knight", "color": "black", "squares": [[0, 1], [0, 6]]},
     ]
-    manager = GameManager(validate_definition(data), "fide-fifty-prospective", ("white", "black"), 0)
+    manager = GameManager(
+        validate_definition(data), "fide-fifty-prospective", ("white", "black"), 0
+    )
     rng = random.Random(438)
     for number in range(99):
         current = manager.get_state()
         occupied = {tuple(piece["square"]) for piece in current["board"]}
         legal_quiet = [
-            intent for intent in manager.get_valid_moves()
+            intent
+            for intent in manager.get_valid_moves()
             if intent.end_pos not in occupied and intent.promotion is None
         ]
         assert legal_quiet, f"no quiet legal continuation at ply {number + 1}"
         choice = rng.choice(legal_quiet)
         result = manager.submit_action(
             current["participants"][str(current["active_side"])],
-            current["revision"], f"fide-quiet-{number}",
-            {"type": "move", "move": choice.to_json()}, number + 1,
+            current["revision"],
+            f"fide-quiet-{number}",
+            {"type": "move", "move": choice.to_json()},
+            number + 1,
         )
         assert result["outcome"] is None, f"premature automatic result at ply {number + 1}"
     before = manager.get_state()
@@ -200,7 +205,8 @@ def test_fide_prospective_fifty_move_threshold_from_ninety_nine_quiet_plies():
     chosen = candidates["intended_moves"][0]
     assert chosen["hops"][-1] not in [piece["square"] for piece in before["board"]]
     result = manager.submit_action(
-        before["participants"][str(before["active_side"])], 99,
+        before["participants"][str(before["active_side"])],
+        99,
         "fide-claim-100",
         {"type": "claim_draw", "claim": "fifty-move", "intended_move": chosen},
         100,
