@@ -515,8 +515,8 @@ class BoardView(ttk.Frame):
                 if row == self.board.rows - 1:
                     self.canvas.create_text(
                         x + size - 3,
-                        y + size - 2,
-                        anchor="se",
+                        y + 2,
+                        anchor="ne",
                         text=self._file_label(col),
                         fill=ink,
                         font=font,
