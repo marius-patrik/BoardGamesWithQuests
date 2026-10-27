@@ -11,6 +11,7 @@ import os
 import platform as host_platform
 from pathlib import Path
 import re
+import signal
 import subprocess
 import sys
 import tarfile
@@ -136,7 +137,13 @@ def smoke(bundle: Path, platform: str) -> None:
     command = [str(executable)]
     if platform == "linux-x64":
         command = ["xvfb-run", "-a", *command]
-    process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        command,
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        start_new_session=os.name == "posix",
+    )
     try:
         time.sleep(5)
         if process.poll() is not None:
@@ -147,11 +154,24 @@ def smoke(bundle: Path, platform: str) -> None:
                 f"Packaged GUI exited before smoke interval: {process.returncode}: {error}"
             )
     finally:
-        process.terminate()
+        # xvfb-run is a wrapper: terminating only its PID can orphan the GUI.
+        if os.name == "posix":
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+        elif process.poll() is None:
+            process.terminate()
         try:
             process.wait(timeout=10)
         except subprocess.TimeoutExpired:
-            process.kill()
+            if os.name == "posix":
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            else:
+                process.kill()
             process.wait(timeout=10)
 
 
