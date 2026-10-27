@@ -233,8 +233,10 @@ def visible_board(image) -> tuple[float, float, float]:
     return left, top, size
 
 
-def await_board(gui, evidence: Path, label: str) -> tuple[float, float, float]:
-    deadline = time.monotonic() + 30
+def await_board(
+    gui, evidence: Path, label: str, timeout: float = 30
+) -> tuple[float, float, float]:
+    deadline = time.monotonic() + timeout
     reason = ""
     while time.monotonic() < deadline:
         try:
@@ -283,10 +285,29 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                         time.sleep(0.5)
                 else:
                     raise Blocked("could not access the real frozen New game chooser")
+                gui.sleep(0.8)
                 gui.screenshot().save(evidence / f"{game}-chooser.png")
-                gui.press("tab")
-                gui.press("return")
-                left, top, size = await_board(gui, evidence, f"{game}-opening")
+                # Tk focus restoration varies across AppKit, Windows and X11.
+                # Retry real keyboard focus traversal, stopping only when the
+                # chooser has disappeared and the unobscured board is visible.
+                last_error = None
+                for attempt in range(4):
+                    gui.press("tab")
+                    gui.press("return")
+                    try:
+                        left, top, size = await_board(
+                            gui, evidence, f"{game}-opening", timeout=5
+                        )
+                        break
+                    except AssertionError as error:
+                        last_error = error
+                        gui.screenshot().save(
+                            evidence / f"{game}-chooser-attempt-{attempt + 1}.png"
+                        )
+                else:
+                    raise AssertionError(
+                        f"native game chooser did not accept Start: {last_error}"
+                    )
                 start, end = ((6, 4), (5, 4)) if game == "chess" else ((2, 1), (3, 0))
 
                 def square(position):
