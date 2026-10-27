@@ -45,6 +45,18 @@ def denied(manager: GameManager, actor: str, action: dict, *, at: int = 1200):
 
 
 @pytest.mark.parametrize("name", ["chess", "checkers"])
+def test_version_one_snapshots_remain_identical_until_draw_lifecycle_is_used(name):
+    manager = game(name)
+    initial = manager.get_state()
+    assert "pending_draw_offer" not in initial
+    assert GameManager.from_snapshot(initial).get_state() == initial
+    take_turn(manager)
+    moved = manager.get_state()
+    assert "pending_draw_offer" not in moved
+    assert GameManager.from_snapshot(moved).get_state() == moved
+
+
+@pytest.mark.parametrize("name", ["chess", "checkers"])
 def test_agreement_is_an_authoritative_nonmoving_result_and_replays(name):
     manager = game(name)
     mover, respondent = take_turn(manager)
