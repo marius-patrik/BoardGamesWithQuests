@@ -57,7 +57,7 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
         run: |
           if [ "$PLATFORM" = linux-x64 ]; then
-            xvfb-run -a -s "-screen 0 1600x1000x24" bash -euc '
+            XDG_SESSION_TYPE=x11 xvfb-run -a -s "-screen 0 1600x1000x24" bash -euc '
               openbox > "$RUNNER_TEMP/openbox-native.log" 2>&1 &
               wm=$!
               trap "kill $wm 2>/dev/null || true" EXIT
