@@ -28,12 +28,14 @@ class PlayerView(ttk.Frame):
         self.turn = tk.StringVar()
         self.columnconfigure(0, weight=1)
         ttk.Label(
-            self, textvariable=self.name, font=("TkDefaultFont", 11, "bold"),
+            self,
+            textvariable=self.name,
+            font=("TkDefaultFont", 11, "bold"),
             wraplength=164,
         ).grid(row=0, column=0, sticky="w")
-        ttk.Label(
-            self, textvariable=self.clock, font=("TkDefaultFont", 19, "bold")
-        ).grid(row=1, column=0, sticky="w", pady=(2, 0))
+        ttk.Label(self, textvariable=self.clock, font=("TkDefaultFont", 19, "bold")).grid(
+            row=1, column=0, sticky="w", pady=(2, 0)
+        )
         ttk.Label(self, textvariable=self.turn, font=("TkDefaultFont", 9)).grid(
             row=2, column=0, sticky="w"
         )
