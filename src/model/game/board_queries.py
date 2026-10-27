@@ -102,8 +102,8 @@ class BoardQueries:
 
     def pieces_matching(self, params: Mapping[str, Any]) -> list[dict[str, Any]]:
         """Enumerate pieces in stable row-major order with JSON-only filters."""
-        if not set(params).issubset({"side", "kind"}):
-            raise QueryResolutionError("pieces_matching accepts only side and kind")
+        if not set(params).issubset({"side", "kind", "square_parity"}):
+            raise QueryResolutionError("pieces_matching accepts only side, kind and square_parity")
         side = params.get("side")
         if side == "active":
             side = self._active_side
@@ -114,6 +114,11 @@ class BoardQueries:
         kind = params.get("kind")
         if kind is not None and (not isinstance(kind, str) or not kind):
             raise QueryResolutionError("piece kind must be a nonempty string")
+        square_parity = params.get("square_parity")
+        if "square_parity" in params and (
+            type(square_parity) is not int or square_parity not in (0, 1)
+        ):
+            raise QueryResolutionError("square_parity must be integer 0 or 1")
         self._budget.consume(self._board.rows * self._board.cols)
         found: list[dict[str, Any]] = []
         for row in range(self._board.rows):
@@ -124,6 +129,8 @@ class BoardQueries:
                 if side is not None and piece.getColor() != side:
                     continue
                 if kind is not None and piece.getType() != kind:
+                    continue
+                if square_parity is not None and (row + col) % 2 != square_parity:
                     continue
                 found.append(
                     {
