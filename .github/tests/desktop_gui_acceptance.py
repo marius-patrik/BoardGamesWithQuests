@@ -635,3 +635,202 @@ def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monk
     assert load_session(target).snapshot() == state
     assert "wins" in window.game_view.turn.get()
     assert window.game_view.action_buttons["Resign"].instate(["disabled"])
+
+
+# #452: these are rendered-widget acceptance paths over actual session actions.
+# The reference positions are separately constructed, not engine-produced snapshots.
+def prepared_position(monkeypatch, game, placement, starting_side):
+    from importlib import resources
+
+    import model.game.session as session_module
+    from model.game.definition import validate_definition
+
+    config = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
+    config["board"]["starting_pieces"] = placement
+    config["starting_side"] = starting_side
+    definition = validate_definition(config)
+    with monkeypatch.context() as patch:
+        patch.setattr(session_module, "load_bundled_definition", lambda _: definition)
+        return DesktopSession(game)
+
+
+def prepared_window(window, session):
+    window.window_controller.game_controller.session = session
+    window.game_view.reload(clean=True)
+    window.update()
+
+
+def descendants(widget):
+    for child in widget.winfo_children():
+        yield child
+        yield from descendants(child)
+
+
+def choose_rendered_route(window, index, expected_text, button="Play selected move"):
+    """Operate the modal's real listbox and visible Tk button during wait_window."""
+    observations = []
+
+    def choose():
+        dialogs = [child for child in window.winfo_children() if isinstance(child, tk.Toplevel)]
+        assert dialogs, "Board click failed to open a real chooser"
+        dialog = dialogs[-1]
+        listbox = next(item for item in descendants(dialog) if isinstance(item, tk.Listbox))
+        options = listbox.get(0, tk.END)
+        assert expected_text in options[index]
+        assert all("[[" not in text and "]]" not in text for text in options)
+        bounds = listbox.bbox(index)
+        assert bounds is not None
+        listbox.event_generate(
+            "<Button-1>", x=bounds[0] + 5, y=bounds[1] + bounds[3] // 2
+        )
+        listbox.event_generate(
+            "<ButtonRelease-1>", x=bounds[0] + 5, y=bounds[1] + bounds[3] // 2
+        )
+        assert listbox.curselection() == (index,)
+        observations.append((options, window.game_view.session.snapshot()["revision"]))
+        confirm = next(
+            item
+            for item in descendants(dialog)
+            if isinstance(item, __import__("tkinter").ttk.Button) and item.cget("text") == button
+        )
+        confirm.invoke()
+
+    window.after(30, choose)
+    return observations
+
+
+@pytest.mark.parametrize("route_index, middle", [(0, "b4"), (1, "f4")])
+def test_pointer_selects_complete_branched_draughts_capture(window, monkeypatch, route_index, middle):
+    session = prepared_position(
+        monkeypatch,
+        "checkers",
+        [
+            {"piece": "man", "color": "black", "squares": [[2, 3]]},
+            {"piece": "man", "color": "white", "squares": [[3, 2], [3, 4], [5, 2], [5, 4]]},
+        ],
+        -1,
+    )
+    legal = session.legal_actions()
+    # WCDF: both complete d6-b4-d2 and d6-f4-d2 paths capture two men.
+    assert len(legal) == 2
+    assert all(m["start"] == [2, 3] and m["hops"][-1] == [6, 3] for m in legal)
+    prepared_window(window, session)
+    click_canvas(window, 2, 3)
+    assert window.window_controller.game_controller.highlighted_moves == [(6, 3)]
+    expected = "d6 × " + middle + " × d2"
+    trace = choose_rendered_route(window, route_index, expected)
+    click_canvas(window, 6, 3)
+    assert trace and trace[0][1] == 0  # no intermediate hop was committed
+    state = window.game_view.session.snapshot()
+    assert state["revision"] == 1
+    route = state["events"][-1]["move"]
+    assert route == legal[route_index]
+    assert len(state["captured"]) == 2
+    assert any(p["square"] == [6, 3] and p["kind"] == "man" for p in state["board"])
+
+
+def test_cancel_capture_chooser_is_atomic_and_highlights_remain(window, monkeypatch):
+    session = prepared_position(
+        monkeypatch,
+        "checkers",
+        [
+            {"piece": "man", "color": "black", "squares": [[2, 3]]},
+            {"piece": "man", "color": "white", "squares": [[3, 2], [3, 4], [5, 2], [5, 4]]},
+        ],
+        -1,
+    )
+    prepared_window(window, session)
+    before = session.snapshot()
+    click_canvas(window, 2, 3)
+
+    def cancel():
+        dialog = next(child for child in window.winfo_children() if isinstance(child, tk.Toplevel))
+        listbox = next(child for child in descendants(dialog) if isinstance(child, tk.Listbox))
+        assert " × " in listbox.get(0)
+        dialog.event_generate("<Escape>")
+
+    window.after(30, cancel)
+    click_canvas(window, 6, 3)
+    assert session.snapshot() == before
+    assert window.window_controller.game_controller.selected_square == (2, 3)
+    assert (6, 3) in window.window_controller.game_controller.highlighted_moves
+
+
+@pytest.mark.parametrize("promotion", ["queen", "rook", "bishop", "knight"])
+def test_pointer_selects_every_chess_promotion_variant(window, monkeypatch, promotion):
+    session = prepared_position(
+        monkeypatch,
+        "chess",
+        [
+            {"piece": "king", "color": "white", "squares": [[7, 4]]},
+            {"piece": "king", "color": "black", "squares": [[0, 7]]},
+            {"piece": "pawn", "color": "white", "squares": [[1, 0]]},
+        ],
+        1,
+    )
+    legal = [m for m in session.legal_actions() if m["start"] == [1, 0]]
+    promoted = [m for m in legal if m["hops"][-1] == [0, 0]]
+    assert {m["promotion"] for m in promoted} == {"queen", "rook", "bishop", "knight"}
+    prepared_window(window, session)
+    click_canvas(window, 1, 0)
+    choice = next(i for i, m in enumerate(promoted) if m["promotion"] == promotion)
+    trace = choose_rendered_route(window, choice, "Promote to " + promotion.title())
+    click_canvas(window, 0, 0)
+    assert trace and trace[0][1] == 0
+    state = session.snapshot()
+    assert state["revision"] == 1
+    assert state["events"][-1]["move"] == promoted[choice]
+    assert any(
+        p["square"] == [0, 0] and p["kind"] == promotion and p["side"] == 1
+        for p in state["board"]
+    )
+
+
+def test_draughts_automatic_crowning_through_canvas_click(window, monkeypatch):
+    session = prepared_position(
+        monkeypatch,
+        "checkers",
+        [
+            {"piece": "man", "color": "black", "squares": [[6, 1]]},
+            {"piece": "man", "color": "white", "squares": [[4, 5]]},
+        ],
+        -1,
+    )
+    prepared_window(window, session)
+    click_canvas(window, 6, 1)
+    click_canvas(window, 7, 0)
+    state = session.snapshot()
+    assert state["revision"] == 1
+    assert any(p["square"] == [7, 0] and p["kind"] == "king" for p in state["board"])
+    assert window.game_view.board_view.canvas.find_withtag("draughts_king")
+
+
+def test_legal_occupied_capture_last_move_hover_and_resize(window):
+    # Chess e4 d5: e4xd5 is an occupied opponent and has a distinct dashed target ring.
+    click_canvas(window, 6, 4)
+    click_canvas(window, 4, 4)
+    click_canvas(window, 1, 3)
+    click_canvas(window, 3, 3)
+    board = window.game_view.board_view
+    click_canvas(window, 4, 4)
+    assert board.canvas.find_withtag("legal_capture")
+    assert not board.canvas.find_withtag("legal_quiet") or board.canvas.find_withtag(
+        "legal_capture"
+    )
+    click_canvas(window, 3, 3)
+    assert window.game_view.session.snapshot()["revision"] == 3
+    assert board.canvas.find_withtag("last_move")
+    for width, height in ((840, 640), (1100, 760)):
+        window.geometry(f"{width}x{height}")
+        window.update()
+        board = window.game_view.board_view
+        assert board.canvas.winfo_width() == 8 * board.square_size
+        assert board.canvas.winfo_height() == 8 * board.square_size
+        # Moving over one square adds a dashed hover marker on the actual Canvas.
+        size = board.square_size
+        board.canvas.event_generate("<Motion>", x=size // 2, y=size // 2)
+        window.update()
+        assert board.canvas.find_withtag("hover")
+        board.canvas.event_generate("<Leave>")
+        window.update()
+        assert not board.canvas.find_withtag("hover")
