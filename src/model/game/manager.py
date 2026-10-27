@@ -1917,8 +1917,10 @@ class GameManager:
                 state, board, captures, effects, event = self._prepare_move(
                     state, side, actor_id, expected_revision, action_id, move, now_ms
                 )
-                # Playing a complete legal move declines any outstanding offer.
-                if "pending_draw_offer" in state:
+                # Only the offeree can implicitly decline a pending draw.
+                # FIDE also permits offers *before* the offerer makes a move.
+                pending = state.get("pending_draw_offer")
+                if pending is not None and pending["actor"] != actor_id:
                     state["pending_draw_offer"] = None
                 counts = None
                 if any(rule["hook"] == "outcome" for rule in self.definition.rules):
