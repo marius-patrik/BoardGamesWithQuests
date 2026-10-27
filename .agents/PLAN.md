@@ -1,5 +1,12 @@
 # Execution plan — BoardGamesWithQuests v1.0.0
 
+## Maintainer review gate and mockup correction (2026-10-27)
+
+**Maintainer submitted CHANGES_REQUESTED on #271:** 54 review threads, **10 new unresolved**, cross-referenced individually in **#462**. Do not resolve or dismiss them before the exact source changes pass acceptance. #462 owns the structural root `games/`, flattened `model/`, renamed view modules and installed app/entrypoint identity `boardgameswithquests` **after** current #452 GUI / #436 Chess / #443 packaging agents hand off; an immediate parallel mass rename would invalidate their branches. Read-only dependency/packaging inventory can occur now.
+
+**Required GUI layout supersedes previous global-right-sidebar wording:** `.agents/reference/images/GUI_mockup.svg` specifies **player 1 + their quests on left | existing Canvas board centered | player 2 + their quests on right**. Both sides have independent authoritative clocks/material/quest progress; no global six-quest cap. Both colors use **filled piece silhouettes** with **actual light-vs-dark fills** and contrast outlines; neither hollow-vs-solid Unicode chess glyphs nor gray same-color pieces meet the requirement. Draughts discs are solid, with visibly crowned kings. #452 current agent has exclusive bounded ownership of this layout and relevant player/quest widgets; #453 continues detailed scrolling/cache/history after #452. Test 840×640, 1100×760 and 1440×900 actual Tk displays for Chess and Draughts. No GUI framework rewrite.
+
+
 **Last orchestration reconciliation:** 2026-10-27. **Canonical release contract:** [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Detailed acceptance belongs in each child issue; this file owns **sequence and active dependencies**, not another specification. One bot-authored draft desktop PR, [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271), targets protected `develop`. The downstream draft [#422](https://github.com/marius-patrik/BoardGamesWithQuests/pull/422) and proposed [v2 design #348](https://github.com/marius-patrik/BoardGamesWithQuests/issues/348) are **deferred until v1.0.0 is published and verified**.
 
 ## Product and release gate

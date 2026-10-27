@@ -1,5 +1,12 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## Fresh review / original GUI reference (2026-10-27)
+
+- Maintainer `CHANGES_REQUESTED` PR #271 on 2026-10-27: **54** GraphQL review threads, **10 unresolved**. Inline comments demand moving immutable `src/games` → root `games/`, flattening `src/model/game` and `src/model/pieces`, renaming the entrypoint/app identity to `boardgameswithquests` under src root, and view module name cleanups. `PlayerGameView` is currently a composite screen/widget-action coordinator, not a second board renderer; original thread was answered. Track every original review in #462; structural changes need serialize after #436 Chess, #452 GUI and #443 packaging.
+- **GUI requirement corrected from mockup:** original reference `.agents/reference/images/GUI_mockup.svg`: left participant/quests, centered Canvas, right participant/quests, not top/bottom players + global shared quest sidebar. Each participant's quests from `state.quest_progress[participant_id]` must be independent and accessible. Both chess sides use filled silhouettes with **actual different light/dark fill and outline contrast**; Draughts use colored solid discs/visibly crowned kings. Own initial layout and pieces in current #452 Agent D; #453 remains later serial scroll/cache/history. Initial source currently violates this; not completed merely by issue clarification.
+- Active branches observed after cleanup: `main`, `develop`, `feature/product-integration`, deferred `feat/independent-server-web-native-bootstrap`, `ux/452-board-interaction-polish`, `game/436-fide-certification`, `qa/443-frozen-native-acceptance`, and optional Chess verification `verify/436-fide-boundary-20261027`. Completed #438/#439 branches and temporary maintenance refs were deleted. All claims about final HEAD CI require re-check.
+
+
 **Snapshot date:** 2026-10-27. Scratchpad notes are operational evidence, not alternative requirements. Canonical release issue [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430).
 
 ## Current topology

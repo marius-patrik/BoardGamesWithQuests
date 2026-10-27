@@ -1,5 +1,13 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## New maintainer acceptance requirements — 2026-10-27
+
+- [ ] **[P0] #452 — currently dispatched:** Replace top/bottom player panels and global right quest list with **left Player 1 + own quests | centered original Canvas board | right Player 2 + own quests** (reference `.agents/reference/images/GUI_mockup.svg`). BOTH white and black use solid filled icon silhouettes distinguished by actual light/dark piece colors with contrast outlines; solid Draughts discs, clearly crowned kings. Agent D may own necessary `player_view.py`/`quest_view.py` parts for the initial layout. Real screenshot/GUI tests at 840×640, 1100×760 and 1440×900.
+- [ ] **[P0] #453 — after #452, NOT parallel:** verify >6 quests per participant, accurate participant identity/XP/progress, individual scroll, game-switch cache invalidation, long capture/100+ move history, without reverting two-side composition.
+- [ ] **[P0] #462 — maintainer-required source/module refactor:** Ten new unresolved #271 threads map to exact operations in #462. Read-only rename/import/resource/entrypoint plan may begin now; **implementation waits until #436/#452/#443 handoff**, then preserve all Python/Tk/native/extracted archive gates and finally resolve verified review threads.
+- [ ] **[P0] #271 maintainer review:** 54 total threads, 10 new unresolved as of 2026-10-27; reviewer CHANGES_REQUESTED. Keep all new findings open until actual code+CI verification, then obtain new native review approval.
+
+
 **Reconciled 2026-10-27.** Canonical parent: [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Implementation branch: bot-authored draft [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271). This queue is not evidence that an agent has been dispatched. Check the live issue and PR head before executing any item.
 
 ## Start now (two independent ownership domains)
