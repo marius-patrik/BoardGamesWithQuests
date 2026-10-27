@@ -348,3 +348,16 @@ def test_concurrent_target_change_causes_non_destructive_save_rejection(tmp_path
         save_session(session, path)
     assert path.read_bytes() == concurrent_bytes
     assert not list(tmp_path.glob(".bgwq-*"))
+
+
+@pytest.mark.skipif(sys.version_info[:2] != (3, 13), reason="temporary formatter evidence")
+def test_temporary_black_diff_diagnostic():
+    """Temporary formatter diagnostic; must be removed before handoff."""
+    subprocess.run([sys.executable, "-m", "pip", "install", "black==26.10.1"],
+                   check=True, capture_output=True, text=True, timeout=120)
+    result = subprocess.run(
+        [sys.executable, "-m", "black", "--diff", "--line-length", "100",
+         "src/model/game/preferences.py", "src/model/game/persistence.py",
+         ".github/tests/test_desktop_persistence_acceptance.py"],
+        cwd=ROOT, capture_output=True, text=True, timeout=120)
+    pytest.fail(result.stdout + "\n" + result.stderr)
