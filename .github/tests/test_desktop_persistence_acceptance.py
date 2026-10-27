@@ -25,7 +25,6 @@ from model.game.preferences import (
 )
 from model.game.session import DesktopSession
 
-
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -145,10 +144,14 @@ print(json.dumps({"pid": os.getpid(), "settings": load_preferences()}))
         env=isolated,
     )
     assert written["pid"] != recovered["pid"]
-    assert recovered["settings"] == written["settings"] == {
-        "board_size": 64,
-        "show_coordinates": False,
-    }
+    assert (
+        recovered["settings"]
+        == written["settings"]
+        == {
+            "board_size": 64,
+            "show_coordinates": False,
+        }
+    )
     saved = Path(written["path"]) / "preferences.json"
     assert json.loads(saved.read_text(encoding="utf-8")) == recovered["settings"]
     saved.write_text('{"board_size": 50, "board_size": 64, "show_coordinates": false}')
@@ -183,15 +186,25 @@ def test_reject_hostile_settings_without_overwriting_existing_values(tmp_path, i
 
 @pytest.mark.parametrize(
     "corruption",
-    ["duplicate", "invalid_utf8", "oversized", "broken_json", "non_object",
-     "nonfinite", "invalid_schema", "tampered_board", "tampered_history",
-     "tampered_clock"],
+    [
+        "duplicate",
+        "invalid_utf8",
+        "oversized",
+        "broken_json",
+        "non_object",
+        "nonfinite",
+        "invalid_schema",
+        "tampered_board",
+        "tampered_history",
+        "tampered_clock",
+    ],
 )
 def test_invalid_save_is_rejected_without_mutating_an_active_game(tmp_path, corruption):
     current = DesktopSession("chess")
     initial = current.snapshot()
-    opening = next(m for m in current.legal_actions()
-                   if m["start"] == [6, 4] and m["hops"][-1] == [4, 4])
+    opening = next(
+        m for m in current.legal_actions() if m["start"] == [6, 4] and m["hops"][-1] == [4, 4]
+    )
     current.submit("white", 0, {"type": "move", "move": opening})
     before = current.snapshot()
     path = tmp_path / "import.json"
@@ -232,8 +245,9 @@ def test_atomic_overwrite_and_failed_save_preserve_live_state_and_prior_file(tmp
     save_session(session, path)
     original = path.read_bytes()
     assert load_session(path).snapshot() == session.snapshot()
-    move = next(m for m in session.legal_actions()
-                if m["start"] == [6, 4] and m["hops"][-1] == [4, 4])
+    move = next(
+        m for m in session.legal_actions() if m["start"] == [6, 4] and m["hops"][-1] == [4, 4]
+    )
     session.submit("white", 0, {"type": "move", "move": move})
     state = session.snapshot()
     outside = tmp_path / "outside.json"
@@ -386,16 +400,3 @@ def test_concurrent_target_change_causes_non_destructive_save_rejection(tmp_path
         save_session(session, path)
     assert path.read_bytes() == concurrent_bytes
     assert not list(tmp_path.glob(".bgwq-*"))
-
-
-@pytest.mark.skipif(sys.version_info[:2] != (3, 13), reason="temporary formatter evidence")
-def test_temporary_black_diff_diagnostic():
-    """Temporary formatter diagnostic; must be removed before handoff."""
-    subprocess.run([sys.executable, "-m", "pip", "install", "black==26.10.1"],
-                   check=True, capture_output=True, text=True, timeout=120)
-    result = subprocess.run(
-        [sys.executable, "-m", "black", "--diff", "--line-length", "100",
-         "src/model/game/preferences.py", "src/model/game/persistence.py",
-         ".github/tests/test_desktop_persistence_acceptance.py"],
-        cwd=ROOT, capture_output=True, text=True, timeout=120)
-    pytest.fail(result.stdout + "\n" + result.stderr)
