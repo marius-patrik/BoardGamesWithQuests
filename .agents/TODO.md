@@ -1,5 +1,16 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## New active status — 2026-10-27 (E/C/F/D2)
+
+- [x] #436 narrowly verified same-colour-promoted-bishops FIDE correction and three dedicated acceptance tests integrated at `2c22e18dd52bb554e9b5ac4a1c0eb8feba3dfaf6` (candidate Python 3.10–3.13 and Tk pass).
+- [ ] #436 **TRUE RED ISSUE:** Buchanan FIDE fortress timeout returns win instead of draw, [CI #40480361409](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40480361409). Requires follow-up bounded correctness design; keep `playable:false`.
+- [ ] #443 native QA: extracted app Chess/Draughts opening moves proven on all four OS, but candidate latest run #40480277365 remains failed; settings missing on Linux/macOS; Windows further journeys blocked. No candidate integration yet.
+- [x] #462 read-only structural plan received; DO NOT perform cross-package rename while active GUI/native writers overlap.
+- [x] #452 interrupted D branch inventoried: tip `adb2e2a7c72ffec4da92fd3b9e0d64466ec1c34e`, nine changed files; filled-color pieces, left/right per-player quests, pointer choices implemented; real Tk screenshots+tests pass and native packaging pass; #463 temp verification PR closed unmerged.
+- [ ] #452 dispatch D2 **RECOVERY** based on exact old D tip using `ux/452-board-interaction-recovery`: finish real UI evidence and UX concerns, compare with latest integration source after #436 E and reconcile CI; do not rebuild working GUI; preserve #438 draw functionality.
+- [ ] #453/#454 quest/history/final Tk polish serial after D2; #462 structural moves only once GUI/native files are unowned.
+
+
 ## New maintainer acceptance requirements — 2026-10-27
 
 - [ ] **[P0] #452 — currently dispatched:** Replace top/bottom player panels and global right quest list with **left Player 1 + own quests | centered original Canvas board | right Player 2 + own quests** (reference `.agents/reference/images/GUI_mockup.svg`). BOTH white and black use solid filled icon silhouettes distinguished by actual light/dark piece colors with contrast outlines; solid Draughts discs, clearly crowned kings. Agent D may own necessary `player_view.py`/`quest_view.py` parts for the initial layout. Real screenshot/GUI tests at 840×640, 1100×760 and 1440×900.

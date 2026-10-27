@@ -1,5 +1,14 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-10-27 agent recovery and verified distinction between packaging and acceptance
+
+- **#436 E source correction integrated:** `2c22e18dd52bb554e9b5ac4a1c0eb8feba3dfaf6` accepted from candidate `6e6c5eb8` after exact file-SHA identity to CI-green evidence SHA. The broader FIDE Buchanan fortress timeout probe completed **RED** (win vs expected draw) at run 40480361409; do not claim complete FIDE.
+- **#443 C stays isolated:** earliest real frozen Chess and Draughts legal moves succeeded on Windows/macOS ARM64/macOS x64/Linux, but all four workstream jobs failed due intentionally blocked follow-up; latest 1ab666fe candidate has confirmed Linux+two macOS settings-save failure and Windows advanced-journey blocker.
+- **#462 F is a read-only accepted PLAN**, not a mass-rename implementation. Root `games/` must remain trusted in editable/wheel/sdist/frozen; no path shim, duplicate package or broken snapshot user-data path.
+- **#452 D interruption:** Original branch `ux/452-board-interaction-polish` tip `adb2e2a7c72ffec4da92fd3b9e0d64466ec1c34e`. Exact tip CI: real Tk screenshots 12 across both games, real GUI+Python 3.10–3.13 and four native package BUILDS all success; DarkFactory issue-binding check failed because disposable PR #463 had no formal bound issue syntax, its other Python/format jobs succeeded. PR #463 closed unmerged. Original GUI source already has centered board between LEFT white player+individual full scrollable quests and RIGHT black player+individual full quests; filled Canvas silhouettes colored actual ivory/dark, colored filled Draughts discs and crowned kings, human-readable branched route/promote choices. **Do not start over.** D2 isolated successor branch `ux/452-board-interaction-recovery` exists at same exact tip, pending independent finishing, screenshot inspection, and integration against newer #271 head.
+- **Current GUI separation:** #453 covers quest stress/history polish after #452; #462 renames after GUI and packaging handoffs. Never rename view modules in current #452 branch.
+
+
 ## Fresh review / original GUI reference (2026-10-27)
 
 - Maintainer `CHANGES_REQUESTED` PR #271 on 2026-10-27: **54** GraphQL review threads, **10 unresolved**. Inline comments demand moving immutable `src/games` → root `games/`, flattening `src/model/game` and `src/model/pieces`, renaming the entrypoint/app identity to `boardgameswithquests` under src root, and view module name cleanups. `PlayerGameView` is currently a composite screen/widget-action coordinator, not a second board renderer; original thread was answered. Track every original review in #462; structural changes need serialize after #436 Chess, #452 GUI and #443 packaging.
