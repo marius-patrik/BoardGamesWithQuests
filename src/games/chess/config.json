@@ -10596,5 +10596,6 @@
       }
     },
     "right": "pawn"
-  }
+  },
+  "draw_agreement_minimum_moves": 1
 }
