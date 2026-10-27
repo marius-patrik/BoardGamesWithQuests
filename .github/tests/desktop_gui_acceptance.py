@@ -831,3 +831,52 @@ def test_legal_occupied_capture_last_move_hover_and_resize(window):
         board.canvas.event_generate("<Leave>")
         window.update()
         assert not board.canvas.find_withtag("hover")
+
+
+@pytest.mark.parametrize("game", ["chess", "checkers"])
+@pytest.mark.parametrize("viewport", [(840, 640), (1100, 760), (1440, 900)])
+def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewport):
+    """The reference layout is white/board/black with independent full quest lists."""
+    root = window
+    root.geometry(f"{viewport[0]}x{viewport[1]}")
+    root.window_controller.game_controller.new_game(game)
+    root.game_view.reload(clean=True)
+    root.update_idletasks()
+    root.update()
+    view = root.game_view
+    state = view.session.snapshot()
+    assert set(view.player_views) == {1, -1}
+    assert set(view.quest_lists) == {1, -1}
+    assert set(view.quest_viewports) == {1, -1}
+    white, black = view.player_views[1], view.player_views[-1]
+    board = view.board_view.canvas
+
+    assert white.winfo_ismapped() and black.winfo_ismapped()
+    assert white.winfo_rootx() < board.winfo_rootx() < black.winfo_rootx()
+    assert white.winfo_rootx() + white.winfo_width() <= board.winfo_rootx()
+    assert board.winfo_rootx() + board.winfo_width() <= black.winfo_rootx()
+    assert board.winfo_height() == board.winfo_width()
+    assert board.winfo_rooty() >= root.winfo_rooty()
+    assert board.winfo_rooty() + board.winfo_height() <= (
+        root.winfo_rooty() + root.winfo_height()
+    )
+    assert white.clock.get() and black.clock.get()
+    assert state["participants"]["1"] in white.name.get()
+    assert state["participants"]["-1"] in black.name.get()
+    for side in (1, -1):
+        participant_id = state["participants"][str(side)]
+        assert len(view.quest_lists[side].cards) == len(state["quest_progress"][participant_id])
+        assert view.quest_viewports[side].winfo_ismapped()
+        assert view.quest_viewports[side].winfo_height() > 0
+        assert view.player_views[side].score.get() == (
+            f"Quest score: {state['quest_scores'][participant_id]}"
+        )
+    if game == "chess":
+        assert len(board.find_withtag("filled_white")) == 16 * 2 + 16 * 1 or board.find_withtag(
+            "filled_white"
+        )
+        assert board.find_withtag("filled_black")
+        assert board.find_withtag("chess_piece")
+    else:
+        assert board.find_withtag("draughts_piece")
+        assert board.find_withtag("draughts_man")
