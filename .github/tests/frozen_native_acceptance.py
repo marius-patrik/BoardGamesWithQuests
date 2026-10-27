@@ -233,9 +233,7 @@ def visible_board(image) -> tuple[float, float, float]:
     return left, top, size
 
 
-def await_board(
-    gui, evidence: Path, label: str, timeout: float = 30
-) -> tuple[float, float, float]:
+def await_board(gui, evidence: Path, label: str, timeout: float = 30) -> tuple[float, float, float]:
     deadline = time.monotonic() + timeout
     reason = ""
     while time.monotonic() < deadline:
@@ -295,9 +293,7 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                     gui.press("tab")
                     gui.press("return")
                     try:
-                        left, top, size = await_board(
-                            gui, evidence, f"{game}-opening", timeout=5
-                        )
+                        left, top, size = await_board(gui, evidence, f"{game}-opening", timeout=5)
                         break
                     except AssertionError as error:
                         last_error = error
@@ -305,9 +301,7 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                             evidence / f"{game}-chooser-attempt-{attempt + 1}.png"
                         )
                 else:
-                    raise AssertionError(
-                        f"native game chooser did not accept Start: {last_error}"
-                    )
+                    raise AssertionError(f"native game chooser did not accept Start: {last_error}")
                 start, end = ((6, 4), (5, 4)) if game == "chess" else ((2, 1), (3, 0))
 
                 def square(position):
