@@ -172,8 +172,12 @@ class BoardView(ttk.Frame):
                         tags=("in_check",),
                     )
                     self.canvas.create_text(
-                        right - 6, top + 4, anchor="ne", text="!",
-                        fill=IN_CHECK, font=("TkDefaultFont", max(9, size // 4), "bold"),
+                        right - 6,
+                        top + 4,
+                        anchor="ne",
+                        text="!",
+                        fill=IN_CHECK,
+                        font=("TkDefaultFont", max(9, size // 4), "bold"),
                         tags=("in_check",),
                     )
 
@@ -197,18 +201,34 @@ class BoardView(ttk.Frame):
 
                 if square == self.selected:
                     self.canvas.create_rectangle(
-                        left + 2, top + 2, right - 2, bottom - 2,
-                        outline="#ffffff", width=5, tags=("selected",)
+                        left + 2,
+                        top + 2,
+                        right - 2,
+                        bottom - 2,
+                        outline="#ffffff",
+                        width=5,
+                        tags=("selected",),
                     )
                     self.canvas.create_rectangle(
-                        left + 3, top + 3, right - 3, bottom - 3,
-                        outline=SELECTED, width=3, tags=("selected",)
+                        left + 3,
+                        top + 3,
+                        right - 3,
+                        bottom - 3,
+                        outline=SELECTED,
+                        width=3,
+                        tags=("selected",),
                     )
 
                 if square == self.hovered:
                     self.canvas.create_rectangle(
-                        left + 1, top + 1, right - 1, bottom - 1,
-                        outline="#ffffff", width=2, dash=(3, 3), tags=("hover",)
+                        left + 1,
+                        top + 1,
+                        right - 1,
+                        bottom - 1,
+                        outline="#ffffff",
+                        width=2,
+                        dash=(3, 3),
+                        tags=("hover",),
                     )
 
                 if square == self.invalid:
@@ -216,12 +236,22 @@ class BoardView(ttk.Frame):
                     cx, cy = (left + right) / 2, (top + bottom) / 2
                     for colour, width in (("#ffffff", 5), ("#b42330", 3)):
                         self.canvas.create_line(
-                            cx - offset, cy - offset, cx + offset, cy + offset,
-                            fill=colour, width=width, tags=("invalid",)
+                            cx - offset,
+                            cy - offset,
+                            cx + offset,
+                            cy + offset,
+                            fill=colour,
+                            width=width,
+                            tags=("invalid",),
                         )
                         self.canvas.create_line(
-                            cx - offset, cy + offset, cx + offset, cy - offset,
-                            fill=colour, width=width, tags=("invalid",)
+                            cx - offset,
+                            cy + offset,
+                            cx + offset,
+                            cy - offset,
+                            fill=colour,
+                            width=width,
+                            tags=("invalid",),
                         )
 
         if self.show_coordinates:
@@ -247,8 +277,10 @@ class BoardView(ttk.Frame):
                 tags=("piece", "draughts_piece"),
             )
             self.canvas.create_oval(
-                left + margin + 4, top + margin + 4,
-                right - margin - 4, bottom - margin - 4,
+                left + margin + 4,
+                top + margin + 4,
+                right - margin - 4,
+                bottom - margin - 4,
                 outline="#777063" if white else "#c0ad87",
                 width=2,
                 tags=("piece", "draughts_piece"),
@@ -257,14 +289,20 @@ class BoardView(ttk.Frame):
                 # Explicit crown glyph plus a ring distinguish kings from men
                 # in monochrome and at the compact 32 px square size.
                 self.canvas.create_text(
-                    *centre, text="K", fill="#24272a" if white else "#ffffff",
+                    *centre,
+                    text="K",
+                    fill="#24272a" if white else "#ffffff",
                     font=("TkDefaultFont", max(10, round(size * 0.36)), "bold"),
                     tags=("piece", "draughts_king"),
                 )
             else:
                 self.canvas.create_oval(
-                    centre[0] - 2, centre[1] - 2, centre[0] + 2, centre[1] + 2,
-                    fill="#696157" if white else "#ded4b9", outline="",
+                    centre[0] - 2,
+                    centre[1] - 2,
+                    centre[0] + 2,
+                    centre[1] + 2,
+                    fill="#696157" if white else "#ded4b9",
+                    outline="",
                     tags=("piece", "draughts_man"),
                 )
             return
@@ -273,13 +311,19 @@ class BoardView(ttk.Frame):
         font = ("TkDefaultFont", max(14, round(size * 0.67)))
         white = piece.getColor() == 1
         self.canvas.create_text(
-            centre[0] + 1, centre[1] + 1,
-            text=glyph, fill="#18232c" if white else "#f8efe2",
-            font=font, tags=("piece",),
+            centre[0] + 1,
+            centre[1] + 1,
+            text=glyph,
+            fill="#18232c" if white else "#f8efe2",
+            font=font,
+            tags=("piece",),
         )
         self.canvas.create_text(
-            *centre, text=glyph, fill="#fffaf0" if white else "#17191e",
-            font=font, tags=("piece",),
+            *centre,
+            text=glyph,
+            fill="#fffaf0" if white else "#17191e",
+            font=font,
+            tags=("piece",),
         )
 
     def _draw_quiet_target(self, left: int, top: int, right: int, bottom: int) -> None:
@@ -287,16 +331,28 @@ class BoardView(ttk.Frame):
         radius = max(4, size * 0.12)
         cx, cy = (left + right) / 2, (top + bottom) / 2
         self.canvas.create_oval(
-            cx - radius, cy - radius, cx + radius, cy + radius,
-            fill=QUIET_TARGET, outline="#ffffff", width=2, tags=("legal_quiet",)
+            cx - radius,
+            cy - radius,
+            cx + radius,
+            cy + radius,
+            fill=QUIET_TARGET,
+            outline="#ffffff",
+            width=2,
+            tags=("legal_quiet",),
         )
 
     def _draw_capture_target(self, left: int, top: int, right: int, bottom: int) -> None:
         margin = max(3, self.square_size // 12)
         for colour, width, dash in (("#ffffff", 5, ()), (CAPTURE_TARGET, 3, (5, 3))):
             self.canvas.create_oval(
-                left + margin, top + margin, right - margin, bottom - margin,
-                outline=colour, width=width, dash=dash, tags=("legal_capture",)
+                left + margin,
+                top + margin,
+                right - margin,
+                bottom - margin,
+                outline=colour,
+                width=width,
+                dash=dash,
+                tags=("legal_capture",),
             )
 
     def _draw_coordinates(self) -> None:
@@ -310,15 +366,23 @@ class BoardView(ttk.Frame):
                 x, y = self._origin(col, row)
                 if col == 0:
                     self.canvas.create_text(
-                        x + 3, y + 2, anchor="nw",
-                        text=str(self.board.rows - row), fill=ink,
-                        font=font, tags=("coordinate",),
+                        x + 3,
+                        y + 2,
+                        anchor="nw",
+                        text=str(self.board.rows - row),
+                        fill=ink,
+                        font=font,
+                        tags=("coordinate",),
                     )
                 if row == self.board.rows - 1:
                     self.canvas.create_text(
-                        x + size - 3, y + size - 2, anchor="se",
-                        text=self._file_label(col), fill=ink,
-                        font=font, tags=("coordinate",),
+                        x + size - 3,
+                        y + size - 2,
+                        anchor="se",
+                        text=self._file_label(col),
+                        fill=ink,
+                        font=font,
+                        tags=("coordinate",),
                     )
 
     @staticmethod
