@@ -1,0 +1,32 @@
+name: UX452 Real Tkinter Visual Evidence
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    name: six-viewport / real Tkinter Xvfb
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - name: Install graphical acceptance dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth
+          python -m pip install -e . pillow
+      - name: Capture rendered game windows and exercise real board clicks
+        run: xvfb-run -a -s '-screen 0 1920x1200x24' python .github/tests/desktop_gui_visual_evidence.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ux452-real-tkinter-reference-screenshots
+          path: ux452-real-screenshots/*.png
+          if-no-files-found: error
