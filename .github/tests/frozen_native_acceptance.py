@@ -287,7 +287,7 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                 gui.press("tab")
                 gui.press("return")
                 left, top, size = await_board(gui, evidence, f"{game}-opening")
-                start, end = ((6, 4), (5, 4)) if game == "chess" else ((5, 0), (4, 1))
+                start, end = ((6, 4), (5, 4)) if game == "chess" else ((2, 1), (3, 0))
 
                 def square(position):
                     return (
