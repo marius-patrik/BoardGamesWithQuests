@@ -580,12 +580,7 @@ class PlayerGameView(ttk.Frame):
         promotion = move.get("promotion")
         if promotion is not None:
             kind = str(promotion)
-            side = "white" if state["active_side"] == 1 else "black"
-            piece_definition = state["config"]["pieces"].get(kind, {})
-            glyph = piece_definition.get("symbols", {}).get(side, "")
             route += f"  —  Promote to {kind.replace('_', ' ').title()}"
-            if glyph:
-                route += f" ({glyph})"
         return route
 
     def _choose_complete_move(
