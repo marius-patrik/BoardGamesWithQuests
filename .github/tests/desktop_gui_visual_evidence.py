@@ -6,6 +6,8 @@ This utility captures the actual display, not a synthetic Canvas export.
 
 from __future__ import annotations
 
+import base64
+from io import BytesIO
 import os
 from pathlib import Path
 import tkinter as tk
@@ -31,6 +33,11 @@ def capture(root: tk.Tk, filename: Path) -> None:
     assert image.size == (width, height)
     assert len(image.resize((64, 64)).getcolors(4096) or []) > 5
     image.save(filename)
+    thumbnail = image.copy()
+    thumbnail.thumbnail((510, 340))
+    packed = BytesIO()
+    thumbnail.save(packed, format="WEBP", quality=55)
+    print(f"UX452_IMAGE:{filename.name}:{base64.b64encode(packed.getvalue()).decode()}", flush=True)
 
 
 def main() -> None:
