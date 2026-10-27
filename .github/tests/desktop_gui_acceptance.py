@@ -880,3 +880,53 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
     else:
         assert board.find_withtag("draughts_piece")
         assert board.find_withtag("draughts_man")
+
+
+def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypatch):
+    """More than six session-defined objectives remain available to each side."""
+    from importlib import resources
+    import model.game.session as session_module
+    from model.game.definition import validate_definition
+
+    data = json.loads(resources.files("games").joinpath("chess", "config.json").read_text())
+    data["quests"].extend(
+        {
+            "id": f"visual-quest-{number}",
+            "description": f"Extended individually owned objective {number}",
+            "reward": number,
+            "when": {"op": "true"},
+        }
+        for number in range(10)
+    )
+    with monkeypatch.context() as patch:
+        patch.setattr(
+            session_module, "load_bundled_definition", lambda _: validate_definition(data)
+        )
+        session = DesktopSession("chess")
+    prepared_window(window, session)
+    window.geometry("840x640")
+    window.update()
+    state = session.snapshot()
+
+    for side in (1, -1):
+        participant = state["participants"][str(side)]
+        listing = window.game_view.quest_lists[side]
+        viewport = window.game_view.quest_viewports[side]
+        assert len(listing.cards) == len(state["quest_progress"][participant])
+        assert len(listing.cards) > 6
+        assert viewport.bbox("all")[3] > viewport.winfo_height()
+        first_scroll = viewport.yview()
+        viewport.event_generate("<Button-5>")
+        window.update()
+        assert viewport.yview()[0] > first_scroll[0]
+
+    # Only White's completed first move is credited; Black's own score is not
+    # silently merged into the opposing participant's quest list.
+    click_canvas(window, 6, 4)
+    click_canvas(window, 4, 4)
+    after = session.snapshot()
+    for side in (1, -1):
+        participant = after["participants"][str(side)]
+        assert window.game_view.player_views[side].score.get() == (
+            f"Quest score: {after['quest_scores'][participant]}"
+        )
