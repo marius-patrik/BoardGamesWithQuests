@@ -420,6 +420,17 @@
               "params": {}
             },
             "right": 80
+          },
+          {
+            "op": "compare",
+            "relation": "eq",
+            "left": {
+              "query": "move_attribute",
+              "params": {
+                "name": "start"
+              }
+            },
+            "right": null
           }
         ]
       },
