@@ -90,9 +90,11 @@ def load_session(path: str | os.PathLike[str]) -> DesktopSession:
         )
         with os.fdopen(os.open(source, flags), "rb") as handle:
             opened = os.fstat(handle.fileno())
-            if not stat.S_ISREG(opened.st_mode) or (
-                opened.st_dev, opened.st_ino, opened.st_mtime_ns, opened.st_size
-            ) != expected or _regular_file_identity(source) != expected:
+            if (
+                not stat.S_ISREG(opened.st_mode)
+                or (opened.st_dev, opened.st_ino, opened.st_mtime_ns, opened.st_size) != expected
+                or _regular_file_identity(source) != expected
+            ):
                 raise SessionFileError("saved game changed while opening")
             data = handle.read(MAX_SNAPSHOT_BYTES + 1)
         if len(data) > MAX_SNAPSHOT_BYTES:
@@ -103,7 +105,14 @@ def load_session(path: str | os.PathLike[str]) -> DesktopSession:
             parse_constant=_reject_constant,
         )
         return DesktopSession.recover(snapshot)
-    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, TypeError, RecursionError) as error:
+    except (
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+        ValueError,
+        TypeError,
+        RecursionError,
+    ) as error:
         if isinstance(error, SessionFileError):
             raise
         raise SessionFileError(f"invalid saved game: {error}") from error
@@ -113,9 +122,9 @@ def save_session(session: DesktopSession, path: str | os.PathLike[str]) -> None:
     """Verify and atomically replace the selected file, preserving failures."""
     snapshot = session.snapshot()
     try:
-        encoded = (
-            json.dumps(snapshot, sort_keys=True, allow_nan=False, indent=2) + "\n"
-        ).encode("utf-8")
+        encoded = (json.dumps(snapshot, sort_keys=True, allow_nan=False, indent=2) + "\n").encode(
+            "utf-8"
+        )
         if len(encoded) > MAX_SNAPSHOT_BYTES:
             raise SessionFileError("saved game exceeds the file-size limit")
         # The same replay contract used on import must accept every exported save.
