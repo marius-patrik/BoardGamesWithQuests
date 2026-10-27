@@ -498,7 +498,7 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         freeze_json(initial_state),
         freeze_json(halfmove_reset),
         frozenset(
-            set(data) & {"initial_state", "halfmove_reset", "position_identity", "starting_side", "draw_offer_timing"}
+            set(data) & {"initial_state", "halfmove_reset", "position_identity", "starting_side", "draw_offer_timing", "draw_agreement_minimum_moves"}
         ),
         starting_side,
         freeze_json(position_identity),
