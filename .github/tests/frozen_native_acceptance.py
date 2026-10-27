@@ -463,6 +463,10 @@ def screenshot_dialog(gui, evidence: Path, label: str, title: str):
         try:
             rect = native_window_rectangle(title)
             gui.screenshot().save(evidence / f"{label}.png")
+            (evidence / f"{label}-rectangle.json").write_text(
+                json.dumps({"x": rect[0], "y": rect[1], "width": rect[2], "height": rect[3]})
+                + "\n", encoding="utf-8",
+            )
             return rect
         except AssertionError:
             gui.sleep(0.4)
@@ -541,9 +545,16 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                     if attempt == 0:
                         # Tk dialog positions (relative to its OS window frame).
                         gui.click(x + 35, y + 72)
-                        gui.hotkey("command", "a") if sys.platform == "darwin" else gui.hotkey("ctrl", "a")
+                        if sys.platform == "darwin":
+                            gui.hotkey("command", "a")
+                        else:
+                            gui.press("home")
+                            gui.keyDown("shift")
+                            gui.press("end")
+                            gui.keyUp("shift")
                         gui.write("64", interval=0.06)
                         gui.click(x + 40, y + 101)  # Real Show board coordinates checkbox.
+                        gui.screenshot().save(evidence / "settings-modified-before-save.png")
                         gui.click(x + 44, y + height - 33)  # Real Save button.
                         deadline = time.monotonic() + 8
                         while time.monotonic() < deadline and not path.is_file():
@@ -572,12 +583,24 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                         else:
                             raise AssertionError("Settings dialog did not close on Save")
                     else:
-                        if sys.platform == "darwin":
-                            gui.hotkey("command", "w")
-                        else:
-                            gui.hotkey("alt", "f4")
+                        gui.click(x + width - 73, y + height - 33)  # Settings Cancel
                         gui.sleep(0.5)
-                    gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
+                        try:
+                            native_window_rectangle("Settings")
+                        except AssertionError:
+                            pass
+                        else:
+                            raise AssertionError("Settings Cancel did not close dialog")
+                    # Click the actual Quit toolbar button, rather than depending
+                    # on OS-specific focus restoration after a modal dialog.
+                    px, py = settings_button(board, platform_name)
+                    relative_quit = {
+                        "windows-x64": 1.8,
+                        "macos-arm64": 2.05,
+                        "macos-x64": 2.05,
+                        "linux-x64": 2.72,
+                    }
+                    gui.click(px + relative_quit[platform_name] * board[2], py)
                     if process.wait(timeout=12):
                         raise AssertionError("frozen application failed clean settings/restart shutdown")
                 finally:
