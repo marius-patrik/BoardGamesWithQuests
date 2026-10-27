@@ -870,11 +870,13 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
             f"Quest score: {state['quest_scores'][participant_id]}"
         )
     if game == "chess":
-        assert len(board.find_withtag("filled_white")) == 16 * 2 + 16 * 1 or board.find_withtag(
-            "filled_white"
-        )
-        assert board.find_withtag("filled_black")
-        assert board.find_withtag("chess_piece")
+        light_shapes = board.find_withtag("filled_white")
+        dark_shapes = board.find_withtag("filled_black")
+        assert len(light_shapes) >= 16 and len(dark_shapes) >= 16
+        assert all(board.type(item) != "text" for item in board.find_withtag("chess_piece"))
+        light_fills = {board.itemcget(item, "fill") for item in light_shapes}
+        dark_fills = {board.itemcget(item, "fill") for item in dark_shapes}
+        assert "#fff8e5" in light_fills and "#17212b" in dark_fills
     else:
         assert board.find_withtag("draughts_piece")
         assert board.find_withtag("draughts_man")
