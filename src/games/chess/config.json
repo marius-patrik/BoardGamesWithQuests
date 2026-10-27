@@ -4,6 +4,7 @@
   "title": "Chess",
   "default": true,
   "playable": false,
+  "draw_offer_timing": "any_time",
   "board": {
     "rows": 8,
     "columns": 8,
