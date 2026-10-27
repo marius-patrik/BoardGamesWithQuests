@@ -163,7 +163,10 @@ def corrupt_asset_check(executable: Path, target: str, cwd: Path) -> dict:
         env.pop("PYTHONPATH", None)
         result = subprocess.run(
             [str(executable), "--check"],
-            cwd=cwd, env=env, capture_output=True, timeout=90,
+            cwd=cwd,
+            env=env,
+            capture_output=True,
+            timeout=90,
         )
         if result.returncode == 0:
             raise AssertionError("corrupt bundled Chess JSON was accepted by frozen application")
@@ -399,11 +402,7 @@ def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
             text=True,
             timeout=8,
         )
-        values = dict(
-            line.split("=", 1)
-            for line in geometry.splitlines()
-            if "=" in line
-        )
+        values = dict(line.split("=", 1) for line in geometry.splitlines() if "=" in line)
         x, y, width, height = (int(values[key]) for key in ("X", "Y", "WIDTH", "HEIGHT"))
     elif sys.platform == "darwin":
         import re
@@ -411,11 +410,11 @@ def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
         code = (
             'tell application "System Events"\n'
             'set p to first process whose name contains "BoardGamesWithQuests"\n'
-            'tell p\n'
+            "tell p\n"
             'set w to first window whose name is "' + title + '"\n'
-            'get {position of w, size of w}\n'
-            'end tell\n'
-            'end tell'
+            "get {position of w, size of w}\n"
+            "end tell\n"
+            "end tell"
         )
         result = subprocess.run(
             ["osascript", "-e", code], capture_output=True, text=True, timeout=15
@@ -453,9 +452,7 @@ def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
         rect = wintypes.RECT()
         if not user32.GetWindowRect(windows[-1], ctypes.byref(rect)):
             raise Blocked(f"Windows GetWindowRect failed for {title}")
-        x, y, width, height = (
-            rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top
-        )
+        x, y, width, height = (rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top)
     if not 150 < width < 900 or not 130 < height < 600:
         raise AssertionError(f"implausible native {title} dialog: {(x, y, width, height)}")
     return x, y, width, height
@@ -469,7 +466,8 @@ def screenshot_dialog(gui, evidence: Path, label: str, title: str):
             gui.screenshot().save(evidence / f"{label}.png")
             (evidence / f"{label}-rectangle.json").write_text(
                 json.dumps({"x": rect[0], "y": rect[1], "width": rect[2], "height": rect[3]})
-                + "\n", encoding="utf-8",
+                + "\n",
+                encoding="utf-8",
             )
             return rect
         except AssertionError:
@@ -495,7 +493,9 @@ def preferences_file(home: Path) -> Path:
     if sys.platform.startswith("win"):
         return home / "AppData" / "Roaming" / "BoardGamesWithQuests" / "preferences.json"
     if sys.platform == "darwin":
-        return home / "Library" / "Application Support" / "BoardGamesWithQuests" / "preferences.json"
+        return (
+            home / "Library" / "Application Support" / "BoardGamesWithQuests" / "preferences.json"
+        )
     return home / ".config" / "BoardGamesWithQuests" / "preferences.json"
 
 
@@ -506,7 +506,8 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     env.update(
-        HOME=str(home), USERPROFILE=str(home),
+        HOME=str(home),
+        USERPROFILE=str(home),
         APPDATA=str(home / "AppData" / "Roaming"),
         XDG_CONFIG_HOME=str(home / ".config"),
     )
@@ -515,8 +516,11 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
         with tempfile.TemporaryDirectory(prefix="bgwq-settings-external-cwd-") as cwd:
             with (evidence / f"settings-{attempt}-stderr.txt").open("wb") as stderr:
                 process = subprocess.Popen(
-                    [str(exe), "--game", "chess"], cwd=cwd, env=env,
-                    stdout=subprocess.DEVNULL, stderr=stderr,
+                    [str(exe), "--game", "chess"],
+                    cwd=cwd,
+                    env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=stderr,
                 )
                 try:
                     deadline = time.monotonic() + 20
@@ -536,12 +540,16 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                         gui.press("tab")
                         gui.press("return")
                         try:
-                            board = await_board(gui, evidence, f"settings-{attempt}-board", timeout=5)
+                            board = await_board(
+                                gui, evidence, f"settings-{attempt}-board", timeout=5
+                            )
                             break
                         except AssertionError:
                             pass
                     if board is None:
-                        raise AssertionError("could not dismiss game chooser during settings journey")
+                        raise AssertionError(
+                            "could not dismiss game chooser during settings journey"
+                        )
                     gui.click(*settings_button(board, platform_name))
                     x, y, width, height = screenshot_dialog(
                         gui, evidence, f"settings-{attempt}-dialog", "Settings"
@@ -565,18 +573,25 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                             gui.sleep(0.3)
                         if not path.is_file():
                             gui.screenshot().save(evidence / "settings-save-missing.png")
-                            raise AssertionError(f"native Settings Save produced no preferences file: {path}")
+                            raise AssertionError(
+                                f"native Settings Save produced no preferences file: {path}"
+                            )
                         value = json.loads(path.read_text(encoding="utf-8"))
                         if value != {"board_size": 64, "show_coordinates": False}:
                             gui.screenshot().save(evidence / "settings-wrong-prefs.png")
-                            raise AssertionError(f"native Settings saved unexpected preferences: {value}")
+                            raise AssertionError(
+                                f"native Settings saved unexpected preferences: {value}"
+                            )
                         gui.screenshot().save(evidence / "settings-saved-board.png")
                     else:
                         gui.screenshot().save(evidence / "settings-reopened-after-restart.png")
                         if json.loads(path.read_text(encoding="utf-8")) != {
-                            "board_size": 64, "show_coordinates": False,
+                            "board_size": 64,
+                            "show_coordinates": False,
                         }:
-                            raise AssertionError("preferences changed after frozen-app process restart")
+                            raise AssertionError(
+                                "preferences changed after frozen-app process restart"
+                            )
                     # Close the real Settings dialog first, then the actual app.
                     if attempt == 0:
                         # Save normally destroys the settings dialog.
@@ -606,7 +621,9 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                     }
                     gui.click(px + relative_quit[platform_name] * board[2], py)
                     if process.wait(timeout=12):
-                        raise AssertionError("frozen application failed clean settings/restart shutdown")
+                        raise AssertionError(
+                            "frozen application failed clean settings/restart shutdown"
+                        )
                 finally:
                     if process.poll() is None:
                         process.terminate()
@@ -615,7 +632,13 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                         except subprocess.TimeoutExpired:
                             process.kill()
                             process.wait(timeout=8)
-    return {"real_settings_dialog": True, "native_pointer_save": True, "user_config_path": str(path), "process_restart": True, "persisted_settings": True}
+    return {
+        "real_settings_dialog": True,
+        "native_pointer_save": True,
+        "user_config_path": str(path),
+        "process_restart": True,
+        "persisted_settings": True,
+    }
 
 
 def main() -> int:
@@ -676,9 +699,7 @@ def main() -> int:
                 raise AssertionError(
                     f"frozen diagnostic failed: {check.stderr.decode(errors='replace')}"
                 )
-            state["corrupt_asset"] = corrupt_asset_check(
-                executable, args.platform, folder
-            )
+            state["corrupt_asset"] = corrupt_asset_check(executable, args.platform, folder)
             gui = native_driver()
             for game in ("chess", "checkers"):
                 state["games"][game] = pointer_gameplay(
