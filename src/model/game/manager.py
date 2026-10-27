@@ -1943,6 +1943,8 @@ class GameManager:
                 if any(effect.op != "propose_outcome" for effect in terminal):
                     raise TransitionError("outcome hook must only propose terminal results")
                 state["outcome"] = self._result((*effects, *terminal), state)
+                if state["outcome"] is not None and "pending_draw_offer" in state:
+                    state["pending_draw_offer"] = None
                 event["outcome"] = state["outcome"]
             self._charge(_json_work(state))
             encoded = json.dumps(thaw_json(state), allow_nan=False, separators=(",", ":"))
