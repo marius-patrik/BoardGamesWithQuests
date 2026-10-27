@@ -538,7 +538,9 @@ class PlayerGameView(ttk.Frame):
         self.window_controller.set_status("Draw accepted." if reply else "Draw offer declined.")
         self.refresh()
 
-    def _format_complete_move(self, move: dict[str, Any], state: dict[str, Any]) -> str:
+    def _format_complete_move(
+        self, move: dict[str, Any], state: dict[str, Any], *, capture_notation: bool = True
+    ) -> str:
         """Describe an engine-supplied full action; never reconstruct its route."""
         rows = state["config"]["board"]["rows"]
         points = [move["start"], *move["hops"]]
@@ -546,7 +548,9 @@ class PlayerGameView(ttk.Frame):
             piece["square"] == move["hops"][-1] and piece["side"] != state["active_side"]
             for piece in state["board"]
         )
-        separator = " × " if len(move["hops"]) > 1 or occupied else " → "
+        separator = (
+            " × " if capture_notation and (len(move["hops"]) > 1 or occupied) else " → "
+        )
         route = separator.join(self._label(point, rows) for point in points)
         promotion = move.get("promotion")
         if promotion is not None:
@@ -567,6 +571,7 @@ class PlayerGameView(ttk.Frame):
         title: str,
         explanation: str,
         confirm_label: str,
+        capture_notation: bool = True,
     ) -> dict[str, Any] | None:
         """Choose exactly one authoritative complete DTO with a real Tk listbox."""
         if not moves:
@@ -592,7 +597,10 @@ class PlayerGameView(ttk.Frame):
         listbox.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")
         for index, move in enumerate(moves, start=1):
-            listbox.insert(tk.END, f"{index}. {self._format_complete_move(move, state)}")
+            description = self._format_complete_move(
+                move, state, capture_notation=capture_notation
+            )
+            listbox.insert(tk.END, f"{index}. {description}")
 
         selected: list[dict[str, Any] | None] = [None]
 
@@ -630,6 +638,7 @@ class PlayerGameView(ttk.Frame):
             title="Intended move for draw claim",
             explanation="Choose the full legal route to claim without playing that move:",
             confirm_label="Use intended move",
+            capture_notation=False,
         )
 
     def claim_draw(self) -> None:
