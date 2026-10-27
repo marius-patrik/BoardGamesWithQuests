@@ -404,6 +404,9 @@ def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
         )
         values = dict(line.split("=", 1) for line in geometry.splitlines() if "=" in line)
         x, y, width, height = (int(values[key]) for key in ("X", "Y", "WIDTH", "HEIGHT"))
+        # This pinned Openbox/Xvfb runner exposes Tk child bounds, not
+        # the decorated Settings window. Verified against actual screenshots.
+        x, y, width, height = x - 28, y - 55, width - 10, height + 15
     elif sys.platform == "darwin":
         import re
 
