@@ -4,6 +4,7 @@
   "title": "English Draughts",
   "default": false,
   "playable": false,
+  "draw_offer_timing": "after_move",
   "board": {
     "rows": 8,
     "columns": 8,
@@ -419,6 +420,17 @@
               "params": {}
             },
             "right": 80
+          },
+          {
+            "op": "compare",
+            "relation": "eq",
+            "left": {
+              "query": "move_attribute",
+              "params": {
+                "name": "start"
+              }
+            },
+            "right": null
           }
         ]
       },
@@ -539,5 +551,6 @@
     "relation": "eq",
     "right": "man"
   },
-  "starting_side": -1
+  "starting_side": -1,
+  "draw_agreement_minimum_moves": 0
 }

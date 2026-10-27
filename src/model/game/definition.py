@@ -72,6 +72,8 @@ class GameDefinition:
     declared_optional_fields: frozenset[str] = frozenset()
     starting_side: int = 1
     position_identity: Mapping[str, Any] | None = None
+    draw_offer_timing: str = "any_time"
+    draw_agreement_minimum_moves: int = 0
 
     def __post_init__(self) -> None:
         """Detach and recursively freeze every configuration-owned JSON value.
@@ -84,8 +86,16 @@ class GameDefinition:
             "halfmove_reset",
             "position_identity",
             "starting_side",
+            "draw_offer_timing",
+            "draw_agreement_minimum_moves",
         }:
             raise ValueError("unknown declared optional configuration fields")
+        if type(
+            self.draw_agreement_minimum_moves
+        ) is not int or self.draw_agreement_minimum_moves not in (0, 1):
+            raise ValueError("draw agreement minimum moves must be zero or one")
+        if self.draw_offer_timing not in ("any_time", "after_move"):
+            raise ValueError("unknown draw offer timing policy")
         if type(self.starting_side) is not int or self.starting_side not in (-1, 1):
             raise ValueError("starting side must be explicit integer 1 or -1")
         object.__setattr__(
@@ -202,7 +212,14 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         or not TOP_LEVEL_FIELDS <= set(data)
         or not set(data)
         <= TOP_LEVEL_FIELDS
-        | {"initial_state", "halfmove_reset", "position_identity", "starting_side"}
+        | {
+            "initial_state",
+            "halfmove_reset",
+            "position_identity",
+            "starting_side",
+            "draw_offer_timing",
+            "draw_agreement_minimum_moves",
+        }
     ):
         raise ConfigurationError(f"{package}: missing or unknown top-level fields")
     try:
@@ -419,6 +436,12 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
             condition(halfmove_reset)
     except ValueError as error:
         raise ConfigurationError(f"{package}: invalid initial lifecycle policy: {error}") from error
+    minimum_moves = data.get("draw_agreement_minimum_moves", 0)
+    if type(minimum_moves) is not int or minimum_moves not in (0, 1):
+        raise ConfigurationError("draw agreement minimum moves must be zero or one")
+    draw_offer_timing = data.get("draw_offer_timing", "any_time")
+    if type(draw_offer_timing) is not str or draw_offer_timing not in ("any_time", "after_move"):
+        raise ConfigurationError("draw offer timing must be any_time or after_move")
     starting_side = data.get("starting_side", 1)
     if type(starting_side) is not int or starting_side not in (-1, 1):
         raise ConfigurationError("starting side must be explicit integer 1 or -1")
@@ -484,10 +507,20 @@ def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:
         freeze_json(initial_state),
         freeze_json(halfmove_reset),
         frozenset(
-            set(data) & {"initial_state", "halfmove_reset", "position_identity", "starting_side"}
+            set(data)
+            & {
+                "initial_state",
+                "halfmove_reset",
+                "position_identity",
+                "starting_side",
+                "draw_offer_timing",
+                "draw_agreement_minimum_moves",
+            }
         ),
         starting_side,
         freeze_json(position_identity),
+        draw_offer_timing,
+        minimum_moves,
     )
 
 

@@ -24,6 +24,7 @@ OUTCOME_CAUSES = {
     "stalemate": "stalemate",
     "no_legal_moves": "no legal moves",
     "timeout": "time expired",
+    "agreement": "mutual agreement",
     "threefold": "threefold repetition",
     "fivefold": "fivefold repetition",
     "fifty-move": "fifty-move rule",
@@ -59,33 +60,6 @@ def outcome_description(state: dict[str, Any]) -> str:
     else:
         side = str(winner)
     return f"{side} wins — {reason}."
-
-
-def configured_draw_claims(state: dict[str, Any]) -> list[str]:
-    """Discover configured claims from event.claim comparisons, not rule names."""
-
-    def declares_claim(condition: Any, claim: str) -> bool:
-        if isinstance(condition, list):
-            return any(declares_claim(child, claim) for child in condition)
-        if not isinstance(condition, dict):
-            return False
-        if condition.get("op") == "compare" and condition.get("relation") == "eq":
-            left, right = condition.get("left"), condition.get("right")
-            if (left == {"ref": "event.claim"} and right == claim) or (
-                right == {"ref": "event.claim"} and left == claim
-            ):
-                return True
-        return any(
-            declares_claim(value, claim)
-            for key, value in condition.items()
-            if key in ("args", "arg")
-        )
-
-    return [
-        rule["id"]
-        for rule in state["config"]["rules"]
-        if rule["hook"] == "outcome" and declares_claim(rule["when"], rule["id"])
-    ]
 
 
 class PlayerGameView(ttk.Frame):
@@ -174,6 +148,8 @@ class PlayerGameView(ttk.Frame):
             add_action(navigation, "Settings", self.on_settings)
         add_action(navigation, "Quit", self._quit)
         add_action(gameplay, "Claim draw", self.claim_draw)
+        add_action(gameplay, "Offer draw", self.offer_draw)
+        add_action(gameplay, "Respond draw", self.respond_draw)
         add_action(gameplay, "Resign", self.resign_game)
         add_action(gameplay, "Export", self.export_game)
         add_action(gameplay, "Notation", self.export_notation)
@@ -359,7 +335,11 @@ class PlayerGameView(ttk.Frame):
         finished = state["outcome"] is not None
         availability = {
             "Resign": not finished,
-            "Claim draw": not finished and bool(configured_draw_claims(state)),
+            "Claim draw": not finished and bool(self.session.configured_draw_claims()),
+            "Offer draw": not finished
+            and bool(self.session.draw_action_availability()["offer_actors"]),
+            "Respond draw": not finished
+            and (self.session.draw_action_availability()["response_actor"] is not None),
             "Notation": state["config"]["exports"] in (["pgn"], ["pdn"]),
         }
         for label, enabled in availability.items():
@@ -389,7 +369,8 @@ class PlayerGameView(ttk.Frame):
         else:
             self._presented_terminal_key = None
             active = "White" if state["active_side"] == 1 else "Black"
-            self.turn.set(f"{game_name} · {active} to move · turn {state['revision'] + 1}")
+            played = sum(event["move"] is not None for event in state["events"])
+            self.turn.set(f"{game_name} · {active} to move · move {played + 1}")
         self.status.set(self.window_controller.status_message or "Ready")
         self._refresh_actions(state)
         self.quest_list.refresh(state)
@@ -401,7 +382,15 @@ class PlayerGameView(ttk.Frame):
             for event in state["events"]:
                 move = event.get("move")
                 if move is None:
-                    description = event.get("action", {}).get("type", "Result")
+                    kind = event.get("action", {}).get("type", "result")
+                    description = {
+                        "offer_draw": "Draw offered",
+                        "accept_draw": "Draw accepted",
+                        "reject_draw": "Draw declined",
+                        "claim_draw": "Draw claimed",
+                        "resign": "Resignation",
+                        "timeout": "Time expired",
+                    }.get(kind, kind.replace("_", " ").capitalize())
                 else:
                     description = (
                         self._label(move["start"], state["config"]["board"]["rows"])
@@ -458,12 +447,127 @@ class PlayerGameView(ttk.Frame):
         self.window_controller.game_controller.reset_selection()
         self.refresh()
 
+    def offer_draw(self) -> None:
+        """Request a non-withdrawable authoritative offer as an actual participant."""
+        state = self.session.snapshot()
+        actors = self.session.draw_action_availability()["offer_actors"]
+        if not actors:
+            return
+        if len(actors) == 1:
+            actor = actors[0]
+        else:
+            labels = [
+                "White" if actor == state["participants"]["1"] else "Black" for actor in actors
+            ]
+            choice = simpledialog.askinteger(
+                "Offer draw",
+                "Choose which participant offers the draw:\n"
+                + "\n".join(f"{i + 1}. {name}" for i, name in enumerate(labels)),
+                parent=self,
+                minvalue=1,
+                maxvalue=len(actors),
+            )
+            if choice is None:
+                return
+            actor = actors[choice - 1]
+        if not messagebox.askyesno(
+            "Offer draw",
+            "Offer your opponent a draw? The offer cannot be withdrawn.",
+            parent=self,
+        ):
+            return
+        try:
+            self.session.submit(actor, state["revision"], {"type": "offer_draw"})
+        except (ValueError, RuntimeError) as error:
+            messagebox.showerror("Offer draw", str(error), parent=self)
+            return
+        self.window_controller.set_status("Draw offered. Waiting for the other player.")
+        self.refresh()
+
+    def respond_draw(self) -> None:
+        """Let only the other participant accept or decline a persisted offer."""
+        state = self.session.snapshot()
+        available = self.session.draw_action_availability()
+        actor = available["response_actor"]
+        if actor is None:
+            return
+        reply = messagebox.askyesnocancel(
+            "Respond to draw",
+            "Accept the draw offer?\nYes: accept. No: decline. Cancel: decide later.",
+            parent=self,
+        )
+        if reply is None:
+            return
+        try:
+            self.session.submit(
+                actor,
+                state["revision"],
+                {"type": "accept_draw" if reply else "reject_draw"},
+            )
+        except (ValueError, RuntimeError) as error:
+            messagebox.showerror("Respond to draw", str(error), parent=self)
+            return
+        self.window_controller.set_status("Draw accepted." if reply else "Draw offer declined.")
+        self.refresh()
+
+    def _choose_intended_move(
+        self, moves: list[dict[str, Any]], rows: int
+    ) -> dict[str, Any] | None:
+        """Pointer-operable scrollable chooser over canonical complete legal moves."""
+        dialog = tk.Toplevel(self)
+        dialog.title("Intended move for draw claim")
+        dialog.transient(self.winfo_toplevel())
+        dialog.resizable(True, True)
+        frame = ttk.Frame(dialog, padding=12)
+        frame.pack(fill="both", expand=True)
+        ttk.Label(
+            frame,
+            text="Choose the full legal route to claim without playing that move:",
+            wraplength=440,
+        ).pack(anchor="w", pady=(0, 8))
+        holder = ttk.Frame(frame)
+        holder.pack(fill="both", expand=True)
+        listbox = tk.Listbox(holder, exportselection=False, width=54, height=12)
+        scroll = ttk.Scrollbar(holder, orient="vertical", command=listbox.yview)
+        listbox.configure(yscrollcommand=scroll.set)
+        listbox.pack(side="left", fill="both", expand=True)
+        scroll.pack(side="right", fill="y")
+        for move in moves:
+            points = [move["start"], *move["hops"]]
+            description = " → ".join(self._label(point, rows) for point in points)
+            if move["promotion"] is not None:
+                description += f" (promote to {move['promotion']})"
+            listbox.insert(tk.END, description)
+        selected: list[dict[str, Any] | None] = [None]
+
+        def finish(accept: bool) -> None:
+            if accept and listbox.curselection():
+                selected[0] = moves[listbox.curselection()[0]]
+            dialog.destroy()
+
+        controls = ttk.Frame(frame)
+        controls.pack(fill="x", pady=(8, 0))
+        ttk.Button(controls, text="Cancel", command=lambda: finish(False)).pack(
+            side="right", padx=(8, 0)
+        )
+        ttk.Button(controls, text="Use intended move", command=lambda: finish(True)).pack(
+            side="right"
+        )
+        dialog.protocol("WM_DELETE_WINDOW", lambda: finish(False))
+        dialog.update_idletasks()
+        dialog.grab_set()
+        listbox.selection_set(0)
+        listbox.activate(0)
+        listbox.focus_set()
+        self.wait_window(dialog)
+        return selected[0]
+
     def claim_draw(self) -> None:
         """Try only named game-owned claim conditions; do not grant local draws."""
         state = self.session.snapshot()
         if state["outcome"] is not None:
             return
-        named = configured_draw_claims(state)
+        named = self.session.configured_draw_claims()
         if not named:
             messagebox.showinfo(
                 "Claim draw", "No draw claims are defined for this game.", parent=self
@@ -482,6 +586,34 @@ class PlayerGameView(ttk.Frame):
         )
         if selected is None:
             return
+        claim = named[selected - 1]
+        try:
+            eligibility = self.session.draw_claim_candidates(claim)
+        except (ValueError, RuntimeError) as error:
+            messagebox.showerror("Claim draw", str(error), parent=self)
+            return
+        intended_move = None
+        prospective = eligibility["intended_moves"]
+        if eligibility["current"] and prospective:
+            choice = messagebox.askyesnocancel(
+                "Claim draw",
+                "Claim the current position? Yes: claim now. No: choose an intended move.",
+                parent=self,
+            )
+            if choice is None:
+                return
+            if not choice:
+                intended_move = self._choose_intended_move(
+                    prospective, state["config"]["board"]["rows"]
+                )
+                if intended_move is None:
+                    return
+        elif not eligibility["current"] and prospective:
+            intended_move = self._choose_intended_move(
+                prospective, state["config"]["board"]["rows"]
+            )
+            if intended_move is None:
+                return
         actor = state["participants"][str(state["active_side"])]
         try:
             self.session.submit(
@@ -489,8 +621,8 @@ class PlayerGameView(ttk.Frame):
                 state["revision"],
                 {
                     "type": "claim_draw",
-                    "claim": named[selected - 1],
-                    "intended_move": None,
+                    "claim": claim,
+                    "intended_move": intended_move,
                 },
             )
         except (ValueError, RuntimeError) as error:

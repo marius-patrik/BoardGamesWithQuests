@@ -82,6 +82,18 @@ class DesktopSession:
         """Return complete player-selectable moves, never live piece objects."""
         return [move.to_json() for move in self._manager.get_valid_moves()]
 
+    def configured_draw_claims(self) -> list[str]:
+        """Discover canonical named outcome claims, without GUI rule parsing."""
+        return self._manager.configured_draw_claims()
+
+    def draw_claim_candidates(self, claim: str) -> dict[str, Any]:
+        """Read authoritative current and complete prospective claim eligibility."""
+        return self._manager.draw_claim_candidates(claim)
+
+    def draw_action_availability(self) -> dict[str, Any]:
+        """Read participant identities permitted to offer or answer a draw."""
+        return self._manager.draw_action_availability()
+
     def submit(
         self,
         actor: str,

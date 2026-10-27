@@ -26,7 +26,7 @@ jobs:
       - name: Install desktop and pytest
         run: python -m pip install -e . pytest
       - name: Exercise authoritative desktop session
-        run: python -m pytest -q .github/tests/test_desktop_json_gameplay.py
+        run: python -m pytest -q .github/tests/test_desktop_json_gameplay.py .github/tests/test_draw_agreement_acceptance.py .github/tests/test_prospective_draw_claims.py
 
   gui:
     name: real-tkinter / Python 3.12
@@ -45,4 +45,4 @@ jobs:
           sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth
           python -m pip install -e . pytest
       - name: Exercise the actual board, modal and settings widgets
-        run: xvfb-run -a python -m pytest -q .github/tests/desktop_gui_acceptance.py
+        run: xvfb-run -a python -m pytest -q .github/tests/desktop_gui_acceptance.py .github/tests/desktop_gui_draw_acceptance.py
