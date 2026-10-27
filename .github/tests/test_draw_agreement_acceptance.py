@@ -195,6 +195,49 @@ def test_fide_offers_are_valid_outside_preferred_post_move_window():
     assert GameManager.from_snapshot(manager.get_state()).get_state() == manager.get_state()
 
 
+def test_fide_offer_made_by_active_player_survives_own_legal_move():
+    # Under FIDE 9.1.2.1, only an opponent's action can refuse an offer.
+    # The offerer may offer before moving; that move does not withdraw it.
+    manager = game("chess")
+    white = "white"
+    black = "black"
+    initial = manager.get_state()
+    send(manager, white, "offer_draw", at=100, action_id="white-offers-first")
+    before = manager.get_state()
+    assert before["pending_draw_offer"]["actor"] == white
+    move = manager.get_valid_moves()[0]
+    event = manager.submit_action(
+        white, before["revision"], "offering-side-move",
+        {"type": "move", "move": move.to_json()}, 200,
+    )
+    after = manager.get_state()
+    assert event["outcome"] is None
+    assert after["pending_draw_offer"]["actor"] == white
+    assert GameManager.from_snapshot(after).get_state() == after
+    denied(manager, black, {"type": "accept_draw"}, at=300)
+    move = manager.get_valid_moves()[0]
+    manager.submit_action(
+        black, after["revision"], "opponent-declines-by-moving",
+        {"type": "move", "move": move.to_json()}, 400,
+    )
+    finished = manager.get_state()
+    assert finished["pending_draw_offer"] is None
+    assert GameManager.from_snapshot(finished).get_state() == finished
+
+    # Once each participant has moved, the opponent can accept a still-pending
+    # offer even if the offering participant just played their next move.
+    send(manager, white, "offer_draw", at=500, action_id="fresh-offer")
+    before = manager.get_state()
+    manager.submit_action(
+        white, before["revision"], "white-third",
+        {"type": "move", "move": manager.get_valid_moves()[0].to_json()}, 600,
+    )
+    assert manager.get_state()["pending_draw_offer"]["actor"] == white
+    accepted = send(manager, black, "accept_draw", at=700, action_id="black-accepts")
+    assert accepted["outcome"]["kind"] == "draw"
+    assert GameManager.from_snapshot(manager.get_state()).get_state() == manager.get_state()
+
+
 def test_strict_payload_auth_revision_and_replay_tampering_are_atomic():
     manager = game("chess")
     initial = manager.get_state()
