@@ -149,6 +149,32 @@ def assert_native_runner(target: str) -> None:
         raise Blocked(f"incorrect native runner: {system}/{machine} expected {target}")
 
 
+def corrupt_asset_check(executable: Path, target: str, cwd: Path) -> dict:
+    """Prove the *extracted* frozen binary rejects altered bundled game JSON."""
+    if target.startswith("macos"):
+        games = executable.parent.parent / "Resources" / "games"
+    else:
+        games = executable.parent / "_internal" / "games"
+    asset = games / "chess" / "config.json"
+    original = asset.read_bytes()
+    try:
+        asset.write_bytes(b'{"corrupt":')
+        env = dict(os.environ)
+        env.pop("PYTHONPATH", None)
+        result = subprocess.run(
+            [str(executable), "--check"],
+            cwd=cwd, env=env, capture_output=True, timeout=90,
+        )
+        if result.returncode == 0:
+            raise AssertionError("corrupt bundled Chess JSON was accepted by frozen application")
+        bad_exit = result.returncode
+    finally:
+        asset.write_bytes(original)
+    if asset.read_bytes() != original:
+        raise AssertionError("extracted asset mutation was not fully restored")
+    return {"corrupt_frozen_asset_rejected": True, "rejection_exit_code": bad_exit}
+
+
 def native_driver():
     try:
         import pyautogui
@@ -623,6 +649,9 @@ def main() -> int:
                 raise AssertionError(
                     f"frozen diagnostic failed: {check.stderr.decode(errors='replace')}"
                 )
+            state["corrupt_asset"] = corrupt_asset_check(
+                executable, args.platform, folder
+            )
             gui = native_driver()
             for game in ("chess", "checkers"):
                 state["games"][game] = pointer_gameplay(
