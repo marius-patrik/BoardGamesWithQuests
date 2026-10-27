@@ -156,7 +156,7 @@ def native_driver():
         pyautogui.FAILSAFE = False
         pyautogui.PAUSE = 0.25
         image = pyautogui.screenshot()
-        if image.width < 840 or image.height < 640 or not image.getbbox():
+        if image.width < 840 or image.height < 640:
             raise Blocked(f"interactive screen capture unavailable ({image.size})")
         return pyautogui
     except Blocked:
