@@ -855,6 +855,8 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
     assert white.winfo_rootx() < board.winfo_rootx() < black.winfo_rootx()
     assert white.winfo_rootx() + white.winfo_width() <= board.winfo_rootx()
     assert board.winfo_rootx() + board.winfo_width() <= black.winfo_rootx()
+    assert board.winfo_rootx() - (white.winfo_rootx() + white.winfo_width()) < 95
+    assert black.winfo_rootx() - (board.winfo_rootx() + board.winfo_width()) < 95
     assert board.winfo_height() == board.winfo_width()
     assert board.winfo_rooty() >= root.winfo_rooty()
     assert board.winfo_rooty() + board.winfo_height() <= (root.winfo_rooty() + root.winfo_height())
