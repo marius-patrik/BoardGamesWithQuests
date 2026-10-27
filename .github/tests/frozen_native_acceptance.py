@@ -409,9 +409,13 @@ def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
         import re
 
         code = (
-            'tell application "System Events" to get {position, size} of first window '
-            'whose name is "' + title + '" of first process '
-            'whose name contains "BoardGamesWithQuests"'
+            'tell application "System Events"\n'
+            'set p to first process whose name contains "BoardGamesWithQuests"\n'
+            'tell p\n'
+            'set w to first window whose name is "' + title + '"\n'
+            'get {position of w, size of w}\n'
+            'end tell\n'
+            'end tell'
         )
         result = subprocess.run(
             ["osascript", "-e", code], capture_output=True, text=True, timeout=15
