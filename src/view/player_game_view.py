@@ -548,9 +548,7 @@ class PlayerGameView(ttk.Frame):
             piece["square"] == move["hops"][-1] and piece["side"] != state["active_side"]
             for piece in state["board"]
         )
-        separator = (
-            " × " if capture_notation and (len(move["hops"]) > 1 or occupied) else " → "
-        )
+        separator = " × " if capture_notation and (len(move["hops"]) > 1 or occupied) else " → "
         route = separator.join(self._label(point, rows) for point in points)
         promotion = move.get("promotion")
         if promotion is not None:
@@ -597,9 +595,7 @@ class PlayerGameView(ttk.Frame):
         listbox.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")
         for index, move in enumerate(moves, start=1):
-            description = self._format_complete_move(
-                move, state, capture_notation=capture_notation
-            )
+            description = self._format_complete_move(move, state, capture_notation=capture_notation)
             listbox.insert(tk.END, f"{index}. {description}")
 
         selected: list[dict[str, Any] | None] = [None]
