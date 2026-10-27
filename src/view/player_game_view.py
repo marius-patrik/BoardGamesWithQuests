@@ -286,24 +286,25 @@ class PlayerGameView(ttk.Frame):
         result = self.window_controller.on_square_clicked(position)
         if result["action"] == "choose":
             options = result["options"]
-            descriptions = [
-                f"{index + 1}. {move['hops']} {move['promotion'] or ''}"
-                for index, move in enumerate(options)
-            ]
-            choice = simpledialog.askinteger(
-                "Choose move",
-                "Select a complete capture route or promotion:\n" + "\n".join(descriptions),
-                parent=self,
-                minvalue=1,
-                maxvalue=len(options),
+            choice = self._choose_complete_move(
+                options,
+                self.session.snapshot(),
+                title="Choose your move",
+                explanation="Select a complete capture route or promotion:",
+                confirm_label="Play selected move",
             )
-            if choice is not None:
-                result = self.window_controller.game_controller.submit_move(options[choice - 1])
+            if choice is None:
+                self.window_controller.set_status(
+                    "Move choice canceled. Select a destination or another piece."
+                )
+            else:
+                result = self.window_controller.game_controller.submit_move(choice)
                 if result["action"] == "moved":
                     self.window_controller.set_status("Move played.")
         controller = self.window_controller.game_controller
         self.board_view.set_selection(controller.selected_square, controller.highlighted_moves)
         if result["action"] == "invalid":
+            self.board_view.show_invalid_square(position)
             self.status.set(result.get("message", "Invalid move."))
         self.refresh()
 
@@ -352,6 +353,32 @@ class PlayerGameView(ttk.Frame):
         if finished:
             self.window_controller.game_controller.reset_selection()
             self.board_view.set_selection(None, [])
+        self.board_view.set_appearance(
+            state["config"].get("appearance", {}),
+            draughts=self.session.game == "checkers",
+        )
+        accepted_moves = [event["move"] for event in state["events"] if event["move"] is not None]
+        if accepted_moves:
+            last = accepted_moves[-1]
+            self.board_view.set_last_move(tuple(last["start"]), tuple(last["hops"][-1]))
+        else:
+            self.board_view.set_last_move(None, None)
+
+        # The current session only reports the terminal checkmate verdict,
+        # not general attack/check state. Never infer check from piece vectors.
+        checked_side = state["active_side"] if (
+            state["outcome"] is not None
+            and state["outcome"]["cause"] == "checkmate"
+        ) else None
+        checked_king = next(
+            (
+                tuple(piece["square"])
+                for piece in state["board"]
+                if piece["kind"] == "king" and piece["side"] == checked_side
+            ),
+            None,
+        )
+        self.board_view.set_in_check(checked_king)
         self.board_view.refresh(self.session.board_projection())
         self._fit_board()
         remaining = self.session.clock_remaining()
@@ -510,34 +537,65 @@ class PlayerGameView(ttk.Frame):
         self.window_controller.set_status("Draw accepted." if reply else "Draw offer declined.")
         self.refresh()
 
-    def _choose_intended_move(
-        self, moves: list[dict[str, Any]], rows: int
+    def _format_complete_move(self, move: dict[str, Any], state: dict[str, Any]) -> str:
+        """Describe an engine-supplied full action; never reconstruct its route."""
+        rows = state["config"]["board"]["rows"]
+        points = [move["start"], *move["hops"]]
+        occupied = any(
+            piece["square"] == move["hops"][-1]
+            and piece["side"] != state["active_side"]
+            for piece in state["board"]
+        )
+        separator = " × " if len(move["hops"]) > 1 or occupied else " → "
+        route = separator.join(self._label(point, rows) for point in points)
+        promotion = move.get("promotion")
+        if promotion is not None:
+            kind = str(promotion)
+            side = "white" if state["active_side"] == 1 else "black"
+            piece_definition = state["config"]["pieces"].get(kind, {})
+            glyph = piece_definition.get("symbols", {}).get(side, "")
+            route += f"  —  Promote to {kind.replace('_', ' ').title()}"
+            if glyph:
+                route += f" ({glyph})"
+        return route
+
+    def _choose_complete_move(
+        self,
+        moves: list[dict[str, Any]],
+        state: dict[str, Any],
+        *,
+        title: str,
+        explanation: str,
+        confirm_label: str,
     ) -> dict[str, Any] | None:
-        """Pointer-operable scrollable chooser over canonical complete legal moves."""
+        """Choose exactly one authoritative complete DTO with a real Tk listbox."""
+        if not moves:
+            return None
         dialog = tk.Toplevel(self)
-        dialog.title("Intended move for draw claim")
+        dialog.title(title)
         dialog.transient(self.winfo_toplevel())
         dialog.resizable(True, True)
         frame = ttk.Frame(dialog, padding=12)
         frame.pack(fill="both", expand=True)
-        ttk.Label(
-            frame,
-            text="Choose the full legal route to claim without playing that move:",
-            wraplength=440,
-        ).pack(anchor="w", pady=(0, 8))
+        ttk.Label(frame, text=explanation, wraplength=420).pack(
+            anchor="w", pady=(0, 8)
+        )
         holder = ttk.Frame(frame)
         holder.pack(fill="both", expand=True)
-        listbox = tk.Listbox(holder, exportselection=False, width=54, height=12)
+        listbox = tk.Listbox(
+            holder,
+            exportselection=False,
+            width=54,
+            height=min(12, max(4, len(moves))),
+            activestyle="dotbox",
+        )
         scroll = ttk.Scrollbar(holder, orient="vertical", command=listbox.yview)
         listbox.configure(yscrollcommand=scroll.set)
         listbox.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")
-        for move in moves:
-            points = [move["start"], *move["hops"]]
-            description = " → ".join(self._label(point, rows) for point in points)
-            if move["promotion"] is not None:
-                description += f" (promote to {move['promotion']})"
-            listbox.insert(tk.END, description)
+        for index, move in enumerate(moves, start=1):
+            listbox.insert(tk.END, f"{index}. {self._format_complete_move(move, state)}")
+
         selected: list[dict[str, Any] | None] = [None]
 
         def finish(accept: bool) -> None:
@@ -550,10 +608,13 @@ class PlayerGameView(ttk.Frame):
         ttk.Button(controls, text="Cancel", command=lambda: finish(False)).pack(
             side="right", padx=(8, 0)
         )
-        ttk.Button(controls, text="Use intended move", command=lambda: finish(True)).pack(
+        ttk.Button(controls, text=confirm_label, command=lambda: finish(True)).pack(
             side="right"
         )
         dialog.protocol("WM_DELETE_WINDOW", lambda: finish(False))
+        dialog.bind("<Escape>", lambda _event: finish(False))
+        dialog.bind("<Return>", lambda _event: finish(True))
+        listbox.bind("<Double-Button-1>", lambda _event: finish(True))
         dialog.update_idletasks()
         dialog.grab_set()
         listbox.selection_set(0)
@@ -561,6 +622,19 @@ class PlayerGameView(ttk.Frame):
         listbox.focus_set()
         self.wait_window(dialog)
         return selected[0]
+
+    def _choose_intended_move(
+        self, moves: list[dict[str, Any]], rows: int
+    ) -> dict[str, Any] | None:
+        """Keep #438's claim chooser semantics: choose an intent, never play it."""
+        state = self.session.snapshot()
+        return self._choose_complete_move(
+            moves,
+            state,
+            title="Intended move for draw claim",
+            explanation="Choose the full legal route to claim without playing that move:",
+            confirm_label="Use intended move",
+        )
 
     def claim_draw(self) -> None:
         """Try only named game-owned claim conditions; do not grant local draws."""
