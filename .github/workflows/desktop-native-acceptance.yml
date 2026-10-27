@@ -2,6 +2,9 @@ name: Desktop Native Package Acceptance
 
 on:
   pull_request:
+  push:
+    branches:
+      - qa/443-frozen-native-acceptance
   workflow_dispatch:
 
 permissions:
