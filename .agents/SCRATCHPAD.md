@@ -11,8 +11,8 @@
 
 ## Code/UX facts needing final proof
 
-- `GameManager` in `src/model/game/manager.py` owns revisioned transitions, clocks, declarations, quests and replay. `DesktopSession` is the sole local authority; GUI consumes detached state. Chess and Draughts JSON both currently say `playable:false`.
-- Source `src/view/player_game_view.py` discovers named configured claim rules but `claim_draw` still submits `intended_move:None`; WCDF prospective threefold cannot complete through GUI. No authoritative mutual offer/accept/reject action yet. Assigned upcoming owner #438.
+- `GameManager` in `src/model/game/manager.py` owns revisioned transitions, clocks, declarations, quests, pending draw offer and replay. `DesktopSession` is the sole local authority; GUI consumes detached state. Chess and Draughts JSON both currently say `playable:false`.
+- **Superseded by #438 integration:** `player_game_view.py` now uses authoritative `DesktopSession.draw_claim_candidates()` and a real pointer-operable Toplevel to submit complete intended moves without playing them. The manager supports `offer_draw`/`accept_draw`/`reject_draw` and revision/replay of pending offers. Integration commit `1ddc4f99fe2cdba63f7ffcfdf335b692c23ecafa`; candidate exact-SHA gameplay matrix and Tk Xvfb successful (Actions #40472124467). Full combined-head CI and four-platform extracted UI remain outstanding.
 - Chess reference #436: corrected a bad en-passant FEN oracle; 26 candidate tests + 99 existing regressions executed green on Python 3.10–3.13. 33-ply Opera Game fixture integrated. Still missing authoritative FIDE 50/75 boundary, rare dead/timeout mating possibilities and intended-move claims.
 - WCDF #437/#449: 263 Python cases per version and a 91-ply sourced game, short kings/capture chain/deferred removal and declarative threefold/40-move claims integrated; generic GUI claim discovery corrected. Re-run complete pointer paths and mutual draw after #438.
 - #435 source/frozen-Linux UX audit documented 26 findings/13 screenshots. Responsive 840×640 and terminal safeguards are fixed via #447/#451. #452–#454 still own capture chooser/piece contrast, scrollable quest/history/player presentation, native ttk/modal/idle polishing.
@@ -20,9 +20,11 @@
 - Tests live under `.github/tests/`; #450 must trace RETAIN/ADAPT/REPLACE/DELETE without replacing external gameplay oracles with implementation-generated expected results.
 - Native acceptance #443 must test the *extracted frozen* application on Windows x64, macOS ARM64, macOS x64 and Linux x64. CI packaging/`--check` is necessary but not sufficient.
 
+- FIDE Article 9.5.3 formal *incorrect* claim arbiter penalties are not implemented: dispatched v1 invalid claim actions reject atomically. #436 must resolve certification wording/requirement before claiming complete FIDE tournament procedure.
+
 ## Ownership hazards / evidence policy
 
-- #438 and #452/#453 can collide in `player_game_view.py`; sequence writers. #439 may proceed only on persistence modules and its own tests while #438 edits engine/session/view.
-- Do not import temporary verify-only workflows/branches into product PR. Automated architecture-diagram regeneration must run on **combined** integration head, never copied from stale task branches.
+- #438 production changes are now integrated; #452 may take exclusive `player_game_view.py` visual ownership. Coordinate any post-integration #438 corrective changes with #452 before writing shared UI. #439 persistence source is integrated and its task branch deleted.
+- Do not import temporary verify-only workflows/branches into product PR. Temporary PR #461 closed unmerged. Ten candidate source/test/workflow blobs accepted; generated diagrams on combined HEAD auto-regenerated (`aff6093e...`), not imported from stale task branch.
 - A new docs/code commit invalidates a literal 'all exact-head checks passed' claim until checks complete on that new SHA. Don't merge, approve, promote or publish without explicit maintainer native review.
 - Maintenance to clarify the master and subordinate issue bodies was applied 2026-10-26: #430 now separates passing Actions checks from failed Vercel statuses; #440 supersedes old '#456 OPEN' claim; #441 supersedes stale '#451 open' and inaccessible-UX-artifact text.
