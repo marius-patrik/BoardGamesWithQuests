@@ -122,9 +122,11 @@ def load_preferences(directory: Path | None = None) -> dict[str, Any]:
         )
         with os.fdopen(os.open(source, flags), "rb") as handle:
             opened = os.fstat(handle.fileno())
-            if not stat.S_ISREG(opened.st_mode) or (
-                opened.st_dev, opened.st_ino, opened.st_mtime_ns, opened.st_size
-            ) != expected or _regular_file_identity(source) != expected:
+            if (
+                not stat.S_ISREG(opened.st_mode)
+                or (opened.st_dev, opened.st_ino, opened.st_mtime_ns, opened.st_size) != expected
+                or _regular_file_identity(source) != expected
+            ):
                 raise PreferencesError("preferences file changed while opening")
             raw = handle.read(MAX_PREFERENCES_BYTES + 1)
         if len(raw) > MAX_PREFERENCES_BYTES:
@@ -143,9 +145,7 @@ def load_preferences(directory: Path | None = None) -> dict[str, Any]:
 def save_preferences(data: Any, directory: Path | None = None) -> dict[str, Any]:
     """Write validated preferences to a private temporary file before replacement."""
     settings = validate_preferences(data)
-    encoded = (json.dumps(settings, sort_keys=True, separators=(",", ":")) + "\n").encode(
-        "utf-8"
-    )
+    encoded = (json.dumps(settings, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
     if len(encoded) > MAX_PREFERENCES_BYTES:
         raise PreferencesError("preferences file exceeds the size limit")
     root = _checked_directory(
