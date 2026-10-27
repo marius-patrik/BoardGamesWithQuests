@@ -360,6 +360,211 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                         process.wait(timeout=8)
 
 
+def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
+    """Locate an actual OS-owned Tk toplevel; no source-process introspection."""
+    if sys.platform.startswith("linux"):
+        windows = subprocess.check_output(
+            ["xdotool", "search", "--name", f"^{title}$"], text=True, timeout=8
+        ).splitlines()
+        if not windows:
+            raise AssertionError(f"native dialog not found: {title}")
+        geometry = subprocess.check_output(
+            ["xdotool", "getwindowgeometry", "--shell", windows[-1]],
+            text=True,
+            timeout=8,
+        )
+        values = dict(
+            line.split("=", 1)
+            for line in geometry.splitlines()
+            if "=" in line
+        )
+        x, y, width, height = (int(values[key]) for key in ("X", "Y", "WIDTH", "HEIGHT"))
+    elif sys.platform == "darwin":
+        import re
+
+        code = (
+            'tell application "System Events" to get {position, size} of first window '
+            'whose name is "' + title + '" of first process '
+            'whose name contains "BoardGamesWithQuests"'
+        )
+        result = subprocess.run(
+            ["osascript", "-e", code], capture_output=True, text=True, timeout=15
+        )
+        if result.returncode:
+            raise Blocked(
+                f"macOS Accessibility does not expose the native {title!r} dialog: "
+                + result.stderr.strip()
+            )
+        numbers = [int(value) for value in re.findall(r"-?\\d+", result.stdout)]
+        if len(numbers) != 4:
+            raise Blocked(f"unexpected AppKit dialog geometry: {result.stdout!r}")
+        x, y, width, height = numbers
+    else:
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32
+        windows = []
+        callback = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+
+        def inspect(hwnd, _):
+            if not user32.IsWindowVisible(hwnd):
+                return True
+            buffer = ctypes.create_unicode_buffer(user32.GetWindowTextLengthW(hwnd) + 1)
+            user32.GetWindowTextW(hwnd, buffer, len(buffer))
+            if buffer.value == title:
+                windows.append(hwnd)
+            return True
+
+        enum_callback = callback(inspect)
+        user32.EnumWindows(enum_callback, 0)
+        if not windows:
+            raise AssertionError(f"Windows native dialog not found: {title}")
+        rect = wintypes.RECT()
+        if not user32.GetWindowRect(windows[-1], ctypes.byref(rect)):
+            raise Blocked(f"Windows GetWindowRect failed for {title}")
+        x, y, width, height = (
+            rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top
+        )
+    if not 150 < width < 900 or not 130 < height < 600:
+        raise AssertionError(f"implausible native {title} dialog: {(x, y, width, height)}")
+    return x, y, width, height
+
+
+def screenshot_dialog(gui, evidence: Path, label: str, title: str):
+    deadline = time.monotonic() + 12
+    while time.monotonic() < deadline:
+        try:
+            rect = native_window_rectangle(title)
+            gui.screenshot().save(evidence / f"{label}.png")
+            return rect
+        except AssertionError:
+            gui.sleep(0.4)
+    gui.screenshot().save(evidence / f"{label}-missing.png")
+    raise AssertionError(f"{title} native dialog did not render within 12 seconds")
+
+
+def settings_button(board: tuple[float, float, float], target: str) -> tuple[float, float]:
+    left, top, size = board
+    # Measured against native Tk screenshots, never source widget commands.
+    offsets = {
+        "windows-x64": (13.2, -2.95),
+        "macos-arm64": (12.45, -2.75),
+        "macos-x64": (12.49, -2.75),
+        "linux-x64": (12.56, -3.52),
+    }
+    dx, dy = offsets[target]
+    return left + dx * size, top + dy * size
+
+
+def preferences_file(home: Path) -> Path:
+    if sys.platform.startswith("win"):
+        return home / "AppData" / "Roaming" / "BoardGamesWithQuests" / "preferences.json"
+    if sys.platform == "darwin":
+        return home / "Library" / "Application Support" / "BoardGamesWithQuests" / "preferences.json"
+    return home / ".config" / "BoardGamesWithQuests" / "preferences.json"
+
+
+def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: str) -> dict:
+    """Change real settings via native pointer, close and relaunch from extraction."""
+    home.mkdir()
+    (home / "AppData" / "Roaming").mkdir(parents=True)
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    env.update(
+        HOME=str(home), USERPROFILE=str(home),
+        APPDATA=str(home / "AppData" / "Roaming"),
+        XDG_CONFIG_HOME=str(home / ".config"),
+    )
+    path = preferences_file(home)
+    for attempt in (0, 1):
+        with tempfile.TemporaryDirectory(prefix="bgwq-settings-external-cwd-") as cwd:
+            with (evidence / f"settings-{attempt}-stderr.txt").open("wb") as stderr:
+                process = subprocess.Popen(
+                    [str(exe), "--game", "chess"], cwd=cwd, env=env,
+                    stdout=subprocess.DEVNULL, stderr=stderr,
+                )
+                try:
+                    deadline = time.monotonic() + 20
+                    while time.monotonic() < deadline:
+                        if process.poll() is not None:
+                            raise AssertionError("frozen GUI exited before settings selection")
+                        try:
+                            focus_chooser()
+                            break
+                        except Blocked:
+                            gui.sleep(0.5)
+                    else:
+                        raise Blocked("could not focus real game chooser for settings journey")
+                    gui.sleep(0.8)
+                    board = None
+                    for _ in range(4):
+                        gui.press("tab")
+                        gui.press("return")
+                        try:
+                            board = await_board(gui, evidence, f"settings-{attempt}-board", timeout=5)
+                            break
+                        except AssertionError:
+                            pass
+                    if board is None:
+                        raise AssertionError("could not dismiss game chooser during settings journey")
+                    gui.click(*settings_button(board, platform_name))
+                    x, y, width, height = screenshot_dialog(
+                        gui, evidence, f"settings-{attempt}-dialog", "Settings"
+                    )
+                    if attempt == 0:
+                        # Tk dialog positions (relative to its OS window frame).
+                        gui.click(x + 35, y + 72)
+                        gui.hotkey("command", "a") if sys.platform == "darwin" else gui.hotkey("ctrl", "a")
+                        gui.write("64", interval=0.06)
+                        gui.click(x + 40, y + 101)  # Real Show board coordinates checkbox.
+                        gui.click(x + 44, y + height - 33)  # Real Save button.
+                        deadline = time.monotonic() + 8
+                        while time.monotonic() < deadline and not path.is_file():
+                            gui.sleep(0.3)
+                        if not path.is_file():
+                            gui.screenshot().save(evidence / "settings-save-missing.png")
+                            raise AssertionError(f"native Settings Save produced no preferences file: {path}")
+                        value = json.loads(path.read_text(encoding="utf-8"))
+                        if value != {"board_size": 64, "show_coordinates": False}:
+                            gui.screenshot().save(evidence / "settings-wrong-prefs.png")
+                            raise AssertionError(f"native Settings saved unexpected preferences: {value}")
+                        gui.screenshot().save(evidence / "settings-saved-board.png")
+                    else:
+                        gui.screenshot().save(evidence / "settings-reopened-after-restart.png")
+                        if json.loads(path.read_text(encoding="utf-8")) != {
+                            "board_size": 64, "show_coordinates": False,
+                        }:
+                            raise AssertionError("preferences changed after frozen-app process restart")
+                    # Close the real Settings dialog first, then the actual app.
+                    if attempt == 0:
+                        # Save normally destroys the settings dialog.
+                        try:
+                            native_window_rectangle("Settings")
+                        except AssertionError:
+                            pass
+                        else:
+                            raise AssertionError("Settings dialog did not close on Save")
+                    else:
+                        if sys.platform == "darwin":
+                            gui.hotkey("command", "w")
+                        else:
+                            gui.hotkey("alt", "f4")
+                        gui.sleep(0.5)
+                    gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
+                    if process.wait(timeout=12):
+                        raise AssertionError("frozen application failed clean settings/restart shutdown")
+                finally:
+                    if process.poll() is None:
+                        process.terminate()
+                        try:
+                            process.wait(timeout=8)
+                        except subprocess.TimeoutExpired:
+                            process.kill()
+                            process.wait(timeout=8)
+    return {"real_settings_dialog": True, "native_pointer_save": True, "user_config_path": str(path), "process_restart": True, "persisted_settings": True}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -390,7 +595,6 @@ def main() -> int:
         "games": {},
         "remaining_final_head_gates": [
             "real save/restart/reopen with history and active side",
-            "settings persistence across restart",
             "in-app switching and cancellation",
             "resignation and terminal reset",
             "draughts capture and promotion variants",
@@ -424,6 +628,9 @@ def main() -> int:
                 state["games"][game] = pointer_gameplay(
                     gui, executable, folder / f"home-{game}", args.evidence_dir, game
                 )
+            state["settings"] = settings_journey(
+                gui, executable, folder / "home-settings", args.evidence_dir, args.platform
+            )
             state["gui"] = "PARTIAL"
             # Incomplete mandatory journeys are BLOCKED, never a green release gate.
             raise Blocked("extracted gameplay was exercised but final native journeys remain")
