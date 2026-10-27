@@ -245,6 +245,8 @@ def test_atomic_overwrite_and_failed_save_preserve_live_state_and_prior_file(tmp
         pytest.skip("symlinks unavailable on this platform/account")
     with pytest.raises(SessionFileError):
         save_session(session, symlink)
+    with pytest.raises(SessionFileError):
+        load_session(symlink)
     assert outside.read_bytes() == original
     with pytest.raises(SessionFileError):
         save_session(session, tmp_path / "missing-parent" / "game.json")
@@ -298,6 +300,42 @@ def test_reject_nonregular_saved_game_and_preferences_files(tmp_path):
         load_session(game_directory)
     with pytest.raises(SessionFileError):
         save_session(DesktopSession("chess"), game_directory)
+
+
+
+def test_read_only_targets_and_unwritable_directories_preserve_existing_data(tmp_path):
+    game = DesktopSession("chess")
+    game_path = tmp_path / "game.json"
+    save_session(game, game_path)
+    game_bytes = game_path.read_bytes()
+    settings_dir = tmp_path / "settings"
+    save_preferences(DEFAULTS, settings_dir)
+    settings_path = settings_dir / "preferences.json"
+    settings_bytes = settings_path.read_bytes()
+
+    try:
+        game_path.chmod(0o444)
+        settings_path.chmod(0o444)
+        with pytest.raises(SessionFileError, match="read-only"):
+            save_session(game, game_path)
+        with pytest.raises(PreferencesError, match="read-only"):
+            save_preferences({"board_size": 80, "show_coordinates": False}, settings_dir)
+        assert game_path.read_bytes() == game_bytes
+        assert settings_path.read_bytes() == settings_bytes
+    finally:
+        game_path.chmod(0o644)
+        settings_path.chmod(0o644)
+
+    if os.name != "posix" or (hasattr(os, "geteuid") and os.geteuid() == 0):
+        pytest.skip("directory mode denial requires an unprivileged POSIX account")
+    try:
+        settings_dir.chmod(0o555)
+        with pytest.raises(OSError):
+            save_preferences(DEFAULTS, settings_dir)
+        assert settings_path.read_bytes() == settings_bytes
+    finally:
+        settings_dir.chmod(0o755)
+    assert not list(settings_dir.glob(".preferences-*"))
 
 
 def test_interrupted_replacement_cleans_temp_and_preserves_old_files(tmp_path, monkeypatch):
