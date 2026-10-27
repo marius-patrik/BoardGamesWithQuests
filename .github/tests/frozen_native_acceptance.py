@@ -421,7 +421,7 @@ def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
                 f"macOS Accessibility does not expose the native {title!r} dialog: "
                 + result.stderr.strip()
             )
-        numbers = [int(value) for value in re.findall(r"-?\\d+", result.stdout)]
+        numbers = [int(value) for value in re.findall(r"-?\d+", result.stdout)]
         if len(numbers) != 4:
             raise Blocked(f"unexpected AppKit dialog geometry: {result.stdout!r}")
         x, y, width, height = numbers
