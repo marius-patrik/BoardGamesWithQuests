@@ -17,13 +17,24 @@ class SessionFileError(ValueError):
     """A saved game cannot be safely read or written."""
 
 
+def _is_symlink_or_junction(path: Path) -> bool:
+    if path.is_symlink() or getattr(path, "is_junction", lambda: False)():
+        return True
+    if os.name == "nt":
+        try:
+            return bool(getattr(path.lstat(), "st_file_attributes", 0) & 0x400)
+        except FileNotFoundError:
+            return False
+    return False
+
+
 def _checked_parent(path: Path) -> Path:
     """Reject traversal and symlinked ancestors before touching user files."""
     if ".." in path.parts:
         raise SessionFileError("saved-game path cannot traverse parent directories")
     parent = path.parent
     for ancestor in (parent, *parent.parents):
-        if ancestor.is_symlink() or getattr(ancestor, "is_junction", lambda: False)():
+        if _is_symlink_or_junction(ancestor):
             raise SessionFileError("refusing symlinked saved-game directory ancestor")
     if not parent.is_dir():
         raise SessionFileError("saved-game parent must be an existing real directory")
