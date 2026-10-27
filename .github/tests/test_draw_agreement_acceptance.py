@@ -247,6 +247,37 @@ def test_fide_offer_made_by_active_player_survives_own_legal_move():
     assert GameManager.from_snapshot(manager.get_state()).get_state() == manager.get_state()
 
 
+def test_fide_offer_does_not_survive_offering_players_checkmating_move():
+    # FIDE 9.1.2.1: even an unrefused offer expires when play concludes.
+    # The independent four-ply Fool's Mate establishes a real terminal move.
+    manager = game("chess")
+
+    def play(actor, start, end, at):
+        state = manager.get_state()
+        start_square = [8 - int(start[1]), ord(start[0]) - ord("a")]
+        end_square = [8 - int(end[1]), ord(end[0]) - ord("a")]
+        candidates = [
+            move for move in manager.get_valid_moves()
+            if list(move.start_pos) == start_square and list(move.end_pos) == end_square
+        ]
+        assert len(candidates) == 1
+        return manager.submit_action(
+            actor, state["revision"], f"mate-ply-{at}",
+            {"type": "move", "move": candidates[0].to_json()}, at,
+        )
+
+    play("white", "f2", "f3", 1)
+    play("black", "e7", "e5", 2)
+    play("white", "g2", "g4", 3)
+    send(manager, "black", "offer_draw", at=4, action_id="black-mate-offer")
+    assert manager.get_state()["pending_draw_offer"]["actor"] == "black"
+    result = play("black", "d8", "h4", 5)
+    assert result["outcome"]["cause"] == "checkmate"
+    terminal = manager.get_state()
+    assert terminal["pending_draw_offer"] is None
+    assert GameManager.from_snapshot(terminal).get_state() == terminal
+
+
 def test_strict_payload_auth_revision_and_replay_tampering_are_atomic():
     manager = game("chess")
     initial = manager.get_state()
