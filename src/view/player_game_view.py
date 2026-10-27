@@ -154,29 +154,110 @@ class PlayerGameView(ttk.Frame):
         add_action(gameplay, "Export", self.export_game)
         add_action(gameplay, "Notation", self.export_notation)
 
+        # The reference GUI places both participants BESIDE the board. The
+        # center column owns all remaining width; quests scroll separately.
         body = ttk.Frame(self)
         body.grid(row=1, column=0, sticky="nsew")
         body.rowconfigure(0, weight=1)
-        body.columnconfigure(0, weight=1)
-        body.columnconfigure(1, minsize=280)
+        body.columnconfigure(0, minsize=168)
+        body.columnconfigure(1, weight=1)
+        body.columnconfigure(2, minsize=168)
 
-        left = ttk.Frame(body)
-        left.grid(row=0, column=0, sticky="nsew")
-        left.columnconfigure(0, weight=1)
-        left.rowconfigure(2, weight=1)
+        self.player_views: dict[int, PlayerView] = {}
+        self.quest_lists: dict[int, QuestList] = {}
+        self.quest_viewports: dict[int, tk.Canvas] = {}
 
-        self.top_player = PlayerView(left, -1)
-        self.top_player.grid(row=0, column=0, sticky="ew")
-        ttk.Label(left, textvariable=self.turn, font=("TkDefaultFont", 12)).grid(
-            row=1, column=0, sticky="w"
-        )
+        for side, column in ((1, 0), (-1, 2)):
+            pane = ttk.Frame(body, padding=(3, 0))
+            pane.grid(row=0, column=column, sticky="nsew")
+            pane.columnconfigure(0, weight=1)
+            pane.rowconfigure(2, weight=1)
+            player = PlayerView(pane, side)
+            player.grid(row=0, column=0, sticky="ew")
+            self.player_views[side] = player
+            ttk.Separator(pane).grid(row=1, column=0, sticky="ew", pady=4)
+
+            quests_host = ttk.LabelFrame(pane, text="Your quests", padding=(2, 2))
+            quests_host.grid(row=2, column=0, sticky="nsew")
+            quests_host.columnconfigure(0, weight=1)
+            quests_host.rowconfigure(0, weight=1)
+            viewport = tk.Canvas(
+                quests_host, width=142, height=60, highlightthickness=0, borderwidth=0
+            )
+            viewport.grid(row=0, column=0, sticky="nsew")
+            scroll = ttk.Scrollbar(
+                quests_host, orient="vertical", command=viewport.yview
+            )
+            scroll.grid(row=0, column=1, sticky="ns")
+            viewport.configure(yscrollcommand=scroll.set, takefocus=1)
+            content = ttk.Frame(viewport)
+            window_id = viewport.create_window((0, 0), window=content, anchor="nw")
+            listing = QuestList(content, side)
+            listing.pack(fill="both", expand=True)
+            content.bind(
+                "<Configure>",
+                lambda _event, target=viewport: target.configure(
+                    scrollregion=target.bbox("all")
+                ),
+            )
+            viewport.bind(
+                "<Configure>",
+                lambda event, target=viewport, identifier=window_id:
+                target.itemconfigure(identifier, width=event.width),
+            )
+            viewport.bind(
+                "<Prior>",
+                lambda _event, target=viewport: target.yview_scroll(-1, "pages"),
+            )
+            viewport.bind(
+                "<Next>",
+                lambda _event, target=viewport: target.yview_scroll(1, "pages"),
+            )
+            viewport.bind(
+                "<Up>",
+                lambda _event, target=viewport: target.yview_scroll(-1, "units"),
+            )
+            viewport.bind(
+                "<Down>",
+                lambda _event, target=viewport: target.yview_scroll(1, "units"),
+            )
+            viewport.bind(
+                "<Button-4>",
+                lambda _event, target=viewport: target.yview_scroll(-3, "units"),
+            )
+            viewport.bind(
+                "<Button-5>",
+                lambda _event, target=viewport: target.yview_scroll(3, "units"),
+            )
+            viewport.bind(
+                "<MouseWheel>",
+                lambda event, target=viewport: self._scroll_quests(event, target),
+            )
+            self.quest_lists[side] = listing
+            self.quest_viewports[side] = viewport
+
+        # Retain existing consumer attributes while the source-tree rename
+        # remains the separate #462 task.
+        self.top_player = self.player_views[-1]
+        self.bottom_player = self.player_views[1]
+        self.quest_viewport = self.quest_viewports[1]
+        self.quest_list = self.quest_lists[1]
+
+        center = ttk.Frame(body, padding=(4, 0))
+        center.grid(row=0, column=1, sticky="nsew")
+        center.rowconfigure(1, weight=1)
+        center.columnconfigure(0, weight=1)
+        ttk.Label(
+            center, textvariable=self.turn, font=("TkDefaultFont", 11),
+            anchor="center", wraplength=330,
+        ).grid(row=0, column=0, sticky="ew", pady=(0, 3))
         try:
             config = load_preferences()
         except PreferencesError:
             config = dict(DEFAULTS)
         self._preferred_board_size = config["board_size"]
-        self.board_area = ttk.Frame(left)
-        self.board_area.grid(row=2, column=0, sticky="nsew")
+        self.board_area = ttk.Frame(center)
+        self.board_area.grid(row=1, column=0, sticky="nsew")
         self.board_view = BoardView(
             self.board_area,
             self.session.board_projection(),
@@ -185,100 +266,36 @@ class PlayerGameView(ttk.Frame):
             show_coordinates=config["show_coordinates"],
         )
         self.board_view.pack(expand=True)
-        # Fit to the board's allocated space, rather than its requested Canvas pixels.
         self.board_area.bind("<Configure>", self._resize_board)
-        self.bottom_player = PlayerView(left, 1)
-        self.bottom_player.grid(row=3, column=0, sticky="ew")
 
-        right = ttk.Frame(body, padding=(12, 0, 0, 0))
-        right.grid(row=0, column=1, sticky="nsew")
-        right.columnconfigure(0, weight=1)
-        right.rowconfigure(1, weight=3)
-        right.rowconfigure(3, weight=2)
-        ttk.Label(right, text="Quests", font=("TkDefaultFont", 12, "bold")).grid(
-            row=0, column=0, sticky="w"
-        )
-
-        quest_panel = ttk.Frame(right)
-        quest_panel.grid(row=1, column=0, sticky="nsew")
-        quest_panel.columnconfigure(0, weight=1)
-        quest_panel.rowconfigure(0, weight=1)
-        self.quest_viewport = tk.Canvas(
-            quest_panel, width=240, height=100, highlightthickness=0, borderwidth=0
-        )
-        self.quest_viewport.grid(row=0, column=0, sticky="nsew")
-        quest_scroll = ttk.Scrollbar(
-            quest_panel, orient="vertical", command=self.quest_viewport.yview
-        )
-        quest_scroll.grid(row=0, column=1, sticky="ns")
-        self.quest_viewport.configure(yscrollcommand=quest_scroll.set, takefocus=1)
-        quest_content = ttk.Frame(self.quest_viewport)
-        self._quest_window = self.quest_viewport.create_window(
-            (0, 0), window=quest_content, anchor="nw"
-        )
-        self.quest_list = QuestList(quest_content)
-        self.quest_list.pack(fill="both", expand=True)
-        quest_content.bind(
-            "<Configure>",
-            lambda _event: self.quest_viewport.configure(
-                scrollregion=self.quest_viewport.bbox("all")
-            ),
-        )
-        self.quest_viewport.bind(
-            "<Configure>",
-            lambda event: self.quest_viewport.itemconfigure(self._quest_window, width=event.width),
-        )
-        self.quest_viewport.bind(
-            "<Prior>", lambda _event: self.quest_viewport.yview_scroll(-1, "pages")
-        )
-        self.quest_viewport.bind(
-            "<Next>", lambda _event: self.quest_viewport.yview_scroll(1, "pages")
-        )
-        self.quest_viewport.bind(
-            "<Up>", lambda _event: self.quest_viewport.yview_scroll(-1, "units")
-        )
-        self.quest_viewport.bind(
-            "<Down>", lambda _event: self.quest_viewport.yview_scroll(1, "units")
-        )
-        self.quest_viewport.bind(
-            "<Button-4>", lambda _event: self.quest_viewport.yview_scroll(-3, "units")
-        )
-        self.quest_viewport.bind(
-            "<Button-5>", lambda _event: self.quest_viewport.yview_scroll(3, "units")
-        )
-        self.quest_viewport.bind("<MouseWheel>", self._scroll_quests)
-
-        ttk.Label(right, text="Moves", font=("TkDefaultFont", 12, "bold")).grid(
-            row=2, column=0, sticky="w", pady=(6, 0)
-        )
-        history_panel = ttk.Frame(right)
-        history_panel.grid(row=3, column=0, sticky="nsew")
+        # History remains the existing simple, scrollable list. Its deeper
+        # redesign is reserved for #453.
+        history_panel = ttk.LabelFrame(self, text="Moves")
+        history_panel.grid(row=2, column=0, sticky="ew", pady=(4, 0))
         history_panel.columnconfigure(0, weight=1)
-        history_panel.rowconfigure(0, weight=1)
-        self.history = tk.Listbox(history_panel, height=4, width=24)
-        self.history.grid(row=0, column=0, sticky="nsew")
-        history_scroll = ttk.Scrollbar(history_panel, orient="vertical", command=self.history.yview)
+        self.history = tk.Listbox(history_panel, height=3)
+        self.history.grid(row=0, column=0, sticky="ew")
+        history_scroll = ttk.Scrollbar(
+            history_panel, orient="vertical", command=self.history.yview
+        )
         history_scroll.grid(row=0, column=1, sticky="ns")
         self.history.configure(yscrollcommand=history_scroll.set)
-        # A long save path must not expand the minimum window beyond its viewport.
-        ttk.Label(self, textvariable=self.status, relief="sunken", anchor="w", width=1).grid(
-            row=2, column=0, sticky="ew", pady=(6, 0)
-        )
+        ttk.Label(
+            self, textvariable=self.status, relief="sunken", anchor="w", width=1
+        ).grid(row=3, column=0, sticky="ew", pady=(4, 0))
 
     def _resize_board(self, event: tk.Event) -> None:
         self._fit_board(event.width, event.height)
 
     def _fit_board(self, width: int | None = None, height: int | None = None) -> None:
-        # Padding belongs to the host, not the board. Preserve square pixels
-        # and use the same size for Canvas hit-testing and drawing.
         width = self.board_area.winfo_width() if width is None else width
         height = self.board_area.winfo_height() if height is None else height
         self.board_view.fit_to(max(1, width), max(1, height - 8), self._preferred_board_size)
 
-    def _scroll_quests(self, event: tk.Event) -> None:
+    def _scroll_quests(self, event: tk.Event, target: tk.Canvas) -> None:
         if event.delta:
             direction = -1 if event.delta > 0 else 1
-            self.quest_viewport.yview_scroll(direction * max(1, abs(event.delta) // 120), "units")
+            target.yview_scroll(direction * max(1, abs(event.delta) // 120), "units")
 
     def on_square_clicked(self, position: tuple[int, int]) -> None:
         if self.session.snapshot()["outcome"] is not None:
@@ -383,8 +400,8 @@ class PlayerGameView(ttk.Frame):
         self.board_view.refresh(self.session.board_projection())
         self._fit_board()
         remaining = self.session.clock_remaining()
-        self.top_player.refresh(state, remaining)
-        self.bottom_player.refresh(state, remaining)
+        for player in self.player_views.values():
+            player.refresh(state, remaining)
         game_name = display_game_name(self.session.game)
         if finished:
             terminal_key = self._state_key(state)
@@ -401,7 +418,8 @@ class PlayerGameView(ttk.Frame):
             self.turn.set(f"{game_name} · {active} to move · move {played + 1}")
         self.status.set(self.window_controller.status_message or "Ready")
         self._refresh_actions(state)
-        self.quest_list.refresh(state)
+        for quests in self.quest_lists.values():
+            quests.refresh(state)
 
         events = tuple(json.dumps(entry, sort_keys=True) for entry in state["events"])
         if events != self._last_history:
