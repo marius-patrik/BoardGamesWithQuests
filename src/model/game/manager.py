@@ -174,7 +174,6 @@ class GameManager:
             },
             "quest_scores": {identity: 0 for identity in participant_ids},
             "outcome": None,
-            "pending_draw_offer": None,
             "revision": 0,
             "halfmove_count": 0,
             "events": [],
@@ -1467,7 +1466,7 @@ class GameManager:
             state = self._state
             if state["outcome"] is not None:
                 return {"offer_actors": [], "response_actor": None, "pending_actor": None}
-            pending = state["pending_draw_offer"]
+            pending = state.get("pending_draw_offer")
             if pending is not None:
                 return {
                     "offer_actors": [],
@@ -1645,7 +1644,7 @@ class GameManager:
         elapsed = now_ms - state["clocks"]["anchor_ms"]
         if elapsed < 0 or elapsed >= state["clocks"]["remaining_ms"][str(active)]:
             raise TransitionError("active participant clock has expired")
-        pending = state["pending_draw_offer"]
+        pending = state.get("pending_draw_offer")
         kind = action["type"]
         if kind == "offer_draw":
             if pending is not None:
@@ -1829,7 +1828,8 @@ class GameManager:
         ):
             raise TransitionError("draw claim is overridden by a decisive proposal")
         state["outcome"] = result
-        state["pending_draw_offer"] = None
+        if "pending_draw_offer" in state:
+            state["pending_draw_offer"] = None
         event["outcome"] = result
         return state, event
 
@@ -1913,7 +1913,8 @@ class GameManager:
                     state, side, actor_id, expected_revision, action_id, move, now_ms
                 )
                 # Playing a complete legal move declines any outstanding offer.
-                state["pending_draw_offer"] = None
+                if "pending_draw_offer" in state:
+                    state["pending_draw_offer"] = None
                 counts = None
                 if any(rule["hook"] == "outcome" for rule in self.definition.rules):
                     counts = {
