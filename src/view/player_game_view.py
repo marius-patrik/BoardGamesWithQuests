@@ -185,9 +185,7 @@ class PlayerGameView(ttk.Frame):
                 quests_host, width=142, height=60, highlightthickness=0, borderwidth=0
             )
             viewport.grid(row=0, column=0, sticky="nsew")
-            scroll = ttk.Scrollbar(
-                quests_host, orient="vertical", command=viewport.yview
-            )
+            scroll = ttk.Scrollbar(quests_host, orient="vertical", command=viewport.yview)
             scroll.grid(row=0, column=1, sticky="ns")
             viewport.configure(yscrollcommand=scroll.set, takefocus=1)
             content = ttk.Frame(viewport)
@@ -196,14 +194,13 @@ class PlayerGameView(ttk.Frame):
             listing.pack(fill="both", expand=True)
             content.bind(
                 "<Configure>",
-                lambda _event, target=viewport: target.configure(
-                    scrollregion=target.bbox("all")
-                ),
+                lambda _event, target=viewport: target.configure(scrollregion=target.bbox("all")),
             )
             viewport.bind(
                 "<Configure>",
-                lambda event, target=viewport, identifier=window_id:
-                target.itemconfigure(identifier, width=event.width),
+                lambda event, target=viewport, identifier=window_id: target.itemconfigure(
+                    identifier, width=event.width
+                ),
             )
             viewport.bind(
                 "<Prior>",
@@ -248,8 +245,11 @@ class PlayerGameView(ttk.Frame):
         center.rowconfigure(1, weight=1)
         center.columnconfigure(0, weight=1)
         ttk.Label(
-            center, textvariable=self.turn, font=("TkDefaultFont", 11),
-            anchor="center", wraplength=330,
+            center,
+            textvariable=self.turn,
+            font=("TkDefaultFont", 11),
+            anchor="center",
+            wraplength=330,
         ).grid(row=0, column=0, sticky="ew", pady=(0, 3))
         try:
             config = load_preferences()
@@ -275,14 +275,12 @@ class PlayerGameView(ttk.Frame):
         history_panel.columnconfigure(0, weight=1)
         self.history = tk.Listbox(history_panel, height=3)
         self.history.grid(row=0, column=0, sticky="ew")
-        history_scroll = ttk.Scrollbar(
-            history_panel, orient="vertical", command=self.history.yview
-        )
+        history_scroll = ttk.Scrollbar(history_panel, orient="vertical", command=self.history.yview)
         history_scroll.grid(row=0, column=1, sticky="ns")
         self.history.configure(yscrollcommand=history_scroll.set)
-        ttk.Label(
-            self, textvariable=self.status, relief="sunken", anchor="w", width=1
-        ).grid(row=3, column=0, sticky="ew", pady=(4, 0))
+        ttk.Label(self, textvariable=self.status, relief="sunken", anchor="w", width=1).grid(
+            row=3, column=0, sticky="ew", pady=(4, 0)
+        )
 
     def _resize_board(self, event: tk.Event) -> None:
         self._fit_board(event.width, event.height)

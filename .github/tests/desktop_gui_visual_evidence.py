@@ -18,9 +18,7 @@ from view.app import build_application
 def click(root: tk.Tk, row: int, col: int) -> None:
     canvas = root.game_view.board_view.canvas
     size = root.game_view.board_view.square_size
-    canvas.event_generate(
-        "<Button-1>", x=(col * size + size // 2), y=(row * size + size // 2)
-    )
+    canvas.event_generate("<Button-1>", x=(col * size + size // 2), y=(row * size + size // 2))
     root.update()
 
 

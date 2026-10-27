@@ -325,15 +325,17 @@ class BoardView(ttk.Frame):
         def polygon(points: list[tuple[float, float]]) -> None:
             self.canvas.create_polygon(
                 *(value for pair in points for value in p(*pair)),
-                fill=ink, outline=edge, width=width, joinstyle=tk.ROUND, tags=tags,
+                fill=ink,
+                outline=edge,
+                width=width,
+                joinstyle=tk.ROUND,
+                tags=tags,
             )
 
         def oval(x0: float, y0: float, x1: float, y1: float) -> None:
             ax, ay = p(x0, y0)
             bx, by = p(x1, y1)
-            self.canvas.create_oval(
-                ax, ay, bx, by, fill=ink, outline=edge, width=width, tags=tags
-            )
+            self.canvas.create_oval(ax, ay, bx, by, fill=ink, outline=edge, width=width, tags=tags)
 
         # Every silhouette uses a filled base plus a recognizable head.
         polygon([(-9, 10), (9, 10), (11, 12), (-11, 12)])
@@ -342,57 +344,122 @@ class BoardView(ttk.Frame):
             polygon([(-3, -1), (3, -1), (7, 9), (-7, 9)])
         elif kind == "rook":
             polygon([(-7, -7), (7, -7), (6, 9), (-6, 9)])
-            polygon([
-                (-9, -10), (-9, -5), (9, -5), (9, -10), (5, -10),
-                (5, -7), (2, -7), (2, -10), (-2, -10), (-2, -7),
-                (-5, -7), (-5, -10),
-            ])
+            polygon(
+                [
+                    (-9, -10),
+                    (-9, -5),
+                    (9, -5),
+                    (9, -10),
+                    (5, -10),
+                    (5, -7),
+                    (2, -7),
+                    (2, -10),
+                    (-2, -10),
+                    (-2, -7),
+                    (-5, -7),
+                    (-5, -10),
+                ]
+            )
         elif kind == "knight":
-            polygon([
-                (-8, 8), (8, 8), (7, -3), (2, -12), (-3, -11),
-                (-8, -7), (-5, -3), (-10, 1), (-7, 3), (-2, 1), (0, 8),
-            ])
+            polygon(
+                [
+                    (-8, 8),
+                    (8, 8),
+                    (7, -3),
+                    (2, -12),
+                    (-3, -11),
+                    (-8, -7),
+                    (-5, -3),
+                    (-10, 1),
+                    (-7, 3),
+                    (-2, 1),
+                    (0, 8),
+                ]
+            )
             x, y = p(-2, -6)
             self.canvas.create_oval(
-                x - 1.5, y - 1.5, x + 1.5, y + 1.5,
-                fill=edge, outline=edge, tags=tags,
+                x - 1.5,
+                y - 1.5,
+                x + 1.5,
+                y + 1.5,
+                fill=edge,
+                outline=edge,
+                tags=tags,
             )
         elif kind == "bishop":
             oval(-6, -10, 6, 2)
             polygon([(-4, 0), (4, 0), (7, 9), (-7, 9)])
             self.canvas.create_line(
-                *p(-2, -7), *p(3, -2), fill=edge, width=width, tags=tags,
+                *p(-2, -7),
+                *p(3, -2),
+                fill=edge,
+                width=width,
+                tags=tags,
             )
         elif kind == "queen":
-            polygon([
-                (-8, -5), (-5, -1), (-2, -8), (0, -1), (3, -8),
-                (6, -1), (9, -5), (7, 8), (-7, 8),
-            ])
+            polygon(
+                [
+                    (-8, -5),
+                    (-5, -1),
+                    (-2, -8),
+                    (0, -1),
+                    (3, -8),
+                    (6, -1),
+                    (9, -5),
+                    (7, 8),
+                    (-7, 8),
+                ]
+            )
             for x, y in ((-8, -6), (-2, -9), (3, -9), (9, -6)):
                 oval(x - 1.8, y - 1.8, x + 1.8, y + 1.8)
         elif kind == "king":
-            polygon([
-                (-7, -4), (-3, -8), (3, -8), (7, -4),
-                (6, 8), (-6, 8),
-            ])
-            self.canvas.create_line(
-                *p(0, -13), *p(0, -5), fill=edge, width=width + 3, tags=tags,
+            polygon(
+                [
+                    (-7, -4),
+                    (-3, -8),
+                    (3, -8),
+                    (7, -4),
+                    (6, 8),
+                    (-6, 8),
+                ]
             )
             self.canvas.create_line(
-                *p(-4, -10), *p(4, -10), fill=edge, width=width + 3, tags=tags,
+                *p(0, -13),
+                *p(0, -5),
+                fill=edge,
+                width=width + 3,
+                tags=tags,
             )
             self.canvas.create_line(
-                *p(0, -13), *p(0, -5), fill=ink, width=width, tags=tags,
+                *p(-4, -10),
+                *p(4, -10),
+                fill=edge,
+                width=width + 3,
+                tags=tags,
             )
             self.canvas.create_line(
-                *p(-4, -10), *p(4, -10), fill=ink, width=width, tags=tags,
+                *p(0, -13),
+                *p(0, -5),
+                fill=ink,
+                width=width,
+                tags=tags,
+            )
+            self.canvas.create_line(
+                *p(-4, -10),
+                *p(4, -10),
+                fill=ink,
+                width=width,
+                tags=tags,
             )
         else:
             # Generic supported configured kind: visible filled shape even
             # when a custom ruleset introduces a new piece identifier.
             oval(-7, -7, 7, 7)
             self.canvas.create_text(
-                cx, cy, text=kind[:1].upper(), fill=edge,
+                cx,
+                cy,
+                text=kind[:1].upper(),
+                fill=edge,
                 font=("TkDefaultFont", max(10, self.square_size // 3), "bold"),
                 tags=tags,
             )
