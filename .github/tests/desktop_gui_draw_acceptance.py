@@ -39,7 +39,7 @@ def descendants(widget):
 
 
 def click_dialog_button(root, label):
-    top = next(child for child in root.winfo_children() if isinstance(child, tk.Toplevel))
+    top = next(child for child in descendants(root) if isinstance(child, tk.Toplevel))
     for child in descendants(top):
         if isinstance(child, tk.Listbox):
             child.selection_clear(0, tk.END)
@@ -207,7 +207,7 @@ def test_actual_legal_multi_hop_route_is_displayed_complete_and_cancelable(
     shown = []
 
     def inspect_and_cancel():
-        modal = next(child for child in window.winfo_children() if isinstance(child, tk.Toplevel))
+        modal = next(child for child in descendants(window) if isinstance(child, tk.Toplevel))
         listing = next(child for child in descendants(modal) if isinstance(child, tk.Listbox))
         shown.extend(listing.get(0, tk.END))
         click_dialog_button(window, "Cancel")
