@@ -42,11 +42,22 @@ def validate_preferences(data: Any) -> dict[str, Any]:
     return {"board_size": size, "show_coordinates": show}
 
 
+def _is_symlink_or_junction(path: Path) -> bool:
+    if path.is_symlink() or getattr(path, "is_junction", lambda: False)():
+        return True
+    if os.name == "nt":
+        try:
+            return bool(getattr(path.lstat(), "st_file_attributes", 0) & 0x400)
+        except FileNotFoundError:
+            return False
+    return False
+
+
 def _checked_directory(directory: Path, *, create: bool) -> Path:
     if ".." in directory.parts:
         raise PreferencesError("unsafe preference directory")
     for ancestor in (directory, *directory.parents):
-        if ancestor.is_symlink() or getattr(ancestor, "is_junction", lambda: False)():
+        if _is_symlink_or_junction(ancestor):
             raise PreferencesError("refusing symlinked preference directory ancestor")
     if create:
         directory.mkdir(parents=True, exist_ok=True, mode=0o700)
