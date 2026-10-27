@@ -159,15 +159,18 @@ class PlayerGameView(ttk.Frame):
         body = ttk.Frame(self)
         body.grid(row=1, column=0, sticky="nsew")
         body.rowconfigure(0, weight=1)
-        body.columnconfigure(0, minsize=168)
-        body.columnconfigure(1, weight=1)
-        body.columnconfigure(2, minsize=168)
+        body.columnconfigure(0, weight=1)
+        body.columnconfigure(1, minsize=170)
+        body.columnconfigure(2, minsize=448)
+        body.columnconfigure(3, minsize=170)
+        body.columnconfigure(4, weight=1)
+        self._body = body
 
         self.player_views: dict[int, PlayerView] = {}
         self.quest_lists: dict[int, QuestList] = {}
         self.quest_viewports: dict[int, tk.Canvas] = {}
 
-        for side, column in ((1, 0), (-1, 2)):
+        for side, column in ((1, 1), (-1, 3)):
             pane = ttk.Frame(body, padding=(3, 0))
             pane.grid(row=0, column=column, sticky="nsew")
             pane.columnconfigure(0, weight=1)
@@ -241,7 +244,7 @@ class PlayerGameView(ttk.Frame):
         self.quest_list = self.quest_lists[1]
 
         center = ttk.Frame(body, padding=(4, 0))
-        center.grid(row=0, column=1, sticky="nsew")
+        center.grid(row=0, column=2, sticky="nsew")
         center.rowconfigure(1, weight=1)
         center.columnconfigure(0, weight=1)
         ttk.Label(
@@ -286,6 +289,14 @@ class PlayerGameView(ttk.Frame):
         self._fit_board(event.width, event.height)
 
     def _fit_board(self, width: int | None = None, height: int | None = None) -> None:
+        # Keep the whole player/board/player cluster centered in spacious
+        # windows, and shrink only the middle column at compact widths.
+        available = max(
+            self.board_view.board.cols * 32,
+            self._body.winfo_width() - 2 * 170 - 20,
+        )
+        desired = min(self.board_view.board.cols * self._preferred_board_size, available)
+        self._body.columnconfigure(2, minsize=desired)
         width = self.board_area.winfo_width() if width is None else width
         height = self.board_area.winfo_height() if height is None else height
         self.board_view.fit_to(max(1, width), max(1, height - 8), self._preferred_board_size)
