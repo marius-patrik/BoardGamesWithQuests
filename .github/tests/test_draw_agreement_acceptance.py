@@ -88,7 +88,7 @@ def test_agreement_is_an_authoritative_nonmoving_result_and_replays(name):
     assert final["clocks"]["anchor_ms"] == 2300
     active = str(prior["active_side"])
     assert final["clocks"]["remaining_ms"][active] == (
-        prior["clocks"]["remaining_ms"][active] - 1300
+        prior["clocks"]["remaining_ms"][active] - (2300 - prior["clocks"]["anchor_ms"])
     )
     assert GameManager.from_snapshot(final).get_state() == final
     assert manager.submit_action(respondent, prior["revision"] + 1, "accept", {"type": "accept_draw"}, 99999) == accepted
