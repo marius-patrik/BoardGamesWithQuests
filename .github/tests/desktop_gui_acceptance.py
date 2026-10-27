@@ -671,7 +671,7 @@ def choose_rendered_route(window, index, expected_text, button="Play selected mo
     observations = []
 
     def choose():
-        dialogs = [child for child in window.winfo_children() if isinstance(child, tk.Toplevel)]
+        dialogs = [child for child in descendants(window) if isinstance(child, tk.Toplevel)]
         assert dialogs, "Board click failed to open a real chooser"
         dialog = dialogs[-1]
         listbox = next(item for item in descendants(dialog) if isinstance(item, tk.Listbox))
@@ -742,7 +742,7 @@ def test_cancel_capture_chooser_is_atomic_and_highlights_remain(window, monkeypa
     click_canvas(window, 2, 3)
 
     def cancel():
-        dialog = next(child for child in window.winfo_children() if isinstance(child, tk.Toplevel))
+        dialog = next(child for child in descendants(window) if isinstance(child, tk.Toplevel))
         listbox = next(child for child in descendants(dialog) if isinstance(child, tk.Listbox))
         assert " × " in listbox.get(0)
         dialog.event_generate("<Escape>")
