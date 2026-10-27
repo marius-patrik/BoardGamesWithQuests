@@ -39,7 +39,11 @@ def extract(archive: Path, destination: Path) -> None:
     if archive.suffix == ".zip":
         with zipfile.ZipFile(archive) as source:
             for entry in source.infolist():
-                if not (destination / entry.filename).resolve().is_relative_to(destination.resolve()):
+                if (
+                    not (destination / entry.filename)
+                    .resolve()
+                    .is_relative_to(destination.resolve())
+                ):
                     raise ValueError(f"archive path traversal: {entry.filename}")
                 if ((entry.external_attr >> 16) & 0o170000) == 0o120000:
                     raise ValueError(f"zip symlink is forbidden: {entry.filename}")
@@ -91,7 +95,9 @@ def inspect_archive(args: argparse.Namespace, output: Path) -> tuple[Path, dict]
         manifest = bundle / "Contents/Resources/build-info.json"
     else:
         exe = bundle / (
-            "BoardGamesWithQuests.exe" if args.platform.startswith("windows") else "BoardGamesWithQuests"
+            "BoardGamesWithQuests.exe"
+            if args.platform.startswith("windows")
+            else "BoardGamesWithQuests"
         )
         games = bundle / "_internal/games"
         manifest = bundle / "build-info.json"
@@ -109,7 +115,10 @@ def inspect_archive(args: argparse.Namespace, output: Path) -> tuple[Path, dict]
     if not str(info.get("python_version", "")).startswith("3.12."):
         raise ValueError("frozen application was not built with configured Python 3.12")
     resources = info.get("resources")
-    if not isinstance(resources, dict) or not {"chess/config.json", "checkers/config.json"}.issubset(resources):
+    if not isinstance(resources, dict) or not {
+        "chess/config.json",
+        "checkers/config.json",
+    }.issubset(resources):
         raise ValueError("required bundled game JSON is not in the manifest")
     actual = {
         path.relative_to(games).as_posix(): sha256(path)
@@ -206,10 +215,7 @@ def visible_board(image) -> tuple[float, float, float]:
     for y in range(0, image.height, 4):
         for x in range(0, image.width, 4):
             rgb = pixels[x, y]
-            if min(
-                max(abs(rgb[i] - shade[i]) for i in range(3))
-                for shade in (LIGHT, DARK)
-            ) <= 7:
+            if min(max(abs(rgb[i] - shade[i]) for i in range(3)) for shade in (LIGHT, DARK)) <= 7:
                 xs.append(x)
                 ys.append(y)
     if len(xs) < 3000:
@@ -258,13 +264,18 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
         with (evidence / f"{game}-stderr.txt").open("wb") as stderr:
             process = subprocess.Popen(
                 [str(executable), "--game", game],
-                cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=stderr,
+                cwd=cwd,
+                env=env,
+                stdout=subprocess.DEVNULL,
+                stderr=stderr,
             )
             try:
                 limit = time.monotonic() + 25
                 while time.monotonic() < limit:
                     if process.poll() is not None:
-                        raise AssertionError(f"frozen executable exited at startup: {process.returncode}")
+                        raise AssertionError(
+                            f"frozen executable exited at startup: {process.returncode}"
+                        )
                     try:
                         focus_chooser()
                         break
@@ -276,9 +287,7 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                 gui.press("tab")
                 gui.press("return")
                 left, top, size = await_board(gui, evidence, f"{game}-opening")
-                start, end = (
-                    ((6, 4), (5, 4)) if game == "chess" else ((5, 0), (4, 1))
-                )
+                start, end = ((6, 4), (5, 4)) if game == "chess" else ((5, 0), (4, 1))
 
                 def square(position):
                     return (
@@ -301,8 +310,10 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                 for position in (start, end):
                     x, y = square(position)
                     box = (
-                        int(x) - radius, int(y) - radius,
-                        int(x) + radius, int(y) + radius,
+                        int(x) - radius,
+                        int(y) - radius,
+                        int(x) + radius,
+                        int(y) + radius,
                     )
                     if not changes.crop(box).getbbox():
                         raise AssertionError(
@@ -318,8 +329,10 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                 if result:
                     raise AssertionError(f"frozen GUI exit status: {result}")
                 return {
-                    "actual_chooser": True, "initial_board": True,
-                    "real_pointer_move": True, "observed_piece_change": True,
+                    "actual_chooser": True,
+                    "initial_board": True,
+                    "real_pointer_move": True,
+                    "observed_piece_change": True,
                     "native_window_close": True,
                 }
             finally:
@@ -334,9 +347,16 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--platform", required=True, choices=(
-        "windows-x64", "macos-arm64", "macos-x64", "linux-x64",
-    ))
+    parser.add_argument(
+        "--platform",
+        required=True,
+        choices=(
+            "windows-x64",
+            "macos-arm64",
+            "macos-x64",
+            "linux-x64",
+        ),
+    )
     parser.add_argument("--version", required=True)
     parser.add_argument("--source-sha", required=True)
     parser.add_argument("--release-dir", type=Path, default=Path("dist/release"))
@@ -344,10 +364,15 @@ def main() -> int:
     args = parser.parse_args()
     args.evidence_dir.mkdir(parents=True, exist_ok=True)
     state = {
-        "platform": args.platform, "source_sha": args.source_sha,
-        "host_os": platform.platform(), "host_machine": platform.machine(),
-        "python": sys.version.split()[0], "packaging": "NOT_RUN",
-        "gui": "NOT_RUN", "classification": "FAIL", "games": {},
+        "platform": args.platform,
+        "source_sha": args.source_sha,
+        "host_os": platform.platform(),
+        "host_machine": platform.machine(),
+        "python": sys.version.split()[0],
+        "packaging": "NOT_RUN",
+        "gui": "NOT_RUN",
+        "classification": "FAIL",
+        "games": {},
         "remaining_final_head_gates": [
             "real save/restart/reopen with history and active side",
             "settings persistence across restart",
@@ -368,8 +393,11 @@ def main() -> int:
             env = dict(os.environ)
             env.pop("PYTHONPATH", None)
             check = subprocess.run(
-                [str(executable), "--check"], cwd=folder, env=env,
-                capture_output=True, timeout=100,
+                [str(executable), "--check"],
+                cwd=folder,
+                env=env,
+                capture_output=True,
+                timeout=100,
             )
             state["frozen_check_exit_code"] = check.returncode
             if check.returncode:
@@ -389,7 +417,8 @@ def main() -> int:
         exit_code = 2
     except Exception as error:
         state.update(
-            classification="FAIL", reason=str(error),
+            classification="FAIL",
+            reason=str(error),
             traceback=traceback.format_exc(),
         )
         exit_code = 1
@@ -397,11 +426,14 @@ def main() -> int:
         report = args.evidence_dir / "native-result.json"
         report.write_text(json.dumps(state, sort_keys=True, indent=2) + "\n", encoding="utf-8")
         print(
-            json.dumps({
-                "classification": state["classification"],
-                "platform": args.platform, "reason": state.get("reason"),
-                "report": str(report),
-            }),
+            json.dumps(
+                {
+                    "classification": state["classification"],
+                    "platform": args.platform,
+                    "reason": state.get("reason"),
+                    "report": str(report),
+                }
+            ),
             flush=True,
         )
     return exit_code

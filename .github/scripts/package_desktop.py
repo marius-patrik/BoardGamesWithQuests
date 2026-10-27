@@ -157,9 +157,7 @@ def smoke(bundle: Path, platform: str) -> None:
 
 def write_build_identity(bundle: Path, platform: str, version: str) -> Path:
     """Bind the candidate archive to the actual checkout and bundled data."""
-    source_sha = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-    ).strip()
+    source_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     if not re.fullmatch(r"[0-9a-f]{40}", source_sha):
         raise ValueError("Invalid checked-out source identity")
     if os.environ.get("GITHUB_SHA") and os.environ["GITHUB_SHA"] != source_sha:

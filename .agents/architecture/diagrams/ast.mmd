@@ -666,8 +666,10 @@ flowchart LR
   nf82b40d222a1eb98e --> n46ccfd4d93d244af9
   nb58a398e6708a6f8e["function_definition smoke"]
   nf82b40d222a1eb98e --> nb58a398e6708a6f8e
-  n8855de36350a78584["function_definition main"]
+  n8855de36350a78584["function_definition write_build_identity"]
   nf82b40d222a1eb98e --> n8855de36350a78584
+  nf16348c3c7dbba5ef["function_definition main"]
+  nf82b40d222a1eb98e --> nf16348c3c7dbba5ef
   n50f8f749b20de7e29["release_gate.py"]
   n2092df3a19d2f7b13 --> n50f8f749b20de7e29
   n18146ec0646429aaf["function_definition authorize_release"]
@@ -780,6 +782,32 @@ flowchart LR
   n6f2a93de9994e922b --> n8b64577ca0364a8e1
   n3f452c23e8a49d396["chess_opera_game_1858.json"]
   n6f2a93de9994e922b --> n3f452c23e8a49d396
+  nc93c44fa3f0e7b9f7["frozen_native_acceptance.py"]
+  nc9f5868186eb03f66 --> nc93c44fa3f0e7b9f7
+  n173166224cfa0881c["class_definition Blocked"]
+  nc93c44fa3f0e7b9f7 --> n173166224cfa0881c
+  nacd866ac35b4a3abd["function_definition sha256"]
+  nc93c44fa3f0e7b9f7 --> nacd866ac35b4a3abd
+  n1a8ea74b51f63795e["function_definition extract"]
+  nc93c44fa3f0e7b9f7 --> n1a8ea74b51f63795e
+  n5413901967605612c["function_definition binary_architecture"]
+  nc93c44fa3f0e7b9f7 --> n5413901967605612c
+  n6ac8ce7e22948b44b["function_definition inspect_archive"]
+  nc93c44fa3f0e7b9f7 --> n6ac8ce7e22948b44b
+  n4c84b9961d87f9c9b["function_definition assert_native_runner"]
+  nc93c44fa3f0e7b9f7 --> n4c84b9961d87f9c9b
+  n448fbfe4e5c68751a["function_definition native_driver"]
+  nc93c44fa3f0e7b9f7 --> n448fbfe4e5c68751a
+  n6eb276afdae7d3c2b["function_definition focus_chooser"]
+  nc93c44fa3f0e7b9f7 --> n6eb276afdae7d3c2b
+  n4de65756079fcec0c["function_definition visible_board"]
+  nc93c44fa3f0e7b9f7 --> n4de65756079fcec0c
+  n3667a3137633849ef["function_definition await_board"]
+  nc93c44fa3f0e7b9f7 --> n3667a3137633849ef
+  n5fe31240973e27209["function_definition pointer_gameplay"]
+  nc93c44fa3f0e7b9f7 --> n5fe31240973e27209
+  n559b0083eb8267195["function_definition main"]
+  nc93c44fa3f0e7b9f7 --> n559b0083eb8267195
   ndcf15fb8fa3f70468["test_aggregate_evaluation_metering.py"]
   nc9f5868186eb03f66 --> ndcf15fb8fa3f70468
   n299f6393853a07bb4["function_definition _predicate"]
