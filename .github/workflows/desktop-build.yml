@@ -51,6 +51,13 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           RELEASE_VERSION: ${{ inputs.version }}
         run: python .github/scripts/package_desktop.py --platform "$PLATFORM" --version "$RELEASE_VERSION"
+      - name: Upload validated platform distribution
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: desktop-${{ matrix.platform }}
+          path: dist/release/
+          if-no-files-found: error
+          retention-days: 14
       - name: Exercise the extracted native GUI (fail closed)
         env:
           RELEASE_VERSION: ${{ inputs.version }}
@@ -75,11 +82,4 @@ jobs:
           name: native-evidence-${{ matrix.platform }}
           path: dist/native-evidence/
           if-no-files-found: warn
-          retention-days: 14
-      - name: Upload validated platform distribution
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: desktop-${{ matrix.platform }}
-          path: dist/release/
-          if-no-files-found: error
           retention-days: 14
