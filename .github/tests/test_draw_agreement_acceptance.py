@@ -133,13 +133,26 @@ def test_wcdf_draw_offer_only_after_own_completed_move_and_cannot_be_withdrawn()
 
 
 def test_fide_offers_are_valid_outside_preferred_post_move_window():
-    # FIDE 9.1.2.1 explicitly recognizes offers at other times as valid.
+    # FIDE 9.1.2.1 validates out-of-window offers; 5.2.3 still requires
+    # at least one move by BOTH players before a draw agreement can terminate.
     for offerer, accepter in (("white", "black"), ("black", "white")):
         manager = game("chess")
         send(manager, offerer, "offer_draw", at=100, action_id="offer")
-        result = send(manager, accepter, "accept_draw", at=200, action_id="accept")
-        assert result["outcome"]["kind"] == "draw"
+        assert manager.get_state()["pending_draw_offer"]["actor"] == offerer
+        denied(manager, accepter, {"type": "accept_draw"}, at=200)
+        send(manager, accepter, "reject_draw", at=300, action_id="reject")
         assert GameManager.from_snapshot(manager.get_state()).get_state() == manager.get_state()
+    manager = game("chess")
+    first, second = take_turn(manager)
+    state = manager.get_state()
+    manager.submit_action(
+        second, state["revision"], "second-move",
+        {"type": "move", "move": manager.get_valid_moves()[0].to_json()}, 1100
+    )
+    send(manager, first, "offer_draw", at=1200, action_id="offer-after-moves")
+    result = send(manager, second, "accept_draw", at=1300, action_id="accept-after-moves")
+    assert result["outcome"]["kind"] == "draw"
+    assert GameManager.from_snapshot(manager.get_state()).get_state() == manager.get_state()
 
 
 def test_strict_payload_auth_revision_and_replay_tampering_are_atomic():
