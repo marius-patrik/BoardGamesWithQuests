@@ -144,6 +144,8 @@ class GameManager:
             config["starting_side"] = definition.starting_side
         if "draw_offer_timing" in definition.declared_optional_fields or definition.draw_offer_timing != "any_time":
             config["draw_offer_timing"] = definition.draw_offer_timing
+        if "draw_agreement_minimum_moves" in definition.declared_optional_fields or definition.draw_agreement_minimum_moves:
+            config["draw_agreement_minimum_moves"] = definition.draw_agreement_minimum_moves
         initial = definition.clock["initial_seconds"] * 1000
         self._config = freeze_json(config)
         state: dict[str, Any] = {
@@ -1659,6 +1661,10 @@ class GameManager:
         else:
             if pending is None or pending["actor"] == actor_id:
                 raise TransitionError("only the opponent may answer a pending draw offer")
+            if kind == "accept_draw" and self.definition.draw_agreement_minimum_moves:
+                moved = {event["actor"] for event in state["events"] if event["move"] is not None}
+                if len(moved) != 2:
+                    raise TransitionError("both participants must have made a move before agreeing to draw")
             state["pending_draw_offer"] = None
         state["revision"] += 1
         event = {
