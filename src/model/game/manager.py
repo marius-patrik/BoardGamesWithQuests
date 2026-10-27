@@ -142,6 +142,8 @@ class GameManager:
             config["position_identity"] = thaw_json(definition.position_identity)
         if "starting_side" in definition.declared_optional_fields or definition.starting_side != 1:
             config["starting_side"] = definition.starting_side
+        if "draw_offer_timing" in definition.declared_optional_fields or definition.draw_offer_timing != "any_time":
+            config["draw_offer_timing"] = definition.draw_offer_timing
         initial = definition.clock["initial_seconds"] * 1000
         self._config = freeze_json(config)
         state: dict[str, Any] = {
@@ -170,6 +172,7 @@ class GameManager:
             },
             "quest_scores": {identity: 0 for identity in participant_ids},
             "outcome": None,
+            "pending_draw_offer": None,
             "revision": 0,
             "halfmove_count": 0,
             "events": [],
@@ -1428,6 +1431,108 @@ class GameManager:
             return thaw_json(self._state)
 
     @staticmethod
+    def _mentions_claim(node: Any, name: str) -> bool:
+        """Recognize named draw predicates without trusting a rule identifier alone."""
+        if isinstance(node, (list, tuple)):
+            return any(GameManager._mentions_claim(part, name) for part in node)
+        if not isinstance(node, Mapping):
+            return False
+        if node.get("op") == "compare" and node.get("relation") == "eq":
+            left, right = node.get("left"), node.get("right")
+            if (left == {"ref": "event.claim"} and right == name) or (
+                right == {"ref": "event.claim"} and left == name
+            ):
+                return True
+        return any(
+            GameManager._mentions_claim(value, name)
+            for key, value in node.items()
+            if key in ("args", "arg")
+        )
+
+    def configured_draw_claims(self) -> list[str]:
+        """Return only named draw claims actually declared by outcome predicates."""
+        with self._lock:
+            return [
+                rule["id"]
+                for rule in self.definition.rules
+                if rule["hook"] == "outcome"
+                and self._mentions_claim(rule["when"], rule["id"])
+            ]
+
+    def draw_action_availability(self) -> dict[str, Any]:
+        """Project permitted draw actors; never use GUI-owned offer state."""
+        with self._lock:
+            state = self._state
+            if state["outcome"] is not None:
+                return {"offer_actors": [], "response_actor": None, "pending_actor": None}
+            pending = state["pending_draw_offer"]
+            if pending is not None:
+                return {
+                    "offer_actors": [],
+                    "response_actor": next(
+                        identity
+                        for identity in state["participants"].values()
+                        if identity != pending["actor"]
+                    ),
+                    "pending_actor": pending["actor"],
+                }
+            if self.definition.draw_offer_timing == "after_move":
+                last = state["events"][-1] if state["events"] else None
+                actors = [last["actor"]] if last is not None and last["move"] is not None else []
+            else:
+                actors = [
+                    state["participants"][str(state["active_side"])],
+                    state["participants"][str(-state["active_side"])],
+                ]
+            return {"offer_actors": actors, "response_actor": None, "pending_actor": None}
+
+    def draw_claim_candidates(self, claim: str) -> dict[str, Any]:
+        """Probe the *real* claim transition without publishing any event or move.
+
+        Each complete legal move is checked by the same outcome arbitration as
+        submit_action. Results are detached and bounded by the legal-intent limit.
+        A rejected or cancelled UI claim cannot change clocks or quest progress.
+        """
+        if type(claim) is not str or claim not in self.configured_draw_claims():
+            raise TransitionError("draw claim is not declared by the game")
+        with self._lock:
+            with self._operation():
+                state = self._copy_state(self._state)
+                if state["outcome"] is not None:
+                    return {"current": False, "intended_moves": []}
+                actor = state["participants"][str(state["active_side"])]
+                legal = self._legal_moves(
+                    state, state["active_side"], state["clocks"]["anchor_ms"]
+                )
+            if len(legal) > 256:
+                raise TransitionError("draw claim projection has too many candidates")
+            result: dict[str, Any] = {"current": False, "intended_moves": []}
+            for move in [None, *legal]:
+                intent = {
+                    "type": "claim_draw",
+                    "claim": claim,
+                    "intended_move": move.to_json() if move is not None else None,
+                }
+                try:
+                    with self._operation():
+                        candidate = self._copy_state(self._state)
+                        self._terminal_action(
+                            candidate,
+                            actor,
+                            candidate["revision"],
+                            "claim-projection",
+                            intent,
+                            candidate["clocks"]["anchor_ms"],
+                        )
+                except TransitionError:
+                    continue
+                if move is None:
+                    result["current"] = True
+                else:
+                    result["intended_moves"].append(move.to_json())
+            return result
+
+    @staticmethod
     def _action(action: Any) -> dict[str, Any]:
         """Parse a closed action DTO without accepting state or result assertions.
 
@@ -1447,6 +1552,9 @@ class GameManager:
             "resign": {"type"},
             "timeout": {"type"},
             "claim_draw": {"type", "claim", "intended_move"},
+            "offer_draw": {"type"},
+            "accept_draw": {"type"},
+            "reject_draw": {"type"},
         }
         if action["type"] not in contracts or set(action) != contracts[action["type"]]:
             raise TransitionError("action has unknown or missing fields")
@@ -1520,6 +1628,65 @@ class GameManager:
         elif winner is not None and winner not in state["participants"].values():
             raise TransitionError("outcome winner must be a participant")
         return result
+
+    def _draw_agreement_action(
+        self,
+        state: dict[str, Any],
+        actor_id: str,
+        expected_revision: int,
+        action_id: str,
+        action: dict[str, Any],
+        now_ms: int,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Apply one non-moving, participant-authorized draw lifecycle action."""
+        active = state["active_side"]
+        elapsed = now_ms - state["clocks"]["anchor_ms"]
+        if elapsed < 0 or elapsed >= state["clocks"]["remaining_ms"][str(active)]:
+            raise TransitionError("active participant clock has expired")
+        pending = state["pending_draw_offer"]
+        kind = action["type"]
+        if kind == "offer_draw":
+            if pending is not None:
+                raise TransitionError("a draw offer is already pending")
+            if self.definition.draw_offer_timing == "after_move":
+                last = state["events"][-1] if state["events"] else None
+                if last is None or last["move"] is None or last["actor"] != actor_id:
+                    raise TransitionError("draw offers require the player's just-completed move")
+            state["pending_draw_offer"] = {
+                "actor": actor_id,
+                "revision": state["revision"] + 1,
+            }
+        else:
+            if pending is None or pending["actor"] == actor_id:
+                raise TransitionError("only the opponent may answer a pending draw offer")
+            state["pending_draw_offer"] = None
+        state["revision"] += 1
+        event = {
+            "revision": state["revision"],
+            "expected_revision": expected_revision,
+            "actor": actor_id,
+            "action_id": action_id,
+            "at_ms": now_ms,
+            "move": None,
+            "captured": [],
+            "effects": [],
+            "outcome": None,
+            "action": action,
+        }
+        if kind == "accept_draw":
+            state["clocks"]["remaining_ms"][str(active)] -= elapsed
+            state["clocks"]["anchor_ms"] = now_ms
+            state["outcome"] = {
+                "kind": "draw",
+                "cause": "agreement",
+                "winner": None,
+                "priority": 1000,
+            }
+            event["outcome"] = state["outcome"]
+        # The active clock continues across offers and refusals. A non-moving
+        # event must neither grant an increment nor advance position history.
+        state["events"].append(event)
+        return state, event
 
     def _terminal_action(
         self,
@@ -1656,6 +1823,7 @@ class GameManager:
         ):
             raise TransitionError("draw claim is overridden by a decisive proposal")
         state["outcome"] = result
+        state["pending_draw_offer"] = None
         event["outcome"] = result
         return state, event
 
@@ -1713,9 +1881,15 @@ class GameManager:
                 raise TransitionError("stale game revision")
             if state["outcome"] is not None:
                 raise TransitionError("game has a terminal result")
+            if state["events"] and now_ms < state["events"][-1]["at_ms"]:
+                raise TransitionError("authoritative timestamp cannot precede an accepted action")
             if len(state["events"]) >= MAX_EVENTS:
                 raise TransitionError("session event limit reached")
-            if request["type"] != "move":
+            if request["type"] in ("offer_draw", "accept_draw", "reject_draw"):
+                state, event = self._draw_agreement_action(
+                    state, actor_id, expected_revision, action_id, request, now_ms
+                )
+            elif request["type"] != "move":
                 state, event = self._terminal_action(
                     state, actor_id, expected_revision, action_id, request, now_ms
                 )
@@ -1732,6 +1906,8 @@ class GameManager:
                 state, board, captures, effects, event = self._prepare_move(
                     state, side, actor_id, expected_revision, action_id, move, now_ms
                 )
+                # Playing a complete legal move declines any outstanding offer.
+                state["pending_draw_offer"] = None
                 counts = None
                 if any(rule["hook"] == "outcome" for rule in self.definition.rules):
                     counts = {
