@@ -16,7 +16,7 @@ Polish the existing Python/Tkinter desktop application and its one JSON-configur
 - [x] #446 recursive evaluator work-metering integrated; #456 aggregate evaluation budgets, late-proposal rollback independently verified and integrated.
 - [x] #447 real small-window responsive Tk Canvas acceptance integrated; #448 keyboard-only board mode consciously deferred.
 - [x] #451 terminal presentation, session replacement safeguards and game-title lifecycle independently verified and integrated.
-- [x] Historical fix, reference and temporary verification refs cleaned (14 obsolete branches, [successful run #40468515823](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40468515823)); active task branches #438/#439 remain separate.
+- [x] Historical fix, reference and temporary verification refs cleaned (14 obsolete branches, [successful run #40468515823](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40468515823)); the active #438 agent branch remains separate; #439 task branch was deleted after its exact source/test blobs were integrated.
 - [x] #439 scoped persistence hardening source and tests independently reviewed and integrated atomically at `520436932d74560fbe4d28e251174fd5cff25aff`, followed by source-generated AST-format commit. **Exact-head governed CI and native #443 acceptance remain open.**
 - [x] Independently executed Chess reference candidate #436 (26 reference scenarios plus 99 affected regressions on Python 3.10–3.13); complete exceptional FIDE certification still **OPEN**.
 - [x] Independently executed and integrated #437/#449 WCDF short-king, deferred captures, claim configuration and 91-ply referenced game; complete pointer-UI certification still **OPEN**.
