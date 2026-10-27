@@ -48,10 +48,20 @@ def denied(manager: GameManager, actor: str, action: dict, *, at: int = 1200):
 def test_agreement_is_an_authoritative_nonmoving_result_and_replays(name):
     manager = game(name)
     mover, respondent = take_turn(manager)
+    if name == "chess":
+        # FIDE 5.2.3: both participants must make a move before agreement.
+        state = manager.get_state()
+        manager.submit_action(
+            respondent, state["revision"], "second-move",
+            {"type": "move", "move": manager.get_valid_moves()[0].to_json()}, 1100,
+        )
+        mover, respondent = respondent, mover
     prior = manager.get_state()
     offer = send(manager, mover, "offer_draw", at=1200, action_id="offer")
     pending = manager.get_state()
-    assert pending["pending_draw_offer"] == {"actor": mover, "revision": 2}
+    assert pending["pending_draw_offer"] == {
+        "actor": mover, "revision": prior["revision"] + 1
+    }
     assert pending["active_side"] == prior["active_side"]
     assert pending["board"] == prior["board"]
     assert pending["position_history"] == prior["position_history"]
@@ -60,7 +70,7 @@ def test_agreement_is_an_authoritative_nonmoving_result_and_replays(name):
     assert pending["clocks"] == prior["clocks"]
     assert offer["outcome"] is None and offer["action"] == {"type": "offer_draw"}
     assert GameManager.from_snapshot(pending).get_state() == pending
-    assert manager.submit_action(mover, 1, "offer", {"type": "offer_draw"}, 99000) == offer
+    assert manager.submit_action(mover, prior["revision"], "offer", {"type": "offer_draw"}, 99000) == offer
     assert manager.get_state() == pending
 
     accepted = send(manager, respondent, "accept_draw", at=2300, action_id="accept")
@@ -81,7 +91,7 @@ def test_agreement_is_an_authoritative_nonmoving_result_and_replays(name):
         prior["clocks"]["remaining_ms"][active] - 1300
     )
     assert GameManager.from_snapshot(final).get_state() == final
-    assert manager.submit_action(respondent, 2, "accept", {"type": "accept_draw"}, 99999) == accepted
+    assert manager.submit_action(respondent, prior["revision"] + 1, "accept", {"type": "accept_draw"}, 99999) == accepted
     denied(manager, mover, {"type": "offer_draw"}, at=2400)
     denied(manager, respondent, {"type": "reject_draw"}, at=2401)
 
