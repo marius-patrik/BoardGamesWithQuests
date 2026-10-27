@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from importlib import resources
 import json
+import random
 
 import pytest
 
@@ -158,6 +159,55 @@ def test_wcdf_forty_completed_moves_cannot_be_claimed_prospectively_at_79():
     mature = manager.draw_claim_candidates("forty-move")
     assert mature["current"] is True
     assert mature["intended_moves"] == []
+    assert GameManager.from_snapshot(manager.get_state()).get_state() == manager.get_state()
+
+
+def test_fide_prospective_fifty_move_threshold_from_ninety_nine_quiet_plies():
+    # FIDE 9.3.1: 50 moves by each player without pawn motion/capture can be
+    # declared before making the 100th half-move. Keep the shipped FIDE rules
+    # intact and exercise 99 genuine accepted quiet legal moves in a small,
+    # independently specified K+2N versus K+2N position.
+    data = json.loads(resources.files("games").joinpath("chess", "config.json").read_text())
+    data["board"]["starting_pieces"] = [
+        {"piece": "king", "color": "white", "squares": [[7, 4]]},
+        {"piece": "knight", "color": "white", "squares": [[7, 1], [7, 6]]},
+        {"piece": "king", "color": "black", "squares": [[0, 4]]},
+        {"piece": "knight", "color": "black", "squares": [[0, 1], [0, 6]]},
+    ]
+    manager = GameManager(validate_definition(data), "fide-fifty-prospective", ("white", "black"), 0)
+    rng = random.Random(438)
+    for number in range(99):
+        current = manager.get_state()
+        occupied = {tuple(piece["square"]) for piece in current["board"]}
+        legal_quiet = [
+            intent for intent in manager.get_valid_moves()
+            if intent.end_pos not in occupied and intent.promotion is None
+        ]
+        assert legal_quiet, f"no quiet legal continuation at ply {number + 1}"
+        choice = rng.choice(legal_quiet)
+        result = manager.submit_action(
+            current["participants"][str(current["active_side"])],
+            current["revision"], f"fide-quiet-{number}",
+            {"type": "move", "move": choice.to_json()}, number + 1,
+        )
+        assert result["outcome"] is None, f"premature automatic result at ply {number + 1}"
+    before = manager.get_state()
+    assert before["halfmove_count"] == 99
+    candidates = manager.draw_claim_candidates("fifty-move")
+    assert candidates["current"] is False
+    assert candidates["intended_moves"]
+    assert manager.get_state() == before
+    chosen = candidates["intended_moves"][0]
+    assert chosen["hops"][-1] not in [piece["square"] for piece in before["board"]]
+    result = manager.submit_action(
+        before["participants"][str(before["active_side"])], 99,
+        "fide-claim-100",
+        {"type": "claim_draw", "claim": "fifty-move", "intended_move": chosen},
+        100,
+    )
+    assert result["outcome"]["kind"] == "draw"
+    assert result["outcome"]["cause"] == "fifty-move"
+    assert manager.get_state()["board"] == before["board"]
     assert GameManager.from_snapshot(manager.get_state()).get_state() == manager.get_state()
 
 
