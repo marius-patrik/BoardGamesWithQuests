@@ -207,8 +207,11 @@ def test_fide_offer_made_by_active_player_survives_own_legal_move():
     assert before["pending_draw_offer"]["actor"] == white
     move = manager.get_valid_moves()[0]
     event = manager.submit_action(
-        white, before["revision"], "offering-side-move",
-        {"type": "move", "move": move.to_json()}, 200,
+        white,
+        before["revision"],
+        "offering-side-move",
+        {"type": "move", "move": move.to_json()},
+        200,
     )
     after = manager.get_state()
     assert event["outcome"] is None
@@ -217,8 +220,11 @@ def test_fide_offer_made_by_active_player_survives_own_legal_move():
     denied(manager, black, {"type": "accept_draw"}, at=300)
     move = manager.get_valid_moves()[0]
     manager.submit_action(
-        black, after["revision"], "opponent-declines-by-moving",
-        {"type": "move", "move": move.to_json()}, 400,
+        black,
+        after["revision"],
+        "opponent-declines-by-moving",
+        {"type": "move", "move": move.to_json()},
+        400,
     )
     finished = manager.get_state()
     assert finished["pending_draw_offer"] is None
@@ -229,8 +235,11 @@ def test_fide_offer_made_by_active_player_survives_own_legal_move():
     send(manager, white, "offer_draw", at=500, action_id="fresh-offer")
     before = manager.get_state()
     manager.submit_action(
-        white, before["revision"], "white-third",
-        {"type": "move", "move": manager.get_valid_moves()[0].to_json()}, 600,
+        white,
+        before["revision"],
+        "white-third",
+        {"type": "move", "move": manager.get_valid_moves()[0].to_json()},
+        600,
     )
     assert manager.get_state()["pending_draw_offer"]["actor"] == white
     accepted = send(manager, black, "accept_draw", at=700, action_id="black-accepts")
