@@ -155,7 +155,7 @@ class PlayerGameView(ttk.Frame):
         add_action(gameplay, "Notation", self.export_notation)
 
         # The reference GUI places both participants BESIDE the board. The
-        # center column owns all remaining width; quests scroll separately.
+        # centered columns preserve space beside the board; quests scroll separately.
         body = ttk.Frame(self)
         body.grid(row=1, column=0, sticky="nsew")
         body.rowconfigure(0, weight=1)
@@ -295,7 +295,9 @@ class PlayerGameView(ttk.Frame):
             self.board_view.board.cols * 32,
             self._body.winfo_width() - 2 * 170 - 20,
         )
-        desired = min(self.board_view.board.cols * self._preferred_board_size, available)
+        # Reserve the center frame's horizontal padding, otherwise a saved
+        # 64-pixel setting renders 63-pixel squares due to integer division.
+        desired = min(self.board_view.board.cols * self._preferred_board_size + 8, available)
         self._body.columnconfigure(2, minsize=desired)
         width = self.board_area.winfo_width() if width is None else width
         height = self.board_area.winfo_height() if height is None else height
