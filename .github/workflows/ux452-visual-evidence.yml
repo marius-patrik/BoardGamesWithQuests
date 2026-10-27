@@ -22,9 +22,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth
-          python -m pip install -e . pillow
+          python -m pip install -e . pillow pytest
       - name: Capture rendered game windows and exercise real board clicks
         run: xvfb-run -a -s '-screen 0 1920x1200x24' python .github/tests/desktop_gui_visual_evidence.py
+      - name: Verify participant ownership, capture routes, promotion, and input
+        run: |
+          xvfb-run -a -s '-screen 0 1920x1200x24' python -m pytest -q .github/tests/desktop_gui_acceptance.py -k 'two_sided or scroll_all or branched_draughts or cancel_capture or chess_promotion or automatic_crowning or occupied_capture'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ux452-real-tkinter-reference-screenshots
