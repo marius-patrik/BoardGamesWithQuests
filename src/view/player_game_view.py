@@ -366,10 +366,11 @@ class PlayerGameView(ttk.Frame):
 
         # The current session only reports the terminal checkmate verdict,
         # not general attack/check state. Never infer check from piece vectors.
-        checked_side = state["active_side"] if (
-            state["outcome"] is not None
-            and state["outcome"]["cause"] == "checkmate"
-        ) else None
+        checked_side = (
+            state["active_side"]
+            if (state["outcome"] is not None and state["outcome"]["cause"] == "checkmate")
+            else None
+        )
         checked_king = next(
             (
                 tuple(piece["square"])
@@ -542,8 +543,7 @@ class PlayerGameView(ttk.Frame):
         rows = state["config"]["board"]["rows"]
         points = [move["start"], *move["hops"]]
         occupied = any(
-            piece["square"] == move["hops"][-1]
-            and piece["side"] != state["active_side"]
+            piece["square"] == move["hops"][-1] and piece["side"] != state["active_side"]
             for piece in state["board"]
         )
         separator = " × " if len(move["hops"]) > 1 or occupied else " → "
@@ -577,9 +577,7 @@ class PlayerGameView(ttk.Frame):
         dialog.resizable(True, True)
         frame = ttk.Frame(dialog, padding=12)
         frame.pack(fill="both", expand=True)
-        ttk.Label(frame, text=explanation, wraplength=420).pack(
-            anchor="w", pady=(0, 8)
-        )
+        ttk.Label(frame, text=explanation, wraplength=420).pack(anchor="w", pady=(0, 8))
         holder = ttk.Frame(frame)
         holder.pack(fill="both", expand=True)
         listbox = tk.Listbox(
@@ -608,9 +606,7 @@ class PlayerGameView(ttk.Frame):
         ttk.Button(controls, text="Cancel", command=lambda: finish(False)).pack(
             side="right", padx=(8, 0)
         )
-        ttk.Button(controls, text=confirm_label, command=lambda: finish(True)).pack(
-            side="right"
-        )
+        ttk.Button(controls, text=confirm_label, command=lambda: finish(True)).pack(side="right")
         dialog.protocol("WM_DELETE_WINDOW", lambda: finish(False))
         dialog.bind("<Escape>", lambda _event: finish(False))
         dialog.bind("<Return>", lambda _event: finish(True))
