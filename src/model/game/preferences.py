@@ -59,13 +59,17 @@ def _checked_directory(directory: Path, *, create: bool) -> Path:
     return directory
 
 
-def _regular_file_identity(path: Path) -> tuple[int, int, int, int] | None:
+def _regular_file_identity(
+    path: Path, *, for_write: bool = False
+) -> tuple[int, int, int, int] | None:
     try:
         found = path.lstat()
     except FileNotFoundError:
         return None
     if not stat.S_ISREG(found.st_mode):
         raise PreferencesError("preferences target must be a regular non-symlinked file")
+    if for_write and not stat.S_IMODE(found.st_mode) & 0o222:
+        raise PreferencesError("refusing to replace read-only preferences file")
     return found.st_dev, found.st_ino, found.st_mtime_ns, found.st_size
 
 
@@ -110,7 +114,12 @@ def load_preferences(directory: Path | None = None) -> dict[str, Any]:
         expected = _regular_file_identity(source)
         if expected is None:
             return dict(DEFAULTS)
-        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0)
+        flags = (
+            os.O_RDONLY
+            | getattr(os, "O_NOFOLLOW", 0)
+            | getattr(os, "O_NONBLOCK", 0)
+            | getattr(os, "O_BINARY", 0)
+        )
         with os.fdopen(os.open(source, flags), "rb") as handle:
             opened = os.fstat(handle.fileno())
             if not stat.S_ISREG(opened.st_mode) or (
@@ -143,7 +152,7 @@ def save_preferences(data: Any, directory: Path | None = None) -> dict[str, Any]
         Path(directory) if directory is not None else preferences_directory(), create=True
     )
     target = root / FILENAME
-    expected = _regular_file_identity(target)
+    expected = _regular_file_identity(target, for_write=True)
     temporary: str | None = None
     try:
         descriptor, temporary = tempfile.mkstemp(prefix=".preferences-", dir=root)
@@ -152,7 +161,7 @@ def save_preferences(data: Any, directory: Path | None = None) -> dict[str, Any]
             handle.flush()
             os.fsync(handle.fileno())
         _checked_directory(root, create=False)
-        if _regular_file_identity(target) != expected:
+        if _regular_file_identity(target, for_write=True) != expected:
             raise PreferencesError("preferences target changed during save")
         os.replace(temporary, target)
         temporary = None
