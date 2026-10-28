@@ -330,7 +330,18 @@ class PlayerGameView(ttk.Frame):
                 if result["action"] == "moved":
                     self.window_controller.set_status("Move played.")
         controller = self.window_controller.game_controller
-        self.board_view.set_selection(controller.selected_square, controller.highlighted_moves)
+        selected = controller.selected_square
+        captures: set[tuple[int, int]] = set()
+        if selected is not None:
+            state = self.session.snapshot()
+            captures = {
+                tuple(move["hops"][-1])
+                for move in self.session.legal_actions()
+                if move["start"] == list(selected) and self._is_capture_move(move, state)
+            }
+        self.board_view.set_selection(
+            selected, controller.highlighted_moves, capture_targets=captures
+        )
         if result["action"] == "invalid":
             self.board_view.show_invalid_square(position)
             self.status.set(result.get("message", "Invalid move."))
@@ -567,17 +578,46 @@ class PlayerGameView(ttk.Frame):
         self.window_controller.set_status("Draw accepted." if reply else "Draw offer declined.")
         self.refresh()
 
+    @staticmethod
+    def _is_capture_move(move: dict[str, Any], state: dict[str, Any]) -> bool:
+        """Classify an engine-authorized route for display, not for move validation."""
+        source = next(
+            (
+                piece
+                for piece in state["board"]
+                if piece["square"] == move["start"] and piece["side"] == state["active_side"]
+            ),
+            None,
+        )
+        if source is None:
+            return False
+        destination = move["hops"][-1]
+        if any(
+            piece["square"] == destination and piece["side"] != source["side"]
+            for piece in state["board"]
+        ):
+            return True
+        # Legal diagonal pawn moves ending on empty squares are en passant.
+        if source["kind"] == "pawn" and move["start"][1] != destination[1]:
+            return True
+        if "capture_policy" not in state["config"]["pieces"].get(source["kind"], {}):
+            return False
+        previous = move["start"]
+        for landing in move["hops"]:
+            if max(abs(landing[0] - previous[0]), abs(landing[1] - previous[1])) > 1:
+                return True
+            previous = landing
+        return False
+
     def _format_complete_move(
         self, move: dict[str, Any], state: dict[str, Any], *, capture_notation: bool = True
     ) -> str:
         """Describe an engine-supplied full action; never reconstruct its route."""
         rows = state["config"]["board"]["rows"]
         points = [move["start"], *move["hops"]]
-        occupied = any(
-            piece["square"] == move["hops"][-1] and piece["side"] != state["active_side"]
-            for piece in state["board"]
+        separator = (
+            " × " if capture_notation and self._is_capture_move(move, state) else " → "
         )
-        separator = " × " if capture_notation and (len(move["hops"]) > 1 or occupied) else " → "
         route = separator.join(self._label(point, rows) for point in points)
         promotion = move.get("promotion")
         if promotion is not None:

@@ -41,6 +41,7 @@ class BoardView(ttk.Frame):
         self.show_coordinates = show_coordinates
         self.selected: Square | None = None
         self.targets: list[Square] = []
+        self.capture_targets: set[Square] = set()
         self.in_check: Square | None = None
         self.last_move: tuple[Square, Square] | None = None
         self.hovered: Square | None = None
@@ -101,10 +102,19 @@ class BoardView(ttk.Frame):
             self._fit_canvas()
             self.redraw()
 
-    def set_selection(self, selected: Square | None, targets: list[Square]) -> None:
-        if selected != self.selected or targets != self.targets:
+    def set_selection(
+        self,
+        selected: Square | None,
+        targets: list[Square],
+        *,
+        capture_targets: set[Square] | None = None,
+    ) -> None:
+        """Draw legal landing squares with presentation-only capture hints."""
+        captures = set(capture_targets or ())
+        if selected != self.selected or targets != self.targets or captures != self.capture_targets:
             self.selected = selected
             self.targets = list(targets)
+            self.capture_targets = captures
             self.redraw()
 
     def set_in_check(self, square: Square | None) -> None:
@@ -185,16 +195,9 @@ class BoardView(ttk.Frame):
                 if piece is not None:
                     self._draw_piece(piece, left, top, right, bottom)
                 if square in targets:
-                    # An occupied opponent is a capture target; other moves
-                    # are shown as empty landing squares. The engine alone
-                    # decides which squares belong in targets.
-                    occupied_capture = (
-                        piece is not None
-                        and self.selected is not None
-                        and (origin := board.get_piece_at(self.selected)) is not None
-                        and piece.getColor() != origin.getColor()
-                    )
-                    if occupied_capture:
+                    # Engine-authorized routes provide capture hints, including
+                    # jumping captures whose destination is unoccupied.
+                    if square in self.capture_targets:
                         self._draw_capture_target(left, top, right, bottom)
                     else:
                         self._draw_quiet_target(left, top, right, bottom)

@@ -715,6 +715,7 @@ def test_pointer_selects_complete_branched_draughts_capture(
     prepared_window(window, session)
     click_canvas(window, 2, 3)
     assert window.window_controller.game_controller.highlighted_moves == [(6, 3)]
+    assert window.game_view.board_view.canvas.find_withtag("legal_capture")
     expected = "d6 × " + middle + " × d2"
     trace = choose_rendered_route(window, route_index, expected)
     click_canvas(window, 6, 3)
@@ -725,6 +726,37 @@ def test_pointer_selects_complete_branched_draughts_capture(
     assert route == legal[route_index]
     assert len(state["captured"]) == 2
     assert any(p["square"] == [6, 3] and p["kind"] == "man" for p in state["board"])
+
+
+
+def test_single_hop_draughts_capture_uses_capture_notation_and_marker(window, monkeypatch):
+    """Jump captures finish on an empty square, unlike occupied Chess captures."""
+    session = prepared_position(
+        monkeypatch,
+        "checkers",
+        [
+            {"piece": "man", "color": "black", "squares": [[2, 3]]},
+            {"piece": "man", "color": "white", "squares": [[3, 2]]},
+        ],
+        -1,
+    )
+    legal = session.legal_actions()
+    assert len(legal) == 1
+    move = legal[0]
+    assert move["start"] == [2, 3] and move["hops"] == [[4, 1]]
+    state = session.snapshot()
+    assert not any(piece["square"] == [4, 1] for piece in state["board"])
+    prepared_window(window, session)
+    assert window.game_view._format_complete_move(move, state) == "d6 × b4"
+    click_canvas(window, 2, 3)
+    canvas = window.game_view.board_view.canvas
+    assert canvas.find_withtag("legal_capture")
+    assert not canvas.find_withtag("legal_quiet")
+    click_canvas(window, 4, 1)
+    after = session.snapshot()
+    assert after["revision"] == 1
+    assert after["events"][-1]["move"] == move
+    assert len(after["captured"]) == 1
 
 
 def test_cancel_capture_chooser_is_atomic_and_highlights_remain(window, monkeypatch):
