@@ -615,9 +615,7 @@ class PlayerGameView(ttk.Frame):
         """Describe an engine-supplied full action; never reconstruct its route."""
         rows = state["config"]["board"]["rows"]
         points = [move["start"], *move["hops"]]
-        separator = (
-            " × " if capture_notation and self._is_capture_move(move, state) else " → "
-        )
+        separator = " × " if capture_notation and self._is_capture_move(move, state) else " → "
         route = separator.join(self._label(point, rows) for point in points)
         promotion = move.get("promotion")
         if promotion is not None:

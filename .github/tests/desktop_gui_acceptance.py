@@ -728,7 +728,6 @@ def test_pointer_selects_complete_branched_draughts_capture(
     assert any(p["square"] == [6, 3] and p["kind"] == "man" for p in state["board"])
 
 
-
 def test_single_hop_draughts_capture_uses_capture_notation_and_marker(window, monkeypatch):
     """Jump captures finish on an empty square, unlike occupied Chess captures."""
     session = prepared_position(
