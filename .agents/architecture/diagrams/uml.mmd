@@ -232,18 +232,27 @@ direction LR
   n6c226a47d78831afd : +getName()
   class nd386ea012669db456["BoardView"]
   nd386ea012669db456 : +__init__()
+  nd386ea012669db456 : +set_appearance()
   nd386ea012669db456 : +refresh()
   nd386ea012669db456 : +_fit_canvas()
   nd386ea012669db456 : +fit_to()
   nd386ea012669db456 : +set_selection()
   nd386ea012669db456 : +set_in_check()
+  nd386ea012669db456 : +set_last_move()
+  nd386ea012669db456 : +show_invalid_square()
+  nd386ea012669db456 : +_clear_invalid()
   nd386ea012669db456 : +redraw()
   nd386ea012669db456 : +_origin()
   nd386ea012669db456 : +_draw_piece()
-  nd386ea012669db456 : +_draw_target()
+  nd386ea012669db456 : +_draw_quiet_target()
+  nd386ea012669db456 : +_draw_capture_target()
   nd386ea012669db456 : +_draw_coordinates()
   nd386ea012669db456 : +_file_label()
+  nd386ea012669db456 : +_square_at()
+  nd386ea012669db456 : +_on_motion()
+  nd386ea012669db456 : +_on_leave()
   nd386ea012669db456 : +_clicked()
+  nd386ea012669db456 : +destroy()
   class nb1c381cb69b92add3["PlayerGameView"]
   nb1c381cb69b92add3 : +__init__()
   nb1c381cb69b92add3 : +_state_key()
@@ -266,6 +275,9 @@ direction LR
   nb1c381cb69b92add3 : +resign_game()
   nb1c381cb69b92add3 : +offer_draw()
   nb1c381cb69b92add3 : +respond_draw()
+  nb1c381cb69b92add3 : +_is_capture_move()
+  nb1c381cb69b92add3 : +_format_complete_move()
+  nb1c381cb69b92add3 : +_choose_complete_move()
   nb1c381cb69b92add3 : +_choose_intended_move()
   nb1c381cb69b92add3 : +claim_draw()
   nb1c381cb69b92add3 : +export_notation()
@@ -299,4 +311,6 @@ direction LR
   n6aed97faf9db3cb3d --> n6c226a47d78831afd : captured_black
   n6aed97faf9db3cb3d --> n6c226a47d78831afd : captured_white
   nb5eb61502c245eff4 --> n9f184d08711df6e4e : _evaluation
+  nb1c381cb69b92add3 --> n3d0c00ed6ff30fa69 : player_views
+  nb1c381cb69b92add3 --> nfd0f3cf1724d49ef5 : quest_lists
   nfd0f3cf1724d49ef5 --> n02c585538c578a39b : cards
