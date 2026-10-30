@@ -90,7 +90,8 @@ def capture_quest_and_history_stress(output: Path) -> None:
             definition_json["quests"] = [
                 {
                     "id": f"demo-quest-{index}",
-                    "description": "Long configured quest " + ("Maintain progress across turns. " * 5),
+                    "description": "Long configured quest "
+                    + ("Maintain progress across turns. " * 5),
                     "reward": 6 + index,
                     "when": {"op": "true"},
                 }
