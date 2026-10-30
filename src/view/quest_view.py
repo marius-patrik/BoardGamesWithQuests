@@ -105,8 +105,12 @@ class QuestList(ttk.Frame):
             json.dumps(definitions, sort_keys=True),
         )
         progress_key = tuple(
-            (quest["id"], records[quest["id"]]["active"], records[quest["id"]]["target"],
-             records[quest["id"]]["completed"])
+            (
+                quest["id"],
+                records[quest["id"]]["active"],
+                records[quest["id"]]["target"],
+                records[quest["id"]]["completed"],
+            )
             for quest in definitions
         )
         if definition_key == self._definition_key and progress_key == self._last:

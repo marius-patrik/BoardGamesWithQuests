@@ -42,8 +42,11 @@ class PlayerView(ttk.Frame):
         self.turn = tk.StringVar()
         self.columnconfigure(0, weight=1)
         self.name_label = ttk.Label(
-            self, textvariable=self.name, font=("TkDefaultFont", 11, "bold"),
-            wraplength=150, justify="left",
+            self,
+            textvariable=self.name,
+            font=("TkDefaultFont", 11, "bold"),
+            wraplength=150,
+            justify="left",
         )
         self.name_label.grid(row=0, column=0, sticky="ew")
         self.clock_label = ttk.Label(
@@ -71,8 +74,9 @@ class PlayerView(ttk.Frame):
         side_key = str(self.side)
         participant = str(state["participants"][side_key])
         color = "White" if self.side == 1 else "Black"
-        self.name.set(color if participant.casefold() == color.casefold() else
-                      f"{color} · {participant}")
+        self.name.set(
+            color if participant.casefold() == color.casefold() else f"{color} · {participant}"
+        )
         self.clock.set(format_seconds((remaining_ms[side_key] + 999) // 1000))
         finished = state["outcome"] is not None
         active = not finished and state["active_side"] == self.side
