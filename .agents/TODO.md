@@ -1,5 +1,14 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## 2026-10-31 — #452 closed; #473 must resolve FIDE correctness
+
+- [x] **#452 source GUI DONE / issue CLOSED:** Combined exact PR #271 HEAD `b9e1db9961cac9c044ad171a48c254fbd6fbe74d` has all nine applicable workflows completed SUCCESS. Preserved original board and 2 sided player/quest GUI; native extracted interactions remain #443.
+- [x] **#436 / Dispatch G read-only/test-only verification:** candidate `b0dcec95eac33b882f2ee0c0ac5cdb84927a3329` adds four independent FIDE tests; all Python 3.10–3.13 147 passed and 1 **FAIL** at dead fortress timeout; real Xvfb 52 passed; near-twin mating possibility and mate-v-75-move precedence pass. CI run [41138925199](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41138925199). No production fix; keep failing witness isolated until corrected (do NOT weaken assertion or poison unrelated PR #271 CI).
+- [ ] **NEW #473 P0 sound unwinnability:** agent branch `game/473-sound-unwinnability` exists at original G tip with 4 tests and generated AST; work on mathematically sound, bounded generic queries with `unwinnable/winnable/unknown` semantics, asymmetric FIDE 6.9 timeout and 5.2.2 two-sided dead. May use CHA-Solver only as researched reference after move-equivalence/native footprint evidence. No heuristic or hardcoded puzzle. Return BLOCKED if cannot implement a sound fix; do not mark Chess playable.
+- [ ] **#453 exclusive GUI** owner continues in prepared `ux/453-quest-history-polish`; after that #454, and then #462 source-tree renames. Native acceptance #443 incomplete and isolated.
+- [ ] Finish WCDF #437/#449; independent #444 audit; protected approval/promotion/release #445 still blocked.
+
+
 ## 2026-10-30 — Independently accepted #452 GUI source integration
 
 - [x] #452 D2 complete candidate `98b08ba0`: genuine two player+quest side panels, filled light/dark Chess vector Canvas pieces, colored crowned Draughts, real full-route/promote dialogs, accurate single-hop jumps and capture-highlight markers, 12 actual before/after Tk screenshots and >6 independent quests.

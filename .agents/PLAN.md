@@ -1,5 +1,13 @@
 # Execution plan — BoardGamesWithQuests v1.0.0
 
+## 2026-10-31 — FIDE fortress blocker / #473 successor
+
+- [x] Source #452 closed after ALL nine exact-head workflow suites succeeded on `b9e1db9961cac9c044ad171a48c254fbd6fbe74d` including real Tk 2-player UI, Python gameplay and native package builds. #453 quest/history, #454 polish and #443 extracted four-OS GUI remain OPEN.
+- [x] Dispatch G four-case *test-only* Chess branch `game/436-dead-position-proof` SHA `b0dcec95eac33b882f2ee0c0ac5cdb84927a3329`: exact verification Actions `41138925199` Python 3.10–3.13 each 147 passing / **one FAIL** for published Buchanan fortress timeout (win incorrectly returned, draw expected); real Tk 52 green. The adversarial live twin helpmate and mate overriding 75-move draw at ply 150 PASS. **Orthodox opening-to-FEN reachability not independently proven.**
+- [ ] **P0 #473** new precise child of #436 for proven generic bounded unwinnability query with asymmetric timeout semantics under FIDE 6.9, opposed to two-sided deadness under 5.2.2. Isolated `game/473-sound-unwinnability` branch created from G tip with four tests. **Do NOT integrate failing test alone** into green shared #271; preserve it for corrective implementation; any unknown outcome requires explicit safe handling and honest scope. No FEN hardcoding, false-positive draw or new engine. #436 remains OPEN; Chess `playable:false`.
+- [ ] #462 maintainer source renames still blocked during GUI #453 / native #443 / Chess #473 writers; existing 10 unresolved review threads remain.
+
+
 ## Orchestrator update — 2026-10-30: #452 D2 integrated
 
 - [x] Independent GUI D2 source/diff review of final `98b08ba0ac87700fcb0e2e3ea1362a891e494f5b`: both per-user scrollable side panels, centered original Canvas board, colored filled Chess and Draughts pieces, legal capture/promotion chooser and accurate single-hop Draughts capture notation/highlights. Actual final screenshot thumbnails independently inspected.

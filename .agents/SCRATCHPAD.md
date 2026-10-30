@@ -1,5 +1,14 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-10-31 — FIDE G diagnostic versus integration distinction
+
+- **True external-published counterexample**: Buchanan StrateGems R0093 FEN `Bb1k1b2/bKp1p1p1/1pP1P1P1/1P6/p5P1/P7/8/8 w - - 0 1`, 0-clock White, app recorded win not draw at public `DesktopSession.poll_timeout()`. Four Python versions repeat identical assertion failure (workflow 41138925199). The allegedly dead FEN's conventional starting-position retro-reachability has not been established; do not equate source puzzle classification and reachable normal game without separate evidence.
+- **False-draw guard**: changed near-twin FEN with a published 21-ply helpmate is winnable, and black flag must award White a win; both covered and PASS. 150th reversible halfmove delivering mate precedes 75-move automatic draw; PASS with snapshot replay. No other selected regression failure (147 tests per Python pass, one true red).
+- **Do not import red test without correction:** G branch `game/436-dead-position-proof` remains isolated; successor `game/473-sound-unwinnability` seeded at same exact code/test tip. Generate diagrams on combined integration after a future accepted fix; temporary verify workflow is verification-only and must not enter product. Keep `playable:false`.
+- **Formal semantics:** FIDE 5.2.2 dead = neither side can ever mate; FIDE 6.9 draw on flag = non-flagged side cannot ever mate. Need read-only, bounded, deterministic proof or witnessed winnability, with unknown explicit (not arbitrarily transformed to win/draw). CHA-Solver is MIT Rust reference, not an accepted new runtime dependency. No speculative fortress heuristic, FEN hardcode or second engine. Track P0 #473.
+- **Latest combined GUI source #452** all nine exact-head workflows succeeded at `b9e1db9961cac9c044ad171a48c254fbd6fbe74d`, so #452 issue is closed; still require #453 quest/history, #454 native polish and #443 extracted frozen acceptance. All #271 maintainer review threads remain open until actual #462 source package review.
+
+
 ## 2026-10-30 — #452 D2 result and source integration
 
 - D2 source `98b08ba0ac87700fcb0e2e3ea1362a891e494f5b` accepted after independent final-source review and all four successful final candidate CI runs (real Tk 52; 43 per Python gameplay; 321 per Python full tests; native PACKAGE builds all four targets). GUI source scope exactly four existing view modules, expanded acceptance test, visual screenshot script, single screenshot workflow; AST/UML excluded.
