@@ -288,6 +288,8 @@ class PlayerGameView(ttk.Frame):
         history_scroll = ttk.Scrollbar(history_panel, orient="vertical", command=self.history.yview)
         history_scroll.grid(row=0, column=1, sticky="ns")
         self.history.configure(yscrollcommand=history_scroll.set)
+        self.history_empty = ttk.Label(self.history, text="No moves or actions yet.")
+        self.history_empty.place(relx=0.5, rely=0.5, anchor="center")
         self.history_result = tk.StringVar()
         self.history_result_label = ttk.Label(
             history_panel,
@@ -526,6 +528,10 @@ class PlayerGameView(ttk.Frame):
                 self.history.yview(first_visible)
             self._last_history = events
             self._history_game_id = state["game_id"]
+        if self.history.size() == 0:
+            self.history_empty.place(relx=0.5, rely=0.5, anchor="center")
+        else:
+            self.history_empty.place_forget()
         if state["outcome"] is None:
             self.history_result.set("")
             self.history_result_label.grid_remove()
