@@ -809,6 +809,7 @@ def test_pointer_selects_every_chess_promotion_variant(window, monkeypatch, prom
     state = session.snapshot()
     assert state["revision"] == 1
     assert state["events"][-1]["move"] == promoted[choice]
+    assert f"Promoted to {promotion.title()}" in window.game_view.history.get(0)
     assert any(
         p["square"] == [0, 0] and p["kind"] == promotion and p["side"] == 1 for p in state["board"]
     )
@@ -847,6 +848,7 @@ def test_legal_occupied_capture_last_move_hover_and_resize(window):
     )
     click_canvas(window, 3, 3)
     assert window.game_view.session.snapshot()["revision"] == 3
+    assert "×" in window.game_view.history.get(2)
     assert board.canvas.find_withtag("last_move")
     for width, height in ((840, 640), (1100, 760)):
         window.geometry(f"{width}x{height}")
