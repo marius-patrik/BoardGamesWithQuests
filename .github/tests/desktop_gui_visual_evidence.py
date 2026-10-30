@@ -72,5 +72,77 @@ def main() -> None:
                 root.destroy()
 
 
+def capture_quest_and_history_stress(output: Path) -> None:
+    """Real Xvfb frames for long, independently scrollable quest/accepted event lists."""
+    import json
+    from importlib import resources
+
+    import model.game.session as session_module
+    from model.game.definition import validate_definition
+    from model.game.session import DesktopSession
+
+    original_loader = session_module.load_bundled_definition
+    try:
+        for game in ("chess", "checkers"):
+            definition_json = json.loads(
+                resources.files("games").joinpath(game, "config.json").read_text()
+            )
+            definition_json["quests"] = [
+                {
+                    "id": f"demo-quest-{index}",
+                    "description": "Long configured quest " + ("Maintain progress across turns. " * 5),
+                    "reward": 6 + index,
+                    "when": {"op": "true"},
+                }
+                for index in range(12)
+            ]
+            definition = validate_definition(definition_json)
+            session_module.load_bundled_definition = lambda _game: definition
+            session = DesktopSession(game)
+            for width, height in ((840, 640), (1024, 768), (1100, 760), (1440, 900)):
+                root = tk.Tk()
+                root.geometry(f"{width}x{height}+0+0")
+                build_application(root, game, show_modal=False)
+                try:
+                    root.window_controller.game_controller.session = session
+                    root.game_view.reload(clean=True)
+                    view = root.game_view
+                    root.update()
+                    assert all(len(view.quest_lists[s].cards) == 12 for s in (1, -1))
+                    # The left and right readers may independently study distant cards.
+                    view.quest_viewports[1].yview_moveto(0.35)
+                    view.quest_viewports[-1].yview_moveto(0.8)
+                    capture(root, output / f"ux453-quests-{game}-{width}x{height}.png")
+                finally:
+                    root.game_view.stop_auto_refresh()
+                    root.destroy()
+
+            if game == "chess":
+                # 110 genuine draw lifecycle events, not a fabricated UI model.
+                participants = session.snapshot()["participants"]
+                for _ in range(55):
+                    before = session.snapshot()
+                    session.submit(participants["1"], before["revision"], {"type": "offer_draw"})
+                    before = session.snapshot()
+                    session.submit(participants["-1"], before["revision"], {"type": "reject_draw"})
+                root = tk.Tk()
+                root.geometry("1100x760+0+0")
+                build_application(root, "chess", show_modal=False)
+                try:
+                    root.window_controller.game_controller.session = session
+                    root.game_view.reload(clean=True)
+                    root.update()
+                    assert root.game_view.history.size() == 110
+                    capture(root, output / "ux453-history-110-events-bottom.png")
+                    root.game_view.history.yview_moveto(0)
+                    capture(root, output / "ux453-history-110-events-reader-top.png")
+                finally:
+                    root.game_view.stop_auto_refresh()
+                    root.destroy()
+    finally:
+        session_module.load_bundled_definition = original_loader
+
+
 if __name__ == "__main__":
     main()
+    capture_quest_and_history_stress(Path("ux452-real-screenshots"))
