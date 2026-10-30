@@ -990,9 +990,7 @@ def _long_quest_session(game, monkeypatch, suffix):
 
 @pytest.mark.parametrize("game", ["chess", "checkers"])
 @pytest.mark.parametrize("size", [(840, 640), (1024, 768), (1100, 760), (1440, 900)])
-def test_quest_long_copy_and_two_independent_mousewheel_scrollers(
-    window, monkeypatch, game, size
-):
+def test_quest_long_copy_and_two_independent_mousewheel_scrollers(window, monkeypatch, game, size):
     session = _long_quest_session(game, monkeypatch, "First")
     prepared_window(window, session)
     window.geometry(f"{size[0]}x{size[1]}")
@@ -1030,8 +1028,9 @@ def test_quest_cache_refreshes_different_config_with_same_ids_and_progress(windo
     prepared_window(window, first)
     view = window.game_view
     before = first.snapshot()
-    assert all(not card.progress_label.cget("text").startswith("1/")
-               for card in view.quest_lists[1].cards)
+    assert all(
+        not card.progress_label.cget("text").startswith("1/") for card in view.quest_lists[1].cards
+    )
     # Force identical session identity in the detached read-only projection:
     # definition changes alone must invalidate render content.
     altered = second.snapshot()
@@ -1047,8 +1046,9 @@ def test_quest_cache_refreshes_different_config_with_same_ids_and_progress(windo
     assert view.session.game == "checkers"
     assert view.history.size() == 0
     assert view.history_empty.winfo_manager() == "place"
-    assert all("Second:" in card.description_label.cget("text")
-               for card in view.quest_lists[1].cards)
+    assert all(
+        "Second:" in card.description_label.cget("text") for card in view.quest_lists[1].cards
+    )
     click_canvas(window, 2, 3)
     click_canvas(window, 3, 2)
     assert view.session.snapshot()["revision"] == 1
