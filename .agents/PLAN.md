@@ -1,5 +1,15 @@
 # Execution plan — BoardGamesWithQuests v1.0.0
 
+## Orchestrator update — 2026-10-30: #452 D2 integrated
+
+- [x] Independent GUI D2 source/diff review of final `98b08ba0ac87700fcb0e2e3ea1362a891e494f5b`: both per-user scrollable side panels, centered original Canvas board, colored filled Chess and Draughts pieces, legal capture/promotion chooser and accurate single-hop Draughts capture notation/highlights. Actual final screenshot thumbnails independently inspected.
+- [x] Candidate exact-SHA CI: real Tk screenshots + 52 GUI tests [#40697531451](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40697531451); Python 3.10–3.13 gameplay [#40697531555](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40697531555); Windows/macOS ARM64/x64/Linux PACKAGE builds [#40697531788](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40697531788); DarkFactory all tests/format/issue binding [#40697533964](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40697533964). **All four succeeded**.
+- [x] Seven non-generated view/test/evidence/workflow candidate blobs safely integrated on existing draft PR #271 at `e295f1230dbcd63d5d81dcf8e084e0194590b5f2`, preserving intervening #436 Chess fix and owner records. Stale AST/UML blobs excluded; generated automatically on combined source at `54d1635a86aa2027548a1dbc7e0212db31d3fb77`.
+- [ ] **#452 gate remains OPEN** until exact combined latest-HEAD gameplay/Tk/quality checks complete successfully. Four native package builds ≠ extracted GUI acceptance #443. Temporary PR #469 closed UNMERGED. D/D2 branches retained for safe later cleanup.
+- [ ] **Next view owner #453**, then #454, with final two-side quest/history/focus/polish verification. #462 structural view/module renames postponed until GUI source ownership hands off.
+- [ ] **True Chess blocker #436**: Buchanan fortress timeout FEN still wins rather than draws; require proof-driven, bounded semantics or honest scope limitation; no `playable:true` yet.
+
+
 ## Orchestrator integration / recovery checkpoint (2026-10-27)
 
 - [x] #436 Agent E: five Python/Chess JSON/test blobs independently matched to successful Python 3.10–3.13 and Tk/Xvfb proof; integrated correction at `2c22e18dd52bb554e9b5ac4a1c0eb8feba3dfaf6`; generated AST regenerated from combined source. **FIDE fortress timeout still fails** reproducibly on [run #40480361409](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40480361409); #436 remains OPEN / `playable:false`.

@@ -1,5 +1,15 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-10-30 — #452 D2 result and source integration
+
+- D2 source `98b08ba0ac87700fcb0e2e3ea1362a891e494f5b` accepted after independent final-source review and all four successful final candidate CI runs (real Tk 52; 43 per Python gameplay; 321 per Python full tests; native PACKAGE builds all four targets). GUI source scope exactly four existing view modules, expanded acceptance test, visual screenshot script, single screenshot workflow; AST/UML excluded.
+- The seven exact candidate blobs were integrated with non-force expected-SHA ref update into PR #271 as `e295f1230dbcd63d5d81dcf8e084e0194590b5f2`; Auto Format regenerated source-derived diagrams on combined HEAD `54d1635a86aa2027548a1dbc7e0212db31d3fb77`. Earlier E Chess corrections left untouched.
+- Actual final render thumbnails independently inspected for Chess and Draughts at 840×640, 1100×760, 1440×900: original Canvas, real light/dark filled Chess silhouettes, solid Draughts discs/crowns, white-left and black-right player+own quest panes, responsive board. Large 1440×900 whitespace respects configured maximum board square size; not a source defect by itself.
+- D2 corrected single-hop Draughts jumping capture display and legal-capture destination marker using engine-projected legal moves; no independent game-state authority. No source rename until #462 after final GUI writers. #453 owns advanced history/quest cache and scroll, #454 later owns final native polish.
+- Candidate-source CI is not exact **combined-head CI** and four native package builds are not #443 extracted frozen GUI acceptance. #452 kept open. Both interrupted original and recovery task branches should be deleted only after exact combined proof; temp #469 closed unmerged.
+- FIDE fortress true RED under #436 and #443 native persistence/dialog failures remain separate release blockers.
+
+
 ## 2026-10-27 agent recovery and verified distinction between packaging and acceptance
 
 - **#436 E source correction integrated:** `2c22e18dd52bb554e9b5ac4a1c0eb8feba3dfaf6` accepted from candidate `6e6c5eb8` after exact file-SHA identity to CI-green evidence SHA. The broader FIDE Buchanan fortress timeout probe completed **RED** (win vs expected draw) at run 40480361409; do not claim complete FIDE.

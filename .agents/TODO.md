@@ -1,5 +1,16 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## 2026-10-30 — Independently accepted #452 GUI source integration
+
+- [x] #452 D2 complete candidate `98b08ba0`: genuine two player+quest side panels, filled light/dark Chess vector Canvas pieces, colored crowned Draughts, real full-route/promote dialogs, accurate single-hop jumps and capture-highlight markers, 12 actual before/after Tk screenshots and >6 independent quests.
+- [x] Candidate exact-source workflows [visual #40697531451](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40697531451), [Python+Tk #40697531555](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40697531555), [four OS packaging #40697531788](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40697531788), [full quality #40697533964](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40697533964) all SUCCESS.
+- [x] #452 seven scoped source/test/workflow files integrated in #271 at `e295f1230dbcd63d5d81dcf8e084e0194590b5f2`; generated diagrams refreshed on combined tree at `54d1635a86aa2027548a1dbc7e0212db31d3fb77`; did NOT overwrite Chess fix or canonical governance records.
+- [ ] #452 current integrated-HEAD UI/tests/governance must PASS before closing issue; detached Windows/macOS/Linux native executable acceptance remains issue #443.
+- [ ] Dispatch #453 focused long-quest, scrolling/cache and history/player panels after #452 integration; no conflicting #454 / #462 files during its ownership.
+- [ ] Dispatch #436 proof-driven FIDE fortress/timeout correctness on engine+Chess tests **without** GUI writes; forbid hard-coded FEN, simplistic material heuristics, or FIDE procedural overclaim.
+- [ ] Once #453/#454/native owners finish, execute maintainer #462 atomic import/resource/module move and resolve 10 review threads, rerun four OS extraction.
+
+
 ## New active status — 2026-10-27 (E/C/F/D2)
 
 - [x] #436 narrowly verified same-colour-promoted-bishops FIDE correction and three dedicated acceptance tests integrated at `2c22e18dd52bb554e9b5ac4a1c0eb8feba3dfaf6` (candidate Python 3.10–3.13 and Tk pass).
