@@ -892,8 +892,8 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
     assert board.winfo_rooty() >= root.winfo_rooty()
     assert board.winfo_rooty() + board.winfo_height() <= (root.winfo_rooty() + root.winfo_height())
     assert white.clock.get() and black.clock.get()
-    assert state["participants"]["1"] in white.name.get()
-    assert state["participants"]["-1"] in black.name.get()
+    assert state["participants"]["1"].casefold() in white.name.get().casefold()
+    assert state["participants"]["-1"].casefold() in black.name.get().casefold()
     for side in (1, -1):
         participant_id = state["participants"][str(side)]
         assert len(view.quest_lists[side].cards) == len(state["quest_progress"][participant_id])
@@ -963,3 +963,170 @@ def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypat
         assert window.game_view.player_views[side].score.get() == (
             f"Quest score: {after['quest_scores'][participant]}"
         )
+
+
+# #453: all exercises below use real rendered Tk widgets and accepted session
+# transitions. Custom quest definitions are validated by the real rule loader.
+def _long_quest_session(game, monkeypatch, suffix):
+    from importlib import resources
+    import model.game.session as session_module
+    from model.game.definition import validate_definition
+
+    data = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
+    data["quests"] = [
+        {
+            "id": f"shared-quest-{index}",
+            "description": f"{suffix}: " + ("Read every word in the longer objective. " * 5),
+            "reward": index + (17 if suffix == "Second" else 3),
+            "when": {"op": "true"},
+        }
+        for index in range(12)
+    ]
+    definition = validate_definition(data)
+    with monkeypatch.context() as patch:
+        patch.setattr(session_module, "load_bundled_definition", lambda _: definition)
+        return DesktopSession(game)
+
+
+@pytest.mark.parametrize("game", ["chess", "checkers"])
+@pytest.mark.parametrize("size", [(840, 640), (1024, 768), (1100, 760), (1440, 900)])
+def test_quest_long_copy_and_two_independent_mousewheel_scrollers(
+    window, monkeypatch, game, size
+):
+    session = _long_quest_session(game, monkeypatch, "First")
+    prepared_window(window, session)
+    window.geometry(f"{size[0]}x{size[1]}")
+    window.update()
+    view = window.game_view
+    board = view.board_view.canvas
+    white, black = view.quest_viewports[1], view.quest_viewports[-1]
+    assert view.player_views[1].winfo_rootx() < board.winfo_rootx()
+    assert board.winfo_rootx() < view.player_views[-1].winfo_rootx()
+    for side in (1, -1):
+        cards = view.quest_lists[side].cards
+        assert len(cards) == 12
+        assert "longer objective" in cards[-1].description_label.cget("text")
+        assert cards[-1].reward_label.cget("text") == "Reward: 14 pts"
+        assert view.quest_viewports[side].bbox("all")[3] > view.quest_viewports[side].winfo_height()
+    white_before, black_before = white.yview(), black.yview()
+    # Deliver the real pointer wheel to a nested quest description, not Canvas.
+    view.quest_lists[1].cards[0].description_label.event_generate("<Button-5>")
+    window.update()
+    assert white.yview()[0] > white_before[0]
+    assert black.yview() == black_before
+    view.quest_lists[-1].cards[0].reward_label.event_generate("<Button-5>")
+    window.update()
+    assert black.yview()[0] > black_before[0]
+    white_position = white.yview()
+    view.refresh()  # regular clock refresh must not reset either scroll position
+    window.update()
+    assert white.yview() == white_position
+    assert view.player_views[1].clock.get() and view.player_views[-1].clock.get()
+
+
+def test_quest_cache_refreshes_different_config_with_same_ids_and_progress(window, monkeypatch):
+    first = _long_quest_session("chess", monkeypatch, "First")
+    second = _long_quest_session("checkers", monkeypatch, "Second")
+    prepared_window(window, first)
+    view = window.game_view
+    before = first.snapshot()
+    assert all(not card.progress_label.cget("text").startswith("1/")
+               for card in view.quest_lists[1].cards)
+    # Force identical session identity in the detached read-only projection:
+    # definition changes alone must invalidate render content.
+    altered = second.snapshot()
+    altered["game_id"] = before["game_id"]
+    for side in (1, -1):
+        listing = view.quest_lists[side]
+        listing.refresh(altered)
+        assert "Second:" in listing.cards[0].description_label.cget("text")
+        assert listing.cards[0].reward_label.cget("text") == "Reward: 17 pts"
+        assert len(listing.cards) == 12
+    # A real Chess -> Draughts session change also replaces stale cards/history.
+    prepared_window(window, second)
+    assert view.session.game == "checkers"
+    assert view.history.size() == 0
+    assert view.history_empty.winfo_manager() == "place"
+    assert all("Second:" in card.description_label.cget("text")
+               for card in view.quest_lists[1].cards)
+    click_canvas(window, 2, 3)
+    click_canvas(window, 3, 2)
+    assert view.session.snapshot()["revision"] == 1
+    completed = view.quest_lists[-1].cards[0]
+    assert completed.progress_label.cget("text").endswith("Completed")
+    assert int(float(completed.indicator["value"])) == int(float(completed.indicator["maximum"]))
+    assert view.player_views[-1].score.get() == (
+        f"Quest score: {view.session.snapshot()['quest_scores']['black']}"
+    )
+
+
+def test_history_120_accepted_events_autofollows_only_from_bottom(window):
+    session = window.game_view.session
+    participants = session.snapshot()["participants"]
+    view = window.game_view
+
+    def offer_and_decline():
+        state = session.snapshot()
+        session.submit(participants["1"], state["revision"], {"type": "offer_draw"})
+        state = session.snapshot()
+        session.submit(participants["-1"], state["revision"], {"type": "reject_draw"})
+
+    assert view.history.size() == 0 and view.history_empty.winfo_manager() == "place"
+    for _ in range(55):
+        offer_and_decline()
+    view.refresh()
+    window.update()
+    assert session.snapshot()["revision"] == 110
+    assert view.history.size() == 110
+    assert "White: Offered a draw" in view.history.get(0)
+    assert "Black: Declined draw offer" in view.history.get(109)
+    assert view.history.yview()[1] > 0.95
+    assert view.history_empty.winfo_manager() == ""
+    # A real Tk PageUp key and listbox focus put the reader above the newest.
+    view.history.focus_set()
+    view.history.event_generate("<Home>")
+    view.history.yview_moveto(0.0)
+    window.update()
+    assert view.history.yview()[0] < 0.05
+    offer_and_decline()
+    view.refresh()
+    window.update()
+    assert view.history.size() == 112
+    assert view.history.yview()[0] < 0.05
+    view.refresh()  # a clock tick cannot replace the listbox contents or scroll
+    assert view.history.yview()[0] < 0.05
+    view.history.see(tk.END)
+    window.update()
+    offer_and_decline()
+    view.refresh()
+    window.update()
+    assert view.history.size() == 114
+    assert view.history.yview()[1] > 0.95
+    assert view.history.get(113).startswith("114.")
+    session.submit(participants["1"], session.snapshot()["revision"], {"type": "resign"})
+    view.refresh()
+    window.update()
+    assert view.history.size() == 115
+    assert "wins" in view.history.get(114)
+    assert "wins" in view.history_result.get()
+    assert view.history_result_label.winfo_ismapped()
+
+
+def test_long_material_is_grouped_without_synthesizing_score(window):
+    view = window.game_view
+    state = view.session.snapshot()
+    state["captured"] = (
+        [{"kind": "pawn", "side": -1}] * 48
+        + [{"kind": "bishop", "side": -1}] * 8
+        + [{"kind": "rook", "side": 1}] * 11
+    )
+    white = view.player_views[1]
+    score_before = white.score.get()
+    white.refresh(state, view.session.clock_remaining())
+    window.geometry("840x640")
+    window.update()
+    assert "pawn ×48" in white.captured.get() and "bishop ×8" in white.captured.get()
+    assert "rook ×11" in white.lost.get()
+    assert white.score.get() == score_before
+    assert white.name.get() == "White"
+    assert white.winfo_width() > 0
