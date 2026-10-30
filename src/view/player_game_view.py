@@ -276,14 +276,23 @@ class PlayerGameView(ttk.Frame):
         history_panel = ttk.LabelFrame(self, text="Move and action history", padding=(4, 3))
         history_panel.grid(row=2, column=0, sticky="ew", pady=(4, 0))
         history_panel.columnconfigure(0, weight=1)
-        self.history = tk.Listbox(history_panel, height=3, font=("TkFixedFont", 10), exportselection=False, activestyle="dotbox", takefocus=1)
+        self.history = tk.Listbox(
+            history_panel,
+            height=3,
+            font=("TkFixedFont", 10),
+            exportselection=False,
+            activestyle="dotbox",
+            takefocus=1,
+        )
         self.history.grid(row=0, column=0, sticky="ew")
         history_scroll = ttk.Scrollbar(history_panel, orient="vertical", command=self.history.yview)
         history_scroll.grid(row=0, column=1, sticky="ns")
         self.history.configure(yscrollcommand=history_scroll.set)
         self.history_result = tk.StringVar()
         self.history_result_label = ttk.Label(
-            history_panel, textvariable=self.history_result, font=("TkDefaultFont", 9, "bold"),
+            history_panel,
+            textvariable=self.history_result,
+            font=("TkDefaultFont", 9, "bold"),
             wraplength=760,
         )
         self.history_result_label.grid(row=1, column=0, columnspan=2, sticky="ew")
@@ -458,7 +467,8 @@ class PlayerGameView(ttk.Frame):
         actor = event.get("actor")
         participants = state["participants"]
         identity = (
-            "White" if actor == participants["1"]
+            "White"
+            if actor == participants["1"]
             else "Black" if actor == participants["-1"] else str(actor or "System")
         )
         move = event.get("move")
@@ -500,7 +510,7 @@ class PlayerGameView(ttk.Frame):
         old = self._last_history or ()
         same_game = self._history_game_id == state["game_id"]
         if not same_game or events != self._last_history:
-            append_only = same_game and len(events) >= len(old) and events[:len(old)] == old
+            append_only = same_game and len(events) >= len(old) and events[: len(old)] == old
             follow = self.history.size() == 0 or self.history.yview()[1] >= 0.96
             first_visible = self.history.nearest(0) if self.history.size() else 0
             if not append_only:
