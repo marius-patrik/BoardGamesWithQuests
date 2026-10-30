@@ -774,6 +774,20 @@ flowchart LR
   nfc5161158ee90ee7f --> n4aa4dc45508e8a7a8
   n7751cb9f11ce8057f["function_definition test_both_participants_can_scroll_all_authoritative_quests"]
   nfc5161158ee90ee7f --> n7751cb9f11ce8057f
+  n0644515d319f38159["function_definition _long_quest_session"]
+  nfc5161158ee90ee7f --> n0644515d319f38159
+  nd6083d416131c09aa["decorated_definition"]
+  nfc5161158ee90ee7f --> nd6083d416131c09aa
+  n02b7ce125f17f37bb["function_definition test_quest_long_copy_and_two_independent_mousewheel_scrollers"]
+  nfc5161158ee90ee7f --> n02b7ce125f17f37bb
+  n0abf975ed7c8983ef["function_definition test_quest_cache_refreshes_different_config_with_same_ids_and_progress"]
+  nfc5161158ee90ee7f --> n0abf975ed7c8983ef
+  nf6e50464c35b86083["function_definition test_history_120_accepted_events_autofollows_only_from_bottom"]
+  nfc5161158ee90ee7f --> nf6e50464c35b86083
+  n3a7e1a6503edda493["function_definition offer_and_decline"]
+  nfc5161158ee90ee7f --> n3a7e1a6503edda493
+  n59bc9b486ea32b33c["function_definition test_long_material_is_grouped_without_synthesizing_score"]
+  nfc5161158ee90ee7f --> n59bc9b486ea32b33c
   nd42993d6a205ba016["desktop_gui_draw_acceptance.py"]
   nc9f5868186eb03f66 --> nd42993d6a205ba016
   n5ee16bebc3c601b22["decorated_definition"]
@@ -812,6 +826,8 @@ flowchart LR
   na74a084b3f59ef6b7 --> n7c3ebdddb1ad9a696
   n1a59aef39d12a4a65["function_definition main"]
   na74a084b3f59ef6b7 --> n1a59aef39d12a4a65
+  nd5b09cf02b8095bed["function_definition capture_quest_and_history_stress"]
+  na74a084b3f59ef6b7 --> nd5b09cf02b8095bed
   nd6487c9d1884235b7["docs_site_acceptance.py"]
   nc9f5868186eb03f66 --> nd6487c9d1884235b7
   n3cc24defd97d2b5a4["function_definition test_repository_navigation_and_every_file_page"]
@@ -2424,66 +2440,82 @@ flowchart LR
   n8a992638c42fe6679 --> n3f55c83209743d2d1
   n6d46b9f13c808248d["function_definition refresh"]
   n8a992638c42fe6679 --> n6d46b9f13c808248d
-  n8d6a2af2e52b531bb["function_definition apply_preferences"]
+  n8d6a2af2e52b531bb["function_definition _history_entry"]
   n8a992638c42fe6679 --> n8d6a2af2e52b531bb
-  n8b7ac34af0abd782a["function_definition open_game"]
+  n8b7ac34af0abd782a["function_definition _refresh_history"]
   n8a992638c42fe6679 --> n8b7ac34af0abd782a
-  n1b9a8d3d7979ef6ef["function_definition resign_game"]
+  n1b9a8d3d7979ef6ef["function_definition apply_preferences"]
   n8a992638c42fe6679 --> n1b9a8d3d7979ef6ef
-  n1b35be644e7afc7ec["function_definition offer_draw"]
+  n1b35be644e7afc7ec["function_definition open_game"]
   n8a992638c42fe6679 --> n1b35be644e7afc7ec
-  ne7d4de5a2c8f51849["function_definition respond_draw"]
+  ne7d4de5a2c8f51849["function_definition resign_game"]
   n8a992638c42fe6679 --> ne7d4de5a2c8f51849
-  nb45038cf564329edc["decorated_definition"]
-  n8a992638c42fe6679 --> nb45038cf564329edc
-  neaeb8ca3e6ec5a14e["function_definition _is_capture_move"]
+  n8a9972bf8074fde0c["function_definition offer_draw"]
+  n8a992638c42fe6679 --> n8a9972bf8074fde0c
+  neaeb8ca3e6ec5a14e["function_definition respond_draw"]
   n8a992638c42fe6679 --> neaeb8ca3e6ec5a14e
-  nae2c58143d2b31d07["function_definition _format_complete_move"]
-  n8a992638c42fe6679 --> nae2c58143d2b31d07
-  n375768b007b264df1["function_definition _choose_complete_move"]
+  nbf9f86d0eb656362d["decorated_definition"]
+  n8a992638c42fe6679 --> nbf9f86d0eb656362d
+  n375768b007b264df1["function_definition _is_capture_move"]
   n8a992638c42fe6679 --> n375768b007b264df1
-  n2e03f1d896ea4d9f7["function_definition finish"]
+  n2e03f1d896ea4d9f7["function_definition _format_complete_move"]
   n8a992638c42fe6679 --> n2e03f1d896ea4d9f7
-  nff59bcbbe0a6f1f2d["function_definition _choose_intended_move"]
+  nff59bcbbe0a6f1f2d["function_definition _choose_complete_move"]
   n8a992638c42fe6679 --> nff59bcbbe0a6f1f2d
-  nbc2ec98cf3c2bfacd["function_definition claim_draw"]
+  nbc2ec98cf3c2bfacd["function_definition finish"]
   n8a992638c42fe6679 --> nbc2ec98cf3c2bfacd
-  nea0bab61f7c1e0b6a["function_definition export_notation"]
+  nea0bab61f7c1e0b6a["function_definition _choose_intended_move"]
   n8a992638c42fe6679 --> nea0bab61f7c1e0b6a
-  n5fa460419acc67010["function_definition export_game"]
+  n5fa460419acc67010["function_definition claim_draw"]
   n8a992638c42fe6679 --> n5fa460419acc67010
-  ndda1bf52cba22ffbd["function_definition _quit"]
+  ndda1bf52cba22ffbd["function_definition export_notation"]
   n8a992638c42fe6679 --> ndda1bf52cba22ffbd
-  n04c0599c2c6592fc4["function_definition stop_auto_refresh"]
+  n04c0599c2c6592fc4["function_definition export_game"]
   n8a992638c42fe6679 --> n04c0599c2c6592fc4
-  n592344e7814970b51["function_definition start_auto_refresh"]
+  n592344e7814970b51["function_definition _quit"]
   n8a992638c42fe6679 --> n592344e7814970b51
-  n34c547e07babf0572["function_definition _auto_refresh"]
+  n34c547e07babf0572["function_definition stop_auto_refresh"]
   n8a992638c42fe6679 --> n34c547e07babf0572
-  n9da8db5d1a42cb917["function_definition destroy"]
+  n9da8db5d1a42cb917["function_definition start_auto_refresh"]
   n8a992638c42fe6679 --> n9da8db5d1a42cb917
+  naa8881f440916136e["function_definition _auto_refresh"]
+  n8a992638c42fe6679 --> naa8881f440916136e
+  n3ad2dcced486925bb["function_definition destroy"]
+  n8a992638c42fe6679 --> n3ad2dcced486925bb
   n1ce2d2fa47f167aa0["player_view.py"]
   n19674d186673a22e3 --> n1ce2d2fa47f167aa0
   n127a020b096f9b48a["function_definition format_seconds"]
   n1ce2d2fa47f167aa0 --> n127a020b096f9b48a
-  n9055762ae4cf9b907["class_definition PlayerView"]
-  n1ce2d2fa47f167aa0 --> n9055762ae4cf9b907
-  nc41c2f933f77ced21["function_definition __init__"]
-  n1ce2d2fa47f167aa0 --> nc41c2f933f77ced21
-  nb37964fdcd221ec47["function_definition refresh"]
+  n874d0f4cd80fb3434["function_definition material_summary"]
+  n1ce2d2fa47f167aa0 --> n874d0f4cd80fb3434
+  n0aa80063cb67500bb["class_definition PlayerView"]
+  n1ce2d2fa47f167aa0 --> n0aa80063cb67500bb
+  nb37964fdcd221ec47["function_definition __init__"]
   n1ce2d2fa47f167aa0 --> nb37964fdcd221ec47
+  nb503c573a1d1d2b36["function_definition _resize_text"]
+  n1ce2d2fa47f167aa0 --> nb503c573a1d1d2b36
+  n0ead5e31c53c2a796["function_definition refresh"]
+  n1ce2d2fa47f167aa0 --> n0ead5e31c53c2a796
   n88e9958208f4bbd44["quest_view.py"]
   n19674d186673a22e3 --> n88e9958208f4bbd44
   nd00e6feaf96a8ea93["class_definition QuestCard"]
   n88e9958208f4bbd44 --> nd00e6feaf96a8ea93
   ne2c010e924022a440["function_definition __init__"]
   n88e9958208f4bbd44 --> ne2c010e924022a440
-  nb37c964ffa0e15e9e["class_definition QuestList"]
-  n88e9958208f4bbd44 --> nb37c964ffa0e15e9e
-  n9f127ce07dfb90559["function_definition __init__"]
+  n62e231bdba0f8285d["function_definition _resize_text"]
+  n88e9958208f4bbd44 --> n62e231bdba0f8285d
+  n9f127ce07dfb90559["function_definition update_progress"]
   n88e9958208f4bbd44 --> n9f127ce07dfb90559
-  ne98166d3d4d317f41["function_definition refresh"]
-  n88e9958208f4bbd44 --> ne98166d3d4d317f41
+  nb257964cf8f1aac8e["class_definition QuestList"]
+  n88e9958208f4bbd44 --> nb257964cf8f1aac8e
+  n353cf595e7682fb87["function_definition __init__"]
+  n88e9958208f4bbd44 --> n353cf595e7682fb87
+  nfe25f55c5b7a287f3["function_definition _scroll"]
+  n88e9958208f4bbd44 --> nfe25f55c5b7a287f3
+  n369e4a8bd7f4a48eb["function_definition _attach_scrolling"]
+  n88e9958208f4bbd44 --> n369e4a8bd7f4a48eb
+  n313921370ba34da68["function_definition refresh"]
+  n88e9958208f4bbd44 --> n313921370ba34da68
   n94cd813570fa898d5["settings_dialog.py"]
   n19674d186673a22e3 --> n94cd813570fa898d5
   nd964b4ca427ad3c3d["class_definition SettingsDialog"]
