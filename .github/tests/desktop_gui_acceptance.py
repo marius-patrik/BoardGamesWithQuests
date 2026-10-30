@@ -635,3 +635,331 @@ def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monk
     assert load_session(target).snapshot() == state
     assert "wins" in window.game_view.turn.get()
     assert window.game_view.action_buttons["Resign"].instate(["disabled"])
+
+
+# #452: these are rendered-widget acceptance paths over actual session actions.
+# The reference positions are separately constructed, not engine-produced snapshots.
+def prepared_position(monkeypatch, game, placement, starting_side):
+    from importlib import resources
+
+    import model.game.session as session_module
+    from model.game.definition import validate_definition
+
+    config = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
+    config["board"]["starting_pieces"] = placement
+    config["starting_side"] = starting_side
+    definition = validate_definition(config)
+    with monkeypatch.context() as patch:
+        patch.setattr(session_module, "load_bundled_definition", lambda _: definition)
+        return DesktopSession(game)
+
+
+def prepared_window(window, session):
+    window.window_controller.game_controller.session = session
+    window.game_view.reload(clean=True)
+    window.update()
+
+
+def descendants(widget):
+    for child in widget.winfo_children():
+        yield child
+        yield from descendants(child)
+
+
+def choose_rendered_route(window, index, expected_text, button="Play selected move"):
+    """Operate the modal's real listbox and visible Tk button during wait_window."""
+    observations = []
+
+    def choose():
+        dialogs = [child for child in descendants(window) if isinstance(child, tk.Toplevel)]
+        assert dialogs, "Board click failed to open a real chooser"
+        dialog = dialogs[-1]
+        listbox = next(item for item in descendants(dialog) if isinstance(item, tk.Listbox))
+        options = listbox.get(0, tk.END)
+        assert expected_text in options[index]
+        assert all("[[" not in text and "]]" not in text for text in options)
+        bounds = listbox.bbox(index)
+        assert bounds is not None
+        listbox.event_generate("<Button-1>", x=bounds[0] + 5, y=bounds[1] + bounds[3] // 2)
+        listbox.event_generate("<ButtonRelease-1>", x=bounds[0] + 5, y=bounds[1] + bounds[3] // 2)
+        assert listbox.curselection() == (index,)
+        observations.append((options, window.game_view.session.snapshot()["revision"]))
+        confirm = next(
+            item
+            for item in descendants(dialog)
+            if isinstance(item, __import__("tkinter").ttk.Button) and item.cget("text") == button
+        )
+        confirm.invoke()
+
+    window.after(30, choose)
+    return observations
+
+
+@pytest.mark.parametrize("route_index, middle", [(0, "b4"), (1, "f4")])
+def test_pointer_selects_complete_branched_draughts_capture(
+    window, monkeypatch, route_index, middle
+):
+    session = prepared_position(
+        monkeypatch,
+        "checkers",
+        [
+            {"piece": "man", "color": "black", "squares": [[2, 3]]},
+            {"piece": "man", "color": "white", "squares": [[3, 2], [3, 4], [5, 2], [5, 4]]},
+        ],
+        -1,
+    )
+    legal = session.legal_actions()
+    # WCDF: both complete d6-b4-d2 and d6-f4-d2 paths capture two men.
+    assert len(legal) == 2
+    assert all(m["start"] == [2, 3] and m["hops"][-1] == [6, 3] for m in legal)
+    prepared_window(window, session)
+    click_canvas(window, 2, 3)
+    assert window.window_controller.game_controller.highlighted_moves == [(6, 3)]
+    assert window.game_view.board_view.canvas.find_withtag("legal_capture")
+    expected = "d6 × " + middle + " × d2"
+    trace = choose_rendered_route(window, route_index, expected)
+    click_canvas(window, 6, 3)
+    assert trace and trace[0][1] == 0  # no intermediate hop was committed
+    state = window.game_view.session.snapshot()
+    assert state["revision"] == 1
+    route = state["events"][-1]["move"]
+    assert route == legal[route_index]
+    assert len(state["captured"]) == 2
+    assert any(p["square"] == [6, 3] and p["kind"] == "man" for p in state["board"])
+
+
+def test_single_hop_draughts_capture_uses_capture_notation_and_marker(window, monkeypatch):
+    """Jump captures finish on an empty square, unlike occupied Chess captures."""
+    session = prepared_position(
+        monkeypatch,
+        "checkers",
+        [
+            {"piece": "man", "color": "black", "squares": [[2, 3]]},
+            {"piece": "man", "color": "white", "squares": [[3, 2]]},
+        ],
+        -1,
+    )
+    legal = session.legal_actions()
+    assert len(legal) == 1
+    move = legal[0]
+    assert move["start"] == [2, 3] and move["hops"] == [[4, 1]]
+    state = session.snapshot()
+    assert not any(piece["square"] == [4, 1] for piece in state["board"])
+    prepared_window(window, session)
+    assert window.game_view._format_complete_move(move, state) == "d6 × b4"
+    click_canvas(window, 2, 3)
+    canvas = window.game_view.board_view.canvas
+    assert canvas.find_withtag("legal_capture")
+    assert not canvas.find_withtag("legal_quiet")
+    click_canvas(window, 4, 1)
+    after = session.snapshot()
+    assert after["revision"] == 1
+    assert after["events"][-1]["move"] == move
+    assert len(after["captured"]) == 1
+
+
+def test_cancel_capture_chooser_is_atomic_and_highlights_remain(window, monkeypatch):
+    session = prepared_position(
+        monkeypatch,
+        "checkers",
+        [
+            {"piece": "man", "color": "black", "squares": [[2, 3]]},
+            {"piece": "man", "color": "white", "squares": [[3, 2], [3, 4], [5, 2], [5, 4]]},
+        ],
+        -1,
+    )
+    prepared_window(window, session)
+    before = session.snapshot()
+    click_canvas(window, 2, 3)
+
+    def cancel():
+        dialog = next(child for child in descendants(window) if isinstance(child, tk.Toplevel))
+        listbox = next(child for child in descendants(dialog) if isinstance(child, tk.Listbox))
+        assert " × " in listbox.get(0)
+        dialog.event_generate("<Escape>")
+
+    window.after(30, cancel)
+    click_canvas(window, 6, 3)
+    assert session.snapshot() == before
+    assert window.window_controller.game_controller.selected_square == (2, 3)
+    assert (6, 3) in window.window_controller.game_controller.highlighted_moves
+
+
+@pytest.mark.parametrize("promotion", ["queen", "rook", "bishop", "knight"])
+def test_pointer_selects_every_chess_promotion_variant(window, monkeypatch, promotion):
+    session = prepared_position(
+        monkeypatch,
+        "chess",
+        [
+            {"piece": "king", "color": "white", "squares": [[7, 4]]},
+            {"piece": "king", "color": "black", "squares": [[0, 7]]},
+            {"piece": "pawn", "color": "white", "squares": [[1, 0]]},
+        ],
+        1,
+    )
+    legal = [m for m in session.legal_actions() if m["start"] == [1, 0]]
+    promoted = [m for m in legal if m["hops"][-1] == [0, 0]]
+    assert {m["promotion"] for m in promoted} == {"queen", "rook", "bishop", "knight"}
+    prepared_window(window, session)
+    click_canvas(window, 1, 0)
+    choice = next(i for i, m in enumerate(promoted) if m["promotion"] == promotion)
+    trace = choose_rendered_route(window, choice, "Promote to " + promotion.title())
+    click_canvas(window, 0, 0)
+    assert trace and trace[0][1] == 0
+    state = session.snapshot()
+    assert state["revision"] == 1
+    assert state["events"][-1]["move"] == promoted[choice]
+    assert any(
+        p["square"] == [0, 0] and p["kind"] == promotion and p["side"] == 1 for p in state["board"]
+    )
+
+
+def test_draughts_automatic_crowning_through_canvas_click(window, monkeypatch):
+    session = prepared_position(
+        monkeypatch,
+        "checkers",
+        [
+            {"piece": "man", "color": "black", "squares": [[6, 1]]},
+            {"piece": "man", "color": "white", "squares": [[4, 5]]},
+        ],
+        -1,
+    )
+    prepared_window(window, session)
+    click_canvas(window, 6, 1)
+    click_canvas(window, 7, 0)
+    state = session.snapshot()
+    assert state["revision"] == 1
+    assert any(p["square"] == [7, 0] and p["kind"] == "king" for p in state["board"])
+    assert window.game_view.board_view.canvas.find_withtag("draughts_king")
+
+
+def test_legal_occupied_capture_last_move_hover_and_resize(window):
+    # Chess e4 d5: e4xd5 is an occupied opponent and has a distinct dashed target ring.
+    click_canvas(window, 6, 4)
+    click_canvas(window, 4, 4)
+    click_canvas(window, 1, 3)
+    click_canvas(window, 3, 3)
+    board = window.game_view.board_view
+    click_canvas(window, 4, 4)
+    assert board.canvas.find_withtag("legal_capture")
+    assert not board.canvas.find_withtag("legal_quiet") or board.canvas.find_withtag(
+        "legal_capture"
+    )
+    click_canvas(window, 3, 3)
+    assert window.game_view.session.snapshot()["revision"] == 3
+    assert board.canvas.find_withtag("last_move")
+    for width, height in ((840, 640), (1100, 760)):
+        window.geometry(f"{width}x{height}")
+        window.update()
+        board = window.game_view.board_view
+        assert board.canvas.winfo_width() == 8 * board.square_size
+        assert board.canvas.winfo_height() == 8 * board.square_size
+        # Moving over one square adds a dashed hover marker on the actual Canvas.
+        size = board.square_size
+        board.canvas.event_generate("<Motion>", x=size // 2, y=size // 2)
+        window.update()
+        assert board.canvas.find_withtag("hover")
+        board.canvas.event_generate("<Leave>")
+        window.update()
+        assert not board.canvas.find_withtag("hover")
+
+
+@pytest.mark.parametrize("game", ["chess", "checkers"])
+@pytest.mark.parametrize("viewport", [(840, 640), (1100, 760), (1440, 900)])
+def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewport):
+    """The reference layout is white/board/black with independent full quest lists."""
+    root = window
+    root.geometry(f"{viewport[0]}x{viewport[1]}")
+    root.window_controller.game_controller.new_game(game)
+    root.game_view.reload(clean=True)
+    root.update_idletasks()
+    root.update()
+    view = root.game_view
+    state = view.session.snapshot()
+    assert set(view.player_views) == {1, -1}
+    assert set(view.quest_lists) == {1, -1}
+    assert set(view.quest_viewports) == {1, -1}
+    white, black = view.player_views[1], view.player_views[-1]
+    board = view.board_view.canvas
+
+    assert white.winfo_ismapped() and black.winfo_ismapped()
+    assert white.winfo_rootx() < board.winfo_rootx() < black.winfo_rootx()
+    assert white.winfo_rootx() + white.winfo_width() <= board.winfo_rootx()
+    assert board.winfo_rootx() + board.winfo_width() <= black.winfo_rootx()
+    assert board.winfo_rootx() - (white.winfo_rootx() + white.winfo_width()) < 95
+    assert black.winfo_rootx() - (board.winfo_rootx() + board.winfo_width()) < 95
+    assert board.winfo_height() == board.winfo_width()
+    assert board.winfo_rooty() >= root.winfo_rooty()
+    assert board.winfo_rooty() + board.winfo_height() <= (root.winfo_rooty() + root.winfo_height())
+    assert white.clock.get() and black.clock.get()
+    assert state["participants"]["1"] in white.name.get()
+    assert state["participants"]["-1"] in black.name.get()
+    for side in (1, -1):
+        participant_id = state["participants"][str(side)]
+        assert len(view.quest_lists[side].cards) == len(state["quest_progress"][participant_id])
+        assert view.quest_viewports[side].winfo_ismapped()
+        assert view.quest_viewports[side].winfo_height() > 0
+        assert view.player_views[side].score.get() == (
+            f"Quest score: {state['quest_scores'][participant_id]}"
+        )
+    if game == "chess":
+        light_shapes = board.find_withtag("filled_white")
+        dark_shapes = board.find_withtag("filled_black")
+        assert len(light_shapes) >= 16 and len(dark_shapes) >= 16
+        assert all(board.type(item) != "text" for item in board.find_withtag("chess_piece"))
+        light_fills = {board.itemcget(item, "fill") for item in light_shapes}
+        dark_fills = {board.itemcget(item, "fill") for item in dark_shapes}
+        assert "#fff8e5" in light_fills and "#17212b" in dark_fills
+    else:
+        assert board.find_withtag("draughts_piece")
+        assert board.find_withtag("draughts_man")
+
+
+def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypatch):
+    """More than six session-defined objectives remain available to each side."""
+    from importlib import resources
+    import model.game.session as session_module
+    from model.game.definition import validate_definition
+
+    data = json.loads(resources.files("games").joinpath("chess", "config.json").read_text())
+    data["quests"].extend(
+        {
+            "id": f"visual-quest-{number}",
+            "description": f"Extended individually owned objective {number}",
+            "reward": number,
+            "when": {"op": "true"},
+        }
+        for number in range(10)
+    )
+    with monkeypatch.context() as patch:
+        patch.setattr(
+            session_module, "load_bundled_definition", lambda _: validate_definition(data)
+        )
+        session = DesktopSession("chess")
+    prepared_window(window, session)
+    window.geometry("840x640")
+    window.update()
+    state = session.snapshot()
+
+    for side in (1, -1):
+        participant = state["participants"][str(side)]
+        listing = window.game_view.quest_lists[side]
+        viewport = window.game_view.quest_viewports[side]
+        assert len(listing.cards) == len(state["quest_progress"][participant])
+        assert len(listing.cards) > 6
+        assert viewport.bbox("all")[3] > viewport.winfo_height()
+        first_scroll = viewport.yview()
+        viewport.event_generate("<Button-5>")
+        window.update()
+        assert viewport.yview()[0] > first_scroll[0]
+
+    # Only White's completed first move is credited; Black's own score is not
+    # silently merged into the opposing participant's quest list.
+    click_canvas(window, 6, 4)
+    click_canvas(window, 4, 4)
+    after = session.snapshot()
+    for side in (1, -1):
+        participant = after["participants"][str(side)]
+        assert window.game_view.player_views[side].score.get() == (
+            f"Quest score: {after['quest_scores'][participant]}"
+        )

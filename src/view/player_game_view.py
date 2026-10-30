@@ -154,29 +154,113 @@ class PlayerGameView(ttk.Frame):
         add_action(gameplay, "Export", self.export_game)
         add_action(gameplay, "Notation", self.export_notation)
 
+        # The reference GUI places both participants BESIDE the board. The
+        # centered columns preserve space beside the board; quests scroll separately.
         body = ttk.Frame(self)
         body.grid(row=1, column=0, sticky="nsew")
         body.rowconfigure(0, weight=1)
         body.columnconfigure(0, weight=1)
-        body.columnconfigure(1, minsize=280)
+        body.columnconfigure(1, minsize=170)
+        body.columnconfigure(2, minsize=448)
+        body.columnconfigure(3, minsize=170)
+        body.columnconfigure(4, weight=1)
+        self._body = body
 
-        left = ttk.Frame(body)
-        left.grid(row=0, column=0, sticky="nsew")
-        left.columnconfigure(0, weight=1)
-        left.rowconfigure(2, weight=1)
+        self.player_views: dict[int, PlayerView] = {}
+        self.quest_lists: dict[int, QuestList] = {}
+        self.quest_viewports: dict[int, tk.Canvas] = {}
 
-        self.top_player = PlayerView(left, -1)
-        self.top_player.grid(row=0, column=0, sticky="ew")
-        ttk.Label(left, textvariable=self.turn, font=("TkDefaultFont", 12)).grid(
-            row=1, column=0, sticky="w"
-        )
+        for side, column in ((1, 1), (-1, 3)):
+            pane = ttk.Frame(body, padding=(3, 0))
+            pane.grid(row=0, column=column, sticky="nsew")
+            pane.columnconfigure(0, weight=1)
+            pane.rowconfigure(2, weight=1)
+            player = PlayerView(pane, side)
+            player.grid(row=0, column=0, sticky="ew")
+            self.player_views[side] = player
+            ttk.Separator(pane).grid(row=1, column=0, sticky="ew", pady=4)
+
+            quests_host = ttk.LabelFrame(pane, text="Your quests", padding=(2, 2))
+            quests_host.grid(row=2, column=0, sticky="nsew")
+            quests_host.columnconfigure(0, weight=1)
+            quests_host.rowconfigure(0, weight=1)
+            viewport = tk.Canvas(
+                quests_host, width=142, height=60, highlightthickness=0, borderwidth=0
+            )
+            viewport.grid(row=0, column=0, sticky="nsew")
+            scroll = ttk.Scrollbar(quests_host, orient="vertical", command=viewport.yview)
+            scroll.grid(row=0, column=1, sticky="ns")
+            viewport.configure(yscrollcommand=scroll.set, takefocus=1)
+            content = ttk.Frame(viewport)
+            window_id = viewport.create_window((0, 0), window=content, anchor="nw")
+            listing = QuestList(content, side)
+            listing.pack(fill="both", expand=True)
+            content.bind(
+                "<Configure>",
+                lambda _event, target=viewport: target.configure(scrollregion=target.bbox("all")),
+            )
+            viewport.bind(
+                "<Configure>",
+                lambda event, target=viewport, identifier=window_id: target.itemconfigure(
+                    identifier, width=event.width
+                ),
+            )
+            viewport.bind(
+                "<Prior>",
+                lambda _event, target=viewport: target.yview_scroll(-1, "pages"),
+            )
+            viewport.bind(
+                "<Next>",
+                lambda _event, target=viewport: target.yview_scroll(1, "pages"),
+            )
+            viewport.bind(
+                "<Up>",
+                lambda _event, target=viewport: target.yview_scroll(-1, "units"),
+            )
+            viewport.bind(
+                "<Down>",
+                lambda _event, target=viewport: target.yview_scroll(1, "units"),
+            )
+            viewport.bind(
+                "<Button-4>",
+                lambda _event, target=viewport: target.yview_scroll(-3, "units"),
+            )
+            viewport.bind(
+                "<Button-5>",
+                lambda _event, target=viewport: target.yview_scroll(3, "units"),
+            )
+            viewport.bind(
+                "<MouseWheel>",
+                lambda event, target=viewport: self._scroll_quests(event, target),
+            )
+            self.quest_lists[side] = listing
+            self.quest_viewports[side] = viewport
+
+        # Retain existing consumer attributes while the source-tree rename
+        # remains the separate #462 task.
+        self.top_player = self.player_views[-1]
+        self.bottom_player = self.player_views[1]
+        self.quest_viewport = self.quest_viewports[1]
+        self.quest_list = self.quest_lists[1]
+
+        center = ttk.Frame(body, padding=(4, 0))
+        center.grid(row=0, column=2, sticky="nsew")
+        center.rowconfigure(1, weight=1)
+        center.columnconfigure(0, weight=1)
+        ttk.Label(
+            center,
+            textvariable=self.turn,
+            font=("TkDefaultFont", 11),
+            anchor="center",
+            wraplength=330,
+        ).grid(row=0, column=0, sticky="ew", pady=(0, 3))
         try:
             config = load_preferences()
         except PreferencesError:
             config = dict(DEFAULTS)
         self._preferred_board_size = config["board_size"]
-        self.board_area = ttk.Frame(left)
-        self.board_area.grid(row=2, column=0, sticky="nsew")
+        self.board_area = ttk.Frame(center)
+        self.board_area.grid(row=1, column=0, sticky="nsew")
         self.board_view = BoardView(
             self.board_area,
             self.session.board_projection(),
@@ -185,100 +269,44 @@ class PlayerGameView(ttk.Frame):
             show_coordinates=config["show_coordinates"],
         )
         self.board_view.pack(expand=True)
-        # Fit to the board's allocated space, rather than its requested Canvas pixels.
         self.board_area.bind("<Configure>", self._resize_board)
-        self.bottom_player = PlayerView(left, 1)
-        self.bottom_player.grid(row=3, column=0, sticky="ew")
 
-        right = ttk.Frame(body, padding=(12, 0, 0, 0))
-        right.grid(row=0, column=1, sticky="nsew")
-        right.columnconfigure(0, weight=1)
-        right.rowconfigure(1, weight=3)
-        right.rowconfigure(3, weight=2)
-        ttk.Label(right, text="Quests", font=("TkDefaultFont", 12, "bold")).grid(
-            row=0, column=0, sticky="w"
-        )
-
-        quest_panel = ttk.Frame(right)
-        quest_panel.grid(row=1, column=0, sticky="nsew")
-        quest_panel.columnconfigure(0, weight=1)
-        quest_panel.rowconfigure(0, weight=1)
-        self.quest_viewport = tk.Canvas(
-            quest_panel, width=240, height=100, highlightthickness=0, borderwidth=0
-        )
-        self.quest_viewport.grid(row=0, column=0, sticky="nsew")
-        quest_scroll = ttk.Scrollbar(
-            quest_panel, orient="vertical", command=self.quest_viewport.yview
-        )
-        quest_scroll.grid(row=0, column=1, sticky="ns")
-        self.quest_viewport.configure(yscrollcommand=quest_scroll.set, takefocus=1)
-        quest_content = ttk.Frame(self.quest_viewport)
-        self._quest_window = self.quest_viewport.create_window(
-            (0, 0), window=quest_content, anchor="nw"
-        )
-        self.quest_list = QuestList(quest_content)
-        self.quest_list.pack(fill="both", expand=True)
-        quest_content.bind(
-            "<Configure>",
-            lambda _event: self.quest_viewport.configure(
-                scrollregion=self.quest_viewport.bbox("all")
-            ),
-        )
-        self.quest_viewport.bind(
-            "<Configure>",
-            lambda event: self.quest_viewport.itemconfigure(self._quest_window, width=event.width),
-        )
-        self.quest_viewport.bind(
-            "<Prior>", lambda _event: self.quest_viewport.yview_scroll(-1, "pages")
-        )
-        self.quest_viewport.bind(
-            "<Next>", lambda _event: self.quest_viewport.yview_scroll(1, "pages")
-        )
-        self.quest_viewport.bind(
-            "<Up>", lambda _event: self.quest_viewport.yview_scroll(-1, "units")
-        )
-        self.quest_viewport.bind(
-            "<Down>", lambda _event: self.quest_viewport.yview_scroll(1, "units")
-        )
-        self.quest_viewport.bind(
-            "<Button-4>", lambda _event: self.quest_viewport.yview_scroll(-3, "units")
-        )
-        self.quest_viewport.bind(
-            "<Button-5>", lambda _event: self.quest_viewport.yview_scroll(3, "units")
-        )
-        self.quest_viewport.bind("<MouseWheel>", self._scroll_quests)
-
-        ttk.Label(right, text="Moves", font=("TkDefaultFont", 12, "bold")).grid(
-            row=2, column=0, sticky="w", pady=(6, 0)
-        )
-        history_panel = ttk.Frame(right)
-        history_panel.grid(row=3, column=0, sticky="nsew")
+        # History remains the existing simple, scrollable list. Its deeper
+        # redesign is reserved for #453.
+        history_panel = ttk.LabelFrame(self, text="Moves")
+        history_panel.grid(row=2, column=0, sticky="ew", pady=(4, 0))
         history_panel.columnconfigure(0, weight=1)
-        history_panel.rowconfigure(0, weight=1)
-        self.history = tk.Listbox(history_panel, height=4, width=24)
-        self.history.grid(row=0, column=0, sticky="nsew")
+        self.history = tk.Listbox(history_panel, height=3)
+        self.history.grid(row=0, column=0, sticky="ew")
         history_scroll = ttk.Scrollbar(history_panel, orient="vertical", command=self.history.yview)
         history_scroll.grid(row=0, column=1, sticky="ns")
         self.history.configure(yscrollcommand=history_scroll.set)
-        # A long save path must not expand the minimum window beyond its viewport.
         ttk.Label(self, textvariable=self.status, relief="sunken", anchor="w", width=1).grid(
-            row=2, column=0, sticky="ew", pady=(6, 0)
+            row=3, column=0, sticky="ew", pady=(4, 0)
         )
 
     def _resize_board(self, event: tk.Event) -> None:
         self._fit_board(event.width, event.height)
 
     def _fit_board(self, width: int | None = None, height: int | None = None) -> None:
-        # Padding belongs to the host, not the board. Preserve square pixels
-        # and use the same size for Canvas hit-testing and drawing.
+        # Keep the whole player/board/player cluster centered in spacious
+        # windows, and shrink only the middle column at compact widths.
+        available = max(
+            self.board_view.board.cols * 32,
+            self._body.winfo_width() - 2 * 170 - 20,
+        )
+        # Reserve the center frame's horizontal padding, otherwise a saved
+        # 64-pixel setting renders 63-pixel squares due to integer division.
+        desired = min(self.board_view.board.cols * self._preferred_board_size + 8, available)
+        self._body.columnconfigure(2, minsize=desired)
         width = self.board_area.winfo_width() if width is None else width
         height = self.board_area.winfo_height() if height is None else height
         self.board_view.fit_to(max(1, width), max(1, height - 8), self._preferred_board_size)
 
-    def _scroll_quests(self, event: tk.Event) -> None:
+    def _scroll_quests(self, event: tk.Event, target: tk.Canvas) -> None:
         if event.delta:
             direction = -1 if event.delta > 0 else 1
-            self.quest_viewport.yview_scroll(direction * max(1, abs(event.delta) // 120), "units")
+            target.yview_scroll(direction * max(1, abs(event.delta) // 120), "units")
 
     def on_square_clicked(self, position: tuple[int, int]) -> None:
         if self.session.snapshot()["outcome"] is not None:
@@ -286,24 +314,36 @@ class PlayerGameView(ttk.Frame):
         result = self.window_controller.on_square_clicked(position)
         if result["action"] == "choose":
             options = result["options"]
-            descriptions = [
-                f"{index + 1}. {move['hops']} {move['promotion'] or ''}"
-                for index, move in enumerate(options)
-            ]
-            choice = simpledialog.askinteger(
-                "Choose move",
-                "Select a complete capture route or promotion:\n" + "\n".join(descriptions),
-                parent=self,
-                minvalue=1,
-                maxvalue=len(options),
+            choice = self._choose_complete_move(
+                options,
+                self.session.snapshot(),
+                title="Choose your move",
+                explanation="Select a complete capture route or promotion:",
+                confirm_label="Play selected move",
             )
-            if choice is not None:
-                result = self.window_controller.game_controller.submit_move(options[choice - 1])
+            if choice is None:
+                self.window_controller.set_status(
+                    "Move choice canceled. Select a destination or another piece."
+                )
+            else:
+                result = self.window_controller.game_controller.submit_move(choice)
                 if result["action"] == "moved":
                     self.window_controller.set_status("Move played.")
         controller = self.window_controller.game_controller
-        self.board_view.set_selection(controller.selected_square, controller.highlighted_moves)
+        selected = controller.selected_square
+        captures: set[tuple[int, int]] = set()
+        if selected is not None:
+            state = self.session.snapshot()
+            captures = {
+                tuple(move["hops"][-1])
+                for move in self.session.legal_actions()
+                if move["start"] == list(selected) and self._is_capture_move(move, state)
+            }
+        self.board_view.set_selection(
+            selected, controller.highlighted_moves, capture_targets=captures
+        )
         if result["action"] == "invalid":
+            self.board_view.show_invalid_square(position)
             self.status.set(result.get("message", "Invalid move."))
         self.refresh()
 
@@ -352,11 +392,38 @@ class PlayerGameView(ttk.Frame):
         if finished:
             self.window_controller.game_controller.reset_selection()
             self.board_view.set_selection(None, [])
+        self.board_view.set_appearance(
+            state["config"].get("appearance", {}),
+            draughts=self.session.game == "checkers",
+        )
+        accepted_moves = [event["move"] for event in state["events"] if event["move"] is not None]
+        if accepted_moves:
+            last = accepted_moves[-1]
+            self.board_view.set_last_move(tuple(last["start"]), tuple(last["hops"][-1]))
+        else:
+            self.board_view.set_last_move(None, None)
+
+        # The current session only reports the terminal checkmate verdict,
+        # not general attack/check state. Never infer check from piece vectors.
+        checked_side = (
+            state["active_side"]
+            if (state["outcome"] is not None and state["outcome"]["cause"] == "checkmate")
+            else None
+        )
+        checked_king = next(
+            (
+                tuple(piece["square"])
+                for piece in state["board"]
+                if piece["kind"] == "king" and piece["side"] == checked_side
+            ),
+            None,
+        )
+        self.board_view.set_in_check(checked_king)
         self.board_view.refresh(self.session.board_projection())
         self._fit_board()
         remaining = self.session.clock_remaining()
-        self.top_player.refresh(state, remaining)
-        self.bottom_player.refresh(state, remaining)
+        for player in self.player_views.values():
+            player.refresh(state, remaining)
         game_name = display_game_name(self.session.game)
         if finished:
             terminal_key = self._state_key(state)
@@ -373,7 +440,8 @@ class PlayerGameView(ttk.Frame):
             self.turn.set(f"{game_name} · {active} to move · move {played + 1}")
         self.status.set(self.window_controller.status_message or "Ready")
         self._refresh_actions(state)
-        self.quest_list.refresh(state)
+        for quests in self.quest_lists.values():
+            quests.refresh(state)
 
         events = tuple(json.dumps(entry, sort_keys=True) for entry in state["events"])
         if events != self._last_history:
@@ -510,34 +578,88 @@ class PlayerGameView(ttk.Frame):
         self.window_controller.set_status("Draw accepted." if reply else "Draw offer declined.")
         self.refresh()
 
-    def _choose_intended_move(
-        self, moves: list[dict[str, Any]], rows: int
+    @staticmethod
+    def _is_capture_move(move: dict[str, Any], state: dict[str, Any]) -> bool:
+        """Classify an engine-authorized route for display, not for move validation."""
+        source = next(
+            (
+                piece
+                for piece in state["board"]
+                if piece["square"] == move["start"] and piece["side"] == state["active_side"]
+            ),
+            None,
+        )
+        if source is None:
+            return False
+        destination = move["hops"][-1]
+        if any(
+            piece["square"] == destination and piece["side"] != source["side"]
+            for piece in state["board"]
+        ):
+            return True
+        # Legal diagonal pawn moves ending on empty squares are en passant.
+        if source["kind"] == "pawn" and move["start"][1] != destination[1]:
+            return True
+        if "capture_policy" not in state["config"]["pieces"].get(source["kind"], {}):
+            return False
+        previous = move["start"]
+        for landing in move["hops"]:
+            if max(abs(landing[0] - previous[0]), abs(landing[1] - previous[1])) > 1:
+                return True
+            previous = landing
+        return False
+
+    def _format_complete_move(
+        self, move: dict[str, Any], state: dict[str, Any], *, capture_notation: bool = True
+    ) -> str:
+        """Describe an engine-supplied full action; never reconstruct its route."""
+        rows = state["config"]["board"]["rows"]
+        points = [move["start"], *move["hops"]]
+        separator = " × " if capture_notation and self._is_capture_move(move, state) else " → "
+        route = separator.join(self._label(point, rows) for point in points)
+        promotion = move.get("promotion")
+        if promotion is not None:
+            kind = str(promotion)
+            route += f"  —  Promote to {kind.replace('_', ' ').title()}"
+        return route
+
+    def _choose_complete_move(
+        self,
+        moves: list[dict[str, Any]],
+        state: dict[str, Any],
+        *,
+        title: str,
+        explanation: str,
+        confirm_label: str,
+        capture_notation: bool = True,
     ) -> dict[str, Any] | None:
-        """Pointer-operable scrollable chooser over canonical complete legal moves."""
+        """Choose exactly one authoritative complete DTO with a real Tk listbox."""
+        if not moves:
+            return None
         dialog = tk.Toplevel(self)
-        dialog.title("Intended move for draw claim")
+        dialog.title(title)
         dialog.transient(self.winfo_toplevel())
         dialog.resizable(True, True)
         frame = ttk.Frame(dialog, padding=12)
         frame.pack(fill="both", expand=True)
-        ttk.Label(
-            frame,
-            text="Choose the full legal route to claim without playing that move:",
-            wraplength=440,
-        ).pack(anchor="w", pady=(0, 8))
+        ttk.Label(frame, text=explanation, wraplength=420).pack(anchor="w", pady=(0, 8))
         holder = ttk.Frame(frame)
         holder.pack(fill="both", expand=True)
-        listbox = tk.Listbox(holder, exportselection=False, width=54, height=12)
+        listbox = tk.Listbox(
+            holder,
+            exportselection=False,
+            width=54,
+            height=min(12, max(4, len(moves))),
+            activestyle="dotbox",
+        )
         scroll = ttk.Scrollbar(holder, orient="vertical", command=listbox.yview)
         listbox.configure(yscrollcommand=scroll.set)
         listbox.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")
-        for move in moves:
-            points = [move["start"], *move["hops"]]
-            description = " → ".join(self._label(point, rows) for point in points)
-            if move["promotion"] is not None:
-                description += f" (promote to {move['promotion']})"
-            listbox.insert(tk.END, description)
+        for index, move in enumerate(moves, start=1):
+            description = self._format_complete_move(move, state, capture_notation=capture_notation)
+            listbox.insert(tk.END, f"{index}. {description}")
+
         selected: list[dict[str, Any] | None] = [None]
 
         def finish(accept: bool) -> None:
@@ -550,10 +672,11 @@ class PlayerGameView(ttk.Frame):
         ttk.Button(controls, text="Cancel", command=lambda: finish(False)).pack(
             side="right", padx=(8, 0)
         )
-        ttk.Button(controls, text="Use intended move", command=lambda: finish(True)).pack(
-            side="right"
-        )
+        ttk.Button(controls, text=confirm_label, command=lambda: finish(True)).pack(side="right")
         dialog.protocol("WM_DELETE_WINDOW", lambda: finish(False))
+        dialog.bind("<Escape>", lambda _event: finish(False))
+        dialog.bind("<Return>", lambda _event: finish(True))
+        listbox.bind("<Double-Button-1>", lambda _event: finish(True))
         dialog.update_idletasks()
         dialog.grab_set()
         listbox.selection_set(0)
@@ -561,6 +684,20 @@ class PlayerGameView(ttk.Frame):
         listbox.focus_set()
         self.wait_window(dialog)
         return selected[0]
+
+    def _choose_intended_move(
+        self, moves: list[dict[str, Any]], rows: int
+    ) -> dict[str, Any] | None:
+        """Keep #438's claim chooser semantics: choose an intent, never play it."""
+        state = self.session.snapshot()
+        return self._choose_complete_move(
+            moves,
+            state,
+            title="Intended move for draw claim",
+            explanation="Choose the full legal route to claim without playing that move:",
+            confirm_label="Use intended move",
+            capture_notation=False,
+        )
 
     def claim_draw(self) -> None:
         """Try only named game-owned claim conditions; do not grant local draws."""
