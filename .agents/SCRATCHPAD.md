@@ -1,5 +1,14 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-10-31 — Dispatch H integration provenance
+
+- H final branch `ux/453-quest-history-polish` SHA `fba5d5674f6d2f6dee660c5d79d6e9583b9368c4` exact candidate tests passed: [#41139365696](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365696) GUI 63 + 22 screenshots, [#41139365527](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365527) Python 3.10–3.13 game, [#41139651941](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139651941) 321 per-version governed/format, [#41139365509](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365509) four OS PACKAGE builds; temporary PR #471 CLOSED UNMERGED.
+- Independent source check confirms game+definition+participant key invalidates quest cards, scroll on nested quest labels, two side-specific independently scrolling quest panes, clocks/material/turn hierarchy, human-readable history of moves and nonmove draw/terminal actions, 115 events and preserved up-scroll unless following bottom. Five owned files imported as exact task blobs in commit `6bf2a001b490d8a34cbf8bc3fe264cd1a8a96fa2`. Stale task-generated AST/UML excluded; combined generated diagrams regenerated.
+- Distinguish full candidate CI from combined latest #271 SHA and from four platform **extracted** GUI acceptance; #453 remains open for exact-head confirmation. The board keyboard mode is deferred (#448); normal OS control keyboard focus still matters in #454.
+- Source #452 already closed, #454 exclusive next UI owner branch `ux/454-native-final-polish` seeded from `0a173933b930f6e47b1dc3be7f14c36d98cdd8ba`. No parallel GUI source writer; #462 renames only after GUI ownership handed off and test matrix revalidated.
+- #473 remains independent FIDE proof blocker and #443 native save/restart acceptance remains failing/blocked. No protected merge, source-tree refactor, PR thread resolution or release.
+
+
 ## 2026-10-31 — FIDE G diagnostic versus integration distinction
 
 - **True external-published counterexample**: Buchanan StrateGems R0093 FEN `Bb1k1b2/bKp1p1p1/1pP1P1P1/1P6/p5P1/P7/8/8 w - - 0 1`, 0-clock White, app recorded win not draw at public `DesktopSession.poll_timeout()`. Four Python versions repeat identical assertion failure (workflow 41138925199). The allegedly dead FEN's conventional starting-position retro-reachability has not been established; do not equate source puzzle classification and reachable normal game without separate evidence.

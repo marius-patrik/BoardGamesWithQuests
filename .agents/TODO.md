@@ -1,5 +1,14 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## 2026-10-31 — H integration and final GUI dispatch
+
+- [x] **#453 source changes accepted:** candidate `fba5d5674f6d2f6dee660c5d79d6e9583b9368c4` quest cards/definition-aware cache/individual nested scrolling, player/material/clock hierarchy, 115-event incremental history; 63 actual GUI tests and 22 screenshots, Python 3.10–3.13 321 governed test cases per version. Four candidate workflows PASSED.
+- [x] Five owned source/test/screenshot file blobs safely integrated into #271 at `6bf2a001b490d8a34cbf8bc3fe264cd1a8a96fa2`; AST/UML auto-regenerated on combined source at `0a173933b930f6e47b1dc3be7f14c36d98cdd8ba`; no interfering engine/packaging changes.
+- [ ] **#453 issue closure GATE:** exact latest combined-head quality, real Tk screenshot and four-OS PACKAGE jobs must pass; frozen native app interaction is separate #443.
+- [ ] **#454 next exclusive GUI owner:** prepared `ux/454-native-final-polish` at `0a173933...`; native ttk theme, cross-platform dialogs/focus, correct preferences, measured redraw, concise I/O messages, visual and pointer regression. Never rename files before #462.
+- [ ] **#473 P0** isolated Chess sound-unwinnability correction (FIDE fortress red) still pending, no speculative shortcut; #437/#449 WCDF final certification, #462 all 10 maintainer path/source-review threads and #443 frozen OS acceptance remain OPEN.
+
+
 ## 2026-10-31 — #452 closed; #473 must resolve FIDE correctness
 
 - [x] **#452 source GUI DONE / issue CLOSED:** Combined exact PR #271 HEAD `b9e1db9961cac9c044ad171a48c254fbd6fbe74d` has all nine applicable workflows completed SUCCESS. Preserved original board and 2 sided player/quest GUI; native extracted interactions remain #443.

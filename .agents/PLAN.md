@@ -1,5 +1,14 @@
 # Execution plan — BoardGamesWithQuests v1.0.0
 
+## 2026-10-31 — Source-verified #453 integrated; #454 GUI handoff
+
+- [x] Dispatch H `ux/453-quest-history-polish` SHA `fba5d5674f6d2f6dee660c5d79d6e9583b9368c4` independently reviewed: quest definitions/progress/cache correctly partitioned by game/definition/participant, 12 quests each, nested independent scrolling; player clocks/material and 115 accepted history events with scroll preservation. Original #452 centered Canvas/two-sided panels and #438 engine authority preserved.
+- [x] All four exact H candidate workflows passed: [real Tk 63 + screenshots #41139365696](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365696), [Python gameplay #41139365527](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365527), [DarkFactory full Python/format #41139651941](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139651941), [four OS package builds #41139365509](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365509).
+- [x] Five non-generated view/test/evidence files selectively integrated into existing draft PR #271 at `6bf2a001b490d8a34cbf8bc3fe264cd1a8a96fa2` with expected-head update. Task AST/UML excluded, combined diagrams auto-regenerated at `0a173933b930f6e47b1dc3be7f14c36d98cdd8ba`.
+- [ ] Exact newer combined #271 HEAD governed Python/Tk/native PACKAGING CI still pending at last check; #453 stays OPEN until verified. Extracted native interactive acceptance remains #443.
+- [ ] GUI #454 exclusive successor branch `ux/454-native-final-polish` created on combined GUI head; finalize ttk, dialogs, settings, safe messages, measured idle refresh, and real graphical screenshots. #462 structural naming/moves must WAIT until #454, #443, #473 hand off. Chess unwinnability P0 #473 and WCDF #437/#449 remain NO-GO blockers.
+
+
 ## 2026-10-31 — FIDE fortress blocker / #473 successor
 
 - [x] Source #452 closed after ALL nine exact-head workflow suites succeeded on `b9e1db9961cac9c044ad171a48c254fbd6fbe74d` including real Tk 2-player UI, Python gameplay and native package builds. #453 quest/history, #454 polish and #443 extracted four-OS GUI remain OPEN.
