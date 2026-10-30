@@ -80,7 +80,8 @@ class PlayerGameView(ttk.Frame):
         self.turn = tk.StringVar()
         self.status = tk.StringVar(value="Ready")
         self._timer_id: str | None = None
-        self._last_history: tuple[Any, ...] | None = None
+        self._last_history: tuple[str, ...] | None = None
+        self._history_game_id: str | None = None
         self._presented_terminal_key: tuple[str, int] | None = None
         # Save-point metadata only: never a duplicate authoritative game snapshot.
         self._saved_state_key = self._state_key(self.session.snapshot())
@@ -193,7 +194,7 @@ class PlayerGameView(ttk.Frame):
             viewport.configure(yscrollcommand=scroll.set, takefocus=1)
             content = ttk.Frame(viewport)
             window_id = viewport.create_window((0, 0), window=content, anchor="nw")
-            listing = QuestList(content, side)
+            listing = QuestList(content, side, viewport=viewport)
             listing.pack(fill="both", expand=True)
             content.bind(
                 "<Configure>",
@@ -271,16 +272,33 @@ class PlayerGameView(ttk.Frame):
         self.board_view.pack(expand=True)
         self.board_area.bind("<Configure>", self._resize_board)
 
-        # History remains the existing simple, scrollable list. Its deeper
-        # redesign is reserved for #453.
-        history_panel = ttk.LabelFrame(self, text="Moves")
+        # A focusable Tk listbox keeps keyboard and scrollbar navigation intact.
+        history_panel = ttk.LabelFrame(self, text="Move and action history", padding=(4, 3))
         history_panel.grid(row=2, column=0, sticky="ew", pady=(4, 0))
         history_panel.columnconfigure(0, weight=1)
-        self.history = tk.Listbox(history_panel, height=3)
+        self.history = tk.Listbox(
+            history_panel,
+            height=3,
+            font=("TkFixedFont", 10),
+            exportselection=False,
+            activestyle="dotbox",
+            takefocus=1,
+        )
         self.history.grid(row=0, column=0, sticky="ew")
         history_scroll = ttk.Scrollbar(history_panel, orient="vertical", command=self.history.yview)
         history_scroll.grid(row=0, column=1, sticky="ns")
         self.history.configure(yscrollcommand=history_scroll.set)
+        self.history_empty = ttk.Label(self.history, text="No moves or actions yet.")
+        self.history_empty.place(relx=0.5, rely=0.5, anchor="center")
+        self.history_result = tk.StringVar()
+        self.history_result_label = ttk.Label(
+            history_panel,
+            textvariable=self.history_result,
+            font=("TkDefaultFont", 9, "bold"),
+            wraplength=760,
+        )
+        self.history_result_label.grid(row=1, column=0, columnspan=2, sticky="ew")
+        self.history_result_label.grid_remove()
         ttk.Label(self, textvariable=self.status, relief="sunken", anchor="w", width=1).grid(
             row=3, column=0, sticky="ew", pady=(4, 0)
         )
@@ -353,6 +371,7 @@ class PlayerGameView(ttk.Frame):
         if clean:
             self._mark_clean()
         self._last_history = None
+        self._history_game_id = None
         self.board_view.set_selection(None, [])
         self.winfo_toplevel().title(self.window_controller.game_title())
         self.refresh()
@@ -443,35 +462,82 @@ class PlayerGameView(ttk.Frame):
         for quests in self.quest_lists.values():
             quests.refresh(state)
 
-        events = tuple(json.dumps(entry, sort_keys=True) for entry in state["events"])
-        if events != self._last_history:
+        self._refresh_history(state)
+
+    def _history_entry(self, event: dict[str, Any], state: dict[str, Any]) -> str:
+        """Describe an accepted event without inferring rules from the UI."""
+        actor = event.get("actor")
+        participants = state["participants"]
+        identity = (
+            "White"
+            if actor == participants["1"]
+            else "Black" if actor == participants["-1"] else str(actor or "System")
+        )
+        move = event.get("move")
+        if move is not None:
+            rows = state["config"]["board"]["rows"]
+            separator = " × " if event.get("captured") else " → "
+            points = [move["start"], *move["hops"]]
+            description = separator.join(self._label(point, rows) for point in points)
+            count = len(event.get("captured", ()))
+            if count > 1:
+                description += f" ({count} captures)"
+            if move.get("promotion"):
+                description += f" · Promoted to {str(move['promotion']).replace('_', ' ').title()}"
+        else:
+            action = event.get("action") or {}
+            kind = action.get("type", "result")
+            description = {
+                "offer_draw": "Offered a draw",
+                "accept_draw": "Accepted draw offer",
+                "reject_draw": "Declined draw offer",
+                "claim_draw": "Claimed draw",
+                "resign": "Resigned",
+                "timeout": "Clock expired",
+            }.get(kind, kind.replace("_", " ").capitalize())
+            if kind == "claim_draw" and action.get("claim"):
+                claim = action["claim"]
+                description += f" ({OUTCOME_CAUSES.get(claim, claim.replace('-', ' '))})"
+        # Only the event that commits a result receives the result suffix.
+        if event.get("outcome") is not None or (
+            state["outcome"] is not None and event["revision"] == state["revision"]
+        ):
+            description += f" · {outcome_description(state)}"
+        return f"{event['revision']}. {identity}: {description}"
+
+    def _refresh_history(self, state: dict[str, Any]) -> None:
+        """Append new accepted events without losing the user's reading position."""
+        history = state["events"]
+        events = tuple(json.dumps(entry, sort_keys=True) for entry in history)
+        old = self._last_history or ()
+        same_game = self._history_game_id == state["game_id"]
+        if not same_game or events != self._last_history:
+            append_only = same_game and len(events) >= len(old) and events[: len(old)] == old
+            follow = self.history.size() == 0 or self.history.yview()[1] >= 0.96
+            first_visible = self.history.nearest(0) if self.history.size() else 0
+            if not append_only:
+                self.history.delete(0, tk.END)
+                start = 0
+            else:
+                start = len(old)
+            for event in history[start:]:
+                self.history.insert(tk.END, self._history_entry(event, state))
+            if not append_only or follow:
+                self.history.see(tk.END)
+            else:
+                self.history.yview(first_visible)
             self._last_history = events
-            self.history.delete(0, tk.END)
-            for event in state["events"]:
-                move = event.get("move")
-                if move is None:
-                    kind = event.get("action", {}).get("type", "result")
-                    description = {
-                        "offer_draw": "Draw offered",
-                        "accept_draw": "Draw accepted",
-                        "reject_draw": "Draw declined",
-                        "claim_draw": "Draw claimed",
-                        "resign": "Resignation",
-                        "timeout": "Time expired",
-                    }.get(kind, kind.replace("_", " ").capitalize())
-                else:
-                    description = (
-                        self._label(move["start"], state["config"]["board"]["rows"])
-                        + " → "
-                        + " → ".join(
-                            self._label(square, state["config"]["board"]["rows"])
-                            for square in move["hops"]
-                        )
-                    )
-                    if move.get("promotion"):
-                        description += f"={move['promotion']}"
-                self.history.insert(tk.END, f"{event['revision']}. {description}")
-            self.history.yview_moveto(1.0)
+            self._history_game_id = state["game_id"]
+        if self.history.size() == 0:
+            self.history_empty.place(relx=0.5, rely=0.5, anchor="center")
+        else:
+            self.history_empty.place_forget()
+        if state["outcome"] is None:
+            self.history_result.set("")
+            self.history_result_label.grid_remove()
+        else:
+            self.history_result.set(outcome_description(state))
+            self.history_result_label.grid()
 
     def apply_preferences(self, values: dict[str, Any]) -> None:
         self._preferred_board_size = values["board_size"]
