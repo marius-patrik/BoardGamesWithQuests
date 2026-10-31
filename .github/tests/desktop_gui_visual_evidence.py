@@ -189,7 +189,11 @@ def capture_native_dialogs(output: Path) -> None:
         capture(root, output / "ux454-native-nested-settings.png")
         root.settings_dialog.close()
         assert root.grab_current() == chooser
-        chooser.event_generate("<Escape>")
+        cancel = next(
+            child for child in descendants(chooser)
+            if isinstance(child, ttk.Button) and child.cget("text") == "Cancel"
+        )
+        cancel.invoke()
         root.update()
         assert root.grab_current() is None
     finally:
