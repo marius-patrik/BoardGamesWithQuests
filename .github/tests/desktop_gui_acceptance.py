@@ -1337,7 +1337,9 @@ def test_io_errors_show_bounded_basename_without_replacing_live_game(
 
     before = window.game_view.session.snapshot()
     filename = "prefix-" + ("x" * 150) + "-save.json"
-    target = str(tmp_path / filename)
+    blocked = tmp_path / "not-a-directory"
+    blocked.write_text("existing file", encoding="utf-8")
+    target = str(blocked / filename)
     captured = []
     monkeypatch.setattr(
         module.messagebox, "showerror",
@@ -1345,12 +1347,6 @@ def test_io_errors_show_bounded_basename_without_replacing_live_game(
     )
     monkeypatch.setattr(
         module.filedialog, "asksaveasfilename", lambda **_kwargs: target,
-    )
-    monkeypatch.setattr(
-        module, "save_session",
-        lambda _session, _destination: (_ for _ in ()).throw(
-            OSError("simulated denied destination " + "z" * 1000)
-        ),
     )
     assert window.game_view.export_game() is False
     assert captured[0][0] == "Save game"
