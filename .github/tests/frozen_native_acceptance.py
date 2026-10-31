@@ -816,6 +816,114 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
     }
 
 
+
+def native_lifecycle_journey(
+    gui, executable: Path, home: Path, evidence: Path, target: str
+) -> dict:
+    """Prove native New Game/Resign cancellation and outcome using real clicks."""
+    from PIL import ImageChops
+
+    home.mkdir()
+    home = home.resolve()
+    (home / "AppData" / "Roaming").mkdir(parents=True)
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    env.update(
+        HOME=str(home), USERPROFILE=str(home),
+        XDG_CONFIG_HOME=str(home / ".config"),
+        APPDATA=str(home / "AppData" / "Roaming"),
+    )
+    # Platform-specific fixed-runner layout positions were measured in
+    # screenshots, not extrapolated from another OS's dialog geometry.
+    offsets = {
+        "windows-x64": {"new": (336, -79), "resign": (416, -47)},
+        "macos-arm64": {"new": (256, -79), "resign": (375, -47)},
+        "macos-x64": {"new": (256, -79), "resign": (375, -47)},
+        "linux-x64": {"new": (263, -79), "resign": (358, -47)},
+    }
+
+    with tempfile.TemporaryDirectory(prefix="bgwq-lifecycle-cwd-") as cwd:
+        with (evidence / "lifecycle-stderr.txt").open("wb") as stderr:
+            process = subprocess.Popen(
+                [str(executable), "--game", "chess"], cwd=cwd, env=env,
+                stdout=subprocess.DEVNULL, stderr=stderr,
+            )
+            try:
+                deadline = time.monotonic() + 25
+                while time.monotonic() < deadline:
+                    if process.poll() is not None:
+                        raise AssertionError("frozen app exited before lifecycle")
+                    try:
+                        focus_chooser()
+                        break
+                    except Blocked:
+                        gui.sleep(0.4)
+                else:
+                    raise Blocked("cannot activate native New game chooser")
+                x, y, width, height = native_window_rectangle("New game")
+                gui.click(x + 0.34 * width, y + 0.66 * height)
+                board = await_board(gui, evidence, "lifecycle-start")
+                left, top, size = board
+
+                def square(position):
+                    return (left + (position[1] + 0.5) * size,
+                            top + (position[0] + 0.5) * size)
+
+                def click_toolbar(name):
+                    dx, dy = offsets[target][name]
+                    gui.click(left + dx, top + dy)
+                    gui.sleep(0.6)
+                    gui.screenshot().save(evidence / f"lifecycle-{name}-dialog.png")
+
+                def real_move(src, dst, name):
+                    before = gui.screenshot().convert("RGB")
+                    gui.click(*square(src))
+                    gui.sleep(0.25)
+                    gui.click(*square(dst))
+                    gui.sleep(0.7)
+                    after = gui.screenshot().convert("RGB")
+                    after.save(evidence / f"lifecycle-{name}.png")
+                    difference = ImageChops.difference(before, after)
+                    radius = max(8, int(size * 0.18))
+                    for pos in (src, dst):
+                        sx, sy = square(pos)
+                        if difference.crop((
+                            int(sx) - radius, int(sy) - radius,
+                            int(sx) + radius, int(sy) + radius
+                        )).getbbox() is None:
+                            raise AssertionError(
+                                f"{name}: native cancel did not permit legal move at {pos}"
+                            )
+                real_move((6, 4), (4, 4), "white-e4")
+                # A dirty game must prompt before replacement; cancelling must
+                # preserve the session, proven by a subsequent Black move.
+                click_toolbar("new")
+                gui.press("escape")
+                gui.sleep(0.5)
+                real_move((1, 3), (3, 3), "black-d5-after-cancel")
+                # Resignation cancellation must likewise leave the session live.
+                click_toolbar("resign")
+                gui.press("escape")
+                gui.sleep(0.5)
+                real_move((4, 4), (3, 3), "white-exd5-after-resign-cancel")
+                gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
+                if process.wait(timeout=15) != 0:
+                    raise AssertionError("native lifecycle exit was not clean")
+                return {
+                    "new_game_cancel_preserves_session": True,
+                    "resign_cancel_preserves_session": True,
+                    "clean_exit": True,
+                }
+            finally:
+                if process.poll() is None:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=8)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait(timeout=8)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -853,6 +961,7 @@ def main() -> int:
             "draughts_real_pointer_opening_and_capture": "NOT EXECUTED",
             "settings_cancel_save_and_restart": "NOT EXECUTED",
             "game_switch_and_cancel": "NOT EXECUTED",
+            "native_new_game_and_resignation_cancellation": "NOT EXECUTED",
             "saved_game_process_restart_and_continuation": "NOT EXECUTED",
             "chess_promotion_and_terminal": "NOT EXECUTED",
             "draughts_multihop_crowning_and_terminal": "NOT EXECUTED",
@@ -919,6 +1028,11 @@ def main() -> int:
                 gui, executable, folder / "home-settings", args.evidence_dir, args.platform
             )
             state["journeys"]["settings_cancel_save_and_restart"] = "PASS"
+            state["current_journey"] = "native_new_game_and_resignation_cancellation"
+            state["lifecycle"] = native_lifecycle_journey(
+                gui, executable, folder / "home-lifecycle", args.evidence_dir, args.platform
+            )
+            state["journeys"]["native_new_game_and_resignation_cancellation"] = "PASS"
             state["gui"] = "BLOCKED"
             state["current_journey"] = None
             # Incomplete mandatory journeys are BLOCKED, never a green release gate.
