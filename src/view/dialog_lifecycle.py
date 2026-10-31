@@ -29,12 +29,14 @@ class ModalLifecycle:
         """Center over the owning window without changing a game's geometry."""
         self.window.update_idletasks()
         try:
-            x = self.parent.winfo_rootx() + (
-                self.parent.winfo_width() - self.window.winfo_reqwidth()
-            ) // 2
-            y = self.parent.winfo_rooty() + (
-                self.parent.winfo_height() - self.window.winfo_reqheight()
-            ) // 2
+            x = (
+                self.parent.winfo_rootx()
+                + (self.parent.winfo_width() - self.window.winfo_reqwidth()) // 2
+            )
+            y = (
+                self.parent.winfo_rooty()
+                + (self.parent.winfo_height() - self.window.winfo_reqheight()) // 2
+            )
             self.window.geometry(f"+{max(0, x)}+{max(0, y)}")
         except tk.TclError:
             pass
