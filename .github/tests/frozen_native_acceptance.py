@@ -208,6 +208,50 @@ def missing_asset_check(executable: Path, target: str, cwd: Path) -> dict:
         asset.write_bytes(original)
 
 
+
+def distribution_trust(executable: Path, target: str) -> dict:
+    """Inspect native trust without assuming that a build is signed or notarized."""
+    if target.startswith("macos"):
+        bundle = executable.parent.parent.parent
+        commands = {
+            "codesign": ["codesign", "-dv", "--verbose=4", str(bundle)],
+            "signature_verification": [
+                "codesign", "--verify", "--deep", "--strict", "--verbose=2", str(bundle)
+            ],
+            "gatekeeper": ["spctl", "--assess", "--type", "execute", "--verbose=4", str(bundle)],
+            "notarization_ticket": ["xcrun", "stapler", "validate", str(bundle)],
+        }
+    elif target.startswith("windows"):
+        script = (
+            "$sig=Get-AuthenticodeSignature -LiteralPath '"
+            + str(executable).replace("'", "''")
+            + "'; Write-Output $sig.Status; Write-Output $sig.StatusMessage"
+        )
+        commands = {"authenticode": ["powershell", "-NoProfile", "-Command", script]}
+    else:
+        return {
+            "signature": "not applicable as a cross-distribution code-signing requirement",
+            "trust_gate": "BLOCKED",
+            "note": "Linux package repository/vendor signature and installation are not tested",
+        }
+    results = {}
+    for name, command in commands.items():
+        try:
+            check = subprocess.run(command, capture_output=True, text=True, timeout=25)
+            results[name] = {
+                "exit_code": check.returncode,
+                "stdout": check.stdout[-1500:],
+                "stderr": check.stderr[-1500:],
+            }
+        except (OSError, subprocess.TimeoutExpired) as error:
+            results[name] = {"error": str(error), "exit_code": None}
+    results["trust_gate"] = "BLOCKED"
+    results["note"] = (
+        "No release signing/notarization is certified by build or extracted GUI checks"
+    )
+    return results
+
+
 def native_driver():
     try:
         import pyautogui
@@ -831,6 +875,8 @@ def main() -> int:
             executable, manifest = inspect_archive(args, folder / "extracted")
             state["packaging"] = "PASS"
             state["journeys"]["archive_and_binary_integrity"] = "PASS"
+            state["native_distribution_trust"] = distribution_trust(executable, args.platform)
+            state["journeys"]["code_signing_and_notarization"] = "BLOCKED"
             state["metadata"] = manifest
             env = dict(os.environ)
             env.pop("PYTHONPATH", None)
