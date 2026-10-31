@@ -6,6 +6,7 @@ import pytest
 
 from model.manager import TransitionError
 from model.session import DesktopSession
+from model.resources import bundled_games_root
 
 
 def chess_pawn_action(session):
@@ -286,7 +287,7 @@ def _positioned_draughts_session(monkeypatch, pieces, *, clock_seconds=600, extr
     import model.session as session_module
     from model.definition import validate_definition
 
-    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
     data["clock"]["initial_seconds"] = clock_seconds
     data["board"]["starting_pieces"] = [
         {

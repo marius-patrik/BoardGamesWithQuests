@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from model.session import DesktopSession
+from model.resources import bundled_games_root
 from view.app import build_application, open_settings
 
 
@@ -643,7 +644,7 @@ def prepared_position(monkeypatch, game, placement, starting_side):
     import model.session as session_module
     from model.definition import validate_definition
 
-    config = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
+    config = json.loads(bundled_games_root().joinpath(game, "config.json").read_text())
     config["board"]["starting_pieces"] = placement
     config["starting_side"] = starting_side
     definition = validate_definition(config)
@@ -921,7 +922,7 @@ def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypat
     import model.session as session_module
     from model.definition import validate_definition
 
-    data = json.loads(resources.files("games").joinpath("chess", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("chess", "config.json").read_text())
     data["quests"].extend(
         {
             "id": f"visual-quest-{number}",
@@ -972,7 +973,7 @@ def _long_quest_session(game, monkeypatch, suffix):
     import model.session as session_module
     from model.definition import validate_definition
 
-    data = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath(game, "config.json").read_text())
     data["quests"] = [
         {
             "id": f"shared-quest-{index}",

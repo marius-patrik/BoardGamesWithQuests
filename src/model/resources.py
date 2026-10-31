@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from importlib import resources
+from importlib.util import find_spec
 from importlib.resources.abc import Traversable
 from pathlib import Path
 import sys
@@ -24,7 +24,15 @@ def bundled_games_root() -> Traversable:
             raise FileNotFoundError("frozen application has no resource base")
         root: Traversable = Path(base) / "games"
     else:
-        root = resources.files("games")
+        spec = find_spec("games")
+        locations = () if spec is None else (spec.submodule_search_locations or ())
+        # Setuptools editable installs add a synthetic namespace path hook.
+        # Filtering to real directories avoids importlib.resources' failure
+        # to construct a MultiplexedPath from that non-directory sentinel.
+        candidates = {Path(location).resolve() for location in locations if Path(location).is_dir()}
+        if len(candidates) != 1:
+            raise FileNotFoundError("expected one installed games resource directory")
+        root = next(iter(candidates))
     if not root.is_dir():
         raise FileNotFoundError("bundled games directory is missing")
     if getattr(sys, "frozen", False):
