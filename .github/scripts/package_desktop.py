@@ -205,6 +205,26 @@ def write_build_identity(bundle: Path, platform: str, version: str) -> Path:
     return location
 
 
+def reseal_macos_after_metadata(bundle: Path, platform: str) -> None:
+    """Restore the app's ad-hoc seal after injecting immutable build manifests.
+
+    PyInstaller signs the .app before we write games/manifest.json and
+    build-info.json. Without resealing, Apple's codesign verifier rejects the
+    extracted app as tampered even when the archive checksum is correct.
+    This is *not* Developer ID signing or notarization.
+    """
+    if not platform.startswith("macos"):
+        return
+    subprocess.run(
+        ["codesign", "--force", "--deep", "--sign", "-", str(bundle)],
+        check=True,
+    )
+    subprocess.run(
+        ["codesign", "--verify", "--deep", "--strict", str(bundle)],
+        check=True,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", required=True, choices=sorted(PLATFORMS))
@@ -213,6 +233,7 @@ def main() -> None:
     bundle = build(args.platform, args.version)
     smoke(bundle, args.platform)
     write_build_identity(bundle, args.platform, args.version)
+    reseal_macos_after_metadata(bundle, args.platform)
     archive, checksum = archive_bundle(bundle, ROOT / "dist/release", args.platform, args.version)
     print(f"Verified desktop bundle: {bundle}")
     print(f"Release asset: {archive}")
