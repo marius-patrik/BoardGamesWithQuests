@@ -1149,7 +1149,9 @@ def test_settings_cancel_save_restart_defaults_and_pointer_mapping(window, tmp_p
     assert window.grab_current() == settings.window
     settings.size.set(preferred)
     settings.coordinates.set(False)
-    settings.window.event_generate("<Escape>")
+    settings.size_control.focus_force()
+    window.update()
+    settings.size_control.event_generate("<Escape>")
     window.update()
     assert not target.exists()
     assert window.game_view._preferred_board_size == original
@@ -1230,10 +1232,14 @@ def test_nested_settings_cancel_restores_game_chooser_grab_and_focus(window):
     assert window.grab_current() == settings.window
 
     settings.size.set(88)
-    settings.window.event_generate("<Escape>")
+    settings.size_control.focus_force()
+    window.update()
+    settings.size_control.event_generate("<Escape>")
     window.update()
     assert window.grab_current() == chooser
     assert chooser.winfo_exists()
+    chooser.focus_force()
+    window.update()
     chooser.event_generate("<Escape>")
     window.update()
     assert window.grab_current() is None
@@ -1244,6 +1250,8 @@ def test_nested_settings_cancel_restores_game_chooser_grab_and_focus(window):
     window.update()
     second = next(widget for widget in window.winfo_children() if isinstance(widget, tk.Toplevel))
     assert window.grab_current() == second
+    second.focus_force()
+    window.update()
     second.event_generate("<Escape>")
     window.update()
     assert window.grab_current() is None
@@ -1258,6 +1266,8 @@ def test_cancelable_real_move_chooser_restores_grab_without_playing(window):
     def cancel():
         chooser = next(widget for widget in descendants(window) if isinstance(widget, tk.Toplevel))
         assert window.grab_current() == chooser
+        chooser.focus_force()
+        window.update()
         chooser.event_generate("<Escape>")
 
     window.after(30, cancel)
