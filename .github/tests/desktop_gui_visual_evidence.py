@@ -144,6 +144,65 @@ def capture_quest_and_history_stress(output: Path) -> None:
         session_module.load_bundled_definition = original_loader
 
 
+def capture_native_dialogs(output: Path) -> None:
+    """Record actual platform-themed chooser, settings and three square-size states."""
+    from tkinter import ttk
+
+    output.mkdir(exist_ok=True)
+    for game in ("chess", "checkers"):
+        for preferred in (32, 56, 88):
+            root = tk.Tk()
+            root.geometry("1100x760+0+0")
+            build_application(root, game, show_modal=False)
+            try:
+                root.game_view.apply_preferences(
+                    {"board_size": preferred, "show_coordinates": preferred != 32}
+                )
+                root.update()
+                capture(root, output / f"ux454-{game}-{preferred}px.png")
+            finally:
+                root.game_view.stop_auto_refresh()
+                root.destroy()
+
+    root = tk.Tk()
+    root.geometry("1100x760+0+0")
+    build_application(root, "chess", show_modal=False)
+    try:
+        root.game_view.on_new_game()
+        root.update()
+        capture(root, output / "ux454-native-game-chooser.png")
+        chooser = next(child for child in root.winfo_children() if isinstance(child, tk.Toplevel))
+
+        def descendants(widget):
+            for child in widget.winfo_children():
+                yield child
+                yield from descendants(child)
+
+        settings_button = next(
+            child
+            for child in descendants(chooser)
+            if isinstance(child, ttk.Button) and child.cget("text") == "Settings"
+        )
+        settings_button.invoke()
+        root.update()
+        assert root.grab_current() == root.settings_dialog.window
+        capture(root, output / "ux454-native-nested-settings.png")
+        root.settings_dialog.close()
+        assert root.grab_current() == chooser
+        cancel = next(
+            child
+            for child in descendants(chooser)
+            if isinstance(child, ttk.Button) and child.cget("text") == "Cancel"
+        )
+        cancel.invoke()
+        root.update()
+        assert root.grab_current() is None
+    finally:
+        root.game_view.stop_auto_refresh()
+        root.destroy()
+
+
 if __name__ == "__main__":
     main()
     capture_quest_and_history_stress(Path("ux452-real-screenshots"))
+    capture_native_dialogs(Path("ux452-real-screenshots"))

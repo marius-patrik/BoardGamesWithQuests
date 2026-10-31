@@ -10,6 +10,7 @@ from tkinter import ttk
 from typing import Callable, List, Optional
 
 from controller.window_controller import display_game_name
+from view.dialog_lifecycle import ModalLifecycle
 
 
 class StartModal:
@@ -43,9 +44,9 @@ class StartModal:
 
         self.window = tk.Toplevel(master)
         self.window.title("New game")
-        self.window.transient(master)
-        self.window.grab_set()
+        self._modal = ModalLifecycle(self.window, master)
         self.window.protocol("WM_DELETE_WINDOW", self.close)
+        self.window.bind("<Escape>", lambda _event: self.close())
 
         body = ttk.Frame(self.window, padding=20)
         body.pack(fill="both", expand=True)
@@ -66,6 +67,7 @@ class StartModal:
         self.start_button = ttk.Button(buttons, text="Start", command=self.start, width=12)
         self.start_button.pack(side="left", padx=(0, 8))
         self.start_button.bind("<Return>", lambda _event: self.start())
+        self.selector.bind("<Return>", lambda _event: self.start())
 
         if on_settings is not None:
             self.settings_button = ttk.Button(
@@ -75,9 +77,8 @@ class StartModal:
 
         ttk.Button(body, text="Cancel", command=self.close).pack(pady=(18, 0))
 
-        self.selector.focus_set()
-        self.window.update_idletasks()
-        self._centre(master)
+        self._modal.center()
+        self._modal.activate(self.selector)
 
     def _centre(self, master: tk.Misc) -> None:
         """Put the modal in the middle of the window it belongs to.
@@ -125,11 +126,7 @@ class StartModal:
         Returns:
             None
         """
-        try:
-            self.window.grab_release()
-        except tk.TclError:  # pragma: no cover - the grab may already be gone
-            pass
-        self.window.destroy()
+        self._modal.close()
         if not self._accepted and self.on_cancel is not None:
             self.on_cancel()
 

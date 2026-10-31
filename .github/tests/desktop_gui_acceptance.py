@@ -1132,3 +1132,225 @@ def test_long_material_is_grouped_without_synthesizing_score(window):
     assert white.score.get() == score_before
     assert white.name.get() == "White"
     assert white.winfo_width() > 0
+
+
+# #454: real Tk widgets, focus/grabs, settings restart, bounded feedback and idle redraw.
+@pytest.mark.parametrize("preferred", [32, 56, 88])
+def test_settings_cancel_save_restart_defaults_and_pointer_mapping(window, tmp_path, preferred):
+    import os
+    import subprocess
+    import sys
+
+    from model.game.preferences import DEFAULTS
+
+    target = Path(os.environ["XDG_CONFIG_HOME"]) / "BoardGamesWithQuests" / "preferences.json"
+    original = window.game_view._preferred_board_size
+    settings = open_settings(window, window.window_controller)
+    assert window.grab_current() == settings.window
+    settings.size.set(preferred)
+    settings.coordinates.set(False)
+    settings.size_control.focus_force()
+    window.update()
+    settings.size_control.event_generate("<Escape>")
+    window.update()
+    assert not target.exists()
+    assert window.game_view._preferred_board_size == original
+    assert window.grab_current() is None
+
+    settings = open_settings(window, window.window_controller)
+    assert settings.size.get() == DEFAULTS["board_size"]
+    settings.size.set(preferred)
+    settings.coordinates.set(False)
+    settings.save()
+    window.update()
+    assert json.loads(target.read_text(encoding="utf-8")) == {
+        "board_size": preferred,
+        "show_coordinates": False,
+    }
+    assert window.game_view._preferred_board_size == preferred
+    assert not window.game_view.board_view.show_coordinates
+
+    # Real second interpreter/process, reading the existing secure OS store.
+    code = (
+        "import json, tkinter as tk; "
+        "from view.app import build_application; "
+        "root = tk.Tk(); root.geometry('1100x860'); "
+        "build_application(root, 'chess', show_modal=False); root.update(); "
+        "view = root.game_view; "
+        "print(json.dumps({'preferred': view._preferred_board_size, "
+        "'coordinates': view.board_view.show_coordinates})); "
+        "view.stop_auto_refresh(); root.destroy()"
+    )
+    child = subprocess.run(
+        [sys.executable, "-c", code],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert json.loads(child.stdout.strip().splitlines()[-1]) == {
+        "preferred": preferred,
+        "coordinates": False,
+    }
+
+    # The preferred size is an upper bound, never a request to clip the board.
+    window.geometry("840x640")
+    window.update()
+    size = window.game_view.board_view.square_size
+    assert 32 <= size <= preferred
+    before = window.game_view.session.snapshot()["revision"]
+    click_canvas(window, 6, 4)
+    click_canvas(window, 4, 4)
+    assert window.game_view.session.snapshot()["revision"] == before + 1
+
+    settings = open_settings(window, window.window_controller)
+    settings.restore_defaults()
+    # Restore defaults is explicitly a draft action until Save.
+    assert json.loads(target.read_text(encoding="utf-8"))["board_size"] == preferred
+    settings.save()
+    window.update()
+    assert json.loads(target.read_text(encoding="utf-8")) == DEFAULTS
+    assert window.game_view._preferred_board_size == DEFAULTS["board_size"]
+
+
+def test_nested_settings_cancel_restores_game_chooser_grab_and_focus(window):
+    before = window.game_view.session.snapshot()
+    window.game_view.on_new_game()
+    window.update()
+    chooser = next(widget for widget in window.winfo_children() if isinstance(widget, tk.Toplevel))
+    assert window.grab_current() == chooser
+    settings_button = next(
+        widget
+        for widget in descendants(chooser)
+        if isinstance(widget, __import__("tkinter").ttk.Button)
+        and widget.cget("text") == "Settings"
+    )
+    settings_button.invoke()
+    window.update()
+    settings = window.settings_dialog
+    assert str(settings.window.transient()) == str(chooser)
+    assert window.grab_current() == settings.window
+
+    settings.size.set(88)
+    settings.size_control.focus_force()
+    window.update()
+    settings.size_control.event_generate("<Escape>")
+    window.update()
+    assert window.grab_current() == chooser
+    assert chooser.winfo_exists()
+    chooser.focus_force()
+    window.update()
+    chooser.event_generate("<Escape>")
+    window.update()
+    assert window.grab_current() is None
+    assert window.game_view.session.snapshot() == before
+
+    # A second chooser/Settings sequence must never leave an orphaned grab.
+    window.game_view.on_new_game()
+    window.update()
+    second = next(widget for widget in window.winfo_children() if isinstance(widget, tk.Toplevel))
+    assert window.grab_current() == second
+    second.focus_force()
+    window.update()
+    second.event_generate("<Escape>")
+    window.update()
+    assert window.grab_current() is None
+
+
+def test_cancelable_real_move_chooser_restores_grab_without_playing(window):
+    view = window.game_view
+    before = view.session.snapshot()
+    options = view.session.legal_actions()[:2]
+    assert options
+
+    def cancel():
+        chooser = next(widget for widget in descendants(window) if isinstance(widget, tk.Toplevel))
+        assert window.grab_current() == chooser
+        chooser.focus_force()
+        window.update()
+        chooser.event_generate("<Escape>")
+
+    window.after(30, cancel)
+    result = view._choose_complete_move(
+        options,
+        before,
+        title="Choose your move",
+        explanation="Choose one legal route.",
+        confirm_label="Play selected move",
+    )
+    assert result is None
+    assert window.grab_current() is None
+    assert view.session.snapshot() == before
+
+
+@pytest.mark.parametrize("game", ["chess", "checkers"])
+def test_clock_only_autorefresh_preserves_actual_canvas_items(window, game):
+    if game != "chess":
+        window.window_controller.game_controller.new_game(game)
+        window.game_view.reload(clean=True)
+    view = window.game_view
+    view.refresh()
+    canvas = view.board_view.canvas
+    identifiers = canvas.find_all()
+    assert identifiers
+
+    # Run the scheduled 500-ms callback through Tk's real event loop.
+    window.after(660, window.quit)
+    window.mainloop()
+    assert canvas.find_all() == identifiers
+    assert view.session.snapshot()["revision"] == 0
+    assert not view.action_buttons["New game"].instate(["disabled"])
+
+    # Compare the original unconditional full Canvas repaint operation to
+    # the optimized real refresh path on the same process, board and display.
+    from time import perf_counter
+    import warnings
+
+    iterations = 24
+    began = perf_counter()
+    for _ in range(iterations):
+        view.board_view.refresh(view.session.board_projection())
+        view.refresh()
+    old_ms = (perf_counter() - began) * 1000 / iterations
+    began = perf_counter()
+    for _ in range(iterations):
+        view.refresh()
+    new_ms = (perf_counter() - began) * 1000 / iterations
+    warnings.warn(
+        f"UX454 {game} 24-iteration Xvfb refresh reference="
+        f"{old_ms:.3f}ms optimized={new_ms:.3f}ms",
+        RuntimeWarning,
+        stacklevel=1,
+    )
+    assert canvas.find_all() != identifiers  # reference path really repainted
+    stable = canvas.find_all()
+    view.refresh()
+    assert canvas.find_all() == stable
+
+
+def test_io_errors_show_bounded_basename_without_replacing_live_game(window, tmp_path, monkeypatch):
+    from view import player_game_view as module
+
+    before = window.game_view.session.snapshot()
+    filename = "prefix-" + ("x" * 150) + "-save.json"
+    blocked = tmp_path / "not-a-directory"
+    blocked.write_text("existing file", encoding="utf-8")
+    target = str(blocked / filename)
+    captured = []
+    monkeypatch.setattr(
+        module.messagebox,
+        "showerror",
+        lambda title, message, **_kwargs: captured.append((title, message)),
+    )
+    monkeypatch.setattr(
+        module.filedialog,
+        "asksaveasfilename",
+        lambda **_kwargs: target,
+    )
+    assert window.game_view.export_game() is False
+    assert captured[0][0] == "Save game"
+    assert "prefix-" in captured[0][1] and "-save.json" in captured[0][1]
+    assert len(captured[0][1]) < 600
+    assert "\n" in captured[0][1]
+    assert window.game_view.session.snapshot() == before
+    assert not window.game_view._has_unsaved_progress()
