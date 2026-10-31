@@ -570,7 +570,7 @@ class PlayerGameView(ttk.Frame):
     def _file_description(destination: str) -> str:
         """Only a basename belongs in the single-line persistent status bar."""
         name = Path(destination).name or "unnamed file"
-        return name if len(name) <= 70 else name[:67] + "…"
+        return name if len(name) <= 70 else name[:34] + "…" + name[-34:]
 
     def _show_file_error(self, operation: str, path: str, error: Exception) -> None:
         """Bound native dialog geometry while keeping the actual failure detail."""
@@ -583,7 +583,7 @@ class PlayerGameView(ttk.Frame):
         )
         messagebox.showerror(
             operation,
-            f'Could not {operation.lower()} "{name}".\\n\\n{detail}',
+            f'Could not {operation.lower()} "{name}".\n\n{detail}',
             parent=self,
         )
 
