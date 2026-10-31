@@ -176,9 +176,7 @@ def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch)
     click_canvas(window, 4, 4)
     previous = window.window_controller.game_controller.session.snapshot()
     saved = tmp_path / "saved.json"
-    monkeypatch.setattr(
-        screen.filedialog, "asksaveasfilename", lambda **kwargs: str(saved)
-    )
+    monkeypatch.setattr(screen.filedialog, "asksaveasfilename", lambda **kwargs: str(saved))
     window.game_view.export_game()
     assert load_session(saved).snapshot() == previous
     window.window_controller.game_controller.new_game("checkers")
@@ -499,13 +497,9 @@ def test_open_cancel_and_failed_replay_preserve_session_title_and_revision(
     bad = tmp_path / "invalid.json"
     bad.write_text('{"revision": 1, "revision": 4}', encoding="utf-8")
     answers = iter((None, False, False))
-    monkeypatch.setattr(
-        screen.messagebox, "askyesnocancel", lambda *a, **k: next(answers)
-    )
+    monkeypatch.setattr(screen.messagebox, "askyesnocancel", lambda *a, **k: next(answers))
     filepaths = iter((str(bad), ""))
-    monkeypatch.setattr(
-        screen.filedialog, "askopenfilename", lambda **kwargs: next(filepaths)
-    )
+    monkeypatch.setattr(screen.filedialog, "askopenfilename", lambda **kwargs: next(filepaths))
     errors = []
     monkeypatch.setattr(
         screen.messagebox,
@@ -624,9 +618,7 @@ def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monk
     window.game_view.resign_game()
     state = window.window_controller.game_controller.session.snapshot()
     target = tmp_path / "final-game.json"
-    monkeypatch.setattr(
-        screen.filedialog, "asksaveasfilename", lambda **kwargs: str(target)
-    )
+    monkeypatch.setattr(screen.filedialog, "asksaveasfilename", lambda **kwargs: str(target))
     assert window.game_view.export_game() is True
     window.game_view.refresh()  # same periodic refresh path as the running Tk clock
     assert "Saved game" in window.game_view.status.get()
