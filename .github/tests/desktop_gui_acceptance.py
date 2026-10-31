@@ -117,7 +117,7 @@ def test_game_switch_through_visible_new_game_modal_resets_board(window):
 
 
 def test_snapshot_export_from_real_window_is_replayable(window, tmp_path, monkeypatch):
-    from view import player_game_view
+    from view import screen as player_game_view
 
     click_canvas(window, 6, 4)
     click_canvas(window, 4, 4)
@@ -170,7 +170,7 @@ def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
 
 def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch):
     from model.persistence import load_session
-    from view import player_game_view
+    from view import screen as player_game_view
 
     click_canvas(window, 6, 4)
     click_canvas(window, 4, 4)
@@ -193,7 +193,7 @@ def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch)
 
 def test_bad_saved_game_preserves_live_window_and_reports_error(window, tmp_path, monkeypatch):
     from model.persistence import SessionFileError, load_session
-    from view import player_game_view
+    from view import screen as player_game_view
 
     before = window.window_controller.game_controller.session.snapshot()
     bad = tmp_path / "invalid.json"
@@ -213,7 +213,7 @@ def test_bad_saved_game_preserves_live_window_and_reports_error(window, tmp_path
 
 
 def test_notation_button_exports_actual_user_game_as_pgn(window, tmp_path, monkeypatch):
-    from view import player_game_view
+    from view import screen as player_game_view
 
     click_canvas(window, 6, 4)
     click_canvas(window, 4, 4)
@@ -232,7 +232,7 @@ def test_notation_button_exports_actual_user_game_as_pgn(window, tmp_path, monke
 
 
 def test_resign_from_real_ui_commits_terminal_result_and_blocks_further_moves(window, monkeypatch):
-    from view import player_game_view
+    from view import screen as player_game_view
 
     monkeypatch.setattr(player_game_view.messagebox, "askyesno", lambda *a, **k: True)
     window.game_view.resign_game()
@@ -246,7 +246,7 @@ def test_resign_from_real_ui_commits_terminal_result_and_blocks_further_moves(wi
 
 
 def test_unavailable_draw_claim_does_not_mutate_authoritative_game(window, monkeypatch):
-    from view import player_game_view
+    from view import screen as player_game_view
 
     before = window.window_controller.game_controller.session.snapshot()
     messages = []
@@ -309,7 +309,7 @@ def test_responsive_live_board_actions_and_clocks(tmp_path, monkeypatch, game, s
                 canvas,
                 view.top_player,
                 view.bottom_player,
-                view.questsport,
+                view.quest_viewport,
                 view.history,
             ):
                 inside(widget)
@@ -491,7 +491,7 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
 def test_open_cancel_and_failed_replay_preserve_session_title_and_revision(
     window, tmp_path, monkeypatch
 ):
-    from view import player_game_view
+    from view import screen as player_game_view
 
     _play_one_legal_move(window)
     previous = window.window_controller.game_controller.session.snapshot()
@@ -525,7 +525,7 @@ def test_open_cancel_and_failed_replay_preserve_session_title_and_revision(
 
 
 def test_save_then_open_switches_title_and_retains_replay(window, tmp_path, monkeypatch):
-    from view import player_game_view
+    from view import screen as player_game_view
     from model.persistence import load_session, save_session
 
     _play_one_legal_move(window)
@@ -554,7 +554,7 @@ def test_save_then_open_switches_title_and_retains_replay(window, tmp_path, monk
 
 
 def test_save_cancel_and_io_error_abort_destructive_new_game(window, tmp_path, monkeypatch):
-    from view import player_game_view
+    from view import screen as player_game_view
 
     _play_one_legal_move(window)
     original = window.window_controller.game_controller.session.snapshot()
@@ -582,7 +582,7 @@ def test_save_cancel_and_io_error_abort_destructive_new_game(window, tmp_path, m
 
 
 def test_claim_prompt_has_real_newlines_and_game_validates_claim(window, monkeypatch):
-    from view import player_game_view
+    from view import screen as player_game_view
 
     prompts = []
     messages = []
@@ -617,7 +617,7 @@ def test_claim_prompt_has_real_newlines_and_game_validates_claim(window, monkeyp
 
 
 def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monkeypatch):
-    from view import player_game_view
+    from view import screen as player_game_view
     from model.persistence import load_session
 
     monkeypatch.setattr(player_game_view.messagebox, "askyesno", lambda *args, **kwargs: True)
@@ -877,10 +877,10 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
     root.update()
     view = root.game_view
     state = view.session.snapshot()
-    assert set(view.panels) == {1, -1}
+    assert set(view.player_views) == {1, -1}
     assert set(view.quest_lists) == {1, -1}
-    assert set(view.questsports) == {1, -1}
-    white, black = view.panels[1], view.panels[-1]
+    assert set(view.quest_viewports) == {1, -1}
+    white, black = view.player_views[1], view.player_views[-1]
     board = view.board_view.canvas
 
     assert white.winfo_ismapped() and black.winfo_ismapped()
@@ -898,9 +898,9 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
     for side in (1, -1):
         participant_id = state["participants"][str(side)]
         assert len(view.quest_lists[side].cards) == len(state["quest_progress"][participant_id])
-        assert view.questsports[side].winfo_ismapped()
-        assert view.questsports[side].winfo_height() > 0
-        assert view.panels[side].score.get() == (
+        assert view.quest_viewports[side].winfo_ismapped()
+        assert view.quest_viewports[side].winfo_height() > 0
+        assert view.player_views[side].score.get() == (
             f"Quest score: {state['quest_scores'][participant_id]}"
         )
     if game == "chess":
@@ -945,7 +945,7 @@ def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypat
     for side in (1, -1):
         participant = state["participants"][str(side)]
         listing = window.game_view.quest_lists[side]
-        viewport = window.game_view.questsports[side]
+        viewport = window.game_view.quest_viewports[side]
         assert len(listing.cards) == len(state["quest_progress"][participant])
         assert len(listing.cards) > 6
         assert viewport.bbox("all")[3] > viewport.winfo_height()
@@ -961,7 +961,7 @@ def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypat
     after = session.snapshot()
     for side in (1, -1):
         participant = after["participants"][str(side)]
-        assert window.game_view.panels[side].score.get() == (
+        assert window.game_view.player_views[side].score.get() == (
             f"Quest score: {after['quest_scores'][participant]}"
         )
 
@@ -998,15 +998,15 @@ def test_quest_long_copy_and_two_independent_mousewheel_scrollers(window, monkey
     window.update()
     view = window.game_view
     board = view.board_view.canvas
-    white, black = view.questsports[1], view.questsports[-1]
-    assert view.panels[1].winfo_rootx() < board.winfo_rootx()
-    assert board.winfo_rootx() < view.panels[-1].winfo_rootx()
+    white, black = view.quest_viewports[1], view.quest_viewports[-1]
+    assert view.player_views[1].winfo_rootx() < board.winfo_rootx()
+    assert board.winfo_rootx() < view.player_views[-1].winfo_rootx()
     for side in (1, -1):
         cards = view.quest_lists[side].cards
         assert len(cards) == 12
         assert "longer objective" in cards[-1].description_label.cget("text")
         assert cards[-1].reward_label.cget("text") == "Reward: 14 pts"
-        assert view.questsports[side].bbox("all")[3] > view.questsports[side].winfo_height()
+        assert view.quest_viewports[side].bbox("all")[3] > view.quest_viewports[side].winfo_height()
     white_before, black_before = white.yview(), black.yview()
     # Deliver the real pointer wheel to a nested quest description, not Canvas.
     view.quest_lists[1].cards[0].description_label.event_generate("<Button-5>")
@@ -1020,7 +1020,7 @@ def test_quest_long_copy_and_two_independent_mousewheel_scrollers(window, monkey
     view.refresh()  # regular clock refresh must not reset either scroll position
     window.update()
     assert white.yview() == white_position
-    assert view.panels[1].clock.get() and view.panels[-1].clock.get()
+    assert view.player_views[1].clock.get() and view.player_views[-1].clock.get()
 
 
 def test_quest_cache_refreshes_different_config_with_same_ids_and_progress(window, monkeypatch):
@@ -1056,7 +1056,7 @@ def test_quest_cache_refreshes_different_config_with_same_ids_and_progress(windo
     completed = view.quest_lists[-1].cards[0]
     assert completed.progress_label.cget("text").endswith("Completed")
     assert int(float(completed.indicator["value"])) == int(float(completed.indicator["maximum"]))
-    assert view.panels[-1].score.get() == (
+    assert view.player_views[-1].score.get() == (
         f"Quest score: {view.session.snapshot()['quest_scores']['black']}"
     )
 
@@ -1121,7 +1121,7 @@ def test_long_material_is_grouped_without_synthesizing_score(window):
         + [{"kind": "bishop", "side": -1}] * 8
         + [{"kind": "rook", "side": 1}] * 11
     )
-    white = view.panels[1]
+    white = view.player_views[1]
     score_before = white.score.get()
     white.refresh(state, view.session.clock_remaining())
     window.geometry("840x640")
@@ -1328,7 +1328,7 @@ def test_clock_only_autorefresh_preserves_actual_canvas_items(window, game):
 
 
 def test_io_errors_show_bounded_basename_without_replacing_live_game(window, tmp_path, monkeypatch):
-    from view import player_game_view as module
+    from view import screen as player_game_view as module
 
     before = window.game_view.session.snapshot()
     filename = "prefix-" + ("x" * 150) + "-save.json"

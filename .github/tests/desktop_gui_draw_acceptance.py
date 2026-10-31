@@ -13,6 +13,7 @@ from tkinter import ttk
 
 import pytest
 
+from model.resources import bundled_games_root
 from model.definition import validate_definition
 from model.session import DesktopSession
 from view.app import build_application
@@ -80,7 +81,7 @@ def draw_ready_chess():
 def draw_ready_wcdf(monkeypatch):
     import model.session as session_module
 
-    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
     data["board"]["starting_pieces"] = [
         {"piece": "king", "color": "black", "squares": [[2, 1]]},
         {"piece": "king", "color": "white", "squares": [[5, 6]]},
@@ -106,7 +107,7 @@ def draw_ready_wcdf(monkeypatch):
 
 
 def test_real_offer_accept_and_terminal_controls(window, monkeypatch):
-    from view import player_game_view as view
+    from view import screen as view
 
     monkeypatch.setattr(view.simpledialog, "askinteger", lambda *a, **k: 1)
     monkeypatch.setattr(view.messagebox, "askyesno", lambda *a, **k: True)
@@ -130,7 +131,7 @@ def test_real_offer_accept_and_terminal_controls(window, monkeypatch):
 
 
 def test_wcdf_real_offer_reject_preserves_game_and_clock_anchor(window, monkeypatch):
-    from view import player_game_view as view
+    from view import screen as view
 
     window.window_controller.game_controller.new_game("checkers")
     window.game_view.reload(clean=True)
@@ -162,7 +163,7 @@ def test_wcdf_real_offer_reject_preserves_game_and_clock_anchor(window, monkeypa
 @pytest.mark.parametrize("game", ["chess", "checkers"])
 @pytest.mark.parametrize("button", ["Cancel", "Use intended move"])
 def test_real_prospective_claim_modal_cancellation_or_acceptance(window, monkeypatch, game, button):
-    from view import player_game_view as view
+    from view import screen as view
 
     session = draw_ready_chess() if game == "chess" else draw_ready_wcdf(monkeypatch)
     window.window_controller.game_controller.session = session
@@ -190,7 +191,7 @@ def test_real_prospective_claim_modal_cancellation_or_acceptance(window, monkeyp
 def test_actual_legal_multi_hop_route_is_displayed_complete_and_cancelable(window, monkeypatch):
     import model.session as session_module
 
-    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
     data["board"]["starting_pieces"] = [
         {"piece": "man", "color": "black", "squares": [[2, 3]]},
         {"piece": "man", "color": "white", "squares": [[3, 2], [3, 4], [5, 4]]},

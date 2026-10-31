@@ -15,6 +15,7 @@ import tkinter as tk
 from PIL import ImageGrab
 
 from view.app import build_application
+from model.resources import bundled_games_root
 
 
 def click(root: tk.Tk, row: int, col: int) -> None:
@@ -52,10 +53,10 @@ def main() -> None:
                 root.update()
                 view = root.game_view
                 board = view.board_view
-                assert view.panels[1].winfo_rootx() < board.winfo_rootx()
-                assert board.winfo_rootx() < view.panels[-1].winfo_rootx()
-                assert view.questsports[1].winfo_ismapped()
-                assert view.questsports[-1].winfo_ismapped()
+                assert view.player_views[1].winfo_rootx() < board.winfo_rootx()
+                assert board.winfo_rootx() < view.player_views[-1].winfo_rootx()
+                assert view.quest_viewports[1].winfo_ismapped()
+                assert view.quest_viewports[-1].winfo_ismapped()
                 capture(root, output / f"ux452-after-{game}-{width}x{height}.png")
                 if game == "chess":
                     click(root, 6, 4)
@@ -85,7 +86,7 @@ def capture_quest_and_history_stress(output: Path) -> None:
     try:
         for game in ("chess", "checkers"):
             definition_json = json.loads(
-                resources.files("games").joinpath(game, "config.json").read_text()
+                bundled_games_root().joinpath(game, "config.json").read_text()
             )
             definition_json["quests"] = [
                 {
@@ -111,8 +112,8 @@ def capture_quest_and_history_stress(output: Path) -> None:
                     root.update()
                     assert all(len(view.quest_lists[s].cards) == 12 for s in (1, -1))
                     # The left and right readers may independently study distant cards.
-                    view.questsports[1].yview_moveto(0.35)
-                    view.questsports[-1].yview_moveto(0.8)
+                    view.quest_viewports[1].yview_moveto(0.35)
+                    view.quest_viewports[-1].yview_moveto(0.8)
                     capture(root, output / f"ux453-quests-{game}-{width}x{height}.png")
                 finally:
                     root.game_view.stop_auto_refresh()

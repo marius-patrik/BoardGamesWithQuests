@@ -5,12 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 from importlib.util import find_spec
-from importlib.resources.abc import Traversable
 from pathlib import Path
 import sys
 
 
-def bundled_games_root() -> Traversable:
+def bundled_games_root() -> Path:
     """Locate shipped JSON definitions in source, installed and frozen applications.
 
     The root-level games/ directory is mapped into the installed `games` namespace
@@ -22,7 +21,7 @@ def bundled_games_root() -> Traversable:
         base = getattr(sys, "_MEIPASS", None)
         if not isinstance(base, str):
             raise FileNotFoundError("frozen application has no resource base")
-        root: Traversable = Path(base) / "games"
+        root: Path = Path(base) / "games"
     else:
         spec = find_spec("games")
         locations = () if spec is None else (spec.submodule_search_locations or ())
