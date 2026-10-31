@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+import textwrap
 from model.game.persistence import SessionFileError, load_session, save_session
 from model.game.notation import NotationError, save_notation
 import tkinter as tk
@@ -11,6 +13,7 @@ from typing import Any
 
 from controller.window_controller import WindowController, display_game_name
 from model.game.preferences import DEFAULTS, PreferencesError, load_preferences
+from view.dialog_lifecycle import ModalLifecycle
 from view.game_view import BoardView
 from view.player_view import PlayerView
 from view.quest_view import QuestList
@@ -81,6 +84,7 @@ class PlayerGameView(ttk.Frame):
         self.status = tk.StringVar(value="Ready")
         self._timer_id: str | None = None
         self._last_history: tuple[str, ...] | None = None
+        self._last_render_key: tuple[str, int] | None = None
         self._history_game_id: str | None = None
         self._presented_terminal_key: tuple[str, int] | None = None
         # Save-point metadata only: never a duplicate authoritative game snapshot.
@@ -128,7 +132,7 @@ class PlayerGameView(ttk.Frame):
         heading = ttk.Frame(self)
         heading.grid(row=0, column=0, sticky="ew", pady=(0, 6))
         heading.columnconfigure(0, weight=1)
-        ttk.Label(heading, text="BoardGamesWithQuests", font=("TkDefaultFont", 16, "bold")).grid(
+        ttk.Label(heading, text="BoardGamesWithQuests", style="GameTitle.TLabel").grid(
             row=0, column=0, sticky="w"
         )
 
@@ -181,7 +185,7 @@ class PlayerGameView(ttk.Frame):
             self.player_views[side] = player
             ttk.Separator(pane).grid(row=1, column=0, sticky="ew", pady=4)
 
-            quests_host = ttk.LabelFrame(pane, text="Your quests", padding=(2, 2))
+            quests_host = ttk.LabelFrame(pane, text="Your quests", padding=(2, 2), style="GameSection.TLabelframe")
             quests_host.grid(row=2, column=0, sticky="nsew")
             quests_host.columnconfigure(0, weight=1)
             quests_host.rowconfigure(0, weight=1)
@@ -273,7 +277,9 @@ class PlayerGameView(ttk.Frame):
         self.board_area.bind("<Configure>", self._resize_board)
 
         # A focusable Tk listbox keeps keyboard and scrollbar navigation intact.
-        history_panel = ttk.LabelFrame(self, text="Move and action history", padding=(4, 3))
+        history_panel = ttk.LabelFrame(
+            self, text="Move and action history", padding=(4, 3), style="GameSection.TLabelframe"
+        )
         history_panel.grid(row=2, column=0, sticky="ew", pady=(4, 0))
         history_panel.columnconfigure(0, weight=1)
         self.history = tk.Listbox(
@@ -299,7 +305,10 @@ class PlayerGameView(ttk.Frame):
         )
         self.history_result_label.grid(row=1, column=0, columnspan=2, sticky="ew")
         self.history_result_label.grid_remove()
-        ttk.Label(self, textvariable=self.status, relief="sunken", anchor="w", width=1).grid(
+        ttk.Label(
+            self, textvariable=self.status, relief="sunken", anchor="w", width=1,
+            style="GameStatus.TLabel"
+        ).grid(
             row=3, column=0, sticky="ew", pady=(4, 0)
         )
 
@@ -372,6 +381,7 @@ class PlayerGameView(ttk.Frame):
             self._mark_clean()
         self._last_history = None
         self._history_game_id = None
+        self._last_render_key = None
         self.board_view.set_selection(None, [])
         self.winfo_toplevel().title(self.window_controller.game_title())
         self.refresh()
@@ -406,63 +416,74 @@ class PlayerGameView(ttk.Frame):
         # New/Open/Export/Settings/Quit remain available after the result is committed.
 
     def refresh(self) -> None:
+        """Repaint changed game revisions; update clocks on every idle tick."""
         state = self.session.snapshot()
+        render_key = self._state_key(state)
         finished = state["outcome"] is not None
-        if finished:
-            self.window_controller.game_controller.reset_selection()
-            self.board_view.set_selection(None, [])
-        self.board_view.set_appearance(
-            state["config"].get("appearance", {}),
-            draughts=self.session.game == "checkers",
-        )
-        accepted_moves = [event["move"] for event in state["events"] if event["move"] is not None]
-        if accepted_moves:
-            last = accepted_moves[-1]
-            self.board_view.set_last_move(tuple(last["start"]), tuple(last["hops"][-1]))
-        else:
-            self.board_view.set_last_move(None, None)
 
-        # The current session only reports the terminal checkmate verdict,
-        # not general attack/check state. Never infer check from piece vectors.
-        checked_side = (
-            state["active_side"]
-            if (state["outcome"] is not None and state["outcome"]["cause"] == "checkmate")
-            else None
-        )
-        checked_king = next(
-            (
-                tuple(piece["square"])
-                for piece in state["board"]
-                if piece["kind"] == "king" and piece["side"] == checked_side
-            ),
-            None,
-        )
-        self.board_view.set_in_check(checked_king)
-        self.board_view.refresh(self.session.board_projection())
-        self._fit_board()
+        # Neither the board's detached projection nor legal target markers
+        # change during a clock-only tick. Keep its existing Canvas items.
+        if render_key != self._last_render_key:
+            if finished:
+                self.window_controller.game_controller.reset_selection()
+                self.board_view.set_selection(None, [])
+            self.board_view.set_appearance(
+                state["config"].get("appearance", {}),
+                draughts=self.session.game == "checkers",
+            )
+            accepted_moves = [
+                event["move"] for event in state["events"] if event["move"] is not None
+            ]
+            if accepted_moves:
+                last = accepted_moves[-1]
+                self.board_view.set_last_move(
+                    tuple(last["start"]), tuple(last["hops"][-1])
+                )
+            else:
+                self.board_view.set_last_move(None, None)
+
+            # The session exposes the terminal checkmate verdict, not a
+            # general-purpose attack-state API. Do not infer check locally.
+            checked_side = (
+                state["active_side"]
+                if finished and state["outcome"]["cause"] == "checkmate"
+                else None
+            )
+            checked_king = next(
+                (
+                    tuple(piece["square"])
+                    for piece in state["board"]
+                    if piece["kind"] == "king" and piece["side"] == checked_side
+                ),
+                None,
+            )
+            self.board_view.set_in_check(checked_king)
+            self.board_view.refresh(self.session.board_projection())
+            self._fit_board()
+            game_name = display_game_name(self.session.game)
+            if finished:
+                if self._presented_terminal_key != render_key:
+                    self._presented_terminal_key = render_key
+                    self.window_controller.set_status(
+                        "Game finished. You can save the result or start another game."
+                    )
+                self.turn.set(f"{game_name} · {outcome_description(state)}")
+            else:
+                self._presented_terminal_key = None
+                active = "White" if state["active_side"] == 1 else "Black"
+                played = sum(event["move"] is not None for event in state["events"])
+                self.turn.set(f"{game_name} · {active} to move · move {played + 1}")
+            self._refresh_actions(state)
+            for quests in self.quest_lists.values():
+                quests.refresh(state)
+            self._refresh_history(state)
+            self._last_render_key = render_key
+
+        # The authoritative timer can advance without changing game revision.
         remaining = self.session.clock_remaining()
         for player in self.player_views.values():
             player.refresh(state, remaining)
-        game_name = display_game_name(self.session.game)
-        if finished:
-            terminal_key = self._state_key(state)
-            if self._presented_terminal_key != terminal_key:
-                self._presented_terminal_key = terminal_key
-                self.window_controller.set_status(
-                    "Game finished. You can save the result or start another game."
-                )
-            self.turn.set(f"{game_name} · {outcome_description(state)}")
-        else:
-            self._presented_terminal_key = None
-            active = "White" if state["active_side"] == 1 else "Black"
-            played = sum(event["move"] is not None for event in state["events"])
-            self.turn.set(f"{game_name} · {active} to move · move {played + 1}")
         self.status.set(self.window_controller.status_message or "Ready")
-        self._refresh_actions(state)
-        for quests in self.quest_lists.values():
-            quests.refresh(state)
-
-        self._refresh_history(state)
 
     def _history_entry(self, event: dict[str, Any], state: dict[str, Any]) -> str:
         """Describe an accepted event without inferring rules from the UI."""
@@ -545,6 +566,27 @@ class PlayerGameView(ttk.Frame):
         self._fit_board()
         self.board_view.refresh()
 
+    @staticmethod
+    def _file_description(destination: str) -> str:
+        """Only a basename belongs in the single-line persistent status bar."""
+        name = Path(destination).name or "unnamed file"
+        return name if len(name) <= 70 else name[:67] + "…"
+
+    def _show_file_error(self, operation: str, path: str, error: Exception) -> None:
+        """Bound native dialog geometry while keeping the actual failure detail."""
+        name = self._file_description(path)
+        detail = str(error).strip() or type(error).__name__
+        if len(detail) > 450:
+            detail = detail[:449] + "…"
+        detail = textwrap.fill(
+            detail, width=68, break_long_words=True, break_on_hyphens=False
+        )
+        messagebox.showerror(
+            operation,
+            f'Could not {operation.lower()} "{name}".\\n\\n{detail}',
+            parent=self,
+        )
+
     def open_game(self) -> None:
         if not self._confirm_replace():
             return
@@ -554,13 +596,13 @@ class PlayerGameView(ttk.Frame):
         try:
             restored = load_session(source)
         except (OSError, SessionFileError, ValueError, TypeError) as error:
-            messagebox.showerror(
-                "Open game", f"Unable to open the saved game:\n{error}", parent=self
-            )
+            self._show_file_error("Open game", source, error)
             return
         # Replay verification has completed before the live session is replaced.
         self.window_controller.game_controller.session = restored
-        self.window_controller.set_status(f"Opened {display_game_name(restored.game)}.")
+        self.window_controller.set_status(
+            f"Opened {display_game_name(restored.game)}: {self._file_description(source)}."
+        )
         self.reload(clean=True)
 
     def resign_game(self) -> None:
@@ -704,7 +746,7 @@ class PlayerGameView(ttk.Frame):
             return None
         dialog = tk.Toplevel(self)
         dialog.title(title)
-        dialog.transient(self.winfo_toplevel())
+        lifecycle = ModalLifecycle(dialog, self)
         dialog.resizable(True, True)
         frame = ttk.Frame(dialog, padding=12)
         frame.pack(fill="both", expand=True)
@@ -731,7 +773,7 @@ class PlayerGameView(ttk.Frame):
         def finish(accept: bool) -> None:
             if accept and listbox.curselection():
                 selected[0] = moves[listbox.curselection()[0]]
-            dialog.destroy()
+            lifecycle.close()
 
         controls = ttk.Frame(frame)
         controls.pack(fill="x", pady=(8, 0))
@@ -743,11 +785,10 @@ class PlayerGameView(ttk.Frame):
         dialog.bind("<Escape>", lambda _event: finish(False))
         dialog.bind("<Return>", lambda _event: finish(True))
         listbox.bind("<Double-Button-1>", lambda _event: finish(True))
-        dialog.update_idletasks()
-        dialog.grab_set()
         listbox.selection_set(0)
         listbox.activate(0)
-        listbox.focus_set()
+        lifecycle.center()
+        lifecycle.activate(listbox)
         self.wait_window(dialog)
         return selected[0]
 
@@ -854,9 +895,11 @@ class PlayerGameView(ttk.Frame):
         try:
             save_notation(self.session, destination)
         except (OSError, NotationError, ValueError) as error:
-            messagebox.showerror("Notation", str(error), parent=self)
+            self._show_file_error("Export notation", destination, error)
             return
-        self.window_controller.set_status(f"Exported notation to {destination}")
+        self.window_controller.set_status(
+            f"Exported notation: {self._file_description(destination)}."
+        )
         self.status.set(self.window_controller.status_message)
 
     def export_game(self) -> bool:
@@ -869,10 +912,12 @@ class PlayerGameView(ttk.Frame):
         try:
             save_session(self.session, destination)
         except (OSError, SessionFileError, ValueError) as error:
-            messagebox.showerror("Save game", f"Unable to save the game:\n{error}", parent=self)
+            self._show_file_error("Save game", destination, error)
             return False
         self._mark_clean()
-        self.window_controller.set_status(f"Saved game to {destination}")
+        self.window_controller.set_status(
+            f"Saved game: {self._file_description(destination)}."
+        )
         self.status.set(self.window_controller.status_message)
         return True
 
