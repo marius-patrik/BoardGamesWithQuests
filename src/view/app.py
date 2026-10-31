@@ -21,8 +21,12 @@ def build_application(root: tk.Tk, game: str = DEFAULT_GAME, show_modal: bool = 
     root.title(f"{APPLICATION_TITLE}")
     # Enforced compact viewport: smaller windows must not silently crop gameplay.
     root.minsize(840, 640)
+    # Keep the native ttk theme selected by the platform's Tk build.
+    # The first entry in theme_names() has no special platform meaning.
     style = ttk.Style(root)
-    style.theme_use(style.theme_names()[0])
+    style.configure("GameTitle.TLabel", font=("TkDefaultFont", 16, "bold"))
+    style.configure("GameSection.TLabelframe.Label", font=("TkDefaultFont", 10, "bold"))
+    style.configure("GameStatus.TLabel", padding=(8, 4))
     games = available_games()
     controller = WindowController(GameController(DesktopSession(game)))
     controller.start()
@@ -40,14 +44,17 @@ def build_application(root: tk.Tk, game: str = DEFAULT_GAME, show_modal: bool = 
     root.window_controller = controller
     root.available_games = games
     view.start_auto_refresh()
+    root.protocol("WM_DELETE_WINDOW", view._quit)
     if show_modal:
         root.after(50, lambda: _offer_modal(root, games, controller, initial=True))
     return root
 
 
-def open_settings(root: tk.Tk, controller: WindowController) -> SettingsDialog:
+def open_settings(
+    root: tk.Tk, controller: WindowController, *, parent: tk.Misc | None = None
+) -> SettingsDialog:
     dialog = SettingsDialog(
-        root,
+        parent if parent is not None else root,
         on_saved=lambda settings: (
             root.game_view.apply_preferences(settings),
             controller.set_status("Preferences saved."),
@@ -72,11 +79,11 @@ def _offer_modal(
             controller.set_status("Continuing the default game.")
             root.game_view.refresh()
 
-    StartModal(
+    chooser = StartModal(
         root,
         games=games,
         default=controller.game_controller.session.game,
         on_start=start,
-        on_settings=lambda: open_settings(root, controller),
+        on_settings=lambda: open_settings(root, controller, parent=chooser.window),
         on_cancel=cancel,
     )
