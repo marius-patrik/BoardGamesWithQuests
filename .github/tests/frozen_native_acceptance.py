@@ -469,10 +469,14 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                             continue
                         x, y = square(position)
                         radius = max(8, int(size * 0.19))
-                        cropped = changes.crop((
-                            int(x) - radius, int(y) - radius,
-                            int(x) + radius, int(y) + radius,
-                        ))
+                        cropped = changes.crop(
+                            (
+                                int(x) - radius,
+                                int(y) - radius,
+                                int(x) + radius,
+                                int(y) + radius,
+                            )
+                        )
                         if cropped.getbbox() is None:
                             raise AssertionError(
                                 f"{game} {label}: real GUI did not visibly change square {position}"
