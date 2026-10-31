@@ -190,7 +190,8 @@ def capture_native_dialogs(output: Path) -> None:
         root.settings_dialog.close()
         assert root.grab_current() == chooser
         cancel = next(
-            child for child in descendants(chooser)
+            child
+            for child in descendants(chooser)
             if isinstance(child, ttk.Button) and child.cget("text") == "Cancel"
         )
         cancel.invoke()
