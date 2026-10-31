@@ -181,7 +181,6 @@ def corrupt_asset_check(executable: Path, target: str, cwd: Path) -> dict:
     return {"corrupt_frozen_asset_rejected": True, "rejection_exit_code": bad_exit}
 
 
-
 def missing_asset_check(executable: Path, target: str, cwd: Path) -> dict:
     """Removing a shipped ruleset must make the real frozen diagnostic fail."""
     games = (
@@ -197,13 +196,17 @@ def missing_asset_check(executable: Path, target: str, cwd: Path) -> dict:
         env.pop("PYTHONPATH", None)
         result = subprocess.run(
             [str(executable), "--check"],
-            cwd=cwd, env=env, capture_output=True, timeout=90,
+            cwd=cwd,
+            env=env,
+            capture_output=True,
+            timeout=90,
         )
         if result.returncode == 0:
             raise AssertionError("missing frozen Draughts JSON was accepted")
         return {"missing_frozen_asset_rejected": True, "rejection_exit_code": result.returncode}
     finally:
         asset.write_bytes(original)
+
 
 def native_driver():
     try:
@@ -529,7 +532,6 @@ def preferences_file(home: Path) -> Path:
     return home / ".config" / "BoardGamesWithQuests" / "preferences.json"
 
 
-
 def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: str) -> dict:
     """Exercise Cancel, Save and restart from actual native dialogs and OS user data."""
     home.mkdir()
@@ -576,7 +578,10 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
             with (evidence / f"settings-cycle-{cycle}-stderr.txt").open("wb") as stderr:
                 process = subprocess.Popen(
                     [str(exe), "--game", "chess"],
-                    cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=stderr,
+                    cwd=cwd,
+                    env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=stderr,
                 )
                 try:
                     open_chooser_settings()
@@ -585,7 +590,9 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                         # Escape is bound to cancel, and must not create user settings.
                         gui.press("escape")
                         if path.exists():
-                            raise AssertionError("Settings Cancel unexpectedly persisted preferences")
+                            raise AssertionError(
+                                "Settings Cancel unexpectedly persisted preferences"
+                            )
                         open_chooser_settings()
                         edit_settings()
                         # SettingsDialog binds Return to Save on the actual Toplevel.
@@ -604,16 +611,23 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                         gui.screenshot().save(evidence / "settings-save-complete.png")
                     else:
                         if json.loads(path.read_text(encoding="utf-8")) != {
-                            "board_size": 64, "show_coordinates": False
+                            "board_size": 64,
+                            "show_coordinates": False,
                         }:
-                            raise AssertionError("preferences were lost across native process restart")
+                            raise AssertionError(
+                                "preferences were lost across native process restart"
+                            )
                         gui.screenshot().save(evidence / "settings-after-process-restart.png")
                         gui.press("escape")
                     # Dismiss the still-open initial New game modal; verify real board.
                     focus_chooser()
                     gui.press("escape")
                     await_board(gui, evidence, f"settings-board-{cycle}")
-                    gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
+                    (
+                        gui.hotkey("command", "q")
+                        if sys.platform == "darwin"
+                        else gui.hotkey("alt", "f4")
+                    )
                     if process.wait(timeout=15) != 0:
                         raise AssertionError("frozen GUI did not exit cleanly after settings")
                 finally:
