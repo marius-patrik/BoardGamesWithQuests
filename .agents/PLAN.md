@@ -1,5 +1,15 @@
 # Execution plan — BoardGamesWithQuests v1.0.0
 
+## 2026-10-31 — Dispatch L source-tree refactor integrated; native #443 recovery
+
+- [x] #462 source candidate a99bb253b6e9da2c4f7fe289927c6b6a0e1a954d independently reviewed against all ten PR #271 maintainer threads. 77 rename-aware paths: root games definitions; src/model flat and model/piece/resources; src/view/board, screen, panel, quests, settings, modal; src/boardgameswithquests entrypoint; installed/frozen metadata and tests.
+- [x] Candidate exact SHA CI all SUCCESS: 321 governed tests per Python 3.10–3.13; 43 desktop tests per Python; 71 real Tk; editable/wheel/sdist clean install with restart/replay; Windows x64/macOS ARM64/macOS x64/Linux x64 native PACKAGE builds (runs 41202434179, 41202433931, 41202433919, 41202433881, 41202433944). Source rulebook JSON relocated byte-for-byte unchanged.
+- [x] Canonical DRAFT PR #271 integration merge a6263e09cd515b50282e94466e738f6a87c41395 has two parents (previous live 93271b08..., candidate a99bb253...), preserves exact candidate blobs on all paths except newer canonical .agents/PLAN, TODO and SCRATCHPAD. No protected merges or release.
+- [ ] #462 exact merged-head full CI and human maintainer review required before issue closure and original ten PR review thread resolutions. As observed, 8/9 workflows green, DarkFactory Runtime running. No new Chess/WCDF certification.
+- [ ] #443 four-OS actual extracted-native acceptance next: qa/443-final-native-recovery seeded from refactor integration a6263e09; preserve old qa/443-frozen-native-acceptance 1ab666fe... as selective source/evidence. Tests must cover Chess and Draughts actual GUI, save/exit/restart/reopen, settings, cancellation, promotion/captures, claims, process shutdown and offline operation. Packaging-only passes are insufficient.
+- [ ] #473 sound Chess dead-position and #477 pending timeout contract remain blockers. #437/#449 WCDF certification and #440/#442/#450 cleanup resume on NEW src/model paths. Keep Chess playable:false, draft #271 and defer #422 v2.
+
+
 ## Native Tk #454 integrated; #462 exclusive source migration (2026-10-31)
 
 - [x] Independent review of Dispatch J final 9a4d6b2; 7 source/test/evidence blobs imported into draft PR #271 at 8b52ec01e; candidate passed 321 governed tests per Python 3.10–3.13, 71 real Tk GUI cases, 30 screenshots and four OS native PACKAGE builds. Source matched 7/7.

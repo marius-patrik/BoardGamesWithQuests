@@ -1,5 +1,14 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-10-31 — Integration provenance and frozen QA branch handoff
+
+- Source refactor candidate a99bb253b6e9da2c4f7fe289927c6b6a0e1a954d had 77 renamed files and 105 raw tree path changes; latest shared before integration 93271b08afffadb75b7681187220cc3d77d0a675 changed ONLY PLAN, TODO, SCRATCHPAD from source base 0e7dd03c. Full two-parent commit a6263e09cd515b50282e94466e738f6a87c41395 includes candidate as second parent and retains current three docs. All other file blobs match candidate exactly. No stale old src/chesswithquests, src/model/game or src/view/game_view.
+- Original Chess/English Draughts config JSON relocated byte-identical; new model.resources bundled_games_root resolves namespace installed modes and _MEIPASS frozen plus SHA-256 resource manifest, pyproject packages root games and gui-scripts boardgameswithquests. Clean installed distribution acceptance covers executable, game transitions, duplicate IDs, process restart and replay.
+- Candidate CI runs #41202433944, #41202433931, #41202433919, #41202433881, #41202434179 all SUCCESS. At source merge combined run first observation 8 SUCCESS/1 DarkFactory running; do not claim 9/9 unless reverified. 4 native PACKAGE checks do NOT certify actual extracted user interactions.
+- #443 old native QA partial source at 1ab666fe191098af2e58796cef4d5f5a1846b296 must be adapted, not directly merged (old paths/manifest): new qa/443-final-native-recovery starts integrated a6263e09. User's two-sided own-quests layout and colored pieces remain unchanged.
+- Maintainer original 10 review threads unresolved by design, issue #462 open for exact merged-head gate and human review. #473/#477 FIDE pending result and sound proof still unresolved. v1 NO-GO.
+
+
 ## 2026-10-31 — Dispatch J provenance and refactor migration boundary
 
 - Candidate source 9a4d6b2 changed five view modules, two GUI test/evidence scripts and two generated AST/UML; imported only seven non-generated blobs as commit 8b52ec01e and verified 7/7 SHA identity against combined source after automatic diagram regeneration 0e7dd03c.

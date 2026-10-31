@@ -1,5 +1,14 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## 2026-10-31 — #462 source integrated; #443 test-harness recovery
+
+- [x] Verified #462 final a99bb253... (77 rename-aware files, all ten maintainer changes) with all candidate Python 3.10–3.13 governed, Linux/Tk GUI, installed editable/wheel/sdist and 4-OS native PACKAGE checks. Integrated into only draft #271 as two-parent a6263e09cd515b50282e94466e738f6a87c41395, preserving three live orchestration docs.
+- [ ] Verify exact merged SHA complete workflows and obtain independent maintainer acceptance of all ten original unresolved review threads; close #462 only after these gates. Preserve doc/tree/generator parity.
+- [ ] #443 new qa/443-final-native-recovery from a6263e09..., selectively adapt old qa/443-frozen-native-acceptance actual 4 OS pointer GUI evidence without overwriting new resource/package code; all required extracted journeys must pass on final source.
+- [ ] Resume WCDF #437/#449, FIDE #436/#473, timeout policy #477 AFTER model migration: paths are src/model/*.py and games/ now; no edits under obsolete src/model/game or src/games.
+- [ ] #444 independent audit and #445 release NO-GO; no main/develop PR merges yet.
+
+
 ## 2026-10-31 — Accepted native GUI and next exclusive #462 migration
 
 - [x] #453 source integrated and issue closed following combined-head nine successful workflows.
