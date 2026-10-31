@@ -1328,7 +1328,7 @@ def test_clock_only_autorefresh_preserves_actual_canvas_items(window, game):
 
 
 def test_io_errors_show_bounded_basename_without_replacing_live_game(window, tmp_path, monkeypatch):
-    from view import screen as player_game_view as module
+    from view import screen as module
 
     before = window.game_view.session.snapshot()
     filename = "prefix-" + ("x" * 150) + "-save.json"
