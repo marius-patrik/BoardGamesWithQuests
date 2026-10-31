@@ -269,24 +269,39 @@ def focus_chooser() -> None:
 
 
 def visible_board(image) -> tuple[float, float, float]:
+    """Locate either real bundled board palette, not one game's colors only."""
+    palettes = (
+        ((240, 217, 181), (181, 136, 99)),  # Chess
+        ((232, 218, 188), (112, 87, 63)),   # English Draughts
+    )
     pixels = image.convert("RGB").load()
     xs, ys = [], []
+    counts = [0, 0]
     for y in range(0, image.height, 4):
         for x in range(0, image.width, 4):
             rgb = pixels[x, y]
-            if min(max(abs(rgb[i] - shade[i]) for i in range(3)) for shade in (LIGHT, DARK)) <= 7:
-                xs.append(x)
-                ys.append(y)
+            for index, (light, dark) in enumerate(palettes):
+                if min(
+                    max(abs(rgb[i] - shade[i]) for i in range(3))
+                    for shade in (light, dark)
+                ) <= 7:
+                    xs.append(x)
+                    ys.append(y)
+                    counts[index] += 1
+                    break
     if len(xs) < 3000:
-        raise AssertionError(f"expected frozen Canvas, found only {len(xs)} colour samples")
+        raise AssertionError(
+            f"expected Chess/Draughts Canvas, found {len(xs)} square-color samples"
+        )
     left, top = min(xs), min(ys)
     horizontal, vertical = max(xs) - left + 4, max(ys) - top + 4
     if abs(horizontal - vertical) > 16 or not 255 <= horizontal <= 710:
         raise AssertionError(f"board not an 8x8 square: {horizontal}x{vertical}")
     size = (horizontal + vertical) / 16
+    light, dark = palettes[counts.index(max(counts))]
     for row, col in ((3, 0), (3, 7), (4, 0), (4, 7)):
         x, y = int(left + (col + 0.22) * size), int(top + (row + 0.22) * size)
-        expected = LIGHT if (row + col) % 2 == 0 else DARK
+        expected = light if (row + col) % 2 == 0 else dark
         if max(abs(pixels[x, y][i] - expected[i]) for i in range(3)) > 25:
             raise AssertionError(f"board checker pattern invalid at ({row}, {col})")
     return left, top, size
@@ -344,11 +359,24 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                     raise Blocked("could not access the real frozen New game chooser")
                 gui.sleep(0.8)
                 gui.screenshot().save(evidence / f"{game}-chooser.png")
-                # Tk focus restoration varies across AppKit, Windows and X11.
-                # Retry real keyboard focus traversal, stopping only when the
-                # chooser has disappeared and the unobscured board is visible.
-                last_error = None
-                for attempt in range(4):
+                # Native window coordinates are measured on each runner.
+                # Click the visible Start control; do not infer modal Tab order.
+                try:
+                    x, y, width, height = native_window_rectangle("New game")
+                    gui.click(x + 0.34 * width, y + 0.66 * height)
+                    left, top, size = await_board(
+                        gui, evidence, f"{game}-opening", timeout=7
+                    )
+                except (AssertionError, Blocked) as error:
+                    last_error = error
+                else:
+                    last_error = None
+                # Fall back to the known native chooser keyboard interaction only
+                # when the pointer-controlled route did not produce the real board.
+                if last_error is not None:
+                    focus_chooser()
+
+                for attempt in range(4) if last_error is not None else range(0):
                     gui.press("tab")
                     gui.press("return")
                     try:
@@ -360,7 +388,8 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                             evidence / f"{game}-chooser-attempt-{attempt + 1}.png"
                         )
                 else:
-                    raise AssertionError(f"native game chooser did not accept Start: {last_error}")
+                    if last_error is not None:
+                        raise AssertionError(f"native game chooser did not accept Start: {last_error}")
                 start, end = ((6, 4), (5, 4)) if game == "chess" else ((2, 1), (3, 0))
 
                 def square(position):
@@ -560,9 +589,8 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
         gui.screenshot().save(evidence / "settings-chooser.png")
         # ModalLifecycle activates the readonly game selector. Tab order:
         # selector -> Start -> Settings; Enter activates the focused button.
-        gui.press("tab")
-        gui.press("tab")
-        gui.press("return")
+        x, y, width, height = native_window_rectangle("New game")
+        gui.click(x + 0.66 * width, y + 0.66 * height)
         screenshot_dialog(gui, evidence, "settings-dialog", "Settings")
 
     def edit_settings() -> None:
