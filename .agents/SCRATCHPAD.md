@@ -1,5 +1,14 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-10-31 — Dispatch J provenance and refactor migration boundary
+
+- Candidate source 9a4d6b2 changed five view modules, two GUI test/evidence scripts and two generated AST/UML; imported only seven non-generated blobs as commit 8b52ec01e and verified 7/7 SHA identity against combined source after automatic diagram regeneration 0e7dd03c.
+- Candidate exact-source runs 41153409448 full governed Python 3.10–3.13, 41153409049 real Tk 71 + gameplay 43 each, 41153409082 screenshots 30, 41153409180 generated governance, 41153409260 four OS PACKAGE builds, 41153409191 docs: all success. Native EXTRACTED GUI still #443 pending. Forced-refresh microbenchmark is not historical speed comparison.
+- Native ttk theme preserved, new modal lifecycle/focus/grab, 32/56/88 board preference save/cancel/restart, bounded file errors, 500ms clock-only board redraw avoided. User's original left player+quests / centered Canvas / right player+quests still intact; real filled light/dark pieces remain.
+- The original source tree still violates all 10 maintainer requested path/naming changes. New exclusive #462 writer on branch refactor/462-source-tree-identity must address root game assets, flattened model, renamed view, installed boardgameswithquests entrypoint and wheel/sdist/frozen import/resource integrity. Do not run old native #443 packaging changes against it concurrently. #477 is read-only adjudication contract; Chess proof #473 still blocked.
+- Human visual QA can still reject compact gray native appearance; passing Tk tests is not aesthetic certification. No release approval.
+
+
 ## 2026-10-31 — Dispatch I handoff / no unsound default
 
 - Dispatch I report `Dispatch_I_473_Sound_Unwinnability_Blocker.md`: `game/473-sound-unwinnability` HEAD unchanged `b0dcec95eac33b882f2ee0c0ac5cdb84927a3329`, zero production modifications, no newly executed tests; G's `41138925199` run still fails Buchanan timeout. Upstream CHA corpus `--` dead fortress / `W-` near-twin is a reference, not an independently checkable negative certificate.

@@ -1,5 +1,14 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## 2026-10-31 — Accepted native GUI and next exclusive #462 migration
+
+- [x] #453 source integrated and issue closed following combined-head nine successful workflows.
+- [x] #454 source candidate 9a4d6b2 independently inspected and all Python/Tk/four-platform PACKAGE workflows passed; seven source/test files selectively integrated into PR #271 at 8b52ec01e. Combined AST/UML regenerated on exact source 0e7dd03c. #454 remains open for exact-head full governance and human visual review.
+- [ ] Dispatch #462 source refactor on refactor/462-source-tree-identity (already created from 0e7dd03c). Address all 10 current PR #271 maintainer review threads atomically, root games/, flat model/, renamed view modules, single boardgameswithquests identity; verify source, clean editable/wheel/sdist, real Tk, four native packages. Do not resolve PR review threads until actual tests.
+- [ ] Pause #443 native QA old branch edits, #437/#449 WCDF and #473 Chess source writes during #462. Read-only design #477 is independent. Native extracted interactive tests are still required after #462.
+- [ ] Remaining v1 blockers: FIDE proof/unknown semantics #436/#473/#477; WCDF certification; independent audit #444 and approved v1 #445. No protected branch merge or release.
+
+
 ## 2026-10-31 — Dispatch I failed closed / #477 unknown-timeout contract
 
 - [x] Confirm Dispatch I is a proof/blocker report only, branch `game/473-sound-unwinnability` unchanged `b0dcec95eac33b882f2ee0c0ac5cdb84927a3329`; previous 147 pass/1 true red per Python from G is not new Dispatch I CI. Source unchanged; don't merge red test as a fix.
