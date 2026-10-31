@@ -15,6 +15,7 @@ import json
 
 import pytest
 
+from model.resources import bundled_games_root
 from model.definition import validate_definition
 from model.manager import GameManager, TransitionError
 from model.move import Move
@@ -23,7 +24,7 @@ from model.session import DesktopSession
 
 def reference_game(pieces, *, start=-1):
     """Create an authoritative game at a small explicitly specified WCDF position."""
-    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
     data["starting_side"] = start
     data["board"]["starting_pieces"] = [
         {
@@ -339,7 +340,7 @@ def test_wcdf_third_repetition_with_declared_next_move_not_moved_flag():
 def test_wcdf_repetition_claim_is_available_through_actual_desktop_session(monkeypatch):
     import model.session as session_module
 
-    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
     data["board"]["starting_pieces"] = [
         {"piece": "king", "color": "black", "squares": [[2, 1]]},
         {"piece": "king", "color": "white", "squares": [[5, 6]]},

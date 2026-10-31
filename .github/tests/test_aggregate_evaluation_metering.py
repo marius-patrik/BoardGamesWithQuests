@@ -12,6 +12,7 @@ from importlib import resources
 
 import pytest
 
+from model.resources import bundled_games_root
 from model.capture_policy import (
     EvaluationBudget,
     EvaluationBudgetExceeded,
@@ -58,7 +59,7 @@ def _manager(
     earlier_reward: bool = False,
 ) -> GameManager:
     data = json.loads(
-        resources.files("games").joinpath(game, "config.json").read_text(encoding="utf-8")
+        bundled_games_root().joinpath(game, "config.json").read_text(encoding="utf-8")
     )
     data["name"] = "metering-" + game
     data["title"] = "Metering reference session"
