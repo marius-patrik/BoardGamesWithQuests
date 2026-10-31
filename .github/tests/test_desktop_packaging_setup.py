@@ -49,7 +49,7 @@ class DesktopPackagingInfrastructureTests(unittest.TestCase):
             script.parent.mkdir(parents=True)
             shutil.copyfile(ROOT / ".github/scripts/package_desktop.py", script)
             (root / "src").mkdir(parents=True)
-            (root / "src/boardgameswithquests.py__main__.py").write_text("", encoding="utf-8")
+            (root / "src/boardgameswithquests.py").write_text("", encoding="utf-8")
             games = root / "games/chess"
             games.mkdir(parents=True)
             (games / "rules.py").write_text("runtime resource", encoding="utf-8")
