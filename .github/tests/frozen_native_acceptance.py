@@ -405,7 +405,7 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                         raise AssertionError(
                             f"native game chooser did not accept Start: {last_error}"
                         )
-                start, end = ((6, 4), (5, 4)) if game == "chess" else ((2, 1), (3, 0))
+                start, end = ((6, 4), (4, 4)) if game == "chess" else ((2, 1), (3, 0))
 
                 def square(position):
                     return (
@@ -437,6 +437,46 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                         raise AssertionError(
                             f"{game} pointer move did not visibly change piece at {position}"
                         )
+                # Continue as real players, including a genuine opponent capture
+                # rather than merely asserting that the first opening moved.
+                # Independent rulebook sequences (row, column):
+                # Chess: 1.e4 d5 2.exd5.
+                # English Draughts: 9-13, 22-18, 13x22 (black upward-down screen).
+                # Source, landing and jumped/removed-piece changes are checked
+                # against real screenshots from the extracted application.
+                if game == "chess":
+                    continuation = [
+                        ((1, 3), (3, 3), None, "black-d7-d5"),
+                        ((4, 4), (3, 3), None, "white-e4-captures-d5"),
+                    ]
+                else:
+                    continuation = [
+                        ((5, 2), (4, 1), None, "white-c3-b4"),
+                        ((3, 0), (5, 2), (4, 1), "black-a5-captures-c3"),
+                    ]
+                for move_start, move_end, jumped, label in continuation:
+                    before = gui.screenshot().convert("RGB")
+                    before.save(evidence / f"{game}-{label}-before.png")
+                    gui.click(*square(move_start))
+                    gui.sleep(0.3)
+                    gui.click(*square(move_end))
+                    gui.sleep(0.75)
+                    after = gui.screenshot().convert("RGB")
+                    after.save(evidence / f"{game}-{label}-after.png")
+                    changes = ImageChops.difference(before, after)
+                    for position in (move_start, move_end, jumped):
+                        if position is None:
+                            continue
+                        x, y = square(position)
+                        radius = max(8, int(size * 0.19))
+                        cropped = changes.crop((
+                            int(x) - radius, int(y) - radius,
+                            int(x) + radius, int(y) + radius,
+                        ))
+                        if cropped.getbbox() is None:
+                            raise AssertionError(
+                                f"{game} {label}: real GUI did not visibly change square {position}"
+                            )
                 if process.poll() is not None:
                     raise AssertionError(f"{game} frozen process unexpectedly terminated")
                 gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
@@ -451,6 +491,8 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                     "initial_board": True,
                     "real_pointer_move": True,
                     "observed_piece_change": True,
+                    "native_capture_journey": True,
+                    "capture_square_changes": True,
                     "native_window_close": True,
                 }
             finally:
