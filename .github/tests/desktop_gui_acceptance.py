@@ -429,9 +429,7 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
     before = window.window_controller.game_controller.session.snapshot()
     title = window.title()
     answers = iter((None, False, False))
-    monkeypatch.setattr(
-        "view.screen.messagebox.askyesnocancel", lambda *a, **k: next(answers)
-    )
+    monkeypatch.setattr("view.screen.messagebox.askyesnocancel", lambda *a, **k: next(answers))
     window.game_view.on_new_game()
     assert window.window_controller.game_controller.session.snapshot() == before
     assert window.title() == title

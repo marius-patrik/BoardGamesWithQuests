@@ -96,12 +96,18 @@ def verify(name: str, install_target: str, workspace: Path, env: dict[str, str])
     install.append(install_target)
     run(install, cwd=workspace, env=env)
     run([str(python), "-m", "boardgameswithquests", "--check"], cwd=workspace, env=env)
-    executable = venv_dir / ("Scripts/boardgameswithquests.exe" if os.name == "nt" else "bin/boardgameswithquests")
+    executable = venv_dir / (
+        "Scripts/boardgameswithquests.exe" if os.name == "nt" else "bin/boardgameswithquests"
+    )
     run([str(executable), "--check"], cwd=workspace, env=env)
     records = workspace / (name + "-saves")
     records.mkdir()
     for phase in ("create", "reopen"):
-        run([str(python), "-c", CHECK_SCRIPT, str(records), phase, str(ROOT), name], cwd=workspace, env=env)
+        run(
+            [str(python), "-c", CHECK_SCRIPT, str(records), phase, str(ROOT), name],
+            cwd=workspace,
+            env=env,
+        )
 
 
 def main() -> None:
