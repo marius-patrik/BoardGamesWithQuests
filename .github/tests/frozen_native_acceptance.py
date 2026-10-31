@@ -792,10 +792,28 @@ def main() -> int:
         "host_os": platform.platform(),
         "host_machine": platform.machine(),
         "python": sys.version.split()[0],
-        "packaging": "NOT_RUN",
-        "gui": "NOT_RUN",
+        "packaging": "NOT EXECUTED",
+        "gui": "NOT EXECUTED",
         "classification": "FAIL",
         "games": {},
+        "current_journey": None,
+        "journeys": {
+            "archive_and_binary_integrity": "NOT EXECUTED",
+            "frozen_game_diagnostic": "NOT EXECUTED",
+            "altered_and_missing_resources": "NOT EXECUTED",
+            "chess_real_pointer_opening_and_capture": "NOT EXECUTED",
+            "draughts_real_pointer_opening_and_capture": "NOT EXECUTED",
+            "settings_cancel_save_and_restart": "NOT EXECUTED",
+            "game_switch_and_cancel": "NOT EXECUTED",
+            "saved_game_process_restart_and_continuation": "NOT EXECUTED",
+            "chess_promotion_and_terminal": "NOT EXECUTED",
+            "draughts_multihop_crowning_and_terminal": "NOT EXECUTED",
+            "draw_offer_response_and_claim": "NOT EXECUTED",
+            "offline_execution": "NOT EXECUTED",
+            "invalid_user_files_and_failed_save": "NOT EXECUTED",
+            "clean_native_process_tree": "NOT EXECUTED",
+            "code_signing_and_notarization": "NOT EXECUTED",
+        },
         "remaining_final_head_gates": [
             "real save/restart/reopen with history and active side",
             "in-app switching and cancellation",
@@ -812,6 +830,7 @@ def main() -> int:
             folder = Path(scratch)
             executable, manifest = inspect_archive(args, folder / "extracted")
             state["packaging"] = "PASS"
+            state["journeys"]["archive_and_binary_integrity"] = "PASS"
             state["metadata"] = manifest
             env = dict(os.environ)
             env.pop("PYTHONPATH", None)
@@ -823,27 +842,47 @@ def main() -> int:
                 timeout=100,
             )
             state["frozen_check_exit_code"] = check.returncode
+            state["current_journey"] = "frozen_game_diagnostic"
             if check.returncode:
                 raise AssertionError(
                     f"frozen diagnostic failed: {check.stderr.decode(errors='replace')}"
                 )
+            state["journeys"]["frozen_game_diagnostic"] = "PASS"
+            state["current_journey"] = "altered_and_missing_resources"
             state["corrupt_asset"] = corrupt_asset_check(executable, args.platform, folder)
             state["missing_asset"] = missing_asset_check(executable, args.platform, folder)
+            state["journeys"]["altered_and_missing_resources"] = "PASS"
             gui = native_driver()
             for game in ("chess", "checkers"):
+                key = (
+                    "chess_real_pointer_opening_and_capture"
+                    if game == "chess"
+                    else "draughts_real_pointer_opening_and_capture"
+                )
+                state["current_journey"] = key
                 state["games"][game] = pointer_gameplay(
                     gui, executable, folder / f"home-{game}", args.evidence_dir, game
                 )
+                state["journeys"][key] = "PASS"
+            state["current_journey"] = "settings_cancel_save_and_restart"
             state["settings"] = settings_journey(
                 gui, executable, folder / "home-settings", args.evidence_dir, args.platform
             )
-            state["gui"] = "PARTIAL"
+            state["journeys"]["settings_cancel_save_and_restart"] = "PASS"
+            state["gui"] = "BLOCKED"
+            state["current_journey"] = None
             # Incomplete mandatory journeys are BLOCKED, never a green release gate.
             raise Blocked("extracted gameplay was exercised but final native journeys remain")
     except Blocked as error:
+        stage = state.get("current_journey")
+        if stage is not None and state["journeys"].get(stage) == "NOT EXECUTED":
+            state["journeys"][stage] = "BLOCKED"
         state.update(classification="BLOCKED", reason=str(error))
         exit_code = 2
     except Exception as error:
+        stage = state.get("current_journey")
+        if stage is not None and state["journeys"].get(stage) == "NOT EXECUTED":
+            state["journeys"][stage] = "FAIL"
         state.update(
             classification="FAIL",
             reason=str(error),
