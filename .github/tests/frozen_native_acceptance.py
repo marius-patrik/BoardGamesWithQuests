@@ -875,9 +875,7 @@ def native_lifecycle_journey(
                             focus_chooser()
                             gui.press("tab")
                             gui.press("return")
-                        board = await_board(
-                            gui, evidence, "lifecycle-start", timeout=6
-                        )
+                        board = await_board(gui, evidence, "lifecycle-start", timeout=6)
                         break
                     except (AssertionError, Blocked):
                         gui.screenshot().save(
