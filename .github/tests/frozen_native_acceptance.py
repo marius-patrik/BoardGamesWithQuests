@@ -608,11 +608,11 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
         # ModalLifecycle activates the readonly game selector. Tab order:
         # selector -> Start -> Settings; Enter activates the focused button.
         if sys.platform.startswith("linux"):
-            # X11 keeps the combobox keyboard traversal deterministic, whereas
-            # decorated-window geometry includes window-manager offsets.
+            # Tk's Start action binds Return, but the Settings ttk.Button
+            # has no Return binding. Native Space activates the focused button.
             gui.press("tab")
             gui.press("tab")
-            gui.press("return")
+            gui.press("space")
         else:
             x, y, width, height = native_window_rectangle("New game")
             (evidence / "chooser-hit-target.json").write_text(
@@ -623,6 +623,8 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                 encoding="utf-8",
             )
             gui.click(x + 0.66 * width, y + 0.66 * height)
+        gui.sleep(0.8)
+        gui.screenshot().save(evidence / "settings-activation.png")
         screenshot_dialog(gui, evidence, "settings-dialog", "Settings")
 
     def edit_settings() -> None:
