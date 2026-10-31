@@ -48,9 +48,9 @@ class DesktopPackagingInfrastructureTests(unittest.TestCase):
             script = root / ".github/scripts/package_desktop.py"
             script.parent.mkdir(parents=True)
             shutil.copyfile(ROOT / ".github/scripts/package_desktop.py", script)
-            (root / "src/chesswithquests").mkdir(parents=True)
-            (root / "src/chesswithquests/__main__.py").write_text("", encoding="utf-8")
-            games = root / "src/games/chess"
+            (root / "src").mkdir(parents=True)
+            (root / "src/boardgameswithquests.py").write_text("", encoding="utf-8")
+            games = root / "games/chess"
             games.mkdir(parents=True)
             (games / "rules.py").write_text("runtime resource", encoding="utf-8")
             (root / "pyproject.toml").write_text(
@@ -62,7 +62,7 @@ class DesktopPackagingInfrastructureTests(unittest.TestCase):
                 "assert args[args.index('--copy-metadata') + 1] == 'fixture-distribution'\n"
                 "bundle = pathlib.Path(args[args.index('--distpath') + 1]) / 'BoardGamesWithQuests'\n"
                 "runtime = bundle / '_internal/games'\n"
-                "shutil.copytree('src/games', runtime, dirs_exist_ok=True)\n"
+                "shutil.copytree('games', runtime, dirs_exist_ok=True)\n"
                 "mode = os.environ['BUNDLER_RESULT']\n"
                 "resource = runtime / 'chess/rules.py'\n"
                 "if mode == 'missing': resource.unlink()\n"

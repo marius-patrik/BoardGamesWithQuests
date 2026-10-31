@@ -13,9 +13,10 @@ from pathlib import Path
 
 import pytest
 
-from model.game.definition import validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.session import DesktopSession
+from model.definition import validate_definition
+from model.manager import GameManager, TransitionError
+from model.session import DesktopSession
+from model.resources import bundled_games_root
 
 OPERA = json.loads(
     (Path(__file__).parent / "fixtures" / "chess_opera_game_1858.json").read_text(encoding="utf-8")
@@ -100,7 +101,7 @@ def reference_position(
 
     The fixture is a position input, not a reduced or alternative rulebook.
     """
-    data = json.loads(resources.files("games").joinpath("chess", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("chess", "config.json").read_text())
     grouped: dict[tuple[str, str], list[list[int]]] = {}
     ranks = fen.split("/")
     assert len(ranks) == 8

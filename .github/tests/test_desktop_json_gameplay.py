@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.manager import TransitionError
-from model.game.session import DesktopSession
+from model.manager import TransitionError
+from model.session import DesktopSession
+from model.resources import bundled_games_root
 
 
 def chess_pawn_action(session):
@@ -211,7 +212,7 @@ def test_real_installation_check_executes_both_bundled_game_openings():
     import sys
 
     completed = subprocess.run(
-        [sys.executable, "-m", "chesswithquests", "--check"],
+        [sys.executable, "-m", "boardgameswithquests", "--check"],
         capture_output=True,
         text=True,
         timeout=90,
@@ -262,7 +263,7 @@ def test_english_draughts_resignation_is_visible_as_authoritative_terminal_resul
 
 
 def test_english_draughts_clock_expiration_commits_and_replays_timeout(monkeypatch):
-    from model.game.session import time
+    from model.session import time
 
     session = DesktopSession("checkers")
     state = session.snapshot()
@@ -283,10 +284,10 @@ def _positioned_draughts_session(monkeypatch, pieces, *, clock_seconds=600, extr
     import json
     from importlib import resources
 
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
+    import model.session as session_module
+    from model.definition import validate_definition
 
-    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
     data["clock"]["initial_seconds"] = clock_seconds
     data["board"]["starting_pieces"] = [
         {
@@ -303,7 +304,7 @@ def _positioned_draughts_session(monkeypatch, pieces, *, clock_seconds=600, extr
 
 
 def test_draughts_timeout_with_no_geometric_move_is_not_no_legal_moves(monkeypatch):
-    from model.game.session import time
+    from model.session import time
 
     # Black on its final row cannot advance even before the clock expires.
     session = _positioned_draughts_session(
@@ -345,7 +346,7 @@ def test_draughts_final_capture_produces_no_legal_moves_only_after_move(monkeypa
 
 
 def test_late_move_rejected_without_consuming_clock_or_mutating_game(monkeypatch):
-    from model.game.session import time
+    from model.session import time
 
     session = DesktopSession("checkers")
     before = session.snapshot()
@@ -359,7 +360,7 @@ def test_late_move_rejected_without_consuming_clock_or_mutating_game(monkeypatch
 
 
 def test_terminal_timeout_retry_and_conflicting_action_identifier(monkeypatch):
-    from model.game.session import time
+    from model.session import time
 
     session = DesktopSession("checkers")
     before = session.snapshot()
@@ -385,7 +386,7 @@ def test_terminal_timeout_retry_and_conflicting_action_identifier(monkeypatch):
 
 
 def test_chess_timeout_uses_configured_win_without_no_legal_moves(monkeypatch):
-    from model.game.session import time
+    from model.session import time
 
     session = DesktopSession("chess")
     before = session.snapshot()
@@ -434,8 +435,8 @@ def test_chess_draw_claim_requires_repetition_and_replays_when_eligible():
 
 @pytest.mark.parametrize("failure", ["equal-priority-conflict", "invalid-arithmetic"])
 def test_failed_terminal_rule_evaluation_rolls_back_entire_session(monkeypatch, failure):
-    from model.game.conditions import QueryResolutionError
-    from model.game.session import time
+    from model.conditions import QueryResolutionError
+    from model.session import time
 
     timeout_condition = {
         "op": "compare",
@@ -490,7 +491,7 @@ def test_failed_terminal_rule_evaluation_rolls_back_entire_session(monkeypatch, 
 
 
 def test_timeout_rejects_nonactive_actor_without_awarding_the_wrong_winner(monkeypatch):
-    from model.game.session import time
+    from model.session import time
 
     session = DesktopSession("checkers")
     before = session.snapshot()

@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Any, Callable
 
-from model.game.preferences import (
+from model.preferences import (
     DEFAULTS,
     PreferencesError,
     load_preferences,

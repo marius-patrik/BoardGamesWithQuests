@@ -15,6 +15,7 @@ import tkinter as tk
 from PIL import ImageGrab
 
 from view.app import build_application
+from model.resources import bundled_games_root
 
 
 def click(root: tk.Tk, row: int, col: int) -> None:
@@ -77,15 +78,15 @@ def capture_quest_and_history_stress(output: Path) -> None:
     import json
     from importlib import resources
 
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
-    from model.game.session import DesktopSession
+    import model.session as session_module
+    from model.definition import validate_definition
+    from model.session import DesktopSession
 
     original_loader = session_module.load_bundled_definition
     try:
         for game in ("chess", "checkers"):
             definition_json = json.loads(
-                resources.files("games").joinpath(game, "config.json").read_text()
+                bundled_games_root().joinpath(game, "config.json").read_text()
             )
             definition_json["quests"] = [
                 {

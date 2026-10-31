@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from importlib import resources
+from model.resources import bundled_games_root
 import re
 
 DEFAULT_GAME = "chess"
@@ -11,7 +11,7 @@ DEFAULT_GAME = "chess"
 def available_games() -> list[str]:
     """Discover only validated source-controlled, packaged JSON definitions."""
     names: list[str] = []
-    for entry in resources.files("games").iterdir():
+    for entry in bundled_games_root().iterdir():
         if (
             entry.is_dir()
             and re.fullmatch(r"[a-z][a-z0-9_]{0,63}", entry.name) is not None
@@ -23,7 +23,7 @@ def available_games() -> list[str]:
 
 def configuration_path(name: str) -> str:
     """Validate a bundled selector and return its inert resource identifier."""
-    from model.game.definition import ConfigurationError, load_bundled_definition
+    from model.definition import ConfigurationError, load_bundled_definition
 
     try:
         load_bundled_definition(name)
@@ -34,4 +34,4 @@ def configuration_path(name: str) -> str:
 
 def games_root() -> str:
     """Describe the installed games resource location for installation diagnostics."""
-    return str(resources.files("games"))
+    return str(bundled_games_root())

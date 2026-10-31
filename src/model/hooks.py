@@ -6,8 +6,8 @@ from collections.abc import Mapping, Callable
 from dataclasses import dataclass
 from typing import Any
 
-from model.game.conditions import ConditionEvaluator, Query, QueryResolutionError
-from model.game.schema import HOOKS, freeze_json, thaw_json, validate_effect, validate_hooks
+from model.conditions import ConditionEvaluator, Query, QueryResolutionError
+from model.schema import HOOKS, freeze_json, thaw_json, validate_effect, validate_hooks
 
 
 @dataclass(frozen=True)

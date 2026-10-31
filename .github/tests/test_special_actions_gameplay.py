@@ -7,11 +7,12 @@ from typing import Any
 
 import pytest
 
-from model.game.conditions import QueryResolutionError
-from model.game.capture_policy import EvaluationBudgetExceeded
-from model.game.definition import ConfigurationError, validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.move import Move
+from model.resources import bundled_games_root
+from model.conditions import QueryResolutionError
+from model.capture_policy import EvaluationBudgetExceeded
+from model.definition import ConfigurationError, validate_definition
+from model.manager import GameManager, TransitionError
+from model.move import Move
 
 
 def rule(identifier: str, hook: str, effects: list[dict], when: dict | None = None) -> dict:
@@ -21,7 +22,7 @@ def rule(identifier: str, hook: str, effects: list[dict], when: dict | None = No
 
 def config() -> dict:
     """Use renamed roles and nonstandard dimensions to expose game-name assumptions."""
-    data = json.loads((resources.files("games").joinpath("chess", "config.json")).read_text())
+    data = json.loads((bundled_games_root().joinpath("chess", "config.json")).read_text())
     data.update(name="independent-specials", title="Declared authority", playable=False)
     token = deepcopy(data["pieces"]["rook"])
     token.update(

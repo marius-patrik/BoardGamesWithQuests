@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.conditions import ConditionEvaluator, QueryResolutionError
-from model.game.hooks import RuleProgram
-from model.game.schema import freeze_json, thaw_json
+from model.conditions import ConditionEvaluator, QueryResolutionError
+from model.hooks import RuleProgram
+from model.schema import freeze_json, thaw_json
 
 
 def rule(when=None, *, operation="permit"):

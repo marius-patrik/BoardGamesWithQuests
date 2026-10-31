@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.manager import GameManager
+from model.manager import GameManager
 from test_chess_fide_full_definition import reference_move, reference_position, square
 
 CASTLING_ROOKS = "r3k2r/8/8/8/8/8/8/R3K2R"

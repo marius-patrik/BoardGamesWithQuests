@@ -14,8 +14,8 @@ import copy
 
 import pytest
 
-from model.game.definition import load_bundled_definition
-from model.game.manager import GameManager, TransitionError
+from model.definition import load_bundled_definition
+from model.manager import GameManager, TransitionError
 
 
 def game(name: str) -> GameManager:

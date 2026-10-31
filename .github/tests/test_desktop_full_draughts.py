@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import re
 
-from model.game.notation import render_notation
-from model.game.session import DesktopSession
+from model.notation import render_notation
+from model.session import DesktopSession
 
 RECORDED_MOVES = """
 9-14 23-18 14x23 27x18 5-9 26-23 12-16 30-26

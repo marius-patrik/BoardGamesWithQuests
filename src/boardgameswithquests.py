@@ -1,6 +1,6 @@
 """The application entry point.
 
-`python -m chesswithquests` starts the application. This module owns the process: it
+`python -m boardgameswithquests` starts the application. This module owns the process: it
 parses the command line, opens the window and runs the event loop. Everything it shows is
 built by `view/`, and the rules it plays are the ones the selected configuration declares.
 """
@@ -9,7 +9,7 @@ import argparse
 import sys
 from typing import Any, List, Optional
 
-from model.game.games import DEFAULT_GAME, available_games, configuration_path, games_root
+from model.games import DEFAULT_GAME, available_games, configuration_path, games_root
 
 __all__ = ["main", "build_window"]
 
@@ -30,7 +30,7 @@ def build_arguments(argv: Optional[List[str]] = None) -> argparse.Namespace:
         argparse.Namespace: The parsed arguments.
     """
     parser = argparse.ArgumentParser(
-        prog="chesswithquests",
+        prog="boardgameswithquests",
         description="Play a board game from a configuration.",
     )
     parser.add_argument(
@@ -53,7 +53,7 @@ def report_installation() -> str:
         str: A report naming the located `games/` directory and every shipped
         configuration.
     """
-    from model.game.session import DesktopSession
+    from model.session import DesktopSession
 
     games = available_games()
     if not games or DEFAULT_GAME not in games:
@@ -176,3 +176,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     window.mainloop()
     return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -7,14 +7,15 @@ import json
 
 import pytest
 
-from model.game.definition import validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.move import Move
+from model.resources import bundled_games_root
+from model.definition import validate_definition
+from model.manager import GameManager, TransitionError
+from model.move import Move
 
 
 def session(pieces, *, starting_side=-1):
     """Open a real game with a public consumer-provided legal starting position."""
-    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
     data["starting_side"] = starting_side
     data["board"]["starting_pieces"] = [
         {

@@ -7,9 +7,9 @@
 
 ### State and transitions
 
-`model.game.manager.GameManager` is the sole authoritative game transition owner. A session pins one validated `GameDefinition` and participant identities; each accepted action advances exactly one revision and records an event. Candidates are evaluated against isolated mutable projections and published as immutable JSON state only after all legal, rule, clock and effect checks pass. Duplicate identical action IDs return their original event, conflicting reuse is rejected, and `from_snapshot` reconstructs and validates state by event replay.
+`model.manager.GameManager` is the sole authoritative game transition owner. A session pins one validated `GameDefinition` and participant identities; each accepted action advances exactly one revision and records an event. Candidates are evaluated against isolated mutable projections and published as immutable JSON state only after all legal, rule, clock and effect checks pass. Duplicate identical action IDs return their original event, conflicting reuse is rejected, and `from_snapshot` reconstructs and validates state by event replay.
 
-`model.game.session.DesktopSession` is the durable local application boundary. It creates and resets games, exposes detached state and board projections, enumerates legal actions, submits actor-bound moves, polls clock expiry and recovers from snapshots. It depends only on the Python domain and local time/IDs; no hosted runtime is involved.
+`model.session.DesktopSession` is the durable local application boundary. It creates and resets games, exposes detached state and board projections, enumerates legal actions, submits actor-bound moves, polls clock expiry and recovers from snapshots. It depends only on the Python domain and local time/IDs; no hosted runtime is involved.
 
 ### Board and declarative rules
 
@@ -17,7 +17,7 @@
 
 ### Notation and player-facing terminal actions
 
-The built-in JSON definitions declare the notation capability: chess PGN with SAN and English draughts PDN with numeric dark-square captures. `model.game.notation.render_notation` replays every accepted action through `GameManager`, verifies final snapshot identity and generates authoritative move text; it does not replicate game legality. Both notations and the replayable JSON snapshot are exported by the Tkinter interface using atomic writes and symlink rejection. Resignation and configured draw claims go through `DesktopSession.submit` and cannot be granted by UI state alone.
+The built-in JSON definitions declare the notation capability: chess PGN with SAN and English draughts PDN with numeric dark-square captures. `model.notation.render_notation` replays every accepted action through `GameManager`, verifies final snapshot identity and generates authoritative move text; it does not replicate game legality. Both notations and the replayable JSON snapshot are exported by the Tkinter interface using atomic writes and symlink rejection. Resignation and configured draw claims go through `DesktopSession.submit` and cannot be granted by UI state alone.
 
 ### Clock and quest state
 
@@ -25,7 +25,7 @@ The authoritative snapshot includes participant clocks, accepted event history, 
 
 ### Game definitions
 
-`src/games/chess/config.json` and `src/games/checkers/config.json` define piece capabilities, initial placement, hooks and quests; their `playable` flag is currently false. English-draughts kings declare short-range movement, unlike flying variants.
+`games/chess/config.json` and `games/checkers/config.json` define piece capabilities, initial placement, hooks and quests; their `playable` flag is currently false. English-draughts kings declare short-range movement, unlike flying variants.
 
 _Source: [0001-components.md](decisions/0001-components.md)_
 
@@ -36,22 +36,22 @@ _Source: [0001-components.md](decisions/0001-components.md)_
 
 Bundled `games/<identifier>/config.json` is loaded by the strict `load_bundled_definition` resource reader without importing individual game Python packages. The version-2 parser rejects duplicate keys, unknown fields, unsupported expressions and unbounded data. Frozen `GameDefinition` instances provide the immutable source for generic board/piece construction, rule hooks, state fields, clocks and configured quests.
 
-`model.game.manager.GameManager` interprets only whitelisted, bounded declarative conditions, queries and effects; game identifiers do not select executable Python rule classes. Per-action work budgets bound geometric searches and condition evaluation. The same pinned definition is embedded in replayable canonical snapshots.
+`model.manager.GameManager` interprets only whitelisted, bounded declarative conditions, queries and effects; game identifiers do not select executable Python rule classes. Per-action work budgets bound geometric searches and condition evaluation. The same pinned definition is embedded in replayable canonical snapshots.
 
 ### User settings
 
-`model.game.preferences` and `view.settings_dialog.SettingsDialog` permit players to set board square size (32–88 pixels) and visibility of coordinates. Persisted preferences contain only these fields. They are validated before writing, stored outside immutable game resources in the OS-specific application-data directory and atomically replaced. The UI exposes no rule or quest editing. Corrupted preference documents raise an error rather than being executed.
+`model.preferences` and `view.settings.SettingsDialog` permit players to set board square size (32–88 pixels) and visibility of coordinates. Persisted preferences contain only these fields. They are validated before writing, stored outside immutable game resources in the OS-specific application-data directory and atomically replaced. The UI exposes no rule or quest editing. Corrupted preference documents raise an error rather than being executed.
 
 _Source: [0002-configuration.md](decisions/0002-configuration.md)_
 
 
 ## Desktop application and UI ownership
 
-`chesswithquests:main` validates game selection and launches a local JSON-backed `DesktopSession`. Its `--check` option loads all installed bundled definitions and accepts/retries/replays real opening moves without needing a display.
+`boardgameswithquests:main` validates game selection and launches a local JSON-backed `DesktopSession`. Its `--check` option loads all installed bundled definitions and accepts/retries/replays real opening moves without needing a display.
 
 `view.app.build_application` constructs Tkinter game selection and gameplay. `GameController` maps clicks to complete legal action intents and submits them with actor IDs and expected revisions. `WindowController` manages status and authoritative timeout polling. The widgets do not own independent game state.
 
-`BoardView` renders detached board projections and legal highlights; `PlayerGameView` handles UI refresh, alternate action choice, game switching, history, atomic JSON snapshot export, replay-verified Open Game recovery, configured PGN/PDN notation export, terminal resignation/draw-claim actions and safe callback cancellation. `PlayerView` and `QuestList` render authoritative clock/captures and configured quest progress/rewards. `SettingsDialog` changes only validated persisted presentation preferences.
+`BoardView` renders detached board projections and legal highlights; `GameScreen` handles UI refresh, alternate action choice, game switching, history, atomic JSON snapshot export, replay-verified Open Game recovery, configured PGN/PDN notation export, terminal resignation/draw-claim actions and safe callback cancellation. `PlayerView` and `QuestList` render authoritative clock/captures and configured quest progress/rewards. `SettingsDialog` changes only validated persisted presentation preferences.
 
 `desktop-gameplay.yml` verifies these interactions under Xvfb, while `desktop-native-acceptance.yml` builds four self-contained frozen applications. The separate frozen GUI user-path acceptance remains an outstanding release requirement.
 

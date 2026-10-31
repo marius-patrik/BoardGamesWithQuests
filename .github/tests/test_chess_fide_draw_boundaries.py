@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.manager import GameManager, TransitionError
+from model.manager import GameManager, TransitionError
 from test_chess_fide_full_definition import reference_position, square
 
 FIDE_KINGS_AND_ROOKS = "4k3/8/8/R7/7r/8/8/K7"

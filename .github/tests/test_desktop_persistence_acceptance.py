@@ -14,16 +14,16 @@ import sys
 
 import pytest
 
-from model.game.manager import MAX_SNAPSHOT_BYTES
-from model.game.persistence import SessionFileError, load_session, save_session
-from model.game.preferences import (
+from model.manager import MAX_SNAPSHOT_BYTES
+from model.persistence import SessionFileError, load_session, save_session
+from model.preferences import (
     DEFAULTS,
     PreferencesError,
     load_preferences,
     preferences_directory,
     save_preferences,
 )
-from model.game.session import DesktopSession
+from model.session import DesktopSession
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -65,8 +65,8 @@ def test_save_exit_reopen_and_continue_in_another_process(
     before = _process(
         """
 import json, os, sys
-from model.game.persistence import save_session
-from model.game.session import DesktopSession
+from model.persistence import save_session
+from model.session import DesktopSession
 
 path, game = sys.argv[1:3]
 start, end = json.loads(sys.argv[3]), json.loads(sys.argv[4])
@@ -93,7 +93,7 @@ print(json.dumps({"pid": os.getpid(), "initial_pieces": len(initial["board"]),
     after = _process(
         """
 import json, os, sys
-from model.game.persistence import load_session
+from model.persistence import load_session
 
 session = load_session(sys.argv[1])
 recovered = session.snapshot()
@@ -128,7 +128,7 @@ def test_settings_survive_an_actual_process_restart_and_reject_corruption(tmp_pa
     written = _process(
         """
 import json, os
-from model.game.preferences import preferences_directory, save_preferences
+from model.preferences import preferences_directory, save_preferences
 settings = save_preferences({"board_size": 64, "show_coordinates": False})
 print(json.dumps({"pid": os.getpid(), "path": str(preferences_directory()),
                   "settings": settings}))
@@ -138,7 +138,7 @@ print(json.dumps({"pid": os.getpid(), "path": str(preferences_directory()),
     recovered = _process(
         """
 import json, os
-from model.game.preferences import load_preferences
+from model.preferences import load_preferences
 print(json.dumps({"pid": os.getpid(), "settings": load_preferences()}))
 """,
         env=isolated,
@@ -353,8 +353,8 @@ def test_read_only_targets_and_unwritable_directories_preserve_existing_data(tmp
 
 def test_interrupted_replacement_cleans_temp_and_preserves_old_files(tmp_path, monkeypatch):
     """Injected rename failure: real disk writes and fsync still run before the fault."""
-    import model.game.persistence as persistence
-    import model.game.preferences as preferences
+    import model.persistence as persistence
+    import model.preferences as preferences
 
     game = DesktopSession("checkers")
     filename = tmp_path / "game.json"
@@ -381,7 +381,7 @@ def test_interrupted_replacement_cleans_temp_and_preserves_old_files(tmp_path, m
 
 def test_concurrent_target_change_causes_non_destructive_save_rejection(tmp_path, monkeypatch):
     """Change the real target after the initial check, before the final replace."""
-    import model.game.persistence as persistence
+    import model.persistence as persistence
 
     session = DesktopSession("chess")
     path = tmp_path / "game.json"

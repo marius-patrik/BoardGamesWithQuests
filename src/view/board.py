@@ -10,8 +10,8 @@ import tkinter as tk
 from tkinter import ttk
 from typing import Callable
 
-from model.game.board import Board
-from model.pieces.piece import Piece
+from model.board import Board
+from model.piece import Piece
 
 Square = tuple[int, int]
 

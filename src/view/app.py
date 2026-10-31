@@ -8,11 +8,11 @@ from typing import Any
 
 from controller.controller import GameController
 from controller.window_controller import WindowController, display_game_name
-from model.game.games import DEFAULT_GAME, available_games
-from model.game.session import DesktopSession
-from view.player_game_view import PlayerGameView
-from view.settings_dialog import SettingsDialog
-from view.start_modal import StartModal
+from model.games import DEFAULT_GAME, available_games
+from model.session import DesktopSession
+from view.screen import GameScreen
+from view.settings import SettingsDialog
+from view.modal import StartModal
 
 APPLICATION_TITLE = "BoardGamesWithQuests"
 
@@ -33,7 +33,7 @@ def build_application(root: tk.Tk, game: str = DEFAULT_GAME, show_modal: bool = 
     root.title(controller.game_title())
     shell = ttk.Frame(root)
     shell.pack(fill="both", expand=True)
-    view = PlayerGameView(
+    view = GameScreen(
         shell,
         controller,
         on_settings=lambda: open_settings(root, controller),

@@ -10,7 +10,7 @@ from collections.abc import Callable, Mapping
 from copy import deepcopy
 from typing import Any
 
-from model.game.schema import (
+from model.schema import (
     MAX_JSON_TEXT_BYTES,
     QUERIES,
     _bounded_json,

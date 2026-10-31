@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from model.game.definition import board_from_definition, load_bundled_definition
+from model.definition import board_from_definition, load_bundled_definition
 
 
 def test_chess_starting_state_is_constructed_from_json_not_chess_classes():
@@ -30,8 +30,8 @@ def test_english_draughts_uses_short_kings_and_12_men_each_side():
     records = [position.get_piece_at((r, c)) for r in range(8) for c in range(8)]
     assert sum(p is not None and p.getColor() == 1 for p in records) == 12
     assert sum(p is not None and p.getColor() == -1 for p in records) == 12
-    from model.game.board import Board
-    from model.pieces.piece import Piece
+    from model.board import Board
+    from model.piece import Piece
 
     king = Piece(
         color=1,

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.capture_policy import EvaluationBudget, EvaluationBudgetExceeded
-from model.game.hooks import RuleProgram
-from model.game.session import DesktopSession
+from model.capture_policy import EvaluationBudget, EvaluationBudgetExceeded
+from model.hooks import RuleProgram
+from model.session import DesktopSession
 
 
 def _run_comparison(relation, left, right, *, limit=100_000):
@@ -88,7 +88,7 @@ def test_nested_membership_charges_each_candidate_until_match():
 )
 def test_rejected_budgeted_game_action_is_atomic(monkeypatch, game, actor, start, hops):
     """Exhausting the real authoritative operation cannot commit an event or clock."""
-    from model.game import manager as manager_module
+    from model import manager as manager_module
 
     session = DesktopSession(game)
     legal = next(

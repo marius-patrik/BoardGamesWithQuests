@@ -13,10 +13,11 @@ import random
 
 import pytest
 
-from model.game.definition import validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.move import Move
-from model.game.session import DesktopSession
+from model.resources import bundled_games_root
+from model.definition import validate_definition
+from model.manager import GameManager, TransitionError
+from model.move import Move
+from model.session import DesktopSession
 
 
 def chess_square(name):
@@ -42,7 +43,7 @@ def chess_move(session, uci):
 
 
 def checkers_reference():
-    data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
     data["board"]["starting_pieces"] = [
         {"piece": "king", "color": "black", "squares": [[2, 1]]},
         {"piece": "king", "color": "white", "squares": [[5, 6]]},
@@ -167,7 +168,7 @@ def test_fide_prospective_fifty_move_threshold_from_ninety_nine_quiet_plies():
     # declared before making the 100th half-move. Keep the shipped FIDE rules
     # intact and exercise 99 genuine accepted quiet legal moves in a small,
     # independently specified K+2N versus K+2N position.
-    data = json.loads(resources.files("games").joinpath("chess", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("chess", "config.json").read_text())
     data["board"]["starting_pieces"] = [
         {"piece": "king", "color": "white", "squares": [[7, 4]]},
         {"piece": "knight", "color": "white", "squares": [[7, 1], [7, 6]]},

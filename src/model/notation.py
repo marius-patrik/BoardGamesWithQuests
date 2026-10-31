@@ -14,10 +14,10 @@ from pathlib import Path
 import tempfile
 from typing import Any, Mapping
 
-from model.game.definition import validate_definition
-from model.game.manager import GameManager
-from model.game.validator import MoveValidator
-from model.game.session import DesktopSession
+from model.definition import validate_definition
+from model.manager import GameManager
+from model.validator import MoveValidator
+from model.session import DesktopSession
 
 PIECE_LETTERS = {"king": "K", "queen": "Q", "rook": "R", "bishop": "B", "knight": "N", "pawn": ""}
 

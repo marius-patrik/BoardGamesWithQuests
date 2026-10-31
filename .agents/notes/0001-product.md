@@ -7,7 +7,7 @@ BoardGamesWithQuests provides a local Python/Tkinter chess and English-draughts 
 
 ## Desktop runtime
 
-`src/chesswithquests/` owns startup, bundled-resource diagnostics and the installed application entry point. `src/model/game/` owns one revisioned, deterministic game engine and its local `DesktopSession`. `src/controller/` translates player clicks into legal actions. `src/view/` owns the Tkinter board, player and quest panels, game chooser and preferences.
+`src/boardgameswithquests.py` owns startup, bundled-resource diagnostics and the installed application entry point. `src/model/` owns one revisioned, deterministic game engine and its local `DesktopSession`. `src/controller/` translates player clicks into legal actions. `src/view/` owns the Tkinter board, player and quest panels, game chooser and preferences.
 
 Game positions, movement, captures, conditions, effects, quests and outcomes come from strictly validated source-controlled JSON rulebooks. The executable Python rule packages, dynamic configuration loader and player-facing code editor are absent from the desktop application.
 

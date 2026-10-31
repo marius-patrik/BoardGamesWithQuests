@@ -2,7 +2,7 @@
 
 import pytest
 
-from model.game.move import Move
+from model.move import Move
 
 
 def test_data_only_move_intent_round_trip_preserves_capture_landings_and_promotion():

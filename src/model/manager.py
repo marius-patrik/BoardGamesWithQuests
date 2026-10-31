@@ -14,28 +14,28 @@ import json
 from threading import RLock
 from typing import Any
 
-from model.game.board import Board
-from model.game.board_queries import BoardQueries
-from model.game.capture_geometry import CaptureEnumerator
-from model.game.capture_policy import (
+from model.board import Board
+from model.board_queries import BoardQueries
+from model.capture_geometry import CaptureEnumerator
+from model.capture_policy import (
     CapturePolicy,
     EvaluationBudget,
     MAX_EVALUATION_WORK,
 )
-from model.game.conditions import ConditionEvaluator, QueryResolutionError
-from model.game.definition import (
+from model.conditions import ConditionEvaluator, QueryResolutionError
+from model.definition import (
     MAX_GAME_JSON_BYTES,
     GameDefinition,
     board_from_definition,
     validate_definition,
 )
-from model.game.hooks import HookInterpreter, PlannedEffect, RuleProgram
-from model.game.move import Move
-from model.game.outcomes import resolve_outcome
-from model.game.schema import freeze_json, thaw_json, _json_work
-from model.game.snapshot_queries import SnapshotQueries
-from model.game.validator import MoveValidator
-from model.pieces.piece import Piece
+from model.hooks import HookInterpreter, PlannedEffect, RuleProgram
+from model.move import Move
+from model.outcomes import resolve_outcome
+from model.schema import freeze_json, thaw_json, _json_work
+from model.snapshot_queries import SnapshotQueries
+from model.validator import MoveValidator
+from model.piece import Piece
 
 MAX_EVENTS = 4096
 MAX_SNAPSHOT_BYTES = 4194304

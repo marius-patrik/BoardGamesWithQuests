@@ -17,315 +17,315 @@ direction LR
   n5a2872e9d721788b8 : +close_dialog()
   n5a2872e9d721788b8 : +on_square_clicked()
   n5a2872e9d721788b8 : +tick_timer()
-  class n6aed97faf9db3cb3d["Board"]
-  n6aed97faf9db3cb3d : +DEFAULT_DIMENSIONS
-  n6aed97faf9db3cb3d : +__init__()
-  n6aed97faf9db3cb3d : +is_within_bounds()
-  n6aed97faf9db3cb3d : +get_piece_at()
-  n6aed97faf9db3cb3d : +set_piece_at()
-  n6aed97faf9db3cb3d : +move_piece()
-  n6aed97faf9db3cb3d : +replace_piece()
-  n6aed97faf9db3cb3d : +apply_placement()
-  class n0ccebd5bc8f4fea83["BoardQueries"]
-  n0ccebd5bc8f4fea83 : +__init__()
-  n0ccebd5bc8f4fea83 : +_square()
-  n0ccebd5bc8f4fea83 : +_fields()
-  n0ccebd5bc8f4fea83 : +piece_at()
-  n0ccebd5bc8f4fea83 : +board_dimension()
-  n0ccebd5bc8f4fea83 : +turn()
-  n0ccebd5bc8f4fea83 : +path_clear()
-  n0ccebd5bc8f4fea83 : +pieces_matching()
-  n0ccebd5bc8f4fea83 : +squares_attacked()
-  n0ccebd5bc8f4fea83 : +_reserve_attacks()
-  n0ccebd5bc8f4fea83 : +integer()
-  n0ccebd5bc8f4fea83 : +square_offset()
-  n0ccebd5bc8f4fea83 : +json_value()
-  n0ccebd5bc8f4fea83 : +pieces_safe()
-  n0ccebd5bc8f4fea83 : +bindings()
-  class n2544a680053c9c4a9["CaptureEnumerator"]
-  n2544a680053c9c4a9 : +__init__()
-  n2544a680053c9c4a9 : +enumerate()
-  n2544a680053c9c4a9 : +for_side()
-  class nafb8d26ba55c416a6["CapturePolicy"]
-  nafb8d26ba55c416a6 : +flying
-  nafb8d26ba55c416a6 : +land_anywhere
-  nafb8d26ba55c416a6 : +deferred_removal
-  nafb8d26ba55c416a6 : +max_nodes
-  nafb8d26ba55c416a6 : +from_json()
-  class n54ce4c14a1b6efe33["EvaluationBudget"]
-  n54ce4c14a1b6efe33 : +limit
-  n54ce4c14a1b6efe33 : +used
-  n54ce4c14a1b6efe33 : +parent
-  n54ce4c14a1b6efe33 : +__post_init__()
-  n54ce4c14a1b6efe33 : +consume()
-  class n3f4822e7fa91cf930["EvaluationBudgetExceeded"]
-  class n58e4149112b09b6d8["ConditionEvaluator"]
-  n58e4149112b09b6d8 : +__init__()
-  n58e4149112b09b6d8 : +resolve()
-  n58e4149112b09b6d8 : +_query()
-  n58e4149112b09b6d8 : +_value()
-  n58e4149112b09b6d8 : +_equal()
-  n58e4149112b09b6d8 : +_compare()
-  n58e4149112b09b6d8 : +evaluate()
-  n58e4149112b09b6d8 : +_evaluate_validated()
-  class nb1544d01d109cbba9["QueryResolutionError"]
-  class n725a9e30616941b33["ConfigurationError"]
-  class ndc75e2de5a96f023b["GameDefinition"]
-  ndc75e2de5a96f023b : +name
-  ndc75e2de5a96f023b : +package
-  ndc75e2de5a96f023b : +title
-  ndc75e2de5a96f023b : +default
-  ndc75e2de5a96f023b : +playable
-  ndc75e2de5a96f023b : +board
-  ndc75e2de5a96f023b : +pieces
-  ndc75e2de5a96f023b : +clock
-  ndc75e2de5a96f023b : +exports
-  ndc75e2de5a96f023b : +appearance
-  ndc75e2de5a96f023b : +rules
-  ndc75e2de5a96f023b : +quests
-  ndc75e2de5a96f023b : +initial_state
-  ndc75e2de5a96f023b : +halfmove_reset
-  ndc75e2de5a96f023b : +declared_optional_fields
-  ndc75e2de5a96f023b : +starting_side
-  ndc75e2de5a96f023b : +position_identity
-  ndc75e2de5a96f023b : +draw_offer_timing
-  ndc75e2de5a96f023b : +draw_agreement_minimum_moves
-  ndc75e2de5a96f023b : +__post_init__()
-  class n5aff68d126a7b527e["HookEvaluation"]
-  n5aff68d126a7b527e : +matched_rule_ids
-  n5aff68d126a7b527e : +effects
-  class n9895aa318098e15f1["HookInterpreter"]
-  n9895aa318098e15f1 : +__init__()
-  n9895aa318098e15f1 : +evaluate()
-  class ne26c55330158726ef["PlannedEffect"]
-  ne26c55330158726ef : +op
-  ne26c55330158726ef : +params
-  ne26c55330158726ef : +__post_init__()
-  class n60c0ad65932206fd1["RuleProgram"]
-  n60c0ad65932206fd1 : +__init__()
-  n60c0ad65932206fd1 : +rules()
-  n60c0ad65932206fd1 : +evaluate()
-  class nb5eb61502c245eff4["GameManager"]
-  nb5eb61502c245eff4 : +__init__()
-  nb5eb61502c245eff4 : +_operation()
-  nb5eb61502c245eff4 : +_copy_state()
-  nb5eb61502c245eff4 : +_charge()
-  nb5eb61502c245eff4 : +definition()
-  nb5eb61502c245eff4 : +_identifier()
-  nb5eb61502c245eff4 : +_timestamp()
-  nb5eb61502c245eff4 : +_placement()
-  nb5eb61502c245eff4 : +_piece()
-  nb5eb61502c245eff4 : +_board()
-  nb5eb61502c245eff4 : +_raw_position_key()
-  nb5eb61502c245eff4 : +_position_key()
-  nb5eb61502c245eff4 : +_legal_target_capture()
-  nb5eb61502c245eff4 : +_paths()
-  nb5eb61502c245eff4 : +_context()
-  nb5eb61502c245eff4 : +_offers()
-  nb5eb61502c245eff4 : +_promotion()
-  nb5eb61502c245eff4 : +_intents()
-  nb5eb61502c245eff4 : +_candidate()
-  nb5eb61502c245eff4 : +_evaluate()
-  nb5eb61502c245eff4 : +_allowed()
-  nb5eb61502c245eff4 : +_complete_quest()
-  nb5eb61502c245eff4 : +_effects()
-  nb5eb61502c245eff4 : +_prepare_move()
-  nb5eb61502c245eff4 : +_candidates()
-  nb5eb61502c245eff4 : +_legal_moves()
-  nb5eb61502c245eff4 : +get_valid_moves()
-  nb5eb61502c245eff4 : +board_projection()
-  nb5eb61502c245eff4 : +get_state()
-  nb5eb61502c245eff4 : +_mentions_claim()
-  nb5eb61502c245eff4 : +configured_draw_claims()
-  nb5eb61502c245eff4 : +draw_action_availability()
-  nb5eb61502c245eff4 : +draw_claim_candidates()
-  nb5eb61502c245eff4 : +_action()
-  nb5eb61502c245eff4 : +submit()
-  nb5eb61502c245eff4 : +_result()
-  nb5eb61502c245eff4 : +_draw_agreement_action()
-  nb5eb61502c245eff4 : +_terminal_action()
-  nb5eb61502c245eff4 : +submit_action()
-  nb5eb61502c245eff4 : +from_snapshot()
-  class n9f184d08711df6e4e["OperationEvaluation"]
-  n9f184d08711df6e4e : +__init__()
-  class nf3c197fb68564d603["TransitionError"]
-  class n8b5815b511426bf62["Move"]
-  n8b5815b511426bf62 : +start_pos
-  n8b5815b511426bf62 : +hops
-  n8b5815b511426bf62 : +promotion
-  n8b5815b511426bf62 : +_square()
-  n8b5815b511426bf62 : +__init__()
-  n8b5815b511426bf62 : +end_pos()
-  n8b5815b511426bf62 : +from_json()
-  n8b5815b511426bf62 : +to_json()
-  class ne370f32181439c909["NotationError"]
-  class n5843f5420723e3b31["Outcome"]
-  n5843f5420723e3b31 : +kind
-  n5843f5420723e3b31 : +cause
-  n5843f5420723e3b31 : +winner
-  n5843f5420723e3b31 : +priority
-  class nbfc5963d1c4756a21["SessionFileError"]
-  class ne791f1abfdbf67f97["PreferencesError"]
-  class nf2ef9a4a783104057["DesktopSession"]
-  nf2ef9a4a783104057 : +__init__()
-  nf2ef9a4a783104057 : +_now()
-  nf2ef9a4a783104057 : +_new_manager()
-  nf2ef9a4a783104057 : +game()
-  nf2ef9a4a783104057 : +snapshot()
-  nf2ef9a4a783104057 : +board_projection()
-  nf2ef9a4a783104057 : +clock_remaining()
-  nf2ef9a4a783104057 : +poll_timeout()
-  nf2ef9a4a783104057 : +legal_actions()
-  nf2ef9a4a783104057 : +configured_draw_claims()
-  nf2ef9a4a783104057 : +draw_claim_candidates()
-  nf2ef9a4a783104057 : +draw_action_availability()
-  nf2ef9a4a783104057 : +submit()
-  nf2ef9a4a783104057 : +reset()
-  nf2ef9a4a783104057 : +recover()
-  class n263ca14c401b362e7["SnapshotQueries"]
-  n263ca14c401b362e7 : +__init__()
-  n263ca14c401b362e7 : +_json_value()
-  n263ca14c401b362e7 : +_key()
-  n263ca14c401b362e7 : +_field()
-  n263ca14c401b362e7 : +_lookup()
-  n263ca14c401b362e7 : +_side_value()
-  n263ca14c401b362e7 : +_count()
-  n263ca14c401b362e7 : +rule_state()
-  n263ca14c401b362e7 : +special_rights()
-  n263ca14c401b362e7 : +temporary_target()
-  n263ca14c401b362e7 : +move_attribute()
-  n263ca14c401b362e7 : +promotion_options()
-  n263ca14c401b362e7 : +repetition_count()
-  n263ca14c401b362e7 : +clock_remaining()
-  n263ca14c401b362e7 : +_square()
-  n263ca14c401b362e7 : +_capture_routes()
-  n263ca14c401b362e7 : +capture_count()
-  n263ca14c401b362e7 : +capture_paths()
-  n263ca14c401b362e7 : +history_count()
-  n263ca14c401b362e7 : +halfmove_count()
-  n263ca14c401b362e7 : +last_action()
-  n263ca14c401b362e7 : +legal_move_count()
-  n263ca14c401b362e7 : +participant()
-  n263ca14c401b362e7 : +position()
-  n263ca14c401b362e7 : +quest_progress()
-  n263ca14c401b362e7 : +bindings()
-  class n1385e36b3a2d20d71["MoveValidator"]
-  n1385e36b3a2d20d71 : +__init__()
-  n1385e36b3a2d20d71 : +_step_limit()
-  n1385e36b3a2d20d71 : +_ray()
-  n1385e36b3a2d20d71 : +get_geometric_moves()
-  n1385e36b3a2d20d71 : +is_square_attacked()
-  class n6c226a47d78831afd["Piece"]
-  n6c226a47d78831afd : +__init__()
-  n6c226a47d78831afd : +_symbol_for()
-  n6c226a47d78831afd : +getDirections()
-  n6c226a47d78831afd : +getAttackDirections()
-  n6c226a47d78831afd : +getMaxSteps()
-  n6c226a47d78831afd : +getInitialVectors()
-  n6c226a47d78831afd : +getSymbol()
-  n6c226a47d78831afd : +getFen()
-  n6c226a47d78831afd : +hasMoved()
-  n6c226a47d78831afd : +setMoved()
-  n6c226a47d78831afd : +canJump()
-  n6c226a47d78831afd : +getColor()
-  n6c226a47d78831afd : +getType()
-  n6c226a47d78831afd : +getName()
+  class n1b04dad949c2b69b7["Board"]
+  n1b04dad949c2b69b7 : +DEFAULT_DIMENSIONS
+  n1b04dad949c2b69b7 : +__init__()
+  n1b04dad949c2b69b7 : +is_within_bounds()
+  n1b04dad949c2b69b7 : +get_piece_at()
+  n1b04dad949c2b69b7 : +set_piece_at()
+  n1b04dad949c2b69b7 : +move_piece()
+  n1b04dad949c2b69b7 : +replace_piece()
+  n1b04dad949c2b69b7 : +apply_placement()
+  class nd81f7ebe1cd96e59a["BoardQueries"]
+  nd81f7ebe1cd96e59a : +__init__()
+  nd81f7ebe1cd96e59a : +_square()
+  nd81f7ebe1cd96e59a : +_fields()
+  nd81f7ebe1cd96e59a : +piece_at()
+  nd81f7ebe1cd96e59a : +board_dimension()
+  nd81f7ebe1cd96e59a : +turn()
+  nd81f7ebe1cd96e59a : +path_clear()
+  nd81f7ebe1cd96e59a : +pieces_matching()
+  nd81f7ebe1cd96e59a : +squares_attacked()
+  nd81f7ebe1cd96e59a : +_reserve_attacks()
+  nd81f7ebe1cd96e59a : +integer()
+  nd81f7ebe1cd96e59a : +square_offset()
+  nd81f7ebe1cd96e59a : +json_value()
+  nd81f7ebe1cd96e59a : +pieces_safe()
+  nd81f7ebe1cd96e59a : +bindings()
+  class n03e0924014e18f0d6["CaptureEnumerator"]
+  n03e0924014e18f0d6 : +__init__()
+  n03e0924014e18f0d6 : +enumerate()
+  n03e0924014e18f0d6 : +for_side()
+  class nda7543ea88d5e693b["CapturePolicy"]
+  nda7543ea88d5e693b : +flying
+  nda7543ea88d5e693b : +land_anywhere
+  nda7543ea88d5e693b : +deferred_removal
+  nda7543ea88d5e693b : +max_nodes
+  nda7543ea88d5e693b : +from_json()
+  class n86b469bd674559590["EvaluationBudget"]
+  n86b469bd674559590 : +limit
+  n86b469bd674559590 : +used
+  n86b469bd674559590 : +parent
+  n86b469bd674559590 : +__post_init__()
+  n86b469bd674559590 : +consume()
+  class n40ad96f686e6f948d["EvaluationBudgetExceeded"]
+  class nf9b5a8bc5a5a4887e["ConditionEvaluator"]
+  nf9b5a8bc5a5a4887e : +__init__()
+  nf9b5a8bc5a5a4887e : +resolve()
+  nf9b5a8bc5a5a4887e : +_query()
+  nf9b5a8bc5a5a4887e : +_value()
+  nf9b5a8bc5a5a4887e : +_equal()
+  nf9b5a8bc5a5a4887e : +_compare()
+  nf9b5a8bc5a5a4887e : +evaluate()
+  nf9b5a8bc5a5a4887e : +_evaluate_validated()
+  class ne7c03df29eb231650["QueryResolutionError"]
+  class naf6627a57bd89e76c["ConfigurationError"]
+  class n23f96811f3edffcac["GameDefinition"]
+  n23f96811f3edffcac : +name
+  n23f96811f3edffcac : +package
+  n23f96811f3edffcac : +title
+  n23f96811f3edffcac : +default
+  n23f96811f3edffcac : +playable
+  n23f96811f3edffcac : +board
+  n23f96811f3edffcac : +pieces
+  n23f96811f3edffcac : +clock
+  n23f96811f3edffcac : +exports
+  n23f96811f3edffcac : +appearance
+  n23f96811f3edffcac : +rules
+  n23f96811f3edffcac : +quests
+  n23f96811f3edffcac : +initial_state
+  n23f96811f3edffcac : +halfmove_reset
+  n23f96811f3edffcac : +declared_optional_fields
+  n23f96811f3edffcac : +starting_side
+  n23f96811f3edffcac : +position_identity
+  n23f96811f3edffcac : +draw_offer_timing
+  n23f96811f3edffcac : +draw_agreement_minimum_moves
+  n23f96811f3edffcac : +__post_init__()
+  class nad0cc5b8d5df801b7["HookEvaluation"]
+  nad0cc5b8d5df801b7 : +matched_rule_ids
+  nad0cc5b8d5df801b7 : +effects
+  class n8323deb50861c4b08["HookInterpreter"]
+  n8323deb50861c4b08 : +__init__()
+  n8323deb50861c4b08 : +evaluate()
+  class n1d259a728a9330586["PlannedEffect"]
+  n1d259a728a9330586 : +op
+  n1d259a728a9330586 : +params
+  n1d259a728a9330586 : +__post_init__()
+  class n1bf7e8937cf77da73["RuleProgram"]
+  n1bf7e8937cf77da73 : +__init__()
+  n1bf7e8937cf77da73 : +rules()
+  n1bf7e8937cf77da73 : +evaluate()
+  class nd83aee9292df79329["GameManager"]
+  nd83aee9292df79329 : +__init__()
+  nd83aee9292df79329 : +_operation()
+  nd83aee9292df79329 : +_copy_state()
+  nd83aee9292df79329 : +_charge()
+  nd83aee9292df79329 : +definition()
+  nd83aee9292df79329 : +_identifier()
+  nd83aee9292df79329 : +_timestamp()
+  nd83aee9292df79329 : +_placement()
+  nd83aee9292df79329 : +_piece()
+  nd83aee9292df79329 : +_board()
+  nd83aee9292df79329 : +_raw_position_key()
+  nd83aee9292df79329 : +_position_key()
+  nd83aee9292df79329 : +_legal_target_capture()
+  nd83aee9292df79329 : +_paths()
+  nd83aee9292df79329 : +_context()
+  nd83aee9292df79329 : +_offers()
+  nd83aee9292df79329 : +_promotion()
+  nd83aee9292df79329 : +_intents()
+  nd83aee9292df79329 : +_candidate()
+  nd83aee9292df79329 : +_evaluate()
+  nd83aee9292df79329 : +_allowed()
+  nd83aee9292df79329 : +_complete_quest()
+  nd83aee9292df79329 : +_effects()
+  nd83aee9292df79329 : +_prepare_move()
+  nd83aee9292df79329 : +_candidates()
+  nd83aee9292df79329 : +_legal_moves()
+  nd83aee9292df79329 : +get_valid_moves()
+  nd83aee9292df79329 : +board_projection()
+  nd83aee9292df79329 : +get_state()
+  nd83aee9292df79329 : +_mentions_claim()
+  nd83aee9292df79329 : +configured_draw_claims()
+  nd83aee9292df79329 : +draw_action_availability()
+  nd83aee9292df79329 : +draw_claim_candidates()
+  nd83aee9292df79329 : +_action()
+  nd83aee9292df79329 : +submit()
+  nd83aee9292df79329 : +_result()
+  nd83aee9292df79329 : +_draw_agreement_action()
+  nd83aee9292df79329 : +_terminal_action()
+  nd83aee9292df79329 : +submit_action()
+  nd83aee9292df79329 : +from_snapshot()
+  class n58f1a6a239d2d5d43["OperationEvaluation"]
+  n58f1a6a239d2d5d43 : +__init__()
+  class nbfed6dad7fe9c8023["TransitionError"]
+  class nb995b1319a41d7a4b["Move"]
+  nb995b1319a41d7a4b : +start_pos
+  nb995b1319a41d7a4b : +hops
+  nb995b1319a41d7a4b : +promotion
+  nb995b1319a41d7a4b : +_square()
+  nb995b1319a41d7a4b : +__init__()
+  nb995b1319a41d7a4b : +end_pos()
+  nb995b1319a41d7a4b : +from_json()
+  nb995b1319a41d7a4b : +to_json()
+  class n7437ed6372440de88["NotationError"]
+  class n0a43bcbad0696c7db["Outcome"]
+  n0a43bcbad0696c7db : +kind
+  n0a43bcbad0696c7db : +cause
+  n0a43bcbad0696c7db : +winner
+  n0a43bcbad0696c7db : +priority
+  class nc85966ac7be5c1f35["SessionFileError"]
+  class n61f485b626f77173a["Piece"]
+  n61f485b626f77173a : +__init__()
+  n61f485b626f77173a : +_symbol_for()
+  n61f485b626f77173a : +getDirections()
+  n61f485b626f77173a : +getAttackDirections()
+  n61f485b626f77173a : +getMaxSteps()
+  n61f485b626f77173a : +getInitialVectors()
+  n61f485b626f77173a : +getSymbol()
+  n61f485b626f77173a : +getFen()
+  n61f485b626f77173a : +hasMoved()
+  n61f485b626f77173a : +setMoved()
+  n61f485b626f77173a : +canJump()
+  n61f485b626f77173a : +getColor()
+  n61f485b626f77173a : +getType()
+  n61f485b626f77173a : +getName()
+  class nd17e96c4e2944e258["PreferencesError"]
+  class n277f7e5c8cb890699["DesktopSession"]
+  n277f7e5c8cb890699 : +__init__()
+  n277f7e5c8cb890699 : +_now()
+  n277f7e5c8cb890699 : +_new_manager()
+  n277f7e5c8cb890699 : +game()
+  n277f7e5c8cb890699 : +snapshot()
+  n277f7e5c8cb890699 : +board_projection()
+  n277f7e5c8cb890699 : +clock_remaining()
+  n277f7e5c8cb890699 : +poll_timeout()
+  n277f7e5c8cb890699 : +legal_actions()
+  n277f7e5c8cb890699 : +configured_draw_claims()
+  n277f7e5c8cb890699 : +draw_claim_candidates()
+  n277f7e5c8cb890699 : +draw_action_availability()
+  n277f7e5c8cb890699 : +submit()
+  n277f7e5c8cb890699 : +reset()
+  n277f7e5c8cb890699 : +recover()
+  class nfc78cb2a5a9449c6a["SnapshotQueries"]
+  nfc78cb2a5a9449c6a : +__init__()
+  nfc78cb2a5a9449c6a : +_json_value()
+  nfc78cb2a5a9449c6a : +_key()
+  nfc78cb2a5a9449c6a : +_field()
+  nfc78cb2a5a9449c6a : +_lookup()
+  nfc78cb2a5a9449c6a : +_side_value()
+  nfc78cb2a5a9449c6a : +_count()
+  nfc78cb2a5a9449c6a : +rule_state()
+  nfc78cb2a5a9449c6a : +special_rights()
+  nfc78cb2a5a9449c6a : +temporary_target()
+  nfc78cb2a5a9449c6a : +move_attribute()
+  nfc78cb2a5a9449c6a : +promotion_options()
+  nfc78cb2a5a9449c6a : +repetition_count()
+  nfc78cb2a5a9449c6a : +clock_remaining()
+  nfc78cb2a5a9449c6a : +_square()
+  nfc78cb2a5a9449c6a : +_capture_routes()
+  nfc78cb2a5a9449c6a : +capture_count()
+  nfc78cb2a5a9449c6a : +capture_paths()
+  nfc78cb2a5a9449c6a : +history_count()
+  nfc78cb2a5a9449c6a : +halfmove_count()
+  nfc78cb2a5a9449c6a : +last_action()
+  nfc78cb2a5a9449c6a : +legal_move_count()
+  nfc78cb2a5a9449c6a : +participant()
+  nfc78cb2a5a9449c6a : +position()
+  nfc78cb2a5a9449c6a : +quest_progress()
+  nfc78cb2a5a9449c6a : +bindings()
+  class nf45c50e893a792b34["MoveValidator"]
+  nf45c50e893a792b34 : +__init__()
+  nf45c50e893a792b34 : +_step_limit()
+  nf45c50e893a792b34 : +_ray()
+  nf45c50e893a792b34 : +get_geometric_moves()
+  nf45c50e893a792b34 : +is_square_attacked()
+  class n0c4a504fea6b31a42["BoardView"]
+  n0c4a504fea6b31a42 : +__init__()
+  n0c4a504fea6b31a42 : +set_appearance()
+  n0c4a504fea6b31a42 : +refresh()
+  n0c4a504fea6b31a42 : +_fit_canvas()
+  n0c4a504fea6b31a42 : +fit_to()
+  n0c4a504fea6b31a42 : +set_selection()
+  n0c4a504fea6b31a42 : +set_in_check()
+  n0c4a504fea6b31a42 : +set_last_move()
+  n0c4a504fea6b31a42 : +show_invalid_square()
+  n0c4a504fea6b31a42 : +_clear_invalid()
+  n0c4a504fea6b31a42 : +redraw()
+  n0c4a504fea6b31a42 : +_origin()
+  n0c4a504fea6b31a42 : +_draw_piece()
+  n0c4a504fea6b31a42 : +_draw_quiet_target()
+  n0c4a504fea6b31a42 : +_draw_capture_target()
+  n0c4a504fea6b31a42 : +_draw_coordinates()
+  n0c4a504fea6b31a42 : +_file_label()
+  n0c4a504fea6b31a42 : +_square_at()
+  n0c4a504fea6b31a42 : +_on_motion()
+  n0c4a504fea6b31a42 : +_on_leave()
+  n0c4a504fea6b31a42 : +_clicked()
+  n0c4a504fea6b31a42 : +destroy()
   class nb16b3190c5ff73cb4["ModalLifecycle"]
   nb16b3190c5ff73cb4 : +__init__()
   nb16b3190c5ff73cb4 : +activate()
   nb16b3190c5ff73cb4 : +center()
   nb16b3190c5ff73cb4 : +close()
-  class nd386ea012669db456["BoardView"]
-  nd386ea012669db456 : +__init__()
-  nd386ea012669db456 : +set_appearance()
-  nd386ea012669db456 : +refresh()
-  nd386ea012669db456 : +_fit_canvas()
-  nd386ea012669db456 : +fit_to()
-  nd386ea012669db456 : +set_selection()
-  nd386ea012669db456 : +set_in_check()
-  nd386ea012669db456 : +set_last_move()
-  nd386ea012669db456 : +show_invalid_square()
-  nd386ea012669db456 : +_clear_invalid()
-  nd386ea012669db456 : +redraw()
-  nd386ea012669db456 : +_origin()
-  nd386ea012669db456 : +_draw_piece()
-  nd386ea012669db456 : +_draw_quiet_target()
-  nd386ea012669db456 : +_draw_capture_target()
-  nd386ea012669db456 : +_draw_coordinates()
-  nd386ea012669db456 : +_file_label()
-  nd386ea012669db456 : +_square_at()
-  nd386ea012669db456 : +_on_motion()
-  nd386ea012669db456 : +_on_leave()
-  nd386ea012669db456 : +_clicked()
-  nd386ea012669db456 : +destroy()
-  class nb1c381cb69b92add3["PlayerGameView"]
-  nb1c381cb69b92add3 : +__init__()
-  nb1c381cb69b92add3 : +_state_key()
-  nb1c381cb69b92add3 : +_mark_clean()
-  nb1c381cb69b92add3 : +_has_unsaved_progress()
-  nb1c381cb69b92add3 : +_confirm_replace()
-  nb1c381cb69b92add3 : +session()
-  nb1c381cb69b92add3 : +_build_layout()
-  nb1c381cb69b92add3 : +_resize_board()
-  nb1c381cb69b92add3 : +_fit_board()
-  nb1c381cb69b92add3 : +_scroll_quests()
-  nb1c381cb69b92add3 : +on_square_clicked()
-  nb1c381cb69b92add3 : +reload()
-  nb1c381cb69b92add3 : +on_new_game()
-  nb1c381cb69b92add3 : +_label()
-  nb1c381cb69b92add3 : +_refresh_actions()
-  nb1c381cb69b92add3 : +refresh()
-  nb1c381cb69b92add3 : +_history_entry()
-  nb1c381cb69b92add3 : +_refresh_history()
-  nb1c381cb69b92add3 : +apply_preferences()
-  nb1c381cb69b92add3 : +_file_description()
-  nb1c381cb69b92add3 : +_show_file_error()
-  nb1c381cb69b92add3 : +open_game()
-  nb1c381cb69b92add3 : +resign_game()
-  nb1c381cb69b92add3 : +offer_draw()
-  nb1c381cb69b92add3 : +respond_draw()
-  nb1c381cb69b92add3 : +_is_capture_move()
-  nb1c381cb69b92add3 : +_format_complete_move()
-  nb1c381cb69b92add3 : +_choose_complete_move()
-  nb1c381cb69b92add3 : +_choose_intended_move()
-  nb1c381cb69b92add3 : +claim_draw()
-  nb1c381cb69b92add3 : +export_notation()
-  nb1c381cb69b92add3 : +export_game()
-  nb1c381cb69b92add3 : +_quit()
-  nb1c381cb69b92add3 : +stop_auto_refresh()
-  nb1c381cb69b92add3 : +start_auto_refresh()
-  nb1c381cb69b92add3 : +_auto_refresh()
-  nb1c381cb69b92add3 : +destroy()
-  class n3d0c00ed6ff30fa69["PlayerView"]
-  n3d0c00ed6ff30fa69 : +__init__()
-  n3d0c00ed6ff30fa69 : +_resize_text()
-  n3d0c00ed6ff30fa69 : +refresh()
-  class n02c585538c578a39b["QuestCard"]
-  n02c585538c578a39b : +__init__()
-  n02c585538c578a39b : +_resize_text()
-  n02c585538c578a39b : +update_progress()
-  class nfd0f3cf1724d49ef5["QuestList"]
-  nfd0f3cf1724d49ef5 : +__init__()
-  nfd0f3cf1724d49ef5 : +_scroll()
-  nfd0f3cf1724d49ef5 : +_attach_scrolling()
-  nfd0f3cf1724d49ef5 : +refresh()
-  class n5577aca53b0111f55["SettingsDialog"]
-  n5577aca53b0111f55 : +__init__()
-  n5577aca53b0111f55 : +restore_defaults()
-  n5577aca53b0111f55 : +save()
-  n5577aca53b0111f55 : +close()
-  class n6f01f740c3af8de38["StartModal"]
-  n6f01f740c3af8de38 : +__init__()
-  n6f01f740c3af8de38 : +_centre()
-  n6f01f740c3af8de38 : +_open_settings()
-  n6f01f740c3af8de38 : +start()
-  n6f01f740c3af8de38 : +close()
-  n6f01f740c3af8de38 : +wait()
-  nb1544d01d109cbba9 <|-- n3f4822e7fa91cf930
-  n6aed97faf9db3cb3d --> n6c226a47d78831afd : board
-  n6aed97faf9db3cb3d --> n6c226a47d78831afd : captured_black
-  n6aed97faf9db3cb3d --> n6c226a47d78831afd : captured_white
-  nb5eb61502c245eff4 --> n9f184d08711df6e4e : _evaluation
-  nb1c381cb69b92add3 --> n3d0c00ed6ff30fa69 : player_views
-  nb1c381cb69b92add3 --> nfd0f3cf1724d49ef5 : quest_lists
-  nfd0f3cf1724d49ef5 --> n02c585538c578a39b : cards
+  class ne2194e7e192f0d2d9["StartModal"]
+  ne2194e7e192f0d2d9 : +__init__()
+  ne2194e7e192f0d2d9 : +_centre()
+  ne2194e7e192f0d2d9 : +_open_settings()
+  ne2194e7e192f0d2d9 : +start()
+  ne2194e7e192f0d2d9 : +close()
+  ne2194e7e192f0d2d9 : +wait()
+  class nd0a380cfcaef62879["PlayerView"]
+  nd0a380cfcaef62879 : +__init__()
+  nd0a380cfcaef62879 : +_resize_text()
+  nd0a380cfcaef62879 : +refresh()
+  class ncf0fa01f54e0ab537["QuestCard"]
+  ncf0fa01f54e0ab537 : +__init__()
+  ncf0fa01f54e0ab537 : +_resize_text()
+  ncf0fa01f54e0ab537 : +update_progress()
+  class n9e4c7eb45a9f09802["QuestList"]
+  n9e4c7eb45a9f09802 : +__init__()
+  n9e4c7eb45a9f09802 : +_scroll()
+  n9e4c7eb45a9f09802 : +_attach_scrolling()
+  n9e4c7eb45a9f09802 : +refresh()
+  class n48a191186d835084c["GameScreen"]
+  n48a191186d835084c : +__init__()
+  n48a191186d835084c : +_state_key()
+  n48a191186d835084c : +_mark_clean()
+  n48a191186d835084c : +_has_unsaved_progress()
+  n48a191186d835084c : +_confirm_replace()
+  n48a191186d835084c : +session()
+  n48a191186d835084c : +_build_layout()
+  n48a191186d835084c : +_resize_board()
+  n48a191186d835084c : +_fit_board()
+  n48a191186d835084c : +_scroll_quests()
+  n48a191186d835084c : +on_square_clicked()
+  n48a191186d835084c : +reload()
+  n48a191186d835084c : +on_new_game()
+  n48a191186d835084c : +_label()
+  n48a191186d835084c : +_refresh_actions()
+  n48a191186d835084c : +refresh()
+  n48a191186d835084c : +_history_entry()
+  n48a191186d835084c : +_refresh_history()
+  n48a191186d835084c : +apply_preferences()
+  n48a191186d835084c : +_file_description()
+  n48a191186d835084c : +_show_file_error()
+  n48a191186d835084c : +open_game()
+  n48a191186d835084c : +resign_game()
+  n48a191186d835084c : +offer_draw()
+  n48a191186d835084c : +respond_draw()
+  n48a191186d835084c : +_is_capture_move()
+  n48a191186d835084c : +_format_complete_move()
+  n48a191186d835084c : +_choose_complete_move()
+  n48a191186d835084c : +_choose_intended_move()
+  n48a191186d835084c : +claim_draw()
+  n48a191186d835084c : +export_notation()
+  n48a191186d835084c : +export_game()
+  n48a191186d835084c : +_quit()
+  n48a191186d835084c : +stop_auto_refresh()
+  n48a191186d835084c : +start_auto_refresh()
+  n48a191186d835084c : +_auto_refresh()
+  n48a191186d835084c : +destroy()
+  class n411c74e2d158d8b3a["SettingsDialog"]
+  n411c74e2d158d8b3a : +__init__()
+  n411c74e2d158d8b3a : +restore_defaults()
+  n411c74e2d158d8b3a : +save()
+  n411c74e2d158d8b3a : +close()
+  ne7c03df29eb231650 <|-- n40ad96f686e6f948d
+  n1b04dad949c2b69b7 --> n61f485b626f77173a : board
+  n1b04dad949c2b69b7 --> n61f485b626f77173a : captured_black
+  n1b04dad949c2b69b7 --> n61f485b626f77173a : captured_white
+  nd83aee9292df79329 --> n58f1a6a239d2d5d43 : _evaluation
+  n9e4c7eb45a9f09802 --> ncf0fa01f54e0ab537 : cards
+  n48a191186d835084c --> nd0a380cfcaef62879 : player_views
+  n48a191186d835084c --> n9e4c7eb45a9f09802 : quest_lists

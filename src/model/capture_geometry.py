@@ -5,9 +5,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from model.game.board import Board
-from model.game.capture_policy import CapturePolicy, EvaluationBudget, MAX_EVALUATION_WORK
-from model.game.conditions import QueryResolutionError
+from model.board import Board
+from model.capture_policy import CapturePolicy, EvaluationBudget, MAX_EVALUATION_WORK
+from model.conditions import QueryResolutionError
 
 
 class CaptureEnumerator:

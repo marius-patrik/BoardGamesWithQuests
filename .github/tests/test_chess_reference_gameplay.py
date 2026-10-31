@@ -10,11 +10,12 @@ from importlib import resources
 
 import pytest
 
-from model.game.definition import validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.move import Move
+from model.resources import bundled_games_root
+from model.definition import validate_definition
+from model.manager import GameManager, TransitionError
+from model.move import Move
 
-CONFIG = resources.files("games").joinpath("chess", "config.json")
+CONFIG = bundled_games_root().joinpath("chess", "config.json")
 
 
 def configuration():

@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from importlib import resources
+from model.resources import bundled_games_root
 import re
 import json
 from typing import Any
 from collections.abc import Mapping
 
-from model.game.capture_policy import CapturePolicy
-from model.game.schema import (
+from model.capture_policy import CapturePolicy
+from model.schema import (
     MAX_JSON_TEXT_BYTES,
     _bounded_json,
     condition,
@@ -187,7 +187,7 @@ def load_bundled_definition(name: str) -> GameDefinition:
     if type(name) is not str or re.fullmatch(r"[a-z][a-z0-9_]{0,63}", name) is None:
         raise ConfigurationError("game identifier must be a bounded safe directory name")
     try:
-        source = resources.files("games").joinpath(name).joinpath("config.json")
+        source = bundled_games_root().joinpath(name).joinpath("config.json")
         raw_json = source.read_text("utf-8")
     except (ModuleNotFoundError, OSError) as error:
         raise ConfigurationError(f"game {name!r} has no bundled config.json") from error
@@ -531,8 +531,8 @@ def board_from_definition(definition: GameDefinition) -> "Board":
     from its declared move/attack geometry, movement rights and symbols. The
     returned board is a distinct mutable projection owned by its caller.
     """
-    from model.game.board import Board
-    from model.pieces.piece import Piece
+    from model.board import Board
+    from model.piece import Piece
 
     if not isinstance(definition, GameDefinition):
         raise TypeError("a validated game definition is required")

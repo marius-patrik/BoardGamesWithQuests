@@ -12,7 +12,7 @@ from collections.abc import Callable, Mapping
 from copy import deepcopy
 from typing import Any
 
-from model.game.conditions import QueryResolutionError
+from model.conditions import QueryResolutionError
 
 
 class SnapshotQueries:

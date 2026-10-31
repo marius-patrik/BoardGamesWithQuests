@@ -7,7 +7,7 @@ nothing here imports a piece subclass.
 
 from typing import Iterable, List, Optional, Tuple
 
-from model.pieces.piece import Piece
+from model.piece import Piece
 
 
 class Board:

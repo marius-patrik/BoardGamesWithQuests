@@ -7,13 +7,13 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.board import Board
-from model.game.board_queries import BoardQueries
-from model.game.capture_policy import EvaluationBudget, EvaluationBudgetExceeded
-from model.game.conditions import QueryResolutionError
-from model.game.hooks import PlannedEffect, RuleProgram
-from model.game.outcomes import resolve_outcome
-from model.pieces.piece import Piece
+from model.board import Board
+from model.board_queries import BoardQueries
+from model.capture_policy import EvaluationBudget, EvaluationBudgetExceeded
+from model.conditions import QueryResolutionError
+from model.hooks import PlannedEffect, RuleProgram
+from model.outcomes import resolve_outcome
+from model.piece import Piece
 
 
 def board_with_piece():

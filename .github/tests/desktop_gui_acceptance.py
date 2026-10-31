@@ -8,7 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from model.game.session import DesktopSession
+from model.session import DesktopSession
+from model.resources import bundled_games_root
 from view.app import build_application, open_settings
 
 
@@ -85,7 +86,7 @@ def test_preferences_dialog_saves_and_reloads_supported_non_executable_settings(
 def test_game_switch_through_visible_new_game_modal_resets_board(window):
     window.game_view.on_new_game()
     window.update()
-    from view.start_modal import StartModal
+    from view.modal import StartModal
 
     modals = [child for child in window.winfo_children() if isinstance(child, tk.Toplevel)]
     assert modals
@@ -116,14 +117,14 @@ def test_game_switch_through_visible_new_game_modal_resets_board(window):
 
 
 def test_snapshot_export_from_real_window_is_replayable(window, tmp_path, monkeypatch):
-    from view import player_game_view
+    from view import screen
 
     click_canvas(window, 6, 4)
     click_canvas(window, 4, 4)
     destination = tmp_path / "game.json"
     # Only the OS-owned save-file selector is replaced with the chosen path.
     monkeypatch.setattr(
-        player_game_view.filedialog,
+        screen.filedialog,
         "asksaveasfilename",
         lambda **kwargs: str(destination),
     )
@@ -134,7 +135,7 @@ def test_snapshot_export_from_real_window_is_replayable(window, tmp_path, monkey
 
 
 def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
-    from model.game.preferences import (
+    from model.preferences import (
         PreferencesError,
         load_preferences,
         save_preferences,
@@ -168,22 +169,20 @@ def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
 
 
 def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch):
-    from model.game.persistence import load_session
-    from view import player_game_view
+    from model.persistence import load_session
+    from view import screen
 
     click_canvas(window, 6, 4)
     click_canvas(window, 4, 4)
     previous = window.window_controller.game_controller.session.snapshot()
     saved = tmp_path / "saved.json"
-    monkeypatch.setattr(
-        player_game_view.filedialog, "asksaveasfilename", lambda **kwargs: str(saved)
-    )
+    monkeypatch.setattr(screen.filedialog, "asksaveasfilename", lambda **kwargs: str(saved))
     window.game_view.export_game()
     assert load_session(saved).snapshot() == previous
     window.window_controller.game_controller.new_game("checkers")
     window.game_view.reload()
     assert window.window_controller.game_controller.session.game == "checkers"
-    monkeypatch.setattr(player_game_view.filedialog, "askopenfilename", lambda **kwargs: str(saved))
+    monkeypatch.setattr(screen.filedialog, "askopenfilename", lambda **kwargs: str(saved))
     window.game_view.open_game()
     assert window.window_controller.game_controller.session.snapshot() == previous
     assert window.window_controller.game_controller.session.game == "chess"
@@ -191,16 +190,16 @@ def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch)
 
 
 def test_bad_saved_game_preserves_live_window_and_reports_error(window, tmp_path, monkeypatch):
-    from model.game.persistence import SessionFileError, load_session
-    from view import player_game_view
+    from model.persistence import SessionFileError, load_session
+    from view import screen
 
     before = window.window_controller.game_controller.session.snapshot()
     bad = tmp_path / "invalid.json"
     bad.write_text('{"revision": 1, "revision": 99}', encoding="utf-8")
-    monkeypatch.setattr(player_game_view.filedialog, "askopenfilename", lambda **kwargs: str(bad))
+    monkeypatch.setattr(screen.filedialog, "askopenfilename", lambda **kwargs: str(bad))
     errors = []
     monkeypatch.setattr(
-        player_game_view.messagebox,
+        screen.messagebox,
         "showerror",
         lambda _title, message, **kwargs: errors.append(str(message)),
     )
@@ -212,13 +211,13 @@ def test_bad_saved_game_preserves_live_window_and_reports_error(window, tmp_path
 
 
 def test_notation_button_exports_actual_user_game_as_pgn(window, tmp_path, monkeypatch):
-    from view import player_game_view
+    from view import screen
 
     click_canvas(window, 6, 4)
     click_canvas(window, 4, 4)
     target = tmp_path / "real-game.pgn"
     monkeypatch.setattr(
-        player_game_view.filedialog,
+        screen.filedialog,
         "asksaveasfilename",
         lambda **kwargs: str(target),
     )
@@ -231,9 +230,9 @@ def test_notation_button_exports_actual_user_game_as_pgn(window, tmp_path, monke
 
 
 def test_resign_from_real_ui_commits_terminal_result_and_blocks_further_moves(window, monkeypatch):
-    from view import player_game_view
+    from view import screen
 
-    monkeypatch.setattr(player_game_view.messagebox, "askyesno", lambda *a, **k: True)
+    monkeypatch.setattr(screen.messagebox, "askyesno", lambda *a, **k: True)
     window.game_view.resign_game()
     state = window.window_controller.game_controller.session.snapshot()
     assert state["outcome"]["kind"] == "win"
@@ -245,24 +244,24 @@ def test_resign_from_real_ui_commits_terminal_result_and_blocks_further_moves(wi
 
 
 def test_unavailable_draw_claim_does_not_mutate_authoritative_game(window, monkeypatch):
-    from view import player_game_view
+    from view import screen
 
     before = window.window_controller.game_controller.session.snapshot()
     messages = []
     monkeypatch.setattr(
-        player_game_view.messagebox,
+        screen.messagebox,
         "showinfo",
         lambda *a, **k: messages.append(a),
     )
     monkeypatch.setattr(
-        player_game_view.simpledialog,
+        screen.simpledialog,
         "askinteger",
         lambda *a, **k: 1,
     )
     # A rejected claim displays a blocking Tk messagebox in the real UI.
     # Capture that player-facing error instead of deadlocking the Xvfb runner.
     monkeypatch.setattr(
-        player_game_view.messagebox,
+        screen.messagebox,
         "showerror",
         lambda *a, **k: messages.append(a),
     )
@@ -403,7 +402,7 @@ def test_terminal_result_and_postgame_actions_are_authoritative(window, game, mo
     _play_one_legal_move(window)
     before = window.window_controller.game_controller.session.snapshot()
     expected_winner = before["participants"][str(-before["active_side"])]
-    monkeypatch.setattr("view.player_game_view.messagebox.askyesno", lambda *a, **k: True)
+    monkeypatch.setattr("view.screen.messagebox.askyesno", lambda *a, **k: True)
     window.game_view.resign_game()
     window.update()
     state = window.window_controller.game_controller.session.snapshot()
@@ -429,9 +428,7 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
     before = window.window_controller.game_controller.session.snapshot()
     title = window.title()
     answers = iter((None, False, False))
-    monkeypatch.setattr(
-        "view.player_game_view.messagebox.askyesnocancel", lambda *a, **k: next(answers)
-    )
+    monkeypatch.setattr("view.screen.messagebox.askyesnocancel", lambda *a, **k: next(answers))
     window.game_view.on_new_game()
     assert window.window_controller.game_controller.session.snapshot() == before
     assert window.title() == title
@@ -492,7 +489,7 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
 def test_open_cancel_and_failed_replay_preserve_session_title_and_revision(
     window, tmp_path, monkeypatch
 ):
-    from view import player_game_view
+    from view import screen
 
     _play_one_legal_move(window)
     previous = window.window_controller.game_controller.session.snapshot()
@@ -500,16 +497,12 @@ def test_open_cancel_and_failed_replay_preserve_session_title_and_revision(
     bad = tmp_path / "invalid.json"
     bad.write_text('{"revision": 1, "revision": 4}', encoding="utf-8")
     answers = iter((None, False, False))
-    monkeypatch.setattr(
-        player_game_view.messagebox, "askyesnocancel", lambda *a, **k: next(answers)
-    )
+    monkeypatch.setattr(screen.messagebox, "askyesnocancel", lambda *a, **k: next(answers))
     filepaths = iter((str(bad), ""))
-    monkeypatch.setattr(
-        player_game_view.filedialog, "askopenfilename", lambda **kwargs: next(filepaths)
-    )
+    monkeypatch.setattr(screen.filedialog, "askopenfilename", lambda **kwargs: next(filepaths))
     errors = []
     monkeypatch.setattr(
-        player_game_view.messagebox,
+        screen.messagebox,
         "showerror",
         lambda _title, message, **kwargs: errors.append(message),
     )
@@ -526,8 +519,8 @@ def test_open_cancel_and_failed_replay_preserve_session_title_and_revision(
 
 
 def test_save_then_open_switches_title_and_retains_replay(window, tmp_path, monkeypatch):
-    from view import player_game_view
-    from model.game.persistence import load_session, save_session
+    from view import screen
+    from model.persistence import load_session, save_session
 
     _play_one_legal_move(window)
     old = window.window_controller.game_controller.session.snapshot()
@@ -538,13 +531,13 @@ def test_save_then_open_switches_title_and_retains_replay(window, tmp_path, monk
     _play_one_legal_move(window)
     checkers = window.window_controller.game_controller.session.snapshot()
     save_before_open = tmp_path / "checkers.json"
-    monkeypatch.setattr(player_game_view.messagebox, "askyesnocancel", lambda *a, **k: True)
+    monkeypatch.setattr(screen.messagebox, "askyesnocancel", lambda *a, **k: True)
     monkeypatch.setattr(
-        player_game_view.filedialog,
+        screen.filedialog,
         "asksaveasfilename",
         lambda **k: str(save_before_open),
     )
-    monkeypatch.setattr(player_game_view.filedialog, "askopenfilename", lambda **k: str(chess_save))
+    monkeypatch.setattr(screen.filedialog, "askopenfilename", lambda **k: str(chess_save))
     window.game_view.open_game()
     window.update()
     assert load_session(save_before_open).snapshot() == checkers
@@ -555,24 +548,24 @@ def test_save_then_open_switches_title_and_retains_replay(window, tmp_path, monk
 
 
 def test_save_cancel_and_io_error_abort_destructive_new_game(window, tmp_path, monkeypatch):
-    from view import player_game_view
+    from view import screen
 
     _play_one_legal_move(window)
     original = window.window_controller.game_controller.session.snapshot()
     title = window.title()
-    monkeypatch.setattr(player_game_view.messagebox, "askyesnocancel", lambda *a, **k: True)
-    monkeypatch.setattr(player_game_view.filedialog, "asksaveasfilename", lambda **k: "")
+    monkeypatch.setattr(screen.messagebox, "askyesnocancel", lambda *a, **k: True)
+    monkeypatch.setattr(screen.filedialog, "asksaveasfilename", lambda **k: "")
     window.game_view.on_new_game()
     assert window.window_controller.game_controller.session.snapshot() == original
     assert window.title() == title
     errors = []
     monkeypatch.setattr(
-        player_game_view.messagebox,
+        screen.messagebox,
         "showerror",
         lambda _title, msg, **kwargs: errors.append(msg),
     )
     monkeypatch.setattr(
-        player_game_view.filedialog,
+        screen.filedialog,
         "asksaveasfilename",
         lambda **k: str(tmp_path / "no-such-directory" / "bad.json"),
     )
@@ -583,17 +576,17 @@ def test_save_cancel_and_io_error_abort_destructive_new_game(window, tmp_path, m
 
 
 def test_claim_prompt_has_real_newlines_and_game_validates_claim(window, monkeypatch):
-    from view import player_game_view
+    from view import screen
 
     prompts = []
     messages = []
     monkeypatch.setattr(
-        player_game_view.simpledialog,
+        screen.simpledialog,
         "askinteger",
         lambda title, prompt, **kwargs: prompts.append(prompt) or 1,
     )
     monkeypatch.setattr(
-        player_game_view.messagebox,
+        screen.messagebox,
         "showerror",
         lambda title, message, **kwargs: messages.append(message),
     )
@@ -618,16 +611,14 @@ def test_claim_prompt_has_real_newlines_and_game_validates_claim(window, monkeyp
 
 
 def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monkeypatch):
-    from view import player_game_view
-    from model.game.persistence import load_session
+    from view import screen
+    from model.persistence import load_session
 
-    monkeypatch.setattr(player_game_view.messagebox, "askyesno", lambda *args, **kwargs: True)
+    monkeypatch.setattr(screen.messagebox, "askyesno", lambda *args, **kwargs: True)
     window.game_view.resign_game()
     state = window.window_controller.game_controller.session.snapshot()
     target = tmp_path / "final-game.json"
-    monkeypatch.setattr(
-        player_game_view.filedialog, "asksaveasfilename", lambda **kwargs: str(target)
-    )
+    monkeypatch.setattr(screen.filedialog, "asksaveasfilename", lambda **kwargs: str(target))
     assert window.game_view.export_game() is True
     window.game_view.refresh()  # same periodic refresh path as the running Tk clock
     assert "Saved game" in window.game_view.status.get()
@@ -642,10 +633,10 @@ def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monk
 def prepared_position(monkeypatch, game, placement, starting_side):
     from importlib import resources
 
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
+    import model.session as session_module
+    from model.definition import validate_definition
 
-    config = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
+    config = json.loads(bundled_games_root().joinpath(game, "config.json").read_text())
     config["board"]["starting_pieces"] = placement
     config["starting_side"] = starting_side
     definition = validate_definition(config)
@@ -920,10 +911,10 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
 def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypatch):
     """More than six session-defined objectives remain available to each side."""
     from importlib import resources
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
+    import model.session as session_module
+    from model.definition import validate_definition
 
-    data = json.loads(resources.files("games").joinpath("chess", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("chess", "config.json").read_text())
     data["quests"].extend(
         {
             "id": f"visual-quest-{number}",
@@ -971,10 +962,10 @@ def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypat
 # transitions. Custom quest definitions are validated by the real rule loader.
 def _long_quest_session(game, monkeypatch, suffix):
     from importlib import resources
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
+    import model.session as session_module
+    from model.definition import validate_definition
 
-    data = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath(game, "config.json").read_text())
     data["quests"] = [
         {
             "id": f"shared-quest-{index}",
@@ -1141,7 +1132,7 @@ def test_settings_cancel_save_restart_defaults_and_pointer_mapping(window, tmp_p
     import subprocess
     import sys
 
-    from model.game.preferences import DEFAULTS
+    from model.preferences import DEFAULTS
 
     target = Path(os.environ["XDG_CONFIG_HOME"]) / "BoardGamesWithQuests" / "preferences.json"
     original = window.game_view._preferred_board_size
@@ -1329,7 +1320,7 @@ def test_clock_only_autorefresh_preserves_actual_canvas_items(window, game):
 
 
 def test_io_errors_show_bounded_basename_without_replacing_live_game(window, tmp_path, monkeypatch):
-    from view import player_game_view as module
+    from view import screen as module
 
     before = window.game_view.session.snapshot()
     filename = "prefix-" + ("x" * 150) + "-save.json"
