@@ -2,6 +2,9 @@ name: Desktop Native Package Acceptance
 
 on:
   pull_request:
+  push:
+    branches:
+      - qa/443-final-native-recovery
   workflow_dispatch:
 
 permissions:

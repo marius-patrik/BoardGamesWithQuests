@@ -38,13 +38,13 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth
+          sudo apt-get install -y --no-install-recommends python3-tk xvfb xauth xdotool openbox scrot
       - name: Install pinned packaging tools and application
         env:
           SETUPTOOLS_SCM_PRETEND_VERSION: ${{ inputs.version }}
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "pyinstaller==6.16.0" .
+          python -m pip install "pyinstaller==6.16.0" "pyautogui==0.9.54" "Pillow==11.3.0" .
       - name: Package and smoke-test the frozen GUI
         env:
           SETUPTOOLS_SCM_PRETEND_VERSION: ${{ inputs.version }}
@@ -57,4 +57,30 @@ jobs:
           name: desktop-${{ matrix.platform }}
           path: dist/release/
           if-no-files-found: error
+          retention-days: 14
+
+      - name: Exercise extracted native desktop (mandatory fail-closed)
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          if [ "$PLATFORM" = linux-x64 ]; then
+            XDG_SESSION_TYPE=x11 xvfb-run -a -s "-screen 0 1600x1000x24" bash -euc '
+              openbox > "$RUNNER_TEMP/openbox-native.log" 2>&1 &
+              wm=$!
+              trap "kill $wm 2>/dev/null || true" EXIT
+              python .github/tests/frozen_native_acceptance.py \
+                --platform "$PLATFORM" --version "$RELEASE_VERSION" --source-sha "$GITHUB_SHA"
+            '
+          else
+            python .github/tests/frozen_native_acceptance.py \
+              --platform "$PLATFORM" --version "$RELEASE_VERSION" --source-sha "$GITHUB_SHA"
+          fi
+      - name: Upload native evidence even when acceptance fails
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: native-evidence-${{ matrix.platform }}
+          path: dist/native-evidence/
+          if-no-files-found: warn
           retention-days: 14

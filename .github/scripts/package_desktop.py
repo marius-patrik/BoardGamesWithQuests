@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from importlib import metadata
 import json
 import os
+import platform as host_platform
 from pathlib import Path
 import re
 import subprocess
@@ -161,6 +163,48 @@ def smoke(bundle: Path, platform: str) -> None:
             process.wait(timeout=10)
 
 
+def write_build_identity(bundle: Path, platform: str, version: str) -> Path:
+    """Bind the candidate archive to the actual checkout and bundled data."""
+    source_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", source_sha):
+        raise ValueError("Invalid checked-out source identity")
+    if os.environ.get("GITHUB_SHA") and os.environ["GITHUB_SHA"] != source_sha:
+        raise ValueError("Source checkout is not the GitHub Actions source SHA")
+    machine = host_platform.machine().lower()
+    expected = {
+        "windows-x64": ("amd64", "x86_64"),
+        "macos-arm64": ("arm64",),
+        "macos-x64": ("x86_64",),
+        "linux-x64": ("x86_64",),
+    }
+    if machine not in expected[platform]:
+        raise ValueError(f"Host architecture {machine} disagrees with {platform}")
+    games = ROOT / "games"
+    resources = {
+        path.relative_to(games).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted(games.rglob("*"))
+        if path.is_file() and "__pycache__" not in path.parts
+    }
+    if not {"chess/config.json", "checkers/config.json"}.issubset(resources):
+        raise ValueError("Source checkout is missing required game JSON")
+    record = {
+        "source_sha": source_sha,
+        "platform": platform,
+        "release_version": version,
+        "host_architecture": machine,
+        "python_version": sys.version.split()[0],
+        "pyinstaller_version": metadata.version("pyinstaller"),
+        "resources": resources,
+    }
+    location = (
+        bundle / "Contents/Resources/build-info.json"
+        if platform.startswith("macos")
+        else bundle / "build-info.json"
+    )
+    location.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return location
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", required=True, choices=sorted(PLATFORMS))
@@ -168,6 +212,7 @@ def main() -> None:
     args = parser.parse_args()
     bundle = build(args.platform, args.version)
     smoke(bundle, args.platform)
+    write_build_identity(bundle, args.platform, args.version)
     archive, checksum = archive_bundle(bundle, ROOT / "dist/release", args.platform, args.version)
     print(f"Verified desktop bundle: {bundle}")
     print(f"Release asset: {archive}")
