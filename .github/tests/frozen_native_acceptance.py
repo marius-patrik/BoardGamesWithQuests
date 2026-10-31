@@ -269,42 +269,54 @@ def focus_chooser() -> None:
 
 
 def visible_board(image) -> tuple[float, float, float]:
-    """Locate either real bundled board palette, not one game's colors only."""
+    """Identify the contiguous 8x8 checkerboard, not stray UI/dock colors."""
     palettes = (
         ((240, 217, 181), (181, 136, 99)),  # Chess
         ((232, 218, 188), (112, 87, 63)),  # English Draughts
     )
-    pixels = image.convert("RGB").load()
-    xs, ys = [], []
-    counts = [0, 0]
-    for y in range(0, image.height, 4):
-        for x in range(0, image.width, 4):
-            rgb = pixels[x, y]
-            for index, (light, dark) in enumerate(palettes):
-                if (
-                    min(max(abs(rgb[i] - shade[i]) for i in range(3)) for shade in (light, dark))
-                    <= 7
-                ):
-                    xs.append(x)
-                    ys.append(y)
-                    counts[index] += 1
-                    break
-    if len(xs) < 3000:
-        raise AssertionError(
-            f"expected Chess/Draughts Canvas, found {len(xs)} square-color samples"
-        )
-    left, top = min(xs), min(ys)
-    horizontal, vertical = max(xs) - left + 4, max(ys) - top + 4
-    if abs(horizontal - vertical) > 16 or not 255 <= horizontal <= 710:
-        raise AssertionError(f"board not an 8x8 square: {horizontal}x{vertical}")
-    size = (horizontal + vertical) / 16
-    light, dark = palettes[counts.index(max(counts))]
-    for row, col in ((3, 0), (3, 7), (4, 0), (4, 7)):
-        x, y = int(left + (col + 0.22) * size), int(top + (row + 0.22) * size)
-        expected = light if (row + col) % 2 == 0 else dark
-        if max(abs(pixels[x, y][i] - expected[i]) for i in range(3)) > 25:
-            raise AssertionError(f"board checker pattern invalid at ({row}, {col})")
-    return left, top, size
+    picture = image.convert("RGB")
+    pixels = picture.load()
+    stride = 4
+    failures: list[str] = []
+    for light, dark in palettes:
+        x_hits = [0] * picture.width
+        y_hits = [0] * picture.height
+        for y in range(0, picture.height, stride):
+            for x in range(0, picture.width, stride):
+                rgb = pixels[x, y]
+                if min(
+                    max(abs(rgb[i] - shade[i]) for i in range(3))
+                    for shade in (light, dark)
+                ) <= 7:
+                    x_hits[x] += 1
+                    y_hits[y] += 1
+        if max(x_hits, default=0) < 20 or max(y_hits, default=0) < 20:
+            failures.append("insufficient sample density")
+            continue
+        x_limit = max(20, int(max(x_hits) * 0.4))
+        y_limit = max(20, int(max(y_hits) * 0.4))
+        columns = [x for x in range(0, picture.width, stride) if x_hits[x] >= x_limit]
+        rows = [y for y in range(0, picture.height, stride) if y_hits[y] >= y_limit]
+        if not columns or not rows:
+            failures.append("no concentrated checkerboard region")
+            continue
+        left, top = min(columns), min(rows)
+        horizontal, vertical = max(columns) - left + stride, max(rows) - top + stride
+        if abs(horizontal - vertical) > 16 or not 255 <= horizontal <= 710:
+            failures.append(f"unexpected rectangle {horizontal}x{vertical}")
+            continue
+        square = (horizontal + vertical) / 16
+        try:
+            for row, col in ((3, 0), (3, 7), (4, 0), (4, 7)):
+                x, y = int(left + (col + 0.22) * square), int(top + (row + 0.22) * square)
+                expected = light if (row + col) % 2 == 0 else dark
+                if max(abs(pixels[x, y][i] - expected[i]) for i in range(3)) > 25:
+                    raise AssertionError(f"unexpected checker color at {row}, {col}")
+        except (AssertionError, IndexError) as exc:
+            failures.append(str(exc))
+            continue
+        return left, top, square
+    raise AssertionError("no unobscured board Canvas: " + "; ".join(failures))
 
 
 def await_board(gui, evidence: Path, label: str, timeout: float = 30) -> tuple[float, float, float]:
@@ -325,6 +337,9 @@ def await_board(gui, evidence: Path, label: str, timeout: float = 30) -> tuple[f
 
 def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: str) -> dict:
     home.mkdir()
+    # macOS TemporaryDirectory may live below /var -> /private/var symlink.
+    # The production preference security policy correctly rejects such a HOME.
+    home = home.resolve()
     (home / "AppData" / "Roaming").mkdir(parents=True)
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
@@ -564,6 +579,9 @@ def preferences_file(home: Path) -> Path:
 def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: str) -> dict:
     """Exercise Cancel, Save and restart from actual native dialogs and OS user data."""
     home.mkdir()
+    # macOS TemporaryDirectory may live below /var -> /private/var symlink.
+    # The production preference security policy correctly rejects such a HOME.
+    home = home.resolve()
     (home / "AppData" / "Roaming").mkdir(parents=True)
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
@@ -589,8 +607,20 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
         gui.screenshot().save(evidence / "settings-chooser.png")
         # ModalLifecycle activates the readonly game selector. Tab order:
         # selector -> Start -> Settings; Enter activates the focused button.
-        x, y, width, height = native_window_rectangle("New game")
-        gui.click(x + 0.66 * width, y + 0.66 * height)
+        if sys.platform.startswith("linux"):
+            # X11 keeps the combobox keyboard traversal deterministic, whereas
+            # decorated-window geometry includes window-manager offsets.
+            gui.press("tab")
+            gui.press("tab")
+            gui.press("return")
+        else:
+            x, y, width, height = native_window_rectangle("New game")
+            (evidence / "chooser-hit-target.json").write_text(
+                json.dumps({"rect": [x, y, width, height],
+                            "point": [x + 0.66 * width, y + 0.66 * height]}) + "\n",
+                encoding="utf-8",
+            )
+            gui.click(x + 0.66 * width, y + 0.66 * height)
         screenshot_dialog(gui, evidence, "settings-dialog", "Settings")
 
     def edit_settings() -> None:
