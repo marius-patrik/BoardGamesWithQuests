@@ -13,10 +13,10 @@ import random
 
 import pytest
 
-from model.game.definition import validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.move import Move
-from model.game.session import DesktopSession
+from model.definition import validate_definition
+from model.manager import GameManager, TransitionError
+from model.move import Move
+from model.session import DesktopSession
 
 
 def chess_square(name):

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from model.game.manager import TransitionError
-from model.game.session import DesktopSession
+from model.manager import TransitionError
+from model.session import DesktopSession
 
 Square = tuple[int, int]
 

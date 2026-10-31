@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.capture_policy import EvaluationBudget, EvaluationBudgetExceeded
-from model.game.hooks import RuleProgram
-from model.game.session import DesktopSession
+from model.capture_policy import EvaluationBudget, EvaluationBudgetExceeded
+from model.hooks import RuleProgram
+from model.session import DesktopSession
 
 
 def _run_comparison(relation, left, right, *, limit=100_000):

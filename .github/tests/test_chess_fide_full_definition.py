@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pytest
 
-from model.game.definition import validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.session import DesktopSession
+from model.definition import validate_definition
+from model.manager import GameManager, TransitionError
+from model.session import DesktopSession
 
 OPERA = json.loads(
     (Path(__file__).parent / "fixtures" / "chess_opera_game_1858.json").read_text(encoding="utf-8")

@@ -7,8 +7,8 @@ import json
 
 import pytest
 
-from model.game.definition import ConfigurationError, load_bundled_definition, parse_definition_json
-from model.game.schema import thaw_json
+from model.definition import ConfigurationError, load_bundled_definition, parse_definition_json
+from model.schema import thaw_json
 
 
 def test_bundled_chess_and_english_draughts_have_valid_version_two_definitions():
@@ -82,8 +82,8 @@ def test_rejects_unrecognized_python_rule_source_in_trusted_definition():
 
 
 def test_capture_policy_validates_declared_bounded_geometry():
-    from model.game.capture_policy import CapturePolicy
-    from model.game.conditions import QueryResolutionError
+    from model.capture_policy import CapturePolicy
+    from model.conditions import QueryResolutionError
 
     accepted = {
         "flying": False,

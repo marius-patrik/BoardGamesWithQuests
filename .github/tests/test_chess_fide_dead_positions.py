@@ -9,7 +9,7 @@ https://handbook.fide.com/chapter/E012023
 
 from __future__ import annotations
 
-from model.game.manager import GameManager
+from model.manager import GameManager
 from test_chess_fide_full_definition import reference_move, reference_position
 
 SAME_COLOUR_PROMOTED_BISHOPS = "4k3/8/8/8/8/2B1B1B1/8/4K3"

@@ -7,11 +7,11 @@ from typing import Any
 
 import pytest
 
-from model.game.conditions import QueryResolutionError
-from model.game.capture_policy import EvaluationBudgetExceeded
-from model.game.definition import ConfigurationError, validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.move import Move
+from model.conditions import QueryResolutionError
+from model.capture_policy import EvaluationBudgetExceeded
+from model.definition import ConfigurationError, validate_definition
+from model.manager import GameManager, TransitionError
+from model.move import Move
 
 
 def rule(identifier: str, hook: str, effects: list[dict], when: dict | None = None) -> dict:

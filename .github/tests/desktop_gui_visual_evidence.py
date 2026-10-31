@@ -52,10 +52,10 @@ def main() -> None:
                 root.update()
                 view = root.game_view
                 board = view.board_view
-                assert view.player_views[1].winfo_rootx() < board.winfo_rootx()
-                assert board.winfo_rootx() < view.player_views[-1].winfo_rootx()
-                assert view.quest_viewports[1].winfo_ismapped()
-                assert view.quest_viewports[-1].winfo_ismapped()
+                assert view.panels[1].winfo_rootx() < board.winfo_rootx()
+                assert board.winfo_rootx() < view.panels[-1].winfo_rootx()
+                assert view.questsports[1].winfo_ismapped()
+                assert view.questsports[-1].winfo_ismapped()
                 capture(root, output / f"ux452-after-{game}-{width}x{height}.png")
                 if game == "chess":
                     click(root, 6, 4)
@@ -77,9 +77,9 @@ def capture_quest_and_history_stress(output: Path) -> None:
     import json
     from importlib import resources
 
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
-    from model.game.session import DesktopSession
+    import model.session as session_module
+    from model.definition import validate_definition
+    from model.session import DesktopSession
 
     original_loader = session_module.load_bundled_definition
     try:
@@ -111,8 +111,8 @@ def capture_quest_and_history_stress(output: Path) -> None:
                     root.update()
                     assert all(len(view.quest_lists[s].cards) == 12 for s in (1, -1))
                     # The left and right readers may independently study distant cards.
-                    view.quest_viewports[1].yview_moveto(0.35)
-                    view.quest_viewports[-1].yview_moveto(0.8)
+                    view.questsports[1].yview_moveto(0.35)
+                    view.questsports[-1].yview_moveto(0.8)
                     capture(root, output / f"ux453-quests-{game}-{width}x{height}.png")
                 finally:
                     root.game_view.stop_auto_refresh()

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.board import Board
-from model.game.capture_geometry import CaptureEnumerator
-from model.game.capture_policy import CapturePolicy, EvaluationBudget, EvaluationBudgetExceeded
+from model.board import Board
+from model.capture_geometry import CaptureEnumerator
+from model.capture_policy import CapturePolicy, EvaluationBudget, EvaluationBudgetExceeded
 
 
 class CandidatePiece:

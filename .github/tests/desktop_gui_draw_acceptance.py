@@ -13,8 +13,8 @@ from tkinter import ttk
 
 import pytest
 
-from model.game.definition import validate_definition
-from model.game.session import DesktopSession
+from model.definition import validate_definition
+from model.session import DesktopSession
 from view.app import build_application
 
 
@@ -78,7 +78,7 @@ def draw_ready_chess():
 
 
 def draw_ready_wcdf(monkeypatch):
-    import model.game.session as session_module
+    import model.session as session_module
 
     data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
     data["board"]["starting_pieces"] = [
@@ -188,7 +188,7 @@ def test_real_prospective_claim_modal_cancellation_or_acceptance(window, monkeyp
 
 
 def test_actual_legal_multi_hop_route_is_displayed_complete_and_cancelable(window, monkeypatch):
-    import model.game.session as session_module
+    import model.session as session_module
 
     data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
     data["board"]["starting_pieces"] = [

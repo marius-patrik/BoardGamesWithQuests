@@ -6,10 +6,10 @@ import math
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from model.game.board import Board
-from model.game.conditions import QueryResolutionError
-from model.game.capture_policy import EvaluationBudget, MAX_EVALUATION_WORK
-from model.game.validator import MoveValidator
+from model.board import Board
+from model.conditions import QueryResolutionError
+from model.capture_policy import EvaluationBudget, MAX_EVALUATION_WORK
+from model.validator import MoveValidator
 
 
 class BoardQueries:

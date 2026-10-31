@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from model.game.board import Board
-from model.pieces.piece import Piece
+from model.board import Board
+from model.piece import Piece
 
 
 class MoveValidator:

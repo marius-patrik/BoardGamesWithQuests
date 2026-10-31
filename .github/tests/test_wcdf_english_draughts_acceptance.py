@@ -15,10 +15,10 @@ import json
 
 import pytest
 
-from model.game.definition import validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.move import Move
-from model.game.session import DesktopSession
+from model.definition import validate_definition
+from model.manager import GameManager, TransitionError
+from model.move import Move
+from model.session import DesktopSession
 
 
 def reference_game(pieces, *, start=-1):
@@ -337,7 +337,7 @@ def test_wcdf_third_repetition_with_declared_next_move_not_moved_flag():
 
 
 def test_wcdf_repetition_claim_is_available_through_actual_desktop_session(monkeypatch):
-    import model.game.session as session_module
+    import model.session as session_module
 
     data = json.loads(resources.files("games").joinpath("checkers", "config.json").read_text())
     data["board"]["starting_pieces"] = [

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.notation import NotationError, render_notation, save_notation
-from model.game.session import DesktopSession
+from model.notation import NotationError, render_notation, save_notation
+from model.session import DesktopSession
 
 
 def perform(session, source, target):

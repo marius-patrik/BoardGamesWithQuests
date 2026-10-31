@@ -1,7 +1,7 @@
 """Supporting canonical geometric candidate behavior, independent of Python rules."""
 
-from model.game.definition import board_from_definition, load_bundled_definition
-from model.game.validator import MoveValidator
+from model.definition import board_from_definition, load_bundled_definition
+from model.validator import MoveValidator
 
 
 def test_chess_pawn_moves_follow_json_relative_vectors():

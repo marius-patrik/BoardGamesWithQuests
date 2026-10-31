@@ -5,18 +5,18 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import textwrap
-from model.game.persistence import SessionFileError, load_session, save_session
-from model.game.notation import NotationError, save_notation
+from model.persistence import SessionFileError, load_session, save_session
+from model.notation import NotationError, save_notation
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 from typing import Any
 
 from controller.window_controller import WindowController, display_game_name
-from model.game.preferences import DEFAULTS, PreferencesError, load_preferences
+from model.preferences import DEFAULTS, PreferencesError, load_preferences
 from view.dialog_lifecycle import ModalLifecycle
-from view.game_view import BoardView
-from view.player_view import PlayerView
-from view.quest_view import QuestList
+from view.board import BoardView
+from view.panel import PlayerView
+from view.quests import QuestList
 
 REFRESH_INTERVAL_MS = 500
 
@@ -65,7 +65,7 @@ def outcome_description(state: dict[str, Any]) -> str:
     return f"{side} wins — {reason}."
 
 
-class PlayerGameView(ttk.Frame):
+class GameScreen(ttk.Frame):
     """Game board, participants, quests and move history; no independent authority."""
 
     def __init__(

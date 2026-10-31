@@ -12,14 +12,14 @@ from importlib import resources
 
 import pytest
 
-from model.game.capture_policy import (
+from model.capture_policy import (
     EvaluationBudget,
     EvaluationBudgetExceeded,
     MAX_EVALUATION_WORK,
 )
-from model.game.definition import validate_definition
-from model.game.manager import GameManager, TransitionError
-from model.game.move import Move
+from model.definition import validate_definition
+from model.manager import GameManager, TransitionError
+from model.move import Move
 
 
 def _predicate(expensive: bool, *, eligible: bool = True) -> dict:

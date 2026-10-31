@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -51,8 +52,8 @@ def build(platform: str, version: str) -> Path:
     """Build the real desktop entry point and include dynamically loaded game sources."""
     if platform not in PLATFORMS or not VERSION.fullmatch(version):
         raise ValueError("A supported platform and PrideVer release version are required")
-    entry = ROOT / "src/chesswithquests/__main__.py"
-    games = ROOT / "src/games"
+    entry = ROOT / "src/boardgameswithquests.py__main__.py"
+    games = ROOT / "games"
     if not entry.is_file() or not games.is_dir():
         raise FileNotFoundError("Completed desktop sources under src/ are required")
     # Read the checked-out distribution identity on every supported Python.
@@ -104,10 +105,18 @@ def build(platform: str, version: str) -> Path:
     runtime = bundle / (
         "Contents/Resources/games" if platform.startswith("macos") else "_internal/games"
     )
+    hashes: dict[str, str] = {}
     for source in resources:
-        packaged = runtime / source.relative_to(games)
-        if not packaged.is_file() or packaged.read_bytes() != source.read_bytes():
+        relative = source.relative_to(games)
+        packaged = runtime / relative
+        payload = source.read_bytes()
+        if not packaged.is_file() or packaged.read_bytes() != payload:
             raise FileNotFoundError(f"Missing or altered frozen runtime resource: {packaged}")
+        hashes[relative.as_posix()] = hashlib.sha256(payload).hexdigest()
+    (runtime / "manifest.json").write_text(
+        json.dumps({"version": 1, "files": dict(sorted(hashes.items()))}, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     return bundle
 
 

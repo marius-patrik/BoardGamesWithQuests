@@ -9,8 +9,8 @@ import stat
 import tempfile
 from typing import Any
 
-from model.game.manager import MAX_SNAPSHOT_BYTES
-from model.game.session import DesktopSession
+from model.manager import MAX_SNAPSHOT_BYTES
+from model.session import DesktopSession
 
 
 class SessionFileError(ValueError):

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from model.game.capture_policy import EvaluationBudget, EvaluationBudgetExceeded
-from model.game.hooks import RuleProgram
-from model.game.snapshot_queries import SnapshotQueries
+from model.capture_policy import EvaluationBudget, EvaluationBudgetExceeded
+from model.hooks import RuleProgram
+from model.snapshot_queries import SnapshotQueries
 
 
 def test_nested_work_reservations_fail_atomically_for_all_counters():

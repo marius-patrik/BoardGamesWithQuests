@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from model.game.session import DesktopSession
+from model.session import DesktopSession
 from view.app import build_application, open_settings
 
 
@@ -85,7 +85,7 @@ def test_preferences_dialog_saves_and_reloads_supported_non_executable_settings(
 def test_game_switch_through_visible_new_game_modal_resets_board(window):
     window.game_view.on_new_game()
     window.update()
-    from view.start_modal import StartModal
+    from view.modal import StartModal
 
     modals = [child for child in window.winfo_children() if isinstance(child, tk.Toplevel)]
     assert modals
@@ -134,7 +134,7 @@ def test_snapshot_export_from_real_window_is_replayable(window, tmp_path, monkey
 
 
 def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
-    from model.game.preferences import (
+    from model.preferences import (
         PreferencesError,
         load_preferences,
         save_preferences,
@@ -168,7 +168,7 @@ def test_hostile_preferences_are_not_accepted_or_executed(window, tmp_path):
 
 
 def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch):
-    from model.game.persistence import load_session
+    from model.persistence import load_session
     from view import player_game_view
 
     click_canvas(window, 6, 4)
@@ -191,7 +191,7 @@ def test_export_and_reopen_real_game_after_switch(window, tmp_path, monkeypatch)
 
 
 def test_bad_saved_game_preserves_live_window_and_reports_error(window, tmp_path, monkeypatch):
-    from model.game.persistence import SessionFileError, load_session
+    from model.persistence import SessionFileError, load_session
     from view import player_game_view
 
     before = window.window_controller.game_controller.session.snapshot()
@@ -308,7 +308,7 @@ def test_responsive_live_board_actions_and_clocks(tmp_path, monkeypatch, game, s
                 canvas,
                 view.top_player,
                 view.bottom_player,
-                view.quest_viewport,
+                view.questsport,
                 view.history,
             ):
                 inside(widget)
@@ -403,7 +403,7 @@ def test_terminal_result_and_postgame_actions_are_authoritative(window, game, mo
     _play_one_legal_move(window)
     before = window.window_controller.game_controller.session.snapshot()
     expected_winner = before["participants"][str(-before["active_side"])]
-    monkeypatch.setattr("view.player_game_view.messagebox.askyesno", lambda *a, **k: True)
+    monkeypatch.setattr("view.screen.messagebox.askyesno", lambda *a, **k: True)
     window.game_view.resign_game()
     window.update()
     state = window.window_controller.game_controller.session.snapshot()
@@ -430,7 +430,7 @@ def test_new_game_cancel_and_discard_preserve_until_choice(window, monkeypatch):
     title = window.title()
     answers = iter((None, False, False))
     monkeypatch.setattr(
-        "view.player_game_view.messagebox.askyesnocancel", lambda *a, **k: next(answers)
+        "view.screen.messagebox.askyesnocancel", lambda *a, **k: next(answers)
     )
     window.game_view.on_new_game()
     assert window.window_controller.game_controller.session.snapshot() == before
@@ -527,7 +527,7 @@ def test_open_cancel_and_failed_replay_preserve_session_title_and_revision(
 
 def test_save_then_open_switches_title_and_retains_replay(window, tmp_path, monkeypatch):
     from view import player_game_view
-    from model.game.persistence import load_session, save_session
+    from model.persistence import load_session, save_session
 
     _play_one_legal_move(window)
     old = window.window_controller.game_controller.session.snapshot()
@@ -619,7 +619,7 @@ def test_claim_prompt_has_real_newlines_and_game_validates_claim(window, monkeyp
 
 def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monkeypatch):
     from view import player_game_view
-    from model.game.persistence import load_session
+    from model.persistence import load_session
 
     monkeypatch.setattr(player_game_view.messagebox, "askyesno", lambda *args, **kwargs: True)
     window.game_view.resign_game()
@@ -642,8 +642,8 @@ def test_postgame_save_feedback_survives_periodic_refresh(window, tmp_path, monk
 def prepared_position(monkeypatch, game, placement, starting_side):
     from importlib import resources
 
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
+    import model.session as session_module
+    from model.definition import validate_definition
 
     config = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
     config["board"]["starting_pieces"] = placement
@@ -878,10 +878,10 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
     root.update()
     view = root.game_view
     state = view.session.snapshot()
-    assert set(view.player_views) == {1, -1}
+    assert set(view.panels) == {1, -1}
     assert set(view.quest_lists) == {1, -1}
-    assert set(view.quest_viewports) == {1, -1}
-    white, black = view.player_views[1], view.player_views[-1]
+    assert set(view.questsports) == {1, -1}
+    white, black = view.panels[1], view.panels[-1]
     board = view.board_view.canvas
 
     assert white.winfo_ismapped() and black.winfo_ismapped()
@@ -899,9 +899,9 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
     for side in (1, -1):
         participant_id = state["participants"][str(side)]
         assert len(view.quest_lists[side].cards) == len(state["quest_progress"][participant_id])
-        assert view.quest_viewports[side].winfo_ismapped()
-        assert view.quest_viewports[side].winfo_height() > 0
-        assert view.player_views[side].score.get() == (
+        assert view.questsports[side].winfo_ismapped()
+        assert view.questsports[side].winfo_height() > 0
+        assert view.panels[side].score.get() == (
             f"Quest score: {state['quest_scores'][participant_id]}"
         )
     if game == "chess":
@@ -920,8 +920,8 @@ def test_two_sided_player_quest_panels_are_visible_and_owned(window, game, viewp
 def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypatch):
     """More than six session-defined objectives remain available to each side."""
     from importlib import resources
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
+    import model.session as session_module
+    from model.definition import validate_definition
 
     data = json.loads(resources.files("games").joinpath("chess", "config.json").read_text())
     data["quests"].extend(
@@ -946,7 +946,7 @@ def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypat
     for side in (1, -1):
         participant = state["participants"][str(side)]
         listing = window.game_view.quest_lists[side]
-        viewport = window.game_view.quest_viewports[side]
+        viewport = window.game_view.questsports[side]
         assert len(listing.cards) == len(state["quest_progress"][participant])
         assert len(listing.cards) > 6
         assert viewport.bbox("all")[3] > viewport.winfo_height()
@@ -962,7 +962,7 @@ def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypat
     after = session.snapshot()
     for side in (1, -1):
         participant = after["participants"][str(side)]
-        assert window.game_view.player_views[side].score.get() == (
+        assert window.game_view.panels[side].score.get() == (
             f"Quest score: {after['quest_scores'][participant]}"
         )
 
@@ -971,8 +971,8 @@ def test_both_participants_can_scroll_all_authoritative_quests(window, monkeypat
 # transitions. Custom quest definitions are validated by the real rule loader.
 def _long_quest_session(game, monkeypatch, suffix):
     from importlib import resources
-    import model.game.session as session_module
-    from model.game.definition import validate_definition
+    import model.session as session_module
+    from model.definition import validate_definition
 
     data = json.loads(resources.files("games").joinpath(game, "config.json").read_text())
     data["quests"] = [
@@ -999,15 +999,15 @@ def test_quest_long_copy_and_two_independent_mousewheel_scrollers(window, monkey
     window.update()
     view = window.game_view
     board = view.board_view.canvas
-    white, black = view.quest_viewports[1], view.quest_viewports[-1]
-    assert view.player_views[1].winfo_rootx() < board.winfo_rootx()
-    assert board.winfo_rootx() < view.player_views[-1].winfo_rootx()
+    white, black = view.questsports[1], view.questsports[-1]
+    assert view.panels[1].winfo_rootx() < board.winfo_rootx()
+    assert board.winfo_rootx() < view.panels[-1].winfo_rootx()
     for side in (1, -1):
         cards = view.quest_lists[side].cards
         assert len(cards) == 12
         assert "longer objective" in cards[-1].description_label.cget("text")
         assert cards[-1].reward_label.cget("text") == "Reward: 14 pts"
-        assert view.quest_viewports[side].bbox("all")[3] > view.quest_viewports[side].winfo_height()
+        assert view.questsports[side].bbox("all")[3] > view.questsports[side].winfo_height()
     white_before, black_before = white.yview(), black.yview()
     # Deliver the real pointer wheel to a nested quest description, not Canvas.
     view.quest_lists[1].cards[0].description_label.event_generate("<Button-5>")
@@ -1021,7 +1021,7 @@ def test_quest_long_copy_and_two_independent_mousewheel_scrollers(window, monkey
     view.refresh()  # regular clock refresh must not reset either scroll position
     window.update()
     assert white.yview() == white_position
-    assert view.player_views[1].clock.get() and view.player_views[-1].clock.get()
+    assert view.panels[1].clock.get() and view.panels[-1].clock.get()
 
 
 def test_quest_cache_refreshes_different_config_with_same_ids_and_progress(window, monkeypatch):
@@ -1057,7 +1057,7 @@ def test_quest_cache_refreshes_different_config_with_same_ids_and_progress(windo
     completed = view.quest_lists[-1].cards[0]
     assert completed.progress_label.cget("text").endswith("Completed")
     assert int(float(completed.indicator["value"])) == int(float(completed.indicator["maximum"]))
-    assert view.player_views[-1].score.get() == (
+    assert view.panels[-1].score.get() == (
         f"Quest score: {view.session.snapshot()['quest_scores']['black']}"
     )
 
@@ -1122,7 +1122,7 @@ def test_long_material_is_grouped_without_synthesizing_score(window):
         + [{"kind": "bishop", "side": -1}] * 8
         + [{"kind": "rook", "side": 1}] * 11
     )
-    white = view.player_views[1]
+    white = view.panels[1]
     score_before = white.score.get()
     white.refresh(state, view.session.clock_remaining())
     window.geometry("840x640")
@@ -1141,7 +1141,7 @@ def test_settings_cancel_save_restart_defaults_and_pointer_mapping(window, tmp_p
     import subprocess
     import sys
 
-    from model.game.preferences import DEFAULTS
+    from model.preferences import DEFAULTS
 
     target = Path(os.environ["XDG_CONFIG_HOME"]) / "BoardGamesWithQuests" / "preferences.json"
     original = window.game_view._preferred_board_size
