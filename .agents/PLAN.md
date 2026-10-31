@@ -1,5 +1,14 @@
 # Execution plan — BoardGamesWithQuests v1.0.0
 
+## 2026-10-31 — Dispatch I BLOCKED, separate proof vs unknown-adjudication contracts
+
+- [x] Dispatch I `game/473-sound-unwinnability` at `b0dcec95eac33b882f2ee0c0ac5cdb84927a3329` independently reported **NO source changes and NO new tests**. This is NOT a correction; historical G run `41138925199` still proves one FIDE dead-fortress timeout FAIL per Python 3.10–3.13.
+- [ ] #473 remains P0 for a mathematically sound, deterministic, bounded game-neutral legal-mate possibility/impossibility proof/witness (not Buchanan-specific, no false draws, no second engine), valid on dead fortress and published live near-twin; no solution or code accepted yet.
+- [ ] **NEW P0 #477:** independent **strict read-only design** of durable `unknown` timeout-adjudication protocol, because a budget-exhausted solver cannot safely default to timeout win or draw. Specify clock suspension, pending outcome, event/revision/action-ID replay, file persistence, human/arbiter resolution and product scope. Maintainer acceptance required BEFORE production changes. Formally separate 5.2.2 dead (both sides unwinnable) and 6.9 flag (other side unwinnable).
+- [ ] #436 Chess `playable:false`; never integrate red G tests alone into shared PR #271. No complete FIDE certification, no release.
+- [ ] #454 owns next GUI source, #443 extracted OS apps, #462 later architectural renames; do not create overlapping implementation branches while #477 read-only architecture is developed.
+
+
 ## 2026-10-31 — Source-verified #453 integrated; #454 GUI handoff
 
 - [x] Dispatch H `ux/453-quest-history-polish` SHA `fba5d5674f6d2f6dee660c5d79d6e9583b9368c4` independently reviewed: quest definitions/progress/cache correctly partitioned by game/definition/participant, 12 quests each, nested independent scrolling; player clocks/material and 115 accepted history events with scroll preservation. Original #452 centered Canvas/two-sided panels and #438 engine authority preserved.

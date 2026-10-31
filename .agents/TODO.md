@@ -1,5 +1,14 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## 2026-10-31 — Dispatch I failed closed / #477 unknown-timeout contract
+
+- [x] Confirm Dispatch I is a proof/blocker report only, branch `game/473-sound-unwinnability` unchanged `b0dcec95eac33b882f2ee0c0ac5cdb84927a3329`; previous 147 pass/1 true red per Python from G is not new Dispatch I CI. Source unchanged; don't merge red test as a fix.
+- [ ] **#473:** sound legal-successor proof/witness with budget and near-twin adversarial oracle; no hardcoded FEN, no blind CHA Rust engine dependency, no full-FIDE claim without mathematical correctness.
+- [ ] **#477:** newly created read-only source-backed design for `unknown` terminal outcome, versioned pending/adjudication state, clocks, action idempotency, event replay, restart, legal resolution, and OS GUI feedback. This missing contract BLOCKS safe production implementation. Maintainer chooses policy.
+- [ ] Leave Chess `playable:false`, #436/#473/#477 OPEN; do not publish or merge protected branches.
+- [ ] Continue GUI #454 serial, native #443, WCDF #437/#449, structural #462 only after source owners hand off.
+
+
 ## 2026-10-31 — H integration and final GUI dispatch
 
 - [x] **#453 source changes accepted:** candidate `fba5d5674f6d2f6dee660c5d79d6e9583b9368c4` quest cards/definition-aware cache/individual nested scrolling, player/material/clock hierarchy, 115-event incremental history; 63 actual GUI tests and 22 screenshots, Python 3.10–3.13 321 governed test cases per version. Four candidate workflows PASSED.

@@ -1,5 +1,13 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-10-31 — Dispatch I handoff / no unsound default
+
+- Dispatch I report `Dispatch_I_473_Sound_Unwinnability_Blocker.md`: `game/473-sound-unwinnability` HEAD unchanged `b0dcec95eac33b882f2ee0c0ac5cdb84927a3329`, zero production modifications, no newly executed tests; G's `41138925199` run still fails Buchanan timeout. Upstream CHA corpus `--` dead fortress / `W-` near-twin is a reference, not an independently checkable negative certificate.
+- Formal `possible(p,s)` witnessed legal mate; `impossible(p,s)` proof of entire lawful successor closure/conservative abstraction; `unknown` budget exhaustion (never automatically a draw or win). FIDE Article 5.2.2 dead both-side conjunction; Article 6.9 timeout single non-expired side. Need separate policy for pending adjudication, not guessed outcome.
+- Existing `GameManager._terminal_action` requires synchronous final `propose_outcome`; Chess JSON presently uses non-bare-king fallback win, which is unsound on unknown. New #477 owns **read-only** versioned pending-outcome/replay/clock/persistence/arbiter policy design with explicit maintainer approval before any implementation, avoiding #454/GUI and #443/native ownership overlap. #473 retains independent bounded reachability proof R&D. No speculative code accepted.
+- Keep Chess `playable:false`; neither #473 nor #436 can close, original G four-case failing test stays isolated, v1 release NO-GO.
+
+
 ## 2026-10-31 — Dispatch H integration provenance
 
 - H final branch `ux/453-quest-history-polish` SHA `fba5d5674f6d2f6dee660c5d79d6e9583b9368c4` exact candidate tests passed: [#41139365696](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365696) GUI 63 + 22 screenshots, [#41139365527](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365527) Python 3.10–3.13 game, [#41139651941](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139651941) 321 per-version governed/format, [#41139365509](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365509) four OS PACKAGE builds; temporary PR #471 CLOSED UNMERGED.
