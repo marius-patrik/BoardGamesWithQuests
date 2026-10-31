@@ -52,10 +52,10 @@ def build(platform: str, version: str) -> Path:
     """Build the real desktop entry point and include dynamically loaded game sources."""
     if platform not in PLATFORMS or not VERSION.fullmatch(version):
         raise ValueError("A supported platform and PrideVer release version are required")
-    entry = ROOT / "src/boardgameswithquests.py__main__.py"
+    entry = ROOT / "src/boardgameswithquests.py"
     games = ROOT / "games"
     if not entry.is_file() or not games.is_dir():
-        raise FileNotFoundError("Completed desktop sources under src/ are required")
+        raise FileNotFoundError("Desktop entrypoint and root game definitions are required")
     # Read the checked-out distribution identity on every supported Python.
     try:
         import tomllib
