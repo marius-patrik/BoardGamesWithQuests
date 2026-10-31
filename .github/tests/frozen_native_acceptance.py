@@ -272,7 +272,7 @@ def visible_board(image) -> tuple[float, float, float]:
     """Locate either real bundled board palette, not one game's colors only."""
     palettes = (
         ((240, 217, 181), (181, 136, 99)),  # Chess
-        ((232, 218, 188), (112, 87, 63)),   # English Draughts
+        ((232, 218, 188), (112, 87, 63)),  # English Draughts
     )
     pixels = image.convert("RGB").load()
     xs, ys = [], []
@@ -281,10 +281,10 @@ def visible_board(image) -> tuple[float, float, float]:
         for x in range(0, image.width, 4):
             rgb = pixels[x, y]
             for index, (light, dark) in enumerate(palettes):
-                if min(
-                    max(abs(rgb[i] - shade[i]) for i in range(3))
-                    for shade in (light, dark)
-                ) <= 7:
+                if (
+                    min(max(abs(rgb[i] - shade[i]) for i in range(3)) for shade in (light, dark))
+                    <= 7
+                ):
                     xs.append(x)
                     ys.append(y)
                     counts[index] += 1
@@ -364,9 +364,7 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                 try:
                     x, y, width, height = native_window_rectangle("New game")
                     gui.click(x + 0.34 * width, y + 0.66 * height)
-                    left, top, size = await_board(
-                        gui, evidence, f"{game}-opening", timeout=7
-                    )
+                    left, top, size = await_board(gui, evidence, f"{game}-opening", timeout=7)
                 except (AssertionError, Blocked) as error:
                     last_error = error
                 else:
@@ -389,7 +387,9 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                         )
                 else:
                     if last_error is not None:
-                        raise AssertionError(f"native game chooser did not accept Start: {last_error}")
+                        raise AssertionError(
+                            f"native game chooser did not accept Start: {last_error}"
+                        )
                 start, end = ((6, 4), (5, 4)) if game == "chess" else ((2, 1), (3, 0))
 
                 def square(position):
