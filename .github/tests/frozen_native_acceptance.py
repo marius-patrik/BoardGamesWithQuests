@@ -889,12 +889,22 @@ def native_lifecycle_journey(
                     return (left + (position[1] + 0.5) * size, top + (position[0] + 0.5) * size)
 
                 def click_toolbar(name):
+                    nonlocal left, top, size
+                    left, top, size = await_board(
+                        gui, evidence, f"lifecycle-before-{name}", timeout=10
+                    )
                     dx, dy = offsets[target][name]
                     gui.click(left + dx, top + dy)
                     gui.sleep(0.6)
                     gui.screenshot().save(evidence / f"lifecycle-{name}-dialog.png")
 
                 def real_move(src, dst, name):
+                    nonlocal left, top, size
+                    # Native window managers may re-center the root after
+                    # closing an OS-owned modal; never reuse stale board coords.
+                    left, top, size = await_board(
+                        gui, evidence, f"lifecycle-{name}-before", timeout=10
+                    )
                     before = gui.screenshot().convert("RGB")
                     gui.click(*square(src))
                     gui.sleep(0.25)
