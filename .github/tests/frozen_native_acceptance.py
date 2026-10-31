@@ -284,10 +284,10 @@ def visible_board(image) -> tuple[float, float, float]:
         for y in range(0, picture.height, stride):
             for x in range(0, picture.width, stride):
                 rgb = pixels[x, y]
-                if min(
-                    max(abs(rgb[i] - shade[i]) for i in range(3))
-                    for shade in (light, dark)
-                ) <= 7:
+                if (
+                    min(max(abs(rgb[i] - shade[i]) for i in range(3)) for shade in (light, dark))
+                    <= 7
+                ):
                     x_hits[x] += 1
                     y_hits[y] += 1
         if max(x_hits, default=0) < 20 or max(y_hits, default=0) < 20:
@@ -616,8 +616,10 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
         else:
             x, y, width, height = native_window_rectangle("New game")
             (evidence / "chooser-hit-target.json").write_text(
-                json.dumps({"rect": [x, y, width, height],
-                            "point": [x + 0.66 * width, y + 0.66 * height]}) + "\n",
+                json.dumps(
+                    {"rect": [x, y, width, height], "point": [x + 0.66 * width, y + 0.66 * height]}
+                )
+                + "\n",
                 encoding="utf-8",
             )
             gui.click(x + 0.66 * width, y + 0.66 * height)
