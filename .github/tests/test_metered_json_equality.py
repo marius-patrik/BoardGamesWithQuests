@@ -88,7 +88,7 @@ def test_nested_membership_charges_each_candidate_until_match():
 )
 def test_rejected_budgeted_game_action_is_atomic(monkeypatch, game, actor, start, hops):
     """Exhausting the real authoritative operation cannot commit an event or clock."""
-    from model.game import manager as manager_module
+    from model import manager as manager_module
 
     session = DesktopSession(game)
     legal = next(
