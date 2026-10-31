@@ -816,7 +816,6 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
     }
 
 
-
 def native_lifecycle_journey(
     gui, executable: Path, home: Path, evidence: Path, target: str
 ) -> dict:
@@ -829,7 +828,8 @@ def native_lifecycle_journey(
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     env.update(
-        HOME=str(home), USERPROFILE=str(home),
+        HOME=str(home),
+        USERPROFILE=str(home),
         XDG_CONFIG_HOME=str(home / ".config"),
         APPDATA=str(home / "AppData" / "Roaming"),
     )
@@ -845,8 +845,11 @@ def native_lifecycle_journey(
     with tempfile.TemporaryDirectory(prefix="bgwq-lifecycle-cwd-") as cwd:
         with (evidence / "lifecycle-stderr.txt").open("wb") as stderr:
             process = subprocess.Popen(
-                [str(executable), "--game", "chess"], cwd=cwd, env=env,
-                stdout=subprocess.DEVNULL, stderr=stderr,
+                [str(executable), "--game", "chess"],
+                cwd=cwd,
+                env=env,
+                stdout=subprocess.DEVNULL,
+                stderr=stderr,
             )
             try:
                 deadline = time.monotonic() + 25
@@ -866,8 +869,7 @@ def native_lifecycle_journey(
                 left, top, size = board
 
                 def square(position):
-                    return (left + (position[1] + 0.5) * size,
-                            top + (position[0] + 0.5) * size)
+                    return (left + (position[1] + 0.5) * size, top + (position[0] + 0.5) * size)
 
                 def click_toolbar(name):
                     dx, dy = offsets[target][name]
@@ -887,13 +889,21 @@ def native_lifecycle_journey(
                     radius = max(8, int(size * 0.18))
                     for pos in (src, dst):
                         sx, sy = square(pos)
-                        if difference.crop((
-                            int(sx) - radius, int(sy) - radius,
-                            int(sx) + radius, int(sy) + radius
-                        )).getbbox() is None:
+                        if (
+                            difference.crop(
+                                (
+                                    int(sx) - radius,
+                                    int(sy) - radius,
+                                    int(sx) + radius,
+                                    int(sy) + radius,
+                                )
+                            ).getbbox()
+                            is None
+                        ):
                             raise AssertionError(
                                 f"{name}: native cancel did not permit legal move at {pos}"
                             )
+
                 real_move((6, 4), (4, 4), "white-e4")
                 # A dirty game must prompt before replacement; cancelling must
                 # preserve the session, proven by a subsequent Black move.
