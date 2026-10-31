@@ -621,8 +621,10 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
         else:
             x, y, width, height = native_window_rectangle("New game")
             (evidence / "chooser-hit-target.json").write_text(
-                json.dumps({"rect": [x, y, width, height],
-                            "point": [x + 0.66 * width, y + 0.66 * height]}) + "\n",
+                json.dumps(
+                    {"rect": [x, y, width, height], "point": [x + 0.66 * width, y + 0.66 * height]}
+                )
+                + "\n",
                 encoding="utf-8",
             )
             gui.click(x + 0.66 * width, y + 0.66 * height)
