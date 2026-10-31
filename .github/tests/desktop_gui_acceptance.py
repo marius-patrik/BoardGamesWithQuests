@@ -1228,7 +1228,7 @@ def test_nested_settings_cancel_restores_game_chooser_grab_and_focus(window):
     settings_button.invoke()
     window.update()
     settings = window.settings_dialog
-    assert settings.window.transient() == str(chooser)
+    assert str(settings.window.transient()) == str(chooser)
     assert window.grab_current() == settings.window
 
     settings.size.set(88)
@@ -1351,6 +1351,6 @@ def test_io_errors_show_bounded_basename_without_replacing_live_game(window, tmp
     assert captured[0][0] == "Save game"
     assert "prefix-" in captured[0][1] and "-save.json" in captured[0][1]
     assert len(captured[0][1]) < 600
-    assert "\\n" in captured[0][1]
+    assert "\n" in captured[0][1]
     assert window.game_view.session.snapshot() == before
     assert not window.game_view._has_unsaved_progress()
