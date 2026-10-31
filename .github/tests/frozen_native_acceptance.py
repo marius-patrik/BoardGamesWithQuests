@@ -208,7 +208,6 @@ def missing_asset_check(executable: Path, target: str, cwd: Path) -> dict:
         asset.write_bytes(original)
 
 
-
 def distribution_trust(executable: Path, target: str) -> dict:
     """Inspect native trust without assuming that a build is signed or notarized."""
     if target.startswith("macos"):
@@ -216,7 +215,12 @@ def distribution_trust(executable: Path, target: str) -> dict:
         commands = {
             "codesign": ["codesign", "-dv", "--verbose=4", str(bundle)],
             "signature_verification": [
-                "codesign", "--verify", "--deep", "--strict", "--verbose=2", str(bundle)
+                "codesign",
+                "--verify",
+                "--deep",
+                "--strict",
+                "--verbose=2",
+                str(bundle),
             ],
             "gatekeeper": ["spctl", "--assess", "--type", "execute", "--verbose=4", str(bundle)],
             "notarization_ticket": ["xcrun", "stapler", "validate", str(bundle)],
