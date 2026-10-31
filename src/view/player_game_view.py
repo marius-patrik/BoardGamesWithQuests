@@ -185,7 +185,9 @@ class PlayerGameView(ttk.Frame):
             self.player_views[side] = player
             ttk.Separator(pane).grid(row=1, column=0, sticky="ew", pady=4)
 
-            quests_host = ttk.LabelFrame(pane, text="Your quests", padding=(2, 2), style="GameSection.TLabelframe")
+            quests_host = ttk.LabelFrame(
+                pane, text="Your quests", padding=(2, 2), style="GameSection.TLabelframe"
+            )
             quests_host.grid(row=2, column=0, sticky="nsew")
             quests_host.columnconfigure(0, weight=1)
             quests_host.rowconfigure(0, weight=1)
@@ -306,11 +308,13 @@ class PlayerGameView(ttk.Frame):
         self.history_result_label.grid(row=1, column=0, columnspan=2, sticky="ew")
         self.history_result_label.grid_remove()
         ttk.Label(
-            self, textvariable=self.status, relief="sunken", anchor="w", width=1,
-            style="GameStatus.TLabel"
-        ).grid(
-            row=3, column=0, sticky="ew", pady=(4, 0)
-        )
+            self,
+            textvariable=self.status,
+            relief="sunken",
+            anchor="w",
+            width=1,
+            style="GameStatus.TLabel",
+        ).grid(row=3, column=0, sticky="ew", pady=(4, 0))
 
     def _resize_board(self, event: tk.Event) -> None:
         self._fit_board(event.width, event.height)
@@ -436,9 +440,7 @@ class PlayerGameView(ttk.Frame):
             ]
             if accepted_moves:
                 last = accepted_moves[-1]
-                self.board_view.set_last_move(
-                    tuple(last["start"]), tuple(last["hops"][-1])
-                )
+                self.board_view.set_last_move(tuple(last["start"]), tuple(last["hops"][-1]))
             else:
                 self.board_view.set_last_move(None, None)
 
@@ -578,9 +580,7 @@ class PlayerGameView(ttk.Frame):
         detail = str(error).strip() or type(error).__name__
         if len(detail) > 450:
             detail = detail[:449] + "…"
-        detail = textwrap.fill(
-            detail, width=68, break_long_words=True, break_on_hyphens=False
-        )
+        detail = textwrap.fill(detail, width=68, break_long_words=True, break_on_hyphens=False)
         messagebox.showerror(
             operation,
             f'Could not {operation.lower()} "{name}".\n\n{detail}',
@@ -915,9 +915,7 @@ class PlayerGameView(ttk.Frame):
             self._show_file_error("Save game", destination, error)
             return False
         self._mark_clean()
-        self.window_controller.set_status(
-            f"Saved game: {self._file_description(destination)}."
-        )
+        self.window_controller.set_status(f"Saved game: {self._file_description(destination)}.")
         self.status.set(self.window_controller.status_message)
         return True
 
