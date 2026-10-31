@@ -593,7 +593,7 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
     )
     path = preferences_file(home)
 
-    def open_chooser_settings() -> None:
+    def open_chooser_settings(*, reopen_after_cancel: bool = False) -> None:
         limit = time.monotonic() + 25
         while time.monotonic() < limit:
             try:
@@ -608,18 +608,21 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
         # ModalLifecycle activates the readonly game selector. Tab order:
         # selector -> Start -> Settings; Enter activates the focused button.
         if sys.platform.startswith("linux"):
-            # Tk's Start action binds Return, but the Settings ttk.Button
-            # has no Return binding. Native Space activates the focused button.
-            gui.press("tab")
-            gui.press("tab")
-            gui.press("space")
+            if reopen_after_cancel:
+                # ModalLifecycle restores focus to the Settings button that
+                # opened the nested dialog, so pressing Space reopens it.
+                gui.press("space")
+            else:
+                # The initial chooser focuses its readonly Combobox; tab
+                # twice to Settings, then activate ttk.Button with Space.
+                gui.press("tab")
+                gui.press("tab")
+                gui.press("space")
         else:
             x, y, width, height = native_window_rectangle("New game")
             (evidence / "chooser-hit-target.json").write_text(
-                json.dumps(
-                    {"rect": [x, y, width, height], "point": [x + 0.66 * width, y + 0.66 * height]}
-                )
-                + "\n",
+                json.dumps({"rect": [x, y, width, height],
+                            "point": [x + 0.66 * width, y + 0.66 * height]}) + "\n",
                 encoding="utf-8",
             )
             gui.click(x + 0.66 * width, y + 0.66 * height)
@@ -629,7 +632,15 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
 
     def edit_settings() -> None:
         # SettingsDialog activates its Spinbox, regardless of the window position.
-        gui.hotkey("command", "a") if sys.platform == "darwin" else gui.hotkey("ctrl", "a")
+        if sys.platform == "darwin":
+            gui.hotkey("command", "a")
+        else:
+            # Tk Spinbox does not consistently implement Ctrl+A selection
+            # on Windows/X11. Select the entire field via navigation keys.
+            gui.press("home")
+            gui.keyDown("shift")
+            gui.press("end")
+            gui.keyUp("shift")
         gui.write("64", interval=0.08)
         gui.press("tab")
         gui.press("space")
@@ -655,7 +666,7 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
                             raise AssertionError(
                                 "Settings Cancel unexpectedly persisted preferences"
                             )
-                        open_chooser_settings()
+                        open_chooser_settings(reopen_after_cancel=True)
                         edit_settings()
                         # SettingsDialog binds Return to Save on the actual Toplevel.
                         gui.press("return")
