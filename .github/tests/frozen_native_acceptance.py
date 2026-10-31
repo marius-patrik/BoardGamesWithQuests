@@ -863,9 +863,28 @@ def native_lifecycle_journey(
                         gui.sleep(0.4)
                 else:
                     raise Blocked("cannot activate native New game chooser")
-                x, y, width, height = native_window_rectangle("New game")
-                gui.click(x + 0.34 * width, y + 0.66 * height)
-                board = await_board(gui, evidence, "lifecycle-start")
+                # The Linux chooser's WM geometry differs from the native
+                # macOS/Windows one; retain the proven keyboard fallback.
+                board = None
+                for attempt in range(5):
+                    try:
+                        if attempt == 0 and not target.startswith("linux"):
+                            x, y, width, height = native_window_rectangle("New game")
+                            gui.click(x + 0.34 * width, y + 0.66 * height)
+                        else:
+                            focus_chooser()
+                            gui.press("tab")
+                            gui.press("return")
+                        board = await_board(
+                            gui, evidence, "lifecycle-start", timeout=6
+                        )
+                        break
+                    except (AssertionError, Blocked):
+                        gui.screenshot().save(
+                            evidence / f"lifecycle-start-attempt-{attempt + 1}.png"
+                        )
+                if board is None:
+                    raise Blocked("cannot dismiss native chooser for lifecycle acceptance")
                 left, top, size = board
 
                 def square(position):
@@ -908,7 +927,13 @@ def native_lifecycle_journey(
                 # A dirty game must prompt before replacement; cancelling must
                 # preserve the session, proven by a subsequent Black move.
                 click_toolbar("new")
-                gui.press("escape")
+                if target.startswith("macos"):
+                    # Mac Tk native messagebox does not respond to Escape on
+                    # hosted runners; click the actual screenshot-calibrated
+                    # blue Cancel button instead.
+                    gui.click(left + 207, top + 341)
+                else:
+                    gui.press("escape")
                 gui.sleep(0.5)
                 real_move((1, 3), (3, 3), "black-d5-after-cancel")
                 # Resignation cancellation must likewise leave the session live.
