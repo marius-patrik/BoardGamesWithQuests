@@ -1,8 +1,100 @@
-# Scratchpad — Active investigation
+# Orchestrator scratchpad — verified observations / open questions
 
-Temporary evidence only; promote verified facts to their canonical documents and remove obsolete notes.
+## 2026-10-31 — Integration provenance and frozen QA branch handoff
 
-- #271 is currently non-mergeable against #414 and must be synchronized **after** the local agent completes and the maintainer approves Phase 0.
-- The implemented current-state #414 engine uses a standard 8×8 chess default board, `Move.validate()` hardcodes 8×8, and `GameManager.save_log()` is a stub; the recovered GUI and completed game behavior belong to #271.
-- The last inspected Python 3.12 suite on #271 reported **424 passed, 46 skipped**, so actual Tkinter GUI acceptance remains unverified.
-- The source packaging workflow prepares native artifacts but requires the finished `src/` UI from #271 before real platform artifact smoke tests can pass.
+- Source refactor candidate a99bb253b6e9da2c4f7fe289927c6b6a0e1a954d had 77 renamed files and 105 raw tree path changes; latest shared before integration 93271b08afffadb75b7681187220cc3d77d0a675 changed ONLY PLAN, TODO, SCRATCHPAD from source base 0e7dd03c. Full two-parent commit a6263e09cd515b50282e94466e738f6a87c41395 includes candidate as second parent and retains current three docs. All other file blobs match candidate exactly. No stale old src/chesswithquests, src/model/game or src/view/game_view.
+- Original Chess/English Draughts config JSON relocated byte-identical; new model.resources bundled_games_root resolves namespace installed modes and _MEIPASS frozen plus SHA-256 resource manifest, pyproject packages root games and gui-scripts boardgameswithquests. Clean installed distribution acceptance covers executable, game transitions, duplicate IDs, process restart and replay.
+- Candidate CI runs #41202433944, #41202433931, #41202433919, #41202433881, #41202434179 all SUCCESS. At source merge combined run first observation 8 SUCCESS/1 DarkFactory running; do not claim 9/9 unless reverified. 4 native PACKAGE checks do NOT certify actual extracted user interactions.
+- #443 old native QA partial source at 1ab666fe191098af2e58796cef4d5f5a1846b296 must be adapted, not directly merged (old paths/manifest): new qa/443-final-native-recovery starts integrated a6263e09. User's two-sided own-quests layout and colored pieces remain unchanged.
+- Maintainer original 10 review threads unresolved by design, issue #462 open for exact merged-head gate and human review. #473/#477 FIDE pending result and sound proof still unresolved. v1 NO-GO.
+
+
+## 2026-10-31 — Dispatch J provenance and refactor migration boundary
+
+- Candidate source 9a4d6b2 changed five view modules, two GUI test/evidence scripts and two generated AST/UML; imported only seven non-generated blobs as commit 8b52ec01e and verified 7/7 SHA identity against combined source after automatic diagram regeneration 0e7dd03c.
+- Candidate exact-source runs 41153409448 full governed Python 3.10–3.13, 41153409049 real Tk 71 + gameplay 43 each, 41153409082 screenshots 30, 41153409180 generated governance, 41153409260 four OS PACKAGE builds, 41153409191 docs: all success. Native EXTRACTED GUI still #443 pending. Forced-refresh microbenchmark is not historical speed comparison.
+- Native ttk theme preserved, new modal lifecycle/focus/grab, 32/56/88 board preference save/cancel/restart, bounded file errors, 500ms clock-only board redraw avoided. User's original left player+quests / centered Canvas / right player+quests still intact; real filled light/dark pieces remain.
+- The original source tree still violates all 10 maintainer requested path/naming changes. New exclusive #462 writer on branch refactor/462-source-tree-identity must address root game assets, flattened model, renamed view, installed boardgameswithquests entrypoint and wheel/sdist/frozen import/resource integrity. Do not run old native #443 packaging changes against it concurrently. #477 is read-only adjudication contract; Chess proof #473 still blocked.
+- Human visual QA can still reject compact gray native appearance; passing Tk tests is not aesthetic certification. No release approval.
+
+
+## 2026-10-31 — Dispatch I handoff / no unsound default
+
+- Dispatch I report `Dispatch_I_473_Sound_Unwinnability_Blocker.md`: `game/473-sound-unwinnability` HEAD unchanged `b0dcec95eac33b882f2ee0c0ac5cdb84927a3329`, zero production modifications, no newly executed tests; G's `41138925199` run still fails Buchanan timeout. Upstream CHA corpus `--` dead fortress / `W-` near-twin is a reference, not an independently checkable negative certificate.
+- Formal `possible(p,s)` witnessed legal mate; `impossible(p,s)` proof of entire lawful successor closure/conservative abstraction; `unknown` budget exhaustion (never automatically a draw or win). FIDE Article 5.2.2 dead both-side conjunction; Article 6.9 timeout single non-expired side. Need separate policy for pending adjudication, not guessed outcome.
+- Existing `GameManager._terminal_action` requires synchronous final `propose_outcome`; Chess JSON presently uses non-bare-king fallback win, which is unsound on unknown. New #477 owns **read-only** versioned pending-outcome/replay/clock/persistence/arbiter policy design with explicit maintainer approval before any implementation, avoiding #454/GUI and #443/native ownership overlap. #473 retains independent bounded reachability proof R&D. No speculative code accepted.
+- Keep Chess `playable:false`; neither #473 nor #436 can close, original G four-case failing test stays isolated, v1 release NO-GO.
+
+
+## 2026-10-31 — Dispatch H integration provenance
+
+- H final branch `ux/453-quest-history-polish` SHA `fba5d5674f6d2f6dee660c5d79d6e9583b9368c4` exact candidate tests passed: [#41139365696](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365696) GUI 63 + 22 screenshots, [#41139365527](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365527) Python 3.10–3.13 game, [#41139651941](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139651941) 321 per-version governed/format, [#41139365509](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41139365509) four OS PACKAGE builds; temporary PR #471 CLOSED UNMERGED.
+- Independent source check confirms game+definition+participant key invalidates quest cards, scroll on nested quest labels, two side-specific independently scrolling quest panes, clocks/material/turn hierarchy, human-readable history of moves and nonmove draw/terminal actions, 115 events and preserved up-scroll unless following bottom. Five owned files imported as exact task blobs in commit `6bf2a001b490d8a34cbf8bc3fe264cd1a8a96fa2`. Stale task-generated AST/UML excluded; combined generated diagrams regenerated.
+- Distinguish full candidate CI from combined latest #271 SHA and from four platform **extracted** GUI acceptance; #453 remains open for exact-head confirmation. The board keyboard mode is deferred (#448); normal OS control keyboard focus still matters in #454.
+- Source #452 already closed, #454 exclusive next UI owner branch `ux/454-native-final-polish` seeded from `0a173933b930f6e47b1dc3be7f14c36d98cdd8ba`. No parallel GUI source writer; #462 renames only after GUI ownership handed off and test matrix revalidated.
+- #473 remains independent FIDE proof blocker and #443 native save/restart acceptance remains failing/blocked. No protected merge, source-tree refactor, PR thread resolution or release.
+
+
+## 2026-10-31 — FIDE G diagnostic versus integration distinction
+
+- **True external-published counterexample**: Buchanan StrateGems R0093 FEN `Bb1k1b2/bKp1p1p1/1pP1P1P1/1P6/p5P1/P7/8/8 w - - 0 1`, 0-clock White, app recorded win not draw at public `DesktopSession.poll_timeout()`. Four Python versions repeat identical assertion failure (workflow 41138925199). The allegedly dead FEN's conventional starting-position retro-reachability has not been established; do not equate source puzzle classification and reachable normal game without separate evidence.
+- **False-draw guard**: changed near-twin FEN with a published 21-ply helpmate is winnable, and black flag must award White a win; both covered and PASS. 150th reversible halfmove delivering mate precedes 75-move automatic draw; PASS with snapshot replay. No other selected regression failure (147 tests per Python pass, one true red).
+- **Do not import red test without correction:** G branch `game/436-dead-position-proof` remains isolated; successor `game/473-sound-unwinnability` seeded at same exact code/test tip. Generate diagrams on combined integration after a future accepted fix; temporary verify workflow is verification-only and must not enter product. Keep `playable:false`.
+- **Formal semantics:** FIDE 5.2.2 dead = neither side can ever mate; FIDE 6.9 draw on flag = non-flagged side cannot ever mate. Need read-only, bounded, deterministic proof or witnessed winnability, with unknown explicit (not arbitrarily transformed to win/draw). CHA-Solver is MIT Rust reference, not an accepted new runtime dependency. No speculative fortress heuristic, FEN hardcode or second engine. Track P0 #473.
+- **Latest combined GUI source #452** all nine exact-head workflows succeeded at `b9e1db9961cac9c044ad171a48c254fbd6fbe74d`, so #452 issue is closed; still require #453 quest/history, #454 native polish and #443 extracted frozen acceptance. All #271 maintainer review threads remain open until actual #462 source package review.
+
+
+## 2026-10-30 — #452 D2 result and source integration
+
+- D2 source `98b08ba0ac87700fcb0e2e3ea1362a891e494f5b` accepted after independent final-source review and all four successful final candidate CI runs (real Tk 52; 43 per Python gameplay; 321 per Python full tests; native PACKAGE builds all four targets). GUI source scope exactly four existing view modules, expanded acceptance test, visual screenshot script, single screenshot workflow; AST/UML excluded.
+- The seven exact candidate blobs were integrated with non-force expected-SHA ref update into PR #271 as `e295f1230dbcd63d5d81dcf8e084e0194590b5f2`; Auto Format regenerated source-derived diagrams on combined HEAD `54d1635a86aa2027548a1dbc7e0212db31d3fb77`. Earlier E Chess corrections left untouched.
+- Actual final render thumbnails independently inspected for Chess and Draughts at 840×640, 1100×760, 1440×900: original Canvas, real light/dark filled Chess silhouettes, solid Draughts discs/crowns, white-left and black-right player+own quest panes, responsive board. Large 1440×900 whitespace respects configured maximum board square size; not a source defect by itself.
+- D2 corrected single-hop Draughts jumping capture display and legal-capture destination marker using engine-projected legal moves; no independent game-state authority. No source rename until #462 after final GUI writers. #453 owns advanced history/quest cache and scroll, #454 later owns final native polish.
+- Candidate-source CI is not exact **combined-head CI** and four native package builds are not #443 extracted frozen GUI acceptance. #452 kept open. Both interrupted original and recovery task branches should be deleted only after exact combined proof; temp #469 closed unmerged.
+- FIDE fortress true RED under #436 and #443 native persistence/dialog failures remain separate release blockers.
+
+
+## 2026-10-27 agent recovery and verified distinction between packaging and acceptance
+
+- **#436 E source correction integrated:** `2c22e18dd52bb554e9b5ac4a1c0eb8feba3dfaf6` accepted from candidate `6e6c5eb8` after exact file-SHA identity to CI-green evidence SHA. The broader FIDE Buchanan fortress timeout probe completed **RED** (win vs expected draw) at run 40480361409; do not claim complete FIDE.
+- **#443 C stays isolated:** earliest real frozen Chess and Draughts legal moves succeeded on Windows/macOS ARM64/macOS x64/Linux, but all four workstream jobs failed due intentionally blocked follow-up; latest 1ab666fe candidate has confirmed Linux+two macOS settings-save failure and Windows advanced-journey blocker.
+- **#462 F is a read-only accepted PLAN**, not a mass-rename implementation. Root `games/` must remain trusted in editable/wheel/sdist/frozen; no path shim, duplicate package or broken snapshot user-data path.
+- **#452 D interruption:** Original branch `ux/452-board-interaction-polish` tip `adb2e2a7c72ffec4da92fd3b9e0d64466ec1c34e`. Exact tip CI: real Tk screenshots 12 across both games, real GUI+Python 3.10–3.13 and four native package BUILDS all success; DarkFactory issue-binding check failed because disposable PR #463 had no formal bound issue syntax, its other Python/format jobs succeeded. PR #463 closed unmerged. Original GUI source already has centered board between LEFT white player+individual full scrollable quests and RIGHT black player+individual full quests; filled Canvas silhouettes colored actual ivory/dark, colored filled Draughts discs and crowned kings, human-readable branched route/promote choices. **Do not start over.** D2 isolated successor branch `ux/452-board-interaction-recovery` exists at same exact tip, pending independent finishing, screenshot inspection, and integration against newer #271 head.
+- **Current GUI separation:** #453 covers quest stress/history polish after #452; #462 renames after GUI and packaging handoffs. Never rename view modules in current #452 branch.
+
+
+## Fresh review / original GUI reference (2026-10-27)
+
+- Maintainer `CHANGES_REQUESTED` PR #271 on 2026-10-27: **54** GraphQL review threads, **10 unresolved**. Inline comments demand moving immutable `src/games` → root `games/`, flattening `src/model/game` and `src/model/pieces`, renaming the entrypoint/app identity to `boardgameswithquests` under src root, and view module name cleanups. `PlayerGameView` is currently a composite screen/widget-action coordinator, not a second board renderer; original thread was answered. Track every original review in #462; structural changes need serialize after #436 Chess, #452 GUI and #443 packaging.
+- **GUI requirement corrected from mockup:** original reference `.agents/reference/images/GUI_mockup.svg`: left participant/quests, centered Canvas, right participant/quests, not top/bottom players + global shared quest sidebar. Each participant's quests from `state.quest_progress[participant_id]` must be independent and accessible. Both chess sides use filled silhouettes with **actual different light/dark fill and outline contrast**; Draughts use colored solid discs/visibly crowned kings. Own initial layout and pieces in current #452 Agent D; #453 remains later serial scroll/cache/history. Initial source currently violates this; not completed merely by issue clarification.
+- Active branches observed after cleanup: `main`, `develop`, `feature/product-integration`, deferred `feat/independent-server-web-native-bootstrap`, `ux/452-board-interaction-polish`, `game/436-fide-certification`, `qa/443-frozen-native-acceptance`, and optional Chess verification `verify/436-fide-boundary-20261027`. Completed #438/#439 branches and temporary maintenance refs were deleted. All claims about final HEAD CI require re-check.
+
+
+**Snapshot date:** 2026-10-27. Scratchpad notes are operational evidence, not alternative requirements. Canonical release issue [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430).
+
+## Current topology
+
+- Repo default: `develop`; release branch: `main`; single bot-authored desktop draft PR [#271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271) (`feature/product-integration → develop`). Second open draft [#422](https://github.com/marius-patrik/BoardGamesWithQuests/pull/422) (`feat/independent-server-web-native-bootstrap → feature/product-integration`) is **V2-only and intentionally deferred**. V2 desired design is #348 (39 app tables, 27 app operations; some proposed defaults await maintainer ratification).
+- At prior verified *code* SHA `1f6816da13e9d3f73f450c1e2bf8635fe12db860`, eight PR-triggered Actions runs passed (Desktop gameplay/Xvfb/native packaging/quality/docs/release metadata). GitHub's *separate* commit-status API reported `Vercel – boardgameswithquests-api` and `Vercel – boardgameswithquests-web` as **failure**, pointing to provider build-rate-limit/upgrade URLs. Required-protection status **not independently established**. No four-OS extracted frozen GUI user journey has been certified.
+- PR #271 review disposition includes maintainer `CHANGES_REQUESTED`; 44 review threads exist and zero are unresolved. Mergeable metadata alone is not approval. No public v1.0.0 release.
+- Branch inventory initially contained 18 refs; 14 obsolete task/verification branches were checked and **deleted** with exact-SHA safety and open-PR/protection guards ([successful cleanup run #40468515823](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/40468515823)). Temporary cleanup branch self-deleted. **Active refs retained:** `main`, `develop`, `feature/product-integration`, `feat/independent-server-web-native-bootstrap`, `game/438-draw-lifecycle`. The completed `security/439-persistence-hardening` ref was deleted after its source/test blobs were independently matched to integrated PR #271 (successful cleanup run #40473689509).
+
+## Code/UX facts needing final proof
+
+- `GameManager` in `src/model/game/manager.py` owns revisioned transitions, clocks, declarations, quests, pending draw offer and replay. `DesktopSession` is the sole local authority; GUI consumes detached state. Chess and Draughts JSON both currently say `playable:false`.
+- **Superseded by #438 integration:** `player_game_view.py` now uses authoritative `DesktopSession.draw_claim_candidates()` and a real pointer-operable Toplevel to submit complete intended moves without playing them. The manager supports `offer_draw`/`accept_draw`/`reject_draw` and revision/replay of pending offers. Integration commit `1ddc4f99fe2cdba63f7ffcfdf335b692c23ecafa`; candidate exact-SHA gameplay matrix and Tk Xvfb successful (Actions #40472124467). Full combined-head CI and four-platform extracted UI remain outstanding.
+- Chess reference #436: corrected a bad en-passant FEN oracle; 26 candidate tests + 99 existing regressions executed green on Python 3.10–3.13. 33-ply Opera Game fixture integrated. Still missing authoritative FIDE 50/75 boundary, rare dead/timeout mating possibilities and intended-move claims.
+- WCDF #437/#449: 263 Python cases per version and a 91-ply sourced game, short kings/capture chain/deferred removal and declarative threefold/40-move claims integrated; generic GUI claim discovery corrected. Re-run complete pointer paths and mutual draw after #438.
+- #435 source/frozen-Linux UX audit documented 26 findings/13 screenshots. Responsive 840×640 and terminal safeguards are fixed via #447/#451. #452–#454 still own capture chooser/piece contrast, scrollable quest/history/player presentation, native ttk/modal/idle polishing.
+- #439 Dispatch B candidate `8c84d395` has three scoped files integrated at `52043693`: validated bounded duplicate/nonfinite JSON, ancestor symlink/junction and file identity checks, read-only destination refusal, replay-verified saves, and real subprocess Chess/Draughts/settings recovery tests. Earlier candidate's 290 cases per Python version executed; full later/exact integrated-head matrix and Windows/macOS native filesystems still need certification. #439 remains open; final native restart acceptance is #443.
+- Tests live under `.github/tests/`; #450 must trace RETAIN/ADAPT/REPLACE/DELETE without replacing external gameplay oracles with implementation-generated expected results.
+- Native acceptance #443 must test the *extracted frozen* application on Windows x64, macOS ARM64, macOS x64 and Linux x64. CI packaging/`--check` is necessary but not sufficient.
+
+- FIDE Article 9.5.3 formal *incorrect* claim arbiter penalties are not implemented: dispatched v1 invalid claim actions reject atomically. #436 must resolve certification wording/requirement before claiming complete FIDE tournament procedure.
+
+## Ownership hazards / evidence policy
+
+- #438 production changes are now integrated; #452 may take exclusive `player_game_view.py` visual ownership. Coordinate any post-integration #438 corrective changes with #452 before writing shared UI. #439 persistence source is integrated and its task branch deleted.
+- Do not import temporary verify-only workflows/branches into product PR. Temporary PR #461 closed unmerged. Ten candidate source/test/workflow blobs accepted; generated diagrams on combined HEAD auto-regenerated (`aff6093e...`), not imported from stale task branch.
+- A new docs/code commit invalidates a literal 'all exact-head checks passed' claim until checks complete on that new SHA. Don't merge, approve, promote or publish without explicit maintainer native review.
+- Maintenance to clarify the master and subordinate issue bodies was applied 2026-10-26: #430 now separates passing Actions checks from failed Vercel statuses; #440 supersedes old '#456 OPEN' claim; #441 supersedes stale '#451 open' and inaccessible-UX-artifact text.

@@ -1,0 +1,17 @@
+name: Desktop Native Package Acceptance
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: native / four platforms
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      version: "1.0.0"
+    permissions:
+      contents: read
