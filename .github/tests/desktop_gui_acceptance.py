@@ -1143,11 +1143,7 @@ def test_settings_cancel_save_restart_defaults_and_pointer_mapping(window, tmp_p
 
     from model.game.preferences import DEFAULTS
 
-    target = (
-        Path(os.environ["XDG_CONFIG_HOME"])
-        / "BoardGamesWithQuests"
-        / "preferences.json"
-    )
+    target = Path(os.environ["XDG_CONFIG_HOME"]) / "BoardGamesWithQuests" / "preferences.json"
     original = window.game_view._preferred_board_size
     settings = open_settings(window, window.window_controller)
     assert window.grab_current() == settings.window
@@ -1219,13 +1215,11 @@ def test_nested_settings_cancel_restores_game_chooser_grab_and_focus(window):
     before = window.game_view.session.snapshot()
     window.game_view.on_new_game()
     window.update()
-    chooser = next(
-        widget for widget in window.winfo_children()
-        if isinstance(widget, tk.Toplevel)
-    )
+    chooser = next(widget for widget in window.winfo_children() if isinstance(widget, tk.Toplevel))
     assert window.grab_current() == chooser
     settings_button = next(
-        widget for widget in descendants(chooser)
+        widget
+        for widget in descendants(chooser)
         if isinstance(widget, __import__("tkinter").ttk.Button)
         and widget.cget("text") == "Settings"
     )
@@ -1248,10 +1242,7 @@ def test_nested_settings_cancel_restores_game_chooser_grab_and_focus(window):
     # A second chooser/Settings sequence must never leave an orphaned grab.
     window.game_view.on_new_game()
     window.update()
-    second = next(
-        widget for widget in window.winfo_children()
-        if isinstance(widget, tk.Toplevel)
-    )
+    second = next(widget for widget in window.winfo_children() if isinstance(widget, tk.Toplevel))
     assert window.grab_current() == second
     second.event_generate("<Escape>")
     window.update()
@@ -1265,10 +1256,7 @@ def test_cancelable_real_move_chooser_restores_grab_without_playing(window):
     assert options
 
     def cancel():
-        chooser = next(
-            widget for widget in descendants(window)
-            if isinstance(widget, tk.Toplevel)
-        )
+        chooser = next(widget for widget in descendants(window) if isinstance(widget, tk.Toplevel))
         assert window.grab_current() == chooser
         chooser.event_generate("<Escape>")
 
@@ -1330,9 +1318,7 @@ def test_clock_only_autorefresh_preserves_actual_canvas_items(window, game):
     assert canvas.find_all() == stable
 
 
-def test_io_errors_show_bounded_basename_without_replacing_live_game(
-    window, tmp_path, monkeypatch
-):
+def test_io_errors_show_bounded_basename_without_replacing_live_game(window, tmp_path, monkeypatch):
     from view import player_game_view as module
 
     before = window.game_view.session.snapshot()
@@ -1342,11 +1328,14 @@ def test_io_errors_show_bounded_basename_without_replacing_live_game(
     target = str(blocked / filename)
     captured = []
     monkeypatch.setattr(
-        module.messagebox, "showerror",
+        module.messagebox,
+        "showerror",
         lambda title, message, **_kwargs: captured.append((title, message)),
     )
     monkeypatch.setattr(
-        module.filedialog, "asksaveasfilename", lambda **_kwargs: target,
+        module.filedialog,
+        "asksaveasfilename",
+        lambda **_kwargs: target,
     )
     assert window.game_view.export_game() is False
     assert captured[0][0] == "Save game"

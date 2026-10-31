@@ -171,9 +171,7 @@ def capture_native_dialogs(output: Path) -> None:
         root.game_view.on_new_game()
         root.update()
         capture(root, output / "ux454-native-game-chooser.png")
-        chooser = next(
-            child for child in root.winfo_children() if isinstance(child, tk.Toplevel)
-        )
+        chooser = next(child for child in root.winfo_children() if isinstance(child, tk.Toplevel))
 
         def descendants(widget):
             for child in widget.winfo_children():
@@ -181,7 +179,8 @@ def capture_native_dialogs(output: Path) -> None:
                 yield from descendants(child)
 
         settings_button = next(
-            child for child in descendants(chooser)
+            child
+            for child in descendants(chooser)
             if isinstance(child, ttk.Button) and child.cget("text") == "Settings"
         )
         settings_button.invoke()
