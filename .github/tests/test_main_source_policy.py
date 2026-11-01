@@ -55,10 +55,10 @@ class MainSourcePolicyTests(unittest.TestCase):
     def test_upstream_exception_pins_exact_source_and_delta(self) -> None:
         workflow = (ROOT / ".github/workflows/main-source.yml").read_text(encoding="utf-8")
         self.assertIn('"chore/479-sync-upstream-main"', workflow)
-        self.assertIn('3bc11ca3621ca5d497aff3bab071ac6d222dadcc', workflow)
-        self.assertIn('a98e36d098a1ee9aa3e793cfc39040ad6e6d2e4e', workflow)
-        self.assertIn('repos/docekalgjkt/ChessWithQuests/branches/main', workflow)
-        self.assertIn('.ahead_by == 1 and .behind_by == 0', workflow)
+        self.assertIn("3bc11ca3621ca5d497aff3bab071ac6d222dadcc", workflow)
+        self.assertIn("a98e36d098a1ee9aa3e793cfc39040ad6e6d2e4e", workflow)
+        self.assertIn("repos/docekalgjkt/ChessWithQuests/branches/main", workflow)
+        self.assertIn(".ahead_by == 1 and .behind_by == 0", workflow)
         self.assertIn('.files[0].filename == "model/figurka.py"', workflow)
         self.assertNotIn("actions/checkout", workflow)
 
