@@ -380,6 +380,15 @@ def await_board(gui, evidence: Path, label: str, timeout: float = 30) -> tuple[f
             reason = str(exc)
         time.sleep(0.6)
     gui.screenshot().save(evidence / f"{label}-missing.png")
+    # Native confirmations can obscure the Canvas. Preserve the color oracle,
+    # but diagnose a lingering modal before blaming screen geometry.
+    for title in ("Resign", "Unsaved game"):
+        try:
+            native_window_rectangle(title)
+        except (AssertionError, Blocked):
+            continue
+        reason = f"interfering native {title!r} dialog; {reason}"
+        break
     raise AssertionError(f"frozen application did not render the game Canvas: {reason}")
 
 
@@ -645,6 +654,20 @@ def screenshot_dialog(gui, evidence: Path, label: str, title: str):
             gui.sleep(0.4)
     gui.screenshot().save(evidence / f"{label}-missing.png")
     raise AssertionError(f"{title} native dialog did not render within 12 seconds")
+
+
+def wait_for_native_dialog_close(gui, evidence: Path, title: str, label: str) -> None:
+    """Do not confuse an obstructing native confirmation with a missing board."""
+    deadline = time.monotonic() + 8
+    while time.monotonic() < deadline:
+        try:
+            native_window_rectangle(title)
+        except AssertionError:
+            gui.screenshot().save(evidence / f"{label}-closed.png")
+            return
+        gui.sleep(0.25)
+    gui.screenshot().save(evidence / f"{label}-still-open.png")
+    raise AssertionError(f"native {title!r} confirmation remained open after cancellation")
 
 
 def settings_button(board: tuple[float, float, float], target: str) -> tuple[float, float]:
@@ -946,8 +969,20 @@ def native_lifecycle_journey(
                 real_move((1, 3), (3, 3), "black-d5-after-cancel")
                 # Resignation cancellation must likewise leave the session live.
                 click_toolbar("resign")
-                gui.press("escape")
-                gui.sleep(0.5)
+                # Windows/Tk uses an OS-owned MessageBox whose Escape key does
+                # not necessarily activate No. The original failing screenshot
+                # shows the confirmation visibly covering the board afterward.
+                # Click the actual native No button using current dialog bounds.
+                if target == "windows-x64":
+                    x, y, width, height = screenshot_dialog(
+                        gui, evidence, "lifecycle-resign-before-cancel", "Resign"
+                    )
+                    # Verified against the Windows-2022 screenshot at
+                    # run 41210943260: No occupies the lower-right button.
+                    gui.click(x + width * 0.83, y + height * 0.86)
+                else:
+                    gui.press("escape")
+                wait_for_native_dialog_close(gui, evidence, "Resign", "lifecycle-resign-cancel")
                 real_move((4, 4), (3, 3), "white-exd5-after-resign-cancel")
                 gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
                 if process.wait(timeout=15) != 0:
