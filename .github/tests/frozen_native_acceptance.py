@@ -1585,11 +1585,21 @@ def native_persistence_failure_journey(
                             )
                     else:
                         gui.sleep(0.55)
-                    gui.screenshot().save(evidence / f"failure-{label}-dialog-cancel.png")
+                    picture_name = (
+                        "failure-save-dialog-cancel.png"
+                        if action == "export"
+                        else "failure-open-dialog-cancel.png"
+                    )
+                    gui.screenshot().save(evidence / picture_name)
                     gui.press("escape")
                     # An unobscured board is still mandatory; do not hide
                     # focus, modal, or screenshot failures.
-                    await_board(gui, evidence, f"failure-{label}led")
+                    recovery_label = (
+                        "failure-save-cancelled"
+                        if action == "export"
+                        else "failure-open-cancelled"
+                    )
+                    await_board(gui, evidence, recovery_label)
 
                 # Load a known good file first; later errors must never replace it.
                 browse("open", source, "initial-valid-open")
