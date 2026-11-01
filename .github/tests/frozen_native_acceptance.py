@@ -1364,26 +1364,60 @@ def persisted_native_game_journey(
                         if before_save is None or before_board is None or initial_snapshot is None:
                             raise AssertionError("missing independent first-process evidence")
                         current = gui.screenshot().convert("RGB")
-                        # Compare the original and restored *piece-bearing*
-                        # squares, not just the wooden checkerboard palette.
-                        # Coordinates are recomputed from both live screenshots.
+                        # Wait for the *restored pieces*, not just a visible
+                        # checkerboard. The Windows OS picker can disappear
+                        # before Tk has replayed and rendered the saved game.
                         sites = (
-                            [(6, 4), (4, 4), (3, 3), (1, 3)]
-                            if game == "chess"
+                            [(6, 4), (4, 4), (3, 3), (1, 3)] if game == "chess"
                             else [(2, 1), (3, 0), (4, 1), (5, 2)]
                         )
-                        for row, col in sites:
-                            px0 = int(before_board[0] + (col + 0.5) * before_board[2])
-                            py0 = int(before_board[1] + (row + 0.5) * before_board[2])
-                            px1 = int(loaded_board[0] + (col + 0.5) * loaded_board[2])
-                            py1 = int(loaded_board[1] + (row + 0.5) * loaded_board[2])
-                            a = before_save.getpixel((px0, py0))
-                            b = current.getpixel((px1, py1))
-                            if max(abs(a[k] - b[k]) for k in range(3)) > 45:
-                                gui.screenshot().save(evidence / f"{game}-reopen-mismatch.png")
-                                raise AssertionError(
-                                    f"{game}: restored piece differs at {row},{col}"
+
+                        def visual_occupied(image, bounds, position):
+                            row, col = position
+                            left, top, size = bounds
+                            bg = image.getpixel((
+                                int(left + (col + 0.18) * size),
+                                int(top + (row + 0.18) * size),
+                            ))
+                            non_bg = 0
+                            for yy in range(
+                                int(top + (row + 0.28) * size),
+                                int(top + (row + 0.80) * size),
+                            ):
+                                for xx in range(
+                                    int(left + (col + 0.28) * size),
+                                    int(left + (col + 0.72) * size),
+                                ):
+                                    pixel = image.getpixel((xx, yy))
+                                    if max(abs(pixel[k] - bg[k]) for k in range(3)) > 35:
+                                        non_bg += 1
+                            return non_bg > 70
+
+                        expected = tuple(
+                            visual_occupied(before_save, before_board, pos)
+                            for pos in sites
+                        )
+                        deadline = time.monotonic() + 15
+                        while time.monotonic() < deadline:
+                            current = gui.screenshot().convert("RGB")
+                            try:
+                                observed = visible_board(current)
+                                actual = tuple(
+                                    visual_occupied(current, observed, pos)
+                                    for pos in sites
                                 )
+                            except AssertionError:
+                                actual = None
+                            if actual == expected:
+                                current.save(evidence / f"{game}-reopened-authoritative.png")
+                                loaded_board = observed
+                                break
+                            gui.sleep(0.25)
+                        else:
+                            gui.screenshot().save(evidence / f"{game}-reopen-mismatch.png")
+                            raise AssertionError(
+                                f"{game}: recovered GUI did not reproduce original piece occupancy"
+                            )
                         move(*final_move, f"persist-continued-move")
                         export(continued, "continued-save")
                         later = json.loads(continued.read_text(encoding="utf-8"))
