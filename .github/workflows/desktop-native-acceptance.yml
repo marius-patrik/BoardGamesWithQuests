@@ -6,6 +6,7 @@ on:
     branches:
       - qa/443-final-native-recovery
       - qa/443-lifecycle-persistence
+      - qa/443-n1b-macos-recovery
   workflow_dispatch:
 
 permissions:
