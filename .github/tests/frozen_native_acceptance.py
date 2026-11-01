@@ -1110,13 +1110,23 @@ def native_file_dialog_submit(
         # as a navigation target relative to the virtual Desktop (verified
         # "Location is not available" screenshot). Navigate a real directory
         # through the address bar, then provide only the file basename.
-        gui.hotkey("ctrl", "l")
+        x, y, width, height = native_window_rectangle(
+            "Save As" if operation == "save" else "Open"
+        )
+        # A keyboard-only Ctrl+L did not navigate the Win32 common dialog.
+        # Activate its visible address breadcrumb directly, then enter the
+        # checked absolute user-data directory via Alt+D.
+        gui.click(x + width * 0.40, y + height * 0.11)
+        gui.hotkey("alt", "d")
         gui.hotkey("ctrl", "a")
-        gui.write(str(destination.parent), interval=0.012)
+        gui.write(str(destination.parent), interval=0.025)
+        gui.screenshot().save(evidence / f"{operation}-{target}-directory-typed.png")
         gui.press("return")
-        gui.sleep(0.65)
+        gui.sleep(0.7)
         gui.screenshot().save(evidence / f"{operation}-{target}-directory.png")
-        x, y, width, height = native_window_rectangle("Save As" if operation == "save" else "Open")
+        x, y, width, height = native_window_rectangle(
+            "Save As" if operation == "save" else "Open"
+        )
         gui.click(x + width * 0.42, y + height * 0.80)
         gui.hotkey("ctrl", "a")
         gui.write(destination.name, interval=0.025)
