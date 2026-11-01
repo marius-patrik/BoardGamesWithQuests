@@ -86,7 +86,7 @@ def capture_quest_and_history_stress(output: Path) -> None:
     try:
         for game in ("chess", "checkers"):
             definition_json = json.loads(
-                bundled_games_root().joinpath(game, "config.json").read_text()
+                bundled_games_root().joinpath(f"{game}.json").read_text()
             )
             definition_json["quests"] = [
                 {

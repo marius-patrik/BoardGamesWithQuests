@@ -38,7 +38,7 @@ def bundled_games_root() -> Path:
             for relative, digest in hashes.items():
                 if (
                     not isinstance(relative, str)
-                    or re.fullmatch(r"[a-z][a-z0-9_]{0,63}\\.json", relative) is None
+                    or re.fullmatch(r"[a-z][a-z0-9_]{0,63}\.json", relative) is None
                     or relative == "manifest.json"
                     or not isinstance(digest, str)
                     or re.fullmatch(r"[a-f0-9]{64}", digest) is None

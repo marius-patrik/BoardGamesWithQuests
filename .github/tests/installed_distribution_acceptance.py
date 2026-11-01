@@ -31,8 +31,8 @@ saved_dir = Path(sys.argv[1])
 phase = sys.argv[2]
 source_root = Path(sys.argv[3])
 installation = sys.argv[4]
-import boardgameswithquests
-if installation != "editable" and Path(boardgameswithquests.__file__).resolve().is_relative_to(source_root):
+import main
+if installation != "editable" and Path(main.__file__).resolve().is_relative_to(source_root):
     raise AssertionError("installed wheel/sdist imported source checkout")
 if metadata.version("boardgameswithquests") != "1.0.0":
     raise AssertionError("distribution metadata version mismatch")
@@ -40,9 +40,9 @@ games = available_games()
 if games != ["chess", "checkers"]:
     raise AssertionError(f"unexpected game catalog {games}")
 for name in games:
-    resource = bundled_games_root().joinpath(name).joinpath("config.json")
+    resource = bundled_games_root().joinpath(f"{name}.json")
     installed = resource.read_bytes()
-    source = (source_root / "games" / name / "config.json").read_bytes()
+    source = (source_root / "data" / f"{name}.json").read_bytes()
     if hashlib.sha256(installed).digest() != hashlib.sha256(source).digest():
         raise AssertionError(f"altered installed {name} rulebook")
     path = saved_dir / (name + ".json")
@@ -95,7 +95,7 @@ def verify(name: str, install_target: str, workspace: Path, env: dict[str, str])
         install.append("-e")
     install.append(install_target)
     run(install, cwd=workspace, env=env)
-    run([str(python), "-m", "boardgameswithquests", "--check"], cwd=workspace, env=env)
+    run([str(python), "-m", "main", "--check"], cwd=workspace, env=env)
     executable = venv_dir / (
         "Scripts/boardgameswithquests.exe" if os.name == "nt" else "bin/boardgameswithquests"
     )

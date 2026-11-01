@@ -81,7 +81,7 @@ def draw_ready_chess():
 def draw_ready_wcdf(monkeypatch):
     import model.session as session_module
 
-    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers.json").read_text())
     data["board"]["starting_pieces"] = [
         {"piece": "king", "color": "black", "squares": [[2, 1]]},
         {"piece": "king", "color": "white", "squares": [[5, 6]]},
@@ -191,7 +191,7 @@ def test_real_prospective_claim_modal_cancellation_or_acceptance(window, monkeyp
 def test_actual_legal_multi_hop_route_is_displayed_complete_and_cancelable(window, monkeypatch):
     import model.session as session_module
 
-    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers.json").read_text())
     data["board"]["starting_pieces"] = [
         {"piece": "man", "color": "black", "squares": [[2, 3]]},
         {"piece": "man", "color": "white", "squares": [[3, 2], [3, 4], [5, 4]]},
