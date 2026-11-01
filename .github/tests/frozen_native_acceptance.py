@@ -1572,11 +1572,31 @@ def native_persistence_failure_journey(
                     gui.press("return")
                 gui.sleep(0.45)
                 gui.screenshot().save(evidence / "failure-readonly-after-overwrite-confirm.png")
-                # Dismiss the app's Save game error (or an OS-owned denial).
-                gui.press("return")
+                # Native error dialogs have independently owned focus. The
+                # first Enter may arrive before Tk presents the application
+                # validation error, so wait for and click its real OK control.
+                dismissed = False
+                if target in ("windows-x64", "linux-x64"):
+                    deadline = time.monotonic() + 7
+                    while time.monotonic() < deadline:
+                        try:
+                            x, y, width, height = native_window_rectangle("Save game")
+                            gui.screenshot().save(
+                                evidence / "failure-readonly-application-error.png"
+                            )
+                            gui.click(x + width * 0.50, y + height * 0.84)
+                            dismissed = True
+                            break
+                        except (AssertionError, subprocess.CalledProcessError):
+                            gui.sleep(0.25)
+                if not dismissed:
+                    gui.press("return")
+                    gui.sleep(0.35)
+                    # A native picker may refuse the overwrite before the app
+                    # sees it; cancel the still-open picker without altering it.
+                    if target == "windows-x64" and native_dialog_present("Save As"):
+                        gui.press("escape")
                 gui.sleep(0.35)
-                if target == "windows-x64" and native_dialog_present("Save As"):
-                    gui.press("escape")
                 gui.screenshot().save(evidence / "failure-readonly-dismissed.png")
                 if read_only.read_bytes() != b"unchanged native failure sentinel\n":
                     raise AssertionError("failed native save modified its original target")
