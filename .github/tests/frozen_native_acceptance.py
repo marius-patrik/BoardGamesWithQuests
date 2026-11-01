@@ -603,9 +603,7 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                         process.wait(timeout=8)
 
 
-def native_window_rectangle(
-    title: str, *, application: bool = False
-) -> tuple[int, int, int, int]:
+def native_window_rectangle(title: str, *, application: bool = False) -> tuple[int, int, int, int]:
     """Locate an actual OS-owned Tk toplevel; no source-process introspection."""
     if sys.platform.startswith("linux"):
         windows = subprocess.check_output(
