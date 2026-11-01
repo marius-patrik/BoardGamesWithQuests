@@ -1595,9 +1595,7 @@ def native_persistence_failure_journey(
                     # An unobscured board is still mandatory; do not hide
                     # focus, modal, or screenshot failures.
                     recovery_label = (
-                        "failure-save-cancelled"
-                        if action == "export"
-                        else "failure-open-cancelled"
+                        "failure-save-cancelled" if action == "export" else "failure-open-cancelled"
                     )
                     await_board(gui, evidence, recovery_label)
 
