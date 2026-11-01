@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - qa/443-final-native-recovery
+      - qa/443-lifecycle-persistence
   workflow_dispatch:
 
 permissions:
