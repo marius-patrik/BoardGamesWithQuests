@@ -1515,8 +1515,17 @@ def native_persistence_failure_journey(
                     gui.press("tab")
                     gui.press("return")
                 else:
-                    x, y, width, height = native_window_rectangle("New game")
-                    gui.click(x + 0.34 * width, y + 0.66 * height)
+                    try:
+                        x, y, width, height = native_window_rectangle("New game")
+                        gui.click(x + 0.34 * width, y + 0.66 * height)
+                    except Blocked:
+                        if not target.startswith("macos"):
+                            raise
+                        # System Events intermittently loses a newly created
+                        # Tk chooser window on the macOS Intel native runner.
+                        # Use the already demonstrated focused chooser controls.
+                        gui.press("tab")
+                        gui.press("return")
                 await_board(gui, evidence, "failure-start")
 
                 def toolbar(action: str, label: str):
