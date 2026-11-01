@@ -18,19 +18,19 @@ Homepage = "https://github.com/marius-patrik/BoardGamesWithQuests"
 Documentation = "https://marius-patrik.github.io/BoardGamesWithQuests/"
 
 [project.gui-scripts]
-boardgameswithquests = "boardgameswithquests:main"
+boardgameswithquests = "main:main"
 
 [tool.setuptools_scm]
 
 [tool.setuptools]
-package-dir = {"" = "src", "games" = "games"}
-py-modules = ["boardgameswithquests"]
+package-dir = {"" = "src", "data" = "data"}
+py-modules = ["main"]
 include-package-data = true
 
-packages = ["controller", "model", "view", "games"]
+packages = ["controller", "model", "view", "data"]
 
 [tool.setuptools.package-data]
-games = ["chess/config.json", "checkers/config.json"]
+data = ["chess.json", "checkers.json"]
 
 [tool.pytest.ini_options]
 testpaths = [".github/tests"]

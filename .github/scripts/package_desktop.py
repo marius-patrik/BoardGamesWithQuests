@@ -52,9 +52,9 @@ def build(platform: str, version: str) -> Path:
     """Build the real desktop entry point and include dynamically loaded game sources."""
     if platform not in PLATFORMS or not VERSION.fullmatch(version):
         raise ValueError("A supported platform and PrideVer release version are required")
-    entry = ROOT / "src/boardgameswithquests.py"
-    games = ROOT / "games"
-    if not entry.is_file() or not games.is_dir():
+    entry = ROOT / "src/main.py"
+    data = ROOT / "data"
+    if not entry.is_file() or not data.is_dir():
         raise FileNotFoundError("Desktop entrypoint and root game definitions are required")
     # Read the checked-out distribution identity on every supported Python.
     try:
@@ -63,10 +63,10 @@ def build(platform: str, version: str) -> Path:
         import tomli as tomllib
 
     resources = [
-        path for path in games.rglob("*") if path.is_file() and "__pycache__" not in path.parts
+        path for path in data.rglob("*") if path.is_file() and "__pycache__" not in path.parts
     ]
-    if not resources:
-        raise FileNotFoundError("Desktop game runtime resources are empty")
+    if sorted(path.name for path in resources) != ["checkers.json", "chess.json"]:
+        raise FileNotFoundError("expected exactly the two shipped game JSON rulebooks")
 
     with (ROOT / "pyproject.toml").open("rb") as source:
         distribution = tomllib.load(source)["project"]["name"]
@@ -85,9 +85,7 @@ def build(platform: str, version: str) -> Path:
         "--paths",
         str(ROOT / "src"),
         "--add-data",
-        f"{games}{os.pathsep}games",
-        "--collect-submodules",
-        "games",
+        f"{data}{os.pathsep}data",
         "--copy-metadata",
         distribution,
         "--distpath",
@@ -103,11 +101,11 @@ def build(platform: str, version: str) -> Path:
         "BoardGamesWithQuests.app" if platform.startswith("macos") else "BoardGamesWithQuests"
     )
     runtime = bundle / (
-        "Contents/Resources/games" if platform.startswith("macos") else "_internal/games"
+        "Contents/Resources/data" if platform.startswith("macos") else "_internal/data"
     )
     hashes: dict[str, str] = {}
     for source in resources:
-        relative = source.relative_to(games)
+        relative = source.relative_to(data)
         packaged = runtime / relative
         payload = source.read_bytes()
         if not packaged.is_file() or packaged.read_bytes() != payload:
