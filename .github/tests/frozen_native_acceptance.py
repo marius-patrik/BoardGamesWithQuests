@@ -1106,12 +1106,20 @@ def native_file_dialog_submit(
             gui.write(destination.name, interval=0.025)
         gui.press("return")
     elif target == "windows-x64":
-        # Windows 2022 evidence shows the Save As dialog does not retain
-        # keystrokes when focus is assumed. Target its real File name field.
+        # A full absolute pathname in Windows' File name field was interpreted
+        # as a navigation target relative to the virtual Desktop (verified
+        # "Location is not available" screenshot). Navigate a real directory
+        # through the address bar, then provide only the file basename.
+        gui.hotkey("ctrl", "l")
+        gui.hotkey("ctrl", "a")
+        gui.write(str(destination.parent), interval=0.012)
+        gui.press("return")
+        gui.sleep(0.65)
+        gui.screenshot().save(evidence / f"{operation}-{target}-directory.png")
         x, y, width, height = native_window_rectangle("Save As" if operation == "save" else "Open")
         gui.click(x + width * 0.42, y + height * 0.80)
         gui.hotkey("ctrl", "a")
-        gui.write(str(destination), interval=0.025)
+        gui.write(destination.name, interval=0.025)
         gui.screenshot().save(evidence / f"{operation}-{target}-typed-path.png")
         gui.press("return")
     else:
@@ -1155,7 +1163,7 @@ def persisted_native_game_journey(
         if game == "chess"
         else [((2, 1), (3, 0)), ((5, 2), (4, 1)), ((3, 0), (5, 2))]
     )
-    final_move = ((1, 6), (2, 5)) if game == "chess" else ((6, 3), (4, 1))
+    final_move = ((0, 6), (2, 5)) if game == "chess" else ((6, 3), (4, 1))
     before_save = None
     before_board = None
     initial_snapshot = None
