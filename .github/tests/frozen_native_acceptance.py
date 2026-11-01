@@ -1543,7 +1543,7 @@ def native_persistence_failure_journey(
                 if target == "windows-x64" and native_dialog_present("Save As"):
                     gui.press("escape")
                 gui.screenshot().save(evidence / "failure-readonly-dismissed.png")
-                if read_only.read_bytes() != b"unchanged native failure sentinel\\n":
+                if read_only.read_bytes() != b"unchanged native failure sentinel\n":
                     raise AssertionError("failed native save modified its original target")
                 await_board(gui, evidence, "failure-readonly-rejected")
                 # Reopen after failures and play a real Black knight move.
