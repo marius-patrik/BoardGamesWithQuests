@@ -1271,8 +1271,10 @@ def persisted_native_game_journey(
                         dx, dy = point(end)
                         radius = int(size * 0.44)
                         destination_box = (
-                            int(dx) - radius, int(dy) - radius,
-                            int(dx) + radius, int(dy) + radius,
+                            int(dx) - radius,
+                            int(dy) - radius,
+                            int(dx) + radius,
+                            int(dy) + radius,
                         )
                         deadline = time.monotonic() + 7
                         while time.monotonic() < deadline:
