@@ -1403,6 +1403,164 @@ def persisted_native_game_journey(
     }
 
 
+def native_persistence_failure_journey(
+    gui, executable: Path, home: Path, source: Path, evidence: Path, target: str
+) -> dict:
+    """Probe native file-dialog cancellation and atomic import/export rollback."""
+    from PIL import ImageChops
+
+    home.mkdir()
+    home = home.resolve()
+    (home / "AppData" / "Roaming").mkdir(parents=True)
+    (home / "Desktop").mkdir(exist_ok=True)
+    invalid = home / "invalid.json"
+    invalid.write_bytes(b"{ incomplete session")
+    read_only = home / "readonly.json"
+    read_only.write_bytes(b"unchanged native failure sentinel\n")
+    read_only.chmod(0o444)
+    recovered = home / "recovered-after-failure.json"
+    baseline = json.loads(source.read_text(encoding="utf-8"))
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    env.update(
+        HOME=str(home), USERPROFILE=str(home),
+        APPDATA=str(home / "AppData" / "Roaming"),
+        XDG_CONFIG_HOME=str(home / ".config"),
+    )
+    offsets = {
+        "windows-x64": {"export": (495, -47), "open": (416, -79)},
+        "macos-arm64": {"export": (473, -47), "open": (368, -79)},
+        "macos-x64": {"export": (473, -47), "open": (368, -79)},
+        "linux-x64": {"export": (450, -47), "open": (357, -79)},
+    }
+    with tempfile.TemporaryDirectory(prefix="bgwq-native-failure-cwd-") as cwd:
+        with (evidence / "failure-journey-stderr.txt").open("wb") as stderr:
+            process = subprocess.Popen(
+                [str(executable), "--game", "chess"],
+                cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=stderr
+            )
+            try:
+                deadline = time.monotonic() + 25
+                while time.monotonic() < deadline:
+                    if process.poll() is not None:
+                        raise AssertionError("frozen application exited before failed-file journey")
+                    try:
+                        focus_chooser()
+                        break
+                    except Blocked:
+                        gui.sleep(0.35)
+                else:
+                    raise Blocked("native chooser unavailable for persistence failure journey")
+                if target == "linux-x64":
+                    gui.press("tab")
+                    gui.press("return")
+                else:
+                    x, y, width, height = native_window_rectangle("New game")
+                    gui.click(x + 0.34 * width, y + 0.66 * height)
+                await_board(gui, evidence, "failure-start")
+
+                def toolbar(action: str, label: str):
+                    board = await_board(gui, evidence, f"failure-before-{label}")
+                    before = gui.screenshot().convert("RGB")
+                    dx, dy = offsets[target][action]
+                    gui.click(board[0] + dx, board[1] + dy)
+                    return before
+
+                def browse(action: str, path: Path, label: str):
+                    before = toolbar(action, label)
+                    native_file_dialog_submit(
+                        gui, path, "save" if action == "export" else "open",
+                        target, evidence, before=before
+                    )
+
+                # Load a known good file first; later errors must never replace it.
+                browse("open", source, "initial-valid-open")
+                await_board(gui, evidence, "failure-loaded-valid")
+                # A cancelled Save As must neither write nor discard the game.
+                toolbar("export", "cancel-save")
+                gui.sleep(0.55)
+                gui.screenshot().save(evidence / "failure-save-dialog-cancel.png")
+                gui.press("escape")
+                await_board(gui, evidence, "failure-save-cancelled")
+                if recovered.exists():
+                    raise AssertionError("cancelled Save As created a file")
+                # A cancelled Open likewise retains the same board.
+                toolbar("open", "cancel-open")
+                gui.sleep(0.55)
+                gui.screenshot().save(evidence / "failure-open-dialog-cancel.png")
+                gui.press("escape")
+                await_board(gui, evidence, "failure-open-cancelled")
+                # Invalid JSON is rejected by the native UI. Dismiss its error.
+                browse("open", invalid, "invalid-file-open")
+                gui.screenshot().save(evidence / "failure-invalid-open-feedback.png")
+                gui.press("return")
+                await_board(gui, evidence, "failure-invalid-rejected")
+                # Existing read-only target cannot be overwritten. Native error
+                # handling must preserve both the original file and live game.
+                browse("export", read_only, "readonly-target-save")
+                gui.screenshot().save(evidence / "failure-readonly-feedback.png")
+                gui.press("return")
+                if read_only.read_bytes() != b"unchanged native failure sentinel\n":
+                    raise AssertionError("failed native save modified its original target")
+                await_board(gui, evidence, "failure-readonly-rejected")
+                # Reopen after failures and play a real Black knight move.
+                browse("open", source, "valid-open-after-failures")
+                left, top, size = await_board(gui, evidence, "failure-valid-reopened")
+                src, dst = (0, 6), (2, 5)
+                p = lambda pos: (
+                    left + (pos[1] + 0.5) * size, top + (pos[0] + 0.5) * size
+                )
+                before = gui.screenshot().convert("RGB")
+                gui.click(*p(src))
+                gui.sleep(0.25)
+                gui.click(*p(dst))
+                gui.sleep(0.6)
+                after = gui.screenshot().convert("RGB")
+                after.save(evidence / "failure-continued-after-reopen.png")
+                changed = ImageChops.difference(before, after)
+                if any(
+                    changed.crop(
+                        (int(p(pos)[0] - size * 0.2),
+                         int(p(pos)[1] - size * 0.2),
+                         int(p(pos)[0] + size * 0.2),
+                         int(p(pos)[1] + size * 0.2))
+                    ).getbbox() is None
+                    for pos in (src, dst)
+                ):
+                    raise AssertionError("failed operations prevented continued native gameplay")
+                browse("export", recovered, "recovered-save")
+                deadline = time.monotonic() + 12
+                while time.monotonic() < deadline and not recovered.is_file():
+                    gui.sleep(0.25)
+                if not recovered.is_file():
+                    raise AssertionError("save after failed operations did not produce a file")
+                later = json.loads(recovered.read_text(encoding="utf-8"))
+                if (
+                    later.get("game_id") != baseline["game_id"]
+                    or later.get("revision") != baseline["revision"] + 1
+                    or later.get("events", [])[:len(baseline["events"])] != baseline["events"]
+                ):
+                    raise AssertionError("invalid native file operation replaced the live session")
+                gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
+                if process.wait(timeout=15) != 0:
+                    raise AssertionError("frozen app did not exit cleanly after failed-file journey")
+            finally:
+                if process.poll() is None:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=8)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait(timeout=8)
+    return {
+        "save_dialog_cancel_no_write": True,
+        "open_dialog_cancel_no_replace": True,
+        "invalid_open_preserves_game": True,
+        "read_only_save_preserves_target": True,
+        "valid_reopen_and_continuation_after_failures": True,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -1524,6 +1682,13 @@ def main() -> int:
                     game,
                 )
             state["journeys"]["saved_game_process_restart_and_continuation"] = "PASS"
+            state["current_journey"] = "invalid_user_files_and_failed_save"
+            state["failure_protection"] = native_persistence_failure_journey(
+                gui, executable, folder / "home-failure",
+                folder / "home-saved-chess" / "chess-saved.json",
+                args.evidence_dir, args.platform
+            )
+            state["journeys"]["invalid_user_files_and_failed_save"] = "PASS"
             state["gui"] = "BLOCKED"
             state["current_journey"] = None
             # Incomplete mandatory journeys are BLOCKED, never a green release gate.
