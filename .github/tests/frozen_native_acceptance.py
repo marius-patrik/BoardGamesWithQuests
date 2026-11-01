@@ -1546,23 +1546,54 @@ def native_persistence_failure_journey(
                         before=before,
                     )
 
+                def cancel_native_picker(action: str, label: str) -> None:
+                    """Wait for an actually visible OS picker before sending Cancel.
+
+                    macOS file panels can appear after a 550ms fixed delay.
+                    Sending Escape before they appear leaves the subsequently
+                    opened sheet covering the board. Use the same screenshot
+                    change threshold as native_file_dialog_submit() instead.
+                    """
+                    before = toolbar(action, label)
+                    if target.startswith("macos"):
+                        deadline = time.monotonic() + 12
+                        observed = False
+                        while time.monotonic() < deadline:
+                            picture = gui.screenshot().convert("RGB")
+                            if picture.size == before.size:
+                                changed = sum(
+                                    max(abs(a - b) for a, b in zip(
+                                        before.getpixel((x, y)), picture.getpixel((x, y))
+                                    )) > 34
+                                    for y in range(75, picture.height - 100, 15)
+                                    for x in range(55, picture.width - 55, 15)
+                                )
+                                if changed > 210:
+                                    observed = True
+                                    break
+                            gui.sleep(0.22)
+                        if not observed:
+                            gui.screenshot().save(evidence / f"failure-{label}-picker-not-visible.png")
+                            raise AssertionError(
+                                f"{target}: native {label} file picker never visibly appeared"
+                            )
+                    else:
+                        gui.sleep(0.55)
+                    gui.screenshot().save(evidence / f"failure-{label}-dialog-cancel.png")
+                    gui.press("escape")
+                    # An unobscured board is still mandatory; do not hide
+                    # focus, modal, or screenshot failures.
+                    await_board(gui, evidence, f"failure-{label}led")
+
                 # Load a known good file first; later errors must never replace it.
                 browse("open", source, "initial-valid-open")
                 await_board(gui, evidence, "failure-loaded-valid")
                 # A cancelled Save As must neither write nor discard the game.
-                toolbar("export", "cancel-save")
-                gui.sleep(0.55)
-                gui.screenshot().save(evidence / "failure-save-dialog-cancel.png")
-                gui.press("escape")
-                await_board(gui, evidence, "failure-save-cancelled")
+                cancel_native_picker("export", "cancel-save")
                 if recovered.exists():
                     raise AssertionError("cancelled Save As created a file")
                 # A cancelled Open likewise retains the same board.
-                toolbar("open", "cancel-open")
-                gui.sleep(0.55)
-                gui.screenshot().save(evidence / "failure-open-dialog-cancel.png")
-                gui.press("escape")
-                await_board(gui, evidence, "failure-open-cancelled")
+                cancel_native_picker("open", "cancel-open")
                 # Invalid JSON is rejected by the native UI. Dismiss its error.
                 browse("open", invalid, "invalid-file-open")
                 gui.screenshot().save(evidence / "failure-invalid-open-feedback.png")
