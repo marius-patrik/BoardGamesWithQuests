@@ -212,7 +212,7 @@ def test_real_installation_check_executes_both_bundled_game_openings():
     import sys
 
     completed = subprocess.run(
-        [sys.executable, "-m", "boardgameswithquests", "--check"],
+        [sys.executable, "-m", "main", "--check"],
         capture_output=True,
         text=True,
         timeout=90,
