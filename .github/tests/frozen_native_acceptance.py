@@ -1081,9 +1081,7 @@ def native_file_dialog_submit(
     elif target == "windows-x64":
         # Windows 2022 evidence shows the Save As dialog does not retain
         # keystrokes when focus is assumed. Target its real File name field.
-        x, y, width, height = native_window_rectangle(
-            "Save As" if operation == "save" else "Open"
-        )
+        x, y, width, height = native_window_rectangle("Save As" if operation == "save" else "Open")
         gui.click(x + width * 0.42, y + height * 0.80)
         gui.hotkey("ctrl", "a")
         gui.write(str(destination), interval=0.025)
