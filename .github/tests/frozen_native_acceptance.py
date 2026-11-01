@@ -1265,9 +1265,28 @@ def persisted_native_game_journey(
                         )
                         old = gui.screenshot().convert("RGB")
                         gui.click(*point(start))
-                        gui.sleep(0.2)
+                        # Native AppKit/Tk may render legal-move targets on the
+                        # next event-loop iteration. Do not click destination
+                        # until its source-authorized highlight is visible.
+                        dx, dy = point(end)
+                        radius = int(size * 0.44)
+                        destination_box = (
+                            int(dx) - radius, int(dy) - radius,
+                            int(dx) + radius, int(dy) + radius,
+                        )
+                        deadline = time.monotonic() + 7
+                        while time.monotonic() < deadline:
+                            selected = gui.screenshot().convert("RGB")
+                            if ImageChops.difference(old, selected).crop(destination_box).getbbox():
+                                selected.save(evidence / f"{game}-{label}-selected.png")
+                                break
+                            gui.sleep(0.2)
+                        else:
+                            raise AssertionError(
+                                f"{game} {label}: selected source produced no legal target highlight"
+                            )
                         gui.click(*point(end))
-                        gui.sleep(0.55)
+                        gui.sleep(0.65)
                         new = gui.screenshot().convert("RGB")
                         new.save(evidence / f"{game}-{label}-after.png")
                         delta = ImageChops.difference(old, new)
