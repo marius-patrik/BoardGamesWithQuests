@@ -1,5 +1,14 @@
 # Execution plan — BoardGamesWithQuests v1.0.0
 
+## 2026-11-01 — N1 session died; N1B recovery dispatched from preserved tests
+
+- [x] Previous native N1 `qa/443-lifecycle-persistence` exact `ee671de5b317700beda6fd6b8e43e8be8b4de40f` has 34 commits since M, all native QA test/workflow and generated AST; no production source. User confirmed N1 agent stopped.
+- [x] Last final N1 run [#41264659881](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41264659881) FAILED: Windows/Linux intentionally BLOCKED at final mandatory-journey gate after implemented settings, gameplay, lifecycle/persistence/error paths; macOS ARM64/x64 FAIL at visual board detection insufficient sample density. Do not conflate screenshot oracle error with confirmed Tk defect.
+- [x] New exclusive successor branch `qa/443-n1b-macos-recovery` CREATED at exact N1 source `ee671de5b...`. Continue rather than rebuild; add this branch to isolated native-acceptance workflow push trigger.
+- [ ] N1B: first inspect Mac artifact 13067148519 (ARM64), 13067088909 (x64), window/focus/Retina/dpi screenshots and native-result.json; fix observed visual/oracle issue with retained screenshot + pointer evidence, not assertion bypass. Verify N1 native New Game & Resign cancellation, Save→exit→relaunch→Open→continue for BOTH games and failed-save/open cancellation on all four OS on a single exact SHA.
+- [ ] N2 serial after N1B: full advanced capture/promote/crown, terminal/draw, offline/process cleanup and signed Windows + DeveloperID/notarized Mac distribution trust. #443 OPEN, no product merge/release; #473/#477 FIDE and #437/#449 WCDF remain blockers.
+
+
 ## 2026-11-01 — Dispatch M partial native tests; N1 lifecycle and persistence follow-up
 
 - [x] Native M final isolated candidate 33e15ecb8ca4d24def9deeaadacbcfd367c14fcb includes recovered real four-OS pointer/UI QA, settings/restart and resource-integrity scripts, a macOS ad-hoc re-signing correction, and fail-closed CI. Earlier exact 654134d8... run 41209961914 proved actual Chess/Draughts captures and settings save/restart across all four operating systems, but total workflow FAILED for missing mandatory journeys.

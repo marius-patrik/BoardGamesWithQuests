@@ -1,5 +1,14 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## 2026-11-01 — N1 agent died; send N1B macOS recovery prompt
+
+- [x] N1 branch `qa/443-lifecycle-persistence` at `ee671de5b...` built 34 commits: screenshot-bound window tracking, native lifecycle, both-games Save/Exit/Restart/Open/Continue, invalid-file/cancel/read-only-save recovery; no src/game edits. Original agent session ended.
+- [x] Last native CI [#41264659881](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41264659881) on exact N1 SHA: Windows and Linux BLOCKED by incomplete future journeys, macOS both architectures FAIL at screenshot palette sample density. Auto Format green, no native job running.
+- [x] New branch `qa/443-n1b-macos-recovery` created from exact final N1 SHA, exclusive next native QA writer; work there only. Add branch to `.github/workflows/desktop-native-acceptance.yml` push filter for CI (currently only M/N1 branch triggers).
+- [ ] Inspect Mac screenshots/artifacts and determine whether blocked window, stale geometry, retina scale, wrong screenshot capture or actual app problem. Fix without relaxing screenshot visual proof; require all four N1 journeys and preserved core passes on same exact SHA. Fail-closed final #443 may remain BLOCKED, N2 after.
+- [ ] No production source writes/merges/releases; #443 still OPEN and #436/#473/#477 release-blocking.
+
+
 ## 2026-11-01 — N1 native QA priority after M incomplete handoff
 
 - [x] M native QA candidate 33e15ecb... exact-head four-OS full acceptance NOT PASS; earlier extracted Chess/Draughts/Settings core evidence succeeded, but advanced acceptance incomplete. Final workflow 41210943260: Windows FAIL after lifecycle dialog, other three BLOCKED; no guarded test relaxation.

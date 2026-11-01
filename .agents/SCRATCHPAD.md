@@ -1,5 +1,13 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-11-01 — N1 abandoned, N1B native screenshot recovery provenance
+
+- N1 exact `ee671de5b317700beda6fd6b8e43e8be8b4de40f` 34 commits after M base. Last [#41264659881](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41264659881) Windows/Linux BLOCKED after partial completed native journeys, macOS ARM64 and x64 FAIL with `no unobscured board Canvas: insufficient sample density`. Mac logs job IDs 124724842977 ARM64, 124724842948 x64. Windows job 124724842986, Linux 124724842733.
+- Mac artifact references: native-evidence-macos-arm64 13067148519, native-evidence-macos-x64 13067088909. Test `visible_board()` scans desktop color clusters at stride 4 and 12/16 middle board samples; `await_board()` then checks OS Toplevel rectangle. Failure is pre-conclusive for product UI. Require screen image + per-window geometry/foreground capture, Retina scaling and modal presence diagnosis.
+- N1B new `qa/443-n1b-macos-recovery` seeded at exact N1, branch filter in native workflow must be extended. This is not a new product branch; old N1 retained temporarily until handoff. Both N1 branches must be pruned after accepted final native QA implementation is integrated.
+- N1's current test sequence includes Chess and Draughts extracted capture/settings, native cancellation, both saved-game restart, invalid user files and read-only failed-save; explicit final `raise Blocked(...remaining journeys...)` remains. Final native full #443 cannot be declared green until N2 advanced journeys and distribution trust policy are resolved. No source/engine changes in N1B.
+
+
 ## 2026-11-01 — Four OS native M forensic observations
 
 - Verified actual M tests source frozen_native_acceptance.py at SHA 33e15ecb... (1118 lines); script explicitly raises Blocked after measured partial journeys. 5 candidate changed paths, no production source. Windows last job ID 124565590138 failure: no unobscured board Canvas, unexpected checker color at 3,7; insufficient sample density. Screenshot capture was uploaded. Mac and Linux self-report BLOCKED for incomplete mandatory journeys.
