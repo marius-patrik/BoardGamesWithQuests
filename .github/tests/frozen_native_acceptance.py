@@ -1603,15 +1603,18 @@ def native_persistence_failure_journey(
                                 # its *actual* window ID and send native Return.
                                 windows = subprocess.check_output(
                                     ["xdotool", "search", "--name", "^Save game$"],
-                                    text=True, timeout=8,
+                                    text=True,
+                                    timeout=8,
                                 ).splitlines()
                                 subprocess.run(
                                     ["xdotool", "windowactivate", "--sync", windows[-1]],
-                                    check=True, timeout=8,
+                                    check=True,
+                                    timeout=8,
                                 )
                                 subprocess.run(
                                     ["xdotool", "key", "--clearmodifiers", "Return"],
-                                    check=True, timeout=8,
+                                    check=True,
+                                    timeout=8,
                                 )
                             else:
                                 gui.click(x + width * 0.50, y + height * 0.84)
