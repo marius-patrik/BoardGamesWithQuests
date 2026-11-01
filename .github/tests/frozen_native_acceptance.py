@@ -384,11 +384,13 @@ def await_board(gui, evidence: Path, label: str, timeout: float = 30) -> tuple[f
     # but diagnose a lingering modal before blaming screen geometry.
     for title in ("Resign", "Unsaved game"):
         try:
-            native_window_rectangle(title)
-        except (AssertionError, Blocked):
+            if native_dialog_present(title):
+                reason = f"interfering native {title!r} dialog; {reason}"
+                break
+        except Blocked:
+            # The board assertion remains authoritative even when OS window
+            # enumeration is unavailable (e.g. macOS Accessibility denied).
             continue
-        reason = f"interfering native {title!r} dialog; {reason}"
-        break
     raise AssertionError(f"frozen application did not render the game Canvas: {reason}")
 
 
@@ -656,13 +658,30 @@ def screenshot_dialog(gui, evidence: Path, label: str, title: str):
     raise AssertionError(f"{title} native dialog did not render within 12 seconds")
 
 
+def native_dialog_present(title: str) -> bool:
+    """Distinguish a missing native dialog from blocked OS window enumeration."""
+    try:
+        native_window_rectangle(title)
+    except AssertionError:
+        return False
+    except subprocess.CalledProcessError:
+        if sys.platform.startswith("linux"):
+            # xdotool search returns status 1 for an absent window.
+            return False
+        raise
+    except Blocked as exc:
+        if sys.platform == "darwin" and "Invalid index" in str(exc):
+            # System Events cannot resolve a window after it was dismissed.
+            return False
+        raise
+    return True
+
+
 def wait_for_native_dialog_close(gui, evidence: Path, title: str, label: str) -> None:
     """Do not confuse an obstructing native confirmation with a missing board."""
     deadline = time.monotonic() + 8
     while time.monotonic() < deadline:
-        try:
-            native_window_rectangle(title)
-        except AssertionError:
+        if not native_dialog_present(title):
             gui.screenshot().save(evidence / f"{label}-closed.png")
             return
         gui.sleep(0.25)
