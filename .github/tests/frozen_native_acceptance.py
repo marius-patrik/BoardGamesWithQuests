@@ -1072,9 +1072,11 @@ def native_file_dialog_submit(
             current = gui.screenshot().convert("RGB")
             if current.size == before.size:
                 changed = sum(
-                    max(abs(a - b) for a, b in zip(
-                        before.getpixel((x, y)), current.getpixel((x, y))
-                    )) > 34
+                    max(
+                        abs(a - b)
+                        for a, b in zip(before.getpixel((x, y)), current.getpixel((x, y)))
+                    )
+                    > 34
                     for y in range(75, current.height - 100, 15)
                     for x in range(55, current.width - 55, 15)
                 )
