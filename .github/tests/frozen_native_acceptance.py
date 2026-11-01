@@ -1528,8 +1528,22 @@ def native_persistence_failure_journey(
                 # handling must preserve both the original file and live game.
                 browse("export", read_only, "readonly-target-save")
                 gui.screenshot().save(evidence / "failure-readonly-feedback.png")
+                # The OS file picker confirms overwriting an existing file
+                # before the production atomic-save validator runs.
+                if target == "windows-x64":
+                    x, y, width, height = native_window_rectangle("Confirm Save As")
+                    gui.click(x + width * 0.66, y + height * 0.82)
+                else:
+                    gui.press("return")
+                gui.sleep(0.45)
+                gui.screenshot().save(evidence / "failure-readonly-after-overwrite-confirm.png")
+                # Dismiss the app's Save game error (or an OS-owned denial).
                 gui.press("return")
-                if read_only.read_bytes() != b"unchanged native failure sentinel\n":
+                gui.sleep(0.35)
+                if target == "windows-x64" and native_dialog_present("Save As"):
+                    gui.press("escape")
+                gui.screenshot().save(evidence / "failure-readonly-dismissed.png")
+                if read_only.read_bytes() != b"unchanged native failure sentinel\\n":
                     raise AssertionError("failed native save modified its original target")
                 await_board(gui, evidence, "failure-readonly-rejected")
                 # Reopen after failures and play a real Black knight move.
