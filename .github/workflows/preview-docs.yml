@@ -3,9 +3,6 @@ name: Preview Documentation
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
-  pull_request_target:
-    branches: [main]
-    types: [opened, edited, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -16,13 +13,13 @@ concurrency:
 
 jobs:
   preview:
-    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository && (github.event_name != 'pull_request_target' || (github.event.pull_request.head.ref == 'chore/479-sync-upstream-main' && github.event.pull_request.head.sha == '3bc11ca3621ca5d497aff3bab071ac6d222dadcc'))
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Check out the exact PR head
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          ref: ${{ github.event_name == 'pull_request_target' && 'develop' || github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Set up documentation Python
@@ -62,7 +59,6 @@ jobs:
         run: printf '%s\n' "$HEAD_SHA" > site/.preview-head
 
       - name: Upload passing PR site
-        if: github.event_name != 'pull_request_target'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: docs-preview-${{ github.event.pull_request.number }}
