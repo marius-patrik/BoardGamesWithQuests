@@ -802,14 +802,12 @@ flowchart LR
   nc9f5868186eb03f66 --> n4c226bf73fa46aeac
   n1ff6a4094456e9a6e["class_definition MainSourcePolicyTests"]
   n4c226bf73fa46aeac --> n1ff6a4094456e9a6e
-  n5a7615ec264ef8328["function_definition test_main_gate_checks_develop_and_pinned_upstream_sync"]
+  n5a7615ec264ef8328["function_definition test_main_gate_checks_only_the_develop_head"]
   n4c226bf73fa46aeac --> n5a7615ec264ef8328
-  n68683bb8177720562["function_definition test_trusted_shell_restricts_release_and_unpinned_branches"]
+  n68683bb8177720562["function_definition test_trusted_shell_accepts_only_same_repository_develop_promotions"]
   n4c226bf73fa46aeac --> n68683bb8177720562
-  n41a0610a23f18413c["function_definition test_upstream_exception_pins_exact_source_and_delta"]
+  n41a0610a23f18413c["function_definition test_main_protection_requires_the_source_check"]
   n4c226bf73fa46aeac --> n41a0610a23f18413c
-  nc1f6e2f4eb2440f7b["function_definition test_main_protection_requires_the_source_check"]
-  n4c226bf73fa46aeac --> nc1f6e2f4eb2440f7b
   n170f6914128af46f0["test_release_gate.py"]
   nc9f5868186eb03f66 --> n170f6914128af46f0
   n1e224dc3f7154dd0c["function_definition invoke"]
@@ -890,8 +888,6 @@ flowchart LR
   nbf32064a6a26ab2df --> nd3df90c45daec0479
   n1e8a52375031a480a["report-failure.yml"]
   nbf32064a6a26ab2df --> n1e8a52375031a480a
-  n70bdd28456ec6644d["upstream-sync-verification.yml"]
-  nbf32064a6a26ab2df --> n70bdd28456ec6644d
   n7319e776256e9b95b["verify-release-metadata.yml"]
   nbf32064a6a26ab2df --> n7319e776256e9b95b
   ndfaa9a79675e5b61b[".gitignore"]
