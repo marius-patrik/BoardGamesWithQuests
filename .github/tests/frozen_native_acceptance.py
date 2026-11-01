@@ -355,11 +355,26 @@ def visible_board(image) -> tuple[float, float, float]:
             continue
         square = (horizontal + vertical) / 16
         try:
-            for row, col in ((3, 0), (3, 7), (4, 0), (4, 7)):
+            # Last-move, legal-destination and focus highlights legitimately
+            # recolor individual squares (Draughts b6->a5 highlights row 3,
+            # col 0). Require broad agreement across independent, well-spaced
+            # samples rather than treating one highlighted square as obscured.
+            sampled = [
+                (row, col)
+                for row in (2, 3, 4, 5)
+                for col in (0, 2, 4, 7)
+            ]
+            matched = 0
+            for row, col in sampled:
                 x, y = int(left + (col + 0.22) * square), int(top + (row + 0.22) * square)
                 expected = light if (row + col) % 2 == 0 else dark
-                if max(abs(pixels[x, y][i] - expected[i]) for i in range(3)) > 25:
-                    raise AssertionError(f"unexpected checker color at {row}, {col}")
+                if max(abs(pixels[x, y][i] - expected[i]) for i in range(3)) <= 25:
+                    matched += 1
+            if matched < 12:
+                raise AssertionError(
+                    f"board palette mismatch across independent squares: "
+                    f"{matched}/{len(sampled)} match"
+                )
         except (AssertionError, IndexError) as exc:
             failures.append(str(exc))
             continue
