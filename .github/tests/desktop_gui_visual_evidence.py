@@ -85,9 +85,7 @@ def capture_quest_and_history_stress(output: Path) -> None:
     original_loader = session_module.load_bundled_definition
     try:
         for game in ("chess", "checkers"):
-            definition_json = json.loads(
-                bundled_games_root().joinpath(f"{game}.json").read_text()
-            )
+            definition_json = json.loads(bundled_games_root().joinpath(f"{game}.json").read_text())
             definition_json["quests"] = [
                 {
                     "id": f"demo-quest-{index}",
