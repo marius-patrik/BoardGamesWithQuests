@@ -1002,7 +1002,9 @@ def native_lifecycle_journey(
                         process.wait(timeout=8)
 
 
-def native_file_dialog_submit(gui, destination: Path, operation: str, target: str, evidence: Path) -> None:
+def native_file_dialog_submit(
+    gui, destination: Path, operation: str, target: str, evidence: Path
+) -> None:
     """Operate the OS file picker, never the in-process persistence API."""
     gui.sleep(0.45)
     gui.screenshot().save(evidence / f"{operation}-{target}-file-dialog.png")
@@ -1066,9 +1068,7 @@ def persisted_native_game_journey(
         if game == "chess"
         else [((2, 1), (3, 0)), ((5, 2), (4, 1)), ((3, 0), (5, 2))]
     )
-    final_move = (
-        ((1, 6), (2, 5)) if game == "chess" else ((6, 3), (4, 1))
-    )
+    final_move = ((1, 6), (2, 5)) if game == "chess" else ((6, 3), (4, 1))
     before_save = None
     before_board = None
     initial_snapshot = None
@@ -1119,13 +1119,20 @@ def persisted_native_game_journey(
                         radius = max(8, int(size * 0.19))
                         for pos in (start, end):
                             px, py = point(pos)
-                            if delta.crop((
-                                int(px) - radius,
-                                int(py) - radius,
-                                int(px) + radius,
-                                int(py) + radius,
-                            )).getbbox() is None:
-                                raise AssertionError(f"{game} {label}: board square unchanged at {pos}")
+                            if (
+                                delta.crop(
+                                    (
+                                        int(px) - radius,
+                                        int(py) - radius,
+                                        int(px) + radius,
+                                        int(py) + radius,
+                                    )
+                                ).getbbox()
+                                is None
+                            ):
+                                raise AssertionError(
+                                    f"{game} {label}: board square unchanged at {pos}"
+                                )
 
                     def toolbar(action, label):
                         nonlocal board
@@ -1151,11 +1158,14 @@ def persisted_native_game_journey(
                         before_save = gui.screenshot().convert("RGB")
                         export(saved, "first-save")
                         initial_snapshot = json.loads(saved.read_text(encoding="utf-8"))
-                        if initial_snapshot.get("revision") != 3 or len(initial_snapshot.get("events", [])) != 3:
-                            raise AssertionError(f"{game}: native Export lacks three accepted events")
-                        if initial_snapshot.get("active_side") != (
-                            -1 if game == "chess" else 1
+                        if (
+                            initial_snapshot.get("revision") != 3
+                            or len(initial_snapshot.get("events", [])) != 3
                         ):
+                            raise AssertionError(
+                                f"{game}: native Export lacks three accepted events"
+                            )
+                        if initial_snapshot.get("active_side") != (-1 if game == "chess" else 1):
                             raise AssertionError(f"{game}: unexpected active side after opening")
                         if initial_snapshot.get("outcome") is not None:
                             raise AssertionError(f"{game}: exported game unexpectedly terminal")
@@ -1176,7 +1186,8 @@ def persisted_native_game_journey(
                         # squares, not just the wooden checkerboard palette.
                         # Coordinates are recomputed from both live screenshots.
                         sites = (
-                            [(6, 4), (4, 4), (3, 3), (1, 3)] if game == "chess"
+                            [(6, 4), (4, 4), (3, 3), (1, 3)]
+                            if game == "chess"
                             else [(2, 1), (3, 0), (4, 1), (5, 2)]
                         )
                         for row, col in sites:
@@ -1188,7 +1199,9 @@ def persisted_native_game_journey(
                             b = current.getpixel((px1, py1))
                             if max(abs(a[k] - b[k]) for k in range(3)) > 45:
                                 gui.screenshot().save(evidence / f"{game}-reopen-mismatch.png")
-                                raise AssertionError(f"{game}: restored piece differs at {row},{col}")
+                                raise AssertionError(
+                                    f"{game}: restored piece differs at {row},{col}"
+                                )
                         move(*final_move, f"persist-continued-move")
                         export(continued, "continued-save")
                         later = json.loads(continued.read_text(encoding="utf-8"))
@@ -1202,7 +1215,11 @@ def persisted_native_game_journey(
                             raise AssertionError(f"{game}: continued move did not advance turn")
                         if later.get("quest_progress") is None or later.get("clocks") is None:
                             raise AssertionError(f"{game}: resumed session lost quests or clocks")
-                    gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
+                    (
+                        gui.hotkey("command", "q")
+                        if sys.platform == "darwin"
+                        else gui.hotkey("alt", "f4")
+                    )
                     if process.wait(timeout=15) != 0:
                         raise AssertionError(f"{game}: frozen GUI exit was not clean")
                 finally:
@@ -1338,8 +1355,12 @@ def main() -> int:
             state["saved_games"] = {}
             for game in ("chess", "checkers"):
                 state["saved_games"][game] = persisted_native_game_journey(
-                    gui, executable, folder / f"home-saved-{game}", args.evidence_dir,
-                    args.platform, game
+                    gui,
+                    executable,
+                    folder / f"home-saved-{game}",
+                    args.evidence_dir,
+                    args.platform,
+                    game,
                 )
             state["journeys"]["saved_game_process_restart_and_continuation"] = "PASS"
             state["gui"] = "BLOCKED"
