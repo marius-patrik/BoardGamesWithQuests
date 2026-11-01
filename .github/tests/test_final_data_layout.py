@@ -50,17 +50,13 @@ def test_frozen_manifest_and_tamper_rejection(tmp_path: Path, monkeypatch) -> No
         bundled_games_root()
 
 
-def test_frozen_manifest_rejects_path_escape_and_extra_json(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_frozen_manifest_rejects_path_escape_and_extra_json(tmp_path: Path, monkeypatch) -> None:
     data = tmp_path / "data"
     data.mkdir()
     payload = (ROOT / "data/chess.json").read_bytes()
     (data / "chess.json").write_bytes(payload)
     (data / "manifest.json").write_text(
-        json.dumps(
-            {"version": 1, "files": {"../chess.json": hashlib.sha256(payload).hexdigest()}}
-        ),
+        json.dumps({"version": 1, "files": {"../chess.json": hashlib.sha256(payload).hexdigest()}}),
         encoding="utf-8",
     )
     monkeypatch.setattr(sys, "frozen", True, raising=False)
@@ -68,9 +64,7 @@ def test_frozen_manifest_rejects_path_escape_and_extra_json(
     with pytest.raises(FileNotFoundError, match="integrity manifest"):
         bundled_games_root()
     (data / "manifest.json").write_text(
-        json.dumps(
-            {"version": 1, "files": {"chess.json": hashlib.sha256(payload).hexdigest()}}
-        ),
+        json.dumps({"version": 1, "files": {"chess.json": hashlib.sha256(payload).hexdigest()}}),
         encoding="utf-8",
     )
     (data / "unexpected.json").write_text("extra", encoding="utf-8")
