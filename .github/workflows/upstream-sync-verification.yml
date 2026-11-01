@@ -4,12 +4,18 @@ on:
     branches: [main]
     types: [opened, edited, synchronize, reopened, ready_for_review]
 permissions:
-  contents: read
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+  repository-projects: write
 jobs:
   verify-upstream:
     name: provenance-and-source-compile
     if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'chore/479-sync-upstream-main' && github.event.pull_request.head.sha == '3bc11ca3621ca5d497aff3bab071ac6d222dadcc'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Validate immutable upstream provenance and entire file delta
         env:
@@ -41,8 +47,9 @@ jobs:
     needs: verify-upstream
     uses: ./.github/workflows/darkfactory-control.yml
     permissions:
-      contents: read
-      actions: read
-      issues: read
-      pull-requests: read
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+      repository-projects: write
     secrets: inherit
