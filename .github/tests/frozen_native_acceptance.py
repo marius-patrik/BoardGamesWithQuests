@@ -1562,9 +1562,13 @@ def native_persistence_failure_journey(
                             picture = gui.screenshot().convert("RGB")
                             if picture.size == before.size:
                                 changed = sum(
-                                    max(abs(a - b) for a, b in zip(
-                                        before.getpixel((x, y)), picture.getpixel((x, y))
-                                    )) > 34
+                                    max(
+                                        abs(a - b)
+                                        for a, b in zip(
+                                            before.getpixel((x, y)), picture.getpixel((x, y))
+                                        )
+                                    )
+                                    > 34
                                     for y in range(75, picture.height - 100, 15)
                                     for x in range(55, picture.width - 55, 15)
                                 )
@@ -1573,7 +1577,9 @@ def native_persistence_failure_journey(
                                     break
                             gui.sleep(0.22)
                         if not observed:
-                            gui.screenshot().save(evidence / f"failure-{label}-picker-not-visible.png")
+                            gui.screenshot().save(
+                                evidence / f"failure-{label}-picker-not-visible.png"
+                            )
                             raise AssertionError(
                                 f"{target}: native {label} file picker never visibly appeared"
                             )
