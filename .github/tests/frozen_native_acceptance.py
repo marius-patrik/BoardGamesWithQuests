@@ -374,7 +374,42 @@ def await_board(gui, evidence: Path, label: str, timeout: float = 30) -> tuple[f
         try:
             picture = gui.screenshot()
             board = visible_board(picture)
+            # The observed 8x8 Canvas must belong to the current application
+            # toplevel, not to another screen/window after native dialogs.
+            root = None
+            for title in (
+                "BoardGamesWithQuests - Chess",
+                "BoardGamesWithQuests - English Draughts",
+            ):
+                try:
+                    root = native_window_rectangle(title, application=True)
+                    break
+                except AssertionError:
+                    continue
+                except subprocess.CalledProcessError:
+                    if sys.platform.startswith("linux"):
+                        continue
+                    raise
+                except Blocked as exc:
+                    if sys.platform == "darwin" and "Invalid index" in str(exc):
+                        continue
+                    raise
+            if root is None:
+                raise AssertionError("the active native game window cannot be located")
+            x, y, width, height = root
+            left, top, square = board
+            if not (
+                x - 8 <= left <= x + width - 8 * square + 8
+                and y - 8 <= top <= y + height - 8 * square + 8
+            ):
+                raise AssertionError(
+                    f"board bounds {board!r} are outside native game window {root!r}"
+                )
             picture.save(evidence / f"{label}.png")
+            (evidence / f"{label}-window.json").write_text(
+                json.dumps({"title": title, "rectangle": root, "board": board}) + "\n",
+                encoding="utf-8",
+            )
             return board
         except Exception as exc:
             reason = str(exc)
@@ -568,7 +603,9 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
                         process.wait(timeout=8)
 
 
-def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
+def native_window_rectangle(
+    title: str, *, application: bool = False
+) -> tuple[int, int, int, int]:
     """Locate an actual OS-owned Tk toplevel; no source-process introspection."""
     if sys.platform.startswith("linux"):
         windows = subprocess.check_output(
@@ -635,7 +672,10 @@ def native_window_rectangle(title: str) -> tuple[int, int, int, int]:
         if not user32.GetWindowRect(windows[-1], ctypes.byref(rect)):
             raise Blocked(f"Windows GetWindowRect failed for {title}")
         x, y, width, height = (rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top)
-    if not 150 < width < 900 or not 130 < height < 600:
+    if application:
+        if not 650 < width < 2000 or not 470 < height < 1400:
+            raise AssertionError(f"implausible application window: {(x, y, width, height)}")
+    elif not 150 < width < 900 or not 130 < height < 600:
         raise AssertionError(f"implausible native {title} dialog: {(x, y, width, height)}")
     return x, y, width, height
 
