@@ -59,7 +59,7 @@ def _manager(
     earlier_reward: bool = False,
 ) -> GameManager:
     data = json.loads(
-        bundled_games_root().joinpath(game, "config.json").read_text(encoding="utf-8")
+        bundled_games_root().joinpath(f"{game}.json").read_text(encoding="utf-8")
     )
     data["name"] = "metering-" + game
     data["title"] = "Metering reference session"

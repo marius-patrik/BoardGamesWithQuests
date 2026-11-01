@@ -101,7 +101,7 @@ def reference_position(
 
     The fixture is a position input, not a reduced or alternative rulebook.
     """
-    data = json.loads(bundled_games_root().joinpath("chess", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("chess.json").read_text())
     grouped: dict[tuple[str, str], list[list[int]]] = {}
     ranks = fen.split("/")
     assert len(ranks) == 8
