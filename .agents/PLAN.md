@@ -1,5 +1,14 @@
 # Execution plan — BoardGamesWithQuests v1.0.0
 
+## 2026-11-01 — Dispatch M partial native tests; N1 lifecycle and persistence follow-up
+
+- [x] Native M final isolated candidate 33e15ecb8ca4d24def9deeaadacbcfd367c14fcb includes recovered real four-OS pointer/UI QA, settings/restart and resource-integrity scripts, a macOS ad-hoc re-signing correction, and fail-closed CI. Earlier exact 654134d8... run 41209961914 proved actual Chess/Draughts captures and settings save/restart across all four operating systems, but total workflow FAILED for missing mandatory journeys.
+- [x] Final exact candidate run 41210943260 Windows FAILED board observation after a modal; Linux and macOS ARM64/x64 deliberately BLOCKED for missing journeys. Windows specific evidence: checkerboard color oracle at row 3 col 7 and insufficient density; not yet proven to be a production Tk regression.
+- [ ] N1 successor isolated branch qa/443-lifecycle-persistence seeded from M final 33e15ecb8... created. Exclusive tests/workflow writer to stabilize screenshot-backed cancellation/focus and real Save/quit/restart/Open/continue on all four OS.
+- [ ] N2 later: complete native promotion, multihop, crowning, terminal/draw, hostile file and offline/process acceptance. Signing/notarization remains separately blocked (Windows unsigned, macOS ad-hoc only). No native release certification or #443 closure.
+- [ ] PR #271 draft; FIDE #473/#477 unresolved; v1 release NO-GO.
+
+
 ## 2026-10-31 — Dispatch L source-tree refactor integrated; native #443 recovery
 
 - [x] #462 source candidate a99bb253b6e9da2c4f7fe289927c6b6a0e1a954d independently reviewed against all ten PR #271 maintainer threads. 77 rename-aware paths: root games definitions; src/model flat and model/piece/resources; src/view/board, screen, panel, quests, settings, modal; src/boardgameswithquests entrypoint; installed/frozen metadata and tests.

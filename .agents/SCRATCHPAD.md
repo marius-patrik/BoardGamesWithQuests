@@ -1,5 +1,13 @@
 # Orchestrator scratchpad — verified observations / open questions
 
+## 2026-11-01 — Four OS native M forensic observations
+
+- Verified actual M tests source frozen_native_acceptance.py at SHA 33e15ecb... (1118 lines); script explicitly raises Blocked after measured partial journeys. 5 candidate changed paths, no production source. Windows last job ID 124565590138 failure: no unobscured board Canvas, unexpected checker color at 3,7; insufficient sample density. Screenshot capture was uploaded. Mac and Linux self-report BLOCKED for incomplete mandatory journeys.
+- Earlier candidate SHA 654134d8... run 41209961914 exercised real frozen Chess 1.e4 d5 2.exd5, English Draughts compulsory capture, native settings cancel/save/restart and altered assets on all four OS. New macOS bundle re-seal verified 41210758430 ad-hoc, not signed by Developer ID and no notarization.
+- N1 qa/443-lifecycle-persistence created from M final exact SHA; focus dynamic foreground window geometry and screenshot proof, then true native Save/restart/Open/continue. Persist old QA branches until their contents merged/verified. All tests fail closed, no fake PASS.
+- Current desktop integration remains draft PR #271; native full extracted acceptance, Chess proof/adjudication and remaining WCDF release conditions NOT complete.
+
+
 ## 2026-10-31 — Integration provenance and frozen QA branch handoff
 
 - Source refactor candidate a99bb253b6e9da2c4f7fe289927c6b6a0e1a954d had 77 renamed files and 105 raw tree path changes; latest shared before integration 93271b08afffadb75b7681187220cc3d77d0a675 changed ONLY PLAN, TODO, SCRATCHPAD from source base 0e7dd03c. Full two-parent commit a6263e09cd515b50282e94466e738f6a87c41395 includes candidate as second parent and retains current three docs. All other file blobs match candidate exactly. No stale old src/chesswithquests, src/model/game or src/view/game_view.

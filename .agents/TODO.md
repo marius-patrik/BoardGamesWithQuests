@@ -1,5 +1,13 @@
 # Current action queue — Python/Tkinter v1.0.0
 
+## 2026-11-01 — N1 native QA priority after M incomplete handoff
+
+- [x] M native QA candidate 33e15ecb... exact-head four-OS full acceptance NOT PASS; earlier extracted Chess/Draughts/Settings core evidence succeeded, but advanced acceptance incomplete. Final workflow 41210943260: Windows FAIL after lifecycle dialog, other three BLOCKED; no guarded test relaxation.
+- [ ] N1 branch qa/443-lifecycle-persistence exists at M exact final SHA; fix screenshot/foreground/modal board detection and prove New Game/Resign cancellation with following moves; then Save/exit/restart/Open/continue real frozen app on all OS, checking active side/revision/board/history/clock/quest.
+- [ ] N2 after N1: promotion/multihop/crowning/terminal/draw, corrupt files, offline, process tree, release signing trust. Do not modify src/games to make tests pass; report actual defects separately.
+- [ ] #443 stays open; no integration of unfinished acceptance suite as completed release gate. #436/#473/#477 and WCDF #437/#449 remain blockers.
+
+
 ## 2026-10-31 — #462 source integrated; #443 test-harness recovery
 
 - [x] Verified #462 final a99bb253... (77 rename-aware files, all ten maintainer changes) with all candidate Python 3.10–3.13 governed, Linux/Tk GUI, installed editable/wheel/sdist and 4-OS native PACKAGE checks. Integrated into only draft #271 as two-parent a6263e09cd515b50282e94466e738f6a87c41395, preserving three live orchestration docs.
