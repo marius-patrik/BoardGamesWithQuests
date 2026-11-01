@@ -1079,10 +1079,15 @@ def native_file_dialog_submit(
             gui.write(destination.name, interval=0.025)
         gui.press("return")
     elif target == "windows-x64":
-        # Windows common dialogs focus the File name input. Use a full path
-        # so no checkout-relative files are accidentally accepted.
+        # Windows 2022 evidence shows the Save As dialog does not retain
+        # keystrokes when focus is assumed. Target its real File name field.
+        x, y, width, height = native_window_rectangle(
+            "Save As" if operation == "save" else "Open"
+        )
+        gui.click(x + width * 0.42, y + height * 0.80)
         gui.hotkey("ctrl", "a")
-        gui.write(str(destination), interval=0.002)
+        gui.write(str(destination), interval=0.025)
+        gui.screenshot().save(evidence / f"{operation}-{target}-typed-path.png")
         gui.press("return")
     else:
         # Tk's native Unix file picker exposes its Location control via Ctrl+L.
