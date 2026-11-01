@@ -1368,17 +1368,20 @@ def persisted_native_game_journey(
                         # checkerboard. The Windows OS picker can disappear
                         # before Tk has replayed and rendered the saved game.
                         sites = (
-                            [(6, 4), (4, 4), (3, 3), (1, 3)] if game == "chess"
+                            [(6, 4), (4, 4), (3, 3), (1, 3)]
+                            if game == "chess"
                             else [(2, 1), (3, 0), (4, 1), (5, 2)]
                         )
 
                         def visual_occupied(image, bounds, position):
                             row, col = position
                             left, top, size = bounds
-                            bg = image.getpixel((
-                                int(left + (col + 0.18) * size),
-                                int(top + (row + 0.18) * size),
-                            ))
+                            bg = image.getpixel(
+                                (
+                                    int(left + (col + 0.18) * size),
+                                    int(top + (row + 0.18) * size),
+                                )
+                            )
                             non_bg = 0
                             for yy in range(
                                 int(top + (row + 0.28) * size),
@@ -1394,8 +1397,7 @@ def persisted_native_game_journey(
                             return non_bg > 70
 
                         expected = tuple(
-                            visual_occupied(before_save, before_board, pos)
-                            for pos in sites
+                            visual_occupied(before_save, before_board, pos) for pos in sites
                         )
                         deadline = time.monotonic() + 15
                         while time.monotonic() < deadline:
@@ -1403,8 +1405,7 @@ def persisted_native_game_journey(
                             try:
                                 observed = visible_board(current)
                                 actual = tuple(
-                                    visual_occupied(current, observed, pos)
-                                    for pos in sites
+                                    visual_occupied(current, observed, pos) for pos in sites
                                 )
                             except AssertionError:
                                 actual = None
