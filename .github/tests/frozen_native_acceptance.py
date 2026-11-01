@@ -1060,19 +1060,44 @@ def native_lifecycle_journey(
 
 
 def native_file_dialog_submit(
-    gui, destination: Path, operation: str, target: str, evidence: Path
+    gui, destination: Path, operation: str, target: str, evidence: Path, before=None
 ) -> None:
-    """Operate the OS file picker, never the in-process persistence API."""
-    gui.sleep(0.45)
+    """Operate a visually observed OS file picker, never the persistence API."""
+    if before is not None:
+        if before.mode != "RGB":
+            before = before.convert("RGB")
+        deadline = time.monotonic() + 12
+        observed = False
+        while time.monotonic() < deadline:
+            current = gui.screenshot().convert("RGB")
+            if current.size == before.size:
+                changed = sum(
+                    max(abs(a - b) for a, b in zip(
+                        before.getpixel((x, y)), current.getpixel((x, y))
+                    )) > 34
+                    for y in range(75, current.height - 100, 15)
+                    for x in range(55, current.width - 55, 15)
+                )
+                if changed > 210:
+                    observed = True
+                    break
+            gui.sleep(0.22)
+        if not observed:
+            gui.screenshot().save(evidence / f"{operation}-{target}-dialog-unobserved.png")
+            raise AssertionError(f"{target} {operation}: OS file picker not visibly present")
     gui.screenshot().save(evidence / f"{operation}-{target}-file-dialog.png")
     if target.startswith("macos"):
         # A native NSSavePanel/NSOpenPanel supports Go to Folder.
         gui.hotkey("command", "shift", "g")
-        gui.sleep(0.4)
+        gui.sleep(0.5)
+        gui.screenshot().save(evidence / f"{operation}-{target}-go-to-folder.png")
         folder = destination.parent if operation == "save" else destination
-        gui.write(str(folder), interval=0.004)
+        gui.hotkey("command", "a")
+        gui.write(str(folder), interval=0.025)
+        gui.screenshot().save(evidence / f"{operation}-{target}-go-to-typed.png")
         gui.press("return")
-        gui.sleep(0.55)
+        gui.sleep(0.6)
+        gui.screenshot().save(evidence / f"{operation}-{target}-after-navigation.png")
         if operation == "save":
             # The Save As filename field is the default active text control.
             gui.hotkey("command", "a")
@@ -1215,12 +1240,16 @@ def persisted_native_game_journey(
                     def toolbar(action, label):
                         nonlocal board
                         board = await_board(gui, evidence, f"{game}-{label}-toolbar", timeout=12)
+                        before_dialog = gui.screenshot().convert("RGB")
                         dx, dy = offsets[target][action]
                         gui.click(board[0] + dx, board[1] + dy)
+                        return before_dialog
 
                     def export(path, label):
-                        toolbar("export", label)
-                        native_file_dialog_submit(gui, path, "save", target, evidence)
+                        before_dialog = toolbar("export", label)
+                        native_file_dialog_submit(
+                            gui, path, "save", target, evidence, before=before_dialog
+                        )
                         deadline = time.monotonic() + 14
                         while time.monotonic() < deadline and not path.is_file():
                             gui.sleep(0.25)
@@ -1254,8 +1283,10 @@ def persisted_native_game_journey(
                     else:
                         # New process, clean initial game, then load the exact
                         # file created by the previous extracted-native process.
-                        toolbar("open", "reopen")
-                        native_file_dialog_submit(gui, saved, "open", target, evidence)
+                        before_dialog = toolbar("open", "reopen")
+                        native_file_dialog_submit(
+                            gui, saved, "open", target, evidence, before=before_dialog
+                        )
                         loaded_board = await_board(gui, evidence, f"{game}-reopened", timeout=15)
                         if before_save is None or before_board is None or initial_snapshot is None:
                             raise AssertionError("missing independent first-process evidence")
