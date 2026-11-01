@@ -1,0 +1,48 @@
+name: Historical upstream sync verification
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+jobs:
+  verify-upstream:
+    name: provenance-and-source-compile
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'chore/479-sync-upstream-main' && github.event.pull_request.head.sha == '3bc11ca3621ca5d497aff3bab071ac6d222dadcc'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate immutable upstream provenance and entire file delta
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          test "$BASE_SHA" = "a98e36d098a1ee9aa3e793cfc39040ad6e6d2e4e"
+          upstream="$(gh api repos/docekalgjkt/ChessWithQuests/branches/main --jq .commit.sha)"
+          test "$upstream" = "$SOURCE_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/compare/$BASE_SHA...$SOURCE_SHA" |
+            jq -e '.ahead_by == 1 and .behind_by == 0 and
+              (.files | length) == 1 and
+              .files[0].filename == "model/figurka.py"' >/dev/null
+      - name: Check out exact immutable historical source with no persisted token
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: historical-source
+          persist-credentials: false
+      - name: Set up source verification interpreter
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify historical Python modules compile
+        run: python -m compileall -q historical-source/model
+  governed:
+    needs: verify-upstream
+    uses: ./.github/workflows/darkfactory-control.yml
+    permissions:
+      contents: read
+      actions: read
+      issues: read
+      pull-requests: read
+    secrets: inherit
