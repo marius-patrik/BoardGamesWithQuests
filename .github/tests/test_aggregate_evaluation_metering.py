@@ -58,9 +58,7 @@ def _manager(
     eligible_draw: bool = True,
     earlier_reward: bool = False,
 ) -> GameManager:
-    data = json.loads(
-        bundled_games_root().joinpath(game, "config.json").read_text(encoding="utf-8")
-    )
+    data = json.loads(bundled_games_root().joinpath(f"{game}.json").read_text(encoding="utf-8"))
     data["name"] = "metering-" + game
     data["title"] = "Metering reference session"
     data["default"] = False

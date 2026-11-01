@@ -15,7 +15,7 @@ from model.definition import validate_definition
 from model.manager import GameManager, TransitionError
 from model.move import Move
 
-CONFIG = bundled_games_root().joinpath("chess", "config.json")
+CONFIG = bundled_games_root().joinpath("chess.json")
 
 
 def configuration():

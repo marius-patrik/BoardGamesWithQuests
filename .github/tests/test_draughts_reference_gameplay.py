@@ -15,7 +15,7 @@ from model.move import Move
 
 def session(pieces, *, starting_side=-1):
     """Open a real game with a public consumer-provided legal starting position."""
-    data = json.loads(bundled_games_root().joinpath("checkers", "config.json").read_text())
+    data = json.loads(bundled_games_root().joinpath("checkers.json").read_text())
     data["starting_side"] = starting_side
     data["board"]["starting_pieces"] = [
         {

@@ -49,10 +49,11 @@ class DesktopPackagingInfrastructureTests(unittest.TestCase):
             script.parent.mkdir(parents=True)
             shutil.copyfile(ROOT / ".github/scripts/package_desktop.py", script)
             (root / "src").mkdir(parents=True)
-            (root / "src/boardgameswithquests.py").write_text("", encoding="utf-8")
-            games = root / "games/chess"
-            games.mkdir(parents=True)
-            (games / "rules.py").write_text("runtime resource", encoding="utf-8")
+            (root / "src/main.py").write_text("", encoding="utf-8")
+            data = root / "data"
+            data.mkdir(parents=True)
+            (data / "chess.json").write_text("runtime resource", encoding="utf-8")
+            (data / "checkers.json").write_text("second resource", encoding="utf-8")
             (root / "pyproject.toml").write_text(
                 '[project]\nname = "fixture-distribution"\n', encoding="utf-8"
             )
@@ -61,10 +62,10 @@ class DesktopPackagingInfrastructureTests(unittest.TestCase):
                 "args = sys.argv[1:]\n"
                 "assert args[args.index('--copy-metadata') + 1] == 'fixture-distribution'\n"
                 "bundle = pathlib.Path(args[args.index('--distpath') + 1]) / 'BoardGamesWithQuests'\n"
-                "runtime = bundle / '_internal/games'\n"
-                "shutil.copytree('games', runtime, dirs_exist_ok=True)\n"
+                "runtime = bundle / '_internal/data'\n"
+                "shutil.copytree('data', runtime, dirs_exist_ok=True)\n"
                 "mode = os.environ['BUNDLER_RESULT']\n"
-                "resource = runtime / 'chess/rules.py'\n"
+                "resource = runtime / 'chess.json'\n"
                 "if mode == 'missing': resource.unlink()\n"
                 "if mode == 'corrupt': resource.write_text('wrong bytes')\n",
                 encoding="utf-8",

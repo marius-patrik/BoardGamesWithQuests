@@ -181,17 +181,16 @@ def parse_definition_json(raw_json: str, package: str = "<custom>") -> GameDefin
 def load_bundled_definition(name: str) -> GameDefinition:
     """Load one bundled game as inert JSON without importing its Python package.
 
-    Game subdirectories are resource data, not executable plugins. An explicit
-    directory selector is never interpreted as a module name or filesystem path.
+    Game selectors name inert flat JSON data, not plugins or arbitrary paths.
     """
     if type(name) is not str or re.fullmatch(r"[a-z][a-z0-9_]{0,63}", name) is None:
         raise ConfigurationError("game identifier must be a bounded safe directory name")
     try:
-        source = bundled_games_root().joinpath(name).joinpath("config.json")
+        source = bundled_games_root().joinpath(f"{name}.json")
         raw_json = source.read_text("utf-8")
     except (ModuleNotFoundError, OSError) as error:
-        raise ConfigurationError(f"game {name!r} has no bundled config.json") from error
-    return parse_definition_json(raw_json, f"games/{name}")
+        raise ConfigurationError(f"game {name!r} has no bundled JSON definition") from error
+    return parse_definition_json(raw_json, f"data/{name}.json")
 
 
 def validate_definition(data: Any, package: str = "<custom>") -> GameDefinition:

@@ -13,11 +13,12 @@ def available_games() -> list[str]:
     names: list[str] = []
     for entry in bundled_games_root().iterdir():
         if (
-            entry.is_dir()
-            and re.fullmatch(r"[a-z][a-z0-9_]{0,63}", entry.name) is not None
-            and entry.joinpath("config.json").is_file()
+            entry.is_file()
+            and entry.suffix == ".json"
+            and entry.name != "manifest.json"
+            and re.fullmatch(r"[a-z][a-z0-9_]{0,63}", entry.stem) is not None
         ):
-            names.append(entry.name)
+            names.append(entry.stem)
     return sorted(names, key=lambda name: (name != DEFAULT_GAME, name))
 
 

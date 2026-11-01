@@ -1,6 +1,6 @@
 """The application entry point.
 
-`python -m boardgameswithquests` starts the application. This module owns the process: it
+`python -m main` starts the application. This module owns the process: it
 parses the command line, opens the window and runs the event loop. Everything it shows is
 built by `view/`, and the rules it plays are the ones the selected configuration declares.
 """
@@ -50,7 +50,7 @@ def report_installation() -> str:
     """Describe what this installation can find.
 
     Returns:
-        str: A report naming the located `games/` directory and every shipped
+        str: A report naming the located `data/` directory and every shipped
         configuration.
     """
     from model.session import DesktopSession
@@ -85,7 +85,7 @@ def report_installation() -> str:
             raise ValueError(f"{name}: installed session does not replay")
     lines = [
         f"{APPLICATION_TITLE} {_version()}",
-        f"games directory: {games_root()}",
+        f"game data directory: {games_root()}",
         f"configurations: {', '.join(games)}",
         f"accepted and replayed opening moves: {len(games)}",
     ]

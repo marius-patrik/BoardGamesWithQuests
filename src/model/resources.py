@@ -1,4 +1,4 @@
-"""Resolve the single trusted game-definition data root in every distribution mode."""
+"""Find one trusted bundled game-data directory in every installation mode."""
 
 from __future__ import annotations
 
@@ -6,34 +6,29 @@ import hashlib
 import json
 from importlib.util import find_spec
 from pathlib import Path
+import re
 import sys
 
 
 def bundled_games_root() -> Path:
-    """Locate shipped JSON definitions in source, installed and frozen applications.
+    """Find bundled inert JSON files in source, installed or frozen applications.
 
-    The root-level games/ directory is mapped into the installed `games` namespace
-    by setuptools. PyInstaller instead places its immutable data under _MEIPASS.
-    Missing resources are fatal; no user-writable or working-directory fallback
-    can silently replace the bundled rulebooks.
+    No user-writable or working-directory fallback can replace game rules.
     """
     if getattr(sys, "frozen", False):
         base = getattr(sys, "_MEIPASS", None)
         if not isinstance(base, str):
             raise FileNotFoundError("frozen application has no resource base")
-        root: Path = Path(base) / "games"
+        root: Path = Path(base) / "data"
     else:
-        spec = find_spec("games")
+        spec = find_spec("data")
         locations = () if spec is None else (spec.submodule_search_locations or ())
-        # Setuptools editable installs add a synthetic namespace path hook.
-        # Filtering to real directories avoids importlib.resources' failure
-        # to construct a MultiplexedPath from that non-directory sentinel.
         candidates = {Path(location).resolve() for location in locations if Path(location).is_dir()}
         if len(candidates) != 1:
-            raise FileNotFoundError("expected one installed games resource directory")
+            raise FileNotFoundError("expected one installed data resource directory")
         root = next(iter(candidates))
     if not root.is_dir():
-        raise FileNotFoundError("bundled games directory is missing")
+        raise FileNotFoundError("bundled game data directory is missing")
     if getattr(sys, "frozen", False):
         try:
             manifest = json.loads(root.joinpath("manifest.json").read_text(encoding="utf-8"))
@@ -43,24 +38,22 @@ def bundled_games_root() -> Path:
             for relative, digest in hashes.items():
                 if (
                     not isinstance(relative, str)
+                    or re.fullmatch(r"[a-z][a-z0-9_]{0,63}\.json", relative) is None
+                    or relative == "manifest.json"
                     or not isinstance(digest, str)
-                    or len(digest) != 64
-                    or len(Path(relative).parts) != 2
-                    or Path(relative).is_absolute()
-                    or ".." in Path(relative).parts
-                    or Path(relative).name != "config.json"
+                    or re.fullmatch(r"[a-f0-9]{64}", digest) is None
                 ):
                     raise ValueError("invalid frozen resource manifest entry")
-                resource = root.joinpath(*Path(relative).parts)
+                resource = root / relative
                 if (
                     not resource.is_file()
                     or hashlib.sha256(resource.read_bytes()).hexdigest() != digest
                 ):
                     raise ValueError(f"altered frozen game definition: {relative}")
             discovered = {
-                f"{entry.name}/config.json"
+                entry.name
                 for entry in root.iterdir()
-                if entry.is_dir() and entry.joinpath("config.json").is_file()
+                if entry.is_file() and entry.suffix == ".json" and entry.name != "manifest.json"
             }
             if discovered != set(hashes):
                 raise ValueError("frozen game resource catalog does not match manifest")
