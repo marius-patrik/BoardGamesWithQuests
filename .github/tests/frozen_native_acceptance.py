@@ -1423,7 +1423,8 @@ def native_persistence_failure_journey(
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     env.update(
-        HOME=str(home), USERPROFILE=str(home),
+        HOME=str(home),
+        USERPROFILE=str(home),
         APPDATA=str(home / "AppData" / "Roaming"),
         XDG_CONFIG_HOME=str(home / ".config"),
     )
@@ -1437,7 +1438,10 @@ def native_persistence_failure_journey(
         with (evidence / "failure-journey-stderr.txt").open("wb") as stderr:
             process = subprocess.Popen(
                 [str(executable), "--game", "chess"],
-                cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=stderr
+                cwd=cwd,
+                env=env,
+                stdout=subprocess.DEVNULL,
+                stderr=stderr,
             )
             try:
                 deadline = time.monotonic() + 25
@@ -1469,8 +1473,12 @@ def native_persistence_failure_journey(
                 def browse(action: str, path: Path, label: str):
                     before = toolbar(action, label)
                     native_file_dialog_submit(
-                        gui, path, "save" if action == "export" else "open",
-                        target, evidence, before=before
+                        gui,
+                        path,
+                        "save" if action == "export" else "open",
+                        target,
+                        evidence,
+                        before=before,
                     )
 
                 # Load a known good file first; later errors must never replace it.
@@ -1507,9 +1515,7 @@ def native_persistence_failure_journey(
                 browse("open", source, "valid-open-after-failures")
                 left, top, size = await_board(gui, evidence, "failure-valid-reopened")
                 src, dst = (0, 6), (2, 5)
-                p = lambda pos: (
-                    left + (pos[1] + 0.5) * size, top + (pos[0] + 0.5) * size
-                )
+                p = lambda pos: (left + (pos[1] + 0.5) * size, top + (pos[0] + 0.5) * size)
                 before = gui.screenshot().convert("RGB")
                 gui.click(*p(src))
                 gui.sleep(0.25)
@@ -1520,11 +1526,14 @@ def native_persistence_failure_journey(
                 changed = ImageChops.difference(before, after)
                 if any(
                     changed.crop(
-                        (int(p(pos)[0] - size * 0.2),
-                         int(p(pos)[1] - size * 0.2),
-                         int(p(pos)[0] + size * 0.2),
-                         int(p(pos)[1] + size * 0.2))
-                    ).getbbox() is None
+                        (
+                            int(p(pos)[0] - size * 0.2),
+                            int(p(pos)[1] - size * 0.2),
+                            int(p(pos)[0] + size * 0.2),
+                            int(p(pos)[1] + size * 0.2),
+                        )
+                    ).getbbox()
+                    is None
                     for pos in (src, dst)
                 ):
                     raise AssertionError("failed operations prevented continued native gameplay")
@@ -1538,12 +1547,14 @@ def native_persistence_failure_journey(
                 if (
                     later.get("game_id") != baseline["game_id"]
                     or later.get("revision") != baseline["revision"] + 1
-                    or later.get("events", [])[:len(baseline["events"])] != baseline["events"]
+                    or later.get("events", [])[: len(baseline["events"])] != baseline["events"]
                 ):
                     raise AssertionError("invalid native file operation replaced the live session")
                 gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
                 if process.wait(timeout=15) != 0:
-                    raise AssertionError("frozen app did not exit cleanly after failed-file journey")
+                    raise AssertionError(
+                        "frozen app did not exit cleanly after failed-file journey"
+                    )
             finally:
                 if process.poll() is None:
                     process.terminate()
@@ -1684,9 +1695,12 @@ def main() -> int:
             state["journeys"]["saved_game_process_restart_and_continuation"] = "PASS"
             state["current_journey"] = "invalid_user_files_and_failed_save"
             state["failure_protection"] = native_persistence_failure_journey(
-                gui, executable, folder / "home-failure",
+                gui,
+                executable,
+                folder / "home-failure",
                 folder / "home-saved-chess" / "chess-saved.json",
-                args.evidence_dir, args.platform
+                args.evidence_dir,
+                args.platform,
             )
             state["journeys"]["invalid_user_files_and_failed_save"] = "PASS"
             state["gui"] = "BLOCKED"
