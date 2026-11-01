@@ -1154,11 +1154,27 @@ def persisted_native_game_journey(
                             gui.sleep(0.35)
                     else:
                         raise Blocked(f"{game} frozen chooser unavailable")
-                    x, y, width, height = native_window_rectangle("New game")
-                    gui.click(x + 0.34 * width, y + 0.66 * height)
-                    board = await_board(
-                        gui, evidence, f"{game}-persist-cycle-{cycle}-start", timeout=12
-                    )
+                    board = None
+                    for attempt in range(3):
+                        try:
+                            if attempt == 0 and target != "linux-x64":
+                                x, y, width, height = native_window_rectangle("New game")
+                                gui.click(x + 0.34 * width, y + 0.66 * height)
+                            else:
+                                focus_chooser()
+                                gui.press("tab")
+                                gui.press("return")
+                            board = await_board(
+                                gui, evidence, f"{game}-persist-cycle-{cycle}-start",
+                                timeout=6,
+                            )
+                            break
+                        except (AssertionError, Blocked):
+                            gui.screenshot().save(
+                                evidence / f"{game}-persist-start-attempt-{attempt + 1}.png"
+                            )
+                    if board is None:
+                        raise AssertionError(f"{game}: native chooser never started a saved game")
 
                     def move(start, end, label):
                         nonlocal board
