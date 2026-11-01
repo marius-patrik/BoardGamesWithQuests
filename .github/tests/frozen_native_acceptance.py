@@ -1151,7 +1151,10 @@ def native_file_dialog_submit(
         gui.sleep(0.7)
         gui.screenshot().save(evidence / f"{operation}-{target}-directory.png")
         x, y, width, height = native_window_rectangle("Save As" if operation == "save" else "Open")
-        gui.click(x + width * 0.42, y + height * 0.80)
+        # The Windows Open picker has a different vertical File name
+        # position from Save As (verified on windows-2022 screenshots).
+        name_y = 0.80 if operation == "save" else 0.88
+        gui.click(x + width * 0.42, y + height * name_y)
         gui.hotkey("ctrl", "a")
         gui.write(destination.name, interval=0.025)
         gui.screenshot().save(evidence / f"{operation}-{target}-typed-path.png")
