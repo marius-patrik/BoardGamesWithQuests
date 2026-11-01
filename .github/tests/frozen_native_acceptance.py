@@ -1165,7 +1165,9 @@ def persisted_native_game_journey(
                                 gui.press("tab")
                                 gui.press("return")
                             board = await_board(
-                                gui, evidence, f"{game}-persist-cycle-{cycle}-start",
+                                gui,
+                                evidence,
+                                f"{game}-persist-cycle-{cycle}-start",
                                 timeout=6,
                             )
                             break
