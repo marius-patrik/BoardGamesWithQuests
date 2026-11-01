@@ -1002,6 +1002,229 @@ def native_lifecycle_journey(
                         process.wait(timeout=8)
 
 
+def native_file_dialog_submit(gui, destination: Path, operation: str, target: str, evidence: Path) -> None:
+    """Operate the OS file picker, never the in-process persistence API."""
+    gui.sleep(0.45)
+    gui.screenshot().save(evidence / f"{operation}-{target}-file-dialog.png")
+    if target.startswith("macos"):
+        # A native NSSavePanel/NSOpenPanel supports Go to Folder.
+        gui.hotkey("command", "shift", "g")
+        gui.sleep(0.4)
+        folder = destination.parent if operation == "save" else destination
+        gui.write(str(folder), interval=0.004)
+        gui.press("return")
+        gui.sleep(0.55)
+        if operation == "save":
+            # The Save As filename field is the default active text control.
+            gui.hotkey("command", "a")
+            gui.write(destination.name, interval=0.025)
+        gui.press("return")
+    elif target == "windows-x64":
+        # Windows common dialogs focus the File name input. Use a full path
+        # so no checkout-relative files are accidentally accepted.
+        gui.hotkey("ctrl", "a")
+        gui.write(str(destination), interval=0.002)
+        gui.press("return")
+    else:
+        # Tk's native Unix file picker exposes its Location control via Ctrl+L.
+        gui.hotkey("ctrl", "l")
+        gui.sleep(0.2)
+        gui.hotkey("ctrl", "a")
+        gui.write(str(destination), interval=0.004)
+        gui.press("return")
+    gui.sleep(0.6)
+    gui.screenshot().save(evidence / f"{operation}-{target}-file-dialog-submitted.png")
+
+
+def persisted_native_game_journey(
+    gui, executable: Path, home: Path, evidence: Path, target: str, game: str
+) -> dict:
+    """Save, terminate, relaunch, reopen, move and export via the frozen UI."""
+    from PIL import ImageChops
+
+    home.mkdir()
+    home = home.resolve()
+    (home / "AppData" / "Roaming").mkdir(parents=True)
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    env.update(
+        HOME=str(home),
+        USERPROFILE=str(home),
+        APPDATA=str(home / "AppData" / "Roaming"),
+        XDG_CONFIG_HOME=str(home / ".config"),
+    )
+    saved = home / f"{game}-saved.json"
+    continued = home / f"{game}-continued.json"
+    offsets = {
+        "windows-x64": {"export": (495, -47), "open": (416, -79)},
+        "macos-arm64": {"export": (473, -47), "open": (368, -79)},
+        "macos-x64": {"export": (473, -47), "open": (368, -79)},
+        "linux-x64": {"export": (450, -47), "open": (357, -79)},
+    }
+    first_moves = (
+        [((6, 4), (4, 4)), ((1, 3), (3, 3)), ((4, 4), (3, 3))]
+        if game == "chess"
+        else [((2, 1), (3, 0)), ((5, 2), (4, 1)), ((3, 0), (5, 2))]
+    )
+    final_move = (
+        ((1, 6), (2, 5)) if game == "chess" else ((6, 3), (4, 1))
+    )
+    before_save = None
+    before_board = None
+    initial_snapshot = None
+    for cycle in (0, 1):
+        with tempfile.TemporaryDirectory(prefix=f"bgwq-{game}-external-") as cwd:
+            with (evidence / f"{game}-persistence-cycle-{cycle}-stderr.txt").open("wb") as err:
+                process = subprocess.Popen(
+                    [str(executable), "--game", game],
+                    cwd=cwd,
+                    env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=err,
+                )
+                try:
+                    deadline = time.monotonic() + 25
+                    while time.monotonic() < deadline:
+                        if process.poll() is not None:
+                            raise AssertionError(f"{game} frozen process exited on restart")
+                        try:
+                            focus_chooser()
+                            break
+                        except Blocked:
+                            gui.sleep(0.35)
+                    else:
+                        raise Blocked(f"{game} frozen chooser unavailable")
+                    x, y, width, height = native_window_rectangle("New game")
+                    gui.click(x + 0.34 * width, y + 0.66 * height)
+                    board = await_board(
+                        gui, evidence, f"{game}-persist-cycle-{cycle}-start", timeout=12
+                    )
+
+                    def move(start, end, label):
+                        nonlocal board
+                        board = await_board(gui, evidence, f"{game}-{label}-before", timeout=10)
+                        left, top, size = board
+                        point = lambda pos: (
+                            left + (pos[1] + 0.5) * size,
+                            top + (pos[0] + 0.5) * size,
+                        )
+                        old = gui.screenshot().convert("RGB")
+                        gui.click(*point(start))
+                        gui.sleep(0.2)
+                        gui.click(*point(end))
+                        gui.sleep(0.55)
+                        new = gui.screenshot().convert("RGB")
+                        new.save(evidence / f"{game}-{label}-after.png")
+                        delta = ImageChops.difference(old, new)
+                        radius = max(8, int(size * 0.19))
+                        for pos in (start, end):
+                            px, py = point(pos)
+                            if delta.crop((
+                                int(px) - radius,
+                                int(py) - radius,
+                                int(px) + radius,
+                                int(py) + radius,
+                            )).getbbox() is None:
+                                raise AssertionError(f"{game} {label}: board square unchanged at {pos}")
+
+                    def toolbar(action, label):
+                        nonlocal board
+                        board = await_board(gui, evidence, f"{game}-{label}-toolbar", timeout=12)
+                        dx, dy = offsets[target][action]
+                        gui.click(board[0] + dx, board[1] + dy)
+
+                    def export(path, label):
+                        toolbar("export", label)
+                        native_file_dialog_submit(gui, path, "save", target, evidence)
+                        deadline = time.monotonic() + 14
+                        while time.monotonic() < deadline and not path.is_file():
+                            gui.sleep(0.25)
+                        if not path.is_file():
+                            gui.screenshot().save(evidence / f"{game}-{label}-save-missing.png")
+                            raise AssertionError(f"{game}: native Export did not create {path}")
+
+                    if cycle == 0:
+                        for index, (src, dst) in enumerate(first_moves):
+                            move(src, dst, f"persist-move-{index + 1}")
+                        board = await_board(gui, evidence, f"{game}-before-save")
+                        before_board = board
+                        before_save = gui.screenshot().convert("RGB")
+                        export(saved, "first-save")
+                        initial_snapshot = json.loads(saved.read_text(encoding="utf-8"))
+                        if initial_snapshot.get("revision") != 3 or len(initial_snapshot.get("events", [])) != 3:
+                            raise AssertionError(f"{game}: native Export lacks three accepted events")
+                        if initial_snapshot.get("active_side") != (
+                            -1 if game == "chess" else 1
+                        ):
+                            raise AssertionError(f"{game}: unexpected active side after opening")
+                        if initial_snapshot.get("outcome") is not None:
+                            raise AssertionError(f"{game}: exported game unexpectedly terminal")
+                        if not isinstance(initial_snapshot.get("quest_progress"), dict):
+                            raise AssertionError(f"{game}: quest progress absent from export")
+                        if not isinstance(initial_snapshot.get("clocks"), dict):
+                            raise AssertionError(f"{game}: clocks absent from export")
+                    else:
+                        # New process, clean initial game, then load the exact
+                        # file created by the previous extracted-native process.
+                        toolbar("open", "reopen")
+                        native_file_dialog_submit(gui, saved, "open", target, evidence)
+                        loaded_board = await_board(gui, evidence, f"{game}-reopened", timeout=15)
+                        if before_save is None or before_board is None or initial_snapshot is None:
+                            raise AssertionError("missing independent first-process evidence")
+                        current = gui.screenshot().convert("RGB")
+                        # Compare the original and restored *piece-bearing*
+                        # squares, not just the wooden checkerboard palette.
+                        # Coordinates are recomputed from both live screenshots.
+                        sites = (
+                            [(6, 4), (4, 4), (3, 3), (1, 3)] if game == "chess"
+                            else [(2, 1), (3, 0), (4, 1), (5, 2)]
+                        )
+                        for row, col in sites:
+                            px0 = int(before_board[0] + (col + 0.5) * before_board[2])
+                            py0 = int(before_board[1] + (row + 0.5) * before_board[2])
+                            px1 = int(loaded_board[0] + (col + 0.5) * loaded_board[2])
+                            py1 = int(loaded_board[1] + (row + 0.5) * loaded_board[2])
+                            a = before_save.getpixel((px0, py0))
+                            b = current.getpixel((px1, py1))
+                            if max(abs(a[k] - b[k]) for k in range(3)) > 45:
+                                gui.screenshot().save(evidence / f"{game}-reopen-mismatch.png")
+                                raise AssertionError(f"{game}: restored piece differs at {row},{col}")
+                        move(*final_move, f"persist-continued-move")
+                        export(continued, "continued-save")
+                        later = json.loads(continued.read_text(encoding="utf-8"))
+                        if later.get("game_id") != initial_snapshot["game_id"]:
+                            raise AssertionError(f"{game}: reopening replaced the game ID")
+                        if later.get("revision") != initial_snapshot["revision"] + 1:
+                            raise AssertionError(f"{game}: continued move did not advance revision")
+                        if later.get("events", [])[:3] != initial_snapshot["events"]:
+                            raise AssertionError(f"{game}: continued move lost prior event history")
+                        if later.get("active_side") == initial_snapshot["active_side"]:
+                            raise AssertionError(f"{game}: continued move did not advance turn")
+                        if later.get("quest_progress") is None or later.get("clocks") is None:
+                            raise AssertionError(f"{game}: resumed session lost quests or clocks")
+                    gui.hotkey("command", "q") if sys.platform == "darwin" else gui.hotkey("alt", "f4")
+                    if process.wait(timeout=15) != 0:
+                        raise AssertionError(f"{game}: frozen GUI exit was not clean")
+                finally:
+                    if process.poll() is None:
+                        process.terminate()
+                        try:
+                            process.wait(timeout=8)
+                        except subprocess.TimeoutExpired:
+                            process.kill()
+                            process.wait(timeout=8)
+    return {
+        "game": game,
+        "native_export": True,
+        "real_process_restart": True,
+        "native_open": True,
+        "board_recovered": True,
+        "authoritative_history": True,
+        "continued_move_and_revision": True,
+        "saved_revision": initial_snapshot["revision"] if initial_snapshot else None,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -1111,6 +1334,14 @@ def main() -> int:
                 gui, executable, folder / "home-lifecycle", args.evidence_dir, args.platform
             )
             state["journeys"]["native_new_game_and_resignation_cancellation"] = "PASS"
+            state["current_journey"] = "saved_game_process_restart_and_continuation"
+            state["saved_games"] = {}
+            for game in ("chess", "checkers"):
+                state["saved_games"][game] = persisted_native_game_journey(
+                    gui, executable, folder / f"home-saved-{game}", args.evidence_dir,
+                    args.platform, game
+                )
+            state["journeys"]["saved_game_process_restart_and_continuation"] = "PASS"
             state["gui"] = "BLOCKED"
             state["current_journey"] = None
             # Incomplete mandatory journeys are BLOCKED, never a green release gate.
