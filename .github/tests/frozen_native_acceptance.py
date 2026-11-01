@@ -359,7 +359,9 @@ def visible_board(image) -> tuple[float, float, float]:
             # recolor individual squares (Draughts b6->a5 highlights row 3,
             # col 0). Require broad agreement across independent, well-spaced
             # samples rather than treating one highlighted square as obscured.
-            sampled = [(row, col) for row in (2, 3, 4, 5) for col in (0, 2, 4, 7)]
+            # Middle ranks avoid the large piece art that covers sample sites
+            # in the initially occupied ranks, while still checking 16 colors.
+            sampled = [(row, col) for row in (3, 4) for col in range(8)]
             matched = 0
             for row, col in sampled:
                 x, y = int(left + (col + 0.22) * square), int(top + (row + 0.22) * square)
@@ -446,6 +448,11 @@ def pointer_gameplay(gui, executable: Path, home: Path, evidence: Path, game: st
     # The production preference security policy correctly rejects such a HOME.
     home = home.resolve()
     (home / "AppData" / "Roaming").mkdir(parents=True)
+    # USERPROFILE is isolated below this directory. Windows' native common
+    # file picker resolves its default Desktop against that profile; a missing
+    # Desktop caused the real "Location is not available" failure on the
+    # windows-2022 runner, independent of keyboard automation.
+    (home / "Desktop").mkdir(exist_ok=True)
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
     env.update(
@@ -768,6 +775,11 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
     # The production preference security policy correctly rejects such a HOME.
     home = home.resolve()
     (home / "AppData" / "Roaming").mkdir(parents=True)
+    # USERPROFILE is isolated below this directory. Windows' native common
+    # file picker resolves its default Desktop against that profile; a missing
+    # Desktop caused the real "Location is not available" failure on the
+    # windows-2022 runner, independent of keyboard automation.
+    (home / "Desktop").mkdir(exist_ok=True)
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     env.update(
@@ -916,6 +928,11 @@ def native_lifecycle_journey(
     home.mkdir()
     home = home.resolve()
     (home / "AppData" / "Roaming").mkdir(parents=True)
+    # USERPROFILE is isolated below this directory. Windows' native common
+    # file picker resolves its default Desktop against that profile; a missing
+    # Desktop caused the real "Location is not available" failure on the
+    # windows-2022 runner, independent of keyboard automation.
+    (home / "Desktop").mkdir(exist_ok=True)
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     env.update(
@@ -1159,6 +1176,11 @@ def persisted_native_game_journey(
     home.mkdir()
     home = home.resolve()
     (home / "AppData" / "Roaming").mkdir(parents=True)
+    # USERPROFILE is isolated below this directory. Windows' native common
+    # file picker resolves its default Desktop against that profile; a missing
+    # Desktop caused the real "Location is not available" failure on the
+    # windows-2022 runner, independent of keyboard automation.
+    (home / "Desktop").mkdir(exist_ok=True)
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     env.update(
