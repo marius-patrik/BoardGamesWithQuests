@@ -45,7 +45,10 @@ def bundled_games_root() -> Path:
                 ):
                     raise ValueError("invalid frozen resource manifest entry")
                 resource = root / relative
-                if not resource.is_file() or hashlib.sha256(resource.read_bytes()).hexdigest() != digest:
+                if (
+                    not resource.is_file()
+                    or hashlib.sha256(resource.read_bytes()).hexdigest() != digest
+                ):
                     raise ValueError(f"altered frozen game definition: {relative}")
             discovered = {
                 entry.name
