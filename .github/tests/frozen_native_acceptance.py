@@ -1613,16 +1613,16 @@ def native_persistence_failure_journey(
                         script = (
                             'tell application "System Events"\n'
                             'set p to first process whose name contains "BoardGamesWithQuests"\n'
-                            'tell p\n'
-                            'if exists sheet 1 of window 1 then\n'
+                            "tell p\n"
+                            "if exists sheet 1 of window 1 then\n"
                             'click button "Cancel" of sheet 1 of window 1\n'
                             'else if exists button "Cancel" of window 1 then\n'
                             'click button "Cancel" of window 1\n'
-                            'else\n'
+                            "else\n"
                             'error "native file panel Cancel button not exposed"\n'
-                            'end if\n'
-                            'end tell\n'
-                            'end tell'
+                            "end if\n"
+                            "end tell\n"
+                            "end tell"
                         )
                         cancelled = subprocess.run(
                             ["osascript", "-e", script],
