@@ -2,15 +2,20 @@
 
 **Canonical complete execution order and acceptance gates:** [PLAN.md](PLAN.md). Product contract: [GOAL.md](GOAL.md). Master issue: #430. Single integration: draft PR #271. **Release NO-GO.**
 
-## Immediate — W1, sole structure/resource writer (#462)
+## W1 — SOURCE DONE; human review still open (#462)
 
-- [ ] From current #271 head, implement the last three explicit maintainer review changes: move resources to data/chess.json + data/checkers.json, remove games subfolders/namespace; rename src/boardgameswithquests.py -> src/main.py while preserving installed boardgameswithquests command.
-- [ ] Update resource discovery/validation, pyproject, native package+manifest, installed distribution tests, all source tests and generated docs. Keep Chess/Draughts JSON semantically identical.
-- [ ] Verify the old games initializer is removed and screen.py is the one GameScreen composition (two already substantially addressed PR review threads).
-- [ ] Prove Python 3.10–3.13, real Tk, clean editable/wheel/sdist **outside checkout**, four native packaging/frozen --check, exact candidate and combined-head CI; independent maintainer resolves all 5 PR #271 threads; close #462.
-- [ ] Do **not** edit native #443 QA branch concurrently. Preserve its current work for one rebase/port after source layout is final.
+- [x] Canonical `data/chess.json`, `data/checkers.json`, `src/main.py` layout; byte-identical game JSON, resource resolver, setuptools and native packaging migrated.
+- [x] Candidate acceptance and **exact merged PR #271 HEAD `a117efaba454433b1caa19607fd45498178f9933`** passed all 9 workflows (full Python 3.10–3.13, real Tk, clean editable/wheel/sdist, four native PACKAGE builds).
+- [x] Old source initializer gone; single `GameScreen` composition preserved.
+- [ ] **Maintainer-only gate:** inspect/accept and resolve the five original PR #271 review threads; close #462 when accepted. Do not falsely mark review complete.
 
-## After W1 — execute on final source
+## W2 — ACTIVE extracted-native acceptance (#443)
+
+- [x] Created `qa/443-final-data-acceptance` from accepted final W1 source; ported 1,913-line recovered actual four-platform pointer/GUI/persistence harness, frozen manifest/build source provenance, macOS re-sealing and workflows to flat `data/` layout.
+- [ ] **Exact source QA run #41510505966 QUEUED as last checked** on `ca4d05583f15e9e5c101d5eac744b3e687b67b62`. Inspect four real extracted OS results, screenshot JSON and failure logs; diagnose concrete faults and repair same branch. DO NOT claim queued as PASS.
+- [ ] Complete J1–J8 on all four OS; no bypass of mandatory advanced/terminal/draw/offline/file-error acceptance, no automatic W2 merge before full proof. Document Windows/macOS trust policy separately.
+
+## Remaining fixed release gates — after W1
 
 - [ ] **W2 native #443:** port recovered qa/443-n1b-macos-recovery test/workflow, diagnose run #41304444805 ARM64 board visibility and x64 unchanged chess persisted move, then pass native J1–J8 on Windows/macOS ARM64/macOS x64/Linux extracted apps on the same exact SHA. Signing trust status truthful.
 - [ ] **W3 WCDF #437/#449:** independently confirm 91-ply full game, legal routes, crowning, 40-move/threefold and all terminal claims, complete session/GUI paths; enable checkers playable only after passing.

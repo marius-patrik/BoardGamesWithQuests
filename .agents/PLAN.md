@@ -1,5 +1,16 @@
 # BoardGamesWithQuests v1.0.0 — definitive remaining execution plan
 
+## EXECUTION CHECKPOINT — 2026-11-02
+
+**W1 source implementation: COMPLETE; maintainer review: OPEN.** The final flat data and single main entrypoint contract was independently integrated into only draft PR #271 at **`a117efaba454433b1caa19607fd45498178f9933`**. Original definition JSON blobs were relocated unchanged to `data/chess.json` and `data/checkers.json`; installed CLI remains `boardgameswithquests`; no old games package/entrypoint, and `src/view/screen.py` remains the single GameScreen composer. Exact combined-head **9/9 workflows SUCCESS**, including Python 3.10–3.13 full governed matrix, clean editable/wheel/sdist, real Tkinter/Xvfb and four native PACKAGE builds. **All FIVE PR #271 inline review threads are still unresolved pending maintainer approval**; do not close #462 until accepted. Earlier W1 instructions below describe its acceptance contract, not outstanding source coding.
+
+**W2 native execution: ACTIVE, not certified.** Isolated `qa/443-final-data-acceptance` starts from W1 HEAD; recovered real four-OS native QA harness, build-info/source SHA and macOS bundle re-sealing were adapted to the final `data/` and `src/main.py` layout (commit `512b911cfeee94729a624d279906b6d2039c28e5`, autoformat-only AST `ca4d05583f15e9e5c101d5eac744b3e687b67b62`). Native CI **#41510505966 QUEUED** at last verification; do not infer PASS. The test still fails closed for unfinished advanced journeys. Existing known previous N1B Mac faults are not considered fixed without new exact-SHA screenshots. No QA work was merged into #271.
+
+**W3 WCDF source evidence refresh:** `src/view/screen.py` already supports WCDF **prospective threefold** via `draw_claim_candidates`, actual Tk complete-move picker and unplayed `intended_move`; real GUI acceptance tests cover both choosing and cancelling. Historical #437/#449 claim that intended_move is always null is obsolete. Independent WCDF signoff and extracted native journeys remain release prerequisites; `playable:false` stays until accepted.
+
+**Next exclusive implementation/acceptance:** inspect W2 exact branch CI and fix only reproduced native failures; W3 read-only certification may proceed concurrently, with no conflicting source writes. No new roadmap or redesign.
+
+
 **Authority:** .agents/GOAL.md and issue #430. **Canonical integration:** draft PR #271 -> protected develop. **Release:** a separately approved develop -> main PR followed by PrideVer. **Status:** NO-GO.
 
 **This document supersedes the previous chronological dispatch notes and speculative next-step advice.** Evidence and earlier attempts remain in issues, CI logs and SCRATCHPAD.md. Do not add new feature requirements, start another general audit, or invent a second product integration PR. Change this plan only for an actual reproduced blocker, a newer explicit maintainer instruction, or an approved change in the frozen product goal. Changes must state why, the affected gate, and the evidence.
