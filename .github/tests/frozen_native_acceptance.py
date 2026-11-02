@@ -793,14 +793,27 @@ def settings_journey(gui, exe: Path, home: Path, evidence: Path, platform_name: 
     def open_chooser_settings(*, reopen_after_cancel: bool = False) -> None:
         limit = time.monotonic() + 25
         while time.monotonic() < limit:
+            if process.poll() is not None:
+                gui.screenshot().save(evidence / "settings-chooser-process-exited.png")
+                raise AssertionError(
+                    f"frozen application exited before the native chooser appeared: "
+                    f"{process.returncode}"
+                )
             try:
                 focus_chooser()
+                # On macOS, process-frontmost is not proof that its Tk
+                # New game dialog exists yet. The previous test captured
+                # a black Finder desktop and immediately queried a
+                # nonexistent window. Wait for real Accessibility geometry.
+                if sys.platform == "darwin":
+                    native_window_rectangle("New game")
                 break
-            except Blocked:
+            except (Blocked, AssertionError):
                 gui.sleep(0.5)
         else:
-            raise Blocked("native chooser not focused for settings")
-        gui.sleep(0.5)
+            gui.screenshot().save(evidence / "settings-chooser-not-visible.png")
+            raise Blocked("native New game chooser never became visible for settings")
+        gui.sleep(0.25)
         gui.screenshot().save(evidence / "settings-chooser.png")
         # ModalLifecycle activates the readonly game selector. Tab order:
         # selector -> Start -> Settings; Enter activates the focused button.
@@ -1591,7 +1604,42 @@ def native_persistence_failure_journey(
                         else "failure-open-dialog-cancel.png"
                     )
                     gui.screenshot().save(evidence / picture_name)
-                    gui.press("escape")
+                    if target.startswith("macos"):
+                        # A real macOS Open panel remained visible after
+                        # Escape in screenshot evidence (W2 ARM64 run
+                        # 41510505966). Operate its actual OS Cancel
+                        # button rather than treating an ignored key as
+                        # successful cancellation.
+                        script = (
+                            'tell application "System Events"\n'
+                            'set p to first process whose name contains "BoardGamesWithQuests"\n'
+                            'tell p\n'
+                            'if exists sheet 1 of window 1 then\n'
+                            'click button "Cancel" of sheet 1 of window 1\n'
+                            'else if exists button "Cancel" of window 1 then\n'
+                            'click button "Cancel" of window 1\n'
+                            'else\n'
+                            'error "native file panel Cancel button not exposed"\n'
+                            'end if\n'
+                            'end tell\n'
+                            'end tell'
+                        )
+                        cancelled = subprocess.run(
+                            ["osascript", "-e", script],
+                            capture_output=True,
+                            text=True,
+                            timeout=15,
+                        )
+                        if cancelled.returncode:
+                            gui.screenshot().save(
+                                evidence / f"failure-{label}-cancel-accessibility.png"
+                            )
+                            raise Blocked(
+                                "macOS native file-panel Cancel button unavailable: "
+                                + cancelled.stderr.strip()
+                            )
+                    else:
+                        gui.press("escape")
                     # An unobscured board is still mandatory; do not hide
                     # focus, modal, or screenshot failures.
                     recovery_label = (
