@@ -11,9 +11,12 @@
 
 ## W2 — ACTIVE extracted-native acceptance (#443)
 
-- [x] Created `qa/443-final-data-acceptance` from accepted final W1 source; ported 1,913-line recovered actual four-platform pointer/GUI/persistence harness, frozen manifest/build source provenance, macOS re-sealing and workflows to flat `data/` layout.
-- [ ] **Exact source QA run #41510505966 QUEUED as last checked** on `ca4d05583f15e9e5c101d5eac744b3e687b67b62`. Inspect four real extracted OS results, screenshot JSON and failure logs; diagnose concrete faults and repair same branch. DO NOT claim queued as PASS.
-- [ ] Complete J1–J8 on all four OS; no bypass of mandatory advanced/terminal/draw/offline/file-error acceptance, no automatic W2 merge before full proof. Document Windows/macOS trust policy separately.
+- [x] Recovered the 1,913-line four-platform frozen GUI harness on isolated `qa/443-final-data-acceptance`, adapted to flat `data/` and `src/main.py`, with native manifests, macOS ad-hoc re-sealing and fail-closed result JSON.
+- [x] Inspected **completed** exact run [#41512854619](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41512854619), SHA `3aed0dc43d2c72ac7f7e560ec1c8e1ceaf024d0f`: Windows/Linux BLOCKED for mandatory unfinished journeys; macOS ARM64/x64 FAIL when readonly-save overwrite confirmation remained visible despite Return. All four passed earlier implemented game captures, preferences, lifecycle and both game save→restart→open→continue; macOS failed late, during failure recovery.
+- [x] Produced narrow QA-only macOS Accessibility Replace correction on same branch at `1e49fa588732a8ec307cc8332272b27398ed7b2a`. New exact-head [native CI #41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817) **QUEUED at checkpoint**; candidate is not accepted or integrated.
+- [ ] Inspect #41625407817 all four job logs and native-result/screenshots, confirm the overwrite confirmation closes and original read-only file stays intact; correct remaining confirmed failures on the same QA branch.
+- [ ] Implement and verify all missing J1–J8 advanced native journeys without skip/waiver, with WIN/macOS ARM64/macOS x64/Linux exact-SHA evidence; document Windows signing, Apple Developer ID, notarization, Gatekeeper and distribution-policy dependencies separately.
+- [ ] Only after independent full QA acceptance, selectively integrate into existing draft PR #271 and rerun exact combined-head checks.
 
 ## Remaining fixed release gates — after W1
 
