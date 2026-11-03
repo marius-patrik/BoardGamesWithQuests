@@ -1670,6 +1670,47 @@ def native_persistence_failure_journey(
                 if target == "windows-x64":
                     x, y, width, height = native_window_rectangle("Confirm Save As")
                     gui.click(x + width * 0.66, y + height * 0.82)
+                elif target.startswith("macos"):
+                    # CI screenshot evidence from 41512854619 shows the native
+                    # "already exists" Replace/Cancel alert remains open after
+                    # Return. Click the actual Accessibility Replace control.
+                    # The subsequent game-specific error and unchanged target
+                    # must still be observed; never skip this rejection check.
+                    script = (
+                        'tell application "System Events"\n'
+                        'set p to first process whose name contains "BoardGamesWithQuests"\n'
+                        "tell p\n"
+                        "repeat with itemRef in entire contents\n"
+                        "try\n"
+                        'if (role of itemRef is "AXButton") and (name of itemRef is "Replace") then\n'
+                        "click itemRef\n"
+                        'return "clicked"\n'
+                        "end if\n"
+                        "end try\n"
+                        "end repeat\n"
+                        "end tell\n"
+                        "end tell\n"
+                        'error "native overwrite Replace control not exposed"'
+                    )
+                    deadline = time.monotonic() + 12
+                    while True:
+                        replace = subprocess.run(
+                            ["osascript", "-e", script],
+                            capture_output=True,
+                            text=True,
+                            timeout=8,
+                        )
+                        if replace.returncode == 0:
+                            break
+                        if time.monotonic() >= deadline:
+                            gui.screenshot().save(
+                                evidence / "failure-readonly-replace-not-activated.png"
+                            )
+                            raise Blocked(
+                                "macOS overwrite Replace button unavailable: "
+                                + replace.stderr.strip()
+                            )
+                        gui.sleep(0.35)
                 else:
                     gui.press("return")
                 gui.sleep(0.45)
