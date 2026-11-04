@@ -1,12 +1,15 @@
 # BoardGamesWithQuests v1.0.0 — current dispatch and execution queue
 
-**Checkpoint:** 2026-11-04. **Status:** NO-GO. **Authority:** [GOAL.md](GOAL.md), [PLAN.md](PLAN.md), [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Product is draft [PR #271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271), `feature/product-integration` at `41f15fd86d301026a34cd5e2ad172cfc2e44a258` before this planning update; no protected merge/public release.
+**Checkpoint:** 2026-11-04. **Status:** NO-GO. **Authority:** [GOAL.md](GOAL.md), [PLAN.md](PLAN.md), [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Product is draft [PR #271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271), `feature/product-integration` at `e2a36338cd82666b841ea9d8c5106e53a622320a` before dispatch-ledger update; no protected merge/public release.
 
-## Immediate dispatch wave (one writer + independent read-only agents)
+## Immediate dispatch wave (TRIGGERED; four requests, one writer + three read-only)
 
-- [ ] **N / native #443, implementation agent:** issue-bound dispatch to existing `qa/443-final-data-acceptance` at `1e49fa588732a8ec307cc8332272b27398ed7b2a`. Latest actual [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817) **FAIL** at workflow level; machine results: **Windows/Linux BLOCKED** by intentionally unimplemented advanced journeys; **macOS ARM64/x64 BLOCKED** at readonly-save step because AX `Replace` button was not exposed. Fix from screenshot/AX evidence; finish J1–J8 without bypass. No `src/` or `data/` edits.
-- [ ] **D / WCDF #437/#449/#438, independent read-only agent:** certify complete bundled rules and public session/UI using 91-ply reference, full terminal game, captures, crown, 40-move/threefold intended move, idempotency/replay. Report FAIL examples, no speculative code.
-- [ ] **C / FIDE #473/#477/#436, independent read-only agent:** evaluate sound impossibility/witness feasibility, Buchanan dead/live, deterministic UNKNOWN, full durable pending-timeout contract, migration, UI/replay. Produce explicit decision sheet; do NOT implement before policy approval.
+- [x] Created bounded Request issues **#489 native writer**, **#490 WCDF read-only**, **#491 Chess proof read-only**, **#492 timeout policy read-only**. GitHub's DarkFactory Runtime delegated issue events to central Autonomous Agent runs. **Agent execution/result not yet independently established; pending container build at checkpoint.**
+- [ ] Identify central run ID → exact issue mapping and verify successful model/worker execution. Claim neither code completion nor approved source until final agent reports are reviewed.
+
+- [ ] **N / native #443 / dispatch #489, implementation agent:** issue-bound dispatch to existing `qa/443-final-data-acceptance` at `1e49fa588732a8ec307cc8332272b27398ed7b2a`. Latest actual [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817) **FAIL** at workflow level; machine results: **Windows/Linux BLOCKED** by intentionally unimplemented advanced journeys; **macOS ARM64/x64 BLOCKED** at readonly-save step because AX `Replace` button was not exposed. Fix from screenshot/AX evidence; finish J1–J8 without bypass. No `src/` or `data/` edits.
+- [ ] **D / WCDF #437/#449/#438 / dispatch #490, independent read-only agent:** certify complete bundled rules and public session/UI using 91-ply reference, full terminal game, captures, crown, 40-move/threefold intended move, idempotency/replay. Report FAIL examples, no speculative code.
+- [ ] **C / FIDE #473/#436 / dispatch #491 and #477 / dispatch #492, two independent read-only agents:** evaluate sound impossibility/witness feasibility, Buchanan dead/live, deterministic UNKNOWN, full durable pending-timeout contract, migration, UI/replay. Produce explicit decision sheet; do NOT implement before policy approval.
 - [ ] **Q / test & quality #440/#442/#450:** inventory final acceptance tests, code-quality P0/P1 and finite retain/fix/replace/delete dossier. Read-only until game/native source stabilized.
 - [ ] **R / final review #441/#454/#462/#476:** maintainer thread dispositions, genuine GUI screenshots, stale source-generated README and docs-deploy evidence; signing/Apple notarization credentials/policy inventory. Read-only until integration.
 
@@ -26,7 +29,8 @@
 
 ## Known live run status and ownership rules
 
-- `feature/product-integration` exact run [#41625688688](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625688688): native **package workflow failed/cancelled** (macOS ARM64 cancelled; other three jobs passed), despite nine other integration workflows green. NOT full native acceptance.
+- `feature/product-integration` previous run [#41625688688](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625688688) failed due to cancelled macOS ARM64 packaging; newest pre-dispatch planning-only [#41797702208](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41797702208) **four PACKAGE jobs PASS**. No extracted-native J1–J8 certification.
+- Latest pre-dispatch product [native PACKAGE run #41797702208](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41797702208) against planning-only `e2a36338`: **all 4 PACKAGE jobs PASS**, not extracted J1–J8. Previous package run #41625688688 failed/cancelled; do not call either full native certification.
 - Native `qa/443-final-data-acceptance` run [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817): 4 job failures; **Windows/Linux internal classification BLOCKED** after all implemented journeys PASS, **both macOS internal classification BLOCKED** at OS Replace control; all advanced journeys remain NOT EXECUTED. Previous source fix `1e49fa5` did not clear the OS Accessibility requirement.
 - Chess Buchanan dead-fortress timeout remains a confirmed wrong win, with independently referenced mating-possible near-twin; no verified sound solution exists.
 - Both shipped definitions `playable:false`, `repo.dfconfig` publication disabled, v2 #422 deferred.
