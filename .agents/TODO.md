@@ -1,40 +1,27 @@
-# BoardGamesWithQuests v1.0.0 — current dispatch and execution queue
+# BoardGamesWithQuests v1.0.0 — finite manual-dispatch queue
 
-**Checkpoint:** 2026-11-04. **Status:** NO-GO. **Authority:** [GOAL.md](GOAL.md), [PLAN.md](PLAN.md), [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Product is draft [PR #271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271), `feature/product-integration` at `e2a36338cd82666b841ea9d8c5106e53a622320a` before dispatch-ledger update; no protected merge/public release.
+**Canonical plan:** [PLAN.md](PLAN.md). **Source authority:** [GOAL.md](GOAL.md), issue #430. **No DarkFactory issue-agent runs.** User manually dispatches copyable prompts from ChatGPT. Do not create duplicate dispatch issues. Product integration is PR #271; v2 only #348.
 
-## Immediate dispatch wave (TRIGGERED; four requests, one writer + three read-only)
+## Active manual prompts, in order
 
-- [x] Created bounded Request issues **#489 native writer**, **#490 WCDF read-only**, **#491 Chess proof read-only**, **#492 timeout policy read-only**. GitHub's DarkFactory Runtime delegated issue events to central Autonomous Agent runs. **Agent execution/result not yet independently established; pending container build at checkpoint.**
-- [ ] Identify central run ID → exact issue mapping and verify successful model/worker execution. Claim neither code completion nor approved source until final agent reports are reviewed.
+- [ ] **A / #443 native** — user launches one isolated QA writer on `qa/443-final-data-acceptance` at last SHA `1e49fa588732a8ec307cc8332272b27398ed7b2a`. Fix reproduced Mac OS overwrite-dialog automation and finish J1–J8 with four-platform per-journey evidence. No production source writes.
+- [ ] **B / #437 WCDF** — independently verify actual bundled complete game, capture chains/crown, draw claims, replay, GUI; read-only initially, narrow patch only after failing external oracle.
+- [ ] **C / #473 + #477 + #436 Chess** — independently reproduce dead/live FIDE defect; choose sound checkable proof/witness/UNKNOWN method and approved minimal pending/timeout policy if required. Small scoped code patch only after decision, never a new engine.
+- [ ] **D / #438 + #439** — verify clocks/quests/terminal and saved game/security against exact integrated source and native QA; fix only actual defects.
+- [ ] **E / #441** — real Tk final screenshots, select/claim/promotion/quests/history/layout/dialog/resize, targeted UI repairs only.
+- [ ] **F / #440 + #442** — one final targeted code-quality owner, then independent suite deduplication/coverage owner; preserve all acceptance.
+- [ ] **G / #462 + #476** — five open maintainer inline threads, final flat paths/packaging, correct docs source and actual default-branch Docs Deployment. No fake resolution.
+- [ ] **H / #444** — one independent exact-SHA final GO audit after A–G.
+- [ ] **I / #445** — separately approved `#271→develop→main` release, PrideVer v1.0.0 and verified four public binaries.
+- [ ] **J / #445** — AFTER release: preserve v2 history/rebase, close v2 draft PR #422 unmerged, delete old v1 branches safely, close all v1/ops issues; leave only `main`, `develop`, `feat/independent-server-web-native-bootstrap` and sole OPEN issue #348.
 
-- [ ] **N / native #443 / dispatch #489, implementation agent:** issue-bound dispatch to existing `qa/443-final-data-acceptance` at `1e49fa588732a8ec307cc8332272b27398ed7b2a`. Latest actual [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817) **FAIL** at workflow level; machine results: **Windows/Linux BLOCKED** by intentionally unimplemented advanced journeys; **macOS ARM64/x64 BLOCKED** at readonly-save step because AX `Replace` button was not exposed. Fix from screenshot/AX evidence; finish J1–J8 without bypass. No `src/` or `data/` edits.
-- [ ] **D / WCDF #437/#449/#438 / dispatch #490, independent read-only agent:** certify complete bundled rules and public session/UI using 91-ply reference, full terminal game, captures, crown, 40-move/threefold intended move, idempotency/replay. Report FAIL examples, no speculative code.
-- [ ] **C / FIDE #473/#436 / dispatch #491 and #477 / dispatch #492, two independent read-only agents:** evaluate sound impossibility/witness feasibility, Buchanan dead/live, deterministic UNKNOWN, full durable pending-timeout contract, migration, UI/replay. Produce explicit decision sheet; do NOT implement before policy approval.
-- [ ] **Q / test & quality #440/#442/#450:** inventory final acceptance tests, code-quality P0/P1 and finite retain/fix/replace/delete dossier. Read-only until game/native source stabilized.
-- [ ] **R / final review #441/#454/#462/#476:** maintainer thread dispositions, genuine GUI screenshots, stale source-generated README and docs-deploy evidence; signing/Apple notarization credentials/policy inventory. Read-only until integration.
+## Verified starting evidence (not release certification)
 
-## Integration and release gates
+- PR #271 pre-plan commit `a752a82bafc5d2ae0ef0a7710811fcd7815f2112`, ten applicable workflows PASS, including four **package** jobs. No final extracted-app J1–J8 evidence.
+- Native QA `1e49fa5`, [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817): Windows/Linux internal BLOCKED unfinished advanced scenarios, Mac ARM64/x64 internal BLOCKED native overwrite control. No current four-OS pass.
+- Chess #473 known FIDE timeout failure Buchanan dead fortress, near-twin mate possible; no accepted proof fix. Both JSON definitions `playable:false`, PrideVer Python publishing disabled.
+- #437 WCDF source already implemented, prospective draw GUI present. #441 UX source already substantially integrated. #438 draw/clocks source integrated and #439 persistence hardening integrated; final acceptance only.
+- Duplicate issues **CLOSED and linked**: #489→#443, #490/#449→#437, #491→#473, #492→#477, #450→#442, #454→#441, #429/#487→#488; #488 closed not planned because no approved DarkFactory fleet upgrade. #476 remains distinct unverified deployment failure.
+- Current draft v2 PR #422 depends on `feature/product-integration`; final cleanup must preserve v2 changes before removing v1 integration branch. **Do not delete any branches before accepted evidence/release.**
 
-- [x] W1 source refactor committed: `data/chess.json`, `data/checkers.json`, `src/main.py`; SHA `a117efab` exact 9/9 original applicable checks PASS. Source layout changes integrated.
-- [ ] W1 human review: resolve exactly **five** #271 outstanding inline threads after independent maintainer approval.
-- [ ] N #443: 4/4 extracted OS **J1–J8 PASS on a single SHA**, with native result JSON + PNG + app/log + artifact provenance; reconcile signing/notarization policy. Package build does not count.
-- [ ] D #437/#449/#438: complete WCDF certification, including actual GUI prospective claim; only then `checkers.playable:true`.
-- [ ] C #477: maintainer-approved pending timeout/durability/authority/migration contract.
-- [ ] C #473/#436: sound proof/evaluator with safe UNKNOWN, Buchanan dead/live, FIDE rulebook acceptance; only then `chess.playable:true`.
-- [ ] Q #440/#442/#450: evidenced P0/P1 cleanup and independent oracle tests, no degraded coverage.
-- [ ] R #439/#441/#454/#462/#476: final OS user-data, GUI review, 5 threads, docs/build corrections and dispositions.
-- [ ] Exact combined PR #271: full Python 3.10–3.13, clean installed tests, actual Tk, packaging and extracted Windows/macOS ARM64/macOS x64/Linux J1–J8, source-generated docs/diagrams/governance, replay/rollback/security all green on one final SHA.
-- [ ] #444 independent release audit GO for exact combined SHA. If FAIL, fix only proven owner defect and re-verify.
-- [ ] #445 maintainer approves #271 → `develop`; separately reviews and approves `develop` → `main`, authorizes PrideVer v1.0.0. Independently verify 4 downloadable archives + SHA256, integrity, real play and truthful signing status; close #430 only after all evidence.
-
-## Known live run status and ownership rules
-
-- `feature/product-integration` previous run [#41625688688](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625688688) failed due to cancelled macOS ARM64 packaging; newest pre-dispatch planning-only [#41797702208](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41797702208) **four PACKAGE jobs PASS**. No extracted-native J1–J8 certification.
-- Latest pre-dispatch product [native PACKAGE run #41797702208](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41797702208) against planning-only `e2a36338`: **all 4 PACKAGE jobs PASS**, not extracted J1–J8. Previous package run #41625688688 failed/cancelled; do not call either full native certification.
-- Native `qa/443-final-data-acceptance` run [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817): 4 job failures; **Windows/Linux internal classification BLOCKED** after all implemented journeys PASS, **both macOS internal classification BLOCKED** at OS Replace control; all advanced journeys remain NOT EXECUTED. Previous source fix `1e49fa5` did not clear the OS Accessibility requirement.
-- Chess Buchanan dead-fortress timeout remains a confirmed wrong win, with independently referenced mating-possible near-twin; no verified sound solution exists.
-- Both shipped definitions `playable:false`, `repo.dfconfig` publication disabled, v2 #422 deferred.
-- Exclusive writer lock: only lane N touches native harness/workflows; D/C/Q/R evidence read-only concurrently. A shared `src/model/`, `data/` or `src/view/` writer starts only after orchestrator grants ownership against the latest accepted integration SHA.
-- **Dispatch labels/comments alone are not execution evidence.** Verify downstream worker result. No auto-merge, protected-branch writes, release, arbitrary fixed ETA or weakening mandatory tests.
-
-**Next checkpoint:** verify issue-bound agent launch and compare its exact committed SHA and four-platform artifacts; do not repeat another broad orientation.
+**Manual agent final handoff:** actual baseline/full final SHA, changed files, exact executable tests, independent outcomes, screenshots/logs if native, blocked/failed cases and recommendation. Orchestrator verifies accepted work; no task passes on generic agent summary alone.
