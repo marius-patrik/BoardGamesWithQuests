@@ -1,40 +1,36 @@
-# Current action queue — BoardGamesWithQuests v1.0.0
+# BoardGamesWithQuests v1.0.0 — current dispatch and execution queue
 
-**Canonical complete execution order and acceptance gates:** [PLAN.md](PLAN.md). Product contract: [GOAL.md](GOAL.md). Master issue: #430. Single integration: draft PR #271. **Release NO-GO.**
+**Checkpoint:** 2026-11-04. **Status:** NO-GO. **Authority:** [GOAL.md](GOAL.md), [PLAN.md](PLAN.md), [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430). Product is draft [PR #271](https://github.com/marius-patrik/BoardGamesWithQuests/pull/271), `feature/product-integration` at `41f15fd86d301026a34cd5e2ad172cfc2e44a258` before this planning update; no protected merge/public release.
 
-## W1 — SOURCE DONE; human review still open (#462)
+## Immediate dispatch wave (one writer + independent read-only agents)
 
-- [x] Canonical `data/chess.json`, `data/checkers.json`, `src/main.py` layout; byte-identical game JSON, resource resolver, setuptools and native packaging migrated.
-- [x] Candidate acceptance and **exact merged PR #271 HEAD `a117efaba454433b1caa19607fd45498178f9933`** passed all 9 workflows (full Python 3.10–3.13, real Tk, clean editable/wheel/sdist, four native PACKAGE builds).
-- [x] Old source initializer gone; single `GameScreen` composition preserved.
-- [ ] **Maintainer-only gate:** inspect/accept and resolve the five original PR #271 review threads; close #462 when accepted. Do not falsely mark review complete.
+- [ ] **N / native #443, implementation agent:** issue-bound dispatch to existing `qa/443-final-data-acceptance` at `1e49fa588732a8ec307cc8332272b27398ed7b2a`. Latest actual [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817) **FAIL** at workflow level; machine results: **Windows/Linux BLOCKED** by intentionally unimplemented advanced journeys; **macOS ARM64/x64 BLOCKED** at readonly-save step because AX `Replace` button was not exposed. Fix from screenshot/AX evidence; finish J1–J8 without bypass. No `src/` or `data/` edits.
+- [ ] **D / WCDF #437/#449/#438, independent read-only agent:** certify complete bundled rules and public session/UI using 91-ply reference, full terminal game, captures, crown, 40-move/threefold intended move, idempotency/replay. Report FAIL examples, no speculative code.
+- [ ] **C / FIDE #473/#477/#436, independent read-only agent:** evaluate sound impossibility/witness feasibility, Buchanan dead/live, deterministic UNKNOWN, full durable pending-timeout contract, migration, UI/replay. Produce explicit decision sheet; do NOT implement before policy approval.
+- [ ] **Q / test & quality #440/#442/#450:** inventory final acceptance tests, code-quality P0/P1 and finite retain/fix/replace/delete dossier. Read-only until game/native source stabilized.
+- [ ] **R / final review #441/#454/#462/#476:** maintainer thread dispositions, genuine GUI screenshots, stale source-generated README and docs-deploy evidence; signing/Apple notarization credentials/policy inventory. Read-only until integration.
 
-## W2 — ACTIVE extracted-native acceptance (#443)
+## Integration and release gates
 
-- [x] Recovered the 1,913-line four-platform frozen GUI harness on isolated `qa/443-final-data-acceptance`, adapted to flat `data/` and `src/main.py`, with native manifests, macOS ad-hoc re-sealing and fail-closed result JSON.
-- [x] Inspected **completed** exact run [#41512854619](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41512854619), SHA `3aed0dc43d2c72ac7f7e560ec1c8e1ceaf024d0f`: Windows/Linux BLOCKED for mandatory unfinished journeys; macOS ARM64/x64 FAIL when readonly-save overwrite confirmation remained visible despite Return. All four passed earlier implemented game captures, preferences, lifecycle and both game save→restart→open→continue; macOS failed late, during failure recovery.
-- [x] Produced narrow QA-only macOS Accessibility Replace correction on same branch at `1e49fa588732a8ec307cc8332272b27398ed7b2a`. New exact-head [native CI #41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817) **QUEUED at checkpoint**; candidate is not accepted or integrated.
-- [ ] Inspect #41625407817 all four job logs and native-result/screenshots, confirm the overwrite confirmation closes and original read-only file stays intact; correct remaining confirmed failures on the same QA branch.
-- [ ] Implement and verify all missing J1–J8 advanced native journeys without skip/waiver, with WIN/macOS ARM64/macOS x64/Linux exact-SHA evidence; document Windows signing, Apple Developer ID, notarization, Gatekeeper and distribution-policy dependencies separately.
-- [ ] Only after independent full QA acceptance, selectively integrate into existing draft PR #271 and rerun exact combined-head checks.
+- [x] W1 source refactor committed: `data/chess.json`, `data/checkers.json`, `src/main.py`; SHA `a117efab` exact 9/9 original applicable checks PASS. Source layout changes integrated.
+- [ ] W1 human review: resolve exactly **five** #271 outstanding inline threads after independent maintainer approval.
+- [ ] N #443: 4/4 extracted OS **J1–J8 PASS on a single SHA**, with native result JSON + PNG + app/log + artifact provenance; reconcile signing/notarization policy. Package build does not count.
+- [ ] D #437/#449/#438: complete WCDF certification, including actual GUI prospective claim; only then `checkers.playable:true`.
+- [ ] C #477: maintainer-approved pending timeout/durability/authority/migration contract.
+- [ ] C #473/#436: sound proof/evaluator with safe UNKNOWN, Buchanan dead/live, FIDE rulebook acceptance; only then `chess.playable:true`.
+- [ ] Q #440/#442/#450: evidenced P0/P1 cleanup and independent oracle tests, no degraded coverage.
+- [ ] R #439/#441/#454/#462/#476: final OS user-data, GUI review, 5 threads, docs/build corrections and dispositions.
+- [ ] Exact combined PR #271: full Python 3.10–3.13, clean installed tests, actual Tk, packaging and extracted Windows/macOS ARM64/macOS x64/Linux J1–J8, source-generated docs/diagrams/governance, replay/rollback/security all green on one final SHA.
+- [ ] #444 independent release audit GO for exact combined SHA. If FAIL, fix only proven owner defect and re-verify.
+- [ ] #445 maintainer approves #271 → `develop`; separately reviews and approves `develop` → `main`, authorizes PrideVer v1.0.0. Independently verify 4 downloadable archives + SHA256, integrity, real play and truthful signing status; close #430 only after all evidence.
 
-## Remaining fixed release gates — after W1
+## Known live run status and ownership rules
 
-- [ ] **W2 native #443:** port recovered qa/443-n1b-macos-recovery test/workflow, diagnose run #41304444805 ARM64 board visibility and x64 unchanged chess persisted move, then pass native J1–J8 on Windows/macOS ARM64/macOS x64/Linux extracted apps on the same exact SHA. Signing trust status truthful.
-- [ ] **W3 WCDF #437/#449:** independently confirm 91-ply full game, legal routes, crowning, 40-move/threefold and all terminal claims, complete session/GUI paths; enable checkers playable only after passing.
-- [ ] **W4 Chess #477/#473/#436:** review/approve full durable pending-timeout design; sound checkable mate possibility/impossibility (Buchanan dead/live adversarial cases), safe unknown resolution, persistence/replay; enable chess playable only after complete FIDE correctness. If mathematically infeasible under v1 domain, release remains blocked; no deceptive shortcut.
-- [ ] **W5 quality/test #440/#442/#450:** concrete P0/P1 code cleanup and behavior-by-behavior test replacement, no general refactor or removing tests before replacement proof.
-- [ ] **W6 GUI/review #454/#462:** final real screenshot visual signoff and all PR threads resolved.
-- [ ] **W7 audit #444:** one final exact-SHA independent GO report, full four-OS evidence matrix.
-- [ ] **W8 release #445:** maintainer-approved PR #271 -> develop; second reviewed develop -> main; PrideVer-enable only with authorization; publish and independently verify four downloadable v1.0.0 archives, hashes and source SHA.
+- `feature/product-integration` exact run [#41625688688](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625688688): native **package workflow failed/cancelled** (macOS ARM64 cancelled; other three jobs passed), despite nine other integration workflows green. NOT full native acceptance.
+- Native `qa/443-final-data-acceptance` run [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817): 4 job failures; **Windows/Linux internal classification BLOCKED** after all implemented journeys PASS, **both macOS internal classification BLOCKED** at OS Replace control; all advanced journeys remain NOT EXECUTED. Previous source fix `1e49fa5` did not clear the OS Accessibility requirement.
+- Chess Buchanan dead-fortress timeout remains a confirmed wrong win, with independently referenced mating-possible near-twin; no verified sound solution exists.
+- Both shipped definitions `playable:false`, `repo.dfconfig` publication disabled, v2 #422 deferred.
+- Exclusive writer lock: only lane N touches native harness/workflows; D/C/Q/R evidence read-only concurrently. A shared `src/model/`, `data/` or `src/view/` writer starts only after orchestrator grants ownership against the latest accepted integration SHA.
+- **Dispatch labels/comments alone are not execution evidence.** Verify downstream worker result. No auto-merge, protected-branch writes, release, arbitrary fixed ETA or weakening mandatory tests.
 
-## Current independently verified facts (2026-11-01)
-
-- PR #271 source SHA before this planning commit: f685c6b276fa015749550c62c65fd97a1a6f2d13, 9/9 applicable CI workflows green; **not** full frozen native acceptance.
-- Five PR #271 review threads unresolved; latest maintainer requests supersede the earlier games/ / boardgameswithquests.py refactor layout.
-- #443 exact isolated N1B native run #41304444805: Windows/Linux BLOCKED (explicit incomplete gate), macOS ARM64 FAIL board observation, macOS x64 FAIL chess persisted move not visibly changing square (6,4).
-- Chess #473/#477 still has a known FIDE dead-position/timeout correctness blocker. WCDF #437/#449 requires final independent certification.
-- Both bundled configurations currently have playable: false; Python release publication is disabled.
-- No protected branch changes or release authorization implied by updating these records.
-
-**Execution rule:** Complete the next bounded work package with actual code+tests+evidence and independently integrate it, rather than generating another broad agent plan.
+**Next checkpoint:** verify issue-bound agent launch and compare its exact committed SHA and four-platform artifacts; do not repeat another broad orientation.
