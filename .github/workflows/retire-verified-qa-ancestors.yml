@@ -1,0 +1,39 @@
+name: One-time verified ancestor QA branch retirement
+on:
+  push:
+    branches: [feature/product-integration]
+    paths: ['.github/workflows/retire-verified-qa-ancestors.yml']
+permissions:
+  contents: write
+jobs:
+  retire:
+    if: github.repository == 'marius-patrik/BoardGamesWithQuests' && github.ref == 'refs/heads/feature/product-integration'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete only approved ancestor refs if unchanged and unreferenced
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          preserved='3d119f4767db06c9d0d814522044436f49dd42d7'
+          kept=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/qa/443-n1b-macos-recovery" --jq .object.sha)
+          test "$kept" = "$preserved"
+          for entry in \
+            'qa/443-final-native-recovery=33e15ecb8ca4d24def9deeaadacbcfd367c14fcb' \
+            'qa/443-lifecycle-persistence=ee671de5b317700beda6fd6b8e43e8be8b4de40f'; do
+            branch="${entry%%=*}"
+            expected="${entry#*=}"
+            ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$branch")
+            actual=$(printf '%s' "$ref" | jq -r .object.sha)
+            test "$actual" = "$expected"
+            behind=$(gh api "repos/$GITHUB_REPOSITORY/compare/$expected...$preserved" --jq .behind_by)
+            test "$behind" = 0
+            refs=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" --jq '.[].head.ref, .[].base.ref')
+            if printf '%s\n' "$refs" | grep -Fxq "$branch"; then
+              echo "Ref referenced by open PR: $branch" >&2
+              exit 1
+            fi
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$branch"
+            echo "Deleted redundant ancestor $branch at $expected (preserved in $preserved)"
+          done
