@@ -1,27 +1,24 @@
-# BoardGamesWithQuests v1.0.0 — finite manual-dispatch queue
+# BoardGamesWithQuests v1.0.0 — current queue (DRAFT)
 
-**Canonical plan:** [PLAN.md](PLAN.md). **Source authority:** [GOAL.md](GOAL.md), issue #430. **No DarkFactory issue-agent runs.** User manually dispatches copyable prompts from ChatGPT. Do not create duplicate dispatch issues. Product integration is PR #271; v2 only #348.
+**Canonical:** [PLAN.md](PLAN.md) and #430; **one integration:** draft PR #271 → develop; **v2:** #348 + draft #422. Manual agent prompts ONLY; user has not authorized dispatch.
 
-## Active manual prompts, in order
+## Completed by orchestrator, 2026-11-05
+- [x] Verified develop has 20 history-only commits from merge-base bc2531e4842a323153e399b6b784a974694d81f2; identical tree 64f5da77bb9390ac83cc7f117a1a7a82b61c4cb3.
+- [x] Integrated all develop commits through two-parent merge commit 3c802428889f58e3b4a96c950a4b57bbbcb969e6 with **no content change**.
+- [x] Safely deleted qa/443-final-native-recovery (33e15ecb8ca4d24def9deeaadacbcfd367c14fcb) and qa/443-lifecycle-persistence (ee671de5b317700beda6fd6b8e43e8be8b4de40f): preserved ancestor commits in qa/443-n1b-macos-recovery (3d119f4767db06c9d0d814522044436f49dd42d7), no open PR ref dependence. Successful GitHub Actions run #42029588171.
+- [x] Removed temporary one-shot deletion workflow after successful execution (plan-update commit).
 
-- [ ] **A / #443 native** — user launches one isolated QA writer on `qa/443-final-data-acceptance` at last SHA `1e49fa588732a8ec307cc8332272b27398ed7b2a`. Fix reproduced Mac OS overwrite-dialog automation and finish J1–J8 with four-platform per-journey evidence. No production source writes.
-- [ ] **B / #437 WCDF** — independently verify actual bundled complete game, capture chains/crown, draw claims, replay, GUI; read-only initially, narrow patch only after failing external oracle.
-- [ ] **C / #473 + #477 + #436 Chess** — independently reproduce dead/live FIDE defect; choose sound checkable proof/witness/UNKNOWN method and approved minimal pending/timeout policy if required. Small scoped code patch only after decision, never a new engine.
-- [ ] **D / #438 + #439** — verify clocks/quests/terminal and saved game/security against exact integrated source and native QA; fix only actual defects.
-- [ ] **E / #441** — real Tk final screenshots, select/claim/promotion/quests/history/layout/dialog/resize, targeted UI repairs only.
-- [ ] **F / #440 + #442** — one final targeted code-quality owner, then independent suite deduplication/coverage owner; preserve all acceptance.
-- [ ] **G / #462 + #476** — five open maintainer inline threads, final flat paths/packaging, correct docs source and actual default-branch Docs Deployment. No fake resolution.
-- [ ] **H / #444** — one independent exact-SHA final GO audit after A–G.
-- [ ] **I / #445** — separately approved `#271→develop→main` release, PrideVer v1.0.0 and verified four public binaries.
-- [ ] **J / #445** — AFTER release: preserve v2 history/rebase, close v2 draft PR #422 unmerged, delete old v1 branches safely, close all v1/ops issues; leave only `main`, `develop`, `feat/independent-server-web-native-bootstrap` and sole OPEN issue #348.
+## Pending, ONLY after plan approval and manually launched prompts
+- [ ] **Prompt 0**: exact unique-scope comparison across 3 surviving native QA branches, preserve 4 Chess proof test cases, choose sound FIDE algorithm or precise blocker, finite existing docs/PR/CI and fleet issue contract, no broad audits.
+- [ ] **Prompt 1**: implement approved C01/C02 Chess, N01 macOS overwrite, N02 J7/J8/advanced native tests, D01 canonical docs paths, D02 docs 422 status handling, G02 five review threads, G03 duplicate fleet automation, G04 playable flags; integrate accepted source and safely remove now-redundant branches.
+- [ ] **Prompt 2**: ONE final independent all-Python/FIDE/WCDF/GUI/4-native-platform J1–J8 acceptance at exact SHA; NO-GO returns targeted fix to Prompt 1.
+- [ ] **Explicit maintainer approvals only:** PR #271 → develop; reviewed develop → main; PrideVer v1.0.0 publication, signing/trust policy, verify 4 public binaries.
+- [ ] **Post-release:** v2 history preserved/reconciled, close stale v2 PR #422, delete obsolete v1 integration branch, close all complete v1/operational issues. Final only main, develop, feat/independent-server-web-native-bootstrap and one OPEN issue #348.
 
-## Verified starting evidence (not release certification)
-
-- PR #271 pre-plan commit `a752a82bafc5d2ae0ef0a7710811fcd7815f2112`, ten applicable workflows PASS, including four **package** jobs. No final extracted-app J1–J8 evidence.
-- Native QA `1e49fa5`, [#41625407817](https://github.com/marius-patrik/BoardGamesWithQuests/actions/runs/41625407817): Windows/Linux internal BLOCKED unfinished advanced scenarios, Mac ARM64/x64 internal BLOCKED native overwrite control. No current four-OS pass.
-- Chess #473 known FIDE timeout failure Buchanan dead fortress, near-twin mate possible; no accepted proof fix. Both JSON definitions `playable:false`, PrideVer Python publishing disabled.
-- #437 WCDF source already implemented, prospective draw GUI present. #441 UX source already substantially integrated. #438 draw/clocks source integrated and #439 persistence hardening integrated; final acceptance only.
-- Duplicate issues **CLOSED and linked**: #489→#443, #490/#449→#437, #491→#473, #492→#477, #450→#442, #454→#441, #429/#487→#488; #488 closed not planned because no approved DarkFactory fleet upgrade. #476 remains distinct unverified deployment failure.
-- Current draft v2 PR #422 depends on `feature/product-integration`; final cleanup must preserve v2 changes before removing v1 integration branch. **Do not delete any branches before accepted evidence/release.**
-
-**Manual agent final handoff:** actual baseline/full final SHA, changed files, exact executable tests, independent outcomes, screenshots/logs if native, blocked/failed cases and recommendation. Orchestrator verifies accepted work; no task passes on generic agent summary alone.
+## Fixed reality checkpoint
+- 324 Python tests passed on each of 3.10–3.13; 71 real Tk passed; editable/wheel/sdist passed; four **native package builds** passed. This is not 4-OS extracted-native certification.
+- Existing qa/443-final-data-acceptance remains 5 commits ahead of integration baseline with real frozen test work, but Mac overwrite AX control failed and advanced/offline/process journeys are NOT RUN. Keep branch for Prompt 1.
+- Existing chess proof branch game/473-sound-unwinnability contains 4 useful sourced tests but remains RED without a mathematically sound fix; adapt stale model.game imports.
+- Both data/chess.json and data/checkers.json have playable:false; release disabled.
+- Five unapproved maintainer review threads, outdated .agents/notes/0001-product.md and 0002-structure.md, Docs deployment-preview-status HTTP 422 and duplicate DarkFactory fleet issue #493 remain.
+- Do not delete qa/443-frozen-native-acceptance or qa/443-n1b-macos-recovery until unique code/tests are checked against final-data; do not touch v2.
