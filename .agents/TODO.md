@@ -7,7 +7,7 @@
 - [ ] Fix known Chess Buchanan dead/live/timeout source bug and preserve all four mandatory regressions (#473); safely suspend any undecidable timeout instead of fabricating FIDE outcomes (#477). Run focused affected tests.
 - [ ] Implement PR #495's two `data/config/` review requests; update installed/frozen resources, package-data, manifests, tests and generated docs (#462).
 - [ ] Finish release configuration: accurate `playable` flags, true four-platform packaging, correct SHA256, PrideVer enablement on approved source, truthful unsigned/unnotarized guidance (#445).
-- [ ] After protected native maintainer approvals: merge #495 → `develop`; confirm actual default-branch Docs Actions deployment (current issue #502); review and merge `develop → main` release PR; publish PrideVer v1.0.0 with four archives and checksums.
-- [ ] Preserve unique v2 commits/PR #496, retire temporary `v1` after release, close completed or canceled v1/ops issues. Final only `main`, `develop`, `v2` and open issue #348.
+- [ ] After protected native maintainer approvals: merge #495 → `develop`; confirm actual default-branch Docs Actions deployment (previous incident #502 already closed); review and merge `develop → main` release PR; publish PrideVer v1.0.0 with four archives and checksums.
+- [ ] Preserve unique v2 commits/PR #496, retire temporary `v1` after release, close completed or canceled v1/ops issues. Independent-acceptance issue #444 is already closed **NOT PLANNED**; native issue #443 and docs issue #502 are already closed. Final only `main`, `develop`, `v2` and open issue #348.
 
 **Not in agent scope:** independent code/GUI/native acceptance, five unfinished J1–J8 test scenarios, macOS native-dialog QA automation, final cross-platform manual game testing. **The maintainer will test the released app.** Never claim unrun tests passed or circumvent red source regressions/required GitHub approvals.
