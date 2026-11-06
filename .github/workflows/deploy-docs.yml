@@ -100,38 +100,10 @@ jobs:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
           PREVIEWS: ${{ needs.assemble.outputs.previews }}
         run: |
-          set -euo pipefail
-          printf '%s' "$PREVIEWS" | jq -e 'type == "object"' >/dev/null
-          while IFS=$'\t' read -r pr sha; do
-            [[ "$pr" =~ ^[0-9]+$ && "$sha" =~ ^[0-9a-f]{40}$ ]] || exit 1
-            actual=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq '.head.sha')
-            [ "$actual" = "$sha" ] || continue
-            deployment=$(gh api "repos/$GITHUB_REPOSITORY/deployments?environment=pr-$pr&per_page=100" \
-              --jq ".[] | select(.sha == \"$sha\") | .id" | head -n 1)
-            if [ -z "$deployment" ]; then
-              payload=$(jq -n --arg sha "$sha" --arg env "pr-$pr" \
-                '{ref:$sha,environment:$env,auto_merge:false,transient_environment:true,required_contexts:[],description:"Documentation preview"}')
-              deployment=$(gh api --method POST "repos/$GITHUB_REPOSITORY/deployments" \
-                --input <(printf '%s' "$payload") --jq '.id')
-            fi
-            gh api --method POST "repos/$GITHUB_REPOSITORY/deployments/$deployment/statuses" \
-              -f state=success \
-              -f environment_url="${PAGE_URL%/}/pr-$pr/" \
-              -f description="Published via GitHub Pages Actions" >/dev/null
-          done < <(printf '%s' "$PREVIEWS" | jq -r 'to_entries[] | [.key,.value] | @tsv')
-
-          # Retire preview deployments whose PR was closed or whose head failed.
-          while IFS=$'\t' read -r deployment env sha; do
-            [[ "$env" =~ ^pr-([0-9]+)$ ]] || continue
-            pr="${BASH_REMATCH[1]}"
-            current=$(printf '%s' "$PREVIEWS" | jq -r --arg pr "$pr" '.[$pr] // empty')
-            [ "$sha" = "$current" ] && continue
-            state=$(gh api "repos/$GITHUB_REPOSITORY/deployments/$deployment/statuses?per_page=1" --jq '.[0].state // empty')
-            [ "$state" = inactive ] && continue
-            gh api --method POST "repos/$GITHUB_REPOSITORY/deployments/$deployment/statuses" \
-              -f state=inactive -f description="Preview not in published Pages site" >/dev/null
-          done < <(gh api --paginate "repos/$GITHUB_REPOSITORY/deployments?per_page=100" \
-            --jq '.[] | [.id,.environment,.sha] | @tsv')
+          python .github/scripts/reconcile_preview_deployments.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --page-url "$PAGE_URL" \
+            --previews "$PREVIEWS"
 
       - name: Retire gh-pages branch only after verified Actions publication
         env:
