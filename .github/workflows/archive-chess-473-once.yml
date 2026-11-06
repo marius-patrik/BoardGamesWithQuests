@@ -1,0 +1,47 @@
+name: One-time archive and retire Chess #473 work branch
+on:
+  push:
+    branches: [v1]
+    paths: ['.github/workflows/archive-chess-473-once.yml']
+permissions:
+  contents: write
+jobs:
+  archive-then-retire:
+    if: github.repository == 'marius-patrik/BoardGamesWithQuests' && github.ref == 'refs/heads/v1'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preserve all commits and four sourced regressions before deleting obsolete branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          old='game/473-sound-unwinnability'
+          expected='b0dcec95eac33b882f2ee0c0ac5cdb84927a3329'
+          expected_blob='f573722e42857decfbac7baa28ccbef199b7f089'
+          tag='archive/chess/473-sound-unwinnability-b0dcec95eac3'
+          current="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$old" --jq '.object.sha')"
+          test "$current" = "$expected"
+          blob="$(gh api "repos/$GITHUB_REPOSITORY/contents/.github/tests/test_chess_fide_reachability_boundaries.py?ref=$expected" --jq '.sha')"
+          test "$blob" = "$expected_blob"
+          pull_refs="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" --jq '.[] | .head.ref, .base.ref')"
+          if printf '%s\n' "$pull_refs" | grep -Fxq "$old"; then
+            echo "Ref is still used by an open PR: $old" >&2
+            exit 1
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" > /dev/null 2>&1; then
+            recorded="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.sha')"
+            test "$recorded" = "$expected"
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f "ref=refs/tags/$tag" -f "sha=$expected" >/dev/null
+          fi
+          preserved="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.sha')"
+          test "$preserved" = "$expected"
+          gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$old" >/dev/null
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$old" >/dev/null 2>&1; then
+            echo "Obsolete Chess branch still exists" >&2
+            exit 1
+          fi
+          echo "Preserved $old at $expected via refs/tags/$tag, including $expected_blob"
+          echo "Deleted obsolete branch $old; independent tests remain available from tag"
