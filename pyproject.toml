@@ -21,6 +21,9 @@ Documentation = "https://marius-patrik.github.io/BoardGamesWithQuests/"
 boardgameswithquests = "main:main"
 
 [tool.setuptools_scm]
+# Only semver release tags determine distribution versions. Archive tags preserve
+# unrelated work and must never be selected by git describe/setuptools-scm.
+git_describe_command = "git describe --dirty --tags --long --match 'v[0-9]*'"
 
 [tool.setuptools]
 package-dir = {"" = "src", "data" = "data"}
