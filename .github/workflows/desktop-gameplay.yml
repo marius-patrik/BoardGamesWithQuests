@@ -26,7 +26,12 @@ jobs:
       - name: Install desktop and pytest
         run: python -m pip install -e . pytest
       - name: Exercise authoritative desktop session
-        run: python -m pytest -q .github/tests/test_desktop_json_gameplay.py .github/tests/test_draw_agreement_acceptance.py .github/tests/test_prospective_draw_claims.py
+        run: |
+          python -m pytest -q \
+            .github/tests/test_desktop_json_gameplay.py \
+            .github/tests/test_draw_agreement_acceptance.py \
+            .github/tests/test_prospective_draw_claims.py \
+            .github/tests/test_chess_fide_reachability_boundaries.py
 
   gui:
     name: real-tkinter / Python 3.12
