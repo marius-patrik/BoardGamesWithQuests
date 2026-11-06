@@ -9,7 +9,7 @@ BoardGamesWithQuests provides a local Python/Tkinter chess and English-draughts 
 
 ### Desktop runtime
 
-`src/boardgameswithquests.py` owns startup, bundled-resource diagnostics and the installed application entry point. `src/model/` owns one revisioned, deterministic game engine and its local `DesktopSession`. `src/controller/` translates player clicks into legal actions. `src/view/` owns the Tkinter board, player and quest panels, game chooser and preferences.
+`src/main.py` owns startup, bundled-resource diagnostics and the installed application entry point. `src/model/` owns one revisioned, deterministic game engine and its local `DesktopSession`. `src/controller/` translates player clicks into legal actions. `src/view/` owns the Tkinter board, player and quest panels, game chooser and preferences.
 
 Game positions, movement, captures, conditions, effects, quests and outcomes come from strictly validated source-controlled JSON rulebooks. The executable Python rule packages, dynamic configuration loader and player-facing code editor are absent from the desktop application.
 
@@ -30,7 +30,7 @@ _Source: [0001-product.md](notes/0001-product.md)_
 
 | Path | Responsibility |
 | --- | --- |
-| `src/boardgameswithquests.py` | Application entry point, CLI arguments and bundled-resource diagnostics |
+| `src/main.py` | Application entry point, CLI arguments and bundled-resource diagnostics |
 | `src/model/{definition,schema,resources}.py` | Strict versioned JSON game definitions and immutable snapshots of configuration |
 | `src/model/manager.py`, `session.py` | Authoritative revisioned game transitions/replay and local two-player desktop session |
 | `src/model/{board,move,validator,capture_geometry,capture_policy}.py` | Generic board, complete action intents, geometry and capture search |
@@ -40,7 +40,7 @@ _Source: [0001-product.md](notes/0001-product.md)_
 | `src/model/preferences.py` | Validated user display preferences and atomic OS-specific persistence |
 | `src/controller/` | Player input, action routing, selection state and window lifecycle |
 | `src/view/` | Tkinter Canvas board, composed GameScreen, side panels, history, quests, settings and game chooser |
-| `games/{chess,checkers}/config.json` | Immutable shipped rules and starting positions in versioned JSON |
+| `data/chess.json`, `data/checkers.json` | Immutable shipped rules and starting positions in versioned JSON |
 | `.github/tests/`, `.github/workflows/` | Central tests, native packaging, governance and guarded release automation |
 | `.agents/{notes,requests,decisions,rules}/` | Canonical sources of generated README, PRD, ARCHITECTURE and AGENTS |
 | `.agents/{GOAL,PLAN,TODO,SCRATCHPAD}.md` | Goal, execution plan, current queue and investigation evidence |
