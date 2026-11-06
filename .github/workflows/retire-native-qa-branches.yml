@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   retire:
-    if: github.event.head_commit.message == 'chore(qa): retire verified native acceptance branches'
+    if: "${{ github.event.head_commit.message == 'chore(qa): retire verified native acceptance branches' }}"
     runs-on: ubuntu-latest
     steps:
       - name: Preserve exact source commits as archive tags before branch deletion
