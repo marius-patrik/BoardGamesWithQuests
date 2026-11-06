@@ -1,70 +1,270 @@
-# BoardGamesWithQuests — v1.0.0 Completion and Release
+# BoardGamesWithQuests v1.0.0 — Chess Desktop Completion and Release
 
-**Canonical v1 issue:** [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430)  
-**Implementation PR:** [#495](https://github.com/marius-patrik/BoardGamesWithQuests/pull/495) (`v1 → develop`)  
-**Release promotion PR:** [#501](https://github.com/marius-patrik/BoardGamesWithQuests/pull/501) (`develop → main`)  
-**Future v2:** [#496](https://github.com/marius-patrik/BoardGamesWithQuests/pull/496) (`v2 → develop`), issue #348  
-**Release:** `v1.0.0`
+**Canonical work item:** [#430](https://github.com/marius-patrik/BoardGamesWithQuests/issues/430) · **Implementation:** [PR #495](https://github.com/marius-patrik/BoardGamesWithQuests/pull/495) (`v1 → develop`) · **Release promotion:** [PR #501](https://github.com/marius-patrik/BoardGamesWithQuests/pull/501) (`develop → main`) · **Future v2:** [PR #496](https://github.com/marius-patrik/BoardGamesWithQuests/pull/496), issue #348 · **Release:** `v1.0.0`.
 
-**Target product:** A complete local Python/Tkinter Chess and English Draughts desktop application with Python-defined rules, authoritative gameplay, clocks, quests, game history and persistent per-game logs. The existing Canvas board remains the drawing surface; the surrounding Tkinter widgets use modern monochrome ttk styling. The maintainer conducts gameplay, GUI and native-platform testing after publication.
+**Product contract:** One local, Python-defined **Chess** desktop application. The game includes orthodox FIDE moves, clocks, quests, player information, game history, crash-durable per-game JSON logs, and resume. Its Tkinter Canvas board and surrounding modern monochrome ttk interface provide all interaction inline. The maintainer tests published binaries after release; implementation supplies focused gameplay regressions and verified four-platform packaging.
 
-**Review interpretation:** The latest overall review on PR #495 requests a **code-defined v1 game model** and alignment with the posted reference UML, including overlapping responsibilities and names. Game rules and built-in game definitions therefore live in Python modules; persistent game records may use JSON as a *data format*. The PR's inline requests are assigned below to concrete code destinations. Treat this interpretation as the working review resolution for maintainer discussion before implementation.
+**Naming contract:** For every Czech-named class specified by the maintainer's PR #495 reference UML, its Czech name is the actual Python class and its English equivalent is a simple alias of the *same* class (for example, `class HerniPlocha`, `Board = HerniPlocha`). Classes already named in English in the UML keep that English name. Newly approved classes use English except `Hra`, which has `Game = Hra`. All module filenames are English. Persistence field names are versioned independently of Python aliases.
 
-## Phase 1 — Complete the application and integrate PR #495
+**Class boundary:** Implement exactly the referenced domain classes that serve v1 Chess, plus approved `Hra`, `Condition`, and the Chess condition subclasses below. `Hra` contains state, participants, clocks, history, status and result; `GameManager` is the single authority that validates/commits transitions. `winner` is an optional `Hrac`: it is absent for stalemate and other drawn games. No standalone result class is necessary.
 
-### 1. Python-defined Chess and English Draughts
+## Phase 1 — Implement the target architecture and finish PR #495
 
-1. Implement bundled game definitions in `src/model/chess.py` and `src/model/checkers.py`, using Python model objects/functions for initial positions, pieces, legal movement, captures, promotion/crowning, terminal rules, clocks and quests. Preserve the behavior represented by the current `data/chess.json` and `data/checkers.json` implementations, including Chess FIDE special moves and WCDF compulsory/multihop captures.
-2. Use `src/model/definition.py` for the common typed game-definition contract and the shared rule/quest declarations. Route the game selector through the two Python definitions; update `src/main.py`, controller calls, installed entrypoint and frozen application boot.
-3. Complete the transition from runtime JSON rule/config evaluation to these Python definitions, then remove the superseded game-definition JSON files, loaders, bundled-configuration packaging, and config-specific tests. Retain observable Chess, Draughts, quests, history and terminal behavior through replacement gameplay regressions.
-4. Align the domain objects and relationships with the **reference class diagram in PR #495's maintainer comment**. For overlapping concerns, implement the roles of `GameManager`, `HerniPlocha`/board, `Figurka`/piece, `Tah`/move, `RevizorTahu`/validator, `Hrac`/player, `Timer`, `Quest`, `QuestManager`, and `GameLogger`. Keep a single authoritative game-state owner and a single legal-move validator. Use the diagram's domain names where matching existing functionality, and preserve explicit Python import names through the coordinated migration.
-5. Retain and pass the four independent Chess reachability regressions already integrated at `.github/tests/test_chess_fide_reachability_boundaries.py`: Buchanan dead fortress, live near-twin legal mate, side-specific timeout result and checkmate precedence at the 75-move boundary. Implement FIDE 5.2.2/6.9/5.1.2 with a sound distinction between provably possible, provably impossible and unresolved mating reachability. Persist unresolved flag falls with suspended clocks, replayable provenance and an explicit operator-resolution flow. Add focused restart, retry, rollback, legacy-save and unaffected-Draughts regressions.
+### 1. Exact target production-file map
 
-### 2. Consolidate the model modules (PR #495 review comments)
+The following **16 Python source files are the target application-source allowlist**. Each exists to host a referenced class, an explicitly requested extension or the indispensable Tkinter entry/view surface. Merge, move and remove superseded production modules after migrating their call sites. Test files, repository build metadata, GitHub workflows, documents, resources and generated diagrams are support artifacts and do not add application classes.
 
-| Review target | Phase 1 code action |
-| --- | --- |
-| `src/model/session.py` | Rename to `src/model/game.py`; retain the public game/session lifecycle, idempotent actions and authoritative state. Update imports and tests. |
-| `src/model/schema.py`, `src/model/outcomes.py` | Move remaining model/action validation and outcome checks into `src/model/validator.py`; remove superseded modules. |
-| `src/model/hooks.py`, `src/model/conditions.py` | Move shared typed rule/condition behavior into `src/model/definition.py` and the Python game definitions; remove superseded interpretation layers. |
-| `src/model/capture_policy.py`, `src/model/capture_geometry.py` | Move capture legality and capture-route generation into `src/model/validator.py`; retain WCDF-specific route semantics. |
-| `src/model/board_queries.py` | Place board-state reads on `src/model/board.py` and move-legality queries on `src/model/validator.py`; retire the stand-alone query facade. |
-| `src/model/snapshot_queries.py` | Move authoritative snapshot reads and history/clock queries into the game/manager state interface; retire the stand-alone snapshot-query adapter after converting all callers. |
-| `src/model/resources.py`, `src/model/games.py` | Replace bundled JSON discovery with direct Python game registration and installed-package imports; remove obsolete resource discovery. |
-| `src/model/notation.py` | Remove PGN/PDN and notation-export implementation and its user commands. |
-| `src/model/preferences.py` | Move any necessary default visual constants to the ttk application; remove player-editable settings persistence. |
-| `src/model/persistence.py` | Consolidate into `src/model/logger.py`; maintain one atomic, revisioned JSON activity/save file per game beneath the **writable application data root** at `data/logs/<game-id>.json`, with secure path handling, retry recovery and deterministic replay. |
-| `src/controller/controller.py` | Rename to `src/controller/game_controller.py`; update the window controller, views, entrypoint and tests. |
+| # | Target file | Classes / responsibilities | Source |
+| ---: | --- | --- | --- |
+| 1 | `src/main.py` | Desktop entrypoint and launch | UI runtime |
+| 2 | `src/model/user.py` | `Uzivatel` / `User`, `UserManager` | REF |
+| 3 | `src/model/player.py` | `Hrac` / `Player` | REF |
+| 4 | `src/model/board.py` | `HerniPlocha` / `Board`; cells, initial Chess placement and piece updates | REF |
+| 5 | `src/model/piece.py` | `Figurka` / `Piece`; `Kun`/`Knight`, `Kral`/`King`, `Dama`/`Queen`, `Strelec`/`Bishop`, `Pesak`/`Pawn`, `Vez`/`Rook` | REF |
+| 6 | `src/model/move.py` | `Tah` / `Move` | REF |
+| 7 | `src/model/validator.py` | `RevizorTahu` / `MoveValidator`; movement, king safety, castling, en passant, promotion, mating reachability proofs | REF |
+| 8 | `src/model/manager.py` | `GameManager`; atomic actions, rule priority, terminal decisions, quest/clock coordination | REF |
+| 9 | `src/model/game.py` | `Hra` / `Game`; unified game state and session lifecycle, status, winner/draw, actions, replay, revision | NEW |
+| 10 | `src/model/condition.py` | `Condition`, `Check`, `Checkmate`, `Stalemate`, `DeadPosition`, `ThreefoldRepetition`, `FivefoldRepetition`, `FiftyMoveRule`, `SeventyFiveMoveRule`, `Timeout` | NEW conditions |
+| 11 | `src/model/timer.py` | `Timer` | REF |
+| 12 | `src/model/quest.py` | `Quest`, `QuestManager` | REF |
+| 13 | `src/model/logger.py` | `GameLogger`; one secure atomic JSON save/activity log per game | REF |
+| 14 | `src/view/app.py` | ttk root, monochrome theme, inline app navigation, state feedback and lifecycle | UI runtime |
+| 15 | `src/view/game.py` | Existing Canvas board and inline promotion, moves and legal destinations | UI runtime |
+| 16 | `src/view/panel.py` | Two player panels, clocks, quests, history, inline game commands and confirmations | UI runtime |
 
-**Persistence placement:** `data/logs/` is relative to the application's writable per-user data directory, so installed wheels and frozen applications can save without modifying bundled code/assets. File identity is one stable file per game; action/history updates are atomic and replayable.
+**Source layout:** `src/main.py`; `src/model/` containing exactly the twelve model files above; `src/view/` containing exactly `app.py`, `game.py`, `panel.py`. Keep real Python package/import requirements satisfied using the existing supported namespace-package approach. All application controller behavior is owned by `view/app.py` (UI routing) and `GameManager` (game transitions).
 
-### 3. Consolidate and restyle the GUI (PR #495 review comments)
+**Auxiliary repository paths:** root `tests/`, root `scripts/`, `.github/workflows/`, `.agents/`, `pyproject.toml` and `repo.dfconfig` retain their required testing, tooling, documentation and packaging roles. Writable activity records resolve under the user's application data root as `data/logs/<game-id>.json`, not into packaged source/assets.
 
-1. Rename `src/view/board.py` to `src/view/game.py`; keep its Canvas board drawing, pointer actions, promotion/capture selection and piece rendering.
-2. Move screen composition, commands, toolbar, game selection, session status, clock displays and dialog ownership from `src/view/screen.py` into `src/view/app.py` and `src/view/game.py`, with a clear separation between Tk application/window ownership and game-specific board presentation.
-3. Move dialog composition from `src/view/modal.py` and focus/grab/close behavior from `src/view/dialog_lifecycle.py` into the appropriate app/game owners; preserve cancellation, focus restoration and error handling.
-4. Merge quest widgets from `src/view/quests.py` into `src/view/panel.py`; each player's quests and status remain visually associated with that player's panel.
-5. Remove the player settings window `src/view/settings.py` and its commands; define the fixed desktop presentation in `src/view/app.py`.
-6. Apply a modern **black/white/neutral-gray ttk theme** in `src/view/app.py`: readable contrast, coherent rounded-where-supported widget styling, clear disabled/focused states, balanced spacing, and the existing left-player/board/right-player composition. Keep game-piece colors distinguishable when required for gameplay.
-7. Replace player-facing file Export, Notation and editable-rule/configuration commands with the automatic per-game activity/save log. Provide session resume and clear saved-game status through the actual game UI.
-8. Update imports, resources and keyboard/mouse actions for the completed view/controller layout and check both Chess and Draughts launch, play, save/resume, draw/resign and shutdown from the installed application.
+### 2. Approved class and condition rules
 
-### 4. Finalize source correctness, packaging and PR review
+**REF / Czech primary + English alias:** `Uzivatel/User`, `Hrac/Player`, `HerniPlocha/Board`, `Figurka/Piece`, `Tah/Move`, `RevizorTahu/MoveValidator`, `Kun/Knight`, `Kral/King`, `Dama/Queen`, `Strelec/Bishop`, `Pesak/Pawn`, `Vez/Rook`.
 
-1. Run focused tests for the new Python definitions, Chess FIDE reachability, complete WCDF capture/crowning, session/clock/quest/terminal transitions, per-game log durability and GUI startup/actions. Migrate existing tests to stable player-facing Python/Tk boundaries and preserve the four independent FIDE regressions.
-2. Move repository-owned tests and helper scripts to root-level `tests/` and `scripts/` in accordance with the original maintainer review on PR #271. Update all workflows, pytest discovery, release tooling and documentation generator paths. Preserve the four Chess FIDE regressions and existing gameplay checks. Update `pyproject.toml`, wheel/sdist contents, native packaging, runtime manifests, generated docs and diagrams for Python game modules. Maintain archive-safe version selection.
-3. Ensure four buildable desktop distributions remain supported: Windows x64, macOS ARM64, macOS x64 and Linux x64. Keep package smoke checks, source/version provenance and SHA256 checksums in the GitHub Actions release path; keep extracted GUI journey tests available to the maintainer as a manual workflow.
-4. Correct the live `Deploy Documentation` workflow failure represented by pipeline incident #503 and route follow-up deployment-failure reporting into the consolidated v1 issue #430; verify source and docs workflow execution on `v1`.
-5. Respond to **all 22 current PR #495 inline review threads** with exact code/diff evidence. Address the latest overall review's Python-only v1 architecture and UML reference. Request the maintainer's review resolution and required protected-branch approval on the final PR SHA.
-6. Deliver a clean `v1` source SHA with passing required source/build CI, traceable code changes and release-ready packaging.
+**REF / English primary:** `GameManager`, `Timer`, `Quest`, `QuestManager`, `GameLogger`, `UserManager`.
 
-## Phase 2 — Publish v1.0.0 and complete repository cleanup
+**NEW / explicitly requested:** `Hra` with `Game = Hra`; `Condition` with the following **nine Chess-only subclasses**, all in the single `condition.py` file:
 
-1. Finalize and obtain required approval for **PR #495 (`v1 → develop`)**; merge through protected GitHub controls and verify the resulting `develop` SHA, required CI and actual default-branch Actions documentation deployment.
-2. Update the **existing draft PR #501 (`develop → main`)** to the promoted candidate, obtain the required maintainer approval and merge through protected GitHub controls.
-3. Enable the existing `repo.dfconfig` Python release publication setting on the reviewed release source; use the existing PrideVer `.github/workflows/release.yml` from the live `main` SHA to publish **`v1.0.0`**.
-4. Verify all four public architecture-correct native archives and their SHA256 sidecars, the source/tag relationship and accurate Windows/macOS unsigned/notarization disclosures. Provide the maintainer with installation and first-run guidance for postrelease testing.
-5. Preserve `main`'s released history in `v2` via a history-preserving merge; retain draft PR #496 and its unique functionality. Delete temporary `v1` after its commits remain reachable from the protected release history. Preserve release tags and archived commits.
-6. Close consolidated issue #430 after successful publication and cleanup. **Final repository branches:** `main`, `develop`, `v2`. **Final open issue:** #348.
+| Condition | Purpose | Decision semantics |
+| --- | --- | --- |
+| `Check` | King under attack | Position status |
+| `Checkmate` | Checked player has no legal move | Automatic win |
+| `Stalemate` | Player has no legal move and is not in check | Automatic draw |
+| `DeadPosition` | Neither side can ever legally give checkmate | Automatic draw, sound proof |
+| `ThreefoldRepetition` | Claimable repeated position | Draw on valid claim |
+| `FivefoldRepetition` | Automatic repeated position | Automatic draw |
+| `FiftyMoveRule` | Claimable 50-move threshold | Draw on valid claim |
+| `SeventyFiveMoveRule` | Automatic 75-move threshold | Automatic draw, subject to checkmate precedence |
+| `Timeout` | Active player's clock expires | Winner, draw or pending according to sound opposing-side mating reachability |
 
-**Delivery ledger:** final source and release SHAs, PR approval/merge links, focused regression results, documented live review dispositions, docs deployment result, four release artifact URLs and hashes, v2 ancestry verification and final issue/branch inventory.
+Draw agreement and resignation are game actions resolved by `GameManager`; promotion, castling and en passant are move-validation behavior owned by `RevizorTahu`. The `Condition` API supports an explicit undecidable result where sound proof is unavailable. `Hra` records `status`, optional `winner`, result reason and a replayable pending timeout when needed. The implementation must pass the four independent existing Chess dead/live/mate-priority regressions and focused persistence/replay tests.
+
+### 3. Reference UML — target class diagram
+
+**Legend:** `REF` = class required by the posted PR #495 reference UML. `NEW` = explicitly requested addition. `NEW condition` = Chess condition extension. Class labels are *primary Python class names*; English aliases are defined above. UML export-writer classes are outside the selected Chess product contract.
+
+```mermaid
+classDiagram
+direction LR
+class Uzivatel {
+  <<REF>>
+}
+class UserManager {
+  <<REF>>
+}
+class Hrac {
+  <<REF>>
+}
+class HerniPlocha {
+  <<REF>>
+}
+class Figurka {
+  <<REF>>
+}
+class Kun {
+  <<REF>>
+}
+class Kral {
+  <<REF>>
+}
+class Dama {
+  <<REF>>
+}
+class Strelec {
+  <<REF>>
+}
+class Pesak {
+  <<REF>>
+}
+class Vez {
+  <<REF>>
+}
+class Tah {
+  <<REF>>
+}
+class RevizorTahu {
+  <<REF>>
+}
+class GameManager {
+  <<REF>>
+}
+class Timer {
+  <<REF>>
+}
+class Quest {
+  <<REF>>
+}
+class QuestManager {
+  <<REF>>
+}
+class GameLogger {
+  <<REF>>
+}
+class Hra {
+  <<NEW>>
+  +status
+  +winner
+  +revision
+  +history
+}
+class Condition {
+  <<NEW>>
+  +evaluate(game)
+}
+class Check {
+  <<NEW condition>>
+}
+class Checkmate {
+  <<NEW condition>>
+}
+class Stalemate {
+  <<NEW condition>>
+}
+class DeadPosition {
+  <<NEW condition>>
+}
+class ThreefoldRepetition {
+  <<NEW condition>>
+}
+class FivefoldRepetition {
+  <<NEW condition>>
+}
+class FiftyMoveRule {
+  <<NEW condition>>
+}
+class SeventyFiveMoveRule {
+  <<NEW condition>>
+}
+class Timeout {
+  <<NEW condition>>
+}
+Uzivatel --> Quest : completed
+UserManager --> Uzivatel : manages
+Hrac --> Uzivatel : profile
+Hra "1" o-- "2" Hrac : participants
+Hra --> HerniPlocha : board state
+Hra --> Timer : clocks
+GameManager --> Hra : commits transitions
+GameManager --> Tah : executes
+GameManager --> RevizorTahu : validates
+GameManager --> QuestManager : awards
+GameManager --> GameLogger : persists
+GameManager --> Condition : evaluates
+QuestManager --> Quest : manages
+HerniPlocha --> Figurka : squares
+Tah --> Figurka : moves
+RevizorTahu --> HerniPlocha : observes
+RevizorTahu --> Tah : validates
+Figurka <|-- Kun
+Figurka <|-- Kral
+Figurka <|-- Dama
+Figurka <|-- Strelec
+Figurka <|-- Pesak
+Figurka <|-- Vez
+Condition <|-- Check
+Condition <|-- Checkmate
+Condition <|-- Stalemate
+Condition <|-- DeadPosition
+Condition <|-- ThreefoldRepetition
+Condition <|-- FivefoldRepetition
+Condition <|-- FiftyMoveRule
+Condition <|-- SeventyFiveMoveRule
+Condition <|-- Timeout
+```
+
+### 4. Exact file-to-class architecture map
+
+The following Mermaid chart contains **the complete target production-source file set**; its labels show their assigned classes and which source items are from the reference or newly approved. No additional production Python module is planned.
+
+```mermaid
+flowchart TB
+  subgraph ENTRY["Desktop runtime — UI surface"]
+    main["src/main.py<br/>Entrypoint [UI]"]
+    app["src/view/app.py<br/>ttk root, inline navigation [UI]"]
+    gameview["src/view/game.py<br/>Canvas board and inline moves [UI]"]
+    panel["src/view/panel.py<br/>Players, clocks, quests and actions [UI]"]
+  end
+  subgraph MODEL["Domain model — exact reference-aligned files"]
+    user["src/model/user.py<br/>Uzivatel / User; UserManager [REF]"]
+    player["src/model/player.py<br/>Hrac / Player [REF]"]
+    board["src/model/board.py<br/>HerniPlocha / Board [REF]"]
+    piece["src/model/piece.py<br/>Figurka / Piece + six Chess pieces [REF]"]
+    move["src/model/move.py<br/>Tah / Move [REF]"]
+    validator["src/model/validator.py<br/>RevizorTahu / MoveValidator [REF]"]
+    manager["src/model/manager.py<br/>GameManager [REF]"]
+    game["src/model/game.py<br/>Hra / Game [NEW]"]
+    condition["src/model/condition.py<br/>Condition + 9 Chess conditions [NEW]"]
+    timer["src/model/timer.py<br/>Timer [REF]"]
+    quest["src/model/quest.py<br/>Quest; QuestManager [REF]"]
+    logger["src/model/logger.py<br/>GameLogger [REF]"]
+  end
+  main --> app
+  app --> gameview
+  app --> panel
+  app --> manager
+  app --> game
+  manager --> game
+  manager --> validator
+  manager --> condition
+  manager --> quest
+  manager --> logger
+  game --> board
+  game --> player
+  game --> timer
+  board --> piece
+  validator --> board
+  validator --> move
+  player --> user
+  logger --> game
+```
+
+### 5. Ordered implementation roadmap
+
+**1 — Contract and source ownership.** Define `Hra`, `GameManager`, `Condition`, aliases and the exact 16-file target map. Move `session.py → game.py`. Update entrypoint, imports and interfaces while preserving existing gameplay and saved-session semantics.
+
+**2 — Python Chess model.** Replace runtime JSON game configuration with direct Python Chess classes and rule logic in `board.py`, `piece.py`, `move.py`, `validator.py`, `condition.py` and `manager.py`. Implement initial setup, full legal moves, promotions, turn handling, quest evaluation and terminal/draw rules. Transition installed/frozen application startup to the Python model. Keep the four sourced FIDE regressions active through the change.
+
+**3 — Fold the model into its owners.** Move `schema.py`, `outcomes.py`, `conditions.py`, `hooks.py`, `capture_policy.py`, `capture_geometry.py`, `board_queries.py`, `snapshot_queries.py` and superseded `definition.py` responsibilities into `validator.py`, `condition.py`, `board.py`, `game.py` and `manager.py`. Put quests and quest management in `quest.py`, clock behavior in `timer.py`, player/user behavior in `player.py` and `user.py`. Convert all consumers before deleting redundant modules.
+
+**4 — Finish FIDE and session durability.** Implement automatic and claimable conditions with explicit precedence; maintain sound possible/impossible/unknown mating analysis. Persist unresolved flag falls, suspend clocks, support resume/replay and use inline participant-visible resolution controls. Ensure mate takes priority at the 75-move boundary and stalemate is an explicit draw. Verify Chess regression behavior using existing focused tests.
+
+**5 — Game logging.** Consolidate `persistence.py` into `logger.py`. Write one atomic, revisioned JSON file per game at the writable application data root's `data/logs/<game-id>.json`, with safe paths, event history, crash recovery, per-game resume and historical-save migration. Keep gameplay storage under `GameLogger` and state under `Hra`.
+
+**6 — Dialog-free desktop UI.** Fold the gameplay controller into `app.py` and `GameManager`; migrate Canvas `board.py → view/game.py`; merge player quests into `panel.py`; move inline navigation/status/controls into `app.py`. Render move/promotion choices, draw offers/claims, resignation confirmation, new-game selection, error reporting and pending-adjudication resolution **inside the existing app/panel/board layout**. Use ttk frames, labels, buttons and inline expansion; retain responsive focus, mouse interaction, closing and restart behavior. Build the fixed monochrome theme in `app.py`. Remove dedicated modal, dialog-lifecycle, screen, settings and controller modules after their functions have been integrated.
+
+**7 — Converge repository tooling and packaging.** Move repository-owned tests and scripts to root `tests/` and `scripts/`; update all Actions selectors/build scripts and source-generated documentation. Rebuild wheel/sdist and Windows x64, macOS ARM64/x64 and Linux x64 assets with Python Chess rules, correct resource manifests, version metadata and SHA256 checks. Maintain manually selectable native GUI QA. Route documentation deployment faults to issue #430 and verify documentation workflow execution.
+
+**8 — Review integration.** Address PR #495's 22 inline threads and overall Python/UML review with code-level evidence, including changes to the JSON rule placement, game/session naming, model decomposition, logging, visual interface, player settings and removal of modal dialogs. Obtain the maintainer's review disposition and required CI before promotion.
+
+**Phase 1 completion:** PR #495 contains the 16-file target product, complete Python Chess, canonical model classes and aliases, required condition classes, inline dialog-free UI, one atomic log per game and four-platform release-ready packages.
+
+## Phase 2 — Publish v1.0.0 and finalize the repository
+
+1. Obtain approval for [PR #495](https://github.com/marius-patrik/BoardGamesWithQuests/pull/495) and merge `v1 → develop` under protected GitHub controls. Verify the merge SHA and live default-branch documentation deployment.
+2. Update and obtain approval for existing [PR #501](https://github.com/marius-patrik/BoardGamesWithQuests/pull/501) and merge `develop → main` under protected GitHub controls.
+3. Enable the existing `repo.dfconfig` Python release publication setting on the reviewed release source. Use PrideVer and the existing GitHub Actions workflow to publish `v1.0.0` from `main`.
+4. Publish and checksum Windows x64, macOS ARM64, macOS x64 and Linux x64 distributions; verify published artifacts, source provenance and signing/notarization disclosures. Provide installation instructions for maintainer-led gameplay/GUI/native testing.
+5. Merge released `main` ancestry into `v2` while preserving [PR #496](https://github.com/marius-patrik/BoardGamesWithQuests/pull/496) and its unique work. Delete the integrated `v1` branch, preserve release/archive tags and close #430 after publication.
+6. Verify exactly three branches—`main`, `develop`, `v2`—and exactly one open issue, #348.
+
+**Release report:** implementation and release SHAs, PR review dispositions, focused regression results, source-file map, documentation deployment, four binary/checksum links, trust guidance and final repository inventory.

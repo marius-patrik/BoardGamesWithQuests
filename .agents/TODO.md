@@ -1,21 +1,19 @@
 # BoardGamesWithQuests — v1.0.0 Action Queue
 
-**One current v1 issue:** #430. **Implementation:** PR #495 (`v1 → develop`). **Release promotion:** existing draft PR #501 (`develop → main`). **Future v2:** #348 / PR #496.
+**Canonical issue:** #430 · **Code PR:** #495 (`v1 → develop`) · **Promotion PR:** #501 (`develop → main`) · **v2:** #348 / PR #496. See [PLAN.md](PLAN.md) for the exact 16-file allowlist, Mermaid reference/file-map diagrams, naming contracts and ordered roadmap.
 
-## Phase 1 — Complete application and PR #495
+## Phase 1 — Python Chess, UML alignment, dialog-free UI
 
-- [ ] Convert Chess and English Draughts' built-in game definitions and rules into Python modules; preserve complete game behavior and independent FIDE/WCDF regressions.
-- [ ] Align GameManager, board, piece, move, validator, clock, quests and logger with the maintainer's reference class diagram; consolidate schema/conditions/hooks/outcomes/capture/query adapters into their named owning modules.
-- [ ] Rename session → game, controller → game_controller and view board → game; place app/dialog/screen composition in app/game, quests in panel; deliver modern monochrome ttk desktop UI.
-- [ ] Remove player-facing settings, notation and export; write one atomic JSON save/activity log per game to the writable app-data `data/logs/` directory; provide resume/replay.
-- [ ] Correct the Buchanan dead/live/flag-fall Chess outcomes with sound proof handling and durable unresolved adjudication; retain the four already-integrated source-backed tests.
-- [ ] Move repository-owned tests and scripts into root `tests/` and `scripts/`, update all CI/tool paths, source consumers, wheel/sdist and native packaging, source-generated docs/diagrams and deployment-failure reporting (#503 → #430).
-- [ ] Address all 22 inline threads and the latest code-only/UML overall review on PR #495; obtain maintainer review disposition and required PR checks.
+- [ ] Produce the exact 16 production Python files: `main.py`; model `user, player, board, piece, move, validator, manager, game, condition, timer, quest, logger`; view `app, game, panel`. Czech primary class identifiers + English aliases where specified by UML; English elsewhere; English filenames.
+- [ ] Implement Python-defined Chess only; complete FIDE legality and terminal/draw conditions. Define `Hra` / `Game`, `Condition` and Check, Checkmate, Stalemate, DeadPosition, Threefold/FivefoldRepetition, Fifty/SeventyFiveMoveRule and Timeout subclasses within `model/condition.py`. Preserve four existing sourced Chess regressions.
+- [ ] Consolidate model and controller logic into the allowed modules. Retain `GameManager` as transition authority, `Hra` as state/lifecycle owner, `RevizorTahu` as single legal-move validator and `GameLogger` as one atomic per-game JSON log under writable app data `data/logs/`.
+- [ ] Deliver a **dialog-free and modal-free** Tkinter UI with modern monochrome ttk. Compose app, Canvas game, and two player panels; provide inline promotion, draw, resignation, new game, resume, errors and pending adjudication.
+- [ ] Relocate repository tests/scripts to root; migrate source/installed/native packaging to Python Chess; maintain focused FIDE/persistence/UI regressions and all four native build+smoke+checksum gates. Repair Docs workflow and consolidate failure reporting to #430.
+- [ ] Address all 22 PR #495 review threads and the overall Python/UML review; obtain final maintainer review and required CI.
 
 ## Phase 2 — Publish and finish
 
-- [ ] Approve and merge PR #495 into protected `develop`; confirm default-branch documentation deployment.
-- [ ] Update and approve existing draft PR #501 (`develop → main`); merge with protected checks.
-- [ ] Enable PrideVer publication and publish v1.0.0 from `main` with four real platform packages, smoke/resource integrity and SHA256 sidecars.
-- [ ] Provide truthful native trust/install guidance for maintainer-led postrelease testing.
-- [ ] Preserve released v1 in `v2`, retain PR #496, delete integrated `v1`, close #430. Finish with branches `main`, `develop`, `v2` and one open issue #348.
+- [ ] Approve and merge #495 → protected `develop`; verify live default-branch Docs deployment.
+- [ ] Approve and merge existing #501 `develop → main`; publish PrideVer `v1.0.0` with four native archives and SHA256 sidecars.
+- [ ] Provide native signing/install disclosures and links for maintainer-owned postrelease testing.
+- [ ] Merge released `main` ancestry into `v2`, preserve PR #496, delete integrated `v1`, close #430. Final branches `main`, `develop`, `v2`; sole open issue #348.
