@@ -132,31 +132,31 @@ class Condition {
   +evaluate(game)
 }
 class Check {
-  <<NEW condition>>
+  <<NEW>>
 }
 class Checkmate {
-  <<NEW condition>>
+  <<NEW>>
 }
 class Stalemate {
-  <<NEW condition>>
+  <<NEW>>
 }
 class DeadPosition {
-  <<NEW condition>>
+  <<NEW>>
 }
 class ThreefoldRepetition {
-  <<NEW condition>>
+  <<NEW>>
 }
 class FivefoldRepetition {
-  <<NEW condition>>
+  <<NEW>>
 }
 class FiftyMoveRule {
-  <<NEW condition>>
+  <<NEW>>
 }
 class SeventyFiveMoveRule {
-  <<NEW condition>>
+  <<NEW>>
 }
 class Timeout {
-  <<NEW condition>>
+  <<NEW>>
 }
 Uzivatel --> Quest : completed
 UserManager --> Uzivatel : manages
