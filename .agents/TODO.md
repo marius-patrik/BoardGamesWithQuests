@@ -9,7 +9,7 @@
 - [ ] Rename session → game, controller → game_controller and view board → game; place app/dialog/screen composition in app/game, quests in panel; deliver modern monochrome ttk desktop UI.
 - [ ] Remove player-facing settings, notation and export; write one atomic JSON save/activity log per game to the writable app-data `data/logs/` directory; provide resume/replay.
 - [ ] Correct the Buchanan dead/live/flag-fall Chess outcomes with sound proof handling and durable unresolved adjudication; retain the four already-integrated source-backed tests.
-- [ ] Update source consumers, tests, wheels/sdists, four native package manifests/builds, generated docs/diagrams and deployment-failure handling (#503 → #430).
+- [ ] Move repository-owned tests and scripts into root `tests/` and `scripts/`, update all CI/tool paths, source consumers, wheel/sdist and native packaging, source-generated docs/diagrams and deployment-failure reporting (#503 → #430).
 - [ ] Address all 22 inline threads and the latest code-only/UML overall review on PR #495; obtain maintainer review disposition and required PR checks.
 
 ## Phase 2 — Publish and finish
