@@ -666,8 +666,36 @@ flowchart LR
   nf82b40d222a1eb98e --> n46ccfd4d93d244af9
   nb58a398e6708a6f8e["function_definition smoke"]
   nf82b40d222a1eb98e --> nb58a398e6708a6f8e
-  n8855de36350a78584["function_definition main"]
+  n8855de36350a78584["function_definition write_build_identity"]
   nf82b40d222a1eb98e --> n8855de36350a78584
+  nf16348c3c7dbba5ef["function_definition reseal_macos_after_metadata"]
+  nf82b40d222a1eb98e --> nf16348c3c7dbba5ef
+  n38127c3e508876208["function_definition main"]
+  nf82b40d222a1eb98e --> n38127c3e508876208
+  n36d3f932626851ec9["reconcile_preview_deployments.py"]
+  n2092df3a19d2f7b13 --> n36d3f932626851ec9
+  n04f5122626c4d2fa8["class_definition APIError"]
+  n36d3f932626851ec9 --> n04f5122626c4d2fa8
+  n7253dd861094ae3fa["function_definition __init__"]
+  n36d3f932626851ec9 --> n7253dd861094ae3fa
+  n0af0224c8d4f1813c["class_definition GitHubAPI"]
+  n36d3f932626851ec9 --> n0af0224c8d4f1813c
+  ncd4cf483598eabbac["function_definition __init__"]
+  n36d3f932626851ec9 --> ncd4cf483598eabbac
+  n13940fbbf7b889753["function_definition request"]
+  n36d3f932626851ec9 --> n13940fbbf7b889753
+  n559e61572f113676f["function_definition get"]
+  n36d3f932626851ec9 --> n559e61572f113676f
+  n29613b1a276cd720d["function_definition post"]
+  n36d3f932626851ec9 --> n29613b1a276cd720d
+  n4c267a6687f5db67f["function_definition records"]
+  n36d3f932626851ec9 --> n4c267a6687f5db67f
+  nce407e8aade9e5006["function_definition preview_post"]
+  n36d3f932626851ec9 --> nce407e8aade9e5006
+  n01f5c80424a1936d7["function_definition reconcile"]
+  n36d3f932626851ec9 --> n01f5c80424a1936d7
+  n7867a89364fe159a6["function_definition main"]
+  n36d3f932626851ec9 --> n7867a89364fe159a6
   n50f8f749b20de7e29["release_gate.py"]
   n2092df3a19d2f7b13 --> n50f8f749b20de7e29
   n18146ec0646429aaf["function_definition authorize_release"]
@@ -888,6 +916,64 @@ flowchart LR
   n6f2a93de9994e922b --> n8b64577ca0364a8e1
   n3f452c23e8a49d396["chess_opera_game_1858.json"]
   n6f2a93de9994e922b --> n3f452c23e8a49d396
+  nc93c44fa3f0e7b9f7["frozen_native_acceptance.py"]
+  nc9f5868186eb03f66 --> nc93c44fa3f0e7b9f7
+  n173166224cfa0881c["class_definition Blocked"]
+  nc93c44fa3f0e7b9f7 --> n173166224cfa0881c
+  nacd866ac35b4a3abd["function_definition sha256"]
+  nc93c44fa3f0e7b9f7 --> nacd866ac35b4a3abd
+  n1a8ea74b51f63795e["function_definition extract"]
+  nc93c44fa3f0e7b9f7 --> n1a8ea74b51f63795e
+  n5413901967605612c["function_definition binary_architecture"]
+  nc93c44fa3f0e7b9f7 --> n5413901967605612c
+  n6ac8ce7e22948b44b["function_definition inspect_archive"]
+  nc93c44fa3f0e7b9f7 --> n6ac8ce7e22948b44b
+  n4c84b9961d87f9c9b["function_definition assert_native_runner"]
+  nc93c44fa3f0e7b9f7 --> n4c84b9961d87f9c9b
+  n448fbfe4e5c68751a["function_definition corrupt_asset_check"]
+  nc93c44fa3f0e7b9f7 --> n448fbfe4e5c68751a
+  n6eb276afdae7d3c2b["function_definition missing_asset_check"]
+  nc93c44fa3f0e7b9f7 --> n6eb276afdae7d3c2b
+  n4de65756079fcec0c["function_definition distribution_trust"]
+  nc93c44fa3f0e7b9f7 --> n4de65756079fcec0c
+  n3667a3137633849ef["function_definition native_driver"]
+  nc93c44fa3f0e7b9f7 --> n3667a3137633849ef
+  n5fe31240973e27209["function_definition focus_chooser"]
+  nc93c44fa3f0e7b9f7 --> n5fe31240973e27209
+  n559b0083eb8267195["function_definition visible_board"]
+  nc93c44fa3f0e7b9f7 --> n559b0083eb8267195
+  n0262806ae2bf2d9a2["function_definition await_board"]
+  nc93c44fa3f0e7b9f7 --> n0262806ae2bf2d9a2
+  nfcfc91b4dd3a1f284["function_definition pointer_gameplay"]
+  nc93c44fa3f0e7b9f7 --> nfcfc91b4dd3a1f284
+  n024dbed0e68bd5573["function_definition native_window_rectangle"]
+  nc93c44fa3f0e7b9f7 --> n024dbed0e68bd5573
+  nee0d50d8eaa9d7946["function_definition screenshot_dialog"]
+  nc93c44fa3f0e7b9f7 --> nee0d50d8eaa9d7946
+  n5ec2d9c5394460499["function_definition native_dialog_present"]
+  nc93c44fa3f0e7b9f7 --> n5ec2d9c5394460499
+  n2fbdfdd30b6ccdafa["function_definition wait_for_native_dialog_close"]
+  nc93c44fa3f0e7b9f7 --> n2fbdfdd30b6ccdafa
+  nd6af3134205157c0e["function_definition settings_button"]
+  nc93c44fa3f0e7b9f7 --> nd6af3134205157c0e
+  n675e1ec0a0ff97f9d["function_definition preferences_file"]
+  nc93c44fa3f0e7b9f7 --> n675e1ec0a0ff97f9d
+  n631bee620fedeb25e["function_definition settings_journey"]
+  nc93c44fa3f0e7b9f7 --> n631bee620fedeb25e
+  n9ca4ea3ee18bdfd0d["function_definition open_chooser_settings"]
+  nc93c44fa3f0e7b9f7 --> n9ca4ea3ee18bdfd0d
+  n7fc5fd2e85b43c811["function_definition edit_settings"]
+  nc93c44fa3f0e7b9f7 --> n7fc5fd2e85b43c811
+  n22552fdd6232b3362["function_definition native_lifecycle_journey"]
+  nc93c44fa3f0e7b9f7 --> n22552fdd6232b3362
+  nb465b73e6a3a64468["function_definition native_file_dialog_submit"]
+  nc93c44fa3f0e7b9f7 --> nb465b73e6a3a64468
+  nabfedf46abdfc63dd["function_definition persisted_native_game_journey"]
+  nc93c44fa3f0e7b9f7 --> nabfedf46abdfc63dd
+  nbf0dba099828fe9b7["function_definition native_persistence_failure_journey"]
+  nc93c44fa3f0e7b9f7 --> nbf0dba099828fe9b7
+  nd80d95a4ffbed1484["function_definition main"]
+  nc93c44fa3f0e7b9f7 --> nd80d95a4ffbed1484
   n1dcd33d5b2e510818["installed_distribution_acceptance.py"]
   nc9f5868186eb03f66 --> n1dcd33d5b2e510818
   nab957932a35159510["function_definition run"]
@@ -1502,6 +1588,32 @@ flowchart LR
   n27d79953c3c1b1843 --> nb58c3a979fb0fd372
   nff0630582f7262775["function_definition test_rejected_budgeted_game_action_is_atomic"]
   n27d79953c3c1b1843 --> nff0630582f7262775
+  nad925e285cef4d0a4["test_preview_deployment_metadata.py"]
+  nc9f5868186eb03f66 --> nad925e285cef4d0a4
+  nc172fff46a52efabe["class_definition API"]
+  nad925e285cef4d0a4 --> nc172fff46a52efabe
+  n8ab82d97ecb1fdea4["function_definition __init__"]
+  nad925e285cef4d0a4 --> n8ab82d97ecb1fdea4
+  n5f5f20383cef51a84["function_definition get"]
+  nad925e285cef4d0a4 --> n5f5f20383cef51a84
+  n0687fa87ad3462b1a["function_definition post"]
+  nad925e285cef4d0a4 --> n0687fa87ad3462b1a
+  n1b6a60907de689254["function_definition test_422_creation_warns_with_pr_and_api_response_then_continues"]
+  nad925e285cef4d0a4 --> n1b6a60907de689254
+  n8fcad821a63572251["function_definition test_422_status_does_not_claim_metadata_updated"]
+  nad925e285cef4d0a4 --> n8fcad821a63572251
+  n47a42ddc59c1fbec9["function_definition test_422_retirement_warns_without_interrupting_reconciliation"]
+  nad925e285cef4d0a4 --> n47a42ddc59c1fbec9
+  n899a9f3fe3fd061d8["decorated_definition"]
+  nad925e285cef4d0a4 --> n899a9f3fe3fd061d8
+  nb82aebdc9256e39e7["function_definition test_other_http_errors_remain_fatal"]
+  nad925e285cef4d0a4 --> nb82aebdc9256e39e7
+  n0242a70bfc8f999b5["function_definition test_stale_pr_head_is_not_published"]
+  nad925e285cef4d0a4 --> n0242a70bfc8f999b5
+  n72f520f28c03d4ba0["decorated_definition"]
+  nad925e285cef4d0a4 --> n72f520f28c03d4ba0
+  nec56584834d2eb7e9["function_definition test_invalid_preview_manifest_rejected"]
+  nad925e285cef4d0a4 --> nec56584834d2eb7e9
   n0513645260baecbf5["test_prospective_draw_claims.py"]
   nc9f5868186eb03f66 --> n0513645260baecbf5
   n5f1a05208d0eaff06["function_definition chess_square"]

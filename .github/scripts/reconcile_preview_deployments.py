@@ -73,14 +73,18 @@ def records(api: GitHubAPI, path: str) -> list[dict]:
     raise ValueError("GitHub deployment pagination limit exceeded")
 
 
-def preview_post(api: GitHubAPI, pr: str, operation: str, endpoint: str, data: dict) -> object | None:
+def preview_post(
+    api: GitHubAPI, pr: str, operation: str, endpoint: str, data: dict
+) -> object | None:
     """Only HTTP 422 on noncritical PR metadata writes is a warning."""
     try:
         return api.post(endpoint, data)
     except APIError as error:
         if error.status != 422:
             raise
-        response = error.response[:2000].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        response = (
+            error.response[:2000].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        )
         print(
             f"::warning title=Preview deployment metadata HTTP 422::"
             f"PR #{pr}: {operation} rejected with HTTP 422; API response: {response}",
@@ -96,8 +100,10 @@ def reconcile(api: GitHubAPI, previews: dict[str, str], page_url: str) -> None:
     if not isinstance(previews, dict):
         raise ValueError("Preview index must be a JSON object")
     for pr, sha in previews.items():
-        if not re.fullmatch(r"[1-9][0-9]*", pr) or not isinstance(sha, str) or not re.fullmatch(
-            r"[0-9a-f]{40}", sha
+        if (
+            not re.fullmatch(r"[1-9][0-9]*", pr)
+            or not isinstance(sha, str)
+            or not re.fullmatch(r"[0-9a-f]{40}", sha)
         ):
             raise ValueError("Invalid preview PR number or source SHA")
 
@@ -178,7 +184,11 @@ def main() -> None:
     parser.add_argument("--previews", required=True)
     parser.add_argument("--page-url", required=True)
     args = parser.parse_args()
-    reconcile(GitHubAPI(args.repo, os.environ.get("GH_TOKEN", "")), json.loads(args.previews), args.page_url)
+    reconcile(
+        GitHubAPI(args.repo, os.environ.get("GH_TOKEN", "")),
+        json.loads(args.previews),
+        args.page_url,
+    )
 
 
 if __name__ == "__main__":

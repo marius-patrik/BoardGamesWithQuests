@@ -40,23 +40,33 @@ class API:
         self.calls.append(("POST", path, payload))
         if self.fail and self.fail[0] in {"create", "status", "retire"}:
             operation = self.fail[0]
-            if (operation == "create" and path == "deployments") or (
-                operation == "status" and path == "deployments/88/statuses"
-            ) or (operation == "retire" and path == "deployments/77/statuses"):
-                raise publisher.APIError(self.fail[1], '{"message":"metadata rejected","errors":["invalid ref"]}')
+            if (
+                (operation == "create" and path == "deployments")
+                or (operation == "status" and path == "deployments/88/statuses")
+                or (operation == "retire" and path == "deployments/77/statuses")
+            ):
+                raise publisher.APIError(
+                    self.fail[1], '{"message":"metadata rejected","errors":["invalid ref"]}'
+                )
         if path == "deployments":
             return {"id": 88}
         return {"state": payload["state"]}
 
 
-def test_422_creation_warns_with_pr_and_api_response_then_continues(capsys: pytest.CaptureFixture[str]) -> None:
+def test_422_creation_warns_with_pr_and_api_response_then_continues(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     api = API(fail=("create", 422))
     publisher.reconcile(api, {"422": SHA}, URL)
     message = capsys.readouterr().out
     assert "PR #422" in message and "HTTP 422" in message
     assert "metadata rejected" in message and "invalid ref" in message
-    assert not any(method == "POST" and path == "deployments/88/statuses" for method, path, _ in api.calls)
-    assert any(method == "POST" and path == "deployments/77/statuses" for method, path, _ in api.calls)
+    assert not any(
+        method == "POST" and path == "deployments/88/statuses" for method, path, _ in api.calls
+    )
+    assert any(
+        method == "POST" and path == "deployments/77/statuses" for method, path, _ in api.calls
+    )
 
 
 def test_422_status_does_not_claim_metadata_updated(capsys: pytest.CaptureFixture[str]) -> None:
@@ -68,16 +78,22 @@ def test_422_status_does_not_claim_metadata_updated(capsys: pytest.CaptureFixtur
     assert "metadata updated" not in output
 
 
-def test_422_retirement_warns_without_interrupting_reconciliation(capsys: pytest.CaptureFixture[str]) -> None:
+def test_422_retirement_warns_without_interrupting_reconciliation(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
     api = API(existing=True, fail=("retire", 422))
     publisher.reconcile(api, {"422": SHA}, URL)
     assert "PR #321" in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("operation,status", [("create", 403), ("status", 500), ("retire", 404), ("lookup", 422)])
+@pytest.mark.parametrize(
+    "operation,status", [("create", 403), ("status", 500), ("retire", 404), ("lookup", 422)]
+)
 def test_other_http_errors_remain_fatal(operation: str, status: int) -> None:
     with pytest.raises(publisher.APIError) as error:
-        publisher.reconcile(API(existing=operation != "create", fail=(operation, status)), {"422": SHA}, URL)
+        publisher.reconcile(
+            API(existing=operation != "create", fail=(operation, status)), {"422": SHA}, URL
+        )
     assert error.value.status == status
 
 
