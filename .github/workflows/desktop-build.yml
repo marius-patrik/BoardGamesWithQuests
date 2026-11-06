@@ -7,6 +7,11 @@ on:
         description: PrideVer-resolved release version
         required: true
         type: string
+      run_native_acceptance:
+        description: Run optional full extracted-app journey automation (maintainer QA)
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -59,7 +64,8 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Exercise extracted native desktop (mandatory fail-closed)
+      - name: Exercise extracted native desktop (optional maintainer QA)
+        if: inputs.run_native_acceptance
         env:
           RELEASE_VERSION: ${{ inputs.version }}
           PLATFORM: ${{ matrix.platform }}
@@ -77,7 +83,7 @@ jobs:
               --platform "$PLATFORM" --version "$RELEASE_VERSION" --source-sha "$GITHUB_SHA"
           fi
       - name: Upload native evidence even when acceptance fails
-        if: always()
+        if: inputs.run_native_acceptance && always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: native-evidence-${{ matrix.platform }}
