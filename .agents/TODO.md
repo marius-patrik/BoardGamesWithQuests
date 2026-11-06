@@ -1,13 +1,21 @@
-# BoardGamesWithQuests — Finish and Ship v1.0.0
+# BoardGamesWithQuests — v1.0.0 Action Queue
 
-**Manual gameplay/GUI/native testing is maintainer-owned after publication.** No independent acceptance agent or J1–J8 gate. The sole remaining dispatch is the **implementation and release** prompt in [PLAN.md](PLAN.md). Active v1 PR #495 (`v1 → develop`), v2 future PR #496 (`v2 → develop`).
+**One current v1 issue:** #430. **Implementation:** PR #495 (`v1 → develop`). **Release promotion:** existing draft PR #501 (`develop → main`). **Future v2:** #348 / PR #496.
 
-- [x] Git history cleanup and integration: exactly `main`, `develop`, `v1`, `v2`. Four independent Chess tests and original history are merged into `v1`; do not reimport, recreate, xfail or delete.
-- [x] Four-platform package workflow retains smoke/build/checksum gates; extracted-app J1–J8 is now opt-in via manual `Desktop Native Manual QA` workflow, not required for release.
-- [ ] Fix known Chess Buchanan dead/live/timeout source bug and preserve all four mandatory regressions (#473); safely suspend any undecidable timeout instead of fabricating FIDE outcomes (#477). Run focused affected tests.
-- [ ] Implement PR #495's two `data/config/` review requests; update installed/frozen resources, package-data, manifests, tests and generated docs (#462).
-- [ ] Finish release configuration: accurate `playable` flags, true four-platform packaging, correct SHA256, PrideVer enablement on approved source, truthful unsigned/unnotarized guidance (#445).
-- [ ] After protected native maintainer approvals: merge #495 → `develop`; confirm actual default-branch Docs Actions deployment (previous incident #502 already closed); review and merge `develop → main` release PR; publish PrideVer v1.0.0 with four archives and checksums.
-- [ ] Preserve unique v2 commits/PR #496, retire temporary `v1` after release, close completed or canceled v1/ops issues. Independent-acceptance issue #444 is already closed **NOT PLANNED**; native issue #443 and docs issue #502 are already closed. Final only `main`, `develop`, `v2` and open issue #348.
+## Phase 1 — Complete application and PR #495
 
-**Not in agent scope:** independent code/GUI/native acceptance, five unfinished J1–J8 test scenarios, macOS native-dialog QA automation, final cross-platform manual game testing. **The maintainer will test the released app.** Never claim unrun tests passed or circumvent red source regressions/required GitHub approvals.
+- [ ] Convert Chess and English Draughts' built-in game definitions and rules into Python modules; preserve complete game behavior and independent FIDE/WCDF regressions.
+- [ ] Align GameManager, board, piece, move, validator, clock, quests and logger with the maintainer's reference class diagram; consolidate schema/conditions/hooks/outcomes/capture/query adapters into their named owning modules.
+- [ ] Rename session → game, controller → game_controller and view board → game; place app/dialog/screen composition in app/game, quests in panel; deliver modern monochrome ttk desktop UI.
+- [ ] Remove player-facing settings, notation and export; write one atomic JSON save/activity log per game to the writable app-data `data/logs/` directory; provide resume/replay.
+- [ ] Correct the Buchanan dead/live/flag-fall Chess outcomes with sound proof handling and durable unresolved adjudication; retain the four already-integrated source-backed tests.
+- [ ] Update source consumers, tests, wheels/sdists, four native package manifests/builds, generated docs/diagrams and deployment-failure handling (#503 → #430).
+- [ ] Address all 22 inline threads and the latest code-only/UML overall review on PR #495; obtain maintainer review disposition and required PR checks.
+
+## Phase 2 — Publish and finish
+
+- [ ] Approve and merge PR #495 into protected `develop`; confirm default-branch documentation deployment.
+- [ ] Update and approve existing draft PR #501 (`develop → main`); merge with protected checks.
+- [ ] Enable PrideVer publication and publish v1.0.0 from `main` with four real platform packages, smoke/resource integrity and SHA256 sidecars.
+- [ ] Provide truthful native trust/install guidance for maintainer-led postrelease testing.
+- [ ] Preserve released v1 in `v2`, retain PR #496, delete integrated `v1`, close #430. Finish with branches `main`, `develop`, `v2` and one open issue #348.
