@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from importlib import metadata
+import json
 import os
+import platform as host_platform
 from pathlib import Path
 import re
 import subprocess
@@ -51,10 +54,10 @@ def build(platform: str, version: str) -> Path:
     """Build the real desktop entry point and include dynamically loaded game sources."""
     if platform not in PLATFORMS or not VERSION.fullmatch(version):
         raise ValueError("A supported platform and PrideVer release version are required")
-    entry = ROOT / "src/chesswithquests/__main__.py"
-    games = ROOT / "src/games"
-    if not entry.is_file() or not games.is_dir():
-        raise FileNotFoundError("Completed desktop sources under src/ are required")
+    entry = ROOT / "src/main.py"
+    data = ROOT / "data"
+    if not entry.is_file() or not data.is_dir():
+        raise FileNotFoundError("Desktop entrypoint and root game definitions are required")
     # Read the checked-out distribution identity on every supported Python.
     try:
         import tomllib
@@ -62,10 +65,10 @@ def build(platform: str, version: str) -> Path:
         import tomli as tomllib
 
     resources = [
-        path for path in games.rglob("*") if path.is_file() and "__pycache__" not in path.parts
+        path for path in data.rglob("*") if path.is_file() and "__pycache__" not in path.parts
     ]
-    if not resources:
-        raise FileNotFoundError("Desktop game runtime resources are empty")
+    if sorted(path.name for path in resources) != ["checkers.json", "chess.json"]:
+        raise FileNotFoundError("expected exactly the two shipped game JSON rulebooks")
 
     with (ROOT / "pyproject.toml").open("rb") as source:
         distribution = tomllib.load(source)["project"]["name"]
@@ -84,9 +87,7 @@ def build(platform: str, version: str) -> Path:
         "--paths",
         str(ROOT / "src"),
         "--add-data",
-        f"{games}{os.pathsep}games",
-        "--collect-submodules",
-        "games",
+        f"{data}{os.pathsep}data",
         "--copy-metadata",
         distribution,
         "--distpath",
@@ -102,12 +103,20 @@ def build(platform: str, version: str) -> Path:
         "BoardGamesWithQuests.app" if platform.startswith("macos") else "BoardGamesWithQuests"
     )
     runtime = bundle / (
-        "Contents/Resources/games" if platform.startswith("macos") else "_internal/games"
+        "Contents/Resources/data" if platform.startswith("macos") else "_internal/data"
     )
+    hashes: dict[str, str] = {}
     for source in resources:
-        packaged = runtime / source.relative_to(games)
-        if not packaged.is_file() or packaged.read_bytes() != source.read_bytes():
+        relative = source.relative_to(data)
+        packaged = runtime / relative
+        payload = source.read_bytes()
+        if not packaged.is_file() or packaged.read_bytes() != payload:
             raise FileNotFoundError(f"Missing or altered frozen runtime resource: {packaged}")
+        hashes[relative.as_posix()] = hashlib.sha256(payload).hexdigest()
+    (runtime / "manifest.json").write_text(
+        json.dumps({"version": 1, "files": dict(sorted(hashes.items()))}, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     return bundle
 
 
@@ -121,6 +130,15 @@ def smoke(bundle: Path, platform: str) -> None:
         executable = bundle / "BoardGamesWithQuests"
     if not executable.is_file():
         raise FileNotFoundError(f"Frozen entry point missing: {executable}")
+    # A frozen application must load its actual embedded JSON rulebooks and
+    # perform a real versioned game transition, idempotent retry and replay.
+    # The --windowed Windows binary has no console; inspect its exit code.
+    check = subprocess.run([str(executable), "--check"], cwd=ROOT, capture_output=True, timeout=90)
+    if check.returncode != 0:
+        raise RuntimeError(
+            f"Frozen application game diagnostic failed ({check.returncode}): "
+            + check.stderr.decode("utf-8", errors="replace")
+        )
     command = [str(executable)]
     if platform == "linux-x64":
         command = ["xvfb-run", "-a", *command]
@@ -143,6 +161,68 @@ def smoke(bundle: Path, platform: str) -> None:
             process.wait(timeout=10)
 
 
+def write_build_identity(bundle: Path, platform: str, version: str) -> Path:
+    """Bind the candidate archive to the actual checkout and bundled data."""
+    source_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", source_sha):
+        raise ValueError("Invalid checked-out source identity")
+    if os.environ.get("GITHUB_SHA") and os.environ["GITHUB_SHA"] != source_sha:
+        raise ValueError("Source checkout is not the GitHub Actions source SHA")
+    machine = host_platform.machine().lower()
+    expected = {
+        "windows-x64": ("amd64", "x86_64"),
+        "macos-arm64": ("arm64",),
+        "macos-x64": ("x86_64",),
+        "linux-x64": ("x86_64",),
+    }
+    if machine not in expected[platform]:
+        raise ValueError(f"Host architecture {machine} disagrees with {platform}")
+    data = ROOT / "data"
+    resources = {
+        path.relative_to(data).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted(data.rglob("*"))
+        if path.is_file() and "__pycache__" not in path.parts
+    }
+    if sorted(resources) != ["checkers.json", "chess.json"]:
+        raise ValueError("Source checkout is missing required game JSON")
+    record = {
+        "source_sha": source_sha,
+        "platform": platform,
+        "release_version": version,
+        "host_architecture": machine,
+        "python_version": sys.version.split()[0],
+        "pyinstaller_version": metadata.version("pyinstaller"),
+        "resources": resources,
+    }
+    location = (
+        bundle / "Contents/Resources/build-info.json"
+        if platform.startswith("macos")
+        else bundle / "build-info.json"
+    )
+    location.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return location
+
+
+def reseal_macos_after_metadata(bundle: Path, platform: str) -> None:
+    """Restore the app's ad-hoc seal after injecting immutable build manifests.
+
+    PyInstaller signs the .app before we write data/manifest.json and
+    build-info.json. Without resealing, Apple's codesign verifier rejects the
+    extracted app as tampered even when the archive checksum is correct.
+    This is *not* Developer ID signing or notarization.
+    """
+    if not platform.startswith("macos"):
+        return
+    subprocess.run(
+        ["codesign", "--force", "--deep", "--sign", "-", str(bundle)],
+        check=True,
+    )
+    subprocess.run(
+        ["codesign", "--verify", "--deep", "--strict", str(bundle)],
+        check=True,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", required=True, choices=sorted(PLATFORMS))
@@ -150,6 +230,8 @@ def main() -> None:
     args = parser.parse_args()
     bundle = build(args.platform, args.version)
     smoke(bundle, args.platform)
+    write_build_identity(bundle, args.platform, args.version)
+    reseal_macos_after_metadata(bundle, args.platform)
     archive, checksum = archive_bundle(bundle, ROOT / "dist/release", args.platform, args.version)
     print(f"Verified desktop bundle: {bundle}")
     print(f"Release asset: {archive}")

@@ -1,10 +1,12 @@
 ---
 status: active
 ---
-# Exclusive repository test location
+# Exclusive repository test location and contract ownership
 
-- Store **every** repository-owned test, fixture, mock, snapshot, support harness and test-only resource under `.github/tests/`. This includes unit, integration, end-to-end, smoke, contract, regression and functional suites.
-- Organize freely under `.github/tests/`, but never place repository tests next to production code, under `.github/scripts/`, in application directories or under `.darkfactory/`, which contains repository-owned integration metadata.
-- Write behavior-driven tests that exercise external outcomes and edge cases, not syntax assertions or mocks that replace the unit under test.
-- Relocate existing tests with every relevant change. The generator and CI must reject any tracked test paths outside `.github/tests/`.
-- Update test discovery and execution commands whenever structure changes. Report unexecuted tests or unavailable CI as blocked, not passing.
+- Store **all** repository-owned tests, fixtures, independent reference data, snapshots, support harnesses and test-only resources under `.github/tests/`. No test infrastructure under production modules, `.github/scripts/`, `.darkfactory/` or parallel test trees. Update CI discovery when reorganizing.
+- Organize suites by **supported observable boundary** and release gate, not by one class or one private method: (a) player-visible DesktopSession/game outcomes, (b) independent Chess/draughts rule references, (c) actual Tkinter GUI user paths, (d) storage/restart/security failure boundaries, (e) real frozen native application workflows, (f) publication integrity/policy. Each case links to a concrete requirement/defect and checks meaningful externally visible results.
+- Avoid tests of internal implementation-only behavior: no private-field assertions, local-class method checklists, syntax/import/mocked-call-count/structural shape assertions presented as gameplay proof, or tests asserting unfinished features return an error. Exceptions for minimal supporting pure-math/parser/security diagnostics must be explicitly distinguished from mandatory product acceptance.
+- Independently source reference games and rules; do not generate the expected outcome from the same production engine and then test that it agrees with itself. Cover legal and illegal actions, events/clock/outcomes, retries/replay, adversarial inputs and boundary constraints via the actual consumer contract.
+- **Replacement policy:** perform a full inventory of legacy tests, map each to one contract and disposition `retain/adapt/replace/delete`. Intentionally replace most obsolete white-box tests after equivalent strong boundary coverage is available; **do not mass-delete real regression evidence just to reduce test counts**. Prefer nonduplicative scenario suites and straightforward readable fixtures.
+- Mandatory real GUI and platform workflows must **not silently skip** for missing display, provider or native host. Keep fast developer contracts separate from slower release-acceptance checks, but all relevant release gates must run and pass on the final candidate SHA. Blocked is not passed.
+- Static repository-source/diagram/release-policy checks remain useful for their own integrity contracts but may not be counted as proof of playable game behavior.
