@@ -54,9 +54,7 @@ class GameLogger:
         }
 
     def uloz_historii(self) -> bool:
-        if self.damaged:
-            self.save_error = "Damaged match file must be repaired or moved before saving"
-            return False
+        """Retry safely after file repair/removal without destroying unrelated match data."""
         try:
             if self.path.exists():
                 try:
@@ -65,13 +63,27 @@ class GameLogger:
                         not isinstance(existing, dict)
                         or existing.get("schema_version") != 1
                         or existing.get("match_id") != self.match_id
+                        or existing.get("players") != self.players
                         or not isinstance(existing.get("events"), list)
+                        or existing.get("status") not in ("in_progress", "terminal")
+                        or not isinstance(existing.get("result"), dict)
                     ):
                         raise ValueError("Invalid match file")
-                except (ValueError, UnicodeError) as exc:
+                    stored_events = existing["events"]
+                    if stored_events != self.events[: len(stored_events)]:
+                        raise ValueError("Repaired history conflicts with the active match")
+                    if existing["status"] == "terminal" and (
+                        stored_events != self.events or existing["result"] != self.result
+                    ):
+                        raise ValueError("Saved terminal history conflicts with the active match")
+                except (ValueError, TypeError, UnicodeError) as exc:
                     self.damaged = True
-                    raise ValueError("Existing match file is damaged and was preserved") from exc
+                    raise ValueError(
+                        f"Existing match file needs repair: {exc}. Original was preserved"
+                    ) from exc
+            # A removed file or safely repaired snapshot is now writable again.
             atomic_json(self.path, self.zapis())
+            self.damaged = False
             self.save_error = None
             self.dirty = False
             return True
