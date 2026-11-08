@@ -26,3 +26,7 @@ include = ["model*", "controller*", "view*"]
 testpaths = [".github/tests"]
 addopts = "-ra"
 markers = ["gui: real Tkinter interactive acceptance"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
