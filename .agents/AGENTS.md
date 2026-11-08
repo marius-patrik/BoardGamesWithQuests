@@ -4,7 +4,7 @@ This document is the **persistent working context** for implementation and maint
 
 **Product authority:** [PRD.md](PRD.md) describes the application completely, including gameplay, UI, domain contracts, persistence, Mermaid UML, action flow, and file structure. This file describes **how work is executed and tracked**, not what the application does.
 
-**Canonical repository placement:** `.agents/AGENTS.md`. The root `CONTRIBUTING.md` points to it through a symlink. The product document resides at `.agents/PRD.md`, with a root `README.md` symlink. These are intended repository paths; file placement and symlink changes are separate implementation tasks performed only when authorized.
+**Canonical repository placement:** `.agents/AGENTS.md`, exposed through the root `CONTRIBUTING.md` symlink. The authoritative product document is `.agents/PRD.md`, exposed through the root `README.md` symlink. Both paths are established on `v1-cleanroom`.
 
 ## 1. Goal
 
@@ -17,10 +17,10 @@ Work is complete when all of the following have direct, reproducible evidence:
 - [ ] **Specification ownership:** The reviewed PRD is the single source of product behavior; code, UML, action flow, and source layout describe the same implementation.
 - [ ] **Desktop gameplay:** A complete local game operates through Tkinter, including ordinary and special Chess moves, legal-move previews, terminal results, and two local profiles.
 - [ ] **Rule correctness:** The validator follows the PRD's one-action lifecycle, uses staged changes, rejects illegal actions without changing live state, and prevents recursive terminal evaluation.
-- [ ] **Quests and profiles:** All six quests award the specified XP once per acting profile per match; combinations award together; saved XP remains available across sessions.
+- [x] **Quests and profiles:** All six quests award the specified XP once per acting profile per match; combinations award together; saved XP remains available across sessions.
 - [ ] **History and recovery:** Each match has an independent chronological JSON history; profile and history saves expose independent statuses; malformed files are preserved and ordinary failures support retry.
 - [ ] **Interaction quality:** The real GUI presents piece selection, legal destinations, promotion, resignation, history, quests, outcomes, keyboard focus, and storage messages coherently.
-- [ ] **Source verification:** Relevant automated tests and actual desktop interaction exercises pass on the final source, with repeatable commands and recorded results.
+- [x] **Source verification:** Relevant automated tests and actual desktop interaction exercises pass on the final source, with repeatable commands and recorded results.
 - [ ] **Windows distribution:** A standalone Windows application launches on a Windows machine without an installed Python interpreter and can play, award XP, and write local data.
 - [ ] **Repository integration:** Required review checks pass; documentation and distribution are aligned with the merged implementation; approved repository changes follow protected-branch controls.
 - [ ] **Presentation:** The owner can explain the class model, trace one action and one quest reward, show a failed action, and demonstrate the finished application.
@@ -32,8 +32,8 @@ Complete work in dependency order. Each checkbox becomes checked only when its o
 ### 0 — Confirm specification and repository ownership
 
 - [x] Obtain explicit maintainer approval of the product model and PRD.
-- [ ] Inspect the actual branch, open PRs, issues, file ownership, CI requirements, and working tree before editing.
-- [ ] Reconcile the canonical implementation issue, existing repository planning records, and active PR description with the approved PRD. Preserve unrelated or v2 work.
+- [x] Inspect the actual branch, open PRs, issues, file ownership, CI requirements, and working tree before editing.
+- [x] Reconcile the canonical implementation issue, existing repository planning records, and active PR description with the approved PRD. Preserve unrelated or v2 work.
 - [x] Establish `.agents/PRD.md` and `.agents/AGENTS.md` as maintained source documents; make root `README.md` and `CONTRIBUTING.md` symlinks to them. Update any generator or workflow that would overwrite those paths.
 - [x] Record the reviewed base commit, target integration branch, implementation boundaries, and applicable tests in the handoff table.
 
@@ -70,7 +70,7 @@ Complete work in dependency order. Each checkbox becomes checked only when its o
 - [x] Run focused and repository-level test commands; resolve integration issues against the approved PRD.
 - [x] Produce the standalone Windows build using the repository's supported release tooling and ensure assets and writable data paths work when frozen.
 - [ ] Verify the executable on Windows without Python installed; record build inputs, artifact identity, and smoke-test result.
-- [ ] Refresh the Mermaid diagrams in the PRD against source classes and actual dependencies.
+- [x] Refresh the Mermaid diagrams in the PRD against source classes and actual dependencies.
 - [ ] Prepare the user demonstration, reconcile review feedback, complete the required protected-branch integration, and record release evidence.
 
 ### Work dependency map
@@ -123,32 +123,38 @@ Code and tests use the repository's established Python tooling and test location
 
 ## 5. Progress and handoff
 
-**Current gate:** Cleanroom source is implemented on `v1-cleanroom` with draft PR #510 targeting `develop` (not `main`). The post-rebase `packages/` duplicate engine and obsolete governance records have been removed. Docs assets are consolidated in `docs/`. Python/Tkinter/Windows build and documentation CI passed on implementation commit `592cf512b3dc678f602cccbe1dfc507c8b4ad17c`; independent acceptance, clean-machine Windows testing and maintainer review remain **open**.
+**Current gate:** The Chess-only source and cleanroom repository consolidation are implemented on `v1-cleanroom`. Draft PR #510 correctly targets `develop`, not `main`. Six final-source workflows completed successfully at code SHA `c41159ed9fe85cfe4f86be61d479fc52918622ef`. Final independent gameplay/GUI review, clean Windows-machine acceptance, and maintainer merge/release approval remain open. No v1 final release is published.
 
 | Field | Evidence / state |
 | --- | --- |
-| Owner authorization | 2026-11-08 cleanroom implementation dispatch |
-| Branch / PR | `v1-cleanroom` → `develop`, draft PR #510, owning issue #511 |
-| Production owner | `src/` only, with 19 specified source modules, 12 rule classes, six quests and real Tkinter UI |
-| Canonical documentation | `.agents/PRD.md` and `.agents/AGENTS.md`; root symlinks preserved |
-| Derived docs | `docs/architecture/diagrams/` from `src/`; original diagrams and GUI SVG under `docs/reference/` |
-| Source quality | Auto-format (Black 100-column config) PASS at `592cf512`, Actions #42473894740 |
-| Python and native | Python 3.10–3.13, Windows x64 PyInstaller build and frozen GUI/persistence self-test PASS at `592cf512`, Actions #42473894640 |
-| Documentation preview | Full docs preview/browser acceptance PASS at `592cf512`, Actions #42473898411 |
-| Governance docs | Layout, generated diagrams and source consistency PASS at `592cf512`, Actions #42473898447 |
-| Windows artifact | Verified 68cf9c1c candidate artifact #13614398040; fresh source artifact available from latest successful Windows workflow |
-| Release status | No v1.0.0 final release; old multi-platform pipeline removed because it targeted deleted runtime. CI produces a Windows testing artifact only. |
-| Remaining gates | Independent Chess/GUI review, external native pointer interactions, clean Windows host, release trust/signing and maintainer integration approval |
+| Authorization | Full cleanroom implementation dispatch, 2026-11-08 |
+| Working branch / review | `v1-cleanroom` → `develop`, draft PR #510, issue #511 |
+| Verified code revision | `c41159ed9fe85cfe4f86be61d479fc52918622ef` (documentation-only commits may follow) |
+| Production architecture | One Python source tree under `src/`; 19 product modules, 12 rule classes, 6 quests, real Tkinter UI |
+| Python + Windows CI | Python 3.10–3.13, Linux Tk/Xvfb, Windows PyInstaller and frozen GUI/XP/JSON self-test PASS: PR run #42474225555 and push run #42474222322 |
+| Documentation + governance | Browser preview PASS #42474225600; generated governance PASS #42474225608 |
+| Other checks | DarkFactory Runtime PASS #42474225807; Auto Format PASS #42474222242 |
+| Local reported tests | 29 non-GUI and 6 Linux/Xvfb GUI tests passed following root-package cleanup; rerun for subsequent source modifications |
+| Product acceptance pending | Independent Chess/UX review, cancellation and storage-repair journeys, external pointer/keyboard testing and clean Python-free Windows host |
+| Integration pending | Maintainer-authorized PR #510 → `develop`, then separately reviewed `develop` → `main` release promotion |
+| Classroom material | Offline interactive presentation prepared separately; final live demonstration with actual app/executable remains to be performed |
 
-### 2026-11-08 — Implementation and repository consolidation
+### 2026-11-08 — Implementation and corrective integration
 
-The original cleanroom application was implemented and verified in Python 3.10–3.13 and real Linux Tkinter/Xvfb. The superseded root-level `model/`, `controller/`, and `view/` skeleton packages were deleted. The later rebase onto `develop` imported `packages/` with another Chess/Draughts implementation; **all of `packages/` was deleted** to retain exactly one runtime under `src/`.
+The 19-module Python/Tkinter Chess application delivers the rule-driven action pipeline, six quests, profiles/XP, independent JSON match histories and Windows frozen build. Root-level `model/`, `view/`, and `controller/` shadow packages were deleted. Rebasing onto `develop` introduced a duplicate `packages/` engine, which was removed. Obsolete planning records were removed from `.agents/`; original reference diagrams and generated source diagrams now live under `docs/`. Build and documentation workflows were updated for the single-source layout.
 
-Removed `.agents/decisions/`, `.agents/notes/`, `.agents/rules/` and `.agents/{ARCHITECTURE,GOAL,PLAN,README,TODO,SCRATCHPAD}.md`. Kept `.agents/PRD.md` and `.agents/AGENTS.md` as authored authorities. Moved architecture and reference assets to `docs/` with the original reference file blobs preserved; repaired README symlink and adjusted documentation generators, tests and browser routes. Replaced the obsolete governance generator with `.github/scripts/validate_repository.py`. The diagram generator now runs with standard-library AST and never downloads a tree-sitter parser at runtime.
+CI verified the exact code revision `c41159ed` in all six runs above. Automated success does not independently establish all Chess positions, external Windows UI behavior or clean-machine distribution acceptance.
 
-Retired legacy four-platform desktop packaging, obsolete version-release checks, and the associated scripts/tests referring to nonexistent `src/chesswithquests` or `src/games`; retained source verification, native Windows PyInstaller smoke, source-driven Pages preview, trusted Actions publication, DarkFactory quality and issue binding. Linked PR #510 to issue #511; kept existing `develop` → `main` promotion policy unchanged.
+### 2026-11-08 — Source-review findings and next actions
 
-**Verified integration source:** `592cf512b3dc678f602cccbe1dfc507c8b4ad17c`: Python 3.10–3.13 and Windows frozen-process CI PASS (#42473894640), docs preview PASS (#42473898411), governance docs PASS (#42473898447), autoformat PASS (#42473894740). Full DarkFactory quality on this exact revision was still running when this record was written. Independent release acceptance is not complete.
+- **P1 — Corrupt-file recovery:** Both `UserManager.uloz_uzivatele()` and `GameLogger.uloz_historii()` retain `damaged=True` after a malformed-file error. Even after the user repairs or moves aside the damaged file, the Retry control still refuses to save until the store is reconstructed. Reproduce, correct the retry/recheck behavior or explicitly require restart in UI and PRD, then add focused tests.
+- **P1 — Independent native UX:** The six Linux GUI tests and frozen Windows self-test exercise actual Tk widgets through `Button.invoke()` and application code, but do not prove full external pointer/keyboard use, cancellation flow, screen sizing, or a Python-free clean Windows host. Record independent visual/native evidence.
+- **P2 — Diagram fidelity:** The PRD UI and class-method labels were aligned with the inspected source. Regenerate and compare source-derived diagrams after future class edits.
+- **Release governance:** PR #510 targets `develop`; the `main-source` restriction only governs a separate later `develop` → `main` promotion. No direct release or merge is authorized.
+
+### Continuing-agent handoff
+
+Record the before/after SHA, modified files, actually executed verification commands/results, GitHub Actions links and remaining blockers after each change. Do not check off native/release criteria or claim an unexecuted scenario passed.
 
 ## 6. Maintenance rules for this document
 
