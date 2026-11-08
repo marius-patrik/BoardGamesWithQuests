@@ -68,7 +68,7 @@ Complete work in dependency order. Each checkbox becomes checked only when its o
 ### 5 — Package and integrate
 
 - [x] Run focused and repository-level test commands; resolve integration issues against the approved PRD.
-- [ ] Produce the standalone Windows build using the repository's supported release tooling and ensure assets and writable data paths work when frozen.
+- [x] Produce the standalone Windows build using the repository's supported release tooling and ensure assets and writable data paths work when frozen.
 - [ ] Verify the executable on Windows without Python installed; record build inputs, artifact identity, and smoke-test result.
 - [ ] Refresh the Mermaid diagrams in the PRD against source classes and actual dependencies.
 - [ ] Prepare the user demonstration, reconcile review feedback, complete the required protected-branch integration, and record release evidence.
@@ -121,7 +121,7 @@ Code and tests use the repository's established Python tooling and test location
 
 ## 5. Progress and handoff
 
-**Current gate:** Full implementation was authorized by the repository owner on 2026-11-08. The cleanroom source and a focused test suite have been implemented and tested locally. Hosted Python-matrix checks, Windows frozen-executable **full GUI acceptance**, policy reconciliation, and independent review remain **open**. PR #510 is not authorized for merge or final publication. **Main Source Policy currently fails** because direct `v1-cleanroom` → `main` violates its `develop`-only rule; the owner must decide an approved integration path.
+**Current gate:** Full implementation was authorized by the repository owner on 2026-11-08. The cleanroom source and a focused test suite have been implemented and tested locally. Hosted Python-matrix checks, Exhaustive native Windows acceptance, protected-branch policy reconciliation, and independent review remain **open**. PR #510 is not authorized for merge or final publication. **Main Source Policy currently fails** because direct `v1-cleanroom` → `main` violates its `develop`-only rule; the owner must decide an approved integration path.
 
 | Field | Current value / evidence |
 | --- | --- |
@@ -132,15 +132,15 @@ Code and tests use the repository's established Python tooling and test location
 | Source delivered | Nineteen production modules; twelve rule classes; six quests; profiles/XP; JSON match history; responsive Tkinter application; keyboard board traversal |
 | Local Python tests | Python 3.13.5: `python -m pytest -q .github/tests -m 'not gui'` → **27 passed** |
 | Real GUI tests | Linux Xvfb: `xvfb-run -a python -m pytest -q .github/tests -m gui` → **6 passed** |
-| Packaging check | `python -m pip wheel --no-deps --no-build-isolation .` → wheel built; `python -m compileall -q src` → successful |
-| Native Windows | Previous source SHA `371afc4c`: Windows package and process-launch smoke passed in Actions run #42470235243, artifact #13613231245. Current follow-up adds a frozen-executable Tk-button/quest/history self-test; exact final SHA not yet verified. |
-| Other interpreters | Python 3.10–3.13 matrix passed at `371afc4c` in Actions #42470238944 and #42470235243. Repeat on final SHA. |
+| Hosted final-source CI | Runs #42470656162 (push) and #42470659435 (PR) both **passed**, Python 3.10–3.13 and Windows build + frozen GUI self-test on SHA `35652bdc` |\n| Packaging check | `python -m pip wheel --no-deps --no-build-isolation .` → wheel built; `python -m compileall -q src` → successful |
+| Native Windows | Previous source SHA `371afc4c`: Windows package and process-launch smoke passed in Actions run #42470235243, artifact #13613231245. Updated source SHA `35652bdc`: Windows PyInstaller artifact #13613367498 and frozen GUI/XP/history acceptance passed in Actions #42470656162 (evidence artifact #13613706543); external pointer and clean-machine acceptance remain open. |
+| Other interpreters | Python 3.10–3.13 matrix passed at `371afc4c` in Actions #42470238944 and #42470235243. Repeat is complete for source SHA `35652bdc`: Actions #42470656162 and #42470659435 passed. |
 | Work remaining | Final-SHA CI and Windows frozen-GUI/persistence acceptance, independent review, main-source policy exception or approved branch strategy, PRD/UML review, owner acceptance |
-| Next gate | Rerun hosted tests and frozen Windows native self-test on final SHA; resolve pre-existing Main Source Policy failure (only `develop` may target `main`) without weakening protected-branch rules |
+| Next gate | Final-SHA Python 3.10–3.13, Windows frozen GUI self-test, package verification passed on source SHA `35652bdc`. Resolve existing Main Source Policy failure (only `develop` may target `main`) without weakening branch rules; independently review Windows external interaction. |
 
 ### 2026-11-08 — Integrated source delivery
 
-Implementation and local verification occurred without editing `main`, `develop`, `v1`, `v2`, releases, or other repositories. The stage-based domain evaluator uses disposable staging; accepted events alone award XP and update per-match records. Any unavailable native or cross-Python verification remains explicitly incomplete. Keep this document synchronized with CI outcomes before seeking PR approval.
+Implementation and local verification occurred without editing `main`, `develop`, `v1`, `v2`, releases, or other repositories. The stage-based domain evaluator uses disposable staging; accepted events alone award XP and update per-match records. Exact-source Python 3.10–3.13, Windows build and the in-process frozen GUI test now passed. Clean-machine/no-Python installation, external pointer interaction, release governance and independent review remain incomplete. Keep this document synchronized with CI outcomes before seeking PR approval.
 
 ## 6. Maintenance rules for this document
 
