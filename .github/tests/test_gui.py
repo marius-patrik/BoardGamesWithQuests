@@ -149,3 +149,53 @@ def test_real_gui_capture_quest_and_new_match_preserves_xp(tmp_path):
         assert not app.manager.quest_manager.dokoncil("alice", "capture")
     finally:
         app.destroy()
+
+
+def test_promotion_cancel_does_not_commit_and_can_be_reopened(tmp_path):
+    from model.board import HerniPlocha
+    from model.piece import Kral, Pesak
+
+    app = application(tmp_path)
+    try:
+        position = HerniPlocha(False)
+        position.poloz((7, 7), Kral("white"))
+        position.poloz((0, 7), Kral("black"))
+        position.poloz((1, 0), Pesak("white"))
+        app.manager.plocha = position
+        app.refresh()
+        original = app.manager.plocha.stav()
+        app.board.buttons[(1, 0)].invoke()
+        app.board.buttons[(0, 0)].invoke()
+        app.update()
+        dialog = next(w for w in app.winfo_children() if isinstance(w, tk.Toplevel))
+        dialog.event_generate("<Escape>")
+        app.update()
+        assert app.manager.revision == 0
+        assert app.manager.plocha.stav() == original
+        assert app.users.uzivatele["alice"].xp == 0
+        app.board.buttons[(1, 0)].invoke()
+        app.board.buttons[(0, 0)].invoke()
+        app.update()
+        dialogs = [w for w in app.winfo_children() if isinstance(w, tk.Toplevel)]
+        assert len(dialogs) == 1
+    finally:
+        app.destroy()
+
+
+def test_profile_recovery_retry_refreshes_setup_controls(tmp_path):
+    bad = tmp_path / "users.json"
+    bad.write_text("{broken", encoding="utf-8")
+    app = BoardGamesApplication(tmp_path)
+    try:
+        assert app.users.damaged
+        app.users.vytvor_uzivatele("alice", "Alice")
+        assert app.users.save_error
+        bad.rename(tmp_path / "users.invalid")
+        app.retry_profiles()
+        app.update()
+        assert app.users.save_error is None
+        assert not app.users.damaged
+        assert "alice" in app.seat_choices["white"].cget("values")
+        assert "Offline" in app.setup_status.cget("text")
+    finally:
+        app.destroy()
