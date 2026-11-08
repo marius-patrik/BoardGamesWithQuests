@@ -1,26 +1,11 @@
 ---
 name: generated-documents
-description: Maintain README, PRD, ARCHITECTURE and AGENTS as deterministic projections of canonical Markdown sources.
+description: Verify authored PRD and AGENTS plus source-generated diagrams without overwriting authored documents.
 ---
-# Generated Documents
+# Documentation and Diagrams
 
-## When to use
+The authoritative documents are `.agents/PRD.md` (root `README.md`) and `.agents/AGENTS.md` (root `CONTRIBUTING.md`). They are authored, **not** generated from note, decision, rule or request records.
 
-After editing published notes, approved requests, accepted decisions or active rules.
+Reference diagrams and the original GUI mockup live under `docs/reference/`. Actual-source architecture diagrams live under `docs/architecture/diagrams/`; regenerate them with `python .github/scripts/generate_diagrams.py`.
 
-## Procedure
-
-1. Edit `.agents/notes/*.md` (front matter `status: published`) for the README overview. Maintain the phase-level execution plan in `.agents/PLAN.md`, the current action queue in `.agents/TODO.md`, and temporary observations in `.agents/SCRATCHPAD.md`. Keep prospective implementation contracts in the owning issues; do not create another roadmap.
-2. Edit `.agents/requests/*.md` (approved) for PRD, `.agents/decisions/*.md` (accepted) for ARCHITECTURE, and `.agents/rules/*.md` (active) for AGENTS.
-3. Verify `.agents/` and `.github/` are real directories, and verify the tracked `.darkfactory/installation.json` integration metadata.
-4. Run `python3 .github/scripts/generate_documents.py --write`.
-5. Run `python3 .github/scripts/generate_documents.py --check` and inspect the generated diff.
-6. Verify root symlinks: README -> `.agents/README.md`, CONTRIBUTING -> `.agents/AGENTS.md`.
-7. Run tests from `.github/tests/`; verify native CI checks in GitHub Actions.
-8. Never manually modify projections to silence failing checks.
-
-## Evidence of completion
-
-Deterministically regenerated documents with passing local validation, no stale references and no tests outside `.github/tests/`.
-
-Follow `.agents/AGENTS.md` and the owning role's boundaries. This file is reusable guidance, not executable automation.
+For every documentation change: update the affected canonical document and diagrams, run `python .github/scripts/validate_repository.py --check`, then build the documentation site with `python .github/scripts/build_docs.py`. Preserve original reference assets and root symlinks. Never recreate the deleted `.agents/{notes,decisions,rules}/` directories or `.agents/{README,ARCHITECTURE,GOAL,PLAN,TODO,SCRATCHPAD}.md` files.

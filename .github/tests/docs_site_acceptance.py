@@ -64,7 +64,7 @@ def test_source_generated_diagrams_work_in_documentation():
     for category, stem in (("implementation", "ast"), ("implementation", "uml")):
         raw = (
             SITE
-            / "agents"
+            / "docs"
             / ("architecture" if category == "implementation" else "reference")
             / "diagrams"
             / (stem + ".mmd")
@@ -72,7 +72,7 @@ def test_source_generated_diagrams_work_in_documentation():
         page = (
             SITE
             / "repository-files"
-            / "agents"
+            / "docs"
             / ("architecture" if category == "implementation" else "reference")
             / "diagrams"
             / (stem + ".mmd")
@@ -107,7 +107,7 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
     incompatible = [
         name
         for name in names
-        if name.startswith(".agents/architecture/diagrams/")
+        if name.startswith("docs/architecture/diagrams/")
         and name.endswith((".svg", ".dot", ".gv"))
     ]
     assert not incompatible, f"Committed diagram sources must be Mermaid: {incompatible}"
@@ -120,7 +120,7 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
     ):
         source = (
             ROOT
-            / ".agents"
+            / "docs"
             / ("architecture" if category == "implementation" else "reference")
             / "diagrams"
             / (name + ".mmd")
@@ -129,7 +129,7 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         page = (
             SITE
             / "repository-files"
-            / "agents"
+            / "docs"
             / ("architecture" if category == "implementation" else "reference")
             / "diagrams"
             / (name + ".mmd")
@@ -151,7 +151,7 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         assert re.search(r'height="[1-9][0-9]*"', opening.group(0))
         if (category, name) == ("implementation", "uml"):
             assert (
-                "GameController" in svg and "GameManager" in svg
+                "GameManagerController" in svg and "GameManager" in svg
             ), "Rendered UML must have real classes"
 
 
@@ -167,8 +167,8 @@ def test_diagram_sources_are_grouped_by_source_ownership():
     document = (SITE / "index.html").read_text(encoding="utf-8")
     sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
     sections = {unescape(s) for s in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
-    assert "/.agents/architecture/diagrams" in sections
-    assert "/.agents/reference/diagrams" in sections
+    assert "/docs/architecture/diagrams" in sections
+    assert "/docs/reference/diagrams" in sections
     for obsolete in (
         "reference-page1.mmd",
         "reference-mvc.mmd",
@@ -185,7 +185,7 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     from html import unescape
     from urllib.parse import urlsplit
 
-    relative = Path(".agents/reference/images/GUI_mockup.svg")
+    relative = Path("docs/reference/images/GUI_mockup.svg")
     source = ROOT / relative
     assert source.is_file(), "The original SVG artwork must exist under images/"
     assert b"svg-source:excalidraw" in source.read_bytes()
@@ -199,7 +199,7 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     page = (
         SITE
         / "repository-files"
-        / "agents"
+        / "docs"
         / "reference"
         / "images"
         / "GUI_mockup.svg"
@@ -219,7 +219,7 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
         published.read_bytes() == source.read_bytes()
     ), "Published image is not the source artwork"
     assert not (
-        ROOT / ".agents/reference/diagrams/gui-mockup.mmd"
+        ROOT / "docs/reference/diagrams/gui-mockup.mmd"
     ).exists(), "Do not replace the GUI image with a conceptual Mermaid diagram"
 
 
@@ -288,7 +288,7 @@ def test_image_and_diagram_viewers_offer_an_accessible_modal():
     index = (
         SITE
         / "repository-files"
-        / "agents"
+        / "docs"
         / "reference"
         / "images"
         / "GUI_mockup.svg"

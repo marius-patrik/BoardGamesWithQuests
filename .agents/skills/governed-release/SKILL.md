@@ -1,22 +1,9 @@
 ---
 name: governed-release
-description: Verify branch promotion, PrideVer releases and native GitHub checks against live provider evidence.
+description: Verify the current Windows build and maintainer-approved release gates from GitHub evidence.
 ---
 # Governed Release
 
-## When to use
+Check the actual `v1-cleanroom`, `develop`, and `main` refs and exact PR head. The cleanroom product is **Windows-only for required distribution**. `.github/workflows/v1-verify.yml` builds and self-tests its PyInstaller executable on native Windows, and uploads an Actions artifact; it does not publish a GitHub Release.
 
-When validating a release candidate or checking the repository's release and promotion configuration.
-
-## Procedure
-
-1. Check the current `develop` and `main` refs and the target PR's exact head SHA.
-2. Read `repo.dfconfig` and `.github/workflows/release.yml` to identify the installed PrideVer version and release mechanism.
-3. Inspect GitHub's native protection and required check results for `main` separately from the repository's declared policy; report unavailable provider evidence as a blocker.
-4. Confirm the release PR originates from this repository's `develop` branch, passes required checks, and has independent maintainer approval of the final revision.
-5. Verify that `main` contains the trusted release workflow before relying on a `push` trigger. A successful check on `develop` is not evidence of an automatic release from `main`.
-6. When a release is authorized and published, verify the release tag, version, commit SHA, and any assets on the actual GitHub release.
-
-## Evidence
-
-GitHub PR review, branch protection, workflow run, released commit, version, tag and release asset evidence.
+Confirm the Python version matrix, real GUI verification, Windows frozen executable evidence, and artifacts on the final commit. A successful build or artifact upload does not authorize a merge or release. Check branch protection and the existing `develop` → `main` promotion policy separately, and require maintainer approval for publication. Do not infer a release mechanism from the retired legacy multi-platform packaging workflow.

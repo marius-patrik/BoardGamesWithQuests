@@ -117,6 +117,8 @@ The root entries are symlinks to canonical documents, not duplicate editable cop
 
 The PRD contains the **class UML**, **action/quest flow**, and **19-module dependency map** as embedded Mermaid diagrams. Update those diagrams when the implementation changes under an approved requirement; this plan links to them rather than repeating product definitions or diagrams.
 
+The separately generated implementation diagrams live under `docs/architecture/diagrams/`, and the authored historical class diagrams and GUI artwork are preserved under `docs/reference/`. Both locations are ordinary documentation, not alternate runtime packages. `src/` is the sole Python production tree; the old `packages/` implementation and generated `.agents/` governance records are retired. `python .github/scripts/validate_repository.py --check` checks layout without ever rewriting the canonical PRD or this file.
+
 Code and tests use the repository's established Python tooling and test locations. Keep production modules focused on the [PRD source layout](PRD.md#7-source-layout) and keep app behavior independent of generated documentation or developer-only artifacts. Repository-specific conventions are verified from the working checkout, not inferred from this text.
 
 ## 5. Progress and handoff
@@ -147,6 +149,14 @@ Implementation and local verification occurred without editing `main`, `develop`
 The original root-level `model/__init__.py`, `model/figurka.py`, `view/__init__.py`, and `controller/__init__.py` were obsolete teacher-reference leftovers: the executable source lives exclusively under `src/`. Removed all four from `v1-cleanroom`; Git automatically removes the now-empty root directories. The newer `src/model/piece.py` already contains the required Czech-named six piece classes, so there is no runtime functionality to migrate. Added layout regressions requiring a single source tree and verifying the `model.piece` import resolves under `src`, never to the old `figurka.py` skeleton.
 
 **Local verification against the cleaned source tree:** Python 3.13.5 `python -m pytest -q .github/tests -m 'not gui'` → **29 passed, 6 deselected**; `xvfb-run -a python -m pytest -q .github/tests -m gui` → **6 passed, 29 deselected**. Final-SHA hosted Python 3.10–3.13 and frozen Windows acceptance must be rechecked after push. PR #510 remains unmerged; Main Source Policy is unchanged.
+
+### 2026-11-08 — Post-rebase layout and CI reconciliation
+
+The rebase on `develop` introduced a second Python implementation under `packages/` plus an obsolete governance-document generator and release workflows that assumed a JSON-driven Chess/Draughts engine. Cleanroom ownership remains `src/`, `.agents/PRD.md` and `.agents/AGENTS.md`; removed the unrelated package tree and obsolete `.agents/` scaffolding, moved the historical `reference/` and generated implementation `architecture/` directories to `docs/`, and updated the corresponding site generator, tests and Actions paths.
+
+The source-derived implementation UML now discovers `src/` rather than the deleted packages. The historical raw reference diagram and GUI SVG remain byte-identical. The obsolete four-platform package/release pipeline, which targeted non-existent `src/chesswithquests` and `src/games` paths and dynamically versioned wheels, is retired; the active cleanroom Windows executable is still built and smoke-tested by `.github/workflows/v1-verify.yml`. Documentation remains deployed by the separate, source-verified GitHub Pages Actions pipeline.
+
+**Verification:** Repo tree/path inspection completed. Local tests and final-SHA CI need to run after this reconciliation; do not mark them passed prematurely. PR #510 targets `develop` and remains draft; do not merge or publish without review.
 
 ## 6. Maintenance rules for this document
 

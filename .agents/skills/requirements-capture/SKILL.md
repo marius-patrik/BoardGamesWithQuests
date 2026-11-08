@@ -1,21 +1,11 @@
 ---
 name: requirements-capture
-description: Capture future product requirements in GitHub issues; document supported behavior only once implemented.
+description: Keep proposed changes in GitHub issues and actual supported product behavior in the canonical PRD.
 ---
 # Requirements Capture
 
-## When to use
-
-When the maintainer requests a new capability or changes its desired contract.
-
-## Procedure
-
-1. Inspect the current implementation and the relevant GitHub issues.
-2. Record **future** behavior, API/DB/DSL/UX contracts, acceptance criteria and dependencies only in the owning GitHub issue; technical ratification belongs to the owning issue.
-3. Reconcile contradictory issue requirements before implementation; do not copy them into `.agents/requests/`, PRD, decisions, or actual-code diagrams.
-4. During the implementing PR, verify actual external behavior first, then update the relevant approved `.agents/requests/` record to describe **only the implemented subset**, with affected decisions/rules/notes.
-5. Regenerate the four governed documents and run their consistency check; leave unimplemented scope open in issues.
-
-## Evidence
-
-Traceable issue decisions, implemented source/tests and matching commit-generated documentation. Issue approval is never runtime acceptance.
+1. Read actual `src/` implementation, `.agents/PRD.md` and related issues.
+2. Record proposed features, acceptance cases and outstanding choices in the owning issue rather than creating parallel plans.
+3. After implementation and verified behavior, update the affected portion of `.agents/PRD.md`, `.agents/AGENTS.md` progress, and `docs/architecture/` diagrams as needed.
+4. Validate the source tree and diagrams, execute the relevant GUI/rule/persistence tests, and record exact evidence.
+Do not derive the PRD from old `.agents/requests/` records, or recreate generated governance files.

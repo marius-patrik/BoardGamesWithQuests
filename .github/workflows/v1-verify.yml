@@ -1,9 +1,9 @@
 name: V1 cleanroom verification
 on:
   push:
-    branches: [v1-cleanroom]
+    branches: [v1-cleanroom, develop, main]
   pull_request:
-    branches: [main]
+    branches: [develop, main]
   workflow_dispatch:
 jobs:
   python:

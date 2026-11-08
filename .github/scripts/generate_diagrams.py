@@ -114,7 +114,7 @@ def implementation_uml(root: Path) -> str:
     for path in tracked_paths(root):
         # Application UML describes production packages, not repository tests or
         # CI helpers. The repository AST still inventories every tracked file.
-        if path.relative_to(root).parts[0] != "packages":
+        if path.relative_to(root).parts[0] != "src":
             continue
         if path.suffix != ".py" or not path.is_file() or path.is_symlink():
             continue
@@ -177,15 +177,15 @@ def implementation_uml(root: Path) -> str:
 def generated_assets(root: Path) -> dict[str, str]:
     """Return solely Mermaid assets, under the repository diagrams folder."""
     return {
-        "agents/architecture/diagrams/ast.mmd": repository_ast(root),
-        "agents/architecture/diagrams/uml.mmd": implementation_uml(root),
+        "docs/architecture/diagrams/ast.mmd": repository_ast(root),
+        "docs/architecture/diagrams/uml.mmd": implementation_uml(root),
     }
 
 
 if __name__ == "__main__":
     root = Path(__file__).resolve().parents[2]
     for path, data in generated_assets(root).items():
-        target = root / ("." + path if path.startswith("agents/") else path)
+        target = root / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(data, encoding="utf-8")
         print(path)
