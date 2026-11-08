@@ -320,7 +320,11 @@ class BoardGamesApplication(tk.Tk):
 
     def retry_profiles(self):
         self.users.uloz_uzivatele()
-        self.refresh()
+        if self.manager is None:
+            # Reload setup choices/status after repairing a profile file on disk.
+            self.show_setup()
+        else:
+            self.refresh()
 
     def retry_history(self):
         if self.manager:
