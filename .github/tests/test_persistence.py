@@ -125,10 +125,12 @@ def test_repaired_profile_file_merges_distinct_users_without_dropping_live_state
     u.vytvor_uzivatele("alice", "Alice")
     u.pridej_xp("alice", 25)
     path.write_text(
-        json.dumps({
-            "schema_version": 1,
-            "users": {"bob": {"username": "bob", "display_name": "Bob", "xp": 40}},
-        }),
+        json.dumps(
+            {
+                "schema_version": 1,
+                "users": {"bob": {"username": "bob", "display_name": "Bob", "xp": 40}},
+            }
+        ),
         encoding="utf-8",
     )
     assert u.uloz_uzivatele()
@@ -142,12 +144,18 @@ def test_repaired_profile_conflict_never_silently_overwrites_disk(tmp_path):
     path.write_text("invalid", encoding="utf-8")
     u = UserManager(tmp_path)
     u.vytvor_uzivatele("alice", "Memory Alice")
-    saved = json.dumps({
-        "schema_version": 1,
-        "users": {"alice": {
-            "username": "alice", "display_name": "Disk Alice", "xp": 80,
-        }},
-    })
+    saved = json.dumps(
+        {
+            "schema_version": 1,
+            "users": {
+                "alice": {
+                    "username": "alice",
+                    "display_name": "Disk Alice",
+                    "xp": 80,
+                }
+            },
+        }
+    )
     path.write_text(saved, encoding="utf-8")
     assert not u.uloz_uzivatele()
     assert path.read_text(encoding="utf-8") == saved
