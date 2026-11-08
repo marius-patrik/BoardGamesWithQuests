@@ -1,0 +1,26 @@
+name: Generated governance sources
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  governance-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Verify source-generated governance documents and native layout
+        run: python3 .github/scripts/generate_documents.py --check
+      - name: Verify source-derived diagrams match the checked-out code
+        run: |
+          python -m pip install "tree-sitter-language-pack>=1.22.1,<1.23"
+          python .github/scripts/generate_diagrams.py
+          git diff --exit-code -- .agents/architecture/diagrams/
+
+      - name: Verify generator and native repository structure
+        run: |
+          python3 -m unittest discover -s .github/tests -p test_repository_structure.py
+          python3 -m unittest discover -s .github/tests -p test_release_gate.py
+          python3 -m unittest discover -s .github/tests -p test_main_source_policy.py

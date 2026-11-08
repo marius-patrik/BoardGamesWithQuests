@@ -1,0 +1,583 @@
+{
+  "schema_version": 1,
+  "name": "chess",
+  "title": "Chess",
+  "default": true,
+  "playable": false,
+  "board": {
+    "rows": 8,
+    "columns": 8,
+    "starting_pieces": [
+      {
+        "piece": "rook",
+        "color": "black",
+        "squares": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            7
+          ]
+        ]
+      },
+      {
+        "piece": "knight",
+        "color": "black",
+        "squares": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            6
+          ]
+        ]
+      },
+      {
+        "piece": "bishop",
+        "color": "black",
+        "squares": [
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            5
+          ]
+        ]
+      },
+      {
+        "piece": "queen",
+        "color": "black",
+        "squares": [
+          [
+            0,
+            3
+          ]
+        ]
+      },
+      {
+        "piece": "king",
+        "color": "black",
+        "squares": [
+          [
+            0,
+            4
+          ]
+        ]
+      },
+      {
+        "piece": "pawn",
+        "color": "black",
+        "squares": [
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            7
+          ]
+        ]
+      },
+      {
+        "piece": "rook",
+        "color": "white",
+        "squares": [
+          [
+            7,
+            0
+          ],
+          [
+            7,
+            7
+          ]
+        ]
+      },
+      {
+        "piece": "knight",
+        "color": "white",
+        "squares": [
+          [
+            7,
+            1
+          ],
+          [
+            7,
+            6
+          ]
+        ]
+      },
+      {
+        "piece": "bishop",
+        "color": "white",
+        "squares": [
+          [
+            7,
+            2
+          ],
+          [
+            7,
+            5
+          ]
+        ]
+      },
+      {
+        "piece": "queen",
+        "color": "white",
+        "squares": [
+          [
+            7,
+            3
+          ]
+        ]
+      },
+      {
+        "piece": "king",
+        "color": "white",
+        "squares": [
+          [
+            7,
+            4
+          ]
+        ]
+      },
+      {
+        "piece": "pawn",
+        "color": "white",
+        "squares": [
+          [
+            6,
+            0
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            6,
+            4
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            6,
+            7
+          ]
+        ]
+      }
+    ]
+  },
+  "pieces": {
+    "pawn": {
+      "symbols": {
+        "white": "♙",
+        "black": "♟"
+      },
+      "moves": [
+        [
+          -1,
+          0
+        ]
+      ],
+      "attacks": [
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "jump": false,
+      "repeat": false,
+      "notation": "",
+      "fen": "p",
+      "color_relative": true
+    },
+    "rook": {
+      "symbols": {
+        "white": "♖",
+        "black": "♜"
+      },
+      "moves": [
+        [
+          1,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          -1
+        ]
+      ],
+      "attacks": [
+        [
+          1,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          -1
+        ]
+      ],
+      "jump": false,
+      "repeat": true,
+      "notation": "R",
+      "fen": "r"
+    },
+    "knight": {
+      "symbols": {
+        "white": "♘",
+        "black": "♞"
+      },
+      "moves": [
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          -1
+        ],
+        [
+          -2,
+          1
+        ],
+        [
+          -2,
+          -1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          -2
+        ],
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          -2
+        ]
+      ],
+      "attacks": [
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          -1
+        ],
+        [
+          -2,
+          1
+        ],
+        [
+          -2,
+          -1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          -2
+        ],
+        [
+          -1,
+          2
+        ],
+        [
+          -1,
+          -2
+        ]
+      ],
+      "jump": true,
+      "repeat": false,
+      "notation": "N",
+      "fen": "n"
+    },
+    "bishop": {
+      "symbols": {
+        "white": "♗",
+        "black": "♝"
+      },
+      "moves": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "attacks": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "jump": false,
+      "repeat": true,
+      "notation": "B",
+      "fen": "b"
+    },
+    "queen": {
+      "symbols": {
+        "white": "♕",
+        "black": "♛"
+      },
+      "moves": [
+        [
+          1,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "attacks": [
+        [
+          1,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "jump": false,
+      "repeat": true,
+      "notation": "Q",
+      "fen": "q"
+    },
+    "king": {
+      "symbols": {
+        "white": "♔",
+        "black": "♚"
+      },
+      "moves": [
+        [
+          1,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "attacks": [
+        [
+          1,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "jump": false,
+      "repeat": false,
+      "notation": "K",
+      "fen": "k"
+    }
+  },
+  "clock": {
+    "initial_seconds": 600,
+    "increment_seconds": 0
+  },
+  "exports": [
+    "algebraic",
+    "pgn",
+    "fen",
+    "metadata",
+    "stenographic"
+  ],
+  "appearance": {
+    "light_square": "#F0D9B5",
+    "dark_square": "#B58863"
+  }
+}

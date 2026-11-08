@@ -1,0 +1,93 @@
+name: Verify Release Metadata
+
+on:
+  pull_request:
+    paths:
+      - pyproject.toml
+      - repo.dfconfig
+      - .github/workflows/release.yml
+      - .github/workflows/verify-release-metadata.yml
+      - .github/scripts/release_gate.py
+      - .github/tests/test_release_gate.py
+  push:
+    branches: [develop, main]
+    paths:
+      - pyproject.toml
+      - repo.dfconfig
+      - .github/workflows/release.yml
+      - .github/workflows/verify-release-metadata.yml
+      - .github/scripts/release_gate.py
+      - .github/tests/test_release_gate.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify-release-metadata
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the build and versioning backends
+        run: python -m pip install 'setuptools>=69' 'setuptools-scm>=8' build
+      - name: Verify two consecutive Git tags produce matching wheel versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/release-version-fixture"
+          git clone --quiet --no-hardlinks "$GITHUB_WORKSPACE" "$fixture"
+          # Actions checks out the PR merge commit in detached HEAD. A plain local
+          # clone may otherwise silently test main instead of the proposed code.
+          git -C "$fixture" fetch --quiet "$GITHUB_WORKSPACE" HEAD
+          git -C "$fixture" checkout --quiet --detach FETCH_HEAD
+          cd "$fixture"
+          git config user.name "Release Verification"
+          git config user.email "release-verification@example.invalid"
+
+          # Simulate two consecutive published tags in an isolated clone.
+          # Neither test tag nor empty commit reaches the real repository.
+          for version in 9000.0.0 9000.0.1; do
+            if [ "$version" = 9000.0.1 ]; then
+              git commit --quiet --allow-empty -m "fix: next development release"
+            fi
+            git tag "v$version"
+            out="$RUNNER_TEMP/wheels-$version"
+            python -m build --wheel --no-isolation --outdir "$out"
+            python - "$out" "$version" <<'PY'
+          import pathlib
+          import re
+          import sys
+          import zipfile
+          import tomllib
+          from email.parser import Parser
+
+          wheel_dir, expected = pathlib.Path(sys.argv[1]), sys.argv[2]
+          wheels = list(wheel_dir.glob("*.whl"))
+          if len(wheels) != 1:
+              raise SystemExit(f"Expected one wheel for {expected}, got {wheels}")
+          with zipfile.ZipFile(wheels[0]) as archive:
+              metadata_paths = [path for path in archive.namelist() if path.endswith(".dist-info/METADATA")]
+              if len(metadata_paths) != 1:
+                  raise SystemExit(f"Expected one METADATA file, got {metadata_paths}")
+              metadata = archive.read(metadata_paths[0]).decode("utf-8")
+              match = re.search(r"^Version:\s*(.+)$", metadata, flags=re.MULTILINE)
+              actual = match.group(1).strip() if match else None
+              project = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]
+              fields = Parser().parsestr(metadata)
+              normalize = lambda name: re.sub(r"[-_.]+", "-", name).lower()
+              assert normalize(fields["Name"]) == normalize(project["name"])
+              license_name = project["license"]["file"]
+              assert license_name in fields.get_all("License-File", [])
+              licenses = [path for path in archive.namelist() if path.endswith("/" + license_name)]
+              assert len(licenses) == 1, licenses
+              assert archive.read(licenses[0]) == pathlib.Path(license_name).read_bytes()
+              assert actual == expected, f"Tag {expected} produced wheel version {actual}"
+              print(f"v{expected} -> {wheels[0].name} (Version: {actual})")
+          PY
+          done
