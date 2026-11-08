@@ -116,7 +116,7 @@ Selection and pending promotion are ephemeral UI/controller states. Views read t
 | Click a legal destination | Commit the move, or show promotion choices when applicable. |
 | Click an invalid destination | Preserve the game; show feedback and keep interaction predictable. |
 | Choose a promotion piece | Commit the selected promotion variant. |
-| Cancel promotion or resignation | Return to the same live board state. |
+| Cancel promotion or resignation | Preserve the live position; cancelling promotion also clears the pending selection. |
 | Resign as the active player | End the match, record the winner, and show the result. |
 | Start New Game | Create a new match with fresh turn, history and quest progress. |
 | Retry a failed save | Write the latest eligible profile or history snapshot and update its own status. |
@@ -439,7 +439,7 @@ Each target file uses a temporary sibling file followed by `os.replace()` for an
 
 - A successful save clears that file's unsaved warning.
 - An ordinary write error retains the accepted in-memory state, marks the affected target as unsaved, and offers a retry of its latest snapshot.
-- An invalid or malformed existing JSON file stays intact. The application displays a recovery warning, uses clean in-memory defaults for that store, and blocks replacement of the damaged target until the file is repaired or moved aside by the user.
+- An invalid or malformed existing JSON file stays intact. The application displays a recovery warning, uses clean in-memory defaults for that store, and blocks replacement of the damaged target until the file is repaired or moved aside by the user. On Retry, the store rechecks the repaired or removed file; a valid, nonconflicting version can be saved without restarting the application. Recovered profile records are merged with the active in-memory profiles, and conflicting identities block the write rather than silently overwriting either copy. Repaired match histories must belong to the active match and agree with its recorded event prefix.
 - Profile and history storage failures are reported independently. In-memory state remains playable while writable persistence is unavailable; changes that remain unsaved can be lost when the program closes.
 
 ## 7. Source layout
