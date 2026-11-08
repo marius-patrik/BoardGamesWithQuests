@@ -43,7 +43,9 @@ class CleanroomLayoutTests(unittest.TestCase):
     def test_mermaid_owners_and_python_uml_sources(self) -> None:
         # UML itself needs only the standard library. Avoid parsing the full
         # tracked repository AST in a small layout test.
-        with patch.object(generate_diagrams, "repository_ast", return_value="flowchart LR\\n"):
+        with patch.object(
+            generate_diagrams, "repository_ast", return_value="flowchart LR\\n"
+        ):
             names = set(generate_diagrams.generated_assets(ROOT))
         self.assertEqual(
             names,

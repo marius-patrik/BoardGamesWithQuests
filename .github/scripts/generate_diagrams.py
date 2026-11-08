@@ -57,11 +57,16 @@ def _declarations(path: Path) -> list[tuple[str, str]]:
     stack: list[tuple[ast.AST, int]] = [(tree, 0)]
     while stack and len(nodes) < 180:
         node, depth = stack.pop()
-        if depth > 0 and isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+        if depth > 0 and isinstance(
+            node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        ):
             kind = "class" if isinstance(node, ast.ClassDef) else "function"
             nodes.append((kind, kind + " " + node.name))
         if depth < 5:
-            stack.extend((child, depth + 1) for child in reversed(list(ast.iter_child_nodes(node))))
+            stack.extend(
+                (child, depth + 1)
+                for child in reversed(list(ast.iter_child_nodes(node)))
+            )
     return nodes
 
 
