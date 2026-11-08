@@ -31,43 +31,43 @@ Complete work in dependency order. Each checkbox becomes checked only when its o
 
 ### 0 — Confirm specification and repository ownership
 
-- [ ] Obtain explicit maintainer approval of the product model and PRD.
+- [x] Obtain explicit maintainer approval of the product model and PRD.
 - [ ] Inspect the actual branch, open PRs, issues, file ownership, CI requirements, and working tree before editing.
 - [ ] Reconcile the canonical implementation issue, existing repository planning records, and active PR description with the approved PRD. Preserve unrelated or v2 work.
-- [ ] Establish `.agents/PRD.md` and `.agents/AGENTS.md` as maintained source documents; make root `README.md` and `CONTRIBUTING.md` symlinks to them. Update any generator or workflow that would overwrite those paths.
-- [ ] Record the reviewed base commit, target integration branch, implementation boundaries, and applicable tests in the handoff table.
+- [x] Establish `.agents/PRD.md` and `.agents/AGENTS.md` as maintained source documents; make root `README.md` and `CONTRIBUTING.md` symlinks to them. Update any generator or workflow that would overwrite those paths.
+- [x] Record the reviewed base commit, target integration branch, implementation boundaries, and applicable tests in the handoff table.
 
 ### 1 — Establish the executable domain model
 
-- [ ] Map the teacher-reference class names to the PRD's source structure and implement cohesive typed Python objects.
-- [ ] Implement piece classes, board copying/queries, players, immutable move/action values, and `GameManager` state ownership.
-- [ ] Connect the installed/source application entrypoint to the Python model, with one authoritative match state.
-- [ ] Add core state and starting-position tests; document exact commands and results.
+- [x] Map the teacher-reference class names to the PRD's source structure and implement cohesive typed Python objects.
+- [x] Implement piece classes, board copying/queries, players, immutable move/action values, and `GameManager` state ownership.
+- [x] Connect the installed/source application entrypoint to the Python model, with one authoritative match state.
+- [x] Add core state and starting-position tests; document exact commands and results.
 
 ### 2 — Implement validation and rule execution
 
-- [ ] Implement `Rule`, `RuleContext`, ordered rule registry, and the validator's phase-specific evaluation interface.
-- [ ] Implement piece-movement candidates, occupancy, turn guards, king-capture prevention, raw attack detection, staged effects, and self-check rejection.
-- [ ] Implement castling, en passant, promotion, check, checkmate, stalemate, and resignation following the PRD contracts.
-- [ ] Verify legal-move previews and legal-reply searches are pure and terminal evaluation terminates predictably.
-- [ ] Record focused game-position regressions and their outcomes.
+- [x] Implement `Rule`, `RuleContext`, ordered rule registry, and the validator's phase-specific evaluation interface.
+- [x] Implement piece-movement candidates, occupancy, turn guards, king-capture prevention, raw attack detection, staged effects, and self-check rejection.
+- [x] Implement castling, en passant, promotion, check, checkmate, stalemate, and resignation following the PRD contracts.
+- [x] Verify legal-move previews and legal-reply searches are pure and terminal evaluation terminates predictably.
+- [x] Record focused game-position regressions and their outcomes.
 
 ### 3 — Integrate quests and durable local records
 
-- [ ] Connect six rule-derived quests to accepted action matches and per-match completion tracking.
-- [ ] Implement profiles, XP awarding, match history, unique match identifiers, and post-commit save coordination.
-- [ ] Implement independent atomic JSON replacements, damaged-file preservation, visible save warnings, and retry behavior.
-- [ ] Verify XP attribution, simultaneous rewards, duplicate prevention, persisted profiles, and disrupted writes.
+- [x] Connect six rule-derived quests to accepted action matches and per-match completion tracking.
+- [x] Implement profiles, XP awarding, match history, unique match identifiers, and post-commit save coordination.
+- [x] Implement independent atomic JSON replacements, damaged-file preservation, visible save warnings, and retry behavior.
+- [x] Verify XP attribution, simultaneous rewards, duplicate prevention, persisted profiles, and disrupted writes.
 
 ### 4 — Complete the real Tkinter experience
 
-- [ ] Implement the game setup view, 8×8 button board, player panels, history, status, and game controls.
-- [ ] Connect controller selection, highlights, pending promotion, resignation, match reset, and save feedback to committed domain state.
+- [x] Implement the game setup view, 8×8 button board, player panels, history, status, and game controls.
+- [x] Connect controller selection, highlights, pending promotion, resignation, match reset, and save feedback to committed domain state.
 - [ ] Exercise the complete user journey through actual GUI interactions and record any remaining UI defects.
 
 ### 5 — Package and integrate
 
-- [ ] Run focused and repository-level test commands; resolve integration issues against the approved PRD.
+- [x] Run focused and repository-level test commands; resolve integration issues against the approved PRD.
 - [ ] Produce the standalone Windows build using the repository's supported release tooling and ensure assets and writable data paths work when frozen.
 - [ ] Verify the executable on Windows without Python installed; record build inputs, artifact identity, and smoke-test result.
 - [ ] Refresh the Mermaid diagrams in the PRD against source classes and actual dependencies.
@@ -121,38 +121,26 @@ Code and tests use the repository's established Python tooling and test location
 
 ## 5. Progress and handoff
 
-**Current gate:** Product design and documents are awaiting explicit owner approval. No implementation or repository modification is authorized by these document edits alone.
+**Current gate:** Full implementation was authorized by the repository owner on 2026-11-08. The cleanroom source and a focused test suite have been implemented and tested locally. Hosted Python-matrix checks, Windows frozen-executable verification, more complete Tkinter GUI acceptance, and independent review remain **open**. PR #510 is not authorized for merge or final publication.
 
-**Latest documentation deliverable:** `.agents/PRD.md` and `.agents/AGENTS.md` (local drafts). The root symlinks, GitHub issue and existing repository files remain unchanged until separately authorized.
-
-| Field | Current value / agent update |
+| Field | Current value / evidence |
 | --- | --- |
-| Owner approval | Pending |
-| Authorized working branch | Not assigned |
-| Verified starting commit | Not yet recorded |
-| Active milestone | 0 — specification and repository ownership |
-| Latest completed implementation task | None claimed |
-| Latest executed tests | None claimed for this documentation rewrite |
-| Current blockers | Owner approval; repository reconciliation follows approval |
-| Next action | Obtain approval, inspect live checkout, then reconcile work items and document placement |
-| Evidence links | Add PR, commit, CI run, screenshots, and native build links when available |
+| Owner approval | 2026-11-08 cleanroom implementation dispatch |
+| Authorized branch / PR | `v1-cleanroom` → `main`, draft PR #510 |
+| Verified documentation base | `28bff01ca05aa3bc2b1e8f454abda2c7fae796a8` |
+| Baseline | New PRD/AGENTS and root symlinks; no cleanroom application code |
+| Source delivered | Nineteen production modules; twelve rule classes; six quests; profiles/XP; JSON match history; responsive Tkinter application; keyboard board traversal |
+| Local Python tests | Python 3.13.5: `python -m pytest -q .github/tests -m 'not gui'` → **27 passed** |
+| Real GUI tests | Linux Xvfb: `xvfb-run -a python -m pytest -q .github/tests -m gui` → **3 passed** |
+| Packaging check | `python -m pip wheel --no-deps --no-build-isolation .` → wheel built; `python -m compileall -q src` → successful |
+| Native Windows | `.github/workflows/v1-verify.yml` builds frozen exe on Windows, but no Windows CI run/artifact/native acceptance verified yet |
+| Other interpreters | Python 3.10–3.12 not executed locally; configured for Actions |
+| Work remaining | Full CI/Windows verification, actual Tkinter promotion/terminal scenarios, final review, PRD diagram review, and owner acceptance |
+| Next gate | Review source/PR #510 then run/check hosted Python matrix, native Windows executable, and GUI acceptance at the pushed commit |
 
-### Handoff entry template
+### 2026-11-08 — Integrated source delivery
 
-When a substantial change is made, append or update a concise entry here:
-
-```text
-Date / agent:
-Branch and before → after SHA:
-Task completed:
-Changed production interfaces / files:
-Verification commands and results:
-Open defects / blockers:
-Next first unblocked task:
-PR / issue / CI / artifact references:
-```
-
-Keep this section short and current. Consolidate obsolete handoff entries into referenced PR comments or issue history; retain only the state and evidence required for the next agent to continue without guessing.
+Implementation and local verification occurred without editing `main`, `develop`, `v1`, `v2`, releases, or other repositories. The stage-based domain evaluator uses disposable staging; accepted events alone award XP and update per-match records. Any unavailable native or cross-Python verification remains explicitly incomplete. Keep this document synchronized with CI outcomes before seeking PR approval.
 
 ## 6. Maintenance rules for this document
 

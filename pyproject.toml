@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boardgameswithquests"
+version = "1.0.0rc1"
+description = "Offline two-player Chess with quests and persistent XP"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+readme = "README.md"
+
+[project.gui-scripts]
+boardgameswithquests = "main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["model*", "controller*", "view*"]
+
+
+[tool.pytest.ini_options]
+testpaths = [".github/tests"]
+addopts = "-ra"
+markers = ["gui: real Tkinter interactive acceptance"]

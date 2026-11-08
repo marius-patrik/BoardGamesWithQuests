@@ -1,0 +1,50 @@
+name: V1 cleanroom verification
+on:
+  push:
+    branches: [v1-cleanroom]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e . pytest
+      - run: python -m pytest -q .github/tests -m 'not gui'
+      - run: sudo apt-get update && sudo apt-get install -y xvfb
+        if: matrix.python-version == '3.12'
+      - run: xvfb-run -a python -m pytest -q .github/tests -m gui
+        if: matrix.python-version == '3.12'
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install and verify source
+        run: |
+          python -m pip install -e . pytest pyinstaller
+          python -m pytest -q .github/tests -m "not gui"
+      - name: Build standalone Windows executable
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name BoardGamesWithQuests src/main.py
+      - name: Executable launch smoke
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "dist/BoardGamesWithQuests.exe" -PassThru
+          Start-Sleep -Seconds 7
+          if ($p.HasExited) { throw "Frozen application exited unexpectedly: $($p.ExitCode)" }
+          Stop-Process -Id $p.Id -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BoardGamesWithQuests-v1-Windows-x64
+          path: dist/BoardGamesWithQuests.exe
+          if-no-files-found: error
