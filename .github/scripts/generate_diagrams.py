@@ -61,9 +61,7 @@ def _declarations(path: Path) -> list[tuple[str, str]]:
             kind = "class" if isinstance(node, ast.ClassDef) else "function"
             nodes.append((kind, kind + " " + node.name))
         if depth < 5:
-            stack.extend((child, depth + 1) for child in reversed(
-                ast.iter_child_nodes(node)
-            ))
+            stack.extend((child, depth + 1) for child in reversed(list(ast.iter_child_nodes(node))))
     return nodes
 
 
