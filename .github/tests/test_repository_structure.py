@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import importlib.util
 import subprocess
 import sys
 import unittest
@@ -36,8 +35,12 @@ class CleanroomLayoutTests(unittest.TestCase):
             self.assertFalse((ROOT / name).exists())
 
     def test_mermaid_owners_and_python_uml_sources(self) -> None:
+        # UML itself needs only the standard library. Avoid parsing the full
+        # tracked repository AST in a small layout test.
+        with patch.object(generate_diagrams, "repository_ast", return_value="flowchart LR\\n"):
+            names = set(generate_diagrams.generated_assets(ROOT))
         self.assertEqual(
-            set(generate_diagrams.generated_assets(ROOT)),
+            names,
             {
                 "docs/architecture/diagrams/ast.mmd",
                 "docs/architecture/diagrams/uml.mmd",
