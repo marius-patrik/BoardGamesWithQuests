@@ -9,9 +9,7 @@ from model.validator import IllegalAction
 
 
 class GameManagerController:
-    def __init__(
-        self, manager: GameManager, on_refresh: Callable[[], None] | None = None
-    ) -> None:
+    def __init__(self, manager: GameManager, on_refresh: Callable[[], None] | None = None) -> None:
         self.manager = manager
         self.on_refresh = on_refresh or (lambda: None)
         self.vybrane: Square | None = None
@@ -41,21 +39,15 @@ class GameManagerController:
             return ()
         if piece and piece.barva == self.manager.aktivni_barva:
             self.vybrane = square
-            self.destinace = tuple(
-                dict.fromkeys(m.kam for m in self.manager.mozne_tahy(square))
-            )
-            self.last_message = (
-                f"{piece.nazev} selected · {len(self.destinace)} legal destinations"
-            )
+            self.destinace = tuple(dict.fromkeys(m.kam for m in self.manager.mozne_tahy(square)))
+            self.last_message = f"{piece.nazev} selected · {len(self.destinace)} legal destinations"
             self._refresh()
             return ()
         if self.vybrane is None:
             self.last_message = "Select a piece of the active player"
             self._refresh()
             return ()
-        available = tuple(
-            m for m in self.manager.mozne_tahy(self.vybrane) if m.kam == square
-        )
+        available = tuple(m for m in self.manager.mozne_tahy(self.vybrane) if m.kam == square)
         if not available:
             self.last_message = "Illegal destination; choose a highlighted square"
             self._refresh()
@@ -71,9 +63,7 @@ class GameManagerController:
     def potvrd_promenu(self, code: str) -> VysledekAkce | None:
         if not self.cekajici_promena:
             return None
-        option = next(
-            (move for move in self.cekajici_promena if move.promena == code), None
-        )
+        option = next((move for move in self.cekajici_promena if move.promena == code), None)
         if option is None:
             raise ValueError("Choose Q, R, B or N")
         return self._submit(Akce.move(option))
@@ -90,7 +80,9 @@ class GameManagerController:
         self.cekajici_promena = ()
         self.last_message = result.text
         if result.xp_awarded:
-            self.last_message += f" · +{result.xp_awarded} XP ({', '.join(q.nazev for q in result.quests)})"
+            self.last_message += (
+                f" · +{result.xp_awarded} XP ({', '.join(q.nazev for q in result.quests)})"
+            )
         self._refresh()
         return result
 

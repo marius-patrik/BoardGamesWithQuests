@@ -18,9 +18,7 @@ def algebraicky(s: Square) -> str:
 
 class HerniPlocha:
     def __init__(self, starting: bool = True) -> None:
-        self.pole: list[list[Figurka | None]] = [
-            [None for _ in range(8)] for _ in range(8)
-        ]
+        self.pole: list[list[Figurka | None]] = [[None for _ in range(8)] for _ in range(8)]
         self.vyhozene_figurky_b: list[Figurka] = []
         self.vyhozene_figurky_c: list[Figurka] = []
         if starting:
@@ -55,11 +53,7 @@ class HerniPlocha:
 
     def kral(self, barva: str) -> Square | None:
         return next(
-            (
-                s
-                for s, p in self.pole_figurek()
-                if p.barva == barva and isinstance(p, Kral)
-            ),
+            (s for s, p in self.pole_figurek() if p.barva == barva and isinstance(p, Kral)),
             None,
         )
 
@@ -67,11 +61,9 @@ class HerniPlocha:
         piece = self.vrat_obsah(square)
         self.poloz(square, None)
         if piece:
-            (
-                self.vyhozene_figurky_b
-                if piece.barva == "white"
-                else self.vyhozene_figurky_c
-            ).append(piece)
+            (self.vyhozene_figurky_b if piece.barva == "white" else self.vyhozene_figurky_c).append(
+                piece
+            )
         return piece
 
     def presun(self, start: Square, end: Square) -> Figurka | None:

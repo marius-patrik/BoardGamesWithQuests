@@ -46,16 +46,12 @@ def tracked_files(root: Path = ROOT) -> list[Path]:
     """Discover every tracked file and symlink through the Git index."""
     # Only tracked file leaves become documentation pages. Never read a directory
     # as a file, regardless of the source-control entry that introduced it.
-    return [
-        path for path in diagram_generator().tracked_paths(root) if not path.is_dir()
-    ]
+    return [path for path in diagram_generator().tracked_paths(root) if not path.is_dir()]
 
 
 def public_path(path: Path) -> str:
     """Publish hidden tracked directories under ordinary URL-safe names."""
-    return "/".join(
-        part.lstrip(".") if part.startswith(".") else part for part in path.parts
-    )
+    return "/".join(part.lstrip(".") if part.startswith(".") else part for part in path.parts)
 
 
 def diagram_viewer_markup(content: str) -> str:
@@ -86,9 +82,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
     # Source pages live under a collision-free URL namespace, keeping original
     # binary assets at their native URLs. The source tree/nav still uses Git paths.
     namespace = "repository-files"
-    source_prefixes = {
-        public_path(path.relative_to(root)).split("/", 1)[0] for path in paths
-    }
+    source_prefixes = {public_path(path.relative_to(root)).split("/", 1)[0] for path in paths}
     while namespace in source_prefixes:
         namespace = "_" + namespace
     pages: list[tuple[str, str, str]] = []
@@ -99,11 +93,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
         markdown = path.suffix.lower() == ".md"
         if markdown:
             if path.name.lower() == "readme.md":
-                dest = (
-                    public_path(rel.parent / "index.md")
-                    if len(rel.parts) > 1
-                    else "index.md"
-                )
+                dest = public_path(rel.parent / "index.md") if len(rel.parts) > 1 else "index.md"
             else:
                 dest = public_path(rel)
         else:
@@ -130,9 +120,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
 
                 import yaml
 
-                config = yaml.safe_load(
-                    (root / "properdocs.yml").read_text(encoding="utf-8")
-                )
+                config = yaml.safe_load((root / "properdocs.yml").read_text(encoding="utf-8"))
                 repository_url = (config.get("repo_url") or "").rstrip("/")
                 revision = subprocess.run(
                     ["git", "-C", str(root), "rev-parse", "HEAD"],
@@ -141,14 +129,10 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
                     text=True,
                 ).stdout.strip()
                 if repository_url.startswith("https://"):
-                    url = (
-                        f"{repository_url}/blob/{revision}/{quote(name, safe=chr(47))}"
-                    )
+                    url = f"{repository_url}/blob/{revision}/{quote(name, safe=chr(47))}"
                     body = header + f"[View complete file at this commit]({url})\n"
                 else:
-                    body = (
-                        header + "Original bytes are retained in the Git repository.\n"
-                    )
+                    body = header + "Original bytes are retained in the Git repository.\n"
             else:
                 import re
 
@@ -164,9 +148,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
 
             title = escape(name, quote=False)
             if rel.suffix.lower() == ".mmd":
-                graphic = (
-                    '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
-                )
+                graphic = '<pre class="mermaid">' + escape(decoded, quote=False) + "</pre>"
             else:
                 # A committed SVG in images/ is an image, not editable diagram
                 # source. Render the original bytes with the same pan/zoom UI.
@@ -201,12 +183,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
         def link(match: re.Match[str]) -> str:
             original = match.group(2)
             parsed = urlsplit(original)
-            if (
-                parsed.scheme
-                or parsed.netloc
-                or not parsed.path
-                or original.startswith("#")
-            ):
+            if parsed.scheme or parsed.netloc or not parsed.path or original.startswith("#"):
                 return match.group(0)
             target = (root / source_dir / unquote(parsed.path)).resolve()
             if not target.is_relative_to(root.resolve()):
@@ -293,9 +270,7 @@ def on_files(files: Any, config: Any) -> Any:
         current = files.get_file_from_path(dest)
         if current is not None:
             files.remove(current)
-        files.append(
-            File.generated(config, dest, content=path.read_text(encoding="utf-8"))
-        )
+        files.append(File.generated(config, dest, content=path.read_text(encoding="utf-8")))
     return files
 
 
@@ -350,9 +325,7 @@ def manifest(site: Path, repository: Path) -> dict[str, list[dict[str, str]]]:
 
     config = json.loads((repository / "repo.dfconfig").read_text(encoding="utf-8"))
     identity = config.get("repo", {}).get("identity", {})
-    default_branch = (
-        identity.get("default_branch") if isinstance(identity, dict) else None
-    )
+    default_branch = identity.get("default_branch") if isinstance(identity, dict) else None
     if not isinstance(default_branch, str) or not default_branch:
         default_branch = "repository root"
     versions = [{"name": default_branch, "path": ""}]
@@ -465,25 +438,15 @@ def render_published_mermaid(site: Path) -> None:
                     # That produces an incorrectly sized image in the viewer.
                     # Use the actual rendered bounds to give both axes real units.
                     opening = re.search(r"<svg\b[^>]*>", data)
-                    viewbox = re.search(
-                        r'viewBox="([^"]+)"', opening.group(0) if opening else ""
-                    )
+                    viewbox = re.search(r'viewBox="([^"]+)"', opening.group(0) if opening else "")
                     if opening is None or viewbox is None:
-                        raise RuntimeError(
-                            f"Mermaid SVG has no intrinsic bounds: {target}"
-                        )
+                        raise RuntimeError(f"Mermaid SVG has no intrinsic bounds: {target}")
                     bounds = viewbox.group(1).split()
-                    if (
-                        len(bounds) != 4
-                        or float(bounds[2]) <= 0
-                        or float(bounds[3]) <= 0
-                    ):
+                    if len(bounds) != 4 or float(bounds[2]) <= 0 or float(bounds[3]) <= 0:
                         raise RuntimeError(f"Mermaid SVG has invalid bounds: {target}")
                     from math import ceil
 
-                    svg_tag = re.sub(
-                        r'\s(?:width|height)="[^"]*"', "", opening.group(0)
-                    )
+                    svg_tag = re.sub(r'\s(?:width|height)="[^"]*"', "", opening.group(0))
                     svg_tag = svg_tag.replace(
                         "<svg",
                         f'<svg width="{ceil(float(bounds[2]))}" height="{ceil(float(bounds[3]))}"',
@@ -492,9 +455,7 @@ def render_published_mermaid(site: Path) -> None:
                     data = data.replace(opening.group(0), svg_tag, 1)
                     target.write_text(data, encoding="utf-8")
                     compiled[digest] = target
-                relative = os.path.relpath(compiled[digest], page.parent).replace(
-                    os.sep, "/"
-                )
+                relative = os.path.relpath(compiled[digest], page.parent).replace(os.sep, "/")
                 return (
                     '<img src="'
                     + quote(relative, safe="/.-_")
@@ -519,9 +480,7 @@ def build() -> None:
         config = yaml.safe_load((ROOT / "properdocs.yml").read_text(encoding="utf-8"))
         config["docs_dir"] = str(source)
         config["site_dir"] = str(ROOT / "site")
-        config["hooks"] = [
-            str((ROOT / hook).resolve()) for hook in config.get("hooks", [])
-        ]
+        config["hooks"] = [str((ROOT / hook).resolve()) for hook in config.get("hooks", [])]
         theme = config.get("theme", {})
         if theme.get("custom_dir"):
             theme["custom_dir"] = str((ROOT / theme["custom_dir"]).resolve())
@@ -558,9 +517,7 @@ def write_manifest(site: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Build or finalize repository documentation"
-    )
+    parser = argparse.ArgumentParser(description="Build or finalize repository documentation")
     parser.add_argument(
         "--manifest",
         action="store_true",

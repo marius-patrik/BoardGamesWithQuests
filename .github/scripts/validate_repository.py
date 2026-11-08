@@ -100,10 +100,7 @@ def validate_layout() -> list[str]:
         check=False,
     )
     if tracked.returncode:
-        errors.append(
-            "Unable to inspect tracked files: "
-            + tracked.stderr.decode(errors="replace")
-        )
+        errors.append("Unable to inspect tracked files: " + tracked.stderr.decode(errors="replace"))
     else:
         for name in filter(
             None, tracked.stdout.decode("utf-8", errors="surrogateescape").split("\0")
@@ -134,9 +131,7 @@ def main() -> int:
     for error in errors:
         print("error: " + error, file=sys.stderr)
     if not errors:
-        print(
-            "Cleanroom repository, canonical documents, and docs asset layout verified."
-        )
+        print("Cleanroom repository, canonical documents, and docs asset layout verified.")
     return bool(errors)
 
 

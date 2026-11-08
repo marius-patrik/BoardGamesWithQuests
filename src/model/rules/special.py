@@ -18,11 +18,7 @@ class CastlingRule(Rule):
         board = context.pred
         source = context.vychozi_pole
         king = board.vrat_obsah(source)
-        if (
-            not isinstance(king, Kral)
-            or king.pohnuta
-            or king.barva != context.puvodni_hrac.barva
-        ):
+        if not isinstance(king, Kral) or king.pohnuta or king.barva != context.puvodni_hrac.barva:
             return ()
         home = 7 if king.barva == "white" else 0
         if source != (home, 4):
@@ -71,11 +67,7 @@ class EnPassantRule(Rule):
 
     def kandidati(self, context: RuleContext) -> tuple[Tah, ...]:
         prev = context.predchozi_tah
-        if (
-            context.vychozi_pole is None
-            or prev is None
-            or prev.typ_tahu != "pawn_double"
-        ):
+        if context.vychozi_pole is None or prev is None or prev.typ_tahu != "pawn_double":
             return ()
         src = context.vychozi_pole
         pawn = context.pred.vrat_obsah(src)

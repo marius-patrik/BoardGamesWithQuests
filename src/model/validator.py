@@ -215,9 +215,7 @@ class RevizorTahu:
             raise IllegalAction("This move is not legal for the selected piece")
         prepared = self._stage(seed)
         if prepared is None:
-            raise IllegalAction(
-                "Move would leave your king in check or violates the rules"
-            )
+            raise IllegalAction("Move would leave your king in check or violates the rules")
         staged, after = prepared
         opponent = "black" if actor.barva == "white" else "white"
         checked = self.v_sachu(after, opponent)

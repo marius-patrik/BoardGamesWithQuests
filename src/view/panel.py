@@ -10,22 +10,18 @@ MUTED = "#626a76"
 
 class HracGameView(tk.Frame):
     def __init__(self, parent, color: str):
-        super().__init__(
-            parent, bg=BG, highlightbackground="#dadce0", highlightthickness=1
-        )
+        super().__init__(parent, bg=BG, highlightbackground="#dadce0", highlightthickness=1)
         self.barva = color
-        self.title = tk.Label(
-            self, font=("Arial", 14, "bold"), anchor="w", bg=BG, fg=INK
-        )
+        self.title = tk.Label(self, font=("Arial", 14, "bold"), anchor="w", bg=BG, fg=INK)
         self.title.pack(fill="x", padx=14, pady=(14, 3))
         self.identity = tk.Label(self, font=("Arial", 10), anchor="w", bg=BG, fg=MUTED)
         self.identity.pack(fill="x", padx=14)
         self.xp = tk.Label(self, font=("Arial", 13, "bold"), anchor="w", bg=BG, fg=INK)
         self.xp.pack(fill="x", padx=14, pady=(10, 9))
         tk.Frame(self, height=1, bg="#dbdee3").pack(fill="x", padx=12)
-        tk.Label(
-            self, text="QUESTS", font=("Arial", 9, "bold"), anchor="w", bg=BG, fg=MUTED
-        ).pack(fill="x", padx=14, pady=(12, 6))
+        tk.Label(self, text="QUESTS", font=("Arial", 9, "bold"), anchor="w", bg=BG, fg=MUTED).pack(
+            fill="x", padx=14, pady=(12, 6)
+        )
         self.quests = []
         for _ in range(6):
             label = tk.Label(
@@ -59,10 +55,7 @@ class HracGameView(tk.Frame):
             highlightthickness=2 if selected else 1,
         )
         self.title.config(
-            text=("●  " if selected else "")
-            + self.barva.title()
-            + " · "
-            + player.uzivatel.jmeno
+            text=("●  " if selected else "") + self.barva.title() + " · " + player.uzivatel.jmeno
         )
         self.identity.config(text="@" + player.uzivatel.uzivatelske_jmeno)
         self.xp.config(text=f"{player.uzivatel.xp} XP")
@@ -79,9 +72,7 @@ class HracGameView(tk.Frame):
             if self.barva == "black"
             else manager.plocha.vyhozene_figurky_c
         )
-        self.captures.config(
-            text="Captured: " + (" ".join(p.kod for p in captured) or "—")
-        )
+        self.captures.config(text="Captured: " + (" ".join(p.kod for p in captured) or "—"))
 
     def zobraz_questy(self, manager: GameManager) -> None:
         self.zobraz_hrace(manager)

@@ -154,9 +154,7 @@ def test_castling_through_check_rejected(tmp_path):
 
 def test_king_capture_never_allowed(tmp_path):
     g = manager(tmp_path)
-    g.plocha = empty(
-        ((7, 4), Kral("white")), ((0, 0), Kral("black")), ((1, 0), Dama("white"))
-    )
+    g.plocha = empty(((7, 4), Kral("white")), ((0, 0), Kral("black")), ((1, 0), Dama("white")))
     assert not any(m.kam == (0, 0) for m in g.mozne_tahy((1, 0)))
 
 
@@ -172,14 +170,10 @@ def test_pinned_piece_must_preserve_king(tmp_path):
     assert any(m.kam == (5, 4) for m in g.mozne_tahy((6, 4)))
 
 
-@pytest.mark.parametrize(
-    "code,cls", [("Q", Dama), ("R", Vez), ("B", Strelec), ("N", Kun)]
-)
+@pytest.mark.parametrize("code,cls", [("Q", Dama), ("R", Vez), ("B", Strelec), ("N", Kun)])
 def test_four_promotion_choices(tmp_path, code, cls):
     g = manager(tmp_path)
-    g.plocha = empty(
-        ((7, 7), Kral("white")), ((0, 7), Kral("black")), ((1, 0), Pesak("white"))
-    )
+    g.plocha = empty(((7, 7), Kral("white")), ((0, 7), Kral("black")), ((1, 0), Pesak("white")))
     options = [m for m in g.mozne_tahy((1, 0)) if m.kam == (0, 0)]
     assert {m.promena for m in options} == {"Q", "R", "B", "N"}
     play(g, (1, 0), (0, 0), "promotion", code)
@@ -189,9 +183,7 @@ def test_four_promotion_choices(tmp_path, code, cls):
 
 def test_stalemate(tmp_path):
     g = manager(tmp_path)
-    g.plocha = empty(
-        ((2, 2), Kral("white")), ((3, 1), Dama("white")), ((0, 0), Kral("black"))
-    )
+    g.plocha = empty(((2, 2), Kral("white")), ((3, 1), Dama("white")), ((0, 0), Kral("black")))
     outcome = play(g, (3, 1), (2, 1))
     assert outcome.reason == "stalemate" and outcome.winner is None
     assert g.stav == "terminal" and g.logger.result == {
@@ -213,9 +205,7 @@ def test_resignation_has_no_move_coordinates(tmp_path):
 def test_vector_candidates_for_each_piece(tmp_path):
     v = RevizorTahu()
     for cls, expected in [(Kral, 8), (Dama, 27), (Vez, 14), (Strelec, 13), (Kun, 8)]:
-        b = empty(
-            ((4, 3), cls("white")), ((0, 0), Kral("black")), ((7, 7), Kral("white"))
-        )
+        b = empty(((4, 3), cls("white")), ((0, 0), Kral("black")), ((7, 7), Kral("white")))
         moves = v.mozne_tahy(
             b,
             Hrac("white", manager(tmp_path / cls.__name__).users.uzivatele["alice"]),
@@ -246,9 +236,7 @@ def test_quests_are_once_per_actor_per_match_and_reset(tmp_path):
 
 def test_pawn_attack_squares_distinct_from_push(tmp_path):
     v = RevizorTahu()
-    b = empty(
-        ((7, 7), Kral("white")), ((0, 7), Kral("black")), ((3, 3), Pesak("white"))
-    )
+    b = empty(((7, 7), Kral("white")), ((0, 7), Kral("black")), ((3, 3), Pesak("white")))
     attacked = v.ohrozena_pole(b, "white")
     assert (2, 2) in attacked and (2, 4) in attacked
     assert (2, 3) not in attacked
@@ -256,7 +244,5 @@ def test_pawn_attack_squares_distinct_from_push(tmp_path):
 
 def test_king_unmoved_and_rook_moved_back_cannot_castle(tmp_path):
     g = manager(tmp_path)
-    g.plocha = empty(
-        ((7, 4), Kral("white")), ((7, 7), Vez("white", True)), ((0, 0), Kral("black"))
-    )
+    g.plocha = empty(((7, 4), Kral("white")), ((7, 7), Vez("white", True)), ((0, 0), Kral("black")))
     assert not any(m.typ_tahu.startswith("castle") for m in g.mozne_tahy((7, 4)))

@@ -55,9 +55,7 @@ class GameLogger:
 
     def uloz_historii(self) -> bool:
         if self.damaged:
-            self.save_error = (
-                "Damaged match file must be repaired or moved before saving"
-            )
+            self.save_error = "Damaged match file must be repaired or moved before saving"
             return False
         try:
             if self.path.exists():
@@ -72,9 +70,7 @@ class GameLogger:
                         raise ValueError("Invalid match file")
                 except (ValueError, UnicodeError) as exc:
                     self.damaged = True
-                    raise ValueError(
-                        "Existing match file is damaged and was preserved"
-                    ) from exc
+                    raise ValueError("Existing match file is damaged and was preserved") from exc
             atomic_json(self.path, self.zapis())
             self.save_error = None
             self.dirty = False

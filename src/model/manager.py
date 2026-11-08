@@ -24,11 +24,7 @@ class VysledekAkce:
 
 class GameManager:
     def __init__(self, users: UserManager, white: str, black: str) -> None:
-        if (
-            white == black
-            or white not in users.uzivatele
-            or black not in users.uzivatele
-        ):
+        if white == black or white not in users.uzivatele or black not in users.uzivatele:
             raise ValueError("Select two distinct existing profiles")
         self.users = users
         self.hraci = {
@@ -67,9 +63,7 @@ class GameManager:
         self.winner = prepared.winner
         self.stav = "terminal" if prepared.reason else "in_progress"
         if akce.typ == "resign":
-            message = (
-                f"{self.hraci[prepared.winner].uzivatel.jmeno} wins by resignation"
-            )
+            message = f"{self.hraci[prepared.winner].uzivatel.jmeno} wins by resignation"
             self.logger.zaznamenej(
                 {
                     "type": "resignation",
@@ -83,9 +77,7 @@ class GameManager:
             gained, quests = 0, ()
         else:
             assert prepared.tah is not None
-            gained, quests = self.quest_manager.pridej_odmeny(
-                prepared.matched_rule_ids, actor
-            )
+            gained, quests = self.quest_manager.pridej_odmeny(prepared.matched_rule_ids, actor)
             if gained:
                 self.users.pridej_xp(actor.uzivatel.uzivatelske_jmeno, gained)
             move = prepared.tah

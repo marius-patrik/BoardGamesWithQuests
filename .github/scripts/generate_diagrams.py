@@ -57,16 +57,11 @@ def _declarations(path: Path) -> list[tuple[str, str]]:
     stack: list[tuple[ast.AST, int]] = [(tree, 0)]
     while stack and len(nodes) < 180:
         node, depth = stack.pop()
-        if depth > 0 and isinstance(
-            node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-        ):
+        if depth > 0 and isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
             kind = "class" if isinstance(node, ast.ClassDef) else "function"
             nodes.append((kind, kind + " " + node.name))
         if depth < 5:
-            stack.extend(
-                (child, depth + 1)
-                for child in reversed(list(ast.iter_child_nodes(node)))
-            )
+            stack.extend((child, depth + 1) for child in reversed(list(ast.iter_child_nodes(node))))
     return nodes
 
 
@@ -147,17 +142,13 @@ def implementation_uml(root: Path) -> str:
     associations: set[tuple[str, str, str]] = set()
     for key, cls in sorted(classes.items()):
         for node in ast.walk(cls):
-            if not isinstance(node, ast.AnnAssign) or not isinstance(
-                node.target, ast.Attribute
-            ):
+            if not isinstance(node, ast.AnnAssign) or not isinstance(node.target, ast.Attribute):
                 continue
             target = node.target
             if not isinstance(target.value, ast.Name) or target.value.id != "self":
                 continue
             annotation_types = {
-                item.id
-                for item in ast.walk(node.annotation)
-                if isinstance(item, ast.Name)
+                item.id for item in ast.walk(node.annotation) if isinstance(item, ast.Name)
             }
             for type_name in sorted(annotation_types):
                 matches = simple.get(type_name, [])

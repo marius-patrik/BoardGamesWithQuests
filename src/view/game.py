@@ -22,13 +22,13 @@ class GameView(tk.Frame):
         self.font_family = font_family
         tk.Label(self, text="", bg="#fafaf8", width=2).grid(row=0, column=0)
         for c in range(8):
-            tk.Label(
-                self, text=chr(97 + c), fg="#51565b", bg="#fafaf8", font=("Arial", 10)
-            ).grid(row=9, column=c + 1, sticky="nsew")
+            tk.Label(self, text=chr(97 + c), fg="#51565b", bg="#fafaf8", font=("Arial", 10)).grid(
+                row=9, column=c + 1, sticky="nsew"
+            )
         for r in range(8):
-            tk.Label(
-                self, text=str(8 - r), fg="#51565b", bg="#fafaf8", font=("Arial", 10)
-            ).grid(row=r + 1, column=0, sticky="nsew")
+            tk.Label(self, text=str(8 - r), fg="#51565b", bg="#fafaf8", font=("Arial", 10)).grid(
+                row=r + 1, column=0, sticky="nsew"
+            )
             for c in range(8):
                 square = (r, c)
                 button = tk.Button(
@@ -46,18 +46,10 @@ class GameView(tk.Frame):
                     command=lambda s=square: self.on_square(s),
                 )
                 button.grid(row=r + 1, column=c + 1, sticky="nsew", padx=1, pady=1)
-                button.bind(
-                    "<Up>", lambda e, s=square: self._focus((max(0, s[0] - 1), s[1]))
-                )
-                button.bind(
-                    "<Down>", lambda e, s=square: self._focus((min(7, s[0] + 1), s[1]))
-                )
-                button.bind(
-                    "<Left>", lambda e, s=square: self._focus((s[0], max(0, s[1] - 1)))
-                )
-                button.bind(
-                    "<Right>", lambda e, s=square: self._focus((s[0], min(7, s[1] + 1)))
-                )
+                button.bind("<Up>", lambda e, s=square: self._focus((max(0, s[0] - 1), s[1])))
+                button.bind("<Down>", lambda e, s=square: self._focus((min(7, s[0] + 1), s[1])))
+                button.bind("<Left>", lambda e, s=square: self._focus((s[0], max(0, s[1] - 1))))
+                button.bind("<Right>", lambda e, s=square: self._focus((s[0], min(7, s[1] + 1))))
                 button.bind("<Return>", lambda e, b=button: b.invoke())
                 button.bind("<space>", lambda e, b=button: b.invoke())
                 self.buttons[square] = button

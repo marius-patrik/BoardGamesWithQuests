@@ -92,11 +92,7 @@ class UserManager:
                 raise ValueError("Unsupported profile format")
             loaded: dict[str, Uzivatel] = {}
             for key, user in raw["users"].items():
-                if (
-                    not isinstance(user, dict)
-                    or type(user.get("xp")) is not int
-                    or user["xp"] < 0
-                ):
+                if not isinstance(user, dict) or type(user.get("xp")) is not int or user["xp"] < 0:
                     raise ValueError("Invalid XP")
                 username = normalize_username(user["username"])
                 if (
@@ -110,9 +106,7 @@ class UserManager:
         except (ValueError, OSError, TypeError, KeyError, json.JSONDecodeError) as exc:
             self.uzivatele = {}
             self.damaged = True
-            self.save_error = (
-                f"Profile file needs repair: {exc}. Original was preserved."
-            )
+            self.save_error = f"Profile file needs repair: {exc}. Original was preserved."
 
     def vytvor_uzivatele(self, username: str, display_name: str) -> Uzivatel:
         key = normalize_username(username)
@@ -135,9 +129,7 @@ class UserManager:
 
     def uloz_uzivatele(self) -> bool:
         if self.damaged:
-            self.save_error = (
-                "Existing profile file is damaged; move or repair it before saving."
-            )
+            self.save_error = "Existing profile file is damaged; move or repair it before saving."
             return False
         try:
             atomic_json(

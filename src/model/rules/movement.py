@@ -81,9 +81,7 @@ class KingCaptureRule(Rule):
     nazev = "King capture prevention"
 
     def povoleno(self, context: RuleContext) -> bool:
-        return context.tah is None or not isinstance(
-            context.pred.vrat_obsah(context.tah.kam), Kral
-        )
+        return context.tah is None or not isinstance(context.pred.vrat_obsah(context.tah.kam), Kral)
 
 
 class KingSafetyRule(Rule):

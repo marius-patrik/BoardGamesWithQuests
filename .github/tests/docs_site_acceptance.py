@@ -20,9 +20,7 @@ def test_repository_navigation_and_every_file_page():
     assert names, "No tracked files were discovered"
     for name in names:
         path = Path(name)
-        source = "/".join(
-            part.lstrip(".") if part.startswith(".") else part for part in path.parts
-        )
+        source = "/".join(part.lstrip(".") if part.startswith(".") else part for part in path.parts)
         if path.suffix.lower() == ".md":
             if path.name.lower() == "readme.md":
                 target = SITE / ("/".join(source.split("/")[:-1])) / "index.html"
@@ -30,9 +28,7 @@ def test_repository_navigation_and_every_file_page():
                 target = SITE / source.removesuffix(".md") / "index.html"
         else:
             target = SITE / "repository-files" / (source + "/index.html")
-        assert (
-            target.is_file()
-        ), f"Missing published navigation page for {name}: {target}"
+        assert target.is_file(), f"Missing published navigation page for {name}: {target}"
 
 
 def test_sidebar_sections_exactly_match_git_tracked_directories():
@@ -45,22 +41,14 @@ def test_sidebar_sections_exactly_match_git_tracked_directories():
         check=True,
         capture_output=True,
     ).stdout
-    paths = [
-        Path(name.decode("utf-8", "surrogateescape"))
-        for name in tracked.split(b"\0")
-        if name
-    ]
+    paths = [Path(name.decode("utf-8", "surrogateescape")) for name in tracked.split(b"\0") if name]
     # Git does not track empty folders, so only file ancestors may be sections.
     expected = {
-        "/" + "/".join(path.parts[:depth])
-        for path in paths
-        for depth in range(1, len(path.parts))
+        "/" + "/".join(path.parts[:depth]) for path in paths for depth in range(1, len(path.parts))
     }
     document = (SITE / "index.html").read_text(encoding="utf-8")
     sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
-    actual = {
-        unescape(name) for name in re.findall(r'data-nav-section="([^"]+)"', sidebar)
-    }
+    actual = {unescape(name) for name in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
     assert actual == expected, (
         "Sidebar entries must correspond exactly to Git-tracked folders: "
         f"unexpected={sorted(actual - expected)}; missing={sorted(expected - actual)}"
@@ -115,18 +103,13 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
         capture_output=True,
         check=True,
     ).stdout
-    names = [
-        part.decode("utf-8", "surrogateescape") for part in tracked.split(b"\0") if part
-    ]
+    names = [part.decode("utf-8", "surrogateescape") for part in tracked.split(b"\0") if part]
     incompatible = [
         name
         for name in names
-        if name.startswith("docs/architecture/diagrams/")
-        and name.endswith((".svg", ".dot", ".gv"))
+        if name.startswith("docs/architecture/diagrams/") and name.endswith((".svg", ".dot", ".gv"))
     ]
-    assert (
-        not incompatible
-    ), f"Committed diagram sources must be Mermaid: {incompatible}"
+    assert not incompatible, f"Committed diagram sources must be Mermaid: {incompatible}"
 
     for category, name in (
         ("implementation", "ast"),
@@ -141,10 +124,7 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
             / "diagrams"
             / (name + ".mmd")
         )
-        assert (
-            source.is_file()
-            and len(source.read_text(encoding="utf-8").splitlines()) > 12
-        )
+        assert source.is_file() and len(source.read_text(encoding="utf-8").splitlines()) > 12
         page = (
             SITE
             / "repository-files"
@@ -259,16 +239,9 @@ def test_published_docs_use_full_viewport_layout_with_operable_navigation_and_fu
     assert "data-fullscreen-toggle" in index
     assert 'aria-pressed="false"' in index
 
-    assert (
-        'html[data-layout="centered"] .layout' in css
-    ), "Centered mode must be available"
-    assert (
-        "--content-max" not in css
-    ), "Main document must use the remaining viewport width"
-    assert (
-        "grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--toc-width)"
-        in css
-    )
+    assert 'html[data-layout="centered"] .layout' in css, "Centered mode must be available"
+    assert "--content-max" not in css, "Main document must use the remaining viewport width"
+    assert "grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--toc-width)" in css
     assert 'html[data-nav-collapsed="true"] .layout' in css
     assert "max-width: none" in css
     assert "requestFullscreen()" in js and "exitFullscreen()" in js

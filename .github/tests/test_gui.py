@@ -104,18 +104,14 @@ def test_real_gui_save_error_and_retry_feedback(tmp_path):
 
     app = application(tmp_path)
     try:
-        with patch(
-            "model.logger.atomic_json", side_effect=OSError("simulated disk full")
-        ):
+        with patch("model.logger.atomic_json", side_effect=OSError("simulated disk full")):
             app.board.buttons[(6, 4)].invoke()
             app.board.buttons[(4, 4)].invoke()
             app.update()
             assert "History was not saved" in app.persist_warning.cget("text")
         app.retry_history()
         app.update()
-        assert "Local profiles and match history saved" in app.persist_warning.cget(
-            "text"
-        )
+        assert "Local profiles and match history saved" in app.persist_warning.cget("text")
         assert app.manager.revision == 1
     finally:
         app.destroy()

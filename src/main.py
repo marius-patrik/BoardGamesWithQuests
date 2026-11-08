@@ -38,9 +38,7 @@ def native_self_test() -> int:
             assert app.manager is not None and app.manager.revision == 3
             assert app.users.uzivatele["alice"].xp == 10
             assert app.manager.logger.path.exists()
-            saved_history = json.loads(
-                app.manager.logger.path.read_text(encoding="utf-8")
-            )
+            saved_history = json.loads(app.manager.logger.path.read_text(encoding="utf-8"))
             saved_profiles = json.loads(app.users.path.read_text(encoding="utf-8"))
             assert len(saved_history["events"]) == 3
             assert saved_profiles["users"]["alice"]["xp"] == 10
@@ -52,9 +50,7 @@ def native_self_test() -> int:
             )
             app.controller.odstup()
             app.update()
-            assert app.manager.stav == "terminal" and "GAME OVER" in app.turn.cget(
-                "text"
-            )
+            assert app.manager.stav == "terminal" and "GAME OVER" in app.turn.cget("text")
             result["checks"].append("terminal interface and resignation")
             app.destroy()
             app = None

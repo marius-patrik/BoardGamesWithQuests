@@ -63,9 +63,7 @@ def test_history_save_failure_and_retry(tmp_path):
     u = users(tmp_path)
     g = GameManager(u, "alice", "bob")
     previous = g.logger.path.read_bytes()
-    g.logger.zaznamenej(
-        {"type": "resignation", "actor": "alice"}, "resignation", "black"
-    )
+    g.logger.zaznamenej({"type": "resignation", "actor": "alice"}, "resignation", "black")
     with patch("model.logger.atomic_json", side_effect=OSError("read-only volume")):
         assert not g.logger.uloz_historii()
         assert g.logger.path.read_bytes() == previous
@@ -97,9 +95,7 @@ def test_profile_and_history_save_status_independent_on_accepted_move(tmp_path):
     g = GameManager(users(tmp_path), "alice", "bob")
     g.users.uloz_uzivatele()
     move = next(m for m in g.mozne_tahy((6, 4)) if m.kam == (4, 4))
-    with patch(
-        "model.logger.atomic_json", side_effect=OSError("history volume unavailable")
-    ):
+    with patch("model.logger.atomic_json", side_effect=OSError("history volume unavailable")):
         g.proved_akci(Akce.move(move))
     assert g.logger.save_error is not None
     assert g.users.save_error is None

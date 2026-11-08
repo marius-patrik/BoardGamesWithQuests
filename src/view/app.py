@@ -126,9 +126,7 @@ class BoardGamesApplication(tk.Tk):
     def create_profile(self) -> None:
         previous_seats = {color: box.get() for color, box in self.seat_choices.items()}
         try:
-            user = self.users.vytvor_uzivatele(
-                self.username.get(), self.display_name.get()
-            )
+            user = self.users.vytvor_uzivatele(self.username.get(), self.display_name.get())
         except ValueError as exc:
             messagebox.showerror("Invalid profile", str(exc), parent=self)
             return
@@ -165,9 +163,7 @@ class BoardGamesApplication(tk.Tk):
             fg="#e7ebf0",
             bg=INK,
         ).pack(side="left")
-        self.turn = tk.Label(
-            header, text="", font=("Arial", 11, "bold"), fg="#f2cc77", bg=INK
-        )
+        self.turn = tk.Label(header, text="", font=("Arial", 11, "bold"), fg="#f2cc77", bg=INK)
         self.turn.pack(side="right")
         toolbar = tk.Frame(self.main, bg=BACKGROUND, padx=12, pady=8)
         toolbar.pack(fill="x")
@@ -371,11 +367,7 @@ class BoardGamesApplication(tk.Tk):
         self.status.config(text=self.controller.last_message)
         messages = [e for e in (self.users.save_error, m.logger.save_error) if e]
         self.persist_warning.config(
-            text=(
-                " | ".join(messages)
-                if messages
-                else "Local profiles and match history saved"
-            ),
+            text=(" | ".join(messages) if messages else "Local profiles and match history saved"),
             fg="#ad4037" if messages else "#276349",
         )
 

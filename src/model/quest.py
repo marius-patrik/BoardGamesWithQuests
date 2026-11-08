@@ -29,9 +29,7 @@ class QuestManager:
         )
         self._awarded: set[tuple[str, str]] = set()
 
-    def pridej_odmeny(
-        self, rule_ids: tuple[str, ...], hrac
-    ) -> tuple[int, tuple[Quest, ...]]:
+    def pridej_odmeny(self, rule_ids: tuple[str, ...], hrac) -> tuple[int, tuple[Quest, ...]]:
         found = set(rule_ids)
         awarded: list[Quest] = []
         for quest in self.quests:
