@@ -286,8 +286,13 @@ class BoardGamesApplication(tk.Tk):
             ttk.Button(controls, text=caption, command=lambda p=code: choose(p)).pack(
                 side="left", padx=3
             )
-        dlg.bind("<Escape>", lambda e: dlg.destroy())
-        dlg.protocol("WM_DELETE_WINDOW", dlg.destroy)
+        def cancel(event=None):
+            # Clear the pending promotion as well as the modal, without committing a move.
+            self.controller.zrus_vyber()
+            dlg.destroy()
+
+        dlg.bind("<Escape>", cancel)
+        dlg.protocol("WM_DELETE_WINDOW", cancel)
         dlg.focus_set()
 
     def resign(self):
