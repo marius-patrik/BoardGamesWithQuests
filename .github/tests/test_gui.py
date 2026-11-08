@@ -187,7 +187,10 @@ def test_promotion_cancel_does_not_commit_and_can_be_reopened(tmp_path):
 def test_profile_recovery_retry_refreshes_setup_controls(tmp_path):
     bad = tmp_path / "users.json"
     bad.write_text("{broken", encoding="utf-8")
-    app = BoardGamesApplication(tmp_path)
+    try:
+        app = BoardGamesApplication(tmp_path)
+    except tk.TclError as exc:
+        pytest.skip(f"Graphical display unavailable: {exc}")
     try:
         assert app.users.damaged
         app.users.vytvor_uzivatele("alice", "Alice")
