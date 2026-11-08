@@ -18,7 +18,7 @@ The board opens at the standard Chess starting position, with 32 pieces, White a
 4. Once accepted, the board, captured pieces, history, quest indicators, active player, and status update from the same committed game state.
 5. A rejected action leaves the existing position intact and presents an informative status message.
 
-Both mouse and keyboard focus are visible. All game commands, promotion choices, and profile controls are usable within the application window.
+Both mouse and keyboard focus are visible. Game commands and profile controls are accessible in the main window; promotion uses a focused native dialog.
 
 ### Finishing and restarting
 
@@ -95,7 +95,7 @@ The player panels show all six quests, their XP values, and each player's curren
 
 ## 4. Desktop interface
 
-The graphical application uses one Tkinter window with a game-selection interface and an active-match interface. The Chess board is an **8×8 grid of `tk.Button` widgets**. Cells display Unicode Chess symbols with a font fallback that keeps piece colors and identities legible. White is displayed at the bottom throughout the match.
+The graphical application uses one Tkinter root window with game setup and active-match interfaces. Focused native dialogs handle promotion choices and confirmation of resignation, new games, and player changes. The Chess board is an **8×8 grid of `tk.Button` widgets**. Cells display Unicode Chess symbols with a font fallback that keeps piece colors and identities legible. White is displayed at the bottom throughout the match.
 
 The active-match layout contains:
 
@@ -172,8 +172,8 @@ class HerniPlocha {
 }
 class Figurka {
   +barva: str
-  +vektory: list
-  +vektory_utoku: list
+  +vektory: tuple
+  +vektory_utoku: tuple
 }
 class Kun
 class Kral
@@ -206,7 +206,6 @@ class RevizorTahu {
   +ohrozena_pole()
 }
 class Rule {
-  <<abstract>>
   +id: str
   +nazev: str
   +popis: str
@@ -245,13 +244,15 @@ class QuestManager {
   +reset_dokonceni()
 }
 class GameLogger {
-  +zaznamenej(akce)
+  +zaznamenej(data, reason, winner)
   +uloz_historii()
 }
 class GameManagerController {
   +vyber_pole()
+  +zrus_vyber()
   +potvrd_promenu()
-  +obnov_zobrazeni()
+  +odstup()
+  +novou_hru()
 }
 class GameView {
   +vykresli_desku()
