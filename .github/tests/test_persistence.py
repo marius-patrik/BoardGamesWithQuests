@@ -101,3 +101,91 @@ def test_profile_and_history_save_status_independent_on_accepted_move(tmp_path):
     assert g.users.save_error is None
     assert g.revision == 1
     assert g.logger.uloz_historii()
+
+
+def test_damaged_profiles_can_be_moved_aside_then_retried(tmp_path):
+    path = tmp_path / "users.json"
+    path.write_text("{invalid", encoding="utf-8")
+    u = UserManager(tmp_path)
+    assert u.damaged
+    u.vytvor_uzivatele("alice", "Alice")
+    assert not u.uloz_uzivatele()
+    broken = tmp_path / "users.original.invalid"
+    path.rename(broken)
+    assert u.uloz_uzivatele()
+    assert not u.damaged and not u.dirty and u.save_error is None
+    assert broken.read_text(encoding="utf-8") == "{invalid"
+    assert UserManager(tmp_path).uzivatele["alice"].jmeno == "Alice"
+
+
+def test_repaired_profile_file_merges_distinct_users_without_dropping_live_state(tmp_path):
+    path = tmp_path / "users.json"
+    path.write_text("corrupt", encoding="utf-8")
+    u = UserManager(tmp_path)
+    u.vytvor_uzivatele("alice", "Alice")
+    u.pridej_xp("alice", 25)
+    path.write_text(
+        json.dumps({
+            "schema_version": 1,
+            "users": {"bob": {"username": "bob", "display_name": "Bob", "xp": 40}},
+        }),
+        encoding="utf-8",
+    )
+    assert u.uloz_uzivatele()
+    restored = UserManager(tmp_path).uzivatele
+    assert restored["alice"].xp == 25 and restored["bob"].xp == 40
+    assert not u.damaged and not u.dirty
+
+
+def test_repaired_profile_conflict_never_silently_overwrites_disk(tmp_path):
+    path = tmp_path / "users.json"
+    path.write_text("invalid", encoding="utf-8")
+    u = UserManager(tmp_path)
+    u.vytvor_uzivatele("alice", "Memory Alice")
+    saved = json.dumps({
+        "schema_version": 1,
+        "users": {"alice": {
+            "username": "alice", "display_name": "Disk Alice", "xp": 80,
+        }},
+    })
+    path.write_text(saved, encoding="utf-8")
+    assert not u.uloz_uzivatele()
+    assert path.read_text(encoding="utf-8") == saved
+    assert u.damaged and "conflicts" in u.save_error
+
+
+def test_damaged_match_file_can_be_moved_aside_then_retried(tmp_path):
+    g = GameManager(users(tmp_path), "alice", "bob")
+    g.logger.path.write_text("broken", encoding="utf-8")
+    assert not g.logger.uloz_historii() and g.logger.damaged
+    backup = g.logger.path.with_suffix(".invalid")
+    g.logger.path.rename(backup)
+    move = next(m for m in g.mozne_tahy((6, 4)) if m.kam == (4, 4))
+    g.proved_akci(Akce.move(move))
+    assert backup.read_text(encoding="utf-8") == "broken"
+    assert g.logger.path.is_file()
+    assert not g.logger.damaged and not g.logger.dirty
+    assert len(json.loads(g.logger.path.read_text(encoding="utf-8"))["events"]) == 1
+
+
+def test_repaired_match_file_retries_only_when_history_is_consistent(tmp_path):
+    g = GameManager(users(tmp_path), "alice", "bob")
+    original = json.loads(g.logger.path.read_text(encoding="utf-8"))
+    g.logger.path.write_text("broken", encoding="utf-8")
+    assert not g.logger.uloz_historii()
+    # Repair with the original, valid state; the store can resume normal saving.
+    g.logger.path.write_text(json.dumps(original), encoding="utf-8")
+    move = next(m for m in g.mozne_tahy((6, 4)) if m.kam == (4, 4))
+    g.proved_akci(Akce.move(move))
+    assert not g.logger.damaged
+    valid = json.loads(g.logger.path.read_text(encoding="utf-8"))
+    assert len(valid["events"]) == 1
+
+    # Detect subsequent foreign edits rather than overwriting a different history.
+    conflict = dict(valid)
+    conflict["events"] = [{"index": 1, "type": "move", "actor": "mallory"}]
+    altered = json.dumps(conflict)
+    g.logger.path.write_text(altered, encoding="utf-8")
+    assert not g.logger.uloz_historii()
+    assert g.logger.damaged and "conflicts" in g.logger.save_error
+    assert g.logger.path.read_text(encoding="utf-8") == altered
