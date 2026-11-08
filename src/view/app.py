@@ -286,6 +286,7 @@ class BoardGamesApplication(tk.Tk):
             ttk.Button(controls, text=caption, command=lambda p=code: choose(p)).pack(
                 side="left", padx=3
             )
+
         def cancel(event=None):
             # Clear the pending promotion as well as the modal, without committing a move.
             self.controller.zrus_vyber()
