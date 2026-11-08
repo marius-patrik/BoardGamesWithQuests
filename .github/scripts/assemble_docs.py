@@ -16,7 +16,9 @@ from pathlib import Path
 def assemble(staging: Path, site: Path, open_prs: set[int]) -> list[int]:
     """Publish a coherent site from staged artifacts without running any builder."""
     if not staging.is_dir():
-        raise FileNotFoundError(f"Documentation staging directory is missing: {staging}")
+        raise FileNotFoundError(
+            f"Documentation staging directory is missing: {staging}"
+        )
     if any(path.is_symlink() for path in staging.rglob("*")):
         raise ValueError("Refusing symlinks in staged Pages artifacts")
     if site.exists():

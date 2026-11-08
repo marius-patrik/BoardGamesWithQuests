@@ -63,16 +63,17 @@ def _declarations(path: Path) -> list[tuple[str, str]]:
         if depth > 0 and (
             "definition" in kind
             or "declaration" in kind
-            or kind in {"class_body", "function_item", "impl_item", "method", "interface"}
+            or kind
+            in {"class_body", "function_item", "impl_item", "method", "interface"}
         ):
             label = kind
             name = node.child_by_field_name("name")
             if name is not None:
                 label += (
                     " "
-                    + source[name.start_byte : name.end_byte].decode("utf-8", errors="replace")[
-                        :120
-                    ]
+                    + source[name.start_byte : name.end_byte].decode(
+                        "utf-8", errors="replace"
+                    )[:120]
                 )
             nodes.append((kind, label))
         if depth < 5 and len(nodes) < 180:
@@ -157,13 +158,17 @@ def implementation_uml(root: Path) -> str:
     associations: set[tuple[str, str, str]] = set()
     for key, cls in sorted(classes.items()):
         for node in ast.walk(cls):
-            if not isinstance(node, ast.AnnAssign) or not isinstance(node.target, ast.Attribute):
+            if not isinstance(node, ast.AnnAssign) or not isinstance(
+                node.target, ast.Attribute
+            ):
                 continue
             target = node.target
             if not isinstance(target.value, ast.Name) or target.value.id != "self":
                 continue
             annotation_types = {
-                item.id for item in ast.walk(node.annotation) if isinstance(item, ast.Name)
+                item.id
+                for item in ast.walk(node.annotation)
+                if isinstance(item, ast.Name)
             }
             for type_name in sorted(annotation_types):
                 matches = simple.get(type_name, [])

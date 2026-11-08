@@ -1,4 +1,5 @@
 """Post-move terminal/check observations; no recursive rule evaluation."""
+
 from model.rules.base import Rule, RuleContext
 
 
@@ -35,6 +36,8 @@ class ResignationRule(Rule):
     nazev = "Resignation"
 
     def povoleno(self, context: RuleContext) -> bool:
-        return context.stav == "in_progress" and context.akce.typ == "resign" and context.akce.tah is None
-
-
+        return (
+            context.stav == "in_progress"
+            and context.akce.typ == "resign"
+            and context.akce.tah is None
+        )

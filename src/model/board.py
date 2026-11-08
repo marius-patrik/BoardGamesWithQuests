@@ -1,4 +1,5 @@
 """Board storage and deterministic, disposable move effects."""
+
 from __future__ import annotations
 
 from dataclasses import replace
@@ -17,7 +18,9 @@ def algebraicky(s: Square) -> str:
 
 class HerniPlocha:
     def __init__(self, starting: bool = True) -> None:
-        self.pole: list[list[Figurka | None]] = [[None for _ in range(8)] for _ in range(8)]
+        self.pole: list[list[Figurka | None]] = [
+            [None for _ in range(8)] for _ in range(8)
+        ]
         self.vyhozene_figurky_b: list[Figurka] = []
         self.vyhozene_figurky_c: list[Figurka] = []
         if starting:
@@ -48,16 +51,27 @@ class HerniPlocha:
             for c in range(8):
                 piece = self.pole[r][c]
                 if piece is not None:
-                    yield (r,c),piece
+                    yield (r, c), piece
 
     def kral(self, barva: str) -> Square | None:
-        return next((s for s,p in self.pole_figurek() if p.barva == barva and isinstance(p, Kral)), None)
+        return next(
+            (
+                s
+                for s, p in self.pole_figurek()
+                if p.barva == barva and isinstance(p, Kral)
+            ),
+            None,
+        )
 
     def odstran(self, square: Square) -> Figurka | None:
         piece = self.vrat_obsah(square)
         self.poloz(square, None)
         if piece:
-            (self.vyhozene_figurky_b if piece.barva == "white" else self.vyhozene_figurky_c).append(piece)
+            (
+                self.vyhozene_figurky_b
+                if piece.barva == "white"
+                else self.vyhozene_figurky_c
+            ).append(piece)
         return piece
 
     def presun(self, start: Square, end: Square) -> Figurka | None:
@@ -77,4 +91,7 @@ class HerniPlocha:
 
     def stav(self) -> tuple:
         """Immutable board fingerprint used by behavioral tests and the UI."""
-        return tuple(tuple((type(p).__name__,p.barva,p.pohnuta) if p else None for p in row) for row in self.pole)
+        return tuple(
+            tuple((type(p).__name__, p.barva, p.pohnuta) if p else None for p in row)
+            for row in self.pole
+        )

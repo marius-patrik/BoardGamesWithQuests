@@ -1,4 +1,5 @@
 """One locally assigned player seat."""
+
 from dataclasses import dataclass
 from model.user import Uzivatel
 

@@ -91,16 +91,24 @@ def validate_layout() -> list[str]:
         check=False,
     )
     if tracked.returncode:
-        errors.append("Unable to inspect tracked files: " + tracked.stderr.decode(errors="replace"))
+        errors.append(
+            "Unable to inspect tracked files: "
+            + tracked.stderr.decode(errors="replace")
+        )
     else:
-        for name in filter(None, tracked.stdout.decode("utf-8", errors="surrogateescape").split("\0")):
+        for name in filter(
+            None, tracked.stdout.decode("utf-8", errors="surrogateescape").split("\0")
+        ):
             parts = name.split("/")
             if name.startswith("packages/") or name.startswith(".agents/architecture/"):
                 errors.append(f"Obsolete tracked content: {name}")
             if name.startswith(".github/tests/"):
                 continue
             leaf = parts[-1]
-            if any(segment.lower() in {"tests", "test", "fixtures", "__tests__"} for segment in parts[:-1]):
+            if any(
+                segment.lower() in {"tests", "test", "fixtures", "__tests__"}
+                for segment in parts[:-1]
+            ):
                 errors.append(f"Tests or fixtures must be under .github/tests/: {name}")
             if leaf.startswith(("test_", "test-")) or re.search(
                 r"(?i)(?:[._-]test|[._-]spec|[._-]e2e)\.[^.]+$", leaf
@@ -117,7 +125,9 @@ def main() -> int:
     for error in errors:
         print("error: " + error, file=sys.stderr)
     if not errors:
-        print("Cleanroom repository, canonical documents, and docs asset layout verified.")
+        print(
+            "Cleanroom repository, canonical documents, and docs asset layout verified."
+        )
     return bool(errors)
 
 

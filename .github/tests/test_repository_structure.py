@@ -25,7 +25,10 @@ class CleanroomLayoutTests(unittest.TestCase):
             self.assertEqual((ROOT / link).readlink().as_posix(), target)
 
     def test_obsolete_package_and_agent_artifacts_are_absent(self) -> None:
-        for path in (*validate_repository.OBSOLETE_DIRECTORIES, *validate_repository.OBSOLETE_DOCUMENTS):
+        for path in (
+            *validate_repository.OBSOLETE_DIRECTORIES,
+            *validate_repository.OBSOLETE_DOCUMENTS,
+        ):
             with self.subTest(path=path):
                 self.assertFalse((ROOT / path).exists())
         for name in ("model", "view", "controller"):
@@ -35,7 +38,10 @@ class CleanroomLayoutTests(unittest.TestCase):
     def test_mermaid_owners_and_python_uml_sources(self) -> None:
         self.assertEqual(
             set(generate_diagrams.generated_assets(ROOT)),
-            {"docs/architecture/diagrams/ast.mmd", "docs/architecture/diagrams/uml.mmd"},
+            {
+                "docs/architecture/diagrams/ast.mmd",
+                "docs/architecture/diagrams/uml.mmd",
+            },
         )
         uml = generate_diagrams.implementation_uml(ROOT)
         self.assertIn('["GameManagerController"]', uml)
@@ -46,15 +52,24 @@ class CleanroomLayoutTests(unittest.TestCase):
 
     def test_validation_cli(self) -> None:
         result = subprocess.run(
-            [sys.executable, str(ROOT / ".github/scripts/validate_repository.py"), "--check"],
-            cwd=ROOT, text=True, capture_output=True, check=False,
+            [
+                sys.executable,
+                str(ROOT / ".github/scripts/validate_repository.py"),
+                "--check",
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_rejects_external_tests(self) -> None:
         fake = subprocess.CompletedProcess(
             args=["git", "ls-files", "-z", "--cached"],
-            returncode=0, stdout=b"unrelated/tests/test_bad.py\0", stderr=b"",
+            returncode=0,
+            stdout=b"unrelated/tests/test_bad.py\0",
+            stderr=b"",
         )
         with patch.object(validate_repository.subprocess, "run", return_value=fake):
             errors = validate_repository.validate_layout()

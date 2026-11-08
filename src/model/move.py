@@ -1,4 +1,5 @@
 """Immutable chess move identity and coordinate-free resignation action."""
+
 from __future__ import annotations
 from dataclasses import dataclass
 from model.board import Square, uvnitr

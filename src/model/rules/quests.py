@@ -1,4 +1,5 @@
 """Gameplay rule observed after a committed capture."""
+
 from model.rules.base import Rule, RuleContext
 
 

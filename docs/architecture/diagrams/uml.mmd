@@ -1,168 +1,209 @@
 classDiagram
 direction LR
-  class nd371e629bfa293ffb["GameController"]
-  nd371e629bfa293ffb : +__init__()
-  nd371e629bfa293ffb : +select_square()
-  nd371e629bfa293ffb : +handle_square_click()
-  nd371e629bfa293ffb : +reset_selection()
-  nd371e629bfa293ffb : +new_game()
-  class nc606331a1c2b21775["WindowController"]
-  nc606331a1c2b21775 : +__init__()
-  nc606331a1c2b21775 : +start()
-  nc606331a1c2b21775 : +stop()
-  nc606331a1c2b21775 : +set_status()
-  nc606331a1c2b21775 : +show_dialog()
-  nc606331a1c2b21775 : +close_dialog()
-  nc606331a1c2b21775 : +on_square_clicked()
-  nc606331a1c2b21775 : +tick_timer()
-  class nc1313c0736e59013c["Board"]
-  nc1313c0736e59013c : +__init__()
-  nc1313c0736e59013c : +is_within_bounds()
-  nc1313c0736e59013c : +get_piece_at()
-  nc1313c0736e59013c : +set_piece_at()
-  nc1313c0736e59013c : +move_piece()
-  nc1313c0736e59013c : +replace_piece()
-  nc1313c0736e59013c : +setup_default_board()
-  class n258a904e29b6a7487["ConfigurationError"]
-  class n02a89850b82a89385["GameDefinition"]
-  n02a89850b82a89385 : +name
-  n02a89850b82a89385 : +package
-  n02a89850b82a89385 : +title
-  n02a89850b82a89385 : +default
-  n02a89850b82a89385 : +playable
-  n02a89850b82a89385 : +board
-  n02a89850b82a89385 : +pieces
-  n02a89850b82a89385 : +clock
-  n02a89850b82a89385 : +exports
-  n02a89850b82a89385 : +appearance
-  class nb94b380f065f4a0fd["GameLogger"]
-  nb94b380f065f4a0fd : +__init__()
-  nb94b380f065f4a0fd : +create_file()
-  nb94b380f065f4a0fd : +log_move()
-  nb94b380f065f4a0fd : +get_moves()
-  nb94b380f065f4a0fd : +file_path()
-  class nda10dab1b63b6cb39["GameManager"]
-  nda10dab1b63b6cb39 : +__init__()
-  nda10dab1b63b6cb39 : +start_turn()
-  nda10dab1b63b6cb39 : +get_valid_moves()
-  nda10dab1b63b6cb39 : +cancel_move()
-  nda10dab1b63b6cb39 : +save_log()
-  nda10dab1b63b6cb39 : +get_state()
-  nda10dab1b63b6cb39 : +make_move()
-  class n45d74fe3962d7d530["Move"]
-  n45d74fe3962d7d530 : +__init__()
-  n45d74fe3962d7d530 : +validate()
-  n45d74fe3962d7d530 : +execute()
-  class n359d08f9e022bd6de["Player"]
-  n359d08f9e022bd6de : +__init__()
-  n359d08f9e022bd6de : +getColor()
-  n359d08f9e022bd6de : +getUser()
-  n359d08f9e022bd6de : +setUser()
-  n359d08f9e022bd6de : +getEloRating()
-  class nb9282aa7602bb6314["Quest"]
-  nb9282aa7602bb6314 : +__init__()
-  nb9282aa7602bb6314 : +validate()
-  nb9282aa7602bb6314 : +complete()
-  class nf8d6c7b85394e7406["Timer"]
-  nf8d6c7b85394e7406 : +__init__()
-  nf8d6c7b85394e7406 : +_get_player_index()
-  nf8d6c7b85394e7406 : +reset_time()
-  nf8d6c7b85394e7406 : +tick()
-  nf8d6c7b85394e7406 : +add_time()
-  nf8d6c7b85394e7406 : +get_time()
-  nf8d6c7b85394e7406 : +is_expired()
-  class ncd6b7a600f01cb085["MoveValidator"]
-  ncd6b7a600f01cb085 : +__init__()
-  ncd6b7a600f01cb085 : +set_board()
-  ncd6b7a600f01cb085 : +set_move()
-  ncd6b7a600f01cb085 : +find_king()
-  ncd6b7a600f01cb085 : +is_square_attacked()
-  ncd6b7a600f01cb085 : +is_check()
-  ncd6b7a600f01cb085 : +get_pseudo_legal_moves()
-  ncd6b7a600f01cb085 : +get_valid_moves()
-  ncd6b7a600f01cb085 : +get_all_valid_moves()
-  ncd6b7a600f01cb085 : +is_valid_move()
-  ncd6b7a600f01cb085 : +is_checkmate()
-  ncd6b7a600f01cb085 : +is_stalemate()
-  ncd6b7a600f01cb085 : +simulate_move()
-  class n1d8b1fb69d5af6b8e["ChessNotationWriter"]
-  n1d8b1fb69d5af6b8e : +__init__()
-  n1d8b1fb69d5af6b8e : +to_stenographic()
-  n1d8b1fb69d5af6b8e : +to_fen()
-  n1d8b1fb69d5af6b8e : +to_pgn()
-  n1d8b1fb69d5af6b8e : +export()
-  class n2db65a0476b9b2af7["ExportWriter"]
-  n2db65a0476b9b2af7 : +__init__()
-  n2db65a0476b9b2af7 : +export()
-  class n1a88b16330183a588["MetadataWriter"]
-  n1a88b16330183a588 : +__init__()
-  n1a88b16330183a588 : +set_header()
-  n1a88b16330183a588 : +get_header()
-  n1a88b16330183a588 : +format_pgn_headers()
-  n1a88b16330183a588 : +export()
-  class nfa5464b8b8014cbb7["QuestManager"]
-  nfa5464b8b8014cbb7 : +__init__()
-  nfa5464b8b8014cbb7 : +register_quest()
-  nfa5464b8b8014cbb7 : +get_quests()
-  nfa5464b8b8014cbb7 : +check_quests()
-  nfa5464b8b8014cbb7 : +get_completed_quests()
-  class n0b9b84d911ee178ba["Bishop"]
-  n0b9b84d911ee178ba : +__init__()
-  class n5221046c4a5d28faf["Horse"]
-  n5221046c4a5d28faf : +__init__()
-  class n3c66775beb86d6814["King"]
-  n3c66775beb86d6814 : +__init__()
-  n3c66775beb86d6814 : +hasMoved()
-  n3c66775beb86d6814 : +setMoved()
-  class ndcf73d29c336a959a["Pawn"]
-  ndcf73d29c336a959a : +__init__()
-  ndcf73d29c336a959a : +hasMoved()
-  ndcf73d29c336a959a : +setMoved()
-  ndcf73d29c336a959a : +getInitialVectors()
-  class nda3e38f4b5ff5b785["Piece"]
-  nda3e38f4b5ff5b785 : +__init__()
-  nda3e38f4b5ff5b785 : +getDirections()
-  nda3e38f4b5ff5b785 : +getAttackDirections()
-  nda3e38f4b5ff5b785 : +canJump()
-  nda3e38f4b5ff5b785 : +getColor()
-  nda3e38f4b5ff5b785 : +getType()
-  nda3e38f4b5ff5b785 : +getName()
-  class n55160175fbafc3dea["Queen"]
-  n55160175fbafc3dea : +__init__()
-  class nc7d8b41bdca19e527["Rook"]
-  nc7d8b41bdca19e527 : +__init__()
-  nc7d8b41bdca19e527 : +hasMoved()
-  nc7d8b41bdca19e527 : +setMoved()
-  class na242b6280b793a394["UserManager"]
-  na242b6280b793a394 : +__init__()
-  na242b6280b793a394 : +register_user()
-  na242b6280b793a394 : +get_user()
-  na242b6280b793a394 : +link_player()
-  na242b6280b793a394 : +log_action()
-  na242b6280b793a394 : +record_history()
-  na242b6280b793a394 : +execute_move()
-  class n50c5f4d1af2eb534f["User"]
-  n50c5f4d1af2eb534f : +__init__()
-  n50c5f4d1af2eb534f : +add_quest()
-  n50c5f4d1af2eb534f : +get_completed_quests()
-  n50c5f4d1af2eb534f : +getEloRating()
-  n2db65a0476b9b2af7 <|-- n1d8b1fb69d5af6b8e
-  nda3e38f4b5ff5b785 <|-- n0b9b84d911ee178ba
-  nda3e38f4b5ff5b785 <|-- n5221046c4a5d28faf
-  nda3e38f4b5ff5b785 <|-- n3c66775beb86d6814
-  nda3e38f4b5ff5b785 <|-- ndcf73d29c336a959a
-  nda3e38f4b5ff5b785 <|-- n55160175fbafc3dea
-  nda3e38f4b5ff5b785 <|-- nc7d8b41bdca19e527
-  nd371e629bfa293ffb --> nda10dab1b63b6cb39 : game_manager
-  nc606331a1c2b21775 --> nd371e629bfa293ffb : game_controller
-  nc1313c0736e59013c --> nda3e38f4b5ff5b785 : board
-  nc1313c0736e59013c --> nda3e38f4b5ff5b785 : captured_black
-  nc1313c0736e59013c --> nda3e38f4b5ff5b785 : captured_white
-  nda10dab1b63b6cb39 --> nc1313c0736e59013c : board
-  nda10dab1b63b6cb39 --> nb94b380f065f4a0fd : game_logger
-  nda10dab1b63b6cb39 --> n45d74fe3962d7d530 : current_move
-  nda10dab1b63b6cb39 --> n359d08f9e022bd6de : players
-  nda10dab1b63b6cb39 --> nf8d6c7b85394e7406 : timer
-  nda10dab1b63b6cb39 --> ncd6b7a600f01cb085 : move_validator
-  nfa5464b8b8014cbb7 --> nb9282aa7602bb6314 : quests
-  na242b6280b793a394 --> n50c5f4d1af2eb534f : users
+  class ndba5dbde851f3153e["GameManagerController"]
+  ndba5dbde851f3153e : +__init__()
+  ndba5dbde851f3153e : +_refresh()
+  ndba5dbde851f3153e : +zrus_vyber()
+  ndba5dbde851f3153e : +vyber_pole()
+  ndba5dbde851f3153e : +potvrd_promenu()
+  ndba5dbde851f3153e : +_submit()
+  ndba5dbde851f3153e : +odstup()
+  ndba5dbde851f3153e : +novou_hru()
+  class n2c4d8724780ce41d2["HerniPlocha"]
+  n2c4d8724780ce41d2 : +__init__()
+  n2c4d8724780ce41d2 : +kopie()
+  n2c4d8724780ce41d2 : +vrat_obsah()
+  n2c4d8724780ce41d2 : +poloz()
+  n2c4d8724780ce41d2 : +pole_figurek()
+  n2c4d8724780ce41d2 : +kral()
+  n2c4d8724780ce41d2 : +odstran()
+  n2c4d8724780ce41d2 : +presun()
+  n2c4d8724780ce41d2 : +promenu()
+  n2c4d8724780ce41d2 : +stav()
+  class n0850fca336210133b["GameLogger"]
+  n0850fca336210133b : +__init__()
+  n0850fca336210133b : +predchozi_tah()
+  n0850fca336210133b : +zaznamenej()
+  n0850fca336210133b : +zapis()
+  n0850fca336210133b : +uloz_historii()
+  class nd83aee9292df79329["GameManager"]
+  nd83aee9292df79329 : +__init__()
+  nd83aee9292df79329 : +aktivni_hrac()
+  nd83aee9292df79329 : +mozne_tahy()
+  nd83aee9292df79329 : +proved_akci()
+  nd83aee9292df79329 : +zkus_ulozit()
+  nd83aee9292df79329 : +reset()
+  class n49dbb51bcddd5420c["VysledekAkce"]
+  n49dbb51bcddd5420c : +tah
+  n49dbb51bcddd5420c : +matched_rule_ids
+  n49dbb51bcddd5420c : +xp_awarded
+  n49dbb51bcddd5420c : +quests
+  n49dbb51bcddd5420c : +reason
+  n49dbb51bcddd5420c : +winner
+  n49dbb51bcddd5420c : +text
+  class n4f457d3dbc4db079e["Akce"]
+  n4f457d3dbc4db079e : +typ
+  n4f457d3dbc4db079e : +tah
+  n4f457d3dbc4db079e : +move()
+  n4f457d3dbc4db079e : +resign()
+  class n9afdb64315ed96967["Tah"]
+  n9afdb64315ed96967 : +odkud
+  n9afdb64315ed96967 : +kam
+  n9afdb64315ed96967 : +typ_tahu
+  n9afdb64315ed96967 : +promena
+  n9afdb64315ed96967 : +__post_init__()
+  class n545870b79b9417a21["Dama"]
+  class n0de5a49ce793863f8["Figurka"]
+  n0de5a49ce793863f8 : +barva
+  n0de5a49ce793863f8 : +pohnuta
+  n0de5a49ce793863f8 : +kod
+  n0de5a49ce793863f8 : +nazev
+  n0de5a49ce793863f8 : +vektory
+  n0de5a49ce793863f8 : +vektory_utoku
+  n0de5a49ce793863f8 : +__post_init__()
+  class nfd1c7696fd3ff5c5d["Kral"]
+  class n7d0d0afe595557395["Kun"]
+  class n6421c0338dba2f6f1["Pesak"]
+  class n394c9ac3ed8d458af["Strelec"]
+  class n3e8f92bfcc442d1a8["Vez"]
+  class na7152a7564194b492["Hrac"]
+  na7152a7564194b492 : +barva
+  na7152a7564194b492 : +uzivatel
+  na7152a7564194b492 : +__post_init__()
+  class n66b5c0124d2018d72["Quest"]
+  n66b5c0124d2018d72 : +rule_id
+  n66b5c0124d2018d72 : +nazev
+  n66b5c0124d2018d72 : +popis
+  n66b5c0124d2018d72 : +xp
+  class n30fbb2f0529dc7685["QuestManager"]
+  n30fbb2f0529dc7685 : +__init__()
+  n30fbb2f0529dc7685 : +pridej_odmeny()
+  n30fbb2f0529dc7685 : +dokoncil()
+  n30fbb2f0529dc7685 : +reset_dokonceni()
+  class n363a22cb5511b4949["Rule"]
+  n363a22cb5511b4949 : +kandidati()
+  n363a22cb5511b4949 : +povoleno()
+  n363a22cb5511b4949 : +priprav()
+  n363a22cb5511b4949 : +nastalo()
+  class n62b5ed36242c35587["RuleContext"]
+  n62b5ed36242c35587 : +akce
+  n62b5ed36242c35587 : +tah
+  n62b5ed36242c35587 : +puvodni_hrac
+  n62b5ed36242c35587 : +pred
+  n62b5ed36242c35587 : +po
+  n62b5ed36242c35587 : +predchozi_tah
+  n62b5ed36242c35587 : +capture
+  n62b5ed36242c35587 : +v_sachu
+  n62b5ed36242c35587 : +ma_odpoved
+  n62b5ed36242c35587 : +ohrozene
+  n62b5ed36242c35587 : +stav
+  n62b5ed36242c35587 : +zdroj
+  n62b5ed36242c35587 : +vychozi_pole()
+  class n558ca6ee663a9e3cf["BasicMovementRule"]
+  n558ca6ee663a9e3cf : +kandidati()
+  class n62c23a2ae910d0453["KingCaptureRule"]
+  n62c23a2ae910d0453 : +povoleno()
+  class ne16addacd2afa105c["KingSafetyRule"]
+  ne16addacd2afa105c : +povoleno()
+  class n7982485ecd843e452["TurnOwnershipRule"]
+  n7982485ecd843e452 : +povoleno()
+  class n13f93fc45530a8026["CheckRule"]
+  n13f93fc45530a8026 : +nastalo()
+  class n25e1546bd9e276bc3["CheckmateRule"]
+  n25e1546bd9e276bc3 : +nastalo()
+  class ne7b6f08a6fa10941d["ResignationRule"]
+  ne7b6f08a6fa10941d : +povoleno()
+  class n93add3fc1ea2abe39["StalemateRule"]
+  n93add3fc1ea2abe39 : +nastalo()
+  class n842236ed59df880e9["CaptureRule"]
+  n842236ed59df880e9 : +nastalo()
+  class ndbaa665d3db60f52f["CastlingRule"]
+  ndbaa665d3db60f52f : +kandidati()
+  ndbaa665d3db60f52f : +priprav()
+  ndbaa665d3db60f52f : +nastalo()
+  class n22aabef6b5ebbbf1e["EnPassantRule"]
+  n22aabef6b5ebbbf1e : +kandidati()
+  n22aabef6b5ebbbf1e : +priprav()
+  n22aabef6b5ebbbf1e : +nastalo()
+  class nbca44ab26daa24149["PromotionRule"]
+  nbca44ab26daa24149 : +kandidati()
+  nbca44ab26daa24149 : +priprav()
+  nbca44ab26daa24149 : +nastalo()
+  class n1c114069155638918["UserManager"]
+  n1c114069155638918 : +__init__()
+  n1c114069155638918 : +nacti_uzivatele()
+  n1c114069155638918 : +vytvor_uzivatele()
+  n1c114069155638918 : +pridej_xp()
+  n1c114069155638918 : +uloz_uzivatele()
+  class ncb8c521878c8ac5f2["Uzivatel"]
+  ncb8c521878c8ac5f2 : +uzivatelske_jmeno
+  ncb8c521878c8ac5f2 : +jmeno
+  ncb8c521878c8ac5f2 : +xp
+  class n3ee09f383d92f9472["IllegalAction"]
+  class n5f7aa1a5781750653["PripravenyTah"]
+  n5f7aa1a5781750653 : +plocha
+  n5f7aa1a5781750653 : +tah
+  n5f7aa1a5781750653 : +captured
+  n5f7aa1a5781750653 : +matched_rule_ids
+  n5f7aa1a5781750653 : +reason
+  n5f7aa1a5781750653 : +winner
+  class nfb0be2193f2e816b7["RevizorTahu"]
+  nfb0be2193f2e816b7 : +__init__()
+  nfb0be2193f2e816b7 : +ohrozena_pole()
+  nfb0be2193f2e816b7 : +v_sachu()
+  nfb0be2193f2e816b7 : +_context()
+  nfb0be2193f2e816b7 : +_candidates()
+  nfb0be2193f2e816b7 : +_castle_safe_transit()
+  nfb0be2193f2e816b7 : +_stage()
+  nfb0be2193f2e816b7 : +mozne_tahy()
+  nfb0be2193f2e816b7 : +vyhodnot()
+  class n7ceda7fc39a0dbcec["BoardGamesApplication"]
+  n7ceda7fc39a0dbcec : +__init__()
+  n7ceda7fc39a0dbcec : +_clear()
+  n7ceda7fc39a0dbcec : +show_setup()
+  n7ceda7fc39a0dbcec : +create_profile()
+  n7ceda7fc39a0dbcec : +start_match()
+  n7ceda7fc39a0dbcec : +show_game()
+  n7ceda7fc39a0dbcec : +on_square()
+  n7ceda7fc39a0dbcec : +ask_promotion()
+  n7ceda7fc39a0dbcec : +resign()
+  n7ceda7fc39a0dbcec : +new_game()
+  n7ceda7fc39a0dbcec : +players_setup()
+  n7ceda7fc39a0dbcec : +retry_profiles()
+  n7ceda7fc39a0dbcec : +retry_history()
+  n7ceda7fc39a0dbcec : +refresh()
+  class n5218e5c27a56be18b["GameView"]
+  n5218e5c27a56be18b : +__init__()
+  n5218e5c27a56be18b : +_focus()
+  n5218e5c27a56be18b : +vykresli_desku()
+  n5218e5c27a56be18b : +zvyrazni_tahy()
+  class n682822810145b7650["HracGameView"]
+  n682822810145b7650 : +__init__()
+  n682822810145b7650 : +zobraz_hrace()
+  n682822810145b7650 : +zobraz_questy()
+  n0de5a49ce793863f8 <|-- n545870b79b9417a21
+  n0de5a49ce793863f8 <|-- nfd1c7696fd3ff5c5d
+  n0de5a49ce793863f8 <|-- n7d0d0afe595557395
+  n0de5a49ce793863f8 <|-- n6421c0338dba2f6f1
+  n0de5a49ce793863f8 <|-- n394c9ac3ed8d458af
+  n0de5a49ce793863f8 <|-- n3e8f92bfcc442d1a8
+  n363a22cb5511b4949 <|-- n558ca6ee663a9e3cf
+  n363a22cb5511b4949 <|-- n62c23a2ae910d0453
+  n363a22cb5511b4949 <|-- ne16addacd2afa105c
+  n363a22cb5511b4949 <|-- n7982485ecd843e452
+  n363a22cb5511b4949 <|-- n13f93fc45530a8026
+  n363a22cb5511b4949 <|-- n25e1546bd9e276bc3
+  n363a22cb5511b4949 <|-- ne7b6f08a6fa10941d
+  n363a22cb5511b4949 <|-- n93add3fc1ea2abe39
+  n363a22cb5511b4949 <|-- n842236ed59df880e9
+  n363a22cb5511b4949 <|-- ndbaa665d3db60f52f
+  n363a22cb5511b4949 <|-- n22aabef6b5ebbbf1e
+  n363a22cb5511b4949 <|-- nbca44ab26daa24149
+  ndba5dbde851f3153e --> n9afdb64315ed96967 : cekajici_promena
+  n2c4d8724780ce41d2 --> n0de5a49ce793863f8 : pole
+  n2c4d8724780ce41d2 --> n0de5a49ce793863f8 : vyhozene_figurky_b
+  n2c4d8724780ce41d2 --> n0de5a49ce793863f8 : vyhozene_figurky_c
+  n1c114069155638918 --> ncb8c521878c8ac5f2 : uzivatele
+  nfb0be2193f2e816b7 --> n363a22cb5511b4949 : rules
+  n7ceda7fc39a0dbcec --> ndba5dbde851f3153e : controller
+  n7ceda7fc39a0dbcec --> nd83aee9292df79329 : manager

@@ -1,4 +1,5 @@
 """Local player identity, durable profile storage and error recovery."""
+
 from __future__ import annotations
 
 import json
@@ -13,17 +14,30 @@ def data_directory() -> Path:
     if os.getenv("BOARDGAMESWITHQUESTS_DATA_DIR"):
         return Path(os.environ["BOARDGAMESWITHQUESTS_DATA_DIR"]).expanduser()
     if sys.platform == "win32":
-        return Path(os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData" / "Local"))) / "BoardGamesWithQuests"
+        return (
+            Path(os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData" / "Local")))
+            / "BoardGamesWithQuests"
+        )
     if sys.platform == "darwin":
         return Path.home() / "Library" / "Application Support" / "BoardGamesWithQuests"
-    return Path(os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local" / "share"))) / "boardgameswithquests"
+    return (
+        Path(os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local" / "share")))
+        / "boardgameswithquests"
+    )
 
 
 def atomic_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp: str | None = None
     try:
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, prefix=".save-", suffix=".tmp", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=".save-",
+            suffix=".tmp",
+            delete=False,
+        ) as f:
             tmp = f.name
             json.dump(data, f, ensure_ascii=False, indent=2)
             f.write("\n")
@@ -70,21 +84,35 @@ class UserManager:
             return
         try:
             raw = json.loads(self.path.read_text(encoding="utf-8"))
-            if not isinstance(raw, dict) or raw.get("schema_version") != 1 or not isinstance(raw.get("users"), dict):
+            if (
+                not isinstance(raw, dict)
+                or raw.get("schema_version") != 1
+                or not isinstance(raw.get("users"), dict)
+            ):
                 raise ValueError("Unsupported profile format")
             loaded: dict[str, Uzivatel] = {}
             for key, user in raw["users"].items():
-                if not isinstance(user, dict) or type(user.get("xp")) is not int or user["xp"] < 0:
+                if (
+                    not isinstance(user, dict)
+                    or type(user.get("xp")) is not int
+                    or user["xp"] < 0
+                ):
                     raise ValueError("Invalid XP")
                 username = normalize_username(user["username"])
-                if username != key or not isinstance(user.get("display_name"), str) or not user["display_name"].strip():
+                if (
+                    username != key
+                    or not isinstance(user.get("display_name"), str)
+                    or not user["display_name"].strip()
+                ):
                     raise ValueError("Invalid profile")
                 loaded[key] = Uzivatel(key, user["display_name"], user["xp"])
             self.uzivatele = loaded
         except (ValueError, OSError, TypeError, KeyError, json.JSONDecodeError) as exc:
             self.uzivatele = {}
             self.damaged = True
-            self.save_error = f"Profile file needs repair: {exc}. Original was preserved."
+            self.save_error = (
+                f"Profile file needs repair: {exc}. Original was preserved."
+            )
 
     def vytvor_uzivatele(self, username: str, display_name: str) -> Uzivatel:
         key = normalize_username(username)
@@ -107,13 +135,25 @@ class UserManager:
 
     def uloz_uzivatele(self) -> bool:
         if self.damaged:
-            self.save_error = "Existing profile file is damaged; move or repair it before saving."
+            self.save_error = (
+                "Existing profile file is damaged; move or repair it before saving."
+            )
             return False
         try:
-            atomic_json(self.path, {"schema_version": 1, "users": {
-                k: {"username": u.uzivatelske_jmeno, "display_name": u.jmeno, "xp": u.xp}
-                for k,u in sorted(self.uzivatele.items())
-            }})
+            atomic_json(
+                self.path,
+                {
+                    "schema_version": 1,
+                    "users": {
+                        k: {
+                            "username": u.uzivatelske_jmeno,
+                            "display_name": u.jmeno,
+                            "xp": u.xp,
+                        }
+                        for k, u in sorted(self.uzivatele.items())
+                    },
+                },
+            )
             self.dirty = False
             self.save_error = None
             return True

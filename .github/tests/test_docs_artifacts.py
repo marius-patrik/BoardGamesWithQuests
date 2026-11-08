@@ -81,7 +81,14 @@ def snapshot(tmp: Path, name: str, html: str, sha: str | None = None) -> None:
 
 def invoke(tmp: Path, env: dict[str, str]):
     return subprocess.run(
-        [sys.executable, str(SCRIPT), "--repo", REPO, "--staging", str(tmp / "staging")],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--repo",
+            REPO,
+            "--staging",
+            str(tmp / "staging"),
+        ],
         env=env,
         capture_output=True,
         text=True,
@@ -152,7 +159,9 @@ def test_main_and_matching_pr_publish_without_branch_storage(tmp_path: Path) -> 
     assert not (tmp_path / "site/pr-339").exists()
 
 
-def test_failed_main_and_outdated_pr_never_publish_stale_content(tmp_path: Path) -> None:
+def test_failed_main_and_outdated_pr_never_publish_stale_content(
+    tmp_path: Path,
+) -> None:
     env = prepare_cli(
         tmp_path,
         {
@@ -171,7 +180,9 @@ def test_failed_main_and_outdated_pr_never_publish_stale_content(tmp_path: Path)
                 "docs-preview-331": [artifact(2, "docs-preview-331", 11)],
             },
             "runs": {
-                "10": run_record(10, "Build Main Documentation", "main", conclusion="failure"),
+                "10": run_record(
+                    10, "Build Main Documentation", "main", conclusion="failure"
+                ),
                 "11": run_record(11, "Preview Documentation", "topic"),
             },
         },
@@ -206,7 +217,9 @@ def test_independent_pr_publishes_when_main_has_no_passing_build(
                 "docs-preview-331": [artifact(2, "docs-preview-331", 11)],
             },
             "runs": {
-                "10": run_record(10, "Build Main Documentation", "main", conclusion="failure"),
+                "10": run_record(
+                    10, "Build Main Documentation", "main", conclusion="failure"
+                ),
                 "11": run_record(11, "Preview Documentation", "topic"),
             },
         },
@@ -220,7 +233,8 @@ def test_independent_pr_publishes_when_main_has_no_passing_build(
     site = tmp_path / "site"
     assert (site / "pr-331/index.html").read_text() == "<h1>Independent preview</h1>"
     assert (
-        "production documentation build is unavailable" in (site / "index.html").read_text().lower()
+        "production documentation build is unavailable"
+        in (site / "index.html").read_text().lower()
     )
     assert "Failed main" not in (site / "index.html").read_text()
 

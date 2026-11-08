@@ -1,4 +1,5 @@
 """Rule protocol: candidate, permission, staged supplement and observation hooks."""
+
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable

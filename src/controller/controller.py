@@ -1,4 +1,5 @@
 """Ephemeral input selection, promotion selection and model action submission."""
+
 from __future__ import annotations
 from collections.abc import Callable
 from model.board import Square
@@ -8,12 +9,14 @@ from model.validator import IllegalAction
 
 
 class GameManagerController:
-    def __init__(self, manager: GameManager, on_refresh: Callable[[],None] | None = None) -> None:
+    def __init__(
+        self, manager: GameManager, on_refresh: Callable[[], None] | None = None
+    ) -> None:
         self.manager = manager
         self.on_refresh = on_refresh or (lambda: None)
         self.vybrane: Square | None = None
-        self.destinace: tuple[Square,...] = ()
-        self.cekajici_promena: tuple[Tah,...] = ()
+        self.destinace: tuple[Square, ...] = ()
+        self.cekajici_promena: tuple[Tah, ...] = ()
         self.last_message = "White to move"
 
     def _refresh(self) -> None:
@@ -25,7 +28,7 @@ class GameManagerController:
         self.cekajici_promena = ()
         self._refresh()
 
-    def vyber_pole(self, square: Square) -> tuple[Tah,...]:
+    def vyber_pole(self, square: Square) -> tuple[Tah, ...]:
         """Returns promotion alternatives only when the user must choose one."""
         self.cekajici_promena = ()
         if self.manager.stav != "in_progress":
@@ -38,15 +41,21 @@ class GameManagerController:
             return ()
         if piece and piece.barva == self.manager.aktivni_barva:
             self.vybrane = square
-            self.destinace = tuple(dict.fromkeys(m.kam for m in self.manager.mozne_tahy(square)))
-            self.last_message = f"{piece.nazev} selected · {len(self.destinace)} legal destinations"
+            self.destinace = tuple(
+                dict.fromkeys(m.kam for m in self.manager.mozne_tahy(square))
+            )
+            self.last_message = (
+                f"{piece.nazev} selected · {len(self.destinace)} legal destinations"
+            )
             self._refresh()
             return ()
         if self.vybrane is None:
             self.last_message = "Select a piece of the active player"
             self._refresh()
             return ()
-        available = tuple(m for m in self.manager.mozne_tahy(self.vybrane) if m.kam == square)
+        available = tuple(
+            m for m in self.manager.mozne_tahy(self.vybrane) if m.kam == square
+        )
         if not available:
             self.last_message = "Illegal destination; choose a highlighted square"
             self._refresh()
@@ -62,7 +71,9 @@ class GameManagerController:
     def potvrd_promenu(self, code: str) -> VysledekAkce | None:
         if not self.cekajici_promena:
             return None
-        option = next((move for move in self.cekajici_promena if move.promena == code),None)
+        option = next(
+            (move for move in self.cekajici_promena if move.promena == code), None
+        )
         if option is None:
             raise ValueError("Choose Q, R, B or N")
         return self._submit(Akce.move(option))

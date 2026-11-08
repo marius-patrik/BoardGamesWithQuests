@@ -1,4 +1,5 @@
 """Immutable chess pieces. Movement vectors are implemented by the rule engine."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -22,35 +23,35 @@ class Figurka:
 class Kral(Figurka):
     kod = "K"
     nazev = "King"
-    vektory = ((-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1))
+    vektory = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
     vektory_utoku = vektory
 
 
 class Dama(Figurka):
     kod = "Q"
     nazev = "Queen"
-    vektory = ((-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1))
+    vektory = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
     vektory_utoku = vektory
 
 
 class Vez(Figurka):
     kod = "R"
     nazev = "Rook"
-    vektory = ((-1,0),(0,-1),(0,1),(1,0))
+    vektory = ((-1, 0), (0, -1), (0, 1), (1, 0))
     vektory_utoku = vektory
 
 
 class Strelec(Figurka):
     kod = "B"
     nazev = "Bishop"
-    vektory = ((-1,-1),(-1,1),(1,-1),(1,1))
+    vektory = ((-1, -1), (-1, 1), (1, -1), (1, 1))
     vektory_utoku = vektory
 
 
 class Kun(Figurka):
     kod = "N"
     nazev = "Knight"
-    vektory = ((-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1))
+    vektory = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1))
     vektory_utoku = vektory
 
 

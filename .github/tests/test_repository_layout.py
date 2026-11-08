@@ -3,13 +3,14 @@
 from pathlib import Path
 import importlib.util
 
-
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_single_source_tree_for_model_view_controller():
     for package in ("model", "view", "controller"):
-        assert not (ROOT / package).exists(), f"Obsolete root-level {package}/ shadows src/{package}/"
+        assert not (
+            ROOT / package
+        ).exists(), f"Obsolete root-level {package}/ shadows src/{package}/"
         assert (ROOT / "src" / package / "__init__.py").is_file()
 
 
