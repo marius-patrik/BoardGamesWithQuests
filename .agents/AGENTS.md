@@ -18,7 +18,7 @@ Work is complete when all of the following have direct, reproducible evidence:
 - [ ] **Desktop gameplay:** A complete local game operates through Tkinter, including ordinary and special Chess moves, legal-move previews, terminal results, and two local profiles.
 - [ ] **Rule correctness:** The validator follows the PRD's one-action lifecycle, uses staged changes, rejects illegal actions without changing live state, and prevents recursive terminal evaluation.
 - [x] **Quests and profiles:** All six quests award the specified XP once per acting profile per match; combinations award together; saved XP remains available across sessions.
-- [ ] **History and recovery:** Each match has an independent chronological JSON history; profile and history saves expose independent statuses; malformed files are preserved and ordinary failures support retry.
+- [x] **History and recovery:** Each match has an independent chronological JSON history; profile and history saves expose independent statuses; malformed files are preserved and ordinary failures support retry.
 - [ ] **Interaction quality:** The real GUI presents piece selection, legal destinations, promotion, resignation, history, quests, outcomes, keyboard focus, and storage messages coherently.
 - [x] **Source verification:** Relevant automated tests and actual desktop interaction exercises pass on the final source, with repeatable commands and recorded results.
 - [ ] **Windows distribution:** A standalone Windows application launches on a Windows machine without an installed Python interpreter and can play, award XP, and write local data.
@@ -123,19 +123,19 @@ Code and tests use the repository's established Python tooling and test location
 
 ## 5. Progress and handoff
 
-**Current gate:** The Chess-only source and cleanroom repository consolidation are implemented on `v1-cleanroom`. Draft PR #510 correctly targets `develop`, not `main`. Six final-source workflows completed successfully at code SHA `c41159ed9fe85cfe4f86be61d479fc52918622ef`. Final independent gameplay/GUI review, clean Windows-machine acceptance, and maintainer merge/release approval remain open. No v1 final release is published.
+**Current gate:** The Chess-only source and cleanroom repository consolidation are implemented on `v1-cleanroom`. Draft PR #510 correctly targets `develop`, not `main`. The storage-recovery and promotion-cancellation corrections passed the V1 Python/Windows, DarkFactory, governance, formatting, and docs checks at SHA `78bae82ee33ba734df13fb013761e05e6f7d0fa9`. Final independent gameplay/GUI review, clean Windows-machine acceptance, and maintainer merge/release approval remain open. No v1 final release is published.
 
 | Field | Evidence / state |
 | --- | --- |
 | Authorization | Full cleanroom implementation dispatch, 2026-11-08 |
 | Working branch / review | `v1-cleanroom` → `develop`, draft PR #510, issue #511 |
-| Verified code revision | `c41159ed9fe85cfe4f86be61d479fc52918622ef` (documentation-only commits may follow) |
+| Verified code revision | `78bae82ee33ba734df13fb013761e05e6f7d0fa9` (corrected gameplay/GUI source; later documentation commits may follow) |
 | Production architecture | One Python source tree under `src/`; 19 product modules, 12 rule classes, 6 quests, real Tkinter UI |
-| Python + Windows CI | Python 3.10–3.13, Linux Tk/Xvfb, Windows PyInstaller and frozen GUI/XP/JSON self-test PASS: PR run #42474225555 and push run #42474222322 |
-| Documentation + governance | Browser preview PASS #42474225600; generated governance PASS #42474225608 |
-| Other checks | DarkFactory Runtime PASS #42474225807; Auto Format PASS #42474222242 |
-| Local reported tests | 29 non-GUI and 6 Linux/Xvfb GUI tests passed following root-package cleanup; rerun for subsequent source modifications |
-| Product acceptance pending | Independent Chess/UX review, cancellation and storage-repair journeys, external pointer/keyboard testing and clean Python-free Windows host |
+| Python + Windows CI | Python 3.10–3.13, 8 Linux Tk/Xvfb GUI tests, Windows PyInstaller and frozen GUI/XP/JSON self-test PASS at `78bae82`: PR run #42492498415 and push run #42492493759 |
+| Documentation + governance | Browser preview PASS #42492498549; generated governance PASS #42492498461 at `78bae82` |
+| Other checks | DarkFactory Runtime PASS #42492498829; Auto Format PASS #42492493826 at `78bae82` |
+| Regression coverage | Added damaged-profile/match-file repair, safe retry and conflict preservation tests, and GUI promotion cancellation/setup recovery tests. Hosted Python checks and Linux GUI tests passed at `78bae82`. |
+| Product acceptance pending | Independent Chess/UX review, external pointer/keyboard testing, display sizing, and a clean Python-free Windows host. Automated promotion cancellation and storage-repair scenarios now pass. |
 | Integration pending | Maintainer-authorized PR #510 → `develop`, then separately reviewed `develop` → `main` release promotion |
 | Classroom material | Offline interactive presentation prepared separately; final live demonstration with actual app/executable remains to be performed |
 
@@ -147,10 +147,16 @@ CI verified the exact code revision `c41159ed` in all six runs above. Automated 
 
 ### 2026-11-08 — Source-review findings and next actions
 
-- **P1 — Corrupt-file recovery:** Both `UserManager.uloz_uzivatele()` and `GameLogger.uloz_historii()` retain `damaged=True` after a malformed-file error. Even after the user repairs or moves aside the damaged file, the Retry control still refuses to save until the store is reconstructed. Reproduce, correct the retry/recheck behavior or explicitly require restart in UI and PRD, then add focused tests.
-- **P1 — Independent native UX:** The six Linux GUI tests and frozen Windows self-test exercise actual Tk widgets through `Button.invoke()` and application code, but do not prove full external pointer/keyboard use, cancellation flow, screen sizing, or a Python-free clean Windows host. Record independent visual/native evidence.
-- **P2 — Diagram fidelity:** The PRD UI and class-method labels were aligned with the inspected source. Regenerate and compare source-derived diagrams after future class edits.
+- **Resolved — Corrupt-file recovery:** Profile and history stores now revalidate a repaired or moved-aside file on retry without recreating the store. Profile identities are merged only when nonconflicting, and mismatched history contents are rejected without overwriting disk. Focused storage tests and the Tk setup recovery test passed under hosted Python/GUI CI at `78bae82`.
+- **P1 — Independent native UX:** Eight Linux/Xvfb GUI tests and a frozen Windows self-test exercise real Tk widgets and cover promotion cancellation, but do not prove external pointer/keyboard use, all screen sizes, or a clean Python-free Windows host. Record independent visual/native evidence.
+- **P2 — Diagram fidelity:** The PRD UI and class-method labels were aligned with inspected source; generated diagrams were checked by governance CI. Regenerate and compare source-derived diagrams after future code changes.
 - **Release governance:** PR #510 targets `develop`; the `main-source` restriction only governs a separate later `develop` → `main` promotion. No direct release or merge is authorized.
+
+### 2026-11-08 — Recovery and promotion-cancellation corrections
+
+After independent source review, changed `src/model/user.py` and `src/model/logger.py` so an explicit save retry can recover after a damaged JSON file is repaired or moved aside. Both stores refuse to overwrite incompatible recovered data. `src/view/app.py` now clears pending UI selection when promotion is cancelled, and refreshes setup profile options after recovery. Added targeted regressions in `.github/tests/test_persistence.py` and `.github/tests/test_gui.py`.
+
+Exact corrected-source CI at `78bae82`: V1 verification PASS (PR #42492498415; push #42492493759), DarkFactory Runtime PASS #42492498829, governance PASS #42492498461, documentation preview PASS #42492498549, Auto Format PASS #42492493826. The checks cover Python 3.10–3.13, Linux/Xvfb GUI, Windows packaging and the frozen GUI smoke. They do not certify arbitrary positions or independent clean-machine usage.
 
 ### Continuing-agent handoff
 
