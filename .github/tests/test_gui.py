@@ -173,6 +173,8 @@ def test_promotion_cancel_does_not_commit_and_can_be_reopened(tmp_path):
         assert app.manager.revision == 0
         assert app.manager.plocha.stav() == original
         assert app.users.uzivatele["alice"].xp == 0
+        assert app.controller.vybrane is None
+        assert not app.controller.cekajici_promena
         app.board.buttons[(1, 0)].invoke()
         app.board.buttons[(0, 0)].invoke()
         app.update()
