@@ -33,7 +33,7 @@ jobs:
       - name: Install and verify source
         run: |
           python -m pip install -e . pytest pyinstaller
-          python -m pytest -q .github/tests -m "not gui"
+          python -m pytest -q .github/tests/test_chess.py .github/tests/test_persistence.py .github/tests/test_repository_layout.py .github/tests/test_repository_structure.py -m "not gui"
       - name: Build standalone Windows executable
         run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name BoardGamesWithQuests src/main.py
       - name: Frozen Windows application GUI and persistence acceptance

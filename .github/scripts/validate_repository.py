@@ -46,7 +46,16 @@ def validate_layout() -> list[str]:
         ("CONTRIBUTING.md", ".agents/AGENTS.md"),
     ):
         link = ROOT / name
-        if not link.is_symlink() or link.readlink().as_posix() != target:
+        # Git for Windows may materialize a tracked 120000 symlink as text.
+        # Verify its content there, and require real links on POSIX.
+        tracked_link = link.is_symlink() and link.readlink().as_posix() == target
+        windows_link = (
+            sys.platform == "win32"
+            and not link.is_symlink()
+            and link.is_file()
+            and link.read_text(encoding="utf-8").strip() == target
+        )
+        if not (tracked_link or windows_link):
             errors.append(f"{name} must be a symlink to {target}")
     for name in ("PRD.md", "AGENTS.md"):
         if not (AGENTS / name).is_file():

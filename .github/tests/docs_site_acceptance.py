@@ -179,8 +179,8 @@ def test_diagram_sources_are_grouped_by_source_ownership():
     from html import unescape
     import re
 
-    architecture = ROOT / ".agents" / "architecture" / "diagrams"
-    reference = ROOT / ".agents" / "reference" / "diagrams"
+    architecture = ROOT / "docs" / "architecture" / "diagrams"
+    reference = ROOT / "docs" / "reference" / "diagrams"
     assert {path.name for path in architecture.glob("*.mmd")} == {"ast.mmd", "uml.mmd"}
     assert {path.name for path in reference.glob("*.mmd")} == {"mvc.mmd", "uml.mmd"}
     document = (SITE / "index.html").read_text(encoding="utf-8")

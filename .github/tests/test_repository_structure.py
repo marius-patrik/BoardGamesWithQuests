@@ -21,7 +21,13 @@ class CleanroomLayoutTests(unittest.TestCase):
             ("README.md", ".agents/PRD.md"),
             ("CONTRIBUTING.md", ".agents/AGENTS.md"),
         ):
-            self.assertEqual((ROOT / link).readlink().as_posix(), target)
+            actual = ROOT / link
+            if actual.is_symlink():
+                self.assertEqual(actual.readlink().as_posix(), target)
+            elif sys.platform == "win32":
+                self.assertEqual(actual.read_text(encoding="utf-8").strip(), target)
+            else:
+                self.fail(f"Expected a real symlink: {link}")
 
     def test_obsolete_package_and_agent_artifacts_are_absent(self) -> None:
         for path in (
