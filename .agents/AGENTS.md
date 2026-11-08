@@ -123,40 +123,32 @@ Code and tests use the repository's established Python tooling and test location
 
 ## 5. Progress and handoff
 
-**Current gate:** Full implementation was authorized by the repository owner on 2026-11-08. The cleanroom source and focused tests are implemented, with the redundant root-level `model/`, `view/`, and `controller/` packages removed. Hosted Python-matrix checks passed on the earlier source SHA; exhaustive native Windows acceptance, protected-branch policy reconciliation, and independent review remain **open**. PR #510 is not authorized for merge or final publication. **Main Source Policy currently fails** because direct `v1-cleanroom` → `main` violates its `develop`-only rule; the owner must decide an approved integration path.
+**Current gate:** Cleanroom source is implemented on `v1-cleanroom` with draft PR #510 targeting `develop` (not `main`). The post-rebase `packages/` duplicate engine and obsolete governance records have been removed. Docs assets are consolidated in `docs/`. Python/Tkinter/Windows build and documentation CI passed on implementation commit `592cf512b3dc678f602cccbe1dfc507c8b4ad17c`; independent acceptance, clean-machine Windows testing and maintainer review remain **open**.
 
-| Field | Current value / evidence |
+| Field | Evidence / state |
 | --- | --- |
-| Owner approval | 2026-11-08 cleanroom implementation dispatch |
-| Authorized branch / PR | `v1-cleanroom` → `main`, draft PR #510 |
-| Verified documentation base | `28bff01ca05aa3bc2b1e8f454abda2c7fae796a8` |
-| Baseline | New PRD/AGENTS and root symlinks; no cleanroom application code |
-| Source delivered | Nineteen production modules; twelve rule classes; six quests; profiles/XP; JSON match history; responsive Tkinter application; keyboard board traversal |
-| Local Python tests | Python 3.13.5: `python -m pytest -q .github/tests -m 'not gui'` → **29 passed** |
-| Real GUI tests | Linux Xvfb: `xvfb-run -a python -m pytest -q .github/tests -m gui` → **6 passed** |
-| Hosted final-source CI | Runs #42470656162 (push) and #42470659435 (PR) both **passed**, Python 3.10–3.13 and Windows build + frozen GUI self-test on SHA `35652bdc` |\n| Packaging check | `python -m pip wheel --no-deps --no-build-isolation .` → wheel built; `python -m compileall -q src` → successful |
-| Native Windows | Previous source SHA `371afc4c`: Windows package and process-launch smoke passed in Actions run #42470235243, artifact #13613231245. Updated source SHA `35652bdc`: Windows PyInstaller artifact #13613367498 and frozen GUI/XP/history acceptance passed in Actions #42470656162 (evidence artifact #13613706543); external pointer and clean-machine acceptance remain open. |
-| Other interpreters | Python 3.10–3.13 matrix passed at `371afc4c` in Actions #42470238944 and #42470235243. Repeat is complete for source SHA `35652bdc`: Actions #42470656162 and #42470659435 passed. |
-| Work remaining | Final-SHA CI and Windows frozen-GUI/persistence acceptance, independent review, main-source policy exception or approved branch strategy, PRD/UML review, owner acceptance |
-| Next gate | Final-SHA Python 3.10–3.13, Windows frozen GUI self-test, package verification passed on source SHA `35652bdc`. Resolve existing Main Source Policy failure (only `develop` may target `main`) without weakening branch rules; independently review Windows external interaction. |
+| Owner authorization | 2026-11-08 cleanroom implementation dispatch |
+| Branch / PR | `v1-cleanroom` → `develop`, draft PR #510, owning issue #511 |
+| Production owner | `src/` only, with 19 specified source modules, 12 rule classes, six quests and real Tkinter UI |
+| Canonical documentation | `.agents/PRD.md` and `.agents/AGENTS.md`; root symlinks preserved |
+| Derived docs | `docs/architecture/diagrams/` from `src/`; original diagrams and GUI SVG under `docs/reference/` |
+| Source quality | Auto-format (Black 100-column config) PASS at `592cf512`, Actions #42473894740 |
+| Python and native | Python 3.10–3.13, Windows x64 PyInstaller build and frozen GUI/persistence self-test PASS at `592cf512`, Actions #42473894640 |
+| Documentation preview | Full docs preview/browser acceptance PASS at `592cf512`, Actions #42473898411 |
+| Governance docs | Layout, generated diagrams and source consistency PASS at `592cf512`, Actions #42473898447 |
+| Windows artifact | Verified 68cf9c1c candidate artifact #13614398040; fresh source artifact available from latest successful Windows workflow |
+| Release status | No v1.0.0 final release; old multi-platform pipeline removed because it targeted deleted runtime. CI produces a Windows testing artifact only. |
+| Remaining gates | Independent Chess/GUI review, external native pointer interactions, clean Windows host, release trust/signing and maintainer integration approval |
 
-### 2026-11-08 — Integrated source delivery
+### 2026-11-08 — Implementation and repository consolidation
 
-Implementation and local verification occurred without editing `main`, `develop`, `v1`, `v2`, releases, or other repositories. The stage-based domain evaluator uses disposable staging; accepted events alone award XP and update per-match records. Exact-source Python 3.10–3.13, Windows build and the in-process frozen GUI test now passed. Clean-machine/no-Python installation, external pointer interaction, release governance and independent review remain incomplete. Keep this document synchronized with CI outcomes before seeking PR approval.
+The original cleanroom application was implemented and verified in Python 3.10–3.13 and real Linux Tkinter/Xvfb. The superseded root-level `model/`, `controller/`, and `view/` skeleton packages were deleted. The later rebase onto `develop` imported `packages/` with another Chess/Draughts implementation; **all of `packages/` was deleted** to retain exactly one runtime under `src/`.
 
-### 2026-11-08 — Root-package shadowing cleanup
+Removed `.agents/decisions/`, `.agents/notes/`, `.agents/rules/` and `.agents/{ARCHITECTURE,GOAL,PLAN,README,TODO,SCRATCHPAD}.md`. Kept `.agents/PRD.md` and `.agents/AGENTS.md` as authored authorities. Moved architecture and reference assets to `docs/` with the original reference file blobs preserved; repaired README symlink and adjusted documentation generators, tests and browser routes. Replaced the obsolete governance generator with `.github/scripts/validate_repository.py`. The diagram generator now runs with standard-library AST and never downloads a tree-sitter parser at runtime.
 
-The original root-level `model/__init__.py`, `model/figurka.py`, `view/__init__.py`, and `controller/__init__.py` were obsolete teacher-reference leftovers: the executable source lives exclusively under `src/`. Removed all four from `v1-cleanroom`; Git automatically removes the now-empty root directories. The newer `src/model/piece.py` already contains the required Czech-named six piece classes, so there is no runtime functionality to migrate. Added layout regressions requiring a single source tree and verifying the `model.piece` import resolves under `src`, never to the old `figurka.py` skeleton.
+Retired legacy four-platform desktop packaging, obsolete version-release checks, and the associated scripts/tests referring to nonexistent `src/chesswithquests` or `src/games`; retained source verification, native Windows PyInstaller smoke, source-driven Pages preview, trusted Actions publication, DarkFactory quality and issue binding. Linked PR #510 to issue #511; kept existing `develop` → `main` promotion policy unchanged.
 
-**Local verification against the cleaned source tree:** Python 3.13.5 `python -m pytest -q .github/tests -m 'not gui'` → **29 passed, 6 deselected**; `xvfb-run -a python -m pytest -q .github/tests -m gui` → **6 passed, 29 deselected**. Final-SHA hosted Python 3.10–3.13 and frozen Windows acceptance must be rechecked after push. PR #510 remains unmerged; Main Source Policy is unchanged.
-
-### 2026-11-08 — Post-rebase layout and CI reconciliation
-
-The rebase on `develop` introduced a second Python implementation under `packages/` plus an obsolete governance-document generator and release workflows that assumed a JSON-driven Chess/Draughts engine. Cleanroom ownership remains `src/`, `.agents/PRD.md` and `.agents/AGENTS.md`; removed the unrelated package tree and obsolete `.agents/` scaffolding, moved the historical `reference/` and generated implementation `architecture/` directories to `docs/`, and updated the corresponding site generator, tests and Actions paths.
-
-The source-derived implementation UML now discovers `src/` rather than the deleted packages. The historical raw reference diagram and GUI SVG remain byte-identical. The obsolete four-platform package/release pipeline, which targeted non-existent `src/chesswithquests` and `src/games` paths and dynamically versioned wheels, is retired; the active cleanroom Windows executable is still built and smoke-tested by `.github/workflows/v1-verify.yml`. Documentation remains deployed by the separate, source-verified GitHub Pages Actions pipeline.
-
-**Verification:** Repo tree/path inspection completed. Local tests and final-SHA CI need to run after this reconciliation; do not mark them passed prematurely. PR #510 targets `develop` and remains draft; do not merge or publish without review.
+**Verified integration source:** `592cf512b3dc678f602cccbe1dfc507c8b4ad17c`: Python 3.10–3.13 and Windows frozen-process CI PASS (#42473894640), docs preview PASS (#42473898411), governance docs PASS (#42473898447), autoformat PASS (#42473894740). Full DarkFactory quality on this exact revision was still running when this record was written. Independent release acceptance is not complete.
 
 ## 6. Maintenance rules for this document
 
