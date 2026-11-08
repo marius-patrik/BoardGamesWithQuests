@@ -79,34 +79,69 @@ class UserManager:
         self.dirty = False
         self.nacti_uzivatele()
 
+    @staticmethod
+    def _read_profiles(path: Path) -> dict[str, Uzivatel]:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(raw, dict)
+            or raw.get("schema_version") != 1
+            or not isinstance(raw.get("users"), dict)
+        ):
+            raise ValueError("Unsupported profile format")
+        loaded: dict[str, Uzivatel] = {}
+        for key, user in raw["users"].items():
+            if not isinstance(user, dict) or type(user.get("xp")) is not int or user["xp"] < 0:
+                raise ValueError("Invalid XP")
+            username = normalize_username(user["username"])
+            if (
+                username != key
+                or not isinstance(user.get("display_name"), str)
+                or not user["display_name"].strip()
+            ):
+                raise ValueError("Invalid profile")
+            loaded[key] = Uzivatel(key, user["display_name"], user["xp"])
+        return loaded
+
     def nacti_uzivatele(self) -> None:
         if not self.path.exists():
             return
         try:
-            raw = json.loads(self.path.read_text(encoding="utf-8"))
-            if (
-                not isinstance(raw, dict)
-                or raw.get("schema_version") != 1
-                or not isinstance(raw.get("users"), dict)
-            ):
-                raise ValueError("Unsupported profile format")
-            loaded: dict[str, Uzivatel] = {}
-            for key, user in raw["users"].items():
-                if not isinstance(user, dict) or type(user.get("xp")) is not int or user["xp"] < 0:
-                    raise ValueError("Invalid XP")
-                username = normalize_username(user["username"])
-                if (
-                    username != key
-                    or not isinstance(user.get("display_name"), str)
-                    or not user["display_name"].strip()
-                ):
-                    raise ValueError("Invalid profile")
-                loaded[key] = Uzivatel(key, user["display_name"], user["xp"])
-            self.uzivatele = loaded
-        except (ValueError, OSError, TypeError, KeyError, json.JSONDecodeError) as exc:
+            self.uzivatele = self._read_profiles(self.path)
+            self.damaged = False
+            self.save_error = None
+        except (ValueError, OSError, TypeError, KeyError, UnicodeError) as exc:
             self.uzivatele = {}
             self.damaged = True
             self.save_error = f"Profile file needs repair: {exc}. Original was preserved."
+
+    def _recover_for_retry(self) -> bool:
+        """Explicit retry after external repair/removal; never overwrite conflicting profiles."""
+        if not self.damaged:
+            return True
+        recovered: dict[str, Uzivatel] = {}
+        if self.path.exists():
+            try:
+                recovered = self._read_profiles(self.path)
+            except (ValueError, OSError, TypeError, KeyError, UnicodeError) as exc:
+                self.save_error = f"Profile file is still damaged: {exc}. Original was preserved."
+                return False
+        conflicting = [
+            name
+            for name, saved in recovered.items()
+            if name in self.uzivatele and self.uzivatele[name] != saved
+        ]
+        if conflicting:
+            self.save_error = (
+                "Repaired profile file conflicts with in-memory profiles ("
+                + ", ".join(sorted(conflicting))
+                + "). Resolve the differences or move the repaired file aside before retrying."
+            )
+            return False
+        # Retain live objects referenced by the current GameManager's player seats.
+        self.uzivatele = {**recovered, **self.uzivatele}
+        self.damaged = False
+        self.dirty = True
+        return True
 
     def vytvor_uzivatele(self, username: str, display_name: str) -> Uzivatel:
         key = normalize_username(username)
@@ -128,8 +163,7 @@ class UserManager:
         self.dirty = True
 
     def uloz_uzivatele(self) -> bool:
-        if self.damaged:
-            self.save_error = "Existing profile file is damaged; move or repair it before saving."
+        if not self._recover_for_retry():
             return False
         try:
             atomic_json(
