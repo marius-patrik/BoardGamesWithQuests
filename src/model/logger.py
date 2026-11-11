@@ -9,6 +9,8 @@ from model.user import atomic_json, data_directory
 
 
 class GameLogger:
+    """Append accepted actions once and persist one independently retryable match file."""
+
     def __init__(self, white: str, black: str, root: Path | None = None) -> None:
         self.match_id = str(uuid.uuid4())
         self.root = Path(root) if root is not None else data_directory()
@@ -34,6 +36,7 @@ class GameLogger:
         return None
 
     def zaznamenej(self, data: dict, reason: str | None, winner: str | None) -> None:
+        """Append a committed action; the independent disk save follows later."""
         self.events.append({"index": len(self.events) + 1, **data})
         if reason:
             self.status = "terminal"

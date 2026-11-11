@@ -9,6 +9,12 @@ from model.validator import IllegalAction
 
 
 class GameManagerController:
+    """Translate board input into at most one valid GameManager action.
+
+    Selection and pending promotion are ephemeral; cancelling either leaves
+    the authoritative position, match revision and rewards unchanged.
+    """
+
     def __init__(self, manager: GameManager, on_refresh: Callable[[], None] | None = None) -> None:
         self.manager = manager
         self.on_refresh = on_refresh or (lambda: None)
@@ -27,7 +33,7 @@ class GameManagerController:
         self._refresh()
 
     def vyber_pole(self, square: Square) -> tuple[Tah, ...]:
-        """Returns promotion alternatives only when the user must choose one."""
+        """Select an owned piece, commit a legal destination, or request promotion."""
         self.cekajici_promena = ()
         if self.manager.stav != "in_progress":
             self.last_message = "The game is over. Start a new match."
@@ -38,21 +44,29 @@ class GameManagerController:
             self.zrus_vyber()
             return ()
         if piece and piece.barva == self.manager.aktivni_barva:
-            self.vybrane = square
-            self.destinace = tuple(dict.fromkeys(m.kam for m in self.manager.mozne_tahy(square)))
-            self.last_message = f"{piece.nazev} selected · {len(self.destinace)} legal destinations"
-            self._refresh()
+            self._select_piece(square, piece.nazev)
             return ()
+        return self._choose_destination(square)
+
+    def _select_piece(self, square: Square, name: str) -> None:
+        self.vybrane = square
+        self.destinace = tuple(dict.fromkeys(move.kam for move in self.manager.mozne_tahy(square)))
+        self.last_message = f"{name} selected · {len(self.destinace)} legal destinations"
+        self._refresh()
+
+    def _choose_destination(self, square: Square) -> tuple[Tah, ...]:
         if self.vybrane is None:
             self.last_message = "Select a piece of the active player"
             self._refresh()
             return ()
-        available = tuple(m for m in self.manager.mozne_tahy(self.vybrane) if m.kam == square)
+        available = tuple(
+            move for move in self.manager.mozne_tahy(self.vybrane) if move.kam == square
+        )
         if not available:
             self.last_message = "Illegal destination; choose a highlighted square"
             self._refresh()
             return ()
-        if len(available) > 1 and all(m.promena for m in available):
+        if len(available) > 1 and all(move.promena for move in available):
             self.cekajici_promena = available
             self.last_message = "Choose the promotion piece"
             self._refresh()

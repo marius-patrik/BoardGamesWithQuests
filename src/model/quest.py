@@ -3,6 +3,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from model.rules.base import Rule
+from model.player import Hrac
 
 
 @dataclass(frozen=True)
@@ -14,6 +15,8 @@ class Quest:
 
 
 class QuestManager:
+    """Award each matching rule-derived quest once per profile per match."""
+
     def __init__(self, rules: tuple[Rule, ...]) -> None:
         lookup = {r.id: r for r in rules if r.quest_xp}
         order = ("capture", "castling", "en_passant", "promotion", "check", "checkmate")
@@ -29,7 +32,8 @@ class QuestManager:
         )
         self._awarded: set[tuple[str, str]] = set()
 
-    def pridej_odmeny(self, rule_ids: tuple[str, ...], hrac) -> tuple[int, tuple[Quest, ...]]:
+    def pridej_odmeny(self, rule_ids: tuple[str, ...], hrac: Hrac) -> tuple[int, tuple[Quest, ...]]:
+        """Reward only post-commit rule observations for the original actor."""
         found = set(rule_ids)
         awarded: list[Quest] = []
         for quest in self.quests:

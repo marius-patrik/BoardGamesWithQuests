@@ -9,6 +9,8 @@ MUTED = "#626a76"
 
 
 class HracGameView(tk.Frame):
+    """Reusable side panel reading profile XP and match-local quest completion."""
+
     def __init__(self, parent, color: str):
         super().__init__(parent, bg=BG, highlightbackground="#dadce0", highlightthickness=1)
         self.barva = color

@@ -269,7 +269,7 @@ def test_capture_promotion_commits_once_and_awards_both_quests(tmp_path, code, c
     assert len(g.plocha.vyhozene_figurky_c) == 1
     assert g.plocha.vyhozene_figurky_c[0].kod == "R"
     assert {"capture", "promotion"}.issubset(outcome.matched_rule_ids)
-    assert outcome.xp_awarded >= 35
+    assert outcome.xp_awarded == (45 if code in {"Q", "R"} else 35)
     assert len(g.logger.events) == 1
 
 

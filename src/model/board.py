@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from collections.abc import Iterator
 from model.piece import Figurka, Kral, Dama, Vez, Strelec, Kun, Pesak, PROMOTIONS
 
 Square = tuple[int, int]
@@ -17,6 +18,8 @@ def algebraicky(s: Square) -> str:
 
 
 class HerniPlocha:
+    """Mutable board owned by GameManager; validators operate on kopie() copies."""
+
     def __init__(self, starting: bool = True) -> None:
         self.pole: list[list[Figurka | None]] = [[None for _ in range(8)] for _ in range(8)]
         self.vyhozene_figurky_b: list[Figurka] = []
@@ -30,6 +33,7 @@ class HerniPlocha:
                 self.pole[6][column] = Pesak("white")
 
     def kopie(self) -> HerniPlocha:
+        """Copy board and captured-piece lists before a tentative move."""
         other = HerniPlocha(False)
         other.pole = [row.copy() for row in self.pole]
         other.vyhozene_figurky_b = self.vyhozene_figurky_b.copy()
@@ -44,7 +48,7 @@ class HerniPlocha:
             raise ValueError(f"Square outside board: {s!r}")
         self.pole[s[0]][s[1]] = piece
 
-    def pole_figurek(self):
+    def pole_figurek(self) -> Iterator[tuple[Square, Figurka]]:
         for r in range(8):
             for c in range(8):
                 piece = self.pole[r][c]

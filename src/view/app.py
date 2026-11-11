@@ -4,7 +4,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk, messagebox
 from pathlib import Path
-from model.board import algebraicky
+from model.board import Square, algebraicky
 from model.manager import GameManager
 from model.user import UserManager
 from controller.controller import GameManagerController
@@ -17,6 +17,12 @@ INK = "#242a31"
 
 
 class BoardGamesApplication(tk.Tk):
+    """One Tk root: setup, live match, focused promotion and save feedback.
+
+    The controller owns ephemeral selection; GameManager owns committed Chess
+    state; display refreshes never directly apply rules or award experience.
+    """
+
     def __init__(self, data_root: Path | None = None):
         super().__init__()
         self.title("BoardGamesWithQuests · Chess")
@@ -35,7 +41,7 @@ class BoardGamesApplication(tk.Tk):
         self.main.pack(fill="both", expand=True)
         self.show_setup()
 
-    def _clear(self):
+    def _clear(self) -> None:
         for child in self.main.winfo_children():
             child.destroy()
 
@@ -152,8 +158,17 @@ class BoardGamesApplication(tk.Tk):
         self.show_game()
 
     def show_game(self) -> None:
+        """Compose the match screen; all widgets read one committed manager."""
         self._clear()
         assert self.manager is not None and self.controller is not None
+        self._build_game_header()
+        self._build_game_toolbar()
+        self._build_game_content()
+        self._build_game_history()
+        self._build_game_persistence()
+        self.refresh()
+
+    def _build_game_header(self) -> None:
         header = tk.Frame(self.main, bg=INK, padx=18, pady=10)
         header.pack(fill="x")
         tk.Label(
@@ -165,6 +180,8 @@ class BoardGamesApplication(tk.Tk):
         ).pack(side="left")
         self.turn = tk.Label(header, text="", font=("Arial", 11, "bold"), fg="#f2cc77", bg=INK)
         self.turn.pack(side="right")
+
+    def _build_game_toolbar(self) -> None:
         toolbar = tk.Frame(self.main, bg=BACKGROUND, padx=12, pady=8)
         toolbar.pack(fill="x")
         for text, command in (
@@ -177,6 +194,8 @@ class BoardGamesApplication(tk.Tk):
             b.pack(side="left", padx=3)
             if text == "Resign":
                 self.resign_button = b
+
+    def _build_game_content(self) -> None:
         central = tk.Frame(self.main, bg=BACKGROUND)
         central.pack(fill="both", expand=True, padx=12, pady=(3, 5))
         central.grid_columnconfigure(0, weight=1, uniform="sides")
@@ -198,6 +217,8 @@ class BoardGamesApplication(tk.Tk):
         self.board.pack(expand=True)
         self.black_panel = HracGameView(central, "black")
         self.black_panel.grid(row=0, column=2, sticky="nsew", padx=(8, 0))
+
+    def _build_game_history(self) -> None:
         bottom = tk.Frame(self.main, bg=PAPER, padx=12, pady=7)
         bottom.pack(fill="x", padx=12, pady=(3, 8))
         tk.Label(
@@ -229,6 +250,8 @@ class BoardGamesApplication(tk.Tk):
             justify="left",
         )
         self.status.pack(fill="x", pady=(6, 1))
+
+    def _build_game_persistence(self) -> None:
         warning = tk.Frame(self.main, bg=BACKGROUND, padx=12, pady=5)
         warning.pack(fill="x")
         self.persist_warning = tk.Label(
@@ -247,15 +270,15 @@ class BoardGamesApplication(tk.Tk):
         ttk.Button(warning, text="Retry history", command=self.retry_history).pack(
             side="right", padx=3
         )
-        self.refresh()
 
-    def on_square(self, square):
+    def on_square(self, square: Square) -> None:
         assert self.controller is not None
         options = self.controller.vyber_pole(square)
         if options:
             self.ask_promotion()
 
-    def ask_promotion(self):
+    def ask_promotion(self) -> None:
+        """Commit only the selected promotion; Escape discards pending input."""
         assert self.controller is not None
         dlg = tk.Toplevel(self)
         dlg.title("Pawn promotion")
@@ -296,7 +319,7 @@ class BoardGamesApplication(tk.Tk):
         dlg.protocol("WM_DELETE_WINDOW", cancel)
         dlg.focus_set()
 
-    def resign(self):
+    def resign(self) -> None:
         assert self.controller is not None and self.manager is not None
         if self.manager.stav == "terminal":
             return
@@ -307,14 +330,14 @@ class BoardGamesApplication(tk.Tk):
         ):
             self.controller.odstup()
 
-    def new_game(self):
+    def new_game(self) -> None:
         assert self.controller is not None
         if messagebox.askyesno(
             "New match", "Start a fresh match with the same players?", parent=self
         ):
             self.controller.novou_hru()
 
-    def players_setup(self):
+    def players_setup(self) -> None:
         if messagebox.askyesno(
             "Change players",
             "Leave this match and return to player selection?",
@@ -324,7 +347,7 @@ class BoardGamesApplication(tk.Tk):
             self.controller = None
             self.show_setup()
 
-    def retry_profiles(self):
+    def retry_profiles(self) -> None:
         self.users.uloz_uzivatele()
         if self.manager is None:
             # Reload setup choices/status after repairing a profile file on disk.
@@ -332,12 +355,13 @@ class BoardGamesApplication(tk.Tk):
         else:
             self.refresh()
 
-    def retry_history(self):
+    def retry_history(self) -> None:
         if self.manager:
             self.manager.logger.uloz_historii()
             self.refresh()
 
-    def refresh(self):
+    def refresh(self) -> None:
+        """Render the current authoritative match and independent save statuses."""
         if (
             not self.manager
             or not self.controller
@@ -346,10 +370,17 @@ class BoardGamesApplication(tk.Tk):
         ):
             return
         self.manager = self.controller.manager
-        m = self.manager
-        self.board.vykresli_desku(m, self.controller.vybrane, self.controller.destinace)
-        self.white_panel.zobraz_hrace(m)
-        self.black_panel.zobraz_hrace(m)
+        manager = self.manager
+        self.board.vykresli_desku(
+            manager, self.controller.vybrane, self.controller.destinace
+        )
+        self.white_panel.zobraz_hrace(manager)
+        self.black_panel.zobraz_hrace(manager)
+        self._render_turn(manager)
+        self._render_history(manager)
+        self._render_persistence_status(manager)
+
+    def _render_turn(self, m: GameManager) -> None:
         if m.stav == "terminal":
             winner = m.hraci[m.winner].uzivatel.jmeno if m.winner else "Neither player"
             self.turn.config(text=f"GAME OVER · {winner} · {m.reason}")
@@ -360,6 +391,8 @@ class BoardGamesApplication(tk.Tk):
                 + (" · CHECK" if m.revizor.v_sachu(m.plocha, m.aktivni_barva) else "")
             )
             self.resign_button.state(["!disabled"])
+
+    def _render_history(self, m: GameManager) -> None:
         self.history.config(state="normal")
         self.history.delete("1.0", "end")
         for event in m.logger.events:
@@ -375,6 +408,8 @@ class BoardGamesApplication(tk.Tk):
         self.history.see("end")
         self.history.config(state="disabled")
         self.status.config(text=self.controller.last_message)
+
+    def _render_persistence_status(self, m: GameManager) -> None:
         messages = [e for e in (self.users.save_error, m.logger.save_error) if e]
         self.persist_warning.config(
             text=(" | ".join(messages) if messages else "Local profiles and match history saved"),
