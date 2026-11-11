@@ -60,7 +60,8 @@ def test_keyboard_board_focus_and_cancel_selection(tmp_path):
                 check=True,
                 timeout=5,
             )
-            # Tk's native Button class can schedule activation after key release.
+            # Process X11 input first, then allow Tk's deferred activation to run.
+            app.update()
             time.sleep(0.18)
             app.update()
 
