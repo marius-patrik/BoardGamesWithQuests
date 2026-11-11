@@ -1,5 +1,5 @@
 import json
- from unittest.mock import patch
+from unittest.mock import patch
 import pytest
 from model.user import UserManager
 from model.manager import GameManager
