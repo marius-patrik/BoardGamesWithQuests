@@ -65,7 +65,9 @@ def test_keyboard_board_focus_and_cancel_selection(tmp_path):
             xtest.fake_input(x11, X.KeyRelease, keycode)
             x11.sync()
             app.update()
-            time.sleep(0.08)
+            # Native tk::ButtonInvoke runs after a 100 ms timer; shorter waits
+            # falsely report no keyboard action even when the XTEST event arrived.
+            time.sleep(0.18)
             app.update()
 
         key("space")
