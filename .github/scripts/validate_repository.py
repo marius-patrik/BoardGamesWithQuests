@@ -24,6 +24,7 @@ OBSOLETE_DIRECTORIES = (
     ".agents/decisions",
     ".agents/notes",
     ".agents/rules",
+    ".agents/requests",
 )
 OBSOLETE_DOCUMENTS = (
     ".agents/ARCHITECTURE.md",

@@ -8,4 +8,4 @@ description: Keep proposed changes in GitHub issues and actual supported product
 2. Record proposed features, acceptance cases and outstanding choices in the owning issue rather than creating parallel plans.
 3. After implementation and verified behavior, update the affected portion of `.agents/PRD.md`, `.agents/AGENTS.md` progress, and `docs/architecture/` diagrams as needed.
 4. Validate the source tree and diagrams, execute the relevant GUI/rule/persistence tests, and record exact evidence.
-Do not derive the PRD from old `.agents/requests/` records, or recreate generated governance files.
+Do not derive the PRD from superseded historical request records, or recreate generated governance files.
