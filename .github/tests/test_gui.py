@@ -40,15 +40,41 @@ def test_setup_and_button_board_move(tmp_path):
 
 
 def test_keyboard_board_focus_and_cancel_selection(tmp_path):
+    """Dispatch Tk key events through widget and class bindings, never invoke()."""
     app = application(tmp_path)
     try:
-        assert app.board._focus((6, 4)) == "break"
-        app.board.buttons[(6, 4)].invoke()
+        square = app.board.buttons[(6, 4)]
+        square.focus_set()
+        app.update()
+        square.event_generate("<KeyPress-space>")
+        app.update()
+        assert app.controller.vybrane == (6, 4), "Space must select exactly once"
+        assert app.manager.revision == 0
+        square.event_generate("<KeyPress-space>")
+        app.update()
+        assert app.controller.vybrane is None, "Second Space must clear exactly once"
+        assert app.manager.revision == 0
+
+        square.focus_set()
+        app.update()
+        square.event_generate("<KeyPress-Up>")
+        app.update()
+        assert app.focus_get() == app.board.buttons[(5, 4)]
+        destination = app.board.buttons[(5, 4)]
+        destination.event_generate("<KeyPress-Down>")
+        app.update()
+        assert app.focus_get() == square
+
+        square.event_generate("<KeyPress-Return>")
         app.update()
         assert app.controller.vybrane == (6, 4)
-        app.controller.zrus_vyber()
-        assert app.controller.vybrane is None
-        assert app.manager.revision == 0
+        square.event_generate("<KeyPress-Up>")
+        app.update()
+        app.board.buttons[(5, 4)].event_generate("<KeyPress-Return>")
+        app.update()
+        assert app.manager.revision == 1
+        assert app.manager.plocha.vrat_obsah((5, 4)) is not None
+        assert len(app.manager.logger.events) == 1
     finally:
         app.destroy()
 

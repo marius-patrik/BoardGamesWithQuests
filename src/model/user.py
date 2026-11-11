@@ -6,7 +6,10 @@ import json
 import os
 import sys
 import tempfile
+import hashlib
+from contextlib import contextmanager
 from dataclasses import dataclass
+from collections.abc import Iterator
 from pathlib import Path
 
 
@@ -53,6 +56,35 @@ def atomic_json(path: Path, data: dict) -> None:
                 pass
 
 
+@contextmanager
+def profile_write_lock(root: Path) -> Iterator[None]:
+    """Serialize profile replacements between cooperating application instances."""
+    root.mkdir(parents=True, exist_ok=True)
+    with (root / ".users.lock").open("a+b") as handle:
+        handle.seek(0, os.SEEK_END)
+        if handle.tell() == 0:
+            handle.write(b"0")
+            handle.flush()
+        handle.seek(0)
+        if sys.platform == "win32":
+            import msvcrt
+
+            msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+            try:
+                yield
+            finally:
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
 def normalize_username(username: str) -> str:
     if not isinstance(username, str):
         raise ValueError("Username must be text")
@@ -70,6 +102,18 @@ class Uzivatel:
 
 
 class UserManager:
+    """Local profiles with cooperative single-writer locking and conflict refusal.
+
+    Valid external changes are never silently overwritten; unsaved in-memory
+    XP is retained for explicit reconciliation or recovery.
+    """
+
+    @staticmethod
+    def _fingerprint(path: Path) -> str | None:
+        if not path.exists():
+            return None
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
     def __init__(self, root: Path | None = None) -> None:
         self.root = Path(root) if root is not None else data_directory()
         self.path = self.root / "users.json"
@@ -77,6 +121,7 @@ class UserManager:
         self.save_error: str | None = None
         self.damaged = False
         self.dirty = False
+        self._observed_disk: str | None = None
         self.nacti_uzivatele()
 
     @staticmethod
@@ -107,6 +152,7 @@ class UserManager:
             return
         try:
             self.uzivatele = self._read_profiles(self.path)
+            self._observed_disk = self._fingerprint(self.path)
             self.damaged = False
             self.save_error = None
         except (ValueError, OSError, TypeError, KeyError, UnicodeError) as exc:
@@ -139,6 +185,7 @@ class UserManager:
             return False
         # Retain live objects referenced by the current GameManager's player seats.
         self.uzivatele = {**recovered, **self.uzivatele}
+        self._observed_disk = self._fingerprint(self.path)
         self.damaged = False
         self.dirty = True
         return True
@@ -163,26 +210,36 @@ class UserManager:
         self.dirty = True
 
     def uloz_uzivatele(self) -> bool:
-        if not self._recover_for_retry():
-            return False
+        """Replace profiles atomically, refusing stale valid-file snapshots."""
         try:
-            atomic_json(
-                self.path,
-                {
-                    "schema_version": 1,
-                    "users": {
-                        k: {
-                            "username": u.uzivatelske_jmeno,
-                            "display_name": u.jmeno,
-                            "xp": u.xp,
-                        }
-                        for k, u in sorted(self.uzivatele.items())
+            with profile_write_lock(self.root):
+                if not self._recover_for_retry():
+                    return False
+                if self._fingerprint(self.path) != self._observed_disk:
+                    self.dirty = True
+                    self.save_error = (
+                        "Profiles changed outside this application. "
+                        "The newer file was preserved; reconcile before retrying."
+                    )
+                    return False
+                atomic_json(
+                    self.path,
+                    {
+                        "schema_version": 1,
+                        "users": {
+                            k: {
+                                "username": u.uzivatelske_jmeno,
+                                "display_name": u.jmeno,
+                                "xp": u.xp,
+                            }
+                            for k, u in sorted(self.uzivatele.items())
+                        },
                     },
-                },
-            )
-            self.dirty = False
-            self.save_error = None
-            return True
+                )
+                self._observed_disk = self._fingerprint(self.path)
+                self.dirty = False
+                self.save_error = None
+                return True
         except OSError as exc:
             self.dirty = True
             self.save_error = f"Profiles were not saved: {exc}"

@@ -1,6 +1,5 @@
 import json
-from pathlib import Path
-from unittest.mock import patch
+ from unittest.mock import patch
 import pytest
 from model.user import UserManager
 from model.manager import GameManager
@@ -42,14 +41,7 @@ def test_profiles_write_failure_and_retry_independent_from_history(tmp_path):
     g = GameManager(u, "alice", "bob")
     original = u.path.read_bytes()
 
-    def failure(path, data):
-        if Path(path) == u.path:
-            raise OSError("simulated disk full")
-        from model.user import atomic_json as real
-
-        real(path, data)
-
-    with patch("model.user.atomic_json", side_effect=OSError("disk full")):
+     with patch("model.user.atomic_json", side_effect=OSError("disk full")):
         u.pridej_xp("alice", 10)
         assert not u.uloz_uzivatele()
         assert u.dirty and u.save_error
@@ -197,3 +189,30 @@ def test_repaired_match_file_retries_only_when_history_is_consistent(tmp_path):
     assert not g.logger.uloz_historii()
     assert g.logger.damaged and "conflicts" in g.logger.save_error
     assert g.logger.path.read_text(encoding="utf-8") == altered
+
+
+def test_two_instances_refuse_stale_profile_overwrite(tmp_path):
+    """A second running instance must not erase valid XP saved by the first."""
+    primary = users(tmp_path)
+    stale = UserManager(tmp_path)
+    primary.pridej_xp("alice", 15)
+    assert primary.uloz_uzivatele()
+    original = primary.path.read_bytes()
+    stale.pridej_xp("bob", 25)
+    assert not stale.uloz_uzivatele()
+    assert stale.dirty and "outside this application" in stale.save_error
+    assert primary.path.read_bytes() == original
+    assert stale.uzivatele["bob"].xp == 25
+    recovered = UserManager(tmp_path)
+    assert recovered.uzivatele["alice"].xp == 15
+    assert recovered.uzivatele["bob"].xp == 0
+
+
+def test_two_instances_cannot_create_overlapping_stale_profiles(tmp_path):
+    first = UserManager(tmp_path)
+    second = UserManager(tmp_path)
+    first.vytvor_uzivatele("alice", "Alice")
+    second.vytvor_uzivatele("bob", "Bob")
+    assert "outside this application" in second.save_error
+    assert sorted(UserManager(tmp_path).uzivatele) == ["alice"]
+    assert "bob" in second.uzivatele

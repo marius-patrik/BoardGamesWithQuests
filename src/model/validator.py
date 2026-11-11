@@ -38,6 +38,11 @@ class PripravenyTah:
 
 
 class RevizorTahu:
+    """Pure Chess rules coordinator: generate, guard, stage, check, observe.
+
+    Legal previews omit observation and never touch live state, XP or persistence.
+    """
+
     def __init__(self) -> None:
         self.rules: tuple[Rule, ...] = (
             TurnOwnershipRule(),
@@ -123,6 +128,13 @@ class RevizorTahu:
         return not self.v_sachu(temporary, ctx.puvodni_hrac.barva)
 
     def _stage(self, context: RuleContext) -> tuple[RuleContext, HerniPlocha] | None:
+        """Apply one candidate on a copy, then prove the acting king remains safe.
+
+        Ordinary relocation captures at most one destination piece; a special
+        supplement may return one off-destination victim only when no ordinary
+        capture occurred. Broken hook invariants propagate as programmer errors,
+        whereas expected guard failures return None without publishing changes.
+        """
         if context.tah is None:
             return None
         if not all(
@@ -134,18 +146,15 @@ class RevizorTahu:
         if not self._castle_safe_transit(context):
             return None
         board = context.pred.kopie()
-        try:
-            capture = board.presun(context.tah.odkud, context.tah.kam)
-            staged = replace(context, po=board, capture=capture)
-            for rule in self.rules:
-                extra = rule.priprav(staged)
-                if extra is not None:
-                    if capture is not None:
-                        raise ValueError("Two captures in one move")
-                    capture = extra
-                    staged = replace(staged, capture=capture)
-        except (ValueError, AssertionError):
-            return None
+        capture = board.presun(context.tah.odkud, context.tah.kam)
+        staged = replace(context, po=board, capture=capture)
+        for rule in self.rules:
+            extra = rule.priprav(staged)
+            if extra is not None:
+                if capture is not None:
+                    raise RuntimeError("Rule invariant violated: two captures in one move")
+                capture = extra
+                staged = replace(staged, capture=capture)
         safety = self.by_id["king_safety"]
         if not safety.povoleno(staged):
             return None

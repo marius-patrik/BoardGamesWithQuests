@@ -50,12 +50,17 @@ class GameView(tk.Frame):
                 button.bind("<Down>", lambda e, s=square: self._focus((min(7, s[0] + 1), s[1])))
                 button.bind("<Left>", lambda e, s=square: self._focus((s[0], max(0, s[1] - 1))))
                 button.bind("<Right>", lambda e, s=square: self._focus((s[0], min(7, s[1] + 1))))
-                button.bind("<Return>", lambda e, b=button: b.invoke())
-                button.bind("<space>", lambda e, b=button: b.invoke())
+                button.bind("<Return>", lambda e, b=button: self._activate(b))
                 self.buttons[square] = button
             self.grid_rowconfigure(r + 1, weight=1)
         for c in range(1, 9):
             self.grid_columnconfigure(c, weight=1)
+
+    @staticmethod
+    def _activate(button: tk.Button) -> str:
+        """Return activates once; Space uses the native Button class binding."""
+        button.invoke()
+        return "break"
 
     def _focus(self, s: Square) -> str:
         self.buttons[s].focus_set()

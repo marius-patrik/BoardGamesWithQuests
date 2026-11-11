@@ -211,7 +211,7 @@ def test_vector_candidates_for_each_piece(tmp_path):
             Hrac("white", manager(tmp_path / cls.__name__).users.uzivatele["alice"]),
             start=(4, 3),
         )
-        assert len(moves) >= expected - 1, (cls, len(moves))
+        assert len(moves) == expected, (cls, len(moves))
 
 
 def test_quests_are_once_per_actor_per_match_and_reset(tmp_path):
@@ -246,3 +246,40 @@ def test_king_unmoved_and_rook_moved_back_cannot_castle(tmp_path):
     g = manager(tmp_path)
     g.plocha = empty(((7, 4), Kral("white")), ((7, 7), Vez("white", True)), ((0, 0), Kral("black")))
     assert not any(m.typ_tahu.startswith("castle") for m in g.mozne_tahy((7, 4)))
+
+
+@pytest.mark.parametrize("code,cls", [("Q", Dama), ("R", Vez), ("B", Strelec), ("N", Kun)])
+def test_capture_promotion_commits_once_and_awards_both_quests(tmp_path, code, cls):
+    g = manager(tmp_path)
+    g.plocha = empty(
+        ((7, 7), Kral("white")),
+        ((0, 7), Kral("black")),
+        ((1, 0), Pesak("white")),
+        ((0, 1), Vez("black")),
+    )
+    before = g.plocha.stav()
+    options = [move for move in g.mozne_tahy((1, 0)) if move.kam == (0, 1)]
+    assert {move.promena for move in options} == {"Q", "R", "B", "N"}
+    assert {move.typ_tahu for move in options} == {"promotion_capture"}
+    selected = next(move for move in options if move.promena == code)
+    outcome = g.proved_akci(Akce.move(selected))
+    assert isinstance(g.plocha.vrat_obsah((0, 1)), cls)
+    assert g.plocha.vrat_obsah((1, 0)) is None
+    assert g.plocha.stav() != before and g.revision == 1
+    assert len(g.plocha.vyhozene_figurky_c) == 1
+    assert g.plocha.vyhozene_figurky_c[0].kod == "R"
+    assert {"capture", "promotion"}.issubset(outcome.matched_rule_ids)
+    assert outcome.xp_awarded >= 35
+    assert len(g.logger.events) == 1
+
+
+def test_internal_staging_bug_is_not_misreported_as_illegal_user_move(tmp_path):
+    from unittest.mock import patch
+
+    g = manager(tmp_path)
+    action = next(m for m in g.mozne_tahy((6, 4)) if m.kam == (4, 4))
+    prior = (g.plocha.stav(), g.revision, list(g.logger.events))
+    with patch("model.board.HerniPlocha.presun", side_effect=AssertionError("broken hook")):
+        with pytest.raises(AssertionError, match="broken hook"):
+            g.proved_akci(Akce.move(action))
+    assert (g.plocha.stav(), g.revision, g.logger.events) == prior

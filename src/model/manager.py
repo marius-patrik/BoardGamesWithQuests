@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from model.board import HerniPlocha, algebraicky
+from model.board import HerniPlocha, Square, algebraicky
 from model.move import Tah, Akce
 from model.player import Hrac
 from model.user import UserManager
@@ -23,6 +23,12 @@ class VysledekAkce:
 
 
 class GameManager:
+    """Owns the only committed board, match status, turn and revision.
+
+    Validation builds a candidate off-board; accepted actions publish exactly
+    once before rewards and independent, potentially failing JSON writes.
+    """
+
     def __init__(self, users: UserManager, white: str, black: str) -> None:
         if white == black or white not in users.uzivatele or black not in users.uzivatele:
             raise ValueError("Select two distinct existing profiles")
@@ -46,12 +52,18 @@ class GameManager:
     def aktivni_hrac(self) -> Hrac:
         return self.hraci[self.aktivni_barva]
 
-    def mozne_tahy(self, start=None):
+    def mozne_tahy(self, start: Square | None = None) -> tuple[Tah, ...]:
+        """Return legal moves without modifying board, turn, quests or files."""
         return self.revizor.mozne_tahy(
             self.plocha, self.aktivni_hrac, self.logger.predchozi_tah, self.stav, start
         )
 
     def proved_akci(self, akce: Akce) -> VysledekAkce:
+        """Validate first, commit once, then reward the original actor and log.
+
+        Profile and match-history saves are independent. Their failure sets a
+        retryable warning; it never rewinds an already accepted in-memory move.
+        """
         actor = self.aktivni_hrac
         prepared = self.revizor.vyhodnot(
             self.plocha, actor, akce, self.logger.predchozi_tah, self.stav
