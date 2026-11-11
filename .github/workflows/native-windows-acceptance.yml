@@ -2,7 +2,7 @@ name: Native Windows desktop acceptance
 
 on:
   push:
-    branches: [v1-cleanroom, develop]
+    branches: [develop]
   pull_request:
     branches: [develop]
   workflow_dispatch:
