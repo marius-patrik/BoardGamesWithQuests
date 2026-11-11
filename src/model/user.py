@@ -148,17 +148,27 @@ class UserManager:
         return loaded
 
     def nacti_uzivatele(self) -> None:
-        if not self.path.exists():
-            return
+        """Read profiles and their exact disk version within one writer lock.
+
+        An atomic replacement between reading JSON and recording its fingerprint
+        would otherwise mark newer, unread profile data as observed, allowing a
+        later save to overwrite somebody else's valid update.
+        """
         try:
-            self.uzivatele = self._read_profiles(self.path)
-            self._observed_disk = self._fingerprint(self.path)
+            with profile_write_lock(self.root):
+                if not self.path.exists():
+                    self._observed_disk = None
+                    return
+                profiles = self._read_profiles(self.path)
+                observed = self._fingerprint(self.path)
+            self.uzivatele = profiles
+            self._observed_disk = observed
             self.damaged = False
             self.save_error = None
         except (ValueError, OSError, TypeError, KeyError, UnicodeError) as exc:
             self.uzivatele = {}
             self.damaged = True
-            self.save_error = f"Profile file needs repair: {exc}. Original was preserved."
+            self.save_error = f"Profile file needs repair or is inaccessible: {exc}. Original was preserved."
 
     def _recover_for_retry(self) -> bool:
         """Explicit retry after external repair/removal; never overwrite conflicting profiles."""
