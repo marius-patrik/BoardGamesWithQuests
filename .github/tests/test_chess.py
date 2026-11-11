@@ -294,9 +294,7 @@ def test_checked_king_has_only_safe_escape_squares(tmp_path):
         ((0, 4), Vez("black")),
     )
     assert g.revizor.v_sachu(g.plocha, "white")
-    assert {m.kam for m in g.mozne_tahy((7, 4))} == {
-        (7, 3), (7, 5), (6, 3), (6, 5)
-    }
+    assert {m.kam for m in g.mozne_tahy((7, 4))} == {(7, 3), (7, 5), (6, 3), (6, 5)}
     before = g.plocha.stav()
     with pytest.raises(IllegalAction):
         g.proved_akci(Akce.move(Tah((7, 4), (6, 4))))
@@ -312,10 +310,7 @@ def test_queenside_castle_through_attacked_transit_is_rejected(tmp_path):
         ((0, 7), Kral("black")),
         ((0, 3), Vez("black")),
     )
-    assert not any(
-        move.typ_tahu == "castle_queenside"
-        for move in g.mozne_tahy((7, 4))
-    )
+    assert not any(move.typ_tahu == "castle_queenside" for move in g.mozne_tahy((7, 4)))
 
 
 def test_castling_while_currently_checked_is_rejected(tmp_path):
@@ -327,7 +322,4 @@ def test_castling_while_currently_checked_is_rejected(tmp_path):
         ((0, 4), Vez("black")),
     )
     assert g.revizor.v_sachu(g.plocha, "white")
-    assert not any(
-        move.typ_tahu.startswith("castle")
-        for move in g.mozne_tahy((7, 4))
-    )
+    assert not any(move.typ_tahu.startswith("castle") for move in g.mozne_tahy((7, 4)))
