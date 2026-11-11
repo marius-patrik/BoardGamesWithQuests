@@ -42,11 +42,13 @@ def test_setup_and_button_board_move(tmp_path):
 
 def test_keyboard_board_focus_and_cancel_selection(tmp_path):
     """Send external XTEST keyboard input, not Tk .invoke() or synthetic callbacks."""
-    from Xlib import X, XK, display
-    from Xlib.ext import xtest
-
+    # Headless Python matrix runs skip at application(), before importing the
+    # Linux/X11-only driver. The graphical acceptance job installs python-xlib.
     app = application(tmp_path)
     try:
+        from Xlib import X, XK, display
+        from Xlib.ext import xtest
+
         square = app.board.buttons[(6, 4)]
         app.focus_force()
         square.focus_force()
