@@ -41,7 +41,7 @@ def test_profiles_write_failure_and_retry_independent_from_history(tmp_path):
     g = GameManager(u, "alice", "bob")
     original = u.path.read_bytes()
 
-     with patch("model.user.atomic_json", side_effect=OSError("disk full")):
+    with patch("model.user.atomic_json", side_effect=OSError("disk full")):
         u.pridej_xp("alice", 10)
         assert not u.uloz_uzivatele()
         assert u.dirty and u.save_error
