@@ -98,6 +98,33 @@ def wait_for_board(output: Path, label: str, timeout: float = 12.0):
     raise AssertionError(f"The board never appeared after external input: {last_error}")
 
 
+def stop_process_tree(process: subprocess.Popen | None) -> None:
+    """Stop the PyInstaller bootloader and its GUI child before restarting."""
+    if process is None:
+        return
+    if process.poll() is None:
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/PID", str(process.pid)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=10)
+    deadline = time.monotonic() + 12
+    while time.monotonic() < deadline:
+        if not any(
+            w.title.startswith("BoardGamesWithQuests")
+            for w in pyautogui.getWindowsWithTitle("BoardGamesWithQuests")
+        ):
+            return
+        time.sleep(0.25)
+    raise AssertionError("Prior frozen GUI remains open after process-tree termination")
+
+
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -153,8 +180,8 @@ def external_gameplay(exe: Path, evidence: Path) -> dict:
             assert users["users"]["alice"]["xp"] == 10, users
             report["checks"].append("external pointer moves + capture quest persisted to JSON")
 
-            process.terminate()
-            process.wait(timeout=12)
+            stop_process_tree(process)
+            process = None
             process = subprocess.Popen([str(exe)], env=environment, cwd=str(data))
             wait_for_window()
             capture(evidence, "04-restarted-setup")
@@ -170,12 +197,7 @@ def external_gameplay(exe: Path, evidence: Path) -> dict:
             capture(evidence, "failure")
             raise
         finally:
-            if process and process.poll() is None:
-                process.terminate()
-                try:
-                    process.wait(timeout=10)
-                except subprocess.TimeoutExpired:
-                    process.kill()
+            stop_process_tree(process)
             (evidence / "external-acceptance.json").write_text(
                 json.dumps(report, indent=2), encoding="utf-8"
             )
