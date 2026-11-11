@@ -356,14 +356,18 @@ flowchart LR
   n7fd0a63dde8ca6dfd --> n77f1f512820b61311
   n365357dce9eec948f["function stop_process_tree"]
   n7fd0a63dde8ca6dfd --> n365357dce9eec948f
-  n01fff6583c89efc13["function read_json"]
+  n01fff6583c89efc13["function wait_for_named_window"]
   n7fd0a63dde8ca6dfd --> n01fff6583c89efc13
-  n84ecea5054f15e1e7["function click_square"]
+  n84ecea5054f15e1e7["function assert_dialog_closed"]
   n7fd0a63dde8ca6dfd --> n84ecea5054f15e1e7
-  n408b224224efcd567["function external_gameplay"]
+  n408b224224efcd567["function read_json"]
   n7fd0a63dde8ca6dfd --> n408b224224efcd567
-  nbaf0573e3b5bfa848["function main"]
+  nbaf0573e3b5bfa848["function click_square"]
   n7fd0a63dde8ca6dfd --> nbaf0573e3b5bfa848
+  nb8f3cf5883f857f6a["function external_gameplay"]
+  n7fd0a63dde8ca6dfd --> nb8f3cf5883f857f6a
+  nc177c2bcf80e2ec57["function main"]
+  n7fd0a63dde8ca6dfd --> nc177c2bcf80e2ec57
   nbf32064a6a26ab2df["workflows/"]
   nfad65243633b77700 --> nbf32064a6a26ab2df
   n936162c3846c6b099["agent.yml"]
@@ -764,26 +768,28 @@ flowchart LR
   n676d3424d0c583c67 --> n660eb8da1d31c47c0
   n4a1b942cb707edc08["function cancel"]
   n676d3424d0c583c67 --> n4a1b942cb707edc08
-  nc61acffe391826d1c["function resign"]
+  nc61acffe391826d1c["function _resign_shortcut"]
   n676d3424d0c583c67 --> nc61acffe391826d1c
-  n1bbe9c8aa298bd27b["function new_game"]
+  n1bbe9c8aa298bd27b["function resign"]
   n676d3424d0c583c67 --> n1bbe9c8aa298bd27b
-  n7777a68c8670098ac["function players_setup"]
+  n7777a68c8670098ac["function new_game"]
   n676d3424d0c583c67 --> n7777a68c8670098ac
-  n27b62e99d99b8d293["function retry_profiles"]
+  n27b62e99d99b8d293["function players_setup"]
   n676d3424d0c583c67 --> n27b62e99d99b8d293
-  n8e86b051d23770ab2["function retry_history"]
+  n8e86b051d23770ab2["function retry_profiles"]
   n676d3424d0c583c67 --> n8e86b051d23770ab2
-  n0c07ac64616c39c9f["function refresh"]
+  n0c07ac64616c39c9f["function retry_history"]
   n676d3424d0c583c67 --> n0c07ac64616c39c9f
-  n42372a67b4e3e126e["function _render_turn"]
+  n42372a67b4e3e126e["function refresh"]
   n676d3424d0c583c67 --> n42372a67b4e3e126e
-  n0f04b2b6f36369d02["function _render_history"]
+  n0f04b2b6f36369d02["function _render_turn"]
   n676d3424d0c583c67 --> n0f04b2b6f36369d02
-  nab3bdaeef768cce0d["function _render_persistence_status"]
+  nab3bdaeef768cce0d["function _render_history"]
   n676d3424d0c583c67 --> nab3bdaeef768cce0d
-  nc377d504cc6f354ac["function run"]
+  nc377d504cc6f354ac["function _render_persistence_status"]
   n676d3424d0c583c67 --> nc377d504cc6f354ac
+  n0db734efae59c53d6["function run"]
+  n676d3424d0c583c67 --> n0db734efae59c53d6
   nea16a24d8d5871483["game.py"]
   n19674d186673a22e3 --> nea16a24d8d5871483
   n52c26dedb7abaaf93["class GameView"]

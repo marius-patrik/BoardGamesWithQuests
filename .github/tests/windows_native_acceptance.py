@@ -125,15 +125,12 @@ def stop_process_tree(process: subprocess.Popen | None) -> None:
     raise AssertionError("Prior frozen GUI remains open after process-tree termination")
 
 
-
 def wait_for_named_window(title: str, timeout: float = 10) -> object:
     """Wait for an externally visible modal created by the frozen application."""
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         matches = [
-            window
-            for window in pyautogui.getWindowsWithTitle(title)
-            if window.title == title
+            window for window in pyautogui.getWindowsWithTitle(title) if window.title == title
         ]
         if matches:
             return matches[0]
