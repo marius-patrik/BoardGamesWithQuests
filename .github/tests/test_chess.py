@@ -283,3 +283,51 @@ def test_internal_staging_bug_is_not_misreported_as_illegal_user_move(tmp_path):
         with pytest.raises(AssertionError, match="broken hook"):
             g.proved_akci(Akce.move(action))
     assert (g.plocha.stav(), g.revision, g.logger.events) == prior
+
+
+def test_checked_king_has_only_safe_escape_squares(tmp_path):
+    """A checked king cannot remain on the attacked rook file."""
+    g = manager(tmp_path)
+    g.plocha = empty(
+        ((7, 4), Kral("white")),
+        ((0, 0), Kral("black")),
+        ((0, 4), Vez("black")),
+    )
+    assert g.revizor.v_sachu(g.plocha, "white")
+    assert {m.kam for m in g.mozne_tahy((7, 4))} == {
+        (7, 3), (7, 5), (6, 3), (6, 5)
+    }
+    before = g.plocha.stav()
+    with pytest.raises(IllegalAction):
+        g.proved_akci(Akce.move(Tah((7, 4), (6, 4))))
+    assert g.plocha.stav() == before and g.revision == 0
+
+
+def test_queenside_castle_through_attacked_transit_is_rejected(tmp_path):
+    """The king may not cross d1 while a black rook attacks that square."""
+    g = manager(tmp_path)
+    g.plocha = empty(
+        ((7, 4), Kral("white")),
+        ((7, 0), Vez("white")),
+        ((0, 7), Kral("black")),
+        ((0, 3), Vez("black")),
+    )
+    assert not any(
+        move.typ_tahu == "castle_queenside"
+        for move in g.mozne_tahy((7, 4))
+    )
+
+
+def test_castling_while_currently_checked_is_rejected(tmp_path):
+    g = manager(tmp_path)
+    g.plocha = empty(
+        ((7, 4), Kral("white")),
+        ((7, 7), Vez("white")),
+        ((0, 7), Kral("black")),
+        ((0, 4), Vez("black")),
+    )
+    assert g.revizor.v_sachu(g.plocha, "white")
+    assert not any(
+        move.typ_tahu.startswith("castle")
+        for move in g.mozne_tahy((7, 4))
+    )
