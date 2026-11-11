@@ -18,7 +18,7 @@ The board opens at the standard Chess starting position, with 32 pieces, White a
 4. Once accepted, the board, captured pieces, history, quest indicators, active player, and status update from the same committed game state.
 5. A rejected action leaves the existing position intact and presents an informative status message.
 
-Both mouse and keyboard focus are visible. Game commands and profile controls are accessible in the main window; Control+Return starts a match from setup. Promotion uses a focused native dialog.
+Both mouse and keyboard focus are visible. Game commands and profile controls are accessible in the main window; Control+Return starts a match from setup; Control+R requests resignation confirmation during a match. Promotion uses a focused native dialog.
 
 ### Finishing and restarting
 

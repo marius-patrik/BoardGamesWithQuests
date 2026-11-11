@@ -125,6 +125,27 @@ def stop_process_tree(process: subprocess.Popen | None) -> None:
     raise AssertionError("Prior frozen GUI remains open after process-tree termination")
 
 
+
+def wait_for_named_window(title: str, timeout: float = 10) -> object:
+    """Wait for an externally visible modal created by the frozen application."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        matches = [
+            window
+            for window in pyautogui.getWindowsWithTitle(title)
+            if window.title == title
+        ]
+        if matches:
+            return matches[0]
+        time.sleep(0.2)
+    raise AssertionError(f"Native user dialog never appeared: {title}")
+
+
+def assert_dialog_closed(title: str) -> None:
+    if any(window.title == title for window in pyautogui.getWindowsWithTitle(title)):
+        raise AssertionError(f"Dialog remained open after external cancel: {title}")
+
+
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -212,6 +233,66 @@ def external_gameplay(exe: Path, evidence: Path) -> dict:
             assert read_json(data / "users.json")["users"]["alice"]["xp"] == 10
             assert len(list((data / "logs").glob("*.json"))) == 2
             report["checks"].append("relaunch retained profile XP and created independent match")
+
+            # Reach a capture-promotion entirely from the normal starting setup.
+            # White: a2-a4, a4xb5, b5xa6, a6-a7, a7xb8=R.
+            # Black: b7-b5, a7-a6, e7-e6, e6-e5.
+            for origin, destination in (
+                ((6, 0), (4, 0)),
+                ((1, 1), (3, 1)),
+                ((4, 0), (3, 1)),
+                ((1, 0), (2, 0)),
+                ((3, 1), (2, 0)),
+                ((1, 4), (2, 4)),
+                ((2, 0), (1, 0)),
+                ((2, 4), (3, 4)),
+            ):
+                click_square(xs, ys, *origin)
+                click_square(xs, ys, *destination)
+            new_log = max((data / "logs").glob("*.json"), key=lambda file: file.stat().st_mtime_ns)
+            assert len(read_json(new_log)["events"]) == 8
+
+            click_square(xs, ys, 1, 0)
+            click_square(xs, ys, 0, 1)
+            wait_for_named_window("Pawn promotion")
+            capture(evidence, "07-promotion-dialog")
+            assert len(read_json(new_log)["events"]) == 8, "Unconfirmed promotion committed a move"
+            pyautogui.press("esc")
+            time.sleep(0.3)
+            assert_dialog_closed("Pawn promotion")
+            assert len(read_json(new_log)["events"]) == 8, "Cancelling promotion committed a move"
+            report["checks"].append("real pointer promotion modal + external Escape cancellation")
+
+            click_square(xs, ys, 1, 0)
+            click_square(xs, ys, 0, 1)
+            wait_for_named_window("Pawn promotion")
+            # A Tk Toplevel starts with dialog focus; Tab traverses to Queen, then Rook.
+            pyautogui.press("tab")
+            pyautogui.press("tab")
+            pyautogui.press("space")
+            time.sleep(0.5)
+            assert_dialog_closed("Pawn promotion")
+            final_history = read_json(new_log)
+            assert len(final_history["events"]) == 9
+            assert final_history["events"][-1]["promotion"] == "R"
+            assert final_history["events"][-1]["capture"]["piece"] == "N"
+            assert {"capture", "promotion"}.issubset(
+                set(final_history["events"][-1]["matched_rule_ids"])
+            )
+            capture(evidence, "08-rook-capture-promotion")
+            report["checks"].append("real keyboard choice commits one capture promotion")
+
+            # The same confirmation is reachable from the user's Ctrl+R shortcut.
+            pyautogui.hotkey("ctrl", "r", interval=0.10)
+            wait_for_named_window("Confirm resignation")
+            pyautogui.press("enter")
+            time.sleep(0.5)
+            finished_history = read_json(new_log)
+            assert len(finished_history["events"]) == 10
+            assert finished_history["events"][-1]["type"] == "resignation"
+            assert finished_history["status"] == "terminal"
+            capture(evidence, "09-resigned-match")
+            report["checks"].append("external keyboard resignation and terminal JSON result")
             report["status"] = "passed"
         except Exception as error:
             report["error"] = f"{type(error).__name__}: {error}"

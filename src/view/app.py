@@ -40,6 +40,7 @@ class BoardGamesApplication(tk.Tk):
         self.main = tk.Frame(self, bg=BACKGROUND)
         self.main.pack(fill="both", expand=True)
         self.bind("<Control-Return>", self._start_match_shortcut)
+        self.bind("<Control-r>", self._resign_shortcut)
         self.show_setup()
 
     def _clear(self) -> None:
@@ -326,6 +327,12 @@ class BoardGamesApplication(tk.Tk):
         dlg.bind("<Escape>", cancel)
         dlg.protocol("WM_DELETE_WINDOW", cancel)
         dlg.focus_set()
+
+    def _resign_shortcut(self, _event: tk.Event | None = None) -> str:
+        """Open the same confirmation as the visible Resign button."""
+        if self.manager is not None:
+            self.resign()
+        return "break"
 
     def resign(self) -> None:
         assert self.controller is not None and self.manager is not None
