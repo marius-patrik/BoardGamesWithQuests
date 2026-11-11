@@ -39,6 +39,7 @@ class BoardGamesApplication(tk.Tk):
         self.style.configure("TCombobox", padding=(5, 6))
         self.main = tk.Frame(self, bg=BACKGROUND)
         self.main.pack(fill="both", expand=True)
+        self.bind("<Control-Return>", self._start_match_shortcut)
         self.show_setup()
 
     def _clear(self) -> None:
@@ -116,7 +117,7 @@ class BoardGamesApplication(tk.Tk):
         ttk.Button(container, text="Create profile", command=self.create_profile).pack(
             fill="x", pady=(8, 13)
         )
-        ttk.Button(container, text="Start new game →", command=self.start_match).pack(
+        ttk.Button(container, text="Start new game →  (Ctrl+Enter)", command=self.start_match).pack(
             fill="x", pady=(6, 4)
         )
         self.setup_status = tk.Label(
@@ -146,6 +147,12 @@ class BoardGamesApplication(tk.Tk):
                 break
         if self.users.save_error:
             self.setup_status.config(text=self.users.save_error, fg="#a53e35")
+
+    def _start_match_shortcut(self, _event: tk.Event | None = None) -> str:
+        """Let the user start a prepared match without finding the mouse button."""
+        if self.manager is None:
+            self.start_match()
+        return "break"
 
     def start_match(self) -> None:
         white, black = (self.seat_choices[color].get() for color in ("white", "black"))

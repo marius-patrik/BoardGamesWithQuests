@@ -47,10 +47,12 @@ def test_keyboard_board_focus_and_cancel_selection(tmp_path):
         square.focus_set()
         app.update()
         square.event_generate("<KeyPress-space>")
+        square.event_generate("<KeyRelease-space>")
         app.update()
         assert app.controller.vybrane == (6, 4), "Space must select exactly once"
         assert app.manager.revision == 0
         square.event_generate("<KeyPress-space>")
+        square.event_generate("<KeyRelease-space>")
         app.update()
         assert app.controller.vybrane is None, "Second Space must clear exactly once"
         assert app.manager.revision == 0
