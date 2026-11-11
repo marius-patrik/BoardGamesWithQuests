@@ -1,8 +1,6 @@
 """Actual Tkinter window and board controls, executed under Xvfb on Linux CI."""
 
 import os
-import shutil
-import subprocess
 import time
 import tkinter as tk
 import pytest
@@ -44,8 +42,9 @@ def test_setup_and_button_board_move(tmp_path):
 
 def test_keyboard_board_focus_and_cancel_selection(tmp_path):
     """Send external XTEST keyboard input, not Tk .invoke() or synthetic callbacks."""
-    if shutil.which("xdotool") is None:
-        pytest.skip("External X11 keyboard tool is unavailable")
+    from Xlib import X, XK, display
+    from Xlib.ext import xtest
+
     app = application(tmp_path)
     try:
         square = app.board.buttons[(6, 4)]
@@ -54,15 +53,19 @@ def test_keyboard_board_focus_and_cancel_selection(tmp_path):
         app.update()
         assert app.focus_get() == square
 
-        def key(value):
-            subprocess.run(
-                ["xdotool", "key", "--clearmodifiers", value],
-                check=True,
-                timeout=5,
-            )
-            # Process X11 input first, then allow Tk's deferred activation to run.
+        x11 = display.Display()
+
+        def key(value: str) -> None:
+            """Send actual XTEST key press/release through the X server."""
+            keycode = x11.keysym_to_keycode(XK.string_to_keysym(value))
+            assert keycode, f"No X11 keycode for {value!r}"
+            xtest.fake_input(x11, X.KeyPress, keycode)
+            x11.sync()
             app.update()
-            time.sleep(0.18)
+            xtest.fake_input(x11, X.KeyRelease, keycode)
+            x11.sync()
+            app.update()
+            time.sleep(0.08)
             app.update()
 
         key("space")
@@ -83,6 +86,8 @@ def test_keyboard_board_focus_and_cancel_selection(tmp_path):
         assert app.manager.plocha.vrat_obsah((5, 4)) is not None
         assert len(app.manager.logger.events) == 1
     finally:
+        if "x11" in locals():
+            x11.close()
         app.destroy()
 
 
