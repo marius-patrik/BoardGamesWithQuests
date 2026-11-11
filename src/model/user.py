@@ -168,7 +168,9 @@ class UserManager:
         except (ValueError, OSError, TypeError, KeyError, UnicodeError) as exc:
             self.uzivatele = {}
             self.damaged = True
-            self.save_error = f"Profile file needs repair or is inaccessible: {exc}. Original was preserved."
+            self.save_error = (
+                f"Profile file needs repair or is inaccessible: {exc}. Original was preserved."
+            )
 
     def _recover_for_retry(self) -> bool:
         """Explicit retry after external repair/removal; never overwrite conflicting profiles."""
