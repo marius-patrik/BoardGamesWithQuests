@@ -129,6 +129,7 @@ class BoardGamesApplication(tk.Tk):
             justify="left",
         )
         self.setup_status.pack(anchor="w", pady=(9, 0))
+        self.after_idle(lambda: self.username.focus_set() if self.username.winfo_exists() else None)
 
     def create_profile(self) -> None:
         previous_seats = {color: box.get() for color, box in self.seat_choices.items()}

@@ -150,6 +150,18 @@ def external_gameplay(exe: Path, evidence: Path) -> dict:
             encoding="utf-8",
         )
         environment = dict(os.environ, BOARDGAMESWITHQUESTS_DATA_DIR=str(data))
+        # Prove the frozen executable does not resolve Python from the host PATH.
+        system_root = Path(os.environ.get("SystemRoot", r"C:\\Windows"))
+        environment["PATH"] = os.pathsep.join(
+            str(folder)
+            for folder in (
+                system_root / "System32",
+                system_root,
+                system_root / "System32" / "Wbem",
+            )
+        )
+        for name in ("PYTHONHOME", "PYTHONPATH", "VIRTUAL_ENV"):
+            environment.pop(name, None)
         report: dict = {"status": "failed", "checks": [], "platform": "Windows"}
         process = None
         try:
@@ -185,8 +197,18 @@ def external_gameplay(exe: Path, evidence: Path) -> dict:
             process = subprocess.Popen([str(exe)], env=environment, cwd=str(data))
             wait_for_window()
             capture(evidence, "04-restarted-setup")
+            # Actually create a local profile using the focused Tk entry fields.
+            pyautogui.write("charlie", interval=0.06)
+            pyautogui.press("tab")
+            pyautogui.write("Charlie", interval=0.06)
+            pyautogui.press("tab")
+            pyautogui.press("space")
+            time.sleep(0.6)
+            capture(evidence, "05-created-profile")
+            assert "charlie" in read_json(data / "users.json")["users"]
+            report["checks"].append("external keyboard profile creation saved to JSON")
             pyautogui.hotkey("ctrl", "enter", interval=0.12)
-            wait_for_board(evidence, "05-restarted-match")
+            wait_for_board(evidence, "06-restarted-match")
             assert read_json(data / "users.json")["users"]["alice"]["xp"] == 10
             assert len(list((data / "logs").glob("*.json"))) == 2
             report["checks"].append("relaunch retained profile XP and created independent match")
