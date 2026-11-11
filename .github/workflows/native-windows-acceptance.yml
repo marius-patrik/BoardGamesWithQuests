@@ -52,9 +52,9 @@ jobs:
       - name: Install source and Tk/Xvfb
         run: |
           python -m pip install -e . pytest
-          if ! command -v xvfb-run >/dev/null || ! command -v Xvfb >/dev/null; then
+          if ! command -v xvfb-run >/dev/null || ! command -v Xvfb >/dev/null || ! command -v xdotool >/dev/null; then
             sudo apt-get update
-            sudo apt-get install -y xvfb
+            sudo apt-get install -y xvfb xdotool
           fi
       - name: Execute actual Tkinter interactions
         run: xvfb-run -a python -m pytest -q .github/tests/test_gui.py

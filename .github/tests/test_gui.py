@@ -1,6 +1,9 @@
 """Actual Tkinter window and board controls, executed under Xvfb on Linux CI."""
 
 import os
+import shutil
+import subprocess
+import time
 import tkinter as tk
 import pytest
 from view.app import BoardGamesApplication
@@ -40,40 +43,41 @@ def test_setup_and_button_board_move(tmp_path):
 
 
 def test_keyboard_board_focus_and_cancel_selection(tmp_path):
-    """Dispatch Tk key events through widget and class bindings, never invoke()."""
+    """Send external XTEST keyboard input, not Tk .invoke() or synthetic callbacks."""
+    if shutil.which("xdotool") is None:
+        pytest.skip("External X11 keyboard tool is unavailable")
     app = application(tmp_path)
     try:
         square = app.board.buttons[(6, 4)]
-        square.focus_set()
-        app.update()
-        square.event_generate("<KeyPress-space>")
-        square.event_generate("<KeyRelease-space>")
-        app.update()
-        assert app.controller.vybrane == (6, 4), "Space must select exactly once"
-        assert app.manager.revision == 0
-        square.event_generate("<KeyPress-space>")
-        square.event_generate("<KeyRelease-space>")
-        app.update()
-        assert app.controller.vybrane is None, "Second Space must clear exactly once"
-        assert app.manager.revision == 0
-
-        square.focus_set()
-        app.update()
-        square.event_generate("<KeyPress-Up>")
-        app.update()
-        assert app.focus_get() == app.board.buttons[(5, 4)]
-        destination = app.board.buttons[(5, 4)]
-        destination.event_generate("<KeyPress-Down>")
+        app.focus_force()
+        square.focus_force()
         app.update()
         assert app.focus_get() == square
 
-        square.event_generate("<KeyPress-Return>")
-        app.update()
+        def key(value):
+            subprocess.run(
+                ["xdotool", "key", "--clearmodifiers", value],
+                check=True,
+                timeout=5,
+            )
+            # Tk's native Button class can schedule activation after key release.
+            time.sleep(0.18)
+            app.update()
+
+        key("space")
+        assert app.controller.vybrane == (6, 4), "One Space must select once"
+        assert app.manager.revision == 0
+        key("space")
+        assert app.controller.vybrane is None, "Second Space must clear once"
+
+        key("Up")
+        assert app.focus_get() == app.board.buttons[(5, 4)]
+        key("Down")
+        assert app.focus_get() == square
+        key("Return")
         assert app.controller.vybrane == (6, 4)
-        square.event_generate("<KeyPress-Up>")
-        app.update()
-        app.board.buttons[(5, 4)].event_generate("<KeyPress-Return>")
-        app.update()
+        key("Up")
+        key("Return")
         assert app.manager.revision == 1
         assert app.manager.plocha.vrat_obsah((5, 4)) is not None
         assert len(app.manager.logger.events) == 1
