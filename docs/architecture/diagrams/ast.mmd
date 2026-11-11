@@ -432,10 +432,8 @@ flowchart LR
   n6bcbf8a919cf8d6b3 --> n2ac302294d73e4b34
   n72eaa99f58d069b21["main.py"]
   n3627e9e02e3c9833b --> n72eaa99f58d069b21
-  n2bae39494f4918d18["function native_self_test"]
+  n2bae39494f4918d18["function main"]
   n72eaa99f58d069b21 --> n2bae39494f4918d18
-  n6385e4b4ba3275cd2["function main"]
-  n72eaa99f58d069b21 --> n6385e4b4ba3275cd2
   n13d1ed874aaea7bd5["model/"]
   n3627e9e02e3c9833b --> n13d1ed874aaea7bd5
   nd991ab777ff53118f["__init__.py"]
@@ -710,48 +708,50 @@ flowchart LR
   n676d3424d0c583c67 --> na7f8273fab391f86e
   n4e40eab0c6af14aef["function create_profile"]
   n676d3424d0c583c67 --> n4e40eab0c6af14aef
-  n66662ebcfc15904d6["function start_match"]
+  n66662ebcfc15904d6["function _start_match_shortcut"]
   n676d3424d0c583c67 --> n66662ebcfc15904d6
-  n54ceb6d67885a971d["function show_game"]
+  n54ceb6d67885a971d["function start_match"]
   n676d3424d0c583c67 --> n54ceb6d67885a971d
-  n186fd6eb82298a843["function _build_game_header"]
+  n186fd6eb82298a843["function show_game"]
   n676d3424d0c583c67 --> n186fd6eb82298a843
-  n6830e647afbc0dd26["function _build_game_toolbar"]
+  n6830e647afbc0dd26["function _build_game_header"]
   n676d3424d0c583c67 --> n6830e647afbc0dd26
-  n3f95c119ca61bf922["function _build_game_content"]
+  n3f95c119ca61bf922["function _build_game_toolbar"]
   n676d3424d0c583c67 --> n3f95c119ca61bf922
-  n8bf06b2a4256196f6["function _build_game_history"]
+  n8bf06b2a4256196f6["function _build_game_content"]
   n676d3424d0c583c67 --> n8bf06b2a4256196f6
-  nb41f228db77da46ec["function _build_game_persistence"]
+  nb41f228db77da46ec["function _build_game_history"]
   n676d3424d0c583c67 --> nb41f228db77da46ec
-  n4ca1e96db397b7662["function on_square"]
+  n4ca1e96db397b7662["function _build_game_persistence"]
   n676d3424d0c583c67 --> n4ca1e96db397b7662
-  n752d5a13a8aa1055d["function ask_promotion"]
+  n752d5a13a8aa1055d["function on_square"]
   n676d3424d0c583c67 --> n752d5a13a8aa1055d
-  n7cf6111c01df7525c["function choose"]
+  n7cf6111c01df7525c["function ask_promotion"]
   n676d3424d0c583c67 --> n7cf6111c01df7525c
-  n660eb8da1d31c47c0["function cancel"]
+  n660eb8da1d31c47c0["function choose"]
   n676d3424d0c583c67 --> n660eb8da1d31c47c0
-  n4a1b942cb707edc08["function resign"]
+  n4a1b942cb707edc08["function cancel"]
   n676d3424d0c583c67 --> n4a1b942cb707edc08
-  nc61acffe391826d1c["function new_game"]
+  nc61acffe391826d1c["function resign"]
   n676d3424d0c583c67 --> nc61acffe391826d1c
-  n1bbe9c8aa298bd27b["function players_setup"]
+  n1bbe9c8aa298bd27b["function new_game"]
   n676d3424d0c583c67 --> n1bbe9c8aa298bd27b
-  n7777a68c8670098ac["function retry_profiles"]
+  n7777a68c8670098ac["function players_setup"]
   n676d3424d0c583c67 --> n7777a68c8670098ac
-  n27b62e99d99b8d293["function retry_history"]
+  n27b62e99d99b8d293["function retry_profiles"]
   n676d3424d0c583c67 --> n27b62e99d99b8d293
-  n8e86b051d23770ab2["function refresh"]
+  n8e86b051d23770ab2["function retry_history"]
   n676d3424d0c583c67 --> n8e86b051d23770ab2
-  n0c07ac64616c39c9f["function _render_turn"]
+  n0c07ac64616c39c9f["function refresh"]
   n676d3424d0c583c67 --> n0c07ac64616c39c9f
-  n42372a67b4e3e126e["function _render_history"]
+  n42372a67b4e3e126e["function _render_turn"]
   n676d3424d0c583c67 --> n42372a67b4e3e126e
-  n0f04b2b6f36369d02["function _render_persistence_status"]
+  n0f04b2b6f36369d02["function _render_history"]
   n676d3424d0c583c67 --> n0f04b2b6f36369d02
-  nab3bdaeef768cce0d["function run"]
+  nab3bdaeef768cce0d["function _render_persistence_status"]
   n676d3424d0c583c67 --> nab3bdaeef768cce0d
+  nc377d504cc6f354ac["function run"]
+  n676d3424d0c583c67 --> nc377d504cc6f354ac
   nea16a24d8d5871483["game.py"]
   n19674d186673a22e3 --> nea16a24d8d5871483
   n52c26dedb7abaaf93["class GameView"]
