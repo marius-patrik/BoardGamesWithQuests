@@ -8,5 +8,5 @@ description: Verify branch state, canonical documents, actual source and deploym
 2. Read `.agents/PRD.md` and `.agents/AGENTS.md`; root README and CONTRIBUTING are symlinks to them.
 3. Inspect actual `src/` runtime modules and `docs/architecture/` plus `docs/reference/`. The removed `packages/` tree is not part of cleanroom runtime.
 4. Inspect relevant GitHub Actions under `.github/workflows/` and avoid treating old branch artifacts as current.
-5. Verify source and docs contracts with `python .github/scripts/validate_repository.py --check`.
+5. Verify source-backed architectural diagrams by regenerating them and inspecting their diff; test real application behavior rather than file-layout assertions.
 Report confirmed facts, blockers and the first actionable task. Do not recreate removed governance documents.

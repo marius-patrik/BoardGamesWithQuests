@@ -117,7 +117,7 @@ The root entries are symlinks to canonical documents, not duplicate editable cop
 
 The PRD contains the **class UML**, **action/quest flow**, and **19-module dependency map** as embedded Mermaid diagrams. Update those diagrams when the implementation changes under an approved requirement; this plan links to them rather than repeating product definitions or diagrams.
 
-The separately generated implementation diagrams live under `docs/architecture/diagrams/`, and the authored historical class diagrams and GUI artwork are preserved under `docs/reference/`. Both locations are ordinary documentation, not alternate runtime packages. `src/` is the sole Python production tree; the old `packages/` implementation and generated `.agents/` governance records are retired. `python .github/scripts/validate_repository.py --check` checks layout without ever rewriting the canonical PRD or this file.
+The separately generated implementation diagrams live under `docs/architecture/diagrams/`, and the authored historical class diagrams and GUI artwork are preserved under `docs/reference/`. Both locations are ordinary documentation, not alternate runtime packages. `src/` is the sole Python production tree; the old `packages/` implementation and generated `.agents/` governance records are retired. The source-derived diagram freshness check never rewrites the canonical PRD or this file.
 
 Code and tests use the repository's established Python tooling and test locations. Keep production modules focused on the [PRD source layout](PRD.md#7-source-layout) and keep app behavior independent of generated documentation or developer-only artifacts. Repository-specific conventions are verified from the working checkout, not inferred from this text.
 
