@@ -371,9 +371,7 @@ class BoardGamesApplication(tk.Tk):
             return
         self.manager = self.controller.manager
         manager = self.manager
-        self.board.vykresli_desku(
-            manager, self.controller.vybrane, self.controller.destinace
-        )
+        self.board.vykresli_desku(manager, self.controller.vybrane, self.controller.destinace)
         self.white_panel.zobraz_hrace(manager)
         self.black_panel.zobraz_hrace(manager)
         self._render_turn(manager)

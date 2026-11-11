@@ -16,6 +16,7 @@ class RuleContext:
     Rule hooks may change only the staged board through po, never pred. Their
     output is evaluated before GameManager publishes a new authoritative board.
     """
+
     akce: Akce
     tah: Tah | None
     puvodni_hrac: Hrac
