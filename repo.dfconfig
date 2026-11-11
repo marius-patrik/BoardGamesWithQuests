@@ -28,7 +28,7 @@
       "initial": "0.1.0"
     },
     "environment": {
-      "$comment": "Python source and Windows GUI packaging are verified by v1-verify.yml. Final releases require independent approval.",
+      "$comment": "Python gameplay is checked by DarkFactory, and external Windows desktop acceptance is owned by native-windows-acceptance.yml. Final releases require independent approval.",
       "testing": {
         "python": {
           "command": "pytest",

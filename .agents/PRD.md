@@ -18,7 +18,7 @@ The board opens at the standard Chess starting position, with 32 pieces, White a
 4. Once accepted, the board, captured pieces, history, quest indicators, active player, and status update from the same committed game state.
 5. A rejected action leaves the existing position intact and presents an informative status message.
 
-Both mouse and keyboard focus are visible. Game commands and profile controls are accessible in the main window; promotion uses a focused native dialog.
+Both mouse and keyboard focus are visible. Game commands and profile controls are accessible in the main window; Control+Return starts a match from setup. Promotion uses a focused native dialog.
 
 ### Finishing and restarting
 
@@ -440,6 +440,7 @@ Each target file uses a temporary sibling file followed by `os.replace()` for an
 - A successful save clears that file's unsaved warning.
 - An ordinary write error retains the accepted in-memory state, marks the affected target as unsaved, and offers a retry of its latest snapshot.
 - An invalid or malformed existing JSON file stays intact. The application displays a recovery warning, uses clean in-memory defaults for that store, and blocks replacement of the damaged target until the file is repaired or moved aside by the user. On Retry, the store rechecks the repaired or removed file; a valid, nonconflicting version can be saved without restarting the application. Recovered profile records are merged with the active in-memory profiles, and conflicting identities block the write rather than silently overwriting either copy. Repaired match histories must belong to the active match and agree with its recorded event prefix.
+- Profile saves use a cooperative per-directory lock and an observed-content fingerprint. If another instance changed a valid profile file since this instance loaded or last saved it, the stale instance refuses to overwrite it. The saved file and unsaved in-memory XP remain intact, and the UI exposes a conflict warning. This lock coordinates participating application instances, not unrelated tools that ignore it.
 - Profile and history storage failures are reported independently. In-memory state remains playable while writable persistence is unavailable; changes that remain unsaved can be lost when the program closes.
 
 ## 7. Source layout
