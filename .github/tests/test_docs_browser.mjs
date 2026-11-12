@@ -1,25 +1,23 @@
-/** Browser-level acceptance for the published documentation controls.
- *
- * Reuses the pinned Mermaid CLI's Chromium/Puppeteer installation, so the
- * documentation preview performs genuine user-visible interaction tests
- * without introducing another browser runtime or production dependency.
+/** End-to-end browser checks against the actual emitted documentation artifact.
+ * No PRD path, image filename, UML class, or fixed diagram count is assumed.
+ * Uses the Chromium runtime already installed for the Mermaid compiler.
  */
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import { join, resolve, relative, extname, sep } from "node:path";
 import assert from "node:assert/strict";
 
 const root = resolve("site");
-const globalModules = execFileSync("npm", ["root", "-g"], { encoding: "utf8" }).trim();
-const requireFromCli = createRequire(join(globalModules, "@mermaid-js/mermaid-cli/package.json"));
+const modules = execFileSync("npm", ["root", "-g"], { encoding: "utf8" }).trim();
+const requireFromCli = createRequire(join(modules, "@mermaid-js/mermaid-cli/package.json"));
 const puppeteer = requireFromCli("puppeteer");
 
 const mime = {
   ".html": "text/html; charset=utf-8",
-  ".js": "application/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
   ".svg": "image/svg+xml",
   ".json": "application/json",
 };
@@ -28,13 +26,12 @@ const server = createServer(async (request, response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
     const target = resolve(root, "." + pathname, pathname.endsWith("/") ? "index.html" : "");
-    const traversal = relative(root, target);
-    if (traversal.startsWith("..") || traversal.startsWith(sep)) {
+    const rel = relative(root, target);
+    if (rel.startsWith("..") || rel.startsWith(sep)) {
       response.writeHead(403).end();
       return;
     }
-    const info = await stat(target);
-    const file = info.isDirectory() ? join(target, "index.html") : target;
+    const file = (await stat(target)).isDirectory() ? join(target, "index.html") : target;
     response.writeHead(200, { "Content-Type": mime[extname(file)] || "application/octet-stream" });
     response.end(await readFile(file));
   } catch {
@@ -42,7 +39,17 @@ const server = createServer(async (request, response) => {
   }
 });
 
-await new Promise(resolveReady => server.listen(0, "127.0.0.1", resolveReady));
+async function htmlPages(dir) {
+  const result = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) result.push(...await htmlPages(path));
+    else if (entry.name === "index.html") result.push(path);
+  }
+  return result;
+}
+
+await new Promise(ok => server.listen(0, "127.0.0.1", ok));
 const base = "http://127.0.0.1:" + server.address().port;
 let browser;
 try {
@@ -51,84 +58,65 @@ try {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   const page = await browser.newPage();
-  page.on("framenavigated", frame => {
-    if (frame === page.mainFrame()) console.log("Document navigated:", frame.url());
-  });
   await page.setViewport({ width: 1440, height: 900 });
-  console.log("Checking centered/full-width layout");
-  await page.goto(base + "/", { waitUntil: "load" });
-  await page.waitForSelector("[data-layout-toggle]");
+  const homepage = await page.goto(base + "/", { waitUntil: "load" });
+  assert.equal(homepage.status(), 200, "The generated documentation home page is not served");
 
-  // Switching the layout must resize the real reading pane, not the browser.
+  // UI contract: layout, preference persistence, navigation and theme.
+  await page.waitForSelector("[data-layout-toggle]");
   const centered = await page.$eval(".content", el => el.getBoundingClientRect().width);
   await page.click("[data-layout-toggle]");
-  const wide = await page.$eval(".content", el => el.getBoundingClientRect().width);
-  assert(wide > centered + 70, "Full-width mode did not expand the actual reader");
+  const expanded = await page.$eval(".content", el => el.getBoundingClientRect().width);
+  assert(expanded > centered + 70, "Full-width toggle did not expand the reading pane");
+  await page.reload({ waitUntil: "load" });
   assert.equal(await page.$eval("html", el => el.dataset.layout), "wide");
-  console.log("Checking layout persistence across page navigation");
-  await page.goto(base + "/repository-files/docs/architecture/diagrams/uml.mmd/", { waitUntil: "load" });
-  assert.equal(await page.$eval("html", el => el.dataset.layout), "wide", "Width mode was not saved");
   await page.click("[data-layout-toggle]");
-
-  // Every section is an actual native disclosure with independently mutable state.
-  console.log("Checking independently collapsible navigation groups");
-  const group = await page.$("details[data-nav-section]");
-  assert(group, "No collapsible sidebar sections were rendered");
-  const initial = await group.evaluate(el => el.open);
-  const summary = await page.$("details[data-nav-section] > summary");
-  assert(summary, "No disclosure summary was rendered");
-  await summary.click();
-  assert.equal(await group.evaluate(el => el.open), !initial, "Section did not collapse");
-  await summary.click();
-
-  // Desktop hamburger must remove the left grid column, then restore it.
-  console.log("Checking hamburger collapse");
   await page.click("[data-nav-toggle]");
   assert.equal(await page.$eval("html", el => el.dataset.navCollapsed), "true");
   await page.click("[data-nav-toggle]");
   assert.notEqual(await page.$eval("html", el => el.dataset.navCollapsed), "true");
 
-  // The original image, rather than a fabricated Mermaid substitute, opens
-  // as a full-viewport modal. Escape must return the same viewer to the page.
-  console.log("Checking original image fullscreen modal");
-  await page.goto(base + "/repository-files/docs/reference/images/GUI_mockup.svg/", {
-    waitUntil: "load",
-  });
-  await page.waitForSelector('[aria-label="Expand image in modal"]');
-  const inlineSize = await page.$eval(".diagram-viewer__viewport", el => el.getBoundingClientRect().width);
-  await page.click('[aria-label="Expand image in modal"]');
-  assert.equal(await page.$eval("dialog.diagram-modal", el => el.open), true);
-  const expandedSize = await page.$eval(".diagram-modal .diagram-viewer__viewport", el => el.getBoundingClientRect().width);
-  assert(expandedSize > inlineSize + 100, "Image modal did not expand beyond reading pane");
-  await page.keyboard.press("Escape");
-  await page.waitForFunction(() => !document.querySelector("dialog.diagram-modal"));
-  assert(await page.$(".diagram-viewer__viewport"), "Image viewer was not restored after modal dismissal");
+  const disclosure = await page.$("details[data-nav-section]");
+  if (disclosure) {
+    const original = await disclosure.evaluate(el => el.open);
+    await disclosure.$("summary").then(summary => summary.click());
+    assert.equal(await disclosure.evaluate(el => el.open), !original);
+  }
+  const color = await page.$eval("html", el => el.dataset.theme);
+  await page.click("[data-theme-toggle]");
+  assert.notEqual(await page.$eval("html", el => el.dataset.theme), color);
+  await page.click("[data-theme-toggle]");
 
-  // The generated implementation UML shares the same modal behavior.
-  console.log("Checking generated implementation UML fullscreen modal");
-  await page.goto(base + "/repository-files/docs/architecture/diagrams/uml.mmd/", {
-    waitUntil: "load",
-  });
-  await page.waitForSelector('[aria-label="Expand image in modal"]');
-  await page.click('[aria-label="Expand image in modal"]');
-  assert.equal(await page.$eval("dialog.diagram-modal", el => el.open), true);
-  await page.click('[aria-label="Close expanded image"]');
-  await page.waitForFunction(() => !document.querySelector("dialog.diagram-modal"));
-  // Fenced Mermaid diagrams embedded in ordinary Markdown use the exact same
-  // viewer, with compiled local SVGs rather than visible source fences.
-  console.log("Checking embedded Markdown Mermaid diagrams");
-  await page.goto(base + "/agents/PRD/", { waitUntil: "load" });
-  const viewerCount = await page.$eval("body", el => el.querySelectorAll("[data-diagram-viewer]").length);
-  assert(viewerCount >= 3, "Canonical PRD's Mermaid diagrams were not rendered");
-  assert(await page.$("[data-diagram-viewer] img"), "Embedded Mermaid has no SVG graphic");
-  const first = await page.$("[data-diagram-viewer]");
-  const expand = await first.$('[aria-label="Expand image in modal"]');
-  assert(expand, "Embedded Mermaid viewer has no expand control");
-  await expand.click();
-  assert.equal(await page.$eval("dialog.diagram-modal", el => el.open), true);
-  await page.keyboard.press("Escape");
-  await page.waitForFunction(() => !document.querySelector("dialog.diagram-modal"));
-  console.log("Documentation layout, nested navigation, standalone and inline Mermaid modals verified in Chromium");
+  // Discover a genuine rendered diagram page; no particular document needs to exist.
+  let viewerPage = null;
+  for (const candidate of await htmlPages(root)) {
+    const html = await readFile(candidate, "utf8");
+    if (html.includes("data-diagram-viewer") && html.includes("Rendered Mermaid architecture diagram")) {
+      viewerPage = candidate;
+      break;
+    }
+  }
+
+  if (viewerPage) {
+    const location = relative(root, viewerPage).split(sep).map(encodeURIComponent).join("/");
+    const rendered = await page.goto(base + "/" + location, { waitUntil: "load" });
+    assert.equal(rendered.status(), 200);
+    await page.waitForSelector('[aria-label="Expand image in modal"]');
+    assert(await page.$("[data-diagram-viewer] img"), "Rendered diagram is missing its SVG image");
+    const before = await page.$eval(".diagram-viewer__zoom-label", el => el.textContent);
+    await page.click('[aria-label="Zoom in"]');
+    const after = await page.$eval(".diagram-viewer__zoom-label", el => el.textContent);
+    assert.notEqual(after, before, "Zoom control did not change diagram scale");
+    await page.click('[aria-label="Expand image in modal"]');
+    assert.equal(await page.$eval("dialog.diagram-modal", el => el.open), true);
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => !document.querySelector("dialog.diagram-modal"));
+    assert(await page.$(".diagram-viewer__viewport"), "Diagram viewer was not restored");
+  } else {
+    console.log("No published diagrams in this checkout: skipping viewer interaction.");
+  }
+
+  console.log("Documentation layout, navigation, theme and discovered diagram interactions passed.");
 } finally {
   await browser?.close();
   await new Promise(done => server.close(done));

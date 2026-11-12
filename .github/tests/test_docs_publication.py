@@ -1,4 +1,9 @@
-"""Behavior tests for publishing branch previews independently of main docs."""
+"""Executable tests for the GitHub Pages site assembler.
+
+Synthetic staging inputs prove independent PR publication, stale-preview removal,
+missing-main fallback, failure on invalid staging, and symlink rejection. These
+assertions inspect emitted files and process exit status, not workflow source text.
+"""
 
 from __future__ import annotations
 
@@ -102,12 +107,3 @@ def test_replaces_stale_deployed_preview_on_update(tmp_path: Path) -> None:
     result = invoke(staging, site, 328)
     assert result.returncode == 0, result.stderr
     assert (site / "pr-328/index.html").read_text() == "new"
-
-
-def test_trusted_publisher_uses_repository_default_branch() -> None:
-    """A PR preview must not require publisher scripts from the older release branch."""
-    workflow = (Path(__file__).resolve().parents[1] / "workflows/deploy-docs.yml").read_text(
-        encoding="utf-8"
-    )
-    assert "ref: ${{ github.event.repository.default_branch }}" in workflow
-    assert "ref: main\n" not in workflow

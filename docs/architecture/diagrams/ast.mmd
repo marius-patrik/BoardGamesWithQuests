@@ -84,50 +84,6 @@ flowchart LR
   n3b9f839fbbebb1fb8 --> n36456e6f6c5ab65b4
   ne529287351db29edc["function main"]
   n3b9f839fbbebb1fb8 --> ne529287351db29edc
-  n3cdac3a1a6fcf734d["build_docs.py"]
-  n2092df3a19d2f7b13 --> n3cdac3a1a6fcf734d
-  n1a69cf04d185352be["function load_builder_module"]
-  n3cdac3a1a6fcf734d --> n1a69cf04d185352be
-  nf38666df6621c1712["function diagram_generator"]
-  n3cdac3a1a6fcf734d --> nf38666df6621c1712
-  n7c9ee7b4e7921b864["function tracked_files"]
-  n3cdac3a1a6fcf734d --> n7c9ee7b4e7921b864
-  n0b5589454366cb852["function public_path"]
-  n3cdac3a1a6fcf734d --> n0b5589454366cb852
-  n628c502f6140e0636["function diagram_viewer_markup"]
-  n3cdac3a1a6fcf734d --> n628c502f6140e0636
-  nb401084c61a080f49["function render_markdown_mermaid"]
-  n3cdac3a1a6fcf734d --> nb401084c61a080f49
-  nee8c87b89b78998dd["function substitute"]
-  n3cdac3a1a6fcf734d --> nee8c87b89b78998dd
-  n90998e54ea8793a85["function pages_for"]
-  n3cdac3a1a6fcf734d --> n90998e54ea8793a85
-  n7de7b419ccc0c3b75["function link"]
-  n3cdac3a1a6fcf734d --> n7de7b419ccc0c3b75
-  ne6c85f7dc7da2a7ae["function navigation"]
-  n3cdac3a1a6fcf734d --> ne6c85f7dc7da2a7ae
-  n0981677583e6e8fac["function entries"]
-  n3cdac3a1a6fcf734d --> n0981677583e6e8fac
-  n1eafe7271d1746b45["function build_nav"]
-  n3cdac3a1a6fcf734d --> n1eafe7271d1746b45
-  n0453057db91c0c18e["function on_config"]
-  n3cdac3a1a6fcf734d --> n0453057db91c0c18e
-  nf75a58d4dbbe2007e["function on_files"]
-  n3cdac3a1a6fcf734d --> nf75a58d4dbbe2007e
-  n5fd9fa78cc3d87cff["function project_registry"]
-  n3cdac3a1a6fcf734d --> n5fd9fa78cc3d87cff
-  n636e0d15b08f11faf["function manifest"]
-  n3cdac3a1a6fcf734d --> n636e0d15b08f11faf
-  nfc8c4b1c612f4f95b["function render_published_mermaid"]
-  n3cdac3a1a6fcf734d --> nfc8c4b1c612f4f95b
-  nf879f9fe40cf72f32["function replace_diagram"]
-  n3cdac3a1a6fcf734d --> nf879f9fe40cf72f32
-  n3d71879c09046420c["function build"]
-  n3cdac3a1a6fcf734d --> n3d71879c09046420c
-  ndf88209cd3578fcd3["function write_manifest"]
-  n3cdac3a1a6fcf734d --> ndf88209cd3578fcd3
-  nfa71d6769266c2807["function main"]
-  n3cdac3a1a6fcf734d --> nfa71d6769266c2807
   nc50428a0522ce7111["collect_docs_artifacts.py"]
   n2092df3a19d2f7b13 --> nc50428a0522ce7111
   ne14968af41ea3df54["function gh"]
@@ -148,90 +104,8 @@ flowchart LR
   nc50428a0522ce7111 --> nb776054b623ca5a3b
   n374d0c58c752aec8a["function main"]
   nc50428a0522ce7111 --> n374d0c58c752aec8a
-  n91d3c07ae3b6e8c4b["generate_diagrams.py"]
-  n2092df3a19d2f7b13 --> n91d3c07ae3b6e8c4b
-  nc6fc72dbbd3d20a66["function tracked_paths"]
-  n91d3c07ae3b6e8c4b --> nc6fc72dbbd3d20a66
-  n69e75d36e47eadef9["function _node"]
-  n91d3c07ae3b6e8c4b --> n69e75d36e47eadef9
-  n4b8a3a1204ab952a3["function _label"]
-  n91d3c07ae3b6e8c4b --> n4b8a3a1204ab952a3
-  n48deeed97c41d5f94["function _declarations"]
-  n91d3c07ae3b6e8c4b --> n48deeed97c41d5f94
-  ne53254a23292d7432["function repository_ast"]
-  n91d3c07ae3b6e8c4b --> ne53254a23292d7432
-  n5710f648dc0f089bf["function implementation_uml"]
-  n91d3c07ae3b6e8c4b --> n5710f648dc0f089bf
-  n94e58f054b723d377["function generated_assets"]
-  n91d3c07ae3b6e8c4b --> n94e58f054b723d377
   nc9f5868186eb03f66["tests/"]
   nfad65243633b77700 --> nc9f5868186eb03f66
-  n62b5b4726381980d4["conftest.py"]
-  nc9f5868186eb03f66 --> n62b5b4726381980d4
-  nd6487c9d1884235b7["docs_site_acceptance.py"]
-  nc9f5868186eb03f66 --> nd6487c9d1884235b7
-  n87eeef8bcc1fbe36d["function test_repository_navigation_and_every_file_page"]
-  nd6487c9d1884235b7 --> n87eeef8bcc1fbe36d
-  n08f6b1cf2353992b0["function test_sidebar_sections_exactly_match_git_tracked_directories"]
-  nd6487c9d1884235b7 --> n08f6b1cf2353992b0
-  n799ca876a55ec313c["function test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images"]
-  nd6487c9d1884235b7 --> n799ca876a55ec313c
-  n1e407c133795830e0["function test_original_gui_mockup_is_an_image_and_ships_unchanged"]
-  nd6487c9d1884235b7 --> n1e407c133795830e0
-  nd0bac21e22d41c92c["function test_embedded_markdown_mermaid_is_rendered_in_the_published_prd"]
-  nd6487c9d1884235b7 --> nd0bac21e22d41c92c
-  n8c085dab85df07352["test_chess.py"]
-  nc9f5868186eb03f66 --> n8c085dab85df07352
-  n5356f4053d6254310["function manager"]
-  n8c085dab85df07352 --> n5356f4053d6254310
-  n639c01595e7cebf23["function play"]
-  n8c085dab85df07352 --> n639c01595e7cebf23
-  n902966353726e224e["function empty"]
-  n8c085dab85df07352 --> n902966353726e224e
-  n48ebb1ba18bb29826["function test_initial_position_and_moves"]
-  n8c085dab85df07352 --> n48ebb1ba18bb29826
-  n5c33a334d00622ae3["function test_side_effect_free_preview_and_rejected_move"]
-  n8c085dab85df07352 --> n5c33a334d00622ae3
-  n62511db5b6a55103a["function test_fools_mate_and_quest_attribution"]
-  n8c085dab85df07352 --> n62511db5b6a55103a
-  neefdf3393e8cc71df["function test_en_passant_and_double_quest"]
-  n8c085dab85df07352 --> neefdf3393e8cc71df
-  n78d081830d4f8b807["function test_en_passant_expires"]
-  n8c085dab85df07352 --> n78d081830d4f8b807
-  nea2052c78dfe1d47f["function test_en_passant_discovered_attack_is_illegal"]
-  n8c085dab85df07352 --> nea2052c78dfe1d47f
-  n06da7364bcadf777d["function test_kingside_and_queenside_castle"]
-  n8c085dab85df07352 --> n06da7364bcadf777d
-  nec79d42531fbfed55["function test_castling_through_check_rejected"]
-  n8c085dab85df07352 --> nec79d42531fbfed55
-  n05f165f8a7aab325e["function test_king_capture_never_allowed"]
-  n8c085dab85df07352 --> n05f165f8a7aab325e
-  n91744d3558ad2cadc["function test_pinned_piece_must_preserve_king"]
-  n8c085dab85df07352 --> n91744d3558ad2cadc
-  n3db5889e466e8fa66["function test_four_promotion_choices"]
-  n8c085dab85df07352 --> n3db5889e466e8fa66
-  n9a22219468ab67891["function test_stalemate"]
-  n8c085dab85df07352 --> n9a22219468ab67891
-  n232c8a14fd33b2e18["function test_resignation_has_no_move_coordinates"]
-  n8c085dab85df07352 --> n232c8a14fd33b2e18
-  ne916dc69417947cfb["function test_vector_candidates_for_each_piece"]
-  n8c085dab85df07352 --> ne916dc69417947cfb
-  nc3bbd398e392fda1e["function test_quests_are_once_per_actor_per_match_and_reset"]
-  n8c085dab85df07352 --> nc3bbd398e392fda1e
-  n7caf206a81deabae7["function test_pawn_attack_squares_distinct_from_push"]
-  n8c085dab85df07352 --> n7caf206a81deabae7
-  ne07138a4c59fbc143["function test_king_unmoved_and_rook_moved_back_cannot_castle"]
-  n8c085dab85df07352 --> ne07138a4c59fbc143
-  n417c28decdf90a4ee["function test_capture_promotion_commits_once_and_awards_both_quests"]
-  n8c085dab85df07352 --> n417c28decdf90a4ee
-  n7cbcf60f80ff55cda["function test_internal_staging_bug_is_not_misreported_as_illegal_user_move"]
-  n8c085dab85df07352 --> n7cbcf60f80ff55cda
-  n5b0f3905d4ce8ba21["function test_checked_king_has_only_safe_escape_squares"]
-  n8c085dab85df07352 --> n5b0f3905d4ce8ba21
-  n55008c39ede251577["function test_queenside_castle_through_attacked_transit_is_rejected"]
-  n8c085dab85df07352 --> n55008c39ede251577
-  ne14dc4c0df9538c08["function test_castling_while_currently_checked_is_rejected"]
-  n8c085dab85df07352 --> ne14dc4c0df9538c08
   n905320175c75255b2["test_docs_artifacts.py"]
   nc9f5868186eb03f66 --> n905320175c75255b2
   nf021606f8ea023fd8["function run_record"]
@@ -260,11 +134,11 @@ flowchart LR
   nc9f5868186eb03f66 --> nc58e9fa04cebf260c
   n574a634296f26fb29["test_docs_embedded_mermaid.py"]
   nc9f5868186eb03f66 --> n574a634296f26fb29
-  n54d857d5ab6a86e47["function test_fenced_mermaid_uses_existing_diagram_viewer_and_escapes_source"]
+  n54d857d5ab6a86e47["function test_markdown_mermaid_parser_reuses_viewer_and_escapes_html"]
   n574a634296f26fb29 --> n54d857d5ab6a86e47
-  n2cd167dfc614c6044["function test_non_mermaid_code_and_inline_examples_remain_unchanged"]
+  n2cd167dfc614c6044["function test_other_code_fences_are_preserved"]
   n574a634296f26fb29 --> n2cd167dfc614c6044
-  nf9479f8b9280d6cce["function test_canonical_prd_contains_multiple_embedded_mermaid_diagrams"]
+  nf9479f8b9280d6cce["function test_every_tracked_diagram_page_publishes_rendered_local_svg"]
   n574a634296f26fb29 --> nf9479f8b9280d6cce
   n5f65b1147cf4c7caa["test_docs_manifest.py"]
   nc9f5868186eb03f66 --> n5f65b1147cf4c7caa
@@ -288,88 +162,6 @@ flowchart LR
   n08502483f6d83fd34 --> nf106a07f2f08c75d6
   n7e1d9be7e80c6ae99["function test_replaces_stale_deployed_preview_on_update"]
   n08502483f6d83fd34 --> n7e1d9be7e80c6ae99
-  n759fa5db536bcba5c["function test_trusted_publisher_uses_repository_default_branch"]
-  n08502483f6d83fd34 --> n759fa5db536bcba5c
-  n9f98fe734168a36b1["test_gui.py"]
-  nc9f5868186eb03f66 --> n9f98fe734168a36b1
-  nc88c1403454fa8f06["function application"]
-  n9f98fe734168a36b1 --> nc88c1403454fa8f06
-  n901b4a79e15a5c5f5["function test_setup_and_button_board_move"]
-  n9f98fe734168a36b1 --> n901b4a79e15a5c5f5
-  ne9a65af4c7884dfdd["function test_keyboard_board_focus_and_cancel_selection"]
-  n9f98fe734168a36b1 --> ne9a65af4c7884dfdd
-  nb0fedb43f3711d0bc["function key"]
-  n9f98fe734168a36b1 --> nb0fedb43f3711d0bc
-  ned7abcf7116a73c42["function test_terminal_display"]
-  n9f98fe734168a36b1 --> ned7abcf7116a73c42
-  nbab1e815b0b4fa76d["function test_real_promotion_dialog_commits_only_after_choice"]
-  n9f98fe734168a36b1 --> nbab1e815b0b4fa76d
-  n9f98df9d2586b2b67["function test_real_gui_save_error_and_retry_feedback"]
-  n9f98fe734168a36b1 --> n9f98df9d2586b2b67
-  nbba3b9bc280bd86fa["function test_real_gui_capture_quest_and_new_match_preserves_xp"]
-  n9f98fe734168a36b1 --> nbba3b9bc280bd86fa
-  n896374460a11a0370["function test_promotion_cancel_does_not_commit_and_can_be_reopened"]
-  n9f98fe734168a36b1 --> n896374460a11a0370
-  nc8af32fe602235896["function test_profile_recovery_retry_refreshes_setup_controls"]
-  n9f98fe734168a36b1 --> nc8af32fe602235896
-  n79974c7fed32dbc92["test_persistence.py"]
-  nc9f5868186eb03f66 --> n79974c7fed32dbc92
-  nc1e6fcc7fe820f8b9["function users"]
-  n79974c7fed32dbc92 --> nc1e6fcc7fe820f8b9
-  n987019cf047633e3f["function test_normalization_and_reload"]
-  n79974c7fed32dbc92 --> n987019cf047633e3f
-  ncaa452b7ad8f302cb["function test_unique_chronological_match_files_and_resign"]
-  n79974c7fed32dbc92 --> ncaa452b7ad8f302cb
-  n991b935e7495d7abc["function test_profiles_write_failure_and_retry_independent_from_history"]
-  n79974c7fed32dbc92 --> n991b935e7495d7abc
-  n3d66a720df1305a95["function test_history_save_failure_and_retry"]
-  n79974c7fed32dbc92 --> n3d66a720df1305a95
-  na18f0eb7a44553479["function test_corrupt_profiles_preserved"]
-  n79974c7fed32dbc92 --> na18f0eb7a44553479
-  n3d459abb203247ab4["function test_corrupt_match_file_preserved"]
-  n79974c7fed32dbc92 --> n3d459abb203247ab4
-  nb63cb67e4a59613e1["function test_profile_and_history_save_status_independent_on_accepted_move"]
-  n79974c7fed32dbc92 --> nb63cb67e4a59613e1
-  na3b57df55f50468d0["function test_damaged_profiles_can_be_moved_aside_then_retried"]
-  n79974c7fed32dbc92 --> na3b57df55f50468d0
-  nc60744b2abd99632d["function test_repaired_profile_file_merges_distinct_users_without_dropping_live_state"]
-  n79974c7fed32dbc92 --> nc60744b2abd99632d
-  n4d28d4b2a89ef739a["function test_repaired_profile_conflict_never_silently_overwrites_disk"]
-  n79974c7fed32dbc92 --> n4d28d4b2a89ef739a
-  n6ffc3dd6822e08c96["function test_damaged_match_file_can_be_moved_aside_then_retried"]
-  n79974c7fed32dbc92 --> n6ffc3dd6822e08c96
-  n4e2f42bdff7498aca["function test_repaired_match_file_retries_only_when_history_is_consistent"]
-  n79974c7fed32dbc92 --> n4e2f42bdff7498aca
-  nb82bde86d05c73425["function test_two_instances_refuse_stale_profile_overwrite"]
-  n79974c7fed32dbc92 --> nb82bde86d05c73425
-  n6584d7ad11c6868c8["function test_two_instances_cannot_create_overlapping_stale_profiles"]
-  n79974c7fed32dbc92 --> n6584d7ad11c6868c8
-  n7fd0a63dde8ca6dfd["windows_native_acceptance.py"]
-  nc9f5868186eb03f66 --> n7fd0a63dde8ca6dfd
-  n658226c50d17c1e44["function capture"]
-  n7fd0a63dde8ca6dfd --> n658226c50d17c1e44
-  nd16218ef9e679b7ab["function _segments"]
-  n7fd0a63dde8ca6dfd --> nd16218ef9e679b7ab
-  n5d9250f4c10611550["function board_centers"]
-  n7fd0a63dde8ca6dfd --> n5d9250f4c10611550
-  n60f61f4aaafd07b93["function wait_for_window"]
-  n7fd0a63dde8ca6dfd --> n60f61f4aaafd07b93
-  n77f1f512820b61311["function wait_for_board"]
-  n7fd0a63dde8ca6dfd --> n77f1f512820b61311
-  n365357dce9eec948f["function stop_process_tree"]
-  n7fd0a63dde8ca6dfd --> n365357dce9eec948f
-  n01fff6583c89efc13["function wait_for_named_window"]
-  n7fd0a63dde8ca6dfd --> n01fff6583c89efc13
-  n84ecea5054f15e1e7["function assert_dialog_closed"]
-  n7fd0a63dde8ca6dfd --> n84ecea5054f15e1e7
-  n408b224224efcd567["function read_json"]
-  n7fd0a63dde8ca6dfd --> n408b224224efcd567
-  nbaf0573e3b5bfa848["function click_square"]
-  n7fd0a63dde8ca6dfd --> nbaf0573e3b5bfa848
-  nb8f3cf5883f857f6a["function external_gameplay"]
-  n7fd0a63dde8ca6dfd --> nb8f3cf5883f857f6a
-  nc177c2bcf80e2ec57["function main"]
-  n7fd0a63dde8ca6dfd --> nc177c2bcf80e2ec57
   nbf32064a6a26ab2df["workflows/"]
   nfad65243633b77700 --> nbf32064a6a26ab2df
   n936162c3846c6b099["agent.yml"]
@@ -438,6 +230,68 @@ flowchart LR
   root --> n424f31ee2b48e507d
   n0c069dda5b5d2988a["requirements-dev.txt"]
   root --> n0c069dda5b5d2988a
+  na5b75927c2a15b32c["scripts/"]
+  root --> na5b75927c2a15b32c
+  nf2d846b75ebab586a["build_docs.py"]
+  na5b75927c2a15b32c --> nf2d846b75ebab586a
+  n881a845aae214f86e["function load_builder_module"]
+  nf2d846b75ebab586a --> n881a845aae214f86e
+  nd472516f32c933fbd["function diagram_generator"]
+  nf2d846b75ebab586a --> nd472516f32c933fbd
+  nc43815085bc4c41f0["function tracked_files"]
+  nf2d846b75ebab586a --> nc43815085bc4c41f0
+  n18c1b575ebf950baa["function public_path"]
+  nf2d846b75ebab586a --> n18c1b575ebf950baa
+  n2e826e5a00f0b3ca8["function diagram_viewer_markup"]
+  nf2d846b75ebab586a --> n2e826e5a00f0b3ca8
+  nbb094c98d4985fe1b["function render_markdown_mermaid"]
+  nf2d846b75ebab586a --> nbb094c98d4985fe1b
+  nd09a26fc0b92abbcd["function substitute"]
+  nf2d846b75ebab586a --> nd09a26fc0b92abbcd
+  n62aaf4a9db17ff2ae["function pages_for"]
+  nf2d846b75ebab586a --> n62aaf4a9db17ff2ae
+  n9a4da0af0c66e5a56["function link"]
+  nf2d846b75ebab586a --> n9a4da0af0c66e5a56
+  n5ea5ab48ed5797d9a["function navigation"]
+  nf2d846b75ebab586a --> n5ea5ab48ed5797d9a
+  n9ab501ebedf11791c["function entries"]
+  nf2d846b75ebab586a --> n9ab501ebedf11791c
+  n3b76a0445b4a29eb9["function build_nav"]
+  nf2d846b75ebab586a --> n3b76a0445b4a29eb9
+  nbb98b5713cdf7db47["function on_config"]
+  nf2d846b75ebab586a --> nbb98b5713cdf7db47
+  nb0dc3340cedd6be28["function on_files"]
+  nf2d846b75ebab586a --> nb0dc3340cedd6be28
+  ne064106924155e1af["function project_registry"]
+  nf2d846b75ebab586a --> ne064106924155e1af
+  n3ceed7841ee34d08f["function manifest"]
+  nf2d846b75ebab586a --> n3ceed7841ee34d08f
+  n79fc2210d4bdae163["function render_published_mermaid"]
+  nf2d846b75ebab586a --> n79fc2210d4bdae163
+  n76dbcb3960ad7b280["function replace_diagram"]
+  nf2d846b75ebab586a --> n76dbcb3960ad7b280
+  n2193c4838b26cda90["function build"]
+  nf2d846b75ebab586a --> n2193c4838b26cda90
+  n7481a51d5e11a2d46["function write_manifest"]
+  nf2d846b75ebab586a --> n7481a51d5e11a2d46
+  n717051453c644c48a["function main"]
+  nf2d846b75ebab586a --> n717051453c644c48a
+  nb3b1f6a0a65d2cafc["generate_diagrams.py"]
+  na5b75927c2a15b32c --> nb3b1f6a0a65d2cafc
+  nd7304798696e66381["function tracked_paths"]
+  nb3b1f6a0a65d2cafc --> nd7304798696e66381
+  nc0dd98d123d9b664f["function _node"]
+  nb3b1f6a0a65d2cafc --> nc0dd98d123d9b664f
+  nc891610d6f430e251["function _label"]
+  nb3b1f6a0a65d2cafc --> nc891610d6f430e251
+  nfc5b832edde6f9b88["function _declarations"]
+  nb3b1f6a0a65d2cafc --> nfc5b832edde6f9b88
+  nba0b8b2ee393aaa2d["function repository_ast"]
+  nb3b1f6a0a65d2cafc --> nba0b8b2ee393aaa2d
+  n52abe8a90e82e89dd["function implementation_uml"]
+  nb3b1f6a0a65d2cafc --> n52abe8a90e82e89dd
+  n8d3d6e2248e38f4f6["function generated_assets"]
+  nb3b1f6a0a65d2cafc --> n8d3d6e2248e38f4f6
   n3627e9e02e3c9833b["src/"]
   root --> n3627e9e02e3c9833b
   n0b085be7ec56eb827["controller/"]
@@ -478,31 +332,31 @@ flowchart LR
   n13d1ed874aaea7bd5 --> nd991ab777ff53118f
   n2376e327762eb008b["board.py"]
   n13d1ed874aaea7bd5 --> n2376e327762eb008b
-  n09488c1c10af999b5["class HerniPlocha"]
-  n2376e327762eb008b --> n09488c1c10af999b5
-  n7bac80da88168173a["function __init__"]
+  n4a8ce23e57f21150f["function uvnitr"]
+  n2376e327762eb008b --> n4a8ce23e57f21150f
+  n7bac80da88168173a["function algebraicky"]
   n2376e327762eb008b --> n7bac80da88168173a
-  n91ed031ee3d93537c["function kopie"]
-  n2376e327762eb008b --> n91ed031ee3d93537c
-  n807ce1ac73ce2884a["function vrat_obsah"]
+  n404462eeb360407ce["class HerniPlocha"]
+  n2376e327762eb008b --> n404462eeb360407ce
+  n807ce1ac73ce2884a["function __init__"]
   n2376e327762eb008b --> n807ce1ac73ce2884a
-  n43a05585fbf6d203a["function poloz"]
+  n43a05585fbf6d203a["function kopie"]
   n2376e327762eb008b --> n43a05585fbf6d203a
-  nb4bbb8fe55bbbb1f6["function pole_figurek"]
+  nb4bbb8fe55bbbb1f6["function vrat_obsah"]
   n2376e327762eb008b --> nb4bbb8fe55bbbb1f6
-  n54ea9a88d7bfd2e8c["function kral"]
+  n54ea9a88d7bfd2e8c["function poloz"]
   n2376e327762eb008b --> n54ea9a88d7bfd2e8c
-  n3938b9981fdc3d8fb["function odstran"]
+  n3938b9981fdc3d8fb["function pole_figurek"]
   n2376e327762eb008b --> n3938b9981fdc3d8fb
-  n6e7f19bf243218a17["function presun"]
+  n6e7f19bf243218a17["function kral"]
   n2376e327762eb008b --> n6e7f19bf243218a17
-  n5180474c4ad789dec["function promenu"]
+  n5180474c4ad789dec["function odstran"]
   n2376e327762eb008b --> n5180474c4ad789dec
-  ne75a6234a6864956e["function stav"]
+  ne75a6234a6864956e["function presun"]
   n2376e327762eb008b --> ne75a6234a6864956e
-  n9b3c9b1ebcab6d991["function uvnitr"]
+  n9b3c9b1ebcab6d991["function promenu"]
   n2376e327762eb008b --> n9b3c9b1ebcab6d991
-  nbdea0abf415d5f75d["function algebraicky"]
+  nbdea0abf415d5f75d["function stav"]
   n2376e327762eb008b --> nbdea0abf415d5f75d
   n11ca414b1335ca78d["logger.py"]
   n13d1ed874aaea7bd5 --> n11ca414b1335ca78d
@@ -676,33 +530,33 @@ flowchart LR
   n89261656072d7fba2 --> na7a6cc7026f3a266f
   n01fdb8f8d062fa02b["user.py"]
   n13d1ed874aaea7bd5 --> n01fdb8f8d062fa02b
-  n6248c40ccced8e888["class Uzivatel"]
-  n01fdb8f8d062fa02b --> n6248c40ccced8e888
-  n4f455e34f9627dca5["class UserManager"]
-  n01fdb8f8d062fa02b --> n4f455e34f9627dca5
-  n5e747f5e50022ad42["function _fingerprint"]
+  n9f68d74860941e150["function data_directory"]
+  n01fdb8f8d062fa02b --> n9f68d74860941e150
+  ne79fe93c311d408cf["function atomic_json"]
+  n01fdb8f8d062fa02b --> ne79fe93c311d408cf
+  n5e747f5e50022ad42["function profile_write_lock"]
   n01fdb8f8d062fa02b --> n5e747f5e50022ad42
-  n27a499c7f3ab55e98["function __init__"]
+  n27a499c7f3ab55e98["function normalize_username"]
   n01fdb8f8d062fa02b --> n27a499c7f3ab55e98
-  ne4c3acbcf32c8bb5d["function _read_profiles"]
-  n01fdb8f8d062fa02b --> ne4c3acbcf32c8bb5d
-  nb584841484fc213d0["function nacti_uzivatele"]
-  n01fdb8f8d062fa02b --> nb584841484fc213d0
-  n37416ad437caede4d["function _recover_for_retry"]
+  n8a731468aaf7a264e["class Uzivatel"]
+  n01fdb8f8d062fa02b --> n8a731468aaf7a264e
+  nf57eb2cc3cfb4b17e["class UserManager"]
+  n01fdb8f8d062fa02b --> nf57eb2cc3cfb4b17e
+  n37416ad437caede4d["function _fingerprint"]
   n01fdb8f8d062fa02b --> n37416ad437caede4d
-  n4d0e0a605a4d4cf30["function vytvor_uzivatele"]
+  n4d0e0a605a4d4cf30["function __init__"]
   n01fdb8f8d062fa02b --> n4d0e0a605a4d4cf30
-  nf2f0a57aa6dcfc0ba["function pridej_xp"]
+  nf2f0a57aa6dcfc0ba["function _read_profiles"]
   n01fdb8f8d062fa02b --> nf2f0a57aa6dcfc0ba
-  na10f9ebb78b396228["function uloz_uzivatele"]
+  na10f9ebb78b396228["function nacti_uzivatele"]
   n01fdb8f8d062fa02b --> na10f9ebb78b396228
-  n3cde144af3ab14599["function data_directory"]
+  n3cde144af3ab14599["function _recover_for_retry"]
   n01fdb8f8d062fa02b --> n3cde144af3ab14599
-  nf835a49ff8f2ae40d["function atomic_json"]
+  nf835a49ff8f2ae40d["function vytvor_uzivatele"]
   n01fdb8f8d062fa02b --> nf835a49ff8f2ae40d
-  n48d95888c2ed456ed["function profile_write_lock"]
+  n48d95888c2ed456ed["function pridej_xp"]
   n01fdb8f8d062fa02b --> n48d95888c2ed456ed
-  n9d8dde41af2734ac7["function normalize_username"]
+  n9d8dde41af2734ac7["function uloz_uzivatele"]
   n01fdb8f8d062fa02b --> n9d8dde41af2734ac7
   n273d316a4935bfc1a["validator.py"]
   n13d1ed874aaea7bd5 --> n273d316a4935bfc1a
@@ -766,28 +620,32 @@ flowchart LR
   n676d3424d0c583c67 --> n752d5a13a8aa1055d
   n7cf6111c01df7525c["function ask_promotion"]
   n676d3424d0c583c67 --> n7cf6111c01df7525c
-  n660eb8da1d31c47c0["function _resign_shortcut"]
+  n660eb8da1d31c47c0["function choose"]
   n676d3424d0c583c67 --> n660eb8da1d31c47c0
-  n4a1b942cb707edc08["function resign"]
+  n4a1b942cb707edc08["function cancel"]
   n676d3424d0c583c67 --> n4a1b942cb707edc08
-  nc61acffe391826d1c["function new_game"]
+  nc61acffe391826d1c["function _resign_shortcut"]
   n676d3424d0c583c67 --> nc61acffe391826d1c
-  n1bbe9c8aa298bd27b["function players_setup"]
+  n1bbe9c8aa298bd27b["function resign"]
   n676d3424d0c583c67 --> n1bbe9c8aa298bd27b
-  n7777a68c8670098ac["function retry_profiles"]
+  n7777a68c8670098ac["function new_game"]
   n676d3424d0c583c67 --> n7777a68c8670098ac
-  n27b62e99d99b8d293["function retry_history"]
+  n27b62e99d99b8d293["function players_setup"]
   n676d3424d0c583c67 --> n27b62e99d99b8d293
-  n8e86b051d23770ab2["function refresh"]
+  n8e86b051d23770ab2["function retry_profiles"]
   n676d3424d0c583c67 --> n8e86b051d23770ab2
-  n0c07ac64616c39c9f["function _render_turn"]
+  n0c07ac64616c39c9f["function retry_history"]
   n676d3424d0c583c67 --> n0c07ac64616c39c9f
-  n42372a67b4e3e126e["function _render_history"]
+  n42372a67b4e3e126e["function refresh"]
   n676d3424d0c583c67 --> n42372a67b4e3e126e
-  n0f04b2b6f36369d02["function _render_persistence_status"]
+  n0f04b2b6f36369d02["function _render_turn"]
   n676d3424d0c583c67 --> n0f04b2b6f36369d02
-  nab3bdaeef768cce0d["function run"]
+  nab3bdaeef768cce0d["function _render_history"]
   n676d3424d0c583c67 --> nab3bdaeef768cce0d
+  nc377d504cc6f354ac["function _render_persistence_status"]
+  n676d3424d0c583c67 --> nc377d504cc6f354ac
+  n0db734efae59c53d6["function run"]
+  n676d3424d0c583c67 --> n0db734efae59c53d6
   nea16a24d8d5871483["game.py"]
   n19674d186673a22e3 --> nea16a24d8d5871483
   n52c26dedb7abaaf93["class GameView"]
@@ -812,3 +670,139 @@ flowchart LR
   n7350f5d3409837203 --> nd7ea4acee46116d14
   n37137ca86c8adcdc6["function zobraz_questy"]
   n7350f5d3409837203 --> n37137ca86c8adcdc6
+  n470d3f6fe1322a4eb["tests/"]
+  root --> n470d3f6fe1322a4eb
+  n5f0c681afb3b05d61["conftest.py"]
+  n470d3f6fe1322a4eb --> n5f0c681afb3b05d61
+  ncf7dcf2b2ce4cf953["test_chess.py"]
+  n470d3f6fe1322a4eb --> ncf7dcf2b2ce4cf953
+  ndb4380aa8e7ba3fc7["function manager"]
+  ncf7dcf2b2ce4cf953 --> ndb4380aa8e7ba3fc7
+  n4f2fa1d9d84a0192d["function play"]
+  ncf7dcf2b2ce4cf953 --> n4f2fa1d9d84a0192d
+  nbfdf174e4705fa955["function empty"]
+  ncf7dcf2b2ce4cf953 --> nbfdf174e4705fa955
+  na6f199bc4b2f6e1a2["function test_initial_position_and_moves"]
+  ncf7dcf2b2ce4cf953 --> na6f199bc4b2f6e1a2
+  n2196ffea828c0421e["function test_side_effect_free_preview_and_rejected_move"]
+  ncf7dcf2b2ce4cf953 --> n2196ffea828c0421e
+  n8bd14467ce92ba136["function test_fools_mate_and_quest_attribution"]
+  ncf7dcf2b2ce4cf953 --> n8bd14467ce92ba136
+  nd82abd39e1b365b41["function test_en_passant_and_double_quest"]
+  ncf7dcf2b2ce4cf953 --> nd82abd39e1b365b41
+  nf1d122e44f0fdbeeb["function test_en_passant_expires"]
+  ncf7dcf2b2ce4cf953 --> nf1d122e44f0fdbeeb
+  n67f0bdc0065ec909d["function test_en_passant_discovered_attack_is_illegal"]
+  ncf7dcf2b2ce4cf953 --> n67f0bdc0065ec909d
+  n982b94e21290a4e0d["function test_kingside_and_queenside_castle"]
+  ncf7dcf2b2ce4cf953 --> n982b94e21290a4e0d
+  nd66089200d8772b33["function test_castling_through_check_rejected"]
+  ncf7dcf2b2ce4cf953 --> nd66089200d8772b33
+  ne5587d1b029f861ea["function test_king_capture_never_allowed"]
+  ncf7dcf2b2ce4cf953 --> ne5587d1b029f861ea
+  nfe4029a7bc74f4e82["function test_pinned_piece_must_preserve_king"]
+  ncf7dcf2b2ce4cf953 --> nfe4029a7bc74f4e82
+  n5a7dccf426a42df75["function test_four_promotion_choices"]
+  ncf7dcf2b2ce4cf953 --> n5a7dccf426a42df75
+  n7f00a573b8514c15d["function test_stalemate"]
+  ncf7dcf2b2ce4cf953 --> n7f00a573b8514c15d
+  n8830f81aab08fef51["function test_resignation_has_no_move_coordinates"]
+  ncf7dcf2b2ce4cf953 --> n8830f81aab08fef51
+  n67652bb2ecaa31829["function test_vector_candidates_for_each_piece"]
+  ncf7dcf2b2ce4cf953 --> n67652bb2ecaa31829
+  n8836dd8b90510b9d9["function test_quests_are_once_per_actor_per_match_and_reset"]
+  ncf7dcf2b2ce4cf953 --> n8836dd8b90510b9d9
+  nf3cc912fa6250b1f4["function test_pawn_attack_squares_distinct_from_push"]
+  ncf7dcf2b2ce4cf953 --> nf3cc912fa6250b1f4
+  nf0a871ed3b7eccdd2["function test_king_unmoved_and_rook_moved_back_cannot_castle"]
+  ncf7dcf2b2ce4cf953 --> nf0a871ed3b7eccdd2
+  n17c39443921c1b412["function test_capture_promotion_commits_once_and_awards_both_quests"]
+  ncf7dcf2b2ce4cf953 --> n17c39443921c1b412
+  n7c43b4e759886467b["function test_internal_staging_bug_is_not_misreported_as_illegal_user_move"]
+  ncf7dcf2b2ce4cf953 --> n7c43b4e759886467b
+  ndb28d95e421fc1680["function test_checked_king_has_only_safe_escape_squares"]
+  ncf7dcf2b2ce4cf953 --> ndb28d95e421fc1680
+  n1482a7182f9048391["function test_queenside_castle_through_attacked_transit_is_rejected"]
+  ncf7dcf2b2ce4cf953 --> n1482a7182f9048391
+  n804246f9868ab99d9["function test_castling_while_currently_checked_is_rejected"]
+  ncf7dcf2b2ce4cf953 --> n804246f9868ab99d9
+  n25160c37db4adc72c["test_gui.py"]
+  n470d3f6fe1322a4eb --> n25160c37db4adc72c
+  nd72567c1d537bf5f6["function application"]
+  n25160c37db4adc72c --> nd72567c1d537bf5f6
+  ndf0d0eef95c84553a["function test_setup_and_button_board_move"]
+  n25160c37db4adc72c --> ndf0d0eef95c84553a
+  n6b1d7551b1c4a834c["function test_keyboard_board_focus_and_cancel_selection"]
+  n25160c37db4adc72c --> n6b1d7551b1c4a834c
+  nbdc4d5712f284c690["function key"]
+  n25160c37db4adc72c --> nbdc4d5712f284c690
+  n5ed55212968433ff2["function test_terminal_display"]
+  n25160c37db4adc72c --> n5ed55212968433ff2
+  n86afe12581bda9168["function test_real_promotion_dialog_commits_only_after_choice"]
+  n25160c37db4adc72c --> n86afe12581bda9168
+  n89a6028c4f7cf116e["function test_real_gui_save_error_and_retry_feedback"]
+  n25160c37db4adc72c --> n89a6028c4f7cf116e
+  n360bee58b37f1527a["function test_real_gui_capture_quest_and_new_match_preserves_xp"]
+  n25160c37db4adc72c --> n360bee58b37f1527a
+  n20cd800079b8c26dd["function test_promotion_cancel_does_not_commit_and_can_be_reopened"]
+  n25160c37db4adc72c --> n20cd800079b8c26dd
+  nfdc92f968918312e1["function test_profile_recovery_retry_refreshes_setup_controls"]
+  n25160c37db4adc72c --> nfdc92f968918312e1
+  n8c587d67d40158565["test_persistence.py"]
+  n470d3f6fe1322a4eb --> n8c587d67d40158565
+  n1cf2a7cd1e1781793["function users"]
+  n8c587d67d40158565 --> n1cf2a7cd1e1781793
+  n99c8bb68dbca40e05["function test_normalization_and_reload"]
+  n8c587d67d40158565 --> n99c8bb68dbca40e05
+  neee314f775888dbc1["function test_unique_chronological_match_files_and_resign"]
+  n8c587d67d40158565 --> neee314f775888dbc1
+  n444683660f585f22c["function test_profiles_write_failure_and_retry_independent_from_history"]
+  n8c587d67d40158565 --> n444683660f585f22c
+  n8f6b4b6b268d1f976["function test_history_save_failure_and_retry"]
+  n8c587d67d40158565 --> n8f6b4b6b268d1f976
+  nf1dec0d46fa44129c["function test_corrupt_profiles_preserved"]
+  n8c587d67d40158565 --> nf1dec0d46fa44129c
+  n22323eb59e3bc8383["function test_corrupt_match_file_preserved"]
+  n8c587d67d40158565 --> n22323eb59e3bc8383
+  na828c5c5f9e0eafcc["function test_profile_and_history_save_status_independent_on_accepted_move"]
+  n8c587d67d40158565 --> na828c5c5f9e0eafcc
+  n8914f524c9b92bdc6["function test_damaged_profiles_can_be_moved_aside_then_retried"]
+  n8c587d67d40158565 --> n8914f524c9b92bdc6
+  n216cf2b8e49a13263["function test_repaired_profile_file_merges_distinct_users_without_dropping_live_state"]
+  n8c587d67d40158565 --> n216cf2b8e49a13263
+  n13f8abc8ebf214b0a["function test_repaired_profile_conflict_never_silently_overwrites_disk"]
+  n8c587d67d40158565 --> n13f8abc8ebf214b0a
+  na4f915c0a1515fbfc["function test_damaged_match_file_can_be_moved_aside_then_retried"]
+  n8c587d67d40158565 --> na4f915c0a1515fbfc
+  n4c408116d4570c2ad["function test_repaired_match_file_retries_only_when_history_is_consistent"]
+  n8c587d67d40158565 --> n4c408116d4570c2ad
+  nc991b48138c9bf16b["function test_two_instances_refuse_stale_profile_overwrite"]
+  n8c587d67d40158565 --> nc991b48138c9bf16b
+  nf44940810ed5d1f25["function test_two_instances_cannot_create_overlapping_stale_profiles"]
+  n8c587d67d40158565 --> nf44940810ed5d1f25
+  n2031ddc61204c5a15["windows_native_acceptance.py"]
+  n470d3f6fe1322a4eb --> n2031ddc61204c5a15
+  n3a7be9b11cc00e9b7["function capture"]
+  n2031ddc61204c5a15 --> n3a7be9b11cc00e9b7
+  neea2a04502daf97e1["function _segments"]
+  n2031ddc61204c5a15 --> neea2a04502daf97e1
+  n97c318895c4d032a6["function board_centers"]
+  n2031ddc61204c5a15 --> n97c318895c4d032a6
+  n15d0ff7e2f3fa49ff["function wait_for_window"]
+  n2031ddc61204c5a15 --> n15d0ff7e2f3fa49ff
+  ncbbdca5768ffe8577["function wait_for_board"]
+  n2031ddc61204c5a15 --> ncbbdca5768ffe8577
+  n75f448e5fe4fede29["function stop_process_tree"]
+  n2031ddc61204c5a15 --> n75f448e5fe4fede29
+  nc4388feac8c1803e1["function wait_for_named_window"]
+  n2031ddc61204c5a15 --> nc4388feac8c1803e1
+  n57ec6dd88fc71edf6["function assert_dialog_closed"]
+  n2031ddc61204c5a15 --> n57ec6dd88fc71edf6
+  neecb87a105e1f9f23["function read_json"]
+  n2031ddc61204c5a15 --> neecb87a105e1f9f23
+  n9298439d958af1ca5["function click_square"]
+  n2031ddc61204c5a15 --> n9298439d958af1ca5
+  n478c27e2cfedbc3d3["function external_gameplay"]
+  n2031ddc61204c5a15 --> n478c27e2cfedbc3d3
+  nb514728db3c438b08["function main"]
+  n2031ddc61204c5a15 --> nb514728db3c438b08

@@ -42,7 +42,7 @@
       },
       "documentation": {
         "python": {
-          "command": "python .github/scripts/build_docs.py",
+          "command": "python scripts/build_docs.py",
           "source": "repository Markdown and Python docstrings"
         }
       },

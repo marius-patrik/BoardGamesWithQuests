@@ -168,7 +168,7 @@ def generated_assets(root: Path) -> dict[str, str]:
 
 
 if __name__ == "__main__":
-    root = Path(__file__).resolve().parents[2]
+    root = Path(__file__).resolve().parents[1]
     for path, data in generated_assets(root).items():
         target = root / path
         target.parent.mkdir(parents=True, exist_ok=True)
