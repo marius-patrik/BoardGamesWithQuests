@@ -84,50 +84,6 @@ flowchart LR
   n3b9f839fbbebb1fb8 --> n36456e6f6c5ab65b4
   ne529287351db29edc["function main"]
   n3b9f839fbbebb1fb8 --> ne529287351db29edc
-  n3cdac3a1a6fcf734d["build_docs.py"]
-  n2092df3a19d2f7b13 --> n3cdac3a1a6fcf734d
-  n1a69cf04d185352be["function load_builder_module"]
-  n3cdac3a1a6fcf734d --> n1a69cf04d185352be
-  nf38666df6621c1712["function diagram_generator"]
-  n3cdac3a1a6fcf734d --> nf38666df6621c1712
-  n7c9ee7b4e7921b864["function tracked_files"]
-  n3cdac3a1a6fcf734d --> n7c9ee7b4e7921b864
-  n0b5589454366cb852["function public_path"]
-  n3cdac3a1a6fcf734d --> n0b5589454366cb852
-  n628c502f6140e0636["function diagram_viewer_markup"]
-  n3cdac3a1a6fcf734d --> n628c502f6140e0636
-  nb401084c61a080f49["function render_markdown_mermaid"]
-  n3cdac3a1a6fcf734d --> nb401084c61a080f49
-  nee8c87b89b78998dd["function substitute"]
-  n3cdac3a1a6fcf734d --> nee8c87b89b78998dd
-  n90998e54ea8793a85["function pages_for"]
-  n3cdac3a1a6fcf734d --> n90998e54ea8793a85
-  n7de7b419ccc0c3b75["function link"]
-  n3cdac3a1a6fcf734d --> n7de7b419ccc0c3b75
-  ne6c85f7dc7da2a7ae["function navigation"]
-  n3cdac3a1a6fcf734d --> ne6c85f7dc7da2a7ae
-  n0981677583e6e8fac["function entries"]
-  n3cdac3a1a6fcf734d --> n0981677583e6e8fac
-  n1eafe7271d1746b45["function build_nav"]
-  n3cdac3a1a6fcf734d --> n1eafe7271d1746b45
-  n0453057db91c0c18e["function on_config"]
-  n3cdac3a1a6fcf734d --> n0453057db91c0c18e
-  nf75a58d4dbbe2007e["function on_files"]
-  n3cdac3a1a6fcf734d --> nf75a58d4dbbe2007e
-  n5fd9fa78cc3d87cff["function project_registry"]
-  n3cdac3a1a6fcf734d --> n5fd9fa78cc3d87cff
-  n636e0d15b08f11faf["function manifest"]
-  n3cdac3a1a6fcf734d --> n636e0d15b08f11faf
-  nfc8c4b1c612f4f95b["function render_published_mermaid"]
-  n3cdac3a1a6fcf734d --> nfc8c4b1c612f4f95b
-  nf879f9fe40cf72f32["function replace_diagram"]
-  n3cdac3a1a6fcf734d --> nf879f9fe40cf72f32
-  n3d71879c09046420c["function build"]
-  n3cdac3a1a6fcf734d --> n3d71879c09046420c
-  ndf88209cd3578fcd3["function write_manifest"]
-  n3cdac3a1a6fcf734d --> ndf88209cd3578fcd3
-  nfa71d6769266c2807["function main"]
-  n3cdac3a1a6fcf734d --> nfa71d6769266c2807
   nc50428a0522ce7111["collect_docs_artifacts.py"]
   n2092df3a19d2f7b13 --> nc50428a0522ce7111
   ne14968af41ea3df54["function gh"]
@@ -148,22 +104,6 @@ flowchart LR
   nc50428a0522ce7111 --> nb776054b623ca5a3b
   n374d0c58c752aec8a["function main"]
   nc50428a0522ce7111 --> n374d0c58c752aec8a
-  n91d3c07ae3b6e8c4b["generate_diagrams.py"]
-  n2092df3a19d2f7b13 --> n91d3c07ae3b6e8c4b
-  nc6fc72dbbd3d20a66["function tracked_paths"]
-  n91d3c07ae3b6e8c4b --> nc6fc72dbbd3d20a66
-  n69e75d36e47eadef9["function _node"]
-  n91d3c07ae3b6e8c4b --> n69e75d36e47eadef9
-  n4b8a3a1204ab952a3["function _label"]
-  n91d3c07ae3b6e8c4b --> n4b8a3a1204ab952a3
-  n48deeed97c41d5f94["function _declarations"]
-  n91d3c07ae3b6e8c4b --> n48deeed97c41d5f94
-  ne53254a23292d7432["function repository_ast"]
-  n91d3c07ae3b6e8c4b --> ne53254a23292d7432
-  n5710f648dc0f089bf["function implementation_uml"]
-  n91d3c07ae3b6e8c4b --> n5710f648dc0f089bf
-  n94e58f054b723d377["function generated_assets"]
-  n91d3c07ae3b6e8c4b --> n94e58f054b723d377
   nc9f5868186eb03f66["tests/"]
   nfad65243633b77700 --> nc9f5868186eb03f66
   nd6487c9d1884235b7["docs_site_acceptance.py"]
@@ -304,6 +244,68 @@ flowchart LR
   root --> n424f31ee2b48e507d
   n0c069dda5b5d2988a["requirements-dev.txt"]
   root --> n0c069dda5b5d2988a
+  na5b75927c2a15b32c["scripts/"]
+  root --> na5b75927c2a15b32c
+  nf2d846b75ebab586a["build_docs.py"]
+  na5b75927c2a15b32c --> nf2d846b75ebab586a
+  n881a845aae214f86e["function load_builder_module"]
+  nf2d846b75ebab586a --> n881a845aae214f86e
+  nd472516f32c933fbd["function diagram_generator"]
+  nf2d846b75ebab586a --> nd472516f32c933fbd
+  nc43815085bc4c41f0["function tracked_files"]
+  nf2d846b75ebab586a --> nc43815085bc4c41f0
+  n18c1b575ebf950baa["function public_path"]
+  nf2d846b75ebab586a --> n18c1b575ebf950baa
+  n2e826e5a00f0b3ca8["function diagram_viewer_markup"]
+  nf2d846b75ebab586a --> n2e826e5a00f0b3ca8
+  nbb094c98d4985fe1b["function render_markdown_mermaid"]
+  nf2d846b75ebab586a --> nbb094c98d4985fe1b
+  nd09a26fc0b92abbcd["function substitute"]
+  nf2d846b75ebab586a --> nd09a26fc0b92abbcd
+  n62aaf4a9db17ff2ae["function pages_for"]
+  nf2d846b75ebab586a --> n62aaf4a9db17ff2ae
+  n9a4da0af0c66e5a56["function link"]
+  nf2d846b75ebab586a --> n9a4da0af0c66e5a56
+  n5ea5ab48ed5797d9a["function navigation"]
+  nf2d846b75ebab586a --> n5ea5ab48ed5797d9a
+  n9ab501ebedf11791c["function entries"]
+  nf2d846b75ebab586a --> n9ab501ebedf11791c
+  n3b76a0445b4a29eb9["function build_nav"]
+  nf2d846b75ebab586a --> n3b76a0445b4a29eb9
+  nbb98b5713cdf7db47["function on_config"]
+  nf2d846b75ebab586a --> nbb98b5713cdf7db47
+  nb0dc3340cedd6be28["function on_files"]
+  nf2d846b75ebab586a --> nb0dc3340cedd6be28
+  ne064106924155e1af["function project_registry"]
+  nf2d846b75ebab586a --> ne064106924155e1af
+  n3ceed7841ee34d08f["function manifest"]
+  nf2d846b75ebab586a --> n3ceed7841ee34d08f
+  n79fc2210d4bdae163["function render_published_mermaid"]
+  nf2d846b75ebab586a --> n79fc2210d4bdae163
+  n76dbcb3960ad7b280["function replace_diagram"]
+  nf2d846b75ebab586a --> n76dbcb3960ad7b280
+  n2193c4838b26cda90["function build"]
+  nf2d846b75ebab586a --> n2193c4838b26cda90
+  n7481a51d5e11a2d46["function write_manifest"]
+  nf2d846b75ebab586a --> n7481a51d5e11a2d46
+  n717051453c644c48a["function main"]
+  nf2d846b75ebab586a --> n717051453c644c48a
+  nb3b1f6a0a65d2cafc["generate_diagrams.py"]
+  na5b75927c2a15b32c --> nb3b1f6a0a65d2cafc
+  nd7304798696e66381["function tracked_paths"]
+  nb3b1f6a0a65d2cafc --> nd7304798696e66381
+  nc0dd98d123d9b664f["function _node"]
+  nb3b1f6a0a65d2cafc --> nc0dd98d123d9b664f
+  nc891610d6f430e251["function _label"]
+  nb3b1f6a0a65d2cafc --> nc891610d6f430e251
+  nfc5b832edde6f9b88["function _declarations"]
+  nb3b1f6a0a65d2cafc --> nfc5b832edde6f9b88
+  nba0b8b2ee393aaa2d["function repository_ast"]
+  nb3b1f6a0a65d2cafc --> nba0b8b2ee393aaa2d
+  n52abe8a90e82e89dd["function implementation_uml"]
+  nb3b1f6a0a65d2cafc --> n52abe8a90e82e89dd
+  n8d3d6e2248e38f4f6["function generated_assets"]
+  nb3b1f6a0a65d2cafc --> n8d3d6e2248e38f4f6
   n3627e9e02e3c9833b["src/"]
   root --> n3627e9e02e3c9833b
   n0b085be7ec56eb827["controller/"]
