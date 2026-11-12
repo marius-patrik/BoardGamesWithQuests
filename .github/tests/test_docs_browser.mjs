@@ -118,14 +118,13 @@ try {
   // viewer, with compiled local SVGs rather than visible source fences.
   console.log("Checking embedded Markdown Mermaid diagrams");
   await page.goto(base + "/agents/PRD/", { waitUntil: "load" });
-  const embedded = await page["$"]("[data-diagram-viewer]");
-  assert(embedded.length >= 3, "Canonical PRD's Mermaid diagrams were not rendered");
+  const viewerCount = await page.$eval("body", el => el.querySelectorAll("[data-diagram-viewer]").length);
+  assert(viewerCount >= 3, "Canonical PRD's Mermaid diagrams were not rendered");
   assert(await page.$("[data-diagram-viewer] img"), "Embedded Mermaid has no SVG graphic");
-  const first = embedded[0];
-  await first.$('[aria-label="Expand image in modal"]').then(async button => {
-    assert(button, "Embedded Mermaid viewer has no expand control");
-    await button.click();
-  });
+  const first = await page.$("[data-diagram-viewer]");
+  const expand = await first.$('[aria-label="Expand image in modal"]');
+  assert(expand, "Embedded Mermaid viewer has no expand control");
+  await expand.click();
   assert.equal(await page.$eval("dialog.diagram-modal", el => el.open), true);
   await page.keyboard.press("Escape");
   await page.waitForFunction(() => !document.querySelector("dialog.diagram-modal"));
