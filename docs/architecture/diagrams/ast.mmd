@@ -180,6 +180,8 @@ flowchart LR
   nbf32064a6a26ab2df --> n76ec2fd65ee9dad06
   n14cf6130af7812ba5["main-source.yml"]
   nbf32064a6a26ab2df --> n14cf6130af7812ba5
+  n40021a2ee278a2824["native-windows-acceptance.yml"]
+  nbf32064a6a26ab2df --> n40021a2ee278a2824
   nc5611faa7a94a1ca4["open-pr.yml"]
   nbf32064a6a26ab2df --> nc5611faa7a94a1ca4
   n0bb25caaca528da62["preview-docs.yml"]
@@ -290,3 +292,513 @@ flowchart LR
   nb3b1f6a0a65d2cafc --> n52abe8a90e82e89dd
   n8d3d6e2248e38f4f6["function generated_assets"]
   nb3b1f6a0a65d2cafc --> n8d3d6e2248e38f4f6
+  n3627e9e02e3c9833b["src/"]
+  root --> n3627e9e02e3c9833b
+  n0b085be7ec56eb827["controller/"]
+  n3627e9e02e3c9833b --> n0b085be7ec56eb827
+  n9207e8cd1678fe773["__init__.py"]
+  n0b085be7ec56eb827 --> n9207e8cd1678fe773
+  n6bcbf8a919cf8d6b3["controller.py"]
+  n0b085be7ec56eb827 --> n6bcbf8a919cf8d6b3
+  nef0f8ac8f8a744b8c["class GameManagerController"]
+  n6bcbf8a919cf8d6b3 --> nef0f8ac8f8a744b8c
+  n5030672dabfef2d4f["function __init__"]
+  n6bcbf8a919cf8d6b3 --> n5030672dabfef2d4f
+  nac16a5f127e134ff1["function _refresh"]
+  n6bcbf8a919cf8d6b3 --> nac16a5f127e134ff1
+  ne1f908df6017bfbd9["function zrus_vyber"]
+  n6bcbf8a919cf8d6b3 --> ne1f908df6017bfbd9
+  n8ad2f3516b29e2e65["function vyber_pole"]
+  n6bcbf8a919cf8d6b3 --> n8ad2f3516b29e2e65
+  n9e7aaf23eba45a681["function _select_piece"]
+  n6bcbf8a919cf8d6b3 --> n9e7aaf23eba45a681
+  n49dffa83b3abef5e6["function _choose_destination"]
+  n6bcbf8a919cf8d6b3 --> n49dffa83b3abef5e6
+  n01f65dcc159912363["function potvrd_promenu"]
+  n6bcbf8a919cf8d6b3 --> n01f65dcc159912363
+  ncd07223ffaa1e6b37["function _submit"]
+  n6bcbf8a919cf8d6b3 --> ncd07223ffaa1e6b37
+  nd9cd5f2d694f42958["function odstup"]
+  n6bcbf8a919cf8d6b3 --> nd9cd5f2d694f42958
+  n2ac302294d73e4b34["function novou_hru"]
+  n6bcbf8a919cf8d6b3 --> n2ac302294d73e4b34
+  n72eaa99f58d069b21["main.py"]
+  n3627e9e02e3c9833b --> n72eaa99f58d069b21
+  n2bae39494f4918d18["function main"]
+  n72eaa99f58d069b21 --> n2bae39494f4918d18
+  n13d1ed874aaea7bd5["model/"]
+  n3627e9e02e3c9833b --> n13d1ed874aaea7bd5
+  nd991ab777ff53118f["__init__.py"]
+  n13d1ed874aaea7bd5 --> nd991ab777ff53118f
+  n2376e327762eb008b["board.py"]
+  n13d1ed874aaea7bd5 --> n2376e327762eb008b
+  n09488c1c10af999b5["class HerniPlocha"]
+  n2376e327762eb008b --> n09488c1c10af999b5
+  n7bac80da88168173a["function __init__"]
+  n2376e327762eb008b --> n7bac80da88168173a
+  n91ed031ee3d93537c["function kopie"]
+  n2376e327762eb008b --> n91ed031ee3d93537c
+  n807ce1ac73ce2884a["function vrat_obsah"]
+  n2376e327762eb008b --> n807ce1ac73ce2884a
+  n43a05585fbf6d203a["function poloz"]
+  n2376e327762eb008b --> n43a05585fbf6d203a
+  nb4bbb8fe55bbbb1f6["function pole_figurek"]
+  n2376e327762eb008b --> nb4bbb8fe55bbbb1f6
+  n54ea9a88d7bfd2e8c["function kral"]
+  n2376e327762eb008b --> n54ea9a88d7bfd2e8c
+  n3938b9981fdc3d8fb["function odstran"]
+  n2376e327762eb008b --> n3938b9981fdc3d8fb
+  n6e7f19bf243218a17["function presun"]
+  n2376e327762eb008b --> n6e7f19bf243218a17
+  n5180474c4ad789dec["function promenu"]
+  n2376e327762eb008b --> n5180474c4ad789dec
+  ne75a6234a6864956e["function stav"]
+  n2376e327762eb008b --> ne75a6234a6864956e
+  n9b3c9b1ebcab6d991["function uvnitr"]
+  n2376e327762eb008b --> n9b3c9b1ebcab6d991
+  nbdea0abf415d5f75d["function algebraicky"]
+  n2376e327762eb008b --> nbdea0abf415d5f75d
+  n11ca414b1335ca78d["logger.py"]
+  n13d1ed874aaea7bd5 --> n11ca414b1335ca78d
+  n7bc31b75e841a58fe["class GameLogger"]
+  n11ca414b1335ca78d --> n7bc31b75e841a58fe
+  n1eecdab648993d86e["function __init__"]
+  n11ca414b1335ca78d --> n1eecdab648993d86e
+  nf1f254ce0043f1720["function predchozi_tah"]
+  n11ca414b1335ca78d --> nf1f254ce0043f1720
+  n5def132b734420303["function zaznamenej"]
+  n11ca414b1335ca78d --> n5def132b734420303
+  n3430cbcb530bef83e["function zapis"]
+  n11ca414b1335ca78d --> n3430cbcb530bef83e
+  n5c9d73ec945cae954["function uloz_historii"]
+  n11ca414b1335ca78d --> n5c9d73ec945cae954
+  ned86115356e93d379["manager.py"]
+  n13d1ed874aaea7bd5 --> ned86115356e93d379
+  n5b04953e93bcc6ee9["class VysledekAkce"]
+  ned86115356e93d379 --> n5b04953e93bcc6ee9
+  ndb7d67e15565dfd26["class GameManager"]
+  ned86115356e93d379 --> ndb7d67e15565dfd26
+  na72878b1043411c2c["function __init__"]
+  ned86115356e93d379 --> na72878b1043411c2c
+  nd45bb9ae4ac2b0cac["function aktivni_hrac"]
+  ned86115356e93d379 --> nd45bb9ae4ac2b0cac
+  n65f567fb4c1c747f5["function mozne_tahy"]
+  ned86115356e93d379 --> n65f567fb4c1c747f5
+  n97f151fd6a36d34e0["function proved_akci"]
+  ned86115356e93d379 --> n97f151fd6a36d34e0
+  nb7bf0d15ebb592188["function zkus_ulozit"]
+  ned86115356e93d379 --> nb7bf0d15ebb592188
+  n2c24c2cfaa6fdea1e["function reset"]
+  ned86115356e93d379 --> n2c24c2cfaa6fdea1e
+  ne62b57ae0116d8998["move.py"]
+  n13d1ed874aaea7bd5 --> ne62b57ae0116d8998
+  n15133e5d4952ffd18["class Tah"]
+  ne62b57ae0116d8998 --> n15133e5d4952ffd18
+  n960cf64cdad26e87e["function __post_init__"]
+  ne62b57ae0116d8998 --> n960cf64cdad26e87e
+  n5157e7e8f8ef4928d["class Akce"]
+  ne62b57ae0116d8998 --> n5157e7e8f8ef4928d
+  n319badd7d7d1ac899["function move"]
+  ne62b57ae0116d8998 --> n319badd7d7d1ac899
+  n25ff03239bd1058e5["function resign"]
+  ne62b57ae0116d8998 --> n25ff03239bd1058e5
+  n8c05913af93d6853a["piece.py"]
+  n13d1ed874aaea7bd5 --> n8c05913af93d6853a
+  n53876f9b8f0cbcf48["class Figurka"]
+  n8c05913af93d6853a --> n53876f9b8f0cbcf48
+  nd6f38084a22af3ab6["function __post_init__"]
+  n8c05913af93d6853a --> nd6f38084a22af3ab6
+  n39d041f4440c8ab2f["class Kral"]
+  n8c05913af93d6853a --> n39d041f4440c8ab2f
+  nf73115bc7bb4decae["class Dama"]
+  n8c05913af93d6853a --> nf73115bc7bb4decae
+  n9f5427a5565f020ae["class Vez"]
+  n8c05913af93d6853a --> n9f5427a5565f020ae
+  n539bf07d30254f101["class Strelec"]
+  n8c05913af93d6853a --> n539bf07d30254f101
+  n791b35913c3942373["class Kun"]
+  n8c05913af93d6853a --> n791b35913c3942373
+  n10610ac7eade8a330["class Pesak"]
+  n8c05913af93d6853a --> n10610ac7eade8a330
+  nb8d5a502c0027f595["player.py"]
+  n13d1ed874aaea7bd5 --> nb8d5a502c0027f595
+  n2f41b2958ded0b89c["class Hrac"]
+  nb8d5a502c0027f595 --> n2f41b2958ded0b89c
+  n7718d8e09f2e900ef["function __post_init__"]
+  nb8d5a502c0027f595 --> n7718d8e09f2e900ef
+  n52df7389ae253926d["quest.py"]
+  n13d1ed874aaea7bd5 --> n52df7389ae253926d
+  nd7a0f443c8dd519a7["class Quest"]
+  n52df7389ae253926d --> nd7a0f443c8dd519a7
+  naaef9ee705cb1edef["class QuestManager"]
+  n52df7389ae253926d --> naaef9ee705cb1edef
+  n5ee19e7677a2c1d19["function __init__"]
+  n52df7389ae253926d --> n5ee19e7677a2c1d19
+  n586ca8ef7b8404612["function pridej_odmeny"]
+  n52df7389ae253926d --> n586ca8ef7b8404612
+  nf27bd72f9bcea2378["function dokoncil"]
+  n52df7389ae253926d --> nf27bd72f9bcea2378
+  nf275a0eaec1d6704c["function reset_dokonceni"]
+  n52df7389ae253926d --> nf275a0eaec1d6704c
+  nb2ec6ac2fbec0c0a5["rules/"]
+  n13d1ed874aaea7bd5 --> nb2ec6ac2fbec0c0a5
+  n56924f5af9d79e8e6["__init__.py"]
+  nb2ec6ac2fbec0c0a5 --> n56924f5af9d79e8e6
+  nf6fa477907e7c1ecc["base.py"]
+  nb2ec6ac2fbec0c0a5 --> nf6fa477907e7c1ecc
+  nfdd3c920bf72f363a["class RuleContext"]
+  nf6fa477907e7c1ecc --> nfdd3c920bf72f363a
+  nc6510363096e3d69c["function vychozi_pole"]
+  nf6fa477907e7c1ecc --> nc6510363096e3d69c
+  nf6402823b4558896d["class Rule"]
+  nf6fa477907e7c1ecc --> nf6402823b4558896d
+  n63bcb1460026bb20b["function kandidati"]
+  nf6fa477907e7c1ecc --> n63bcb1460026bb20b
+  n3fbeb5c7f027c3141["function povoleno"]
+  nf6fa477907e7c1ecc --> n3fbeb5c7f027c3141
+  n4ab4d32719faeaf6a["function priprav"]
+  nf6fa477907e7c1ecc --> n4ab4d32719faeaf6a
+  n316c1ecf484611ce8["function nastalo"]
+  nf6fa477907e7c1ecc --> n316c1ecf484611ce8
+  nb0037d2eaffae2039["movement.py"]
+  nb2ec6ac2fbec0c0a5 --> nb0037d2eaffae2039
+  nd32d114cdfad63378["class TurnOwnershipRule"]
+  nb0037d2eaffae2039 --> nd32d114cdfad63378
+  n33000d9fba798ce83["function povoleno"]
+  nb0037d2eaffae2039 --> n33000d9fba798ce83
+  na9be67eb6337b0b89["class BasicMovementRule"]
+  nb0037d2eaffae2039 --> na9be67eb6337b0b89
+  n925185059d5f86380["function kandidati"]
+  nb0037d2eaffae2039 --> n925185059d5f86380
+  n6a3e4f438e6b9ca79["class KingCaptureRule"]
+  nb0037d2eaffae2039 --> n6a3e4f438e6b9ca79
+  neb4a4fdb7ef5e4600["function povoleno"]
+  nb0037d2eaffae2039 --> neb4a4fdb7ef5e4600
+  n32147352f61124f75["class KingSafetyRule"]
+  nb0037d2eaffae2039 --> n32147352f61124f75
+  nb10ccc678a1368384["function povoleno"]
+  nb0037d2eaffae2039 --> nb10ccc678a1368384
+  ne068ce704957d1bff["outcomes.py"]
+  nb2ec6ac2fbec0c0a5 --> ne068ce704957d1bff
+  n3600cfd7422751b97["class CheckRule"]
+  ne068ce704957d1bff --> n3600cfd7422751b97
+  ne8ccb717f1fd9295f["function nastalo"]
+  ne068ce704957d1bff --> ne8ccb717f1fd9295f
+  ne5ca7fe533d960e4a["class CheckmateRule"]
+  ne068ce704957d1bff --> ne5ca7fe533d960e4a
+  n7255a13b57c44e7a6["function nastalo"]
+  ne068ce704957d1bff --> n7255a13b57c44e7a6
+  n63052f63c9f95a8c4["class StalemateRule"]
+  ne068ce704957d1bff --> n63052f63c9f95a8c4
+  n0f1dae4ff4fee4a21["function nastalo"]
+  ne068ce704957d1bff --> n0f1dae4ff4fee4a21
+  nd40735da696c1ec1c["class ResignationRule"]
+  ne068ce704957d1bff --> nd40735da696c1ec1c
+  nc9451a8eb2d4b7235["function povoleno"]
+  ne068ce704957d1bff --> nc9451a8eb2d4b7235
+  n997c3ebaeaee35ff1["quests.py"]
+  nb2ec6ac2fbec0c0a5 --> n997c3ebaeaee35ff1
+  n5d250996cf94859c8["class CaptureRule"]
+  n997c3ebaeaee35ff1 --> n5d250996cf94859c8
+  nb0fdf5a5453cbad68["function nastalo"]
+  n997c3ebaeaee35ff1 --> nb0fdf5a5453cbad68
+  n89261656072d7fba2["special.py"]
+  nb2ec6ac2fbec0c0a5 --> n89261656072d7fba2
+  n16cc79cb84b92a23d["class CastlingRule"]
+  n89261656072d7fba2 --> n16cc79cb84b92a23d
+  na8ea2bf5062d1b3c6["function kandidati"]
+  n89261656072d7fba2 --> na8ea2bf5062d1b3c6
+  n9858366c38c794fc6["function priprav"]
+  n89261656072d7fba2 --> n9858366c38c794fc6
+  n39c21405e69aaf566["function nastalo"]
+  n89261656072d7fba2 --> n39c21405e69aaf566
+  ndd2c736b9f8466ff0["class EnPassantRule"]
+  n89261656072d7fba2 --> ndd2c736b9f8466ff0
+  n3b5012905e2cc4ce2["function kandidati"]
+  n89261656072d7fba2 --> n3b5012905e2cc4ce2
+  n5ea2e7fe5baf22f29["function priprav"]
+  n89261656072d7fba2 --> n5ea2e7fe5baf22f29
+  n34760f24c6ddb14cf["function nastalo"]
+  n89261656072d7fba2 --> n34760f24c6ddb14cf
+  n35d45fd9eda94f621["class PromotionRule"]
+  n89261656072d7fba2 --> n35d45fd9eda94f621
+  n6465212194a58a23f["function kandidati"]
+  n89261656072d7fba2 --> n6465212194a58a23f
+  n7239a7241199c82a3["function priprav"]
+  n89261656072d7fba2 --> n7239a7241199c82a3
+  na7a6cc7026f3a266f["function nastalo"]
+  n89261656072d7fba2 --> na7a6cc7026f3a266f
+  n01fdb8f8d062fa02b["user.py"]
+  n13d1ed874aaea7bd5 --> n01fdb8f8d062fa02b
+  n6248c40ccced8e888["class Uzivatel"]
+  n01fdb8f8d062fa02b --> n6248c40ccced8e888
+  n4f455e34f9627dca5["class UserManager"]
+  n01fdb8f8d062fa02b --> n4f455e34f9627dca5
+  n5e747f5e50022ad42["function _fingerprint"]
+  n01fdb8f8d062fa02b --> n5e747f5e50022ad42
+  n27a499c7f3ab55e98["function __init__"]
+  n01fdb8f8d062fa02b --> n27a499c7f3ab55e98
+  ne4c3acbcf32c8bb5d["function _read_profiles"]
+  n01fdb8f8d062fa02b --> ne4c3acbcf32c8bb5d
+  nb584841484fc213d0["function nacti_uzivatele"]
+  n01fdb8f8d062fa02b --> nb584841484fc213d0
+  n37416ad437caede4d["function _recover_for_retry"]
+  n01fdb8f8d062fa02b --> n37416ad437caede4d
+  n4d0e0a605a4d4cf30["function vytvor_uzivatele"]
+  n01fdb8f8d062fa02b --> n4d0e0a605a4d4cf30
+  nf2f0a57aa6dcfc0ba["function pridej_xp"]
+  n01fdb8f8d062fa02b --> nf2f0a57aa6dcfc0ba
+  na10f9ebb78b396228["function uloz_uzivatele"]
+  n01fdb8f8d062fa02b --> na10f9ebb78b396228
+  n3cde144af3ab14599["function data_directory"]
+  n01fdb8f8d062fa02b --> n3cde144af3ab14599
+  nf835a49ff8f2ae40d["function atomic_json"]
+  n01fdb8f8d062fa02b --> nf835a49ff8f2ae40d
+  n48d95888c2ed456ed["function profile_write_lock"]
+  n01fdb8f8d062fa02b --> n48d95888c2ed456ed
+  n9d8dde41af2734ac7["function normalize_username"]
+  n01fdb8f8d062fa02b --> n9d8dde41af2734ac7
+  n273d316a4935bfc1a["validator.py"]
+  n13d1ed874aaea7bd5 --> n273d316a4935bfc1a
+  nb94b8ebd985a99107["class IllegalAction"]
+  n273d316a4935bfc1a --> nb94b8ebd985a99107
+  ncd1e59e00217b959f["class PripravenyTah"]
+  n273d316a4935bfc1a --> ncd1e59e00217b959f
+  n48b95f55cff65666b["class RevizorTahu"]
+  n273d316a4935bfc1a --> n48b95f55cff65666b
+  nf312db7c6666ac357["function __init__"]
+  n273d316a4935bfc1a --> nf312db7c6666ac357
+  n28a3e9f3f971d3bf7["function ohrozena_pole"]
+  n273d316a4935bfc1a --> n28a3e9f3f971d3bf7
+  n0de944bb54a604844["function v_sachu"]
+  n273d316a4935bfc1a --> n0de944bb54a604844
+  nf68b9b801520fdc67["function _context"]
+  n273d316a4935bfc1a --> nf68b9b801520fdc67
+  n4fd8ef35045852e6a["function _candidates"]
+  n273d316a4935bfc1a --> n4fd8ef35045852e6a
+  n190cd15fe3b22bb51["function _castle_safe_transit"]
+  n273d316a4935bfc1a --> n190cd15fe3b22bb51
+  n830fde14bdf658d18["function _stage"]
+  n273d316a4935bfc1a --> n830fde14bdf658d18
+  na0c1725bb84b3a373["function mozne_tahy"]
+  n273d316a4935bfc1a --> na0c1725bb84b3a373
+  naded7e9c063dc3935["function vyhodnot"]
+  n273d316a4935bfc1a --> naded7e9c063dc3935
+  n19674d186673a22e3["view/"]
+  n3627e9e02e3c9833b --> n19674d186673a22e3
+  nbc6a2f1a8e8ef068d["__init__.py"]
+  n19674d186673a22e3 --> nbc6a2f1a8e8ef068d
+  n676d3424d0c583c67["app.py"]
+  n19674d186673a22e3 --> n676d3424d0c583c67
+  n0fca1e5772a816efd["class BoardGamesApplication"]
+  n676d3424d0c583c67 --> n0fca1e5772a816efd
+  nbf071c03649d8c64a["function __init__"]
+  n676d3424d0c583c67 --> nbf071c03649d8c64a
+  nab57d0b5f9ccc8bf5["function _clear"]
+  n676d3424d0c583c67 --> nab57d0b5f9ccc8bf5
+  na7f8273fab391f86e["function show_setup"]
+  n676d3424d0c583c67 --> na7f8273fab391f86e
+  n4e40eab0c6af14aef["function create_profile"]
+  n676d3424d0c583c67 --> n4e40eab0c6af14aef
+  n66662ebcfc15904d6["function _start_match_shortcut"]
+  n676d3424d0c583c67 --> n66662ebcfc15904d6
+  n54ceb6d67885a971d["function start_match"]
+  n676d3424d0c583c67 --> n54ceb6d67885a971d
+  n186fd6eb82298a843["function show_game"]
+  n676d3424d0c583c67 --> n186fd6eb82298a843
+  n6830e647afbc0dd26["function _build_game_header"]
+  n676d3424d0c583c67 --> n6830e647afbc0dd26
+  n3f95c119ca61bf922["function _build_game_toolbar"]
+  n676d3424d0c583c67 --> n3f95c119ca61bf922
+  n8bf06b2a4256196f6["function _build_game_content"]
+  n676d3424d0c583c67 --> n8bf06b2a4256196f6
+  nb41f228db77da46ec["function _build_game_history"]
+  n676d3424d0c583c67 --> nb41f228db77da46ec
+  n4ca1e96db397b7662["function _build_game_persistence"]
+  n676d3424d0c583c67 --> n4ca1e96db397b7662
+  n752d5a13a8aa1055d["function on_square"]
+  n676d3424d0c583c67 --> n752d5a13a8aa1055d
+  n7cf6111c01df7525c["function ask_promotion"]
+  n676d3424d0c583c67 --> n7cf6111c01df7525c
+  n660eb8da1d31c47c0["function _resign_shortcut"]
+  n676d3424d0c583c67 --> n660eb8da1d31c47c0
+  n4a1b942cb707edc08["function resign"]
+  n676d3424d0c583c67 --> n4a1b942cb707edc08
+  nc61acffe391826d1c["function new_game"]
+  n676d3424d0c583c67 --> nc61acffe391826d1c
+  n1bbe9c8aa298bd27b["function players_setup"]
+  n676d3424d0c583c67 --> n1bbe9c8aa298bd27b
+  n7777a68c8670098ac["function retry_profiles"]
+  n676d3424d0c583c67 --> n7777a68c8670098ac
+  n27b62e99d99b8d293["function retry_history"]
+  n676d3424d0c583c67 --> n27b62e99d99b8d293
+  n8e86b051d23770ab2["function refresh"]
+  n676d3424d0c583c67 --> n8e86b051d23770ab2
+  n0c07ac64616c39c9f["function _render_turn"]
+  n676d3424d0c583c67 --> n0c07ac64616c39c9f
+  n42372a67b4e3e126e["function _render_history"]
+  n676d3424d0c583c67 --> n42372a67b4e3e126e
+  n0f04b2b6f36369d02["function _render_persistence_status"]
+  n676d3424d0c583c67 --> n0f04b2b6f36369d02
+  nab3bdaeef768cce0d["function run"]
+  n676d3424d0c583c67 --> nab3bdaeef768cce0d
+  nea16a24d8d5871483["game.py"]
+  n19674d186673a22e3 --> nea16a24d8d5871483
+  n52c26dedb7abaaf93["class GameView"]
+  nea16a24d8d5871483 --> n52c26dedb7abaaf93
+  n0090ae6a9475f33d2["function __init__"]
+  nea16a24d8d5871483 --> n0090ae6a9475f33d2
+  nc04ab75d930efc022["function _activate"]
+  nea16a24d8d5871483 --> nc04ab75d930efc022
+  n996b2aa43fba85877["function _focus"]
+  nea16a24d8d5871483 --> n996b2aa43fba85877
+  n50085f7ee81c09c8b["function vykresli_desku"]
+  nea16a24d8d5871483 --> n50085f7ee81c09c8b
+  nc74d2ba1d9bd3ab17["function zvyrazni_tahy"]
+  nea16a24d8d5871483 --> nc74d2ba1d9bd3ab17
+  n7350f5d3409837203["panel.py"]
+  n19674d186673a22e3 --> n7350f5d3409837203
+  n15b7a642cdbde3be6["class HracGameView"]
+  n7350f5d3409837203 --> n15b7a642cdbde3be6
+  n367fdc83a0d6e2b6f["function __init__"]
+  n7350f5d3409837203 --> n367fdc83a0d6e2b6f
+  nd7ea4acee46116d14["function zobraz_hrace"]
+  n7350f5d3409837203 --> nd7ea4acee46116d14
+  n37137ca86c8adcdc6["function zobraz_questy"]
+  n7350f5d3409837203 --> n37137ca86c8adcdc6
+  n470d3f6fe1322a4eb["tests/"]
+  root --> n470d3f6fe1322a4eb
+  n5f0c681afb3b05d61["conftest.py"]
+  n470d3f6fe1322a4eb --> n5f0c681afb3b05d61
+  ncf7dcf2b2ce4cf953["test_chess.py"]
+  n470d3f6fe1322a4eb --> ncf7dcf2b2ce4cf953
+  ndb4380aa8e7ba3fc7["function manager"]
+  ncf7dcf2b2ce4cf953 --> ndb4380aa8e7ba3fc7
+  n4f2fa1d9d84a0192d["function play"]
+  ncf7dcf2b2ce4cf953 --> n4f2fa1d9d84a0192d
+  nbfdf174e4705fa955["function empty"]
+  ncf7dcf2b2ce4cf953 --> nbfdf174e4705fa955
+  na6f199bc4b2f6e1a2["function test_initial_position_and_moves"]
+  ncf7dcf2b2ce4cf953 --> na6f199bc4b2f6e1a2
+  n2196ffea828c0421e["function test_side_effect_free_preview_and_rejected_move"]
+  ncf7dcf2b2ce4cf953 --> n2196ffea828c0421e
+  n8bd14467ce92ba136["function test_fools_mate_and_quest_attribution"]
+  ncf7dcf2b2ce4cf953 --> n8bd14467ce92ba136
+  nd82abd39e1b365b41["function test_en_passant_and_double_quest"]
+  ncf7dcf2b2ce4cf953 --> nd82abd39e1b365b41
+  nf1d122e44f0fdbeeb["function test_en_passant_expires"]
+  ncf7dcf2b2ce4cf953 --> nf1d122e44f0fdbeeb
+  n67f0bdc0065ec909d["function test_en_passant_discovered_attack_is_illegal"]
+  ncf7dcf2b2ce4cf953 --> n67f0bdc0065ec909d
+  n982b94e21290a4e0d["function test_kingside_and_queenside_castle"]
+  ncf7dcf2b2ce4cf953 --> n982b94e21290a4e0d
+  nd66089200d8772b33["function test_castling_through_check_rejected"]
+  ncf7dcf2b2ce4cf953 --> nd66089200d8772b33
+  ne5587d1b029f861ea["function test_king_capture_never_allowed"]
+  ncf7dcf2b2ce4cf953 --> ne5587d1b029f861ea
+  nfe4029a7bc74f4e82["function test_pinned_piece_must_preserve_king"]
+  ncf7dcf2b2ce4cf953 --> nfe4029a7bc74f4e82
+  n5a7dccf426a42df75["function test_four_promotion_choices"]
+  ncf7dcf2b2ce4cf953 --> n5a7dccf426a42df75
+  n7f00a573b8514c15d["function test_stalemate"]
+  ncf7dcf2b2ce4cf953 --> n7f00a573b8514c15d
+  n8830f81aab08fef51["function test_resignation_has_no_move_coordinates"]
+  ncf7dcf2b2ce4cf953 --> n8830f81aab08fef51
+  n67652bb2ecaa31829["function test_vector_candidates_for_each_piece"]
+  ncf7dcf2b2ce4cf953 --> n67652bb2ecaa31829
+  n8836dd8b90510b9d9["function test_quests_are_once_per_actor_per_match_and_reset"]
+  ncf7dcf2b2ce4cf953 --> n8836dd8b90510b9d9
+  nf3cc912fa6250b1f4["function test_pawn_attack_squares_distinct_from_push"]
+  ncf7dcf2b2ce4cf953 --> nf3cc912fa6250b1f4
+  nf0a871ed3b7eccdd2["function test_king_unmoved_and_rook_moved_back_cannot_castle"]
+  ncf7dcf2b2ce4cf953 --> nf0a871ed3b7eccdd2
+  n17c39443921c1b412["function test_capture_promotion_commits_once_and_awards_both_quests"]
+  ncf7dcf2b2ce4cf953 --> n17c39443921c1b412
+  n7c43b4e759886467b["function test_internal_staging_bug_is_not_misreported_as_illegal_user_move"]
+  ncf7dcf2b2ce4cf953 --> n7c43b4e759886467b
+  ndb28d95e421fc1680["function test_checked_king_has_only_safe_escape_squares"]
+  ncf7dcf2b2ce4cf953 --> ndb28d95e421fc1680
+  n1482a7182f9048391["function test_queenside_castle_through_attacked_transit_is_rejected"]
+  ncf7dcf2b2ce4cf953 --> n1482a7182f9048391
+  n804246f9868ab99d9["function test_castling_while_currently_checked_is_rejected"]
+  ncf7dcf2b2ce4cf953 --> n804246f9868ab99d9
+  n25160c37db4adc72c["test_gui.py"]
+  n470d3f6fe1322a4eb --> n25160c37db4adc72c
+  nd72567c1d537bf5f6["function application"]
+  n25160c37db4adc72c --> nd72567c1d537bf5f6
+  ndf0d0eef95c84553a["function test_setup_and_button_board_move"]
+  n25160c37db4adc72c --> ndf0d0eef95c84553a
+  n6b1d7551b1c4a834c["function test_keyboard_board_focus_and_cancel_selection"]
+  n25160c37db4adc72c --> n6b1d7551b1c4a834c
+  nbdc4d5712f284c690["function key"]
+  n25160c37db4adc72c --> nbdc4d5712f284c690
+  n5ed55212968433ff2["function test_terminal_display"]
+  n25160c37db4adc72c --> n5ed55212968433ff2
+  n86afe12581bda9168["function test_real_promotion_dialog_commits_only_after_choice"]
+  n25160c37db4adc72c --> n86afe12581bda9168
+  n89a6028c4f7cf116e["function test_real_gui_save_error_and_retry_feedback"]
+  n25160c37db4adc72c --> n89a6028c4f7cf116e
+  n360bee58b37f1527a["function test_real_gui_capture_quest_and_new_match_preserves_xp"]
+  n25160c37db4adc72c --> n360bee58b37f1527a
+  n20cd800079b8c26dd["function test_promotion_cancel_does_not_commit_and_can_be_reopened"]
+  n25160c37db4adc72c --> n20cd800079b8c26dd
+  nfdc92f968918312e1["function test_profile_recovery_retry_refreshes_setup_controls"]
+  n25160c37db4adc72c --> nfdc92f968918312e1
+  n8c587d67d40158565["test_persistence.py"]
+  n470d3f6fe1322a4eb --> n8c587d67d40158565
+  n1cf2a7cd1e1781793["function users"]
+  n8c587d67d40158565 --> n1cf2a7cd1e1781793
+  n99c8bb68dbca40e05["function test_normalization_and_reload"]
+  n8c587d67d40158565 --> n99c8bb68dbca40e05
+  neee314f775888dbc1["function test_unique_chronological_match_files_and_resign"]
+  n8c587d67d40158565 --> neee314f775888dbc1
+  n444683660f585f22c["function test_profiles_write_failure_and_retry_independent_from_history"]
+  n8c587d67d40158565 --> n444683660f585f22c
+  n8f6b4b6b268d1f976["function test_history_save_failure_and_retry"]
+  n8c587d67d40158565 --> n8f6b4b6b268d1f976
+  nf1dec0d46fa44129c["function test_corrupt_profiles_preserved"]
+  n8c587d67d40158565 --> nf1dec0d46fa44129c
+  n22323eb59e3bc8383["function test_corrupt_match_file_preserved"]
+  n8c587d67d40158565 --> n22323eb59e3bc8383
+  na828c5c5f9e0eafcc["function test_profile_and_history_save_status_independent_on_accepted_move"]
+  n8c587d67d40158565 --> na828c5c5f9e0eafcc
+  n8914f524c9b92bdc6["function test_damaged_profiles_can_be_moved_aside_then_retried"]
+  n8c587d67d40158565 --> n8914f524c9b92bdc6
+  n216cf2b8e49a13263["function test_repaired_profile_file_merges_distinct_users_without_dropping_live_state"]
+  n8c587d67d40158565 --> n216cf2b8e49a13263
+  n13f8abc8ebf214b0a["function test_repaired_profile_conflict_never_silently_overwrites_disk"]
+  n8c587d67d40158565 --> n13f8abc8ebf214b0a
+  na4f915c0a1515fbfc["function test_damaged_match_file_can_be_moved_aside_then_retried"]
+  n8c587d67d40158565 --> na4f915c0a1515fbfc
+  n4c408116d4570c2ad["function test_repaired_match_file_retries_only_when_history_is_consistent"]
+  n8c587d67d40158565 --> n4c408116d4570c2ad
+  nc991b48138c9bf16b["function test_two_instances_refuse_stale_profile_overwrite"]
+  n8c587d67d40158565 --> nc991b48138c9bf16b
+  nf44940810ed5d1f25["function test_two_instances_cannot_create_overlapping_stale_profiles"]
+  n8c587d67d40158565 --> nf44940810ed5d1f25
+  n2031ddc61204c5a15["windows_native_acceptance.py"]
+  n470d3f6fe1322a4eb --> n2031ddc61204c5a15
+  n3a7be9b11cc00e9b7["function capture"]
+  n2031ddc61204c5a15 --> n3a7be9b11cc00e9b7
+  neea2a04502daf97e1["function _segments"]
+  n2031ddc61204c5a15 --> neea2a04502daf97e1
+  n97c318895c4d032a6["function board_centers"]
+  n2031ddc61204c5a15 --> n97c318895c4d032a6
+  n15d0ff7e2f3fa49ff["function wait_for_window"]
+  n2031ddc61204c5a15 --> n15d0ff7e2f3fa49ff
+  ncbbdca5768ffe8577["function wait_for_board"]
+  n2031ddc61204c5a15 --> ncbbdca5768ffe8577
+  n75f448e5fe4fede29["function stop_process_tree"]
+  n2031ddc61204c5a15 --> n75f448e5fe4fede29
+  nc4388feac8c1803e1["function wait_for_named_window"]
+  n2031ddc61204c5a15 --> nc4388feac8c1803e1
+  n57ec6dd88fc71edf6["function assert_dialog_closed"]
+  n2031ddc61204c5a15 --> n57ec6dd88fc71edf6
+  neecb87a105e1f9f23["function read_json"]
+  n2031ddc61204c5a15 --> neecb87a105e1f9f23
+  n9298439d958af1ca5["function click_square"]
+  n2031ddc61204c5a15 --> n9298439d958af1ca5
+  n478c27e2cfedbc3d3["function external_gameplay"]
+  n2031ddc61204c5a15 --> n478c27e2cfedbc3d3
+  nb514728db3c438b08["function main"]
+  n2031ddc61204c5a15 --> nb514728db3c438b08
