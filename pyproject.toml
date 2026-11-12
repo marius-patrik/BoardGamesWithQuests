@@ -5,27 +5,21 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "boardgameswithquests"
 version = "1.0.0rc1"
-description = "Offline two-player Chess with quests and persistent XP"
+description = "BoardGamesWithQuests documentation and governance foundation"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
 readme = "README.md"
 
-[project.gui-scripts]
-boardgameswithquests = "main:main"
-
+# The application-specific package layout and entry point live on the
+# separate application scaffold/implementation branches. This foundation
+# intentionally has no distributable Python modules.
 [tool.setuptools]
-package-dir = {"" = "src"}
-py-modules = ["main"]
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["model*", "controller*", "view*"]
-
+py-modules = []
+packages = []
 
 [tool.pytest.ini_options]
-testpaths = ["tests", ".github/tests"]
+testpaths = [".github/tests"]
 addopts = "-ra"
-markers = ["gui: real Tkinter interactive acceptance"]
 
 [tool.black]
 line-length = 100
