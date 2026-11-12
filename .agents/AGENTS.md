@@ -113,7 +113,7 @@ flowchart LR
 | Application description, behavior, classes, diagrams, file map, data shapes | `.agents/PRD.md` | `README.md` → `.agents/PRD.md` |
 | Agent context, goal, criteria, task status, operating rules, handoffs | `.agents/AGENTS.md` | `CONTRIBUTING.md` → `.agents/AGENTS.md` |
 
-The root entries are symlinks to canonical documents, not duplicate editable copies. Any repository documentation generator, linter, packaging step, or publishing workflow respects these ownership boundaries. Other project-specific agent instructions apply only where they are consistent with the approved PRD and authorized task.
+The root entries are symlinks to canonical documents, not duplicate editable copies. Repository documentation generators, linters and packaging respect these ownership boundaries. Other project-specific agent instructions apply only where they are consistent with the approved PRD and authorized task.
 
 The PRD contains the **class UML**, **action/quest flow**, and **19-module dependency map** as embedded Mermaid diagrams. Update those diagrams when the implementation changes under an approved requirement; this plan links to them rather than repeating product definitions or diagrams.
 
@@ -170,3 +170,7 @@ Record the before/after SHA, modified files, actually executed verification comm
 - Update **Progress and handoff** after every meaningful working session, including blockers, exact refs, executed verification, and the next owner/action.
 - Keep the file concise. Link to PRs, issues, logs, and tests rather than pasting long investigation transcripts or duplicating PRD material.
 - When an agent changes this document, include the update with its implementation commit or PR so the context and work remain synchronized.
+
+### 2026-11-12 — Retire website deployment from the cleanroom product
+
+The Chess v1 application is an offline Python/Tkinter desktop product. The documentation preview, main-site build and GitHub Pages publishing workflows were removed from `v1-cleanroom`, together with their artifact-collection/assembly scripts and publisher-only behavioral tests. Canonical Markdown, source-derived architecture diagrams, and the separate `governance-docs` diagram freshness check remain. The obsolete `preview` required check and Pages build setting were removed from `repo.dfconfig`; branch protection in GitHub Settings must be checked independently because the configuration file does not itself change live protection. The Windows native acceptance workflow, DarkFactory Python matrix, formatter, and protected release-source policy remain unchanged.
