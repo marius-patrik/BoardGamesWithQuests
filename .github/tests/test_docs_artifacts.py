@@ -1,4 +1,10 @@
-"""Black-box CLI acceptance of artifact-backed documentation publication."""
+"""Black-box acceptance for GitHub Actions documentation artifact collection.
+
+An executable synthetic ``gh`` CLI models PR heads, workflow runs and uploaded
+artifacts. The actual collector/assembler subprocesses must publish only
+successful, current, same-repository results; reject stale/spoofed/failed builds;
+and never report success on a broken GitHub API response.
+"""
 
 from __future__ import annotations
 
@@ -12,7 +18,7 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "collect_docs_artifacts.py"
 ASSEMBLER = Path(__file__).resolve().parents[1] / "scripts" / "assemble_docs.py"
-REPO = "marius-patrik/BoardGamesWithQuests"
+REPO = "example/documentation"
 GOOD = "a" * 40
 STALE = "b" * 40
 

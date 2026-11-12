@@ -46,7 +46,6 @@ def test_every_tracked_diagram_page_publishes_rendered_local_svg():
     site = ROOT / "site"
     assert (site / "index.html").is_file(), "Build the documentation before artifact checks"
     pages = builder.pages_for(ROOT)
-    rendered_count = 0
     for original, target, body in pages:
         expected = body.count('<pre class="mermaid">')
         if not expected:
@@ -72,7 +71,3 @@ def test_every_tracked_diagram_page_publishes_rendered_local_svg():
             assert path.is_file(), f"Missing SVG diagram asset for {original}"
             svg = path.read_text(encoding="utf-8")
             assert "<svg" in svg and "</svg>" in svg
-        rendered_count += len(sources)
-    # No requirement that a particular PRD or diagram exists. Synthetic parser
-    # tests above still enforce rendering behavior in a source tree without any.
-    assert rendered_count >= 0
