@@ -1,5 +1,27 @@
 classDiagram
 direction LR
+  class ndba5dbde851f3153e["GameManagerController"]
+  ndba5dbde851f3153e : +__init__()
+  ndba5dbde851f3153e : +_refresh()
+  ndba5dbde851f3153e : +zrus_vyber()
+  ndba5dbde851f3153e : +vyber_pole()
+  ndba5dbde851f3153e : +_select_piece()
+  ndba5dbde851f3153e : +_choose_destination()
+  ndba5dbde851f3153e : +potvrd_promenu()
+  ndba5dbde851f3153e : +_submit()
+  ndba5dbde851f3153e : +odstup()
+  ndba5dbde851f3153e : +novou_hru()
+  class n2c4d8724780ce41d2["HerniPlocha"]
+  n2c4d8724780ce41d2 : +__init__()
+  n2c4d8724780ce41d2 : +kopie()
+  n2c4d8724780ce41d2 : +vrat_obsah()
+  n2c4d8724780ce41d2 : +poloz()
+  n2c4d8724780ce41d2 : +pole_figurek()
+  n2c4d8724780ce41d2 : +kral()
+  n2c4d8724780ce41d2 : +odstran()
+  n2c4d8724780ce41d2 : +presun()
+  n2c4d8724780ce41d2 : +promenu()
+  n2c4d8724780ce41d2 : +stav()
   class n9418e109b1be6abb2["Dama"]
   n9418e109b1be6abb2 : +__init__()
   class n0c0944b4c3c7e3f34["Figurka"]
@@ -21,9 +43,195 @@ direction LR
   nd72912d37909b4533 : +__init__()
   class n05a0517a13e7731de["Vez"]
   n05a0517a13e7731de : +__init__()
-  n0c0944b4c3c7e3f34 <|-- n9418e109b1be6abb2
-  n0c0944b4c3c7e3f34 <|-- ne2e50ac6f3f2c1c85
-  n0c0944b4c3c7e3f34 <|-- n96d04f4e071afc1f8
-  n0c0944b4c3c7e3f34 <|-- na3cdf808c99ccd235
-  n0c0944b4c3c7e3f34 <|-- nd72912d37909b4533
-  n0c0944b4c3c7e3f34 <|-- n05a0517a13e7731de
+  class n0850fca336210133b["GameLogger"]
+  n0850fca336210133b : +__init__()
+  n0850fca336210133b : +predchozi_tah()
+  n0850fca336210133b : +zaznamenej()
+  n0850fca336210133b : +zapis()
+  n0850fca336210133b : +uloz_historii()
+  class nd83aee9292df79329["GameManager"]
+  nd83aee9292df79329 : +__init__()
+  nd83aee9292df79329 : +aktivni_hrac()
+  nd83aee9292df79329 : +mozne_tahy()
+  nd83aee9292df79329 : +proved_akci()
+  nd83aee9292df79329 : +zkus_ulozit()
+  nd83aee9292df79329 : +reset()
+  class n49dbb51bcddd5420c["VysledekAkce"]
+  n49dbb51bcddd5420c : +tah
+  n49dbb51bcddd5420c : +matched_rule_ids
+  n49dbb51bcddd5420c : +xp_awarded
+  n49dbb51bcddd5420c : +quests
+  n49dbb51bcddd5420c : +reason
+  n49dbb51bcddd5420c : +winner
+  n49dbb51bcddd5420c : +text
+  class n4f457d3dbc4db079e["Akce"]
+  n4f457d3dbc4db079e : +typ
+  n4f457d3dbc4db079e : +tah
+  n4f457d3dbc4db079e : +move()
+  n4f457d3dbc4db079e : +resign()
+  class n9afdb64315ed96967["Tah"]
+  n9afdb64315ed96967 : +odkud
+  n9afdb64315ed96967 : +kam
+  n9afdb64315ed96967 : +typ_tahu
+  n9afdb64315ed96967 : +promena
+  n9afdb64315ed96967 : +__post_init__()
+  class n545870b79b9417a21["Dama"]
+  class n0de5a49ce793863f8["Figurka"]
+  n0de5a49ce793863f8 : +barva
+  n0de5a49ce793863f8 : +pohnuta
+  n0de5a49ce793863f8 : +kod
+  n0de5a49ce793863f8 : +nazev
+  n0de5a49ce793863f8 : +vektory
+  n0de5a49ce793863f8 : +vektory_utoku
+  n0de5a49ce793863f8 : +__post_init__()
+  class nfd1c7696fd3ff5c5d["Kral"]
+  class n7d0d0afe595557395["Kun"]
+  class n6421c0338dba2f6f1["Pesak"]
+  class n394c9ac3ed8d458af["Strelec"]
+  class n3e8f92bfcc442d1a8["Vez"]
+  class na7152a7564194b492["Hrac"]
+  na7152a7564194b492 : +barva
+  na7152a7564194b492 : +uzivatel
+  na7152a7564194b492 : +__post_init__()
+  class n66b5c0124d2018d72["Quest"]
+  n66b5c0124d2018d72 : +rule_id
+  n66b5c0124d2018d72 : +nazev
+  n66b5c0124d2018d72 : +popis
+  n66b5c0124d2018d72 : +xp
+  class n30fbb2f0529dc7685["QuestManager"]
+  n30fbb2f0529dc7685 : +__init__()
+  n30fbb2f0529dc7685 : +pridej_odmeny()
+  n30fbb2f0529dc7685 : +dokoncil()
+  n30fbb2f0529dc7685 : +reset_dokonceni()
+  class n363a22cb5511b4949["Rule"]
+  n363a22cb5511b4949 : +kandidati()
+  n363a22cb5511b4949 : +povoleno()
+  n363a22cb5511b4949 : +priprav()
+  n363a22cb5511b4949 : +nastalo()
+  class n62b5ed36242c35587["RuleContext"]
+  n62b5ed36242c35587 : +akce
+  n62b5ed36242c35587 : +tah
+  n62b5ed36242c35587 : +puvodni_hrac
+  n62b5ed36242c35587 : +pred
+  n62b5ed36242c35587 : +po
+  n62b5ed36242c35587 : +predchozi_tah
+  n62b5ed36242c35587 : +capture
+  n62b5ed36242c35587 : +v_sachu
+  n62b5ed36242c35587 : +ma_odpoved
+  n62b5ed36242c35587 : +ohrozene
+  n62b5ed36242c35587 : +stav
+  n62b5ed36242c35587 : +zdroj
+  n62b5ed36242c35587 : +vychozi_pole()
+  class n558ca6ee663a9e3cf["BasicMovementRule"]
+  n558ca6ee663a9e3cf : +kandidati()
+  class n62c23a2ae910d0453["KingCaptureRule"]
+  n62c23a2ae910d0453 : +povoleno()
+  class ne16addacd2afa105c["KingSafetyRule"]
+  ne16addacd2afa105c : +povoleno()
+  class n7982485ecd843e452["TurnOwnershipRule"]
+  n7982485ecd843e452 : +povoleno()
+  class n13f93fc45530a8026["CheckRule"]
+  n13f93fc45530a8026 : +nastalo()
+  class n25e1546bd9e276bc3["CheckmateRule"]
+  n25e1546bd9e276bc3 : +nastalo()
+  class ne7b6f08a6fa10941d["ResignationRule"]
+  ne7b6f08a6fa10941d : +povoleno()
+  class n93add3fc1ea2abe39["StalemateRule"]
+  n93add3fc1ea2abe39 : +nastalo()
+  class n842236ed59df880e9["CaptureRule"]
+  n842236ed59df880e9 : +nastalo()
+  class ndbaa665d3db60f52f["CastlingRule"]
+  ndbaa665d3db60f52f : +kandidati()
+  ndbaa665d3db60f52f : +priprav()
+  ndbaa665d3db60f52f : +nastalo()
+  class n22aabef6b5ebbbf1e["EnPassantRule"]
+  n22aabef6b5ebbbf1e : +kandidati()
+  n22aabef6b5ebbbf1e : +priprav()
+  n22aabef6b5ebbbf1e : +nastalo()
+  class nbca44ab26daa24149["PromotionRule"]
+  nbca44ab26daa24149 : +kandidati()
+  nbca44ab26daa24149 : +priprav()
+  nbca44ab26daa24149 : +nastalo()
+  class n1c114069155638918["UserManager"]
+  n1c114069155638918 : +_fingerprint()
+  n1c114069155638918 : +__init__()
+  n1c114069155638918 : +_read_profiles()
+  n1c114069155638918 : +nacti_uzivatele()
+  n1c114069155638918 : +_recover_for_retry()
+  n1c114069155638918 : +vytvor_uzivatele()
+  n1c114069155638918 : +pridej_xp()
+  n1c114069155638918 : +uloz_uzivatele()
+  class ncb8c521878c8ac5f2["Uzivatel"]
+  ncb8c521878c8ac5f2 : +uzivatelske_jmeno
+  ncb8c521878c8ac5f2 : +jmeno
+  ncb8c521878c8ac5f2 : +xp
+  class n3ee09f383d92f9472["IllegalAction"]
+  class n5f7aa1a5781750653["PripravenyTah"]
+  n5f7aa1a5781750653 : +plocha
+  n5f7aa1a5781750653 : +tah
+  n5f7aa1a5781750653 : +captured
+  n5f7aa1a5781750653 : +matched_rule_ids
+  n5f7aa1a5781750653 : +reason
+  n5f7aa1a5781750653 : +winner
+  class nfb0be2193f2e816b7["RevizorTahu"]
+  nfb0be2193f2e816b7 : +__init__()
+  nfb0be2193f2e816b7 : +ohrozena_pole()
+  nfb0be2193f2e816b7 : +v_sachu()
+  nfb0be2193f2e816b7 : +_context()
+  nfb0be2193f2e816b7 : +_candidates()
+  nfb0be2193f2e816b7 : +_castle_safe_transit()
+  nfb0be2193f2e816b7 : +_stage()
+  nfb0be2193f2e816b7 : +mozne_tahy()
+  nfb0be2193f2e816b7 : +vyhodnot()
+  class n7ceda7fc39a0dbcec["BoardGamesApplication"]
+  n7ceda7fc39a0dbcec : +__init__()
+  n7ceda7fc39a0dbcec : +_clear()
+  n7ceda7fc39a0dbcec : +show_setup()
+  n7ceda7fc39a0dbcec : +create_profile()
+  n7ceda7fc39a0dbcec : +_start_match_shortcut()
+  n7ceda7fc39a0dbcec : +start_match()
+  n7ceda7fc39a0dbcec : +show_game()
+  n7ceda7fc39a0dbcec : +_build_game_header()
+  n7ceda7fc39a0dbcec : +_build_game_toolbar()
+  n7ceda7fc39a0dbcec : +_build_game_content()
+  n7ceda7fc39a0dbcec : +_build_game_history()
+  n7ceda7fc39a0dbcec : +_build_game_persistence()
+  n7ceda7fc39a0dbcec : +on_square()
+  n7ceda7fc39a0dbcec : +ask_promotion()
+  n7ceda7fc39a0dbcec : +_resign_shortcut()
+  n7ceda7fc39a0dbcec : +resign()
+  n7ceda7fc39a0dbcec : +new_game()
+  n7ceda7fc39a0dbcec : +players_setup()
+  n7ceda7fc39a0dbcec : +retry_profiles()
+  n7ceda7fc39a0dbcec : +retry_history()
+  n7ceda7fc39a0dbcec : +refresh()
+  n7ceda7fc39a0dbcec : +_render_turn()
+  n7ceda7fc39a0dbcec : +_render_history()
+  n7ceda7fc39a0dbcec : +_render_persistence_status()
+  class n5218e5c27a56be18b["GameView"]
+  n5218e5c27a56be18b : +__init__()
+  n5218e5c27a56be18b : +_activate()
+  n5218e5c27a56be18b : +_focus()
+  n5218e5c27a56be18b : +vykresli_desku()
+  n5218e5c27a56be18b : +zvyrazni_tahy()
+  class n682822810145b7650["HracGameView"]
+  n682822810145b7650 : +__init__()
+  n682822810145b7650 : +zobraz_hrace()
+  n682822810145b7650 : +zobraz_questy()
+  n363a22cb5511b4949 <|-- n558ca6ee663a9e3cf
+  n363a22cb5511b4949 <|-- n62c23a2ae910d0453
+  n363a22cb5511b4949 <|-- ne16addacd2afa105c
+  n363a22cb5511b4949 <|-- n7982485ecd843e452
+  n363a22cb5511b4949 <|-- n13f93fc45530a8026
+  n363a22cb5511b4949 <|-- n25e1546bd9e276bc3
+  n363a22cb5511b4949 <|-- ne7b6f08a6fa10941d
+  n363a22cb5511b4949 <|-- n93add3fc1ea2abe39
+  n363a22cb5511b4949 <|-- n842236ed59df880e9
+  n363a22cb5511b4949 <|-- ndbaa665d3db60f52f
+  n363a22cb5511b4949 <|-- n22aabef6b5ebbbf1e
+  n363a22cb5511b4949 <|-- nbca44ab26daa24149
+  ndba5dbde851f3153e --> n9afdb64315ed96967 : cekajici_promena
+  n1c114069155638918 --> ncb8c521878c8ac5f2 : uzivatele
+  nfb0be2193f2e816b7 --> n363a22cb5511b4949 : rules
+  n7ceda7fc39a0dbcec --> ndba5dbde851f3153e : controller
+  n7ceda7fc39a0dbcec --> nd83aee9292df79329 : manager
