@@ -13,9 +13,6 @@ readme = "README.md"
 [project.gui-scripts]
 boardgameswithquests = "main:main"
 
-# The application-specific package layout and entry point live on the
-# separate application scaffold/implementation branches. This foundation
-# intentionally has no distributable Python modules.
 [tool.setuptools]
 package-dir = {"" = "src"}
 py-modules = ["main"]
