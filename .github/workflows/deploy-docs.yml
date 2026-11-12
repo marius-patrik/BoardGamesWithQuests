@@ -51,7 +51,7 @@ jobs:
           python .github/scripts/assemble_docs.py \
             --staging "$RUNNER_TEMP/docs-staging" \
             --site site --open-prs "${open_prs[@]}"
-          python .github/scripts/build_docs.py --manifest --site site
+          python scripts/build_docs.py --manifest --site site
           test -f site/index.html
 
       - name: Record the exact included preview heads

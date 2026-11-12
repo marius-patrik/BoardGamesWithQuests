@@ -8,11 +8,11 @@
       "project_title": "BoardGamesWithQuests",
       "agent_slug": "boardgameswithquests-agent",
       "default_branch": "develop",
-      "description": "Python board-game engine with chess/checkers configuration, GitHub Pages documentation and DarkFactory automation",
+      "description": "Offline two-player Chess desktop application with six quests, persistent local player XP and Tkinter UI",
       "topics": [
         "chess",
-        "checkers",
         "python",
+        "tkinter",
         "game",
         "education"
       ],
@@ -28,7 +28,7 @@
       "initial": "0.1.0"
     },
     "environment": {
-      "$comment": "Python and documentation actions. Python artifact publishing remains disabled until the behavior release gate.",
+      "$comment": "Python gameplay is checked by DarkFactory, and external Windows desktop acceptance is owned by native-windows-acceptance.yml. Final releases require independent approval.",
       "testing": {
         "python": {
           "command": "pytest",
@@ -42,7 +42,7 @@
       },
       "documentation": {
         "python": {
-          "command": "python .github/scripts/build_docs.py",
+          "command": "python scripts/build_docs.py",
           "source": "repository Markdown and Python docstrings"
         }
       },
@@ -106,7 +106,7 @@
         ]
       },
       "docs": {
-        "description": "Source-generated documentation, Mermaid diagrams and the docs UI",
+        "description": "Canonical PRD/AGENTS and source-derived docs/architecture plus preserved docs/reference assets",
         "keywords": [
           "doc",
           "docs",
@@ -138,15 +138,16 @@
         ]
       },
       "game": {
-        "description": "Chess and checkers configuration JSON and game-owned code",
+        "description": "Local Chess rules, match lifecycle, quests and player profiles",
         "keywords": [
           "chess",
-          "checkers",
-          "draughts",
-          "wcdf",
-          "fen",
-          "pgn",
-          "game"
+          "king",
+          "queen",
+          "pawn",
+          "match",
+          "game",
+          "checkmate",
+          "quest"
         ]
       }
     },
@@ -217,7 +218,7 @@
     "version": 1,
     "site": {
       "name": "BoardGamesWithQuests",
-      "description": "Python chess/checkers engine source, configuration assets and generated repository documentation"
+      "description": "Offline Chess and quests: Python/Tkinter source, diagrams and documentation"
     },
     "home": "README.md"
   },

@@ -1,4 +1,10 @@
-"""Black-box CLI acceptance of artifact-backed documentation publication."""
+"""Black-box acceptance for GitHub Actions documentation artifact collection.
+
+An executable synthetic ``gh`` CLI models PR heads, workflow runs and uploaded
+artifacts. The actual collector/assembler subprocesses must publish only
+successful, current, same-repository results; reject stale/spoofed/failed builds;
+and never report success on a broken GitHub API response.
+"""
 
 from __future__ import annotations
 
@@ -12,7 +18,7 @@ import pytest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "collect_docs_artifacts.py"
 ASSEMBLER = Path(__file__).resolve().parents[1] / "scripts" / "assemble_docs.py"
-REPO = "marius-patrik/BoardGamesWithQuests"
+REPO = "example/documentation"
 GOOD = "a" * 40
 STALE = "b" * 40
 
@@ -81,7 +87,14 @@ def snapshot(tmp: Path, name: str, html: str, sha: str | None = None) -> None:
 
 def invoke(tmp: Path, env: dict[str, str]):
     return subprocess.run(
-        [sys.executable, str(SCRIPT), "--repo", REPO, "--staging", str(tmp / "staging")],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--repo",
+            REPO,
+            "--staging",
+            str(tmp / "staging"),
+        ],
         env=env,
         capture_output=True,
         text=True,
@@ -152,7 +165,9 @@ def test_main_and_matching_pr_publish_without_branch_storage(tmp_path: Path) -> 
     assert not (tmp_path / "site/pr-339").exists()
 
 
-def test_failed_main_and_outdated_pr_never_publish_stale_content(tmp_path: Path) -> None:
+def test_failed_main_and_outdated_pr_never_publish_stale_content(
+    tmp_path: Path,
+) -> None:
     env = prepare_cli(
         tmp_path,
         {

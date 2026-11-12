@@ -1,1 +1,1 @@
-.agents/README.md
+.agents/PRD.md
