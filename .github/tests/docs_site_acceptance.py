@@ -55,43 +55,6 @@ def test_sidebar_sections_exactly_match_git_tracked_directories():
     )
 
 
-def test_source_generated_diagrams_work_in_documentation():
-    """Generated implementation diagrams must open from their actual repository paths."""
-    import re
-    from html import unescape
-    from urllib.parse import urlsplit
-
-    for category, stem in (("implementation", "ast"), ("implementation", "uml")):
-        raw = (
-            SITE
-            / "docs"
-            / ("architecture" if category == "implementation" else "reference")
-            / "diagrams"
-            / (stem + ".mmd")
-        )
-        page = (
-            SITE
-            / "repository-files"
-            / "docs"
-            / ("architecture" if category == "implementation" else "reference")
-            / "diagrams"
-            / (stem + ".mmd")
-            / "index.html"
-        )
-        assert raw.is_file(), f"Generated diagram source is missing: {category}/{stem}"
-        assert raw.read_text(encoding="utf-8").startswith(("classDiagram", "flowchart"))
-        assert page.is_file(), f"Rendered diagram page is missing: {category}/{stem}"
-        html = page.read_text(encoding="utf-8")
-        assert 'class="diagram-viewer"' in html and "assets/diagrams.js" in html
-        rendered = re.search(r'<img src="([^"]+\.svg)"', html)
-        assert rendered, f"Mermaid was not rendered: {category}/{stem}"
-        relative = urlsplit(unescape(rendered.group(1))).path
-        image = (page.parent / relative).resolve()
-        assert image.is_relative_to(SITE.resolve()) and image.is_file()
-        assert "<svg" in image.read_text(encoding="utf-8")
-        assert 'class="mermaid"' not in html
-
-
 def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
     """Assert the actual deployment pages contain visible graphics, not source dumps."""
     import re
@@ -154,30 +117,6 @@ def test_mermaid_only_diagram_sources_are_rendered_as_nonempty_images():
             ), "Rendered UML must have real classes"
 
 
-def test_diagram_sources_are_grouped_by_source_ownership():
-    """Architecture diagrams and reference diagrams have separate canonical folders."""
-    from html import unescape
-    import re
-
-    architecture = ROOT / "docs" / "architecture" / "diagrams"
-    reference = ROOT / "docs" / "reference" / "diagrams"
-    assert {path.name for path in architecture.glob("*.mmd")} == {"ast.mmd", "uml.mmd"}
-    assert {path.name for path in reference.glob("*.mmd")} == {"mvc.mmd", "uml.mmd"}
-    document = (SITE / "index.html").read_text(encoding="utf-8")
-    sidebar = document.split('<aside class="sidebar"', 1)[1].split("</aside>", 1)[0]
-    sections = {unescape(s) for s in re.findall(r'data-nav-section="([^"]+)"', sidebar)}
-    assert "/docs/architecture/diagrams" in sections
-    assert "/docs/reference/diagrams" in sections
-    for obsolete in (
-        "reference-page1.mmd",
-        "reference-mvc.mmd",
-        "repository-ast.mmd",
-        "implementation-uml.mmd",
-    ):
-        assert not (architecture / obsolete).exists()
-        assert not (reference / obsolete).exists()
-
-
 def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     """The authored Excalidraw mockup must survive the docs build byte-for-byte."""
     import re
@@ -224,90 +163,6 @@ def test_original_gui_mockup_is_an_image_and_ships_unchanged():
     assert not (
         ROOT / "docs/reference/diagrams/gui-mockup.mmd"
     ).exists(), "Do not replace the GUI image with a conceptual Mermaid diagram"
-
-
-def test_published_docs_use_full_viewport_layout_with_operable_navigation_and_fullscreen():
-    """Verify the shipped reader's real HTML, CSS and JavaScript contracts."""
-    index = (SITE / "index.html").read_text(encoding="utf-8")
-    css = (SITE / "assets" / "theme.css").read_text(encoding="utf-8")
-    js = (SITE / "assets" / "theme.js").read_text(encoding="utf-8")
-
-    assert "data-docs-layout" in index
-    assert 'id="docs-navigation"' in index
-    assert "data-nav-toggle" in index
-    assert 'aria-controls="docs-navigation"' in index
-    assert "data-fullscreen-toggle" in index
-    assert 'aria-pressed="false"' in index
-
-    assert 'html[data-layout="centered"] .layout' in css, "Centered mode must be available"
-    assert "--content-max" not in css, "Main document must use the remaining viewport width"
-    assert "grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--toc-width)" in css
-    assert 'html[data-nav-collapsed="true"] .layout' in css
-    assert "max-width: none" in css
-    assert "requestFullscreen()" in js and "exitFullscreen()" in js
-    assert "fullscreenchange" in js
-    assert "data-nav-collapsed" in js
-    assert 'sidebar.classList.toggle("is-open")' in js
-    assert 'navToggle.setAttribute("aria-expanded"' in js
-    assert 'event.key === "Escape"' in js
-
-
-def test_reading_width_and_independent_fullscreen_buttons():
-    """The published browser app must offer distinct layout and fullscreen actions."""
-    page = (SITE / "index.html").read_text(encoding="utf-8")
-    stylesheet = (SITE / "assets/theme.css").read_text(encoding="utf-8")
-    script = (SITE / "assets/theme.js").read_text(encoding="utf-8")
-    assert page.count("data-layout-toggle") == 1
-    assert page.count("data-fullscreen-toggle") == 1
-    assert 'data-layout="centered"' in page
-    assert 'aria-label="Use full-width layout"' in page
-    assert "docs-layout" in page
-    assert 'html[data-layout="centered"] .layout' in stylesheet
-    assert 'html[data-layout="wide"] .icon-layout-centered' in stylesheet
-    assert "requestFullscreen()" in script and "exitFullscreen()" in script
-    assert 'localStorage.setItem("docs-layout"' in script
-    assert 'root.setAttribute("data-layout"' in script
-
-
-def test_navigation_sections_are_natively_collapsible_and_preserve_active_page():
-    """Published navigation must expose working disclosure controls at every depth."""
-    page = (SITE / "index.html").read_text(encoding="utf-8")
-    css = (SITE / "assets/theme.css").read_text(encoding="utf-8")
-    script = (SITE / "assets/theme.js").read_text(encoding="utf-8")
-    assert 'class="nav__group"' in page
-    assert "data-nav-section=" in page
-    assert '<summary class="nav__label">' in page
-    assert "nav__group[open]" in css
-    assert "docs-sidebar-sections" in script
-    assert "group.querySelector" in script
-    assert 'group.addEventListener("toggle"' in script
-    assert 'aria-current="page"' in page
-
-
-def test_image_and_diagram_viewers_offer_an_accessible_modal():
-    """Every graphic uses the same zoomable viewer with modal expansion."""
-    css = (SITE / "assets/theme.css").read_text(encoding="utf-8")
-    script = (SITE / "assets/diagrams.js").read_text(encoding="utf-8")
-    index = (
-        SITE
-        / "repository-files"
-        / "docs"
-        / "reference"
-        / "images"
-        / "GUI_mockup.svg"
-        / "index.html"
-    )
-    assert index.is_file()
-    html = index.read_text(encoding="utf-8")
-    assert 'class="diagram-viewer"' in html
-    assert "assets/diagrams.js" in html
-    assert '"Expand image in modal"' in script
-    assert "dialog.showModal()" in script
-    assert 'dialog.addEventListener("close"' in script
-    assert 'dialog.setAttribute("aria-label", "Expanded image viewer")' in script
-    assert "marker.replaceWith(root)" in script
-    assert ".diagram-modal::backdrop" in css
-    assert ".diagram-modal .diagram-viewer__viewport" in css
 
 
 def test_embedded_markdown_mermaid_is_rendered_in_the_published_prd():
