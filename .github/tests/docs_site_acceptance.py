@@ -308,3 +308,24 @@ def test_image_and_diagram_viewers_offer_an_accessible_modal():
     assert "marker.replaceWith(root)" in script
     assert ".diagram-modal::backdrop" in css
     assert ".diagram-modal .diagram-viewer__viewport" in css
+
+
+def test_embedded_markdown_mermaid_is_rendered_in_the_published_prd():
+    """Mermaid fenced inside the real PRD is a visible, zoomable SVG, not code."""
+    import re
+    from html import unescape
+    from urllib.parse import urlsplit
+
+    page = SITE / "agents" / "PRD" / "index.html"
+    assert page.is_file(), "The canonical PRD should have a published Markdown page"
+    markup = page.read_text(encoding="utf-8")
+    assert markup.count('class="diagram-viewer"') >= 3
+    assert 'assets/diagrams.js' in markup
+    assert '<pre class="mermaid">' not in markup
+    assert "language-mermaid" not in markup
+    sources = re.findall(r'<img src="([^"]+\\.svg)"[^>]*alt="Rendered Mermaid architecture diagram"', markup)
+    assert len(sources) >= 3, "Every PRD Mermaid fence should compile to a real image"
+    for source in sources:
+        image = (page.parent / urlsplit(unescape(source)).path).resolve()
+        assert image.is_relative_to(SITE.resolve()) and image.is_file()
+        assert "<svg" in image.read_text(encoding="utf-8")

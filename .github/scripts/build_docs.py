@@ -64,6 +64,29 @@ def diagram_viewer_markup(content: str) -> str:
     )
 
 
+def render_markdown_mermaid(markdown: str) -> str:
+    """Promote fenced Mermaid diagrams into the existing zoomable SVG viewer.
+
+    Markdown source remains canonical. Source fences are escaped before becoming
+    raw HTML; the published-site compiler replaces only their safe text with
+    locally generated SVGs. Ordinary fenced code is never interpreted.
+    """
+    import html
+    import re
+
+    fence = re.compile(
+        r"(?m)^(?P<indent> {0,3})(?P<marker>`{3,}|~{3,})mermaid[ \\t]*\\r?\\n"
+        r"(?P<source>[\\s\\S]*?)"
+        r"^(?P=indent)(?P=marker)[ \\t]*(?:\\r?\\n|$)"
+    )
+
+    def substitute(match: re.Match[str]) -> str:
+        source = html.escape(match.group("source").strip(), quote=False)
+        return diagram_viewer_markup('<pre class="mermaid">' + source + "</pre>") + "\\n\\n"
+
+    return fence.sub(substitute, markdown)
+
+
 def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
     """Mirror every tracked repository file as one page, irrespective of language.
 
@@ -109,7 +132,7 @@ def pages_for(root: Path = ROOT) -> list[tuple[str, str, str]]:
         except UnicodeDecodeError:
             decoded = None
         if markdown and decoded is not None and len(raw) <= 256_000:
-            body = decoded
+            body = render_markdown_mermaid(decoded)
         else:
             digest = hashlib.sha256(raw).hexdigest()
             header = f"# {rel.name}\n\nRepository path: `{name}`  \nSize: {len(raw)} bytes  \nSHA-256: `{digest}`\n\n"
