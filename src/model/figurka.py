@@ -7,7 +7,7 @@ class Figurka:
         vektory_utoku=None,
         muze_v_nasobcich=False,
         maximalni_nasobek=1,
-        muze_preskakovat=False
+        muze_preskakovat=False,
     ):
         self.__barva = barva
         self._typ = typ
@@ -41,12 +41,7 @@ class Figurka:
 
 class Kral(Figurka):
     def __init__(self, barva, typ):
-        vektory = [
-            (0, 1), (0, -1),
-            (1, 0), (-1, 0),
-            (1, 1), (1, -1),
-            (-1, 1), (-1, -1)
-        ]
+        vektory = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
         super().__init__(
             barva,
@@ -55,18 +50,13 @@ class Kral(Figurka):
             vektory_utoku=vektory,
             muze_v_nasobcich=False,
             maximalni_nasobek=1,
-            muze_preskakovat=False
+            muze_preskakovat=False,
         )
 
 
 class Kun(Figurka):
     def __init__(self, barva, typ):
-        vektory = [
-            (1, 2), (2, 1),
-            (-1, 2), (-2, 1),
-            (1, -2), (2, -1),
-            (-1, -2), (-2, -1)
-        ]
+        vektory = [(1, 2), (2, 1), (-1, 2), (-2, 1), (1, -2), (2, -1), (-1, -2), (-2, -1)]
 
         super().__init__(
             barva,
@@ -75,16 +65,13 @@ class Kun(Figurka):
             vektory_utoku=vektory,
             muze_v_nasobcich=False,
             maximalni_nasobek=1,
-            muze_preskakovat=True
+            muze_preskakovat=True,
         )
 
 
 class Vez(Figurka):
     def __init__(self, barva, typ):
-        vektory = [
-            (0, 1), (0, -1),
-            (1, 0), (-1, 0)
-        ]
+        vektory = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
         super().__init__(
             barva,
@@ -93,16 +80,13 @@ class Vez(Figurka):
             vektory_utoku=vektory,
             muze_v_nasobcich=True,
             maximalni_nasobek=7,
-            muze_preskakovat=False
+            muze_preskakovat=False,
         )
 
 
 class Strelec(Figurka):
     def __init__(self, barva, typ):
-        vektory = [
-            (1, 1), (1, -1),
-            (-1, 1), (-1, -1)
-        ]
+        vektory = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
 
         super().__init__(
             barva,
@@ -111,7 +95,7 @@ class Strelec(Figurka):
             vektory_utoku=vektory,
             muze_v_nasobcich=True,
             maximalni_nasobek=7,
-            muze_preskakovat=False
+            muze_preskakovat=False,
         )
 
 
@@ -119,14 +103,9 @@ class Pesec(Figurka):
     def __init__(self, barva, typ):
         smer = 1 if barva == 1 else -1
 
-        vektory_pohybu = [
-            (0, smer)
-        ]
+        vektory_pohybu = [(0, smer)]
 
-        vektory_utoku = [
-            (1, smer),
-            (-1, smer)
-        ]
+        vektory_utoku = [(1, smer), (-1, smer)]
 
         super().__init__(
             barva,
@@ -135,18 +114,13 @@ class Pesec(Figurka):
             vektory_utoku=vektory_utoku,
             muze_v_nasobcich=False,
             maximalni_nasobek=1,
-            muze_preskakovat=False
+            muze_preskakovat=False,
         )
 
 
 class Dama(Figurka):
     def __init__(self, barva, typ):
-        vektory = [
-            (0, 1), (0, -1),
-            (1, 0), (-1, 0),
-            (1, 1), (1, -1),
-            (-1, 1), (-1, -1)
-        ]
+        vektory = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
         super().__init__(
             barva,
@@ -155,7 +129,7 @@ class Dama(Figurka):
             vektory_utoku=vektory,
             muze_v_nasobcich=True,
             maximalni_nasobek=7,
-            muze_preskakovat=False
+            muze_preskakovat=False,
         )
 
 

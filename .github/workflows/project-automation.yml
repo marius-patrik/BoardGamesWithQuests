@@ -1,0 +1,30 @@
+name: Project Board Automation
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
+  pull_request:
+    types: [opened, edited, synchronize, closed, reopened, labeled, unlabeled, ready_for_review]
+  push:
+    branches: [develop, main]
+  schedule:
+    - cron: '43 5 * * *'
+  workflow_dispatch:
+
+# The job bodies and the scripts they run come from the pinned pipeline. This file is a caller,
+# not a copy. The job name is part of every check this reports, so renaming it renames the check.
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  repository-projects: write
+
+jobs:
+  run:
+    uses: marius-patrik/DarkFactory/.github/workflows/project-automation.yml@4a922f5be5ec3d928f9142424674b433e0f40b71
+    with:
+      pipeline-repo: marius-patrik/DarkFactory
+      pipeline-ref: "4a922f5be5ec3d928f9142424674b433e0f40b71"
+    secrets:
+      DARKFACTORY_APP_PRIVATE_KEY: ${{ secrets.DARKFACTORY_APP_PRIVATE_KEY }}
+      GH_PROJECT_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}

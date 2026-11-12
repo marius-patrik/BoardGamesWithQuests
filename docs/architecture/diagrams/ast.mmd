@@ -1,0 +1,350 @@
+flowchart LR
+  root["Tracked repository"]
+  nb76abd85885f19e9e[".agents/"]
+  root --> nb76abd85885f19e9e
+  ne64882b8ccd8b0554["AGENTS.md"]
+  nb76abd85885f19e9e --> ne64882b8ccd8b0554
+  n8f792cd219cdac109["PRD.md"]
+  nb76abd85885f19e9e --> n8f792cd219cdac109
+  n76d1a56514e81e69d["agents/"]
+  nb76abd85885f19e9e --> n76d1a56514e81e69d
+  n5c34316668d369c69["implementer.md"]
+  n76d1a56514e81e69d --> n5c34316668d369c69
+  nc96542f51186e244a["orchestrator.md"]
+  n76d1a56514e81e69d --> nc96542f51186e244a
+  naad57f2f4484b9af6["planner.md"]
+  n76d1a56514e81e69d --> naad57f2f4484b9af6
+  n1d5adb7655469660e["reviewer.md"]
+  n76d1a56514e81e69d --> n1d5adb7655469660e
+  n24380ce935d3a3abe["verifier.md"]
+  n76d1a56514e81e69d --> n24380ce935d3a3abe
+  nda68ad85bfdf98035["skills/"]
+  nb76abd85885f19e9e --> nda68ad85bfdf98035
+  n224f0608d961c1188["architecture-decisions/"]
+  nda68ad85bfdf98035 --> n224f0608d961c1188
+  n8d512cf33227892ea["SKILL.md"]
+  n224f0608d961c1188 --> n8d512cf33227892ea
+  n369d0017130991429["governed-release/"]
+  nda68ad85bfdf98035 --> n369d0017130991429
+  nfb2b7521132ea5a6c["SKILL.md"]
+  n369d0017130991429 --> nfb2b7521132ea5a6c
+  n5c37b45c8fda9ce79["implementation-verification/"]
+  nda68ad85bfdf98035 --> n5c37b45c8fda9ce79
+  n3711963b441dd7c1f["SKILL.md"]
+  n5c37b45c8fda9ce79 --> n3711963b441dd7c1f
+  n2eba75e1862a5eefd["independent-review/"]
+  nda68ad85bfdf98035 --> n2eba75e1862a5eefd
+  n003a21a9e52591d21["SKILL.md"]
+  n2eba75e1862a5eefd --> n003a21a9e52591d21
+  nddb3aed1a8347d20d["repository-orientation/"]
+  nda68ad85bfdf98035 --> nddb3aed1a8347d20d
+  ndbda1a2d70447845c["SKILL.md"]
+  nddb3aed1a8347d20d --> ndbda1a2d70447845c
+  ne407b13ac65882f12["requirements-capture/"]
+  nda68ad85bfdf98035 --> ne407b13ac65882f12
+  n7765b6e4999008fb9["SKILL.md"]
+  ne407b13ac65882f12 --> n7765b6e4999008fb9
+  n13fa1c3ddbfcc027c[".darkfactory/"]
+  root --> n13fa1c3ddbfcc027c
+  nbd7ef0a7a3e47a946["installation.json"]
+  n13fa1c3ddbfcc027c --> nbd7ef0a7a3e47a946
+  n8c5eaea0103dcc1b2[".gitattributes"]
+  root --> n8c5eaea0103dcc1b2
+  nfad65243633b77700[".github/"]
+  root --> nfad65243633b77700
+  n0e4e78a57baca273d["ISSUE_TEMPLATE/"]
+  nfad65243633b77700 --> n0e4e78a57baca273d
+  nc44034c1b213d1ea7["request.yml"]
+  n0e4e78a57baca273d --> nc44034c1b213d1ea7
+  n3ddd352e5822ea5fd["PULL_REQUEST_TEMPLATE.md"]
+  nfad65243633b77700 --> n3ddd352e5822ea5fd
+  n6d0842500b0a11032["docs-ui/"]
+  nfad65243633b77700 --> n6d0842500b0a11032
+  n0a78d11ace79474b3["assets/"]
+  n6d0842500b0a11032 --> n0a78d11ace79474b3
+  n06612ffac08cb47cc["diagrams.js"]
+  n0a78d11ace79474b3 --> n06612ffac08cb47cc
+  n8d4ecad21e87ba737["theme.css"]
+  n0a78d11ace79474b3 --> n8d4ecad21e87ba737
+  n7477ddeebffaccea6["theme.js"]
+  n0a78d11ace79474b3 --> n7477ddeebffaccea6
+  n960d63bc6f1917817["main.html"]
+  n6d0842500b0a11032 --> n960d63bc6f1917817
+  nb914c06ad22602465["partials/"]
+  n6d0842500b0a11032 --> nb914c06ad22602465
+  nfb50d01947bc6fa63["nav.html"]
+  nb914c06ad22602465 --> nfb50d01947bc6fa63
+  n56d8aa4f97d913c40["switcher.html"]
+  nb914c06ad22602465 --> n56d8aa4f97d913c40
+  n2092df3a19d2f7b13["scripts/"]
+  nfad65243633b77700 --> n2092df3a19d2f7b13
+  n3b9f839fbbebb1fb8["assemble_docs.py"]
+  n2092df3a19d2f7b13 --> n3b9f839fbbebb1fb8
+  n36456e6f6c5ab65b4["function assemble"]
+  n3b9f839fbbebb1fb8 --> n36456e6f6c5ab65b4
+  ne529287351db29edc["function main"]
+  n3b9f839fbbebb1fb8 --> ne529287351db29edc
+  nc50428a0522ce7111["collect_docs_artifacts.py"]
+  n2092df3a19d2f7b13 --> nc50428a0522ce7111
+  ne14968af41ea3df54["function gh"]
+  nc50428a0522ce7111 --> ne14968af41ea3df54
+  n6b30d7ec2afb28b98["function api"]
+  nc50428a0522ce7111 --> n6b30d7ec2afb28b98
+  n130f12cea55547967["function pages"]
+  nc50428a0522ce7111 --> n130f12cea55547967
+  naa57ed5e320daca2d["function open_same_repo_prs"]
+  nc50428a0522ce7111 --> naa57ed5e320daca2d
+  n62767c90025ba8241["function artifacts"]
+  nc50428a0522ce7111 --> n62767c90025ba8241
+  nc4a56f5c33e071b7d["function approved_run"]
+  nc50428a0522ce7111 --> nc4a56f5c33e071b7d
+  n08655f27c177c39f7["function download"]
+  nc50428a0522ce7111 --> n08655f27c177c39f7
+  nb776054b623ca5a3b["function restore"]
+  nc50428a0522ce7111 --> nb776054b623ca5a3b
+  n374d0c58c752aec8a["function main"]
+  nc50428a0522ce7111 --> n374d0c58c752aec8a
+  nc9f5868186eb03f66["tests/"]
+  nfad65243633b77700 --> nc9f5868186eb03f66
+  n905320175c75255b2["test_docs_artifacts.py"]
+  nc9f5868186eb03f66 --> n905320175c75255b2
+  nf021606f8ea023fd8["function run_record"]
+  n905320175c75255b2 --> nf021606f8ea023fd8
+  n9775f25c8bdd5ec64["function artifact"]
+  n905320175c75255b2 --> n9775f25c8bdd5ec64
+  nc41445254e3fe96c3["function prepare_cli"]
+  n905320175c75255b2 --> nc41445254e3fe96c3
+  nd0767f73250f85076["function snapshot"]
+  n905320175c75255b2 --> nd0767f73250f85076
+  n6a5f30a5981ea05e7["function invoke"]
+  n905320175c75255b2 --> n6a5f30a5981ea05e7
+  n020ae264bcc60d366["function assemble"]
+  n905320175c75255b2 --> n020ae264bcc60d366
+  nba73bfcfd7114d73f["function test_main_and_matching_pr_publish_without_branch_storage"]
+  n905320175c75255b2 --> nba73bfcfd7114d73f
+  n4c92f95b5f4edeb83["function test_failed_main_and_outdated_pr_never_publish_stale_content"]
+  n905320175c75255b2 --> n4c92f95b5f4edeb83
+  nd4d5db7ccbbc95c23["function test_independent_pr_publishes_when_main_has_no_passing_build"]
+  n905320175c75255b2 --> nd4d5db7ccbbc95c23
+  nf3d53e3ca3af8c0bd["function test_spoofed_artifact_origin_is_rejected"]
+  n905320175c75255b2 --> nf3d53e3ca3af8c0bd
+  n1fd7b65f60417b1e4["function test_github_api_failure_does_not_claim_success"]
+  n905320175c75255b2 --> n1fd7b65f60417b1e4
+  nc58e9fa04cebf260c["test_docs_browser.mjs"]
+  nc9f5868186eb03f66 --> nc58e9fa04cebf260c
+  n574a634296f26fb29["test_docs_embedded_mermaid.py"]
+  nc9f5868186eb03f66 --> n574a634296f26fb29
+  n54d857d5ab6a86e47["function test_markdown_mermaid_parser_reuses_viewer_and_escapes_html"]
+  n574a634296f26fb29 --> n54d857d5ab6a86e47
+  n2cd167dfc614c6044["function test_other_code_fences_are_preserved"]
+  n574a634296f26fb29 --> n2cd167dfc614c6044
+  nf9479f8b9280d6cce["function test_every_tracked_diagram_page_publishes_rendered_local_svg"]
+  n574a634296f26fb29 --> nf9479f8b9280d6cce
+  n5f65b1147cf4c7caa["test_docs_manifest.py"]
+  nc9f5868186eb03f66 --> n5f65b1147cf4c7caa
+  n4f9ff89afbadd4d0a["function publish"]
+  n5f65b1147cf4c7caa --> n4f9ff89afbadd4d0a
+  n5b77489b350c16458["function test_published_manifest_lists_only_real_deployable_builds"]
+  n5f65b1147cf4c7caa --> n5b77489b350c16458
+  nbcc031ffcaeb28544["function test_missing_documentation_root_fails_without_publishing"]
+  n5f65b1147cf4c7caa --> nbcc031ffcaeb28544
+  n08502483f6d83fd34["test_docs_publication.py"]
+  nc9f5868186eb03f66 --> n08502483f6d83fd34
+  n5334579fdb981f045["function invoke"]
+  n08502483f6d83fd34 --> n5334579fdb981f045
+  n5fcce9b66504b9258["function test_publishes_pr_even_without_main_site"]
+  n08502483f6d83fd34 --> n5fcce9b66504b9258
+  n79ac7844e16f2f06d["function test_preserves_last_passing_main_and_filters_closed_previews"]
+  n08502483f6d83fd34 --> n79ac7844e16f2f06d
+  nec51c4283bc403903["function test_missing_staging_fails_instead_of_reporting_success"]
+  n08502483f6d83fd34 --> nec51c4283bc403903
+  nf106a07f2f08c75d6["function test_rejects_symlink_payload_in_untrusted_artifact"]
+  n08502483f6d83fd34 --> nf106a07f2f08c75d6
+  n7e1d9be7e80c6ae99["function test_replaces_stale_deployed_preview_on_update"]
+  n08502483f6d83fd34 --> n7e1d9be7e80c6ae99
+  nbf32064a6a26ab2df["workflows/"]
+  nfad65243633b77700 --> nbf32064a6a26ab2df
+  n936162c3846c6b099["agent.yml"]
+  nbf32064a6a26ab2df --> n936162c3846c6b099
+  nf062b443567dc1fe8["auto-format.yml"]
+  nbf32064a6a26ab2df --> nf062b443567dc1fe8
+  ne7cad7434d574f09c["build-main-docs.yml"]
+  nbf32064a6a26ab2df --> ne7cad7434d574f09c
+  n3feee3a065a9480cc["darkfactory-control.yml"]
+  nbf32064a6a26ab2df --> n3feee3a065a9480cc
+  n287ff0a0ecf3283a1["darkfactory.yml"]
+  nbf32064a6a26ab2df --> n287ff0a0ecf3283a1
+  n84354cf99c1713fc6["deploy-docs.yml"]
+  nbf32064a6a26ab2df --> n84354cf99c1713fc6
+  n76ec2fd65ee9dad06["governance-docs.yml"]
+  nbf32064a6a26ab2df --> n76ec2fd65ee9dad06
+  n14cf6130af7812ba5["main-source.yml"]
+  nbf32064a6a26ab2df --> n14cf6130af7812ba5
+  nc5611faa7a94a1ca4["open-pr.yml"]
+  nbf32064a6a26ab2df --> nc5611faa7a94a1ca4
+  n0bb25caaca528da62["preview-docs.yml"]
+  nbf32064a6a26ab2df --> n0bb25caaca528da62
+  na3772da1592627a41["project-automation.yml"]
+  nbf32064a6a26ab2df --> na3772da1592627a41
+  n1e8a52375031a480a["report-failure.yml"]
+  nbf32064a6a26ab2df --> n1e8a52375031a480a
+  ndfaa9a79675e5b61b[".gitignore"]
+  root --> ndfaa9a79675e5b61b
+  n3dd5be28cd0a8ce42["CONTRIBUTING.md"]
+  root --> n3dd5be28cd0a8ce42
+  nbd84daf23e7f5febd["LICENSE"]
+  root --> nbd84daf23e7f5febd
+  n42c59af8a4bae559b["README.md"]
+  root --> n42c59af8a4bae559b
+  nffa9424a5a52fc9f7["docs/"]
+  root --> nffa9424a5a52fc9f7
+  n6478234e89bea74de["PRD_TEMPLATE.md"]
+  nffa9424a5a52fc9f7 --> n6478234e89bea74de
+  n5fc96ead7af2ff7e5["architecture/"]
+  nffa9424a5a52fc9f7 --> n5fc96ead7af2ff7e5
+  nf46666975391c91e2["diagrams/"]
+  n5fc96ead7af2ff7e5 --> nf46666975391c91e2
+  n01b1b4a0698882dd9["ast.mmd"]
+  nf46666975391c91e2 --> n01b1b4a0698882dd9
+  n58049bafd23fc930f["uml.mmd"]
+  nf46666975391c91e2 --> n58049bafd23fc930f
+  n942a1dd3ac285a443["reference/"]
+  nffa9424a5a52fc9f7 --> n942a1dd3ac285a443
+  nd8290a951a747133e["diagrams/"]
+  n942a1dd3ac285a443 --> nd8290a951a747133e
+  n83808a788e77182a2["mvc.mmd"]
+  nd8290a951a747133e --> n83808a788e77182a2
+  n1561ed20756105c41["uml.mmd"]
+  nd8290a951a747133e --> n1561ed20756105c41
+  n8ab1bda17cd014606["images/"]
+  n942a1dd3ac285a443 --> n8ab1bda17cd014606
+  n192e5538384c95fdf["GUI_mockup.svg"]
+  n8ab1bda17cd014606 --> n192e5538384c95fdf
+  nb027812e179e11aad["properdocs.yml"]
+  root --> nb027812e179e11aad
+  n90d5d08d3a6b3fd1f["pyproject.toml"]
+  root --> n90d5d08d3a6b3fd1f
+  n424f31ee2b48e507d["repo.dfconfig"]
+  root --> n424f31ee2b48e507d
+  n0c069dda5b5d2988a["requirements-dev.txt"]
+  root --> n0c069dda5b5d2988a
+  na5b75927c2a15b32c["scripts/"]
+  root --> na5b75927c2a15b32c
+  nf2d846b75ebab586a["build_docs.py"]
+  na5b75927c2a15b32c --> nf2d846b75ebab586a
+  n881a845aae214f86e["function load_builder_module"]
+  nf2d846b75ebab586a --> n881a845aae214f86e
+  nd472516f32c933fbd["function diagram_generator"]
+  nf2d846b75ebab586a --> nd472516f32c933fbd
+  nc43815085bc4c41f0["function tracked_files"]
+  nf2d846b75ebab586a --> nc43815085bc4c41f0
+  n18c1b575ebf950baa["function public_path"]
+  nf2d846b75ebab586a --> n18c1b575ebf950baa
+  n2e826e5a00f0b3ca8["function diagram_viewer_markup"]
+  nf2d846b75ebab586a --> n2e826e5a00f0b3ca8
+  nbb094c98d4985fe1b["function render_markdown_mermaid"]
+  nf2d846b75ebab586a --> nbb094c98d4985fe1b
+  nd09a26fc0b92abbcd["function substitute"]
+  nf2d846b75ebab586a --> nd09a26fc0b92abbcd
+  n62aaf4a9db17ff2ae["function pages_for"]
+  nf2d846b75ebab586a --> n62aaf4a9db17ff2ae
+  n9a4da0af0c66e5a56["function link"]
+  nf2d846b75ebab586a --> n9a4da0af0c66e5a56
+  n5ea5ab48ed5797d9a["function navigation"]
+  nf2d846b75ebab586a --> n5ea5ab48ed5797d9a
+  n9ab501ebedf11791c["function entries"]
+  nf2d846b75ebab586a --> n9ab501ebedf11791c
+  n3b76a0445b4a29eb9["function build_nav"]
+  nf2d846b75ebab586a --> n3b76a0445b4a29eb9
+  nbb98b5713cdf7db47["function on_config"]
+  nf2d846b75ebab586a --> nbb98b5713cdf7db47
+  nb0dc3340cedd6be28["function on_files"]
+  nf2d846b75ebab586a --> nb0dc3340cedd6be28
+  ne064106924155e1af["function project_registry"]
+  nf2d846b75ebab586a --> ne064106924155e1af
+  n3ceed7841ee34d08f["function manifest"]
+  nf2d846b75ebab586a --> n3ceed7841ee34d08f
+  n79fc2210d4bdae163["function render_published_mermaid"]
+  nf2d846b75ebab586a --> n79fc2210d4bdae163
+  n76dbcb3960ad7b280["function replace_diagram"]
+  nf2d846b75ebab586a --> n76dbcb3960ad7b280
+  n2193c4838b26cda90["function build"]
+  nf2d846b75ebab586a --> n2193c4838b26cda90
+  n7481a51d5e11a2d46["function write_manifest"]
+  nf2d846b75ebab586a --> n7481a51d5e11a2d46
+  n717051453c644c48a["function main"]
+  nf2d846b75ebab586a --> n717051453c644c48a
+  nb3b1f6a0a65d2cafc["generate_diagrams.py"]
+  na5b75927c2a15b32c --> nb3b1f6a0a65d2cafc
+  nd7304798696e66381["function tracked_paths"]
+  nb3b1f6a0a65d2cafc --> nd7304798696e66381
+  nc0dd98d123d9b664f["function _node"]
+  nb3b1f6a0a65d2cafc --> nc0dd98d123d9b664f
+  nc891610d6f430e251["function _label"]
+  nb3b1f6a0a65d2cafc --> nc891610d6f430e251
+  nfc5b832edde6f9b88["function _declarations"]
+  nb3b1f6a0a65d2cafc --> nfc5b832edde6f9b88
+  nba0b8b2ee393aaa2d["function repository_ast"]
+  nb3b1f6a0a65d2cafc --> nba0b8b2ee393aaa2d
+  n52abe8a90e82e89dd["function implementation_uml"]
+  nb3b1f6a0a65d2cafc --> n52abe8a90e82e89dd
+  n8d3d6e2248e38f4f6["function generated_assets"]
+  nb3b1f6a0a65d2cafc --> n8d3d6e2248e38f4f6
+  n3627e9e02e3c9833b["src/"]
+  root --> n3627e9e02e3c9833b
+  n0b085be7ec56eb827["controller/"]
+  n3627e9e02e3c9833b --> n0b085be7ec56eb827
+  n9207e8cd1678fe773["__init__.py"]
+  n0b085be7ec56eb827 --> n9207e8cd1678fe773
+  n13d1ed874aaea7bd5["model/"]
+  n3627e9e02e3c9833b --> n13d1ed874aaea7bd5
+  nd991ab777ff53118f["__init__.py"]
+  n13d1ed874aaea7bd5 --> nd991ab777ff53118f
+  n90de32b19b2a4480b["figurka.py"]
+  n13d1ed874aaea7bd5 --> n90de32b19b2a4480b
+  n2b120ff40fdf9e4ae["class Figurka"]
+  n90de32b19b2a4480b --> n2b120ff40fdf9e4ae
+  n8c95ab6c35cfaa962["function __init__"]
+  n90de32b19b2a4480b --> n8c95ab6c35cfaa962
+  n398b008e826988519["function get_smery_pohybu"]
+  n90de32b19b2a4480b --> n398b008e826988519
+  nd6dd14f42fdf6cdb0["function getSmeryUtoku"]
+  n90de32b19b2a4480b --> nd6dd14f42fdf6cdb0
+  nd53c4a5f92591684c["function muzeVNasobcich"]
+  n90de32b19b2a4480b --> nd53c4a5f92591684c
+  n0869fac3d18aa4dd9["function getMaximalniNasobek"]
+  n90de32b19b2a4480b --> n0869fac3d18aa4dd9
+  nddedabc38d123e5da["function muzePreskakovat"]
+  n90de32b19b2a4480b --> nddedabc38d123e5da
+  n1b4492fcd67550f9d["function getBarva"]
+  n90de32b19b2a4480b --> n1b4492fcd67550f9d
+  ne9ce1b3d235656cc5["function getTyp"]
+  n90de32b19b2a4480b --> ne9ce1b3d235656cc5
+  ndb37a19c518982589["class Kral"]
+  n90de32b19b2a4480b --> ndb37a19c518982589
+  n394d40329f3fd7fad["function __init__"]
+  n90de32b19b2a4480b --> n394d40329f3fd7fad
+  ncd9af53bef7ea1c51["class Kun"]
+  n90de32b19b2a4480b --> ncd9af53bef7ea1c51
+  nf4e5e4334ebe6c193["function __init__"]
+  n90de32b19b2a4480b --> nf4e5e4334ebe6c193
+  n13a989d9d07590d38["class Vez"]
+  n90de32b19b2a4480b --> n13a989d9d07590d38
+  nf23de0f575e1b770a["function __init__"]
+  n90de32b19b2a4480b --> nf23de0f575e1b770a
+  n40a0c6d8cc600078a["class Strelec"]
+  n90de32b19b2a4480b --> n40a0c6d8cc600078a
+  n308b4e43f812e65a7["function __init__"]
+  n90de32b19b2a4480b --> n308b4e43f812e65a7
+  n0356e6ad3472ae1fe["class Pesec"]
+  n90de32b19b2a4480b --> n0356e6ad3472ae1fe
+  n0d01a92fe1ac15db5["function __init__"]
+  n90de32b19b2a4480b --> n0d01a92fe1ac15db5
+  n5d63d58d881bf5ac9["class Dama"]
+  n90de32b19b2a4480b --> n5d63d58d881bf5ac9
+  nbb938db8b8db0edeb["function __init__"]
+  n90de32b19b2a4480b --> nbb938db8b8db0edeb
+  n19674d186673a22e3["view/"]
+  n3627e9e02e3c9833b --> n19674d186673a22e3
+  nbc6a2f1a8e8ef068d["__init__.py"]
+  n19674d186673a22e3 --> nbc6a2f1a8e8ef068d

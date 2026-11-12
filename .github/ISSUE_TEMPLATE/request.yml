@@ -1,0 +1,38 @@
+name: "User Request"
+description: "Request a change to Chess rules, Tkinter UI, persistent profiles, tests or documentation."
+title: "Request: "
+labels: ["Request"]
+body:
+  - type: textarea
+    id: verbatim_request
+    attributes:
+      label: "User request"
+      description: "Describe the complete requested behavior."
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Primary area"
+      options:
+        - "Chess rules and validation (area:rules)"
+        - "Tkinter desktop GUI (area:desktop)"
+        - "Quests, profiles and persistence (area:core)"
+        - "Testing and Windows packaging (area:ci)"
+        - "Documentation and architecture (area:docs)"
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: "Change type"
+      options: ["feat", "fix", "refactor", "docs", "test", "chore", "ci"]
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: "Observable acceptance criteria"
+      description: "Actor, input, action, outcome, failure cases and verification boundary."
+    validations:
+      required: true

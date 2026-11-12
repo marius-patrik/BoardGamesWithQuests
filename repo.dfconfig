@@ -1,0 +1,226 @@
+{
+  "repo": {
+    "$comment": "DarkFactory repository configuration. Documentation is deployed from GitHub Actions and has a project-specific docs UI.",
+    "identity": {
+      "owner": "marius-patrik",
+      "repo": "BoardGamesWithQuests",
+      "display_name": "BoardGamesWithQuests",
+      "project_title": "BoardGamesWithQuests",
+      "agent_slug": "boardgameswithquests-agent",
+      "default_branch": "develop",
+      "description": "Offline two-player Chess desktop application with six quests, persistent local player XP and Tkinter UI",
+      "topics": [
+        "chess",
+        "python",
+        "tkinter",
+        "game",
+        "education"
+      ],
+      "development_branch": "develop"
+    },
+    "upstream": {
+      "repo": "marius-patrik/DarkFactory",
+      "ref": "fc5896c9ffbf9b1ac5762a271ec2b26ee0efafd4"
+    },
+    "versioning": {
+      "mode": "pridever",
+      "tag_prefix": "v",
+      "initial": "0.1.0"
+    },
+    "environment": {
+      "$comment": "Python gameplay is checked by DarkFactory, and external Windows desktop acceptance is owned by native-windows-acceptance.yml. Final releases require independent approval.",
+      "testing": {
+        "python": {
+          "command": "pytest",
+          "versions": [
+            "3.10",
+            "3.11",
+            "3.12",
+            "3.13"
+          ]
+        }
+      },
+      "documentation": {
+        "python": {
+          "command": "python scripts/build_docs.py",
+          "source": "repository Markdown and Python docstrings"
+        }
+      },
+      "release": {
+        "python": {
+          "enabled": false
+        }
+      }
+    },
+    "areas": {
+      "$comment": "Logical ownership/triage areas; declarations do not claim that target functionality is complete.",
+      "$default": "core",
+      "rules": {
+        "description": "Python game validators, legal move handling and rule-related source",
+        "keywords": [
+          "rule",
+          "rules",
+          "move",
+          "check",
+          "mate",
+          "castling",
+          "promotion",
+          "stalemate",
+          "legal"
+        ]
+      },
+      "pieces": {
+        "description": "Python chess piece classes and movement implementations",
+        "keywords": [
+          "piece",
+          "pieces",
+          "bishop",
+          "knight",
+          "rook",
+          "queen",
+          "king",
+          "pawn",
+          "vector"
+        ]
+      },
+      "quests": {
+        "description": "Quest models and quest manager code in the Python engine",
+        "keywords": [
+          "quest",
+          "quests",
+          "objective",
+          "reward",
+          "progression",
+          "challenge"
+        ]
+      },
+      "board": {
+        "description": "Python board model, coordinates and game configuration",
+        "keywords": [
+          "board",
+          "square",
+          "grid",
+          "coordinate",
+          "layout",
+          "configuration"
+        ]
+      },
+      "docs": {
+        "description": "Canonical PRD/AGENTS and source-derived docs/architecture plus preserved docs/reference assets",
+        "keywords": [
+          "doc",
+          "docs",
+          "documentation",
+          "readme"
+        ]
+      },
+      "ci": {
+        "description": "Native GitHub Actions, documentation and release automation",
+        "keywords": [
+          "ci",
+          "action",
+          "workflow",
+          "pipeline",
+          "runner",
+          "automation"
+        ]
+      },
+      "core": {
+        "description": "Existing Python controller, model wiring and application entry point",
+        "keywords": [
+          "controller",
+          "model",
+          "mvc",
+          "lifecycle",
+          "config",
+          "state",
+          "engine"
+        ]
+      },
+      "game": {
+        "description": "Local Chess rules, match lifecycle, quests and player profiles",
+        "keywords": [
+          "chess",
+          "king",
+          "queen",
+          "pawn",
+          "match",
+          "game",
+          "checkmate",
+          "quest"
+        ]
+      }
+    },
+    "board": {
+      "global": "Global",
+      "boards": [
+        "Global",
+        "BoardGamesWithQuests"
+      ]
+    },
+    "pages": {
+      "build_type": "workflow"
+    },
+    "documentation": {
+      "projects": [
+        {
+          "name": "DarkFactory",
+          "url": "https://marius-patrik.github.io/DarkFactory/"
+        },
+        {
+          "name": "Omnis",
+          "url": "https://marius-patrik.github.io/omnis/"
+        },
+        {
+          "name": "BoardGamesWithQuests",
+          "url": "https://marius-patrik.github.io/BoardGamesWithQuests/"
+        }
+      ]
+    },
+    "license": {
+      "spdx": "GPL-3.0-only",
+      "holder": "marius-patrik",
+      "year": "2026"
+    },
+    "protection": {
+      "lanes": [
+        {
+          "branch": "main",
+          "required_checks": [
+            "governed / released-df-quality",
+            "governed / issue-binding / verify-bound-issue",
+            "main-source",
+            "governance-docs",
+            "preview"
+          ],
+          "approvals": 1,
+          "strict": true,
+          "enforce_admins": true,
+          "resolve_conversations": true
+        },
+        {
+          "branch": "develop",
+          "required_checks": [
+            "governed / released-df-quality",
+            "governed / issue-binding / verify-bound-issue",
+            "governance-docs",
+            "preview"
+          ],
+          "approvals": 1,
+          "strict": true,
+          "enforce_admins": true,
+          "resolve_conversations": true
+        }
+      ]
+    }
+  },
+  "docs": {
+    "version": 1,
+    "site": {
+      "name": "BoardGamesWithQuests",
+      "description": "Offline Chess and quests: Python/Tkinter source, diagrams and documentation"
+    },
+    "home": "README.md"
+  },
+  "providers": {}
+}

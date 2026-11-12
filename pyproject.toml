@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boardgameswithquests"
+version = "1.0.0rc1"
+description = "BoardGamesWithQuests documentation and governance foundation"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+readme = "README.md"
+
+# The application-specific package layout and entry point live on the
+# separate application scaffold/implementation branches. This foundation
+# intentionally has no distributable Python modules.
+[tool.setuptools]
+py-modules = []
+packages = []
+
+[tool.pytest.ini_options]
+testpaths = [".github/tests"]
+addopts = "-ra"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]

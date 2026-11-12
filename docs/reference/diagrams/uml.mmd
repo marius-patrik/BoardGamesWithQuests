@@ -1,0 +1,142 @@
+classDiagram
+direction LR
+%% Reference UML specification; separate from source-derived implementation UML.
+class Uzivatel {
+  +uzivatelske_jmeno : string
+  +jmeno : string
+  +email : string
+  +elo : integer
+  +splnene_kwesty : List
+  +pridej_quest(quest)
+}
+class Quest {
+  +nazev : string
+  +popis : string
+  +validate() bool
+}
+class HerniPlocha {
+  +rozmery : Tuple
+  +herni_deska : List
+  +vyhozene_figurky_b : List
+  +vyhozene_figurky_c : List
+  +vrat_obsah(souradnice) Figurka
+  +posun_figurky(tah) bool
+  +nahrad_figurku(figurka,tah)
+}
+class Figurka {
+  +nazev : string
+  +vektory_utoku : List
+  +barva : integer
+  +vektory : List
+}
+class Hrac {
+  +barva : integer
+  +uzivatel : Uzivatel
+  +getEloRating() integer
+}
+class GameManager {
+  +plocha : HerniPlocha
+  +aktivni_hrac : int
+  +hraci : List
+  +aktualni_tah : Tah
+  +casovac : Timer
+  +game_logger : GameLogger
+  +revizor_tahu : RevizorTahu
+  +zacni_tah() Tah
+  +mozne_tahy() List
+  +zrus_tah()
+  +uloz_log()
+  +get_stav() integer
+}
+class Tah {
+  +vychozi_pozice : List
+  +cilova_pozice : List
+  +figurka : Figurka
+  +typ_tahu : string
+  +over_platnost() bool
+  +proved_tah()
+}
+class RevizorTahu {
+  +herni_plocha : HerniPlocha
+  +tah : Tah
+  +simulate_Move() List
+  +check_Sach() bool
+  +check_Mat() bool
+  +check_Pat() bool
+}
+class Kun {
+  +vektory : List
+  +skok : bool
+}
+class Kral {
+  +vektory : List
+  +skok : bool
+}
+class Dama {
+  +vektory : List
+  +skok : bool
+}
+class Strelec {
+  +vektory : List
+  +skok : bool
+}
+class Pesak {
+  +vektory : List
+  +vektory_utoku : List
+  +skok : bool
+}
+class Vez {
+  +vektory : List
+  +skok : bool
+}
+class UserManager {
+  +id_uzivatele : int
+  +log_uzivatelu : string
+  +historie_uzivatele : string
+}
+class ExportWriter {
+  +field : string
+}
+class ChessNotationWriter {
+  +to_pgn()
+  +to_fen()
+}
+class MetadataWriter {
+  +export()
+}
+class GameLogger {
+  +soubor : File
+  +uloz_tah(tah)
+  +vytvor_soubor(filename)
+}
+class Timer {
+  +cas_hrac : List
+  +nuluj_cas()
+  +pocitej_cas(hrac)
+}
+class QuestManager {
+  +register_quest(quest)
+  +get_completed_quests()
+}
+Uzivatel --> Quest : completed
+Hrac --> Uzivatel : profile
+GameManager --> Hrac : players
+GameManager --> HerniPlocha : board
+GameManager --> Tah : action
+GameManager --> Timer : clock
+GameManager --> GameLogger : history
+GameManager --> RevizorTahu : validates
+HerniPlocha --> Figurka : pieces
+Tah --> Figurka : moves
+RevizorTahu --> HerniPlocha : observes
+RevizorTahu --> Tah : checks
+Figurka <|-- Kun
+Figurka <|-- Kral
+Figurka <|-- Dama
+Figurka <|-- Strelec
+Figurka <|-- Pesak
+Figurka <|-- Vez
+UserManager --> Uzivatel : manages
+ExportWriter <|-- ChessNotationWriter
+ExportWriter <|-- MetadataWriter
+QuestManager --> Quest : awards
