@@ -6,6 +6,7 @@ The approved behavior is specified in .agents/PRD.md.
 
 from __future__ import annotations
 
+
 class HerniPlocha:
     """TODO: implement this contract."""
 
@@ -39,8 +40,10 @@ class HerniPlocha:
     def stav(self, *args, **kwargs):
         raise NotImplementedError("Scaffold only: see .agents/PRD.md")
 
+
 def uvnitr(*args, **kwargs):
     raise NotImplementedError("Scaffold only: see .agents/PRD.md")
+
 
 def algebraicky(*args, **kwargs):
     raise NotImplementedError("Scaffold only: see .agents/PRD.md")

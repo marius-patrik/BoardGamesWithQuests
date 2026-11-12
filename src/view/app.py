@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import tkinter as tk
 
+
 class BoardGamesApplication(tk.Tk):
     """TODO: implement this contract."""
 
@@ -82,6 +83,7 @@ class BoardGamesApplication(tk.Tk):
 
     def _render_persistence_status(self, *args, **kwargs):
         raise NotImplementedError("Scaffold only: see .agents/PRD.md")
+
 
 def run(*args, **kwargs):
     raise NotImplementedError("Scaffold only: see .agents/PRD.md")

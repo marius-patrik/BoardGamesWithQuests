@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from .base import Rule
 
+
 class CastlingRule(Rule):
     """TODO: implement this contract."""
 
@@ -20,6 +21,7 @@ class CastlingRule(Rule):
     def nastalo(self, *args, **kwargs):
         raise NotImplementedError("Scaffold only: see .agents/PRD.md")
 
+
 class EnPassantRule(Rule):
     """TODO: implement this contract."""
 
@@ -31,6 +33,7 @@ class EnPassantRule(Rule):
 
     def nastalo(self, *args, **kwargs):
         raise NotImplementedError("Scaffold only: see .agents/PRD.md")
+
 
 class PromotionRule(Rule):
     """TODO: implement this contract."""

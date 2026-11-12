@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import tkinter as tk
 
+
 class HracGameView(tk.Frame):
     """TODO: implement this contract."""
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from .base import Rule
 
+
 class CaptureRule(Rule):
     """TODO: implement this contract."""
 

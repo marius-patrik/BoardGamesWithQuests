@@ -6,6 +6,7 @@ The approved behavior is specified in .agents/PRD.md.
 
 from __future__ import annotations
 
+
 class Uzivatel:
     """TODO: implement this contract."""
 
@@ -41,14 +42,18 @@ class UserManager:
     def uloz_uzivatele(self, *args, **kwargs):
         raise NotImplementedError("Scaffold only: see .agents/PRD.md")
 
+
 def data_directory(*args, **kwargs):
     raise NotImplementedError("Scaffold only: see .agents/PRD.md")
+
 
 def atomic_json(*args, **kwargs):
     raise NotImplementedError("Scaffold only: see .agents/PRD.md")
 
+
 def profile_write_lock(*args, **kwargs):
     raise NotImplementedError("Scaffold only: see .agents/PRD.md")
+
 
 def normalize_username(*args, **kwargs):
     raise NotImplementedError("Scaffold only: see .agents/PRD.md")

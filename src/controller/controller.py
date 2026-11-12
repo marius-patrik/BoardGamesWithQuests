@@ -6,6 +6,7 @@ The approved behavior is specified in .agents/PRD.md.
 
 from __future__ import annotations
 
+
 class GameManagerController:
     """TODO: implement this contract."""
 
