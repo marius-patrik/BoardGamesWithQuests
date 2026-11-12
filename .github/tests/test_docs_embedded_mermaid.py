@@ -47,6 +47,10 @@ def test_every_tracked_diagram_page_publishes_rendered_local_svg():
     assert (site / "index.html").is_file(), "Build the documentation before artifact checks"
     pages = builder.pages_for(ROOT)
     for original, target, body in pages:
+        # Source-code listings can contain the literal HTML string used by the
+        # compiler; those strings are not actual Mermaid diagrams.
+        if not original.lower().endswith((".md", ".mmd")):
+            continue
         expected = body.count('<pre class="mermaid">')
         if not expected:
             continue
