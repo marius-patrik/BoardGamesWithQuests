@@ -491,10 +491,6 @@ html[data-nav-collapsed="true"] .layout:has(.toc--empty) {
   .header__kbd { display: none; }
 }
 
-/* Mermaid remains a navigable, scalable diagram instead of a static screenshot. */
-.prose pre.mermaid { overflow: auto; max-width: 100%; padding: 1.25rem; background: var(--background, transparent); border: 1px solid var(--border, #ddd); }
-.prose pre.mermaid svg { max-width: none; min-width: 100%; height: auto; }
-
 /* Diagram viewers render Mermaid and SVG assets as graphics with real pan/zoom.
    Override the generic 1rem icon SVG rule for architectural SVG elements. */
 .prose .diagram-viewer {
@@ -551,15 +547,6 @@ html[data-nav-collapsed="true"] .layout:has(.toc--empty) {
   max-width: none;
   transform-origin: 0 0;
   will-change: transform;
-}
-.prose .diagram-viewer__canvas pre.mermaid {
-  padding: 0;
-  margin: 0;
-  border: 0;
-  overflow: visible;
-  max-width: none;
-  min-width: 0;
-  background: transparent;
 }
 .prose .diagram-viewer__canvas img {
   display: block;
