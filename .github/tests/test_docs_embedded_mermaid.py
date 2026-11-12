@@ -47,7 +47,9 @@ def test_every_tracked_diagram_page_publishes_rendered_local_svg():
     if not (site / "index.html").is_file():
         import pytest
 
-        pytest.skip("Published-site artifact checks require a docs build; docs CI always builds first")
+        pytest.skip(
+            "Published-site artifact checks require a docs build; docs CI always builds first"
+        )
     pages = builder.pages_for(ROOT)
     for original, target, body in pages:
         # Source-code listings can contain the literal HTML string used by the
