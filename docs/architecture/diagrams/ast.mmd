@@ -78,12 +78,6 @@ flowchart LR
   nb914c06ad22602465 --> n56d8aa4f97d913c40
   n2092df3a19d2f7b13["scripts/"]
   nfad65243633b77700 --> n2092df3a19d2f7b13
-  n3b9f839fbbebb1fb8["assemble_docs.py"]
-  n2092df3a19d2f7b13 --> n3b9f839fbbebb1fb8
-  n36456e6f6c5ab65b4["function assemble"]
-  n3b9f839fbbebb1fb8 --> n36456e6f6c5ab65b4
-  ne529287351db29edc["function main"]
-  n3b9f839fbbebb1fb8 --> ne529287351db29edc
   n3cdac3a1a6fcf734d["build_docs.py"]
   n2092df3a19d2f7b13 --> n3cdac3a1a6fcf734d
   n1a69cf04d185352be["function load_builder_module"]
@@ -124,26 +118,6 @@ flowchart LR
   n3cdac3a1a6fcf734d --> nf879f9fe40cf72f32
   n3d71879c09046420c["function main"]
   n3cdac3a1a6fcf734d --> n3d71879c09046420c
-  nc50428a0522ce7111["collect_docs_artifacts.py"]
-  n2092df3a19d2f7b13 --> nc50428a0522ce7111
-  ne14968af41ea3df54["function gh"]
-  nc50428a0522ce7111 --> ne14968af41ea3df54
-  n6b30d7ec2afb28b98["function api"]
-  nc50428a0522ce7111 --> n6b30d7ec2afb28b98
-  n130f12cea55547967["function pages"]
-  nc50428a0522ce7111 --> n130f12cea55547967
-  naa57ed5e320daca2d["function open_same_repo_prs"]
-  nc50428a0522ce7111 --> naa57ed5e320daca2d
-  n62767c90025ba8241["function artifacts"]
-  nc50428a0522ce7111 --> n62767c90025ba8241
-  nc4a56f5c33e071b7d["function approved_run"]
-  nc50428a0522ce7111 --> nc4a56f5c33e071b7d
-  n08655f27c177c39f7["function download"]
-  nc50428a0522ce7111 --> n08655f27c177c39f7
-  nb776054b623ca5a3b["function restore"]
-  nc50428a0522ce7111 --> nb776054b623ca5a3b
-  n374d0c58c752aec8a["function main"]
-  nc50428a0522ce7111 --> n374d0c58c752aec8a
   n91d3c07ae3b6e8c4b["generate_diagrams.py"]
   n2092df3a19d2f7b13 --> n91d3c07ae3b6e8c4b
   nc6fc72dbbd3d20a66["function tracked_paths"]
@@ -238,30 +212,6 @@ flowchart LR
   n8c085dab85df07352 --> n55008c39ede251577
   ne14dc4c0df9538c08["function test_castling_while_currently_checked_is_rejected"]
   n8c085dab85df07352 --> ne14dc4c0df9538c08
-  n905320175c75255b2["test_docs_artifacts.py"]
-  nc9f5868186eb03f66 --> n905320175c75255b2
-  nf021606f8ea023fd8["function run_record"]
-  n905320175c75255b2 --> nf021606f8ea023fd8
-  n9775f25c8bdd5ec64["function artifact"]
-  n905320175c75255b2 --> n9775f25c8bdd5ec64
-  nc41445254e3fe96c3["function prepare_cli"]
-  n905320175c75255b2 --> nc41445254e3fe96c3
-  nd0767f73250f85076["function snapshot"]
-  n905320175c75255b2 --> nd0767f73250f85076
-  n6a5f30a5981ea05e7["function invoke"]
-  n905320175c75255b2 --> n6a5f30a5981ea05e7
-  n020ae264bcc60d366["function assemble"]
-  n905320175c75255b2 --> n020ae264bcc60d366
-  nba73bfcfd7114d73f["function test_main_and_matching_pr_publish_without_branch_storage"]
-  n905320175c75255b2 --> nba73bfcfd7114d73f
-  n4c92f95b5f4edeb83["function test_failed_main_and_outdated_pr_never_publish_stale_content"]
-  n905320175c75255b2 --> n4c92f95b5f4edeb83
-  nd4d5db7ccbbc95c23["function test_independent_pr_publishes_when_main_has_no_passing_build"]
-  n905320175c75255b2 --> nd4d5db7ccbbc95c23
-  nf3d53e3ca3af8c0bd["function test_spoofed_artifact_origin_is_rejected"]
-  n905320175c75255b2 --> nf3d53e3ca3af8c0bd
-  n1fd7b65f60417b1e4["function test_github_api_failure_does_not_claim_success"]
-  n905320175c75255b2 --> n1fd7b65f60417b1e4
   nc58e9fa04cebf260c["test_docs_browser.mjs"]
   nc9f5868186eb03f66 --> nc58e9fa04cebf260c
   n5f65b1147cf4c7caa["test_docs_manifest.py"]
@@ -272,22 +222,6 @@ flowchart LR
   n5f65b1147cf4c7caa --> n5b77489b350c16458
   nbcc031ffcaeb28544["function test_missing_documentation_root_fails_without_publishing"]
   n5f65b1147cf4c7caa --> nbcc031ffcaeb28544
-  n08502483f6d83fd34["test_docs_publication.py"]
-  nc9f5868186eb03f66 --> n08502483f6d83fd34
-  n5334579fdb981f045["function invoke"]
-  n08502483f6d83fd34 --> n5334579fdb981f045
-  n5fcce9b66504b9258["function test_publishes_pr_even_without_main_site"]
-  n08502483f6d83fd34 --> n5fcce9b66504b9258
-  n79ac7844e16f2f06d["function test_preserves_last_passing_main_and_filters_closed_previews"]
-  n08502483f6d83fd34 --> n79ac7844e16f2f06d
-  nec51c4283bc403903["function test_missing_staging_fails_instead_of_reporting_success"]
-  n08502483f6d83fd34 --> nec51c4283bc403903
-  nf106a07f2f08c75d6["function test_rejects_symlink_payload_in_untrusted_artifact"]
-  n08502483f6d83fd34 --> nf106a07f2f08c75d6
-  n7e1d9be7e80c6ae99["function test_replaces_stale_deployed_preview_on_update"]
-  n08502483f6d83fd34 --> n7e1d9be7e80c6ae99
-  n759fa5db536bcba5c["function test_trusted_publisher_uses_repository_default_branch"]
-  n08502483f6d83fd34 --> n759fa5db536bcba5c
   n9f98fe734168a36b1["test_gui.py"]
   nc9f5868186eb03f66 --> n9f98fe734168a36b1
   nc88c1403454fa8f06["function application"]
@@ -374,14 +308,10 @@ flowchart LR
   nbf32064a6a26ab2df --> n936162c3846c6b099
   nf062b443567dc1fe8["auto-format.yml"]
   nbf32064a6a26ab2df --> nf062b443567dc1fe8
-  ne7cad7434d574f09c["build-main-docs.yml"]
-  nbf32064a6a26ab2df --> ne7cad7434d574f09c
   n3feee3a065a9480cc["darkfactory-control.yml"]
   nbf32064a6a26ab2df --> n3feee3a065a9480cc
   n287ff0a0ecf3283a1["darkfactory.yml"]
   nbf32064a6a26ab2df --> n287ff0a0ecf3283a1
-  n84354cf99c1713fc6["deploy-docs.yml"]
-  nbf32064a6a26ab2df --> n84354cf99c1713fc6
   n76ec2fd65ee9dad06["governance-docs.yml"]
   nbf32064a6a26ab2df --> n76ec2fd65ee9dad06
   n14cf6130af7812ba5["main-source.yml"]
@@ -390,8 +320,6 @@ flowchart LR
   nbf32064a6a26ab2df --> n40021a2ee278a2824
   nc5611faa7a94a1ca4["open-pr.yml"]
   nbf32064a6a26ab2df --> nc5611faa7a94a1ca4
-  n0bb25caaca528da62["preview-docs.yml"]
-  nbf32064a6a26ab2df --> n0bb25caaca528da62
   na3772da1592627a41["project-automation.yml"]
   nbf32064a6a26ab2df --> na3772da1592627a41
   n1e8a52375031a480a["report-failure.yml"]
