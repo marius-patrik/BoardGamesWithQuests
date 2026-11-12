@@ -320,10 +320,12 @@ def test_embedded_markdown_mermaid_is_rendered_in_the_published_prd():
     assert page.is_file(), "The canonical PRD should have a published Markdown page"
     markup = page.read_text(encoding="utf-8")
     assert markup.count('class="diagram-viewer"') >= 3
-    assert 'assets/diagrams.js' in markup
+    assert "assets/diagrams.js" in markup
     assert '<pre class="mermaid">' not in markup
     assert "language-mermaid" not in markup
-    sources = re.findall(r'<img src="([^"]+\\.svg)"[^>]*alt="Rendered Mermaid architecture diagram"', markup)
+    sources = re.findall(
+        r'<img src="([^"]+\\.svg)"[^>]*alt="Rendered Mermaid architecture diagram"', markup
+    )
     assert len(sources) >= 3, "Every PRD Mermaid fence should compile to a real image"
     for source in sources:
         image = (page.parent / urlsplit(unescape(source)).path).resolve()

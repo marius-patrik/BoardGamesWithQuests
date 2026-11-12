@@ -17,7 +17,7 @@ spec.loader.exec_module(builder)
 def test_fenced_mermaid_uses_existing_diagram_viewer_and_escapes_source():
     markdown = (
         "# Document\n\nBefore\n\n"
-        "```mermaid\nflowchart LR\nA[\"<unsafe>\"] --> B\n```\n\n"
+        '```mermaid\nflowchart LR\nA["<unsafe>"] --> B\n```\n\n'
         "Between\n\n~~~mermaid\nsequenceDiagram\nA->>B: Hello\n~~~\n\nAfter\n"
     )
     result = builder.render_markdown_mermaid(markdown)

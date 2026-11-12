@@ -96,34 +96,38 @@ flowchart LR
   n3cdac3a1a6fcf734d --> n0b5589454366cb852
   n628c502f6140e0636["function diagram_viewer_markup"]
   n3cdac3a1a6fcf734d --> n628c502f6140e0636
-  nb401084c61a080f49["function pages_for"]
+  nb401084c61a080f49["function render_markdown_mermaid"]
   n3cdac3a1a6fcf734d --> nb401084c61a080f49
-  nee8c87b89b78998dd["function link"]
+  nee8c87b89b78998dd["function substitute"]
   n3cdac3a1a6fcf734d --> nee8c87b89b78998dd
-  n90998e54ea8793a85["function navigation"]
+  n90998e54ea8793a85["function pages_for"]
   n3cdac3a1a6fcf734d --> n90998e54ea8793a85
-  n7de7b419ccc0c3b75["function entries"]
+  n7de7b419ccc0c3b75["function link"]
   n3cdac3a1a6fcf734d --> n7de7b419ccc0c3b75
-  ne6c85f7dc7da2a7ae["function build_nav"]
+  ne6c85f7dc7da2a7ae["function navigation"]
   n3cdac3a1a6fcf734d --> ne6c85f7dc7da2a7ae
-  n0981677583e6e8fac["function on_config"]
+  n0981677583e6e8fac["function entries"]
   n3cdac3a1a6fcf734d --> n0981677583e6e8fac
-  n1eafe7271d1746b45["function on_files"]
+  n1eafe7271d1746b45["function build_nav"]
   n3cdac3a1a6fcf734d --> n1eafe7271d1746b45
-  n0453057db91c0c18e["function project_registry"]
+  n0453057db91c0c18e["function on_config"]
   n3cdac3a1a6fcf734d --> n0453057db91c0c18e
-  nf75a58d4dbbe2007e["function manifest"]
+  nf75a58d4dbbe2007e["function on_files"]
   n3cdac3a1a6fcf734d --> nf75a58d4dbbe2007e
-  n5fd9fa78cc3d87cff["function render_published_mermaid"]
+  n5fd9fa78cc3d87cff["function project_registry"]
   n3cdac3a1a6fcf734d --> n5fd9fa78cc3d87cff
-  n636e0d15b08f11faf["function replace_diagram"]
+  n636e0d15b08f11faf["function manifest"]
   n3cdac3a1a6fcf734d --> n636e0d15b08f11faf
-  nfc8c4b1c612f4f95b["function build"]
+  nfc8c4b1c612f4f95b["function render_published_mermaid"]
   n3cdac3a1a6fcf734d --> nfc8c4b1c612f4f95b
-  nf879f9fe40cf72f32["function write_manifest"]
+  nf879f9fe40cf72f32["function replace_diagram"]
   n3cdac3a1a6fcf734d --> nf879f9fe40cf72f32
-  n3d71879c09046420c["function main"]
+  n3d71879c09046420c["function build"]
   n3cdac3a1a6fcf734d --> n3d71879c09046420c
+  ndf88209cd3578fcd3["function write_manifest"]
+  n3cdac3a1a6fcf734d --> ndf88209cd3578fcd3
+  nfa71d6769266c2807["function main"]
+  n3cdac3a1a6fcf734d --> nfa71d6769266c2807
   nc50428a0522ce7111["collect_docs_artifacts.py"]
   n2092df3a19d2f7b13 --> nc50428a0522ce7111
   ne14968af41ea3df54["function gh"]
@@ -186,6 +190,8 @@ flowchart LR
   nd6487c9d1884235b7 --> n60b7a22b571106478
   n9fb4ad9de0920ff12["function test_image_and_diagram_viewers_offer_an_accessible_modal"]
   nd6487c9d1884235b7 --> n9fb4ad9de0920ff12
+  nb9afea5281c4622ba["function test_embedded_markdown_mermaid_is_rendered_in_the_published_prd"]
+  nd6487c9d1884235b7 --> nb9afea5281c4622ba
   n8c085dab85df07352["test_chess.py"]
   nc9f5868186eb03f66 --> n8c085dab85df07352
   n5356f4053d6254310["function manager"]
@@ -264,6 +270,14 @@ flowchart LR
   n905320175c75255b2 --> n1fd7b65f60417b1e4
   nc58e9fa04cebf260c["test_docs_browser.mjs"]
   nc9f5868186eb03f66 --> nc58e9fa04cebf260c
+  n574a634296f26fb29["test_docs_embedded_mermaid.py"]
+  nc9f5868186eb03f66 --> n574a634296f26fb29
+  n54d857d5ab6a86e47["function test_fenced_mermaid_uses_existing_diagram_viewer_and_escapes_source"]
+  n574a634296f26fb29 --> n54d857d5ab6a86e47
+  n2cd167dfc614c6044["function test_non_mermaid_code_and_inline_examples_remain_unchanged"]
+  n574a634296f26fb29 --> n2cd167dfc614c6044
+  nf9479f8b9280d6cce["function test_canonical_prd_contains_multiple_embedded_mermaid_diagrams"]
+  n574a634296f26fb29 --> nf9479f8b9280d6cce
   n5f65b1147cf4c7caa["test_docs_manifest.py"]
   nc9f5868186eb03f66 --> n5f65b1147cf4c7caa
   n4f9ff89afbadd4d0a["function publish"]
