@@ -34,7 +34,7 @@ def test_non_mermaid_code_and_inline_examples_remain_unchanged():
 
 
 def test_canonical_prd_contains_multiple_embedded_mermaid_diagrams():
-    source = (SCRIPT.parents[1] / ".agents" / "PRD.md").read_text(encoding="utf-8")
+    source = (SCRIPT.parents[2] / ".agents" / "PRD.md").read_text(encoding="utf-8")
     result = builder.render_markdown_mermaid(source)
     assert result.count('class="diagram-viewer"') >= 3
     assert result.count('<pre class="mermaid">') >= 3

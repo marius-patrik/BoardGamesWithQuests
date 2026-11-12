@@ -75,14 +75,14 @@ def render_markdown_mermaid(markdown: str) -> str:
     import re
 
     fence = re.compile(
-        r"(?m)^(?P<indent> {0,3})(?P<marker>`{3,}|~{3,})mermaid[ \\t]*\\r?\\n"
-        r"(?P<source>[\\s\\S]*?)"
-        r"^(?P=indent)(?P=marker)[ \\t]*(?:\\r?\\n|$)"
+        r"(?m)^(?P<indent> {0,3})(?P<marker>`{3,}|~{3,})mermaid[ \t]*\r?\n"
+        r"(?P<source>[\s\S]*?)"
+        r"^(?P=indent)(?P=marker)[ \t]*(?:\r?\n|$)"
     )
 
     def substitute(match: re.Match[str]) -> str:
         source = html.escape(match.group("source").strip(), quote=False)
-        return diagram_viewer_markup('<pre class="mermaid">' + source + "</pre>") + "\\n\\n"
+        return diagram_viewer_markup('<pre class="mermaid">' + source + "</pre>") + "\n\n"
 
     return fence.sub(substitute, markdown)
 
