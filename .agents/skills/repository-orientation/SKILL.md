@@ -1,6 +1,6 @@
 ---
 name: repository-orientation
-description: Verify branch state, canonical documents, production source, and native verification workflows before changes.
+description: Verify branch state, canonical documents, actual source and deployment workflows before changes.
 ---
 # Repository Orientation
 

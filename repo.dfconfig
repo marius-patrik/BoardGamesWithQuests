@@ -1,6 +1,6 @@
 {
   "repo": {
-    "$comment": "DarkFactory repository configuration for the offline Python/Tkinter Chess application; web documentation deployment is retired.",
+    "$comment": "DarkFactory repository configuration. Documentation is deployed from GitHub Actions and has a project-specific docs UI.",
     "identity": {
       "owner": "marius-patrik",
       "repo": "BoardGamesWithQuests",
@@ -115,7 +115,7 @@
         ]
       },
       "ci": {
-        "description": "Native desktop verification, Python quality gates, and release governance",
+        "description": "Native GitHub Actions, documentation and release automation",
         "keywords": [
           "ci",
           "action",
@@ -158,6 +158,9 @@
         "BoardGamesWithQuests"
       ]
     },
+    "pages": {
+      "build_type": "workflow"
+    },
     "documentation": {
       "projects": [
         {
@@ -187,7 +190,8 @@
             "governed / released-df-quality",
             "governed / issue-binding / verify-bound-issue",
             "main-source",
-            "governance-docs"
+            "governance-docs",
+            "preview"
           ],
           "approvals": 1,
           "strict": true,
@@ -199,7 +203,8 @@
           "required_checks": [
             "governed / released-df-quality",
             "governed / issue-binding / verify-bound-issue",
-            "governance-docs"
+            "governance-docs",
+            "preview"
           ],
           "approvals": 1,
           "strict": true,
