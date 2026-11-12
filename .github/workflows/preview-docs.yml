@@ -43,7 +43,7 @@ jobs:
 
       - name: Build documentation from PR source
         run: |
-          python .github/scripts/build_docs.py
+          python scripts/build_docs.py
           test -f site/index.html
           touch site/.nojekyll
 

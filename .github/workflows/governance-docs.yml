@@ -13,6 +13,6 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Verify source-derived diagrams match the checked-out code
         run: |
-          python .github/scripts/generate_diagrams.py
+          python scripts/generate_diagrams.py
           git diff --exit-code -- docs/architecture/diagrams/
 

@@ -54,7 +54,7 @@ jobs:
       - name: Regenerate source-derived Mermaid architecture
         if: hashFiles('docs/architecture/diagrams/*.mmd') != ''
         run: |
-          python .github/scripts/generate_diagrams.py
+          python scripts/generate_diagrams.py
 
       - name: Commit tracked formatting changes
         run: |
