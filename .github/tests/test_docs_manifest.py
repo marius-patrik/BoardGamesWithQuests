@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PUBLISHER = ROOT / ".github/scripts/build_docs.py"
+PUBLISHER = ROOT / "scripts/build_docs.py"
 
 
 def publish(site: Path) -> subprocess.CompletedProcess[str]:
