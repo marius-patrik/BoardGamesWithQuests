@@ -23,7 +23,7 @@ include = ["model*", "controller*", "view*"]
 
 
 [tool.pytest.ini_options]
-testpaths = [".github/tests"]
+testpaths = ["tests", ".github/tests"]
 addopts = "-ra"
 markers = ["gui: real Tkinter interactive acceptance"]
 
