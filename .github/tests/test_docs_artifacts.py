@@ -81,7 +81,14 @@ def snapshot(tmp: Path, name: str, html: str, sha: str | None = None) -> None:
 
 def invoke(tmp: Path, env: dict[str, str]):
     return subprocess.run(
-        [sys.executable, str(SCRIPT), "--repo", REPO, "--staging", str(tmp / "staging")],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--repo",
+            REPO,
+            "--staging",
+            str(tmp / "staging"),
+        ],
         env=env,
         capture_output=True,
         text=True,
@@ -152,7 +159,9 @@ def test_main_and_matching_pr_publish_without_branch_storage(tmp_path: Path) -> 
     assert not (tmp_path / "site/pr-339").exists()
 
 
-def test_failed_main_and_outdated_pr_never_publish_stale_content(tmp_path: Path) -> None:
+def test_failed_main_and_outdated_pr_never_publish_stale_content(
+    tmp_path: Path,
+) -> None:
     env = prepare_cli(
         tmp_path,
         {

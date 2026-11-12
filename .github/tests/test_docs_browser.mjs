@@ -66,7 +66,7 @@ try {
   assert(wide > centered + 70, "Full-width mode did not expand the actual reader");
   assert.equal(await page.$eval("html", el => el.dataset.layout), "wide");
   console.log("Checking layout persistence across page navigation");
-  await page.goto(base + "/repository-files/agents/architecture/diagrams/uml.mmd/", { waitUntil: "load" });
+  await page.goto(base + "/repository-files/docs/architecture/diagrams/uml.mmd/", { waitUntil: "load" });
   assert.equal(await page.$eval("html", el => el.dataset.layout), "wide", "Width mode was not saved");
   await page.click("[data-layout-toggle]");
 
@@ -91,7 +91,7 @@ try {
   // The original image, rather than a fabricated Mermaid substitute, opens
   // as a full-viewport modal. Escape must return the same viewer to the page.
   console.log("Checking original image fullscreen modal");
-  await page.goto(base + "/repository-files/agents/reference/images/GUI_mockup.svg/", {
+  await page.goto(base + "/repository-files/docs/reference/images/GUI_mockup.svg/", {
     waitUntil: "load",
   });
   await page.waitForSelector('[aria-label="Expand image in modal"]');
@@ -106,7 +106,7 @@ try {
 
   // The generated implementation UML shares the same modal behavior.
   console.log("Checking generated implementation UML fullscreen modal");
-  await page.goto(base + "/repository-files/agents/architecture/diagrams/uml.mmd/", {
+  await page.goto(base + "/repository-files/docs/architecture/diagrams/uml.mmd/", {
     waitUntil: "load",
   });
   await page.waitForSelector('[aria-label="Expand image in modal"]');
@@ -114,7 +114,21 @@ try {
   assert.equal(await page.$eval("dialog.diagram-modal", el => el.open), true);
   await page.click('[aria-label="Close expanded image"]');
   await page.waitForFunction(() => !document.querySelector("dialog.diagram-modal"));
-  console.log("Documentation layout, nested navigation and image/UML modals verified in Chromium");
+  // Fenced Mermaid diagrams embedded in ordinary Markdown use the exact same
+  // viewer, with compiled local SVGs rather than visible source fences.
+  console.log("Checking embedded Markdown Mermaid diagrams");
+  await page.goto(base + "/agents/PRD/", { waitUntil: "load" });
+  const viewerCount = await page.$eval("body", el => el.querySelectorAll("[data-diagram-viewer]").length);
+  assert(viewerCount >= 3, "Canonical PRD's Mermaid diagrams were not rendered");
+  assert(await page.$("[data-diagram-viewer] img"), "Embedded Mermaid has no SVG graphic");
+  const first = await page.$("[data-diagram-viewer]");
+  const expand = await first.$('[aria-label="Expand image in modal"]');
+  assert(expand, "Embedded Mermaid viewer has no expand control");
+  await expand.click();
+  assert.equal(await page.$eval("dialog.diagram-modal", el => el.open), true);
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog.diagram-modal"));
+  console.log("Documentation layout, nested navigation, standalone and inline Mermaid modals verified in Chromium");
 } finally {
   await browser?.close();
   await new Promise(done => server.close(done));

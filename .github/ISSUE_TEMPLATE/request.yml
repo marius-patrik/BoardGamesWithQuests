@@ -1,5 +1,5 @@
 name: "User Request"
-description: "Request a product change, correction, refactor, or documentation update."
+description: "Request a change to Chess rules, Tkinter UI, persistent profiles, tests or documentation."
 title: "Request: "
 labels: ["Request"]
 body:
@@ -7,55 +7,32 @@ body:
     id: verbatim_request
     attributes:
       label: "User request"
-      description: "Include the complete request without changing its meaning."
-      placeholder: "Describe the desired externally observable outcome."
+      description: "Describe the complete requested behavior."
     validations:
       required: true
-
   - type: dropdown
     id: area
     attributes:
       label: "Primary area"
-      description: "Select the main responsibility affected."
       options:
-        - "engine (area:model)"
-        - "declarative game definitions and rules (area:game)"
-        - "server and persistence (area:server)"
-        - "web interface (area:web)"
-        - "desktop application (area:desktop)"
-        - "CI and DarkFactory (area:ci)"
-        - "documentation and architecture (area:docs)"
+        - "Chess rules and validation (area:rules)"
+        - "Tkinter desktop GUI (area:desktop)"
+        - "Quests, profiles and persistence (area:core)"
+        - "Testing and Windows packaging (area:ci)"
+        - "Documentation and architecture (area:docs)"
     validations:
       required: true
-
   - type: dropdown
     id: type
     attributes:
       label: "Change type"
-      options:
-        - "feat"
-        - "fix"
-        - "refactor"
-        - "docs"
-        - "test"
-        - "chore"
-        - "ci"
+      options: ["feat", "fix", "refactor", "docs", "test", "chore", "ci"]
     validations:
       required: true
-
   - type: textarea
     id: acceptance_criteria
     attributes:
-      label: "Behavioral acceptance criteria"
-      description: "Describe the supported actor, input, actions, expected outcomes, failure cases, and verification boundary."
-      placeholder: "What must a user or external consumer demonstrably be able to do?"
+      label: "Observable acceptance criteria"
+      description: "Actor, input, action, outcome, failure cases and verification boundary."
     validations:
       required: true
-
-  - type: textarea
-    id: dependencies
-    attributes:
-      label: "Dependencies and constraints"
-      description: "List related issues, architecture contracts, provider requirements, and known blockers."
-    validations:
-      required: false

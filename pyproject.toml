@@ -1,73 +1,32 @@
 [build-system]
-requires = ["setuptools>=69", "setuptools-scm>=8"]
+requires = ["setuptools>=65", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "chesswithquests"
-dynamic = ["version"]
-# The Git release tag is the version source of truth, including for Python builds.
-description = "A board game engine in which the configuration is the product: chess and checkers share one engine."
-readme = "README.md"
+name = "boardgameswithquests"
+version = "1.0.0rc1"
+description = "Offline two-player Chess with quests and persistent XP"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
-authors = [{ name = "marius-patrik" }]
-keywords = ["chess", "checkers", "board game", "engine", "mvc", "quests"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: End Users/Desktop",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Games/Entertainment :: Board Games",
-]
-# The runtime uses the standard library and tkinter, and nothing else. `python-chess` is
-# banned: FEN, PGN, SAN and coordinate conversion are hand-rolled in this repository.
-dependencies = []
-
-[project.urls]
-Homepage = "https://github.com/marius-patrik/BoardGamesWithQuests"
-Documentation = "https://marius-patrik.github.io/BoardGamesWithQuests/"
-"Architecture diagram" = "https://app.diagrams.net/#G19OY7iySOQWRAZDFKy1r-7tJKG_L-_Qn8#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D"
+license = {file = "LICENSE"}
+readme = "README.md"
 
 [project.gui-scripts]
-chesswithquests = "engine.app:main"
-
-[project.entry-points."boardgameswithquests.games"]
-chess = "chess"
-checkers = "checkers"
-
-[tool.setuptools_scm]
-# setuptools-scm reads Git tags directly; no manually maintained package version.
+boardgameswithquests = "main:main"
 
 [tool.setuptools]
-package-dir = {"" = "packages"}
+package-dir = {"" = "src"}
+py-modules = ["main"]
 
 [tool.setuptools.packages.find]
-where = ["packages"]
-include = ["engine*", "chess*", "checkers*"]
+where = ["src"]
+include = ["model*", "controller*", "view*"]
 
-[tool.setuptools.package-data]
-chess = ["config.json"]
-checkers = ["config.json"]
 
 [tool.pytest.ini_options]
-minversion = "7.0"
 testpaths = [".github/tests"]
-pythonpath = ["packages", "."]
+addopts = "-ra"
+markers = ["gui: real Tkinter interactive acceptance"]
 
 [tool.black]
 line-length = 100
-target-version = ["py310", "py311", "py312", "py313"]
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.venv
-  | \.pytest_cache
-  | build
-  | dist
-)/
-'''
+target-version = ["py310"]

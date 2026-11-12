@@ -7,9 +7,10 @@ on:
       - Deploy Documentation
       - Open Pull Request
       - Project Board Automation
-      - Release
       - Run Autonomous Agent
-      - Verify Docs Layout
+      - Generated governance sources
+      - V1 cleanroom verification
+      - Preview Documentation
     types: [completed]
 
 permissions:

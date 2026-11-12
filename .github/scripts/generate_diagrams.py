@@ -41,42 +41,27 @@ def _label(text: str) -> str:
 
 
 def _declarations(path: Path) -> list[tuple[str, str]]:
-    """Read syntax structure for any language supported by Tree-sitter."""
-    if not path.is_file() or path.is_symlink():
-        return []
-    from tree_sitter_language_pack import detect_language, get_parser
+    """Extract Python syntax with the standard library; never download parsers.
 
-    language = "json" if path.name.endswith(".dfconfig") else detect_language(str(path))
-    if not language:
+    Every tracked file is still represented as a leaf in the repository AST.
+    Non-Python assets are represented by filename and can be opened from the
+    generated repository-file pages.
+    """
+    if not path.is_file() or path.is_symlink() or path.suffix.lower() != ".py":
         return []
-    source = path.read_bytes()
-    if b"\0" in source:
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, SyntaxError):
         return []
-    tree = get_parser(language).parse(source)
     nodes: list[tuple[str, str]] = []
-    # The global diagram shows structural declarations. The original content
-    # of every file is available from its generated documentation page.
-    stack: list[tuple[Any, int]] = [(tree.root_node, 0)]
-    while stack:
+    stack: list[tuple[ast.AST, int]] = [(tree, 0)]
+    while stack and len(nodes) < 180:
         node, depth = stack.pop()
-        kind = node.type
-        if depth > 0 and (
-            "definition" in kind
-            or "declaration" in kind
-            or kind in {"class_body", "function_item", "impl_item", "method", "interface"}
-        ):
-            label = kind
-            name = node.child_by_field_name("name")
-            if name is not None:
-                label += (
-                    " "
-                    + source[name.start_byte : name.end_byte].decode("utf-8", errors="replace")[
-                        :120
-                    ]
-                )
-            nodes.append((kind, label))
-        if depth < 5 and len(nodes) < 180:
-            stack.extend((child, depth + 1) for child in reversed(node.named_children))
+        if depth > 0 and isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            kind = "class" if isinstance(node, ast.ClassDef) else "function"
+            nodes.append((kind, kind + " " + node.name))
+        if depth < 5:
+            stack.extend((child, depth + 1) for child in reversed(list(ast.iter_child_nodes(node))))
     return nodes
 
 
@@ -114,7 +99,7 @@ def implementation_uml(root: Path) -> str:
     for path in tracked_paths(root):
         # Application UML describes production packages, not repository tests or
         # CI helpers. The repository AST still inventories every tracked file.
-        if path.relative_to(root).parts[0] != "packages":
+        if path.relative_to(root).parts[0] != "src":
             continue
         if path.suffix != ".py" or not path.is_file() or path.is_symlink():
             continue
@@ -177,15 +162,15 @@ def implementation_uml(root: Path) -> str:
 def generated_assets(root: Path) -> dict[str, str]:
     """Return solely Mermaid assets, under the repository diagrams folder."""
     return {
-        "agents/architecture/diagrams/ast.mmd": repository_ast(root),
-        "agents/architecture/diagrams/uml.mmd": implementation_uml(root),
+        "docs/architecture/diagrams/ast.mmd": repository_ast(root),
+        "docs/architecture/diagrams/uml.mmd": implementation_uml(root),
     }
 
 
 if __name__ == "__main__":
     root = Path(__file__).resolve().parents[2]
     for path, data in generated_assets(root).items():
-        target = root / ("." + path if path.startswith("agents/") else path)
+        target = root / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(data, encoding="utf-8")
         print(path)

@@ -47,7 +47,9 @@ def test_publishes_pr_even_without_main_site(tmp_path: Path) -> None:
     assert (site / ".nojekyll").exists()
 
 
-def test_preserves_last_passing_main_and_filters_closed_previews(tmp_path: Path) -> None:
+def test_preserves_last_passing_main_and_filters_closed_previews(
+    tmp_path: Path,
+) -> None:
     staging = tmp_path / "staging"
     staging.mkdir()
     (staging / "index.html").write_text("<h1>Last passing main</h1>", encoding="utf-8")

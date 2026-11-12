@@ -1,53 +1,25 @@
-## Scope and contract
+## Scope and acceptance
 
-<!-- Document only observable behavior implemented at this PR head. Proposed contracts belong in their owning issue until implementation, not in current-state repository docs. -->
+Describe **implemented** user-facing behavior on this PR's current head, link the owning issue, and state exclusions/risks. Unimplemented proposals belong in the owning GitHub issue, not in the PRD.
 
-## Linked issue
+## Source ownership and documentation
 
-<!-- Reference the owning issue (for example, Advances #123) and do not close it until all its acceptance criteria are met. -->
+- [ ] `src/` is the sole production Python package tree (no duplicate `packages/`).
+- [ ] `.agents/PRD.md` and `.agents/AGENTS.md` describe verified product behavior/progress; root README and CONTRIBUTING symlinks are preserved.
+- [ ] `docs/architecture/diagrams/` generated diagrams agree with Python source; `docs/reference/` original assets are unchanged.
+- [ ] `python .github/scripts/validate_repository.py --check` and source diagram generation succeed; no old generated governance records were recreated.
 
-## Changes and dependencies
+## Verification
 
-<!-- Describe permanent implementation surfaces; list affected packages, schemas, docs, diagrams, CI and deployments. -->
-<!-- State unresolved dependencies and work that remains outside this PR. -->
+- [ ] Python 3.10–3.13 rule, persistence and package tests passed at the final SHA.
+- [ ] Actual Tkinter controls and interaction paths tested, including rejected actions.
+- [ ] Windows x64 PyInstaller artifact built and frozen GUI/persistence smoke passed.
+- [ ] Source/docs site preview built and its real browser controls tested.
+- [ ] CI failures, unavailable native checks and unresolved bugs recorded explicitly.
 
-## External behavior verification
+## Merge and release governance
 
-<!-- Supply commands/links and observed input -> action -> outcome evidence. -->
-
-- [ ] Supported user/consumer/provider path exercised; observed output or durable effect verified
-- [ ] Adversarial and boundary cases covered, including authorization and concurrent state changes where applicable
-- [ ] Regressions fail on the defective behavior and pass after the correction
-- [ ] Provider, database, browser and packaged application gates run when required
-- [ ] Unavailable mandatory external gates declared **BLOCKED**, never replaced by mocked passes
-- [ ] Typecheck, build, format, documentation and package validation pass where applicable
-
-## Governance source verification
-
-- [ ] **Actual state:** every claim in README, PRD, ARCHITECTURE, AGENTS, code-derived diagrams and release/deployment docs is supported by **this final commit**; unimplemented designs stay in issues
-- [ ] **Same-PR reconciliation:** all affected authored governance records, generated projections, tests, examples, CI and documentation are updated **within this PR**, with no deferred clean-up
-- [ ] **No premature contracts:** proposed endpoints, DTOs, data schemas, operator registries, game rules or UI designs are not committed as if implemented
-
-- [ ] Updated any affected `.agents/{notes,requests,decisions,rules}/` source record and regenerated README, PRD, ARCHITECTURE and AGENTS in one diff
-- [ ] `python3 .github/scripts/generate_documents.py --check` passes, including symlinks, unchanged DarkFactory metadata and `.github/tests/` ownership
-- [ ] The base branch and review policy match the **actual GitHub configuration**. Release PRs to `main` originate only from this repository's `develop` and require the native `main-source` check; merging such a PR automatically releases via PrideVer once the admin cutover is verified.
-
-## Artifact alignment
-
-- [ ] APIs, implementations, configuration, schemas, migrations, game JSON, tests, documentation and diagrams agree
-- [ ] Links, example commands, issue criteria, deployment and release metadata updated where affected
-- [ ] No unused parallel authority, fake readiness, disposable scaffold or historical commentary introduced
-- [ ] No credentials or privileged operations exposed to public clients
-- [ ] Independent reviewer has checked implementation, security and actual acceptance evidence
-- [ ] `.darkfactory/` and release/branch controls are unchanged unless separately authorized and verified
-- [ ] Draft remains unmerged pending explicit maintainer approval
-
-## Independent final-commit review
-
-- [ ] Reviewer inspected the actual diff, implementation and externally observed behavior, not only issue criteria or passing structural checks
-- [ ] Reviewer checked documentation links, source-derived diagrams and provider evidence; unavailable mandatory acceptance remains **BLOCKED**
-- [ ] Maintainer's explicit approval is required on the final SHA; neither a successful CI run nor an uploaded docs preview is deployment/merge approval
-
-## Acceptance status
-
-<!-- Distinguish VERIFIED, BLOCKED and OUT OF SCOPE. Never claim product readiness based only on green build checks. -->
+- [ ] Source branch and target branch match repository promotion policy.
+- [ ] Independent maintainer review covers the final commit and evidence.
+- [ ] No direct release publication is inferred from a green CI run; distribution requires explicit approval.
+- [ ] This PR remains unmerged until the maintainer authorizes integration.

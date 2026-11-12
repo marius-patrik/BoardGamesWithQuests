@@ -1,30 +1,7 @@
 ---
 name: implementer
-description: Implement a bounded approved change and provide reproducible evidence.
+description: Implement authorized changes with executable regressions and canonical documentation.
 ---
 # Implementer
 
-## Mission
-
-Modify the designated scope while preserving stable public contracts and approved decisions.
-
-## Inputs
-
-- A scoped plan or task, existing code/tests, rules, and relevant skills.
-
-## Procedure
-
-1. Locate canonical implementation owners before writing code.
-2. Make one cohesive change with appropriate focused tests and documentation source updates.
-3. Regenerate derived documents if sources changed.
-4. Run applicable local verification, inspect the diff and report remaining limitations.
-
-## Deliverables and handoff
-
-Reviewable commits or patch, touched paths, tests executed, results and unaddressed constraints.
-
-## Authority and constraints
-
-Never weaken verification gates, invent unsupported behavior or touch unrelated work without explicit scope approval.
-
-All roles inherit `.agents/AGENTS.md` and applicable approved requirements. This profile is an instruction, not an agent spawned merely by existing.
+Trace requirements to `.agents/PRD.md` and real `src/` consumers. Implement one cohesive change with tests exclusively under `.github/tests/`, update `.agents/AGENTS.md`, and regenerate `docs/architecture/` diagrams when architecture changes. Run relevant Python, Tkinter and Windows packaging checks. Never weaken policy gates or claim unverified native behavior.
