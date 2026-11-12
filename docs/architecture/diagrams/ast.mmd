@@ -146,11 +146,11 @@ flowchart LR
   nc9f5868186eb03f66 --> nc58e9fa04cebf260c
   n574a634296f26fb29["test_docs_embedded_mermaid.py"]
   nc9f5868186eb03f66 --> n574a634296f26fb29
-  n54d857d5ab6a86e47["function test_fenced_mermaid_uses_existing_diagram_viewer_and_escapes_source"]
+  n54d857d5ab6a86e47["function test_markdown_mermaid_parser_reuses_viewer_and_escapes_html"]
   n574a634296f26fb29 --> n54d857d5ab6a86e47
-  n2cd167dfc614c6044["function test_non_mermaid_code_and_inline_examples_remain_unchanged"]
+  n2cd167dfc614c6044["function test_other_code_fences_are_preserved"]
   n574a634296f26fb29 --> n2cd167dfc614c6044
-  nf9479f8b9280d6cce["function test_canonical_prd_contains_multiple_embedded_mermaid_diagrams"]
+  nf9479f8b9280d6cce["function test_every_tracked_diagram_page_publishes_rendered_local_svg"]
   n574a634296f26fb29 --> nf9479f8b9280d6cce
   n5f65b1147cf4c7caa["test_docs_manifest.py"]
   nc9f5868186eb03f66 --> n5f65b1147cf4c7caa
