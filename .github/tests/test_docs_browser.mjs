@@ -118,7 +118,7 @@ try {
   // viewer, with compiled local SVGs rather than visible source fences.
   console.log("Checking embedded Markdown Mermaid diagrams");
   await page.goto(base + "/agents/PRD/", { waitUntil: "load" });
-  const embedded = await page.$("[data-diagram-viewer]");
+  const embedded = await page["$"]("[data-diagram-viewer]");
   assert(embedded.length >= 3, "Canonical PRD's Mermaid diagrams were not rendered");
   assert(await page.$("[data-diagram-viewer] img"), "Embedded Mermaid has no SVG graphic");
   const first = embedded[0];
